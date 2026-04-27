@@ -202,7 +202,10 @@ export class FeatureClient {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(stream: string, operations: FeatureBulkOperation[]) {
+  async bulk(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<{ applied: number; skipped: number }> {
     validateFeatures(
       operations
         .filter((operation) => 'index' in operation)
@@ -210,7 +213,12 @@ export class FeatureClient {
     );
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
+    const skipped = operations.length - resolvedOperations.length;
 
+    if (resolvedOperations.length === 0) {
+      return { applied: 0, skipped };
+    }
+      
     return await bulkWithInferenceFallback(this.clients.logger, ({ includeEmbedding }) =>
       this.clients.storageClient.bulk({
         operations: resolvedOperations.map((operation) => {
@@ -283,6 +291,34 @@ export class FeatureClient {
       throw new StatusError(`Feature ${uuid} not found`, 404);
     }
     return fromStorage(source);
+  }
+
+  /**
+   * Resolves a list of feature UUIDs to their owning stream by querying storage
+   * directly on `_id` (which is the UUID by construction — see `bulk` above).
+   * UUIDs that do not exist in storage are simply absent from the result; the
+   * caller can compute "not found" as `input.length - result.length` (deduped)
+   * and treat them as idempotent no-ops.
+   */
+  async findFeaturesByUuids(
+    uuids: string[]
+  ): Promise<Array<{ uuid: string; stream_name: string }>> {
+    if (uuids.length === 0) {
+      return [];
+    }
+    const response = await this.clients.storageClient.search({
+      size: uuids.length,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ terms: { _id: uuids } }],
+        },
+      },
+    });
+    return response.hits.hits.map((hit) => ({
+      uuid: hit._id!,
+      stream_name: hit._source![STREAM_NAME] as string,
+    }));
   }
 
   async deleteFeature(stream: string, uuid: string) {
