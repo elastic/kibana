@@ -10,12 +10,12 @@ For test-type-specific guidance, see [UI](./ui-best-practices.md) and [API](./ap
 
 Pick the test type **before** writing the test:
 
-| Test type                                                                      | Ideal for                                                                                                                                                                                                                                     |
-| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Scout UI test**                                                              | • user flows that span multiple pages or components<br>• role-based behavior (e.g. viewer can see X, editor can do Y)<br>• confirming the UI renders and reacts to interaction (not exact data values)                                        |
-| **Scout API test**                                                             | • status code, response shape, and key fields of an HTTP endpoint<br>• authorization checks (e.g. role X gets `403` from endpoint Y)<br>• exact data values computed by the backend (counts, aggregations, formulas)                          |
-| **Jest integration test**<br>A unit test with a Elasticsearch instance running | • saved object / data migrations from a previous Kibana version<br>• behavior that depends on a specific Elasticsearch data shape on disk<br>• scenarios that modify the system in ways a real user couldn't (e.g. writing to system indices) |
-| **Jest unit test**<br>Often paired with the React Testing Library              | • conditional rendering and component state (loading, error, empty)<br>• field validation, formatters, tooltips<br>• pure business logic (utilities, hooks, reducers)                                                                         |
+| Test type                                                                      | Ideal for                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Scout UI test**                                                              | • user flows that span multiple pages or components<br>• role-based behavior (e.g. viewer can see X, editor can do Y)<br>• confirming the UI renders and reacts to interaction (not exact data values)                                 |
+| **Scout API test**                                                             | • status code, response shape, and key fields of an HTTP endpoint<br>• authorization checks (e.g. role X gets `403` from endpoint Y)<br>• exact data values computed by the backend (counts, aggregations, formulas)                   |
+| **Jest integration test**<br>A unit test with an Elasticsearch instance running | • saved object / data migrations from a previous version<br>• behavior that depends on a specific Elasticsearch data shape on disk<br>• scenarios that modify the system in ways a real user couldn't (e.g. writing to system indices) |
+| **Jest unit test**<br>Often paired with the React Testing Library              | • conditional rendering and component state (loading, error, empty)<br>• field validation, formatters, tooltips<br>• pure business logic (utilities, hooks, reducers)                                                                  |
 
 :::::{dropdown} Examples
 
@@ -90,7 +90,7 @@ it('migrates docs from a previous version', async () => {
 
 How these tests work:
 
-- They start a real Elasticsearch via `startElasticsearch(...)` from `@kbn/migrator-test-kit` and run the in-process migrator via `getKibanaMigratorTestKit(...).runMigrations()` — no full Kibana HTTP server is booted.
+- They start a real Elasticsearch with `startElasticsearch(...)`, then import Kibana's real `KibanaMigrator` and run it in-process via `getKibanaMigratorTestKit(...).runMigrations()`. The HTTP server, plugins, and UI aren't booted — the test exercises the actual migration code path against real ES, just without the Kibana process around it.
 - "Previous version" data comes from a baseline ES data archive zip (e.g. `BASELINE_TEST_ARCHIVE_LARGE`) passed as `dataArchive`; if you don't need a snapshot, skip it and seed via `savedObjectsRepository.bulkCreate`.
 - Assertions run directly against ES (`client.indices.get` / `getMapping`), the SO repository (`savedObjectsRepository.find`), the returned `MigrationResult[]`, or migration logs.
 
