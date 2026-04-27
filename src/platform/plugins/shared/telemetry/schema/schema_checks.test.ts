@@ -142,7 +142,6 @@ describe('Telemetry Schema Checks', () => {
       'observability:apmEnableTransactionProfiling',
       'observability:apmProgressiveLoading',
       'observability:apmServiceGroupMaxNumberOfServices',
-      'observability:apmUseUnifiedTraceWaterfall',
       'observability:enableComparisonByDefault',
       'observability:enableInfrastructureAssetCustomDashboards',
       'observability:enableInspectEsQueries',
