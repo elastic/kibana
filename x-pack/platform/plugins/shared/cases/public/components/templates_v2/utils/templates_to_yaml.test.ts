@@ -26,6 +26,7 @@ describe('templatesToYaml', () => {
         latestVersion: 3,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'My template',
           fields: [
@@ -93,6 +94,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'DatePicker Template',
           fields: [
@@ -130,6 +132,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'DatePicker Template',
           fields: [
@@ -163,6 +166,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'DatePicker Template',
           fields: [
@@ -192,6 +196,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'Conditions Template',
           fields: [
@@ -227,6 +232,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'Validation Template',
           fields: [
@@ -274,6 +280,7 @@ describe('templatesToYaml', () => {
         isLatest: true,
         isEnabled: false,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'Meta Template',
           severity: 'high',
