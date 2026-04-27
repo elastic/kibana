@@ -31,8 +31,27 @@ import {
 // Storybook Meta
 // =============================================================================
 
-const meta: Meta = {
+interface ExtendedStoryArgs {
+  scrollableInline: boolean;
+  responsiveBreakpoint: boolean;
+}
+
+const meta: Meta<ExtendedStoryArgs> = {
   title: 'Content List/Core Features + Extended',
+  argTypes: {
+    scrollableInline: {
+      control: 'boolean',
+      description: 'Enable horizontal scrolling when columns exceed container width.',
+    },
+    responsiveBreakpoint: {
+      control: 'boolean',
+      description: 'Collapse the table into responsive cards on narrow viewports.',
+    },
+  },
+  args: {
+    scrollableInline: true,
+    responsiveBreakpoint: false,
+  },
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -68,7 +87,10 @@ const { Filters } = ContentListToolbar;
  * - [x] Created By filter — include/exclude by user (PR 10)
  * - [x] Content editor — "View details" row action via `item.onInspect` (PR 12)
  */
-const CoreTagsStarredFeaturesWrapper = () => {
+const CoreTagsStarredFeaturesWrapper = ({
+  scrollableInline = true,
+  responsiveBreakpoint = false,
+}: ExtendedStoryArgs) => {
   const { onInspect, flyout } = useInspectFlyout();
 
   const labels = useMemo(
@@ -158,11 +180,22 @@ const CoreTagsStarredFeaturesWrapper = () => {
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
-        <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
+        <ContentListTable title="dashboards table" {...{ scrollableInline, responsiveBreakpoint }}>
+          {tableChildren}
+        </ContentListTable>
         <ContentListFooter />
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, favoritesClient, tableChildren]
+    [
+      labels,
+      dataSource,
+      features,
+      itemConfig,
+      favoritesClient,
+      tableChildren,
+      scrollableInline,
+      responsiveBreakpoint,
+    ]
   );
 
   return (
@@ -202,7 +235,12 @@ const CoreTagsStarredFeaturesWrapper = () => {
           </ContentListToolbar>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
+          <ContentListTable
+            title="dashboards table"
+            {...{ scrollableInline, responsiveBreakpoint }}
+          >
+            {tableChildren}
+          </ContentListTable>
         </EuiFlexItem>
         <EuiFlexItem>
           <ContentListFooter />
@@ -232,7 +270,9 @@ const CoreTagsStarredFeaturesWrapper = () => {
  * "Starred" filter to narrow the list. Use the "Created by" filter to filter by
  * user, or type `createdBy:email` in the search bar. Hold Cmd/Ctrl to exclude.
  */
-export const CoreTagsStarredFeatures: StoryObj = {
+type Story = StoryObj<ExtendedStoryArgs>;
+
+export const CoreTagsStarredFeatures: Story = {
   name: 'Core Features + Extended',
-  render: () => <CoreTagsStarredFeaturesWrapper />,
+  render: (args) => <CoreTagsStarredFeaturesWrapper {...args} />,
 };

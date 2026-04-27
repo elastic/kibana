@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
 import { useMutation } from '@kbn/react-query';
 import type { z } from '@kbn/zod/v4';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
@@ -15,6 +14,7 @@ import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
 import type { ServerError } from '../../types';
+import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import * as i18n from './translations';
@@ -33,8 +33,8 @@ export const computeNewExtendedFields = (
 ): Record<string, string> => {
   const result: Record<string, string> = {};
   for (const field of newTemplateFields) {
-    const snakeKey = `${field.name}_as_${field.type}`;
-    const camelKey = camelCase(snakeKey);
+    const snakeKey = getFieldSnakeKey(field.name, field.type);
+    const camelKey = getFieldCamelKey(field.name, field.type);
     const existingValue = currentExtendedFields[camelKey];
     if (existingValue !== undefined && existingValue !== '') {
       result[snakeKey] = String(existingValue);

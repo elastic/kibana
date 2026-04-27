@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { registerDisableAllWorkflowsRoute } from './disable_all_workflows';
+import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
 import type { RouteDependencies } from '../types';
 

@@ -3664,6 +3664,22 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_connection.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_clients.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_connections.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.ts"
               },
               {
@@ -3927,6 +3943,66 @@
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/executions.ts"
+              },
+              {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
@@ -4001,90 +4077,6 @@
               {
                 "plugin": "@kbn/content-management-access-control-server",
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -4777,6 +4769,34 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
               },
               {
                 "plugin": "observability",
@@ -6400,6 +6420,22 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_connection.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_clients.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_connections.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
               },
               {
@@ -6636,6 +6672,10 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts"
               },
               {
@@ -6813,6 +6853,18 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/deprecations/kibana_user_role.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/create_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_connection.ts"
               },
               {
                 "plugin": "security",
@@ -7119,6 +7171,46 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/sml.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/sml.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
@@ -7205,66 +7297,6 @@
               {
                 "plugin": "@kbn/content-management-access-control-server",
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/nl_to_esql_route.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/sml.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/sml.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -7688,10 +7720,6 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/hidden_saved_object_routes.ts"
               },
               {
@@ -8011,6 +8039,26 @@
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/nl_to_esql_route.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -8237,6 +8285,10 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/clean.ts"
+              },
+              {
+                "plugin": "ftrApis",
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/task_manager/run_soon.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -9424,6 +9476,18 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/create_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_connection.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/role_mapping/post.test.ts"
               },
               {
@@ -9647,6 +9711,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
@@ -9657,14 +9725,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9877,6 +9937,10 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "observability",
@@ -10227,6 +10291,14 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_connection.ts"
+              },
+              {
                 "plugin": "maintenanceWindows",
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/apis/maintenance_window/external/update/update_maintenance_window_route.ts"
               },
@@ -10373,6 +10445,14 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_connection.test.ts"
               }
             ],
             "returnComment": [],
@@ -10575,6 +10655,10 @@
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
               },
@@ -10585,10 +10669,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -14519,7 +14599,7 @@
               "\nlevels:\n- warning: will not break deployment upon upgrade.\n- critical: needs to be addressed before upgrade."
             ],
             "signature": [
-              "\"warning\" | \"critical\""
+              "\"critical\" | \"warning\""
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "lineNumber": 138,
@@ -16208,58 +16288,6 @@
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_connectors.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fieldsMetadata",
-                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
-              },
-              {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_children_executions.ts"
               },
@@ -16362,6 +16390,58 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
+                "plugin": "fieldsMetadata",
+                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17779,22 +17859,6 @@
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
               },
               {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
-              },
-              {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/update_workflow.ts"
               },
@@ -17817,6 +17881,22 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -18270,46 +18350,6 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/chat_complete/anonymization/replacements/replacements_routes.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_force_send.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in_stats.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/local_shipper/initialize_local_shipper.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/sanitize/register_sanitize_route.ts"
-              },
-              {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/cancel_execution.ts"
               },
@@ -18408,6 +18448,46 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_force_send.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in_stats.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/local_shipper/initialize_local_shipper.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/sanitize/register_sanitize_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -19753,12 +19833,12 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -19928,18 +20008,6 @@
                 "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
-              },
-              {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/bulk_delete_workflows.ts"
               },
@@ -19970,6 +20038,18 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
               },
               {
                 "plugin": "@kbn/core",

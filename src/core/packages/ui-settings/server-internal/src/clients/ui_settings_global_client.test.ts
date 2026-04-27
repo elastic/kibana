@@ -62,6 +62,7 @@ describe('ui settings global client', () => {
       savedObjectsClient,
       overrides,
       log: logger,
+      namespace: '__global__',
     });
 
     return {

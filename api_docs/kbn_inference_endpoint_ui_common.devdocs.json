@@ -11,10 +11,10 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, focusTrapProps, allowedTaskTypes, excludeProviders, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, focusTrapProps, allowedTaskTypes, excludeProviders, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-        "lineNumber": 116,
+        "lineNumber": 114,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -24,13 +24,13 @@
             "id": "def-public.InferenceFlyoutWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  enableEisPromoTour,\n  focusTrapProps,\n  allowedTaskTypes,\n  excludeProviders,\n}",
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  focusTrapProps,\n  allowedTaskTypes,\n  excludeProviders,\n}",
             "description": [],
             "signature": [
               "InferenceFlyoutWrapperProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-            "lineNumber": 116,
+            "lineNumber": 114,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -48,10 +48,10 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, enableEisPromoTour, allowedTaskTypes, excludeProviders, }, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, allowedTaskTypes, excludeProviders, }, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
-        "lineNumber": 126,
+        "lineNumber": 124,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -61,13 +61,13 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    enableEisPromoTour,\n    allowedTaskTypes,\n    excludeProviders,\n  },\n}",
+            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    allowedTaskTypes,\n    excludeProviders,\n  },\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
-            "lineNumber": 126,
+            "lineNumber": 124,
             "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
@@ -1928,6 +1928,37 @@
                 ]
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.mistral",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.mistral]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.mistral.hidden",
+                "type": "Array",
+                "tags": [],
+                "label": "hidden",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+                "lineNumber": 141,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -3375,6 +3406,87 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.TASK_TYPE_DESCRIPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "TASK_TYPE_DESCRIPTIONS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+        "lineNumber": 160,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.text_embedding",
+            "type": "string",
+            "tags": [],
+            "label": "text_embedding",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.sparse_embedding",
+            "type": "string",
+            "tags": [],
+            "label": "sparse_embedding",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.rerank",
+            "type": "string",
+            "tags": [],
+            "label": "rerank",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.completion",
+            "type": "string",
+            "tags": [],
+            "label": "completion",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.chat_completion",
+            "type": "string",
+            "tags": [],
+            "label": "chat_completion",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
