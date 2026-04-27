@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { EmbeddableProfilingSearchBar } from '@kbn/observability-shared-plugin/public';
 import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -24,6 +24,9 @@ import { usePageHeader } from '../hooks/use_page_header';
 import { useProfilingKuery } from '../hooks/use_profiling_kuery';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { ContentTabIds, type ContentTemplateProps } from '../types';
+import { LogsSearchBarHeader } from '../tabs/logs/logs_search_bar_header';
+import { MetadataSearchBarHeader } from '../tabs/metadata/metadata_search_bar_header';
+import { ProcessesSearchBarHeader } from '../tabs/processes/processes_search_bar_header';
 import { getIntegrationsAvailable } from '../utils';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
@@ -37,6 +40,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const trackOnlyOnce = React.useRef(false);
   const { activeTabId } = useTabSwitcherContext();
   const isProfilingTab = activeTabId === ContentTabIds.PROFILING;
+  const isLogsTab = activeTabId === ContentTabIds.LOGS;
+  const isMetadataTab = activeTabId === ContentTabIds.METADATA;
+  const isProcessesTab = activeTabId === ContentTabIds.PROCESSES;
   const showDatePicker = DATE_PICKER_VISIBLE_TABS.includes(activeTabId as ContentTabIds);
   const {
     services: { telemetry },
@@ -103,6 +109,24 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         color: 'subdued' as unknown as EuiPageHeaderProps['color'],
         children: isProfilingTab ? (
           <ProfilingSearchBarHeader />
+        ) : isLogsTab ? (
+          <>
+            <LogsSearchBarHeader />
+            <EuiSpacer size="s" />
+            <DatePicker />
+          </>
+        ) : isMetadataTab ? (
+          <>
+            <MetadataSearchBarHeader />
+            <EuiSpacer size="s" />
+            <DatePicker />
+          </>
+        ) : isProcessesTab ? (
+          <>
+            <ProcessesSearchBarHeader />
+            <EuiSpacer size="s" />
+            <DatePicker />
+          </>
         ) : showDatePicker ? (
           <DatePicker />
         ) : undefined,
@@ -111,7 +135,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       data-asset-type={entity.type}
       data-schema-selected={schema}
     >
-      <Content showDatePicker={false} showProfilingSearchBar={false} />
+      <Content showDatePicker={false} showProfilingSearchBar={false} showTabSearchBar={false} />
     </InfraPageTemplate>
   );
 };

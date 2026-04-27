@@ -21,22 +21,34 @@ import {
   Processes,
   Profiling,
 } from '../tabs';
+import { LogsSearchBarHeader } from '../tabs/logs/logs_search_bar_header';
+import { MetadataSearchBarHeader } from '../tabs/metadata/metadata_search_bar_header';
+import { ProcessesSearchBarHeader } from '../tabs/processes/processes_search_bar_header';
 import { DATE_PICKER_VISIBLE_TABS } from '../constants';
 import { ContentTabIds } from '../types';
 import { Callouts } from './callouts';
 
+const SEARCH_BAR_TABS = [ContentTabIds.LOGS, ContentTabIds.METADATA, ContentTabIds.PROCESSES];
+
 export const Content = ({
   showDatePicker = true,
   showProfilingSearchBar = true,
+  showTabSearchBar = true,
 }: {
   showDatePicker?: boolean;
   showProfilingSearchBar?: boolean;
+  showTabSearchBar?: boolean;
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <Callouts />
       </EuiFlexItem>
+      {showTabSearchBar && (
+        <EuiFlexItem grow={false}>
+          <TabSearchBarWrapper />
+        </EuiFlexItem>
+      )}
       {showDatePicker && (
         <EuiFlexItem grow={false}>
           <DatePickerWrapper />
@@ -72,6 +84,28 @@ export const Content = ({
         </TabPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+const TabSearchBarWrapper = () => {
+  const { activeTabId } = useTabSwitcherContext();
+
+  if (!SEARCH_BAR_TABS.includes(activeTabId as ContentTabIds)) {
+    return null;
+  }
+
+  return (
+    <>
+      <div hidden={activeTabId !== ContentTabIds.LOGS}>
+        <LogsSearchBarHeader />
+      </div>
+      <div hidden={activeTabId !== ContentTabIds.METADATA}>
+        <MetadataSearchBarHeader />
+      </div>
+      <div hidden={activeTabId !== ContentTabIds.PROCESSES}>
+        <ProcessesSearchBarHeader />
+      </div>
+    </>
   );
 };
 

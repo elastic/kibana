@@ -140,7 +140,6 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraAssetDetailsMetadataNoData')).toBeInTheDocument();
   });
 
@@ -161,7 +160,6 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
   });
 
@@ -172,7 +170,6 @@ describe('Single Host Metadata (Hosts View)', () => {
     });
     const result = await waitFor(() => renderHostMetadata());
 
-    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraAssetDetailsMetadataLoading')).toBeInTheDocument();
   });
 
