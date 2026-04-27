@@ -58,11 +58,7 @@ test.describe('Advanced tab with basic license', { tag: [...tags.stateful.classi
     );
 
     await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
-
-    // Navigate to the Advanced tab from a stable page to avoid race conditions
-    await page.getByRole('tab', { name: 'Advanced' }).click();
-    await page.waitForURL(/\/advanced/);
+    await pageObjects.streams.gotoAdvancedTab(WIRED_STREAM);
 
     // Verify the Advanced tab is visible
     await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
@@ -103,11 +99,7 @@ test.describe('Advanced tab with basic license', { tag: [...tags.stateful.classi
     );
 
     await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
-
-    // Navigate to the Advanced tab from a stable page to avoid race conditions
-    await page.getByRole('tab', { name: 'Advanced' }).click();
-    await page.waitForURL(/\/advanced/);
+    await pageObjects.streams.gotoAdvancedTab(CLASSIC_STREAM);
 
     // Verify the Advanced tab is visible
     await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
