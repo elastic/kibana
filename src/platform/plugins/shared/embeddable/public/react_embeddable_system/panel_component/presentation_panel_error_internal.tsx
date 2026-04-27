@@ -32,9 +32,9 @@ import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { triggers } from '@kbn/ui-actions-plugin/public';
-import { uiActions } from '../kibana_services';
-import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
-import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
+import { uiActions } from '../../kibana_services';
+import { ACTION_EDIT_PANEL } from '../../ui_actions/edit_panel_action/constants';
+import { executeEditPanelAction } from '../../ui_actions/edit_panel_action/execute_edit_action';
 import type { DefaultPresentationPanelApi } from './types';
 
 export interface PresentationPanelErrorProps {

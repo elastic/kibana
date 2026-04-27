@@ -18,7 +18,7 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { uiActions } from '../../kibana_services';
+import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];

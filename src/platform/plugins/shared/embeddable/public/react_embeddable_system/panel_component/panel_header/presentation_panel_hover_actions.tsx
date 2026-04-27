@@ -35,10 +35,12 @@ import {
   ON_OPEN_PANEL_MENU,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { uiActions } from '../../kibana_services';
+import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { EmbeddableRendererContext } from '../../embeddable_renderer_context';
-import { DEFAULT_QUICK_ACTION_IDS } from '../constants';
+import {
+  DEFAULT_QUICK_ACTIONS,
+  EmbeddableRendererContext,
+} from '../../embeddable_renderer_context';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -131,7 +133,7 @@ export const PresentationPanelHoverActions = ({
   const contextQuickActions = useContext(EmbeddableRendererContext)?.quickActions;
   const quickActionIds = useMemo(() => {
     const actionMode = viewMode === 'edit' ? 'edit' : 'view';
-    return (contextQuickActions?.[actionMode] ?? DEFAULT_QUICK_ACTION_IDS[actionMode])?.filter(
+    return (contextQuickActions?.[actionMode] ?? DEFAULT_QUICK_ACTIONS[actionMode])?.filter(
       (actionId) => actionId && (disabledActionIds ?? [])?.indexOf(actionId) === -1
     );
   }, [viewMode, contextQuickActions, disabledActionIds]);

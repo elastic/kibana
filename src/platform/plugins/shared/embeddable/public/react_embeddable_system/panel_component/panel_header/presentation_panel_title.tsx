@@ -21,9 +21,9 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { CustomizePanelActionApi } from '../../panel_actions/customize_panel_action';
-import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
-import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
+import type { CustomizePanelActionApi } from '../../../ui_actions/customize_panel_action';
+import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/customize_panel_action';
+import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
 
 export const PresentationPanelTitle = ({
   api,

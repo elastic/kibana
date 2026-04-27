@@ -37,3 +37,24 @@ type QuickActionViewMode = Extract<ViewMode, 'view' | 'edit'>;
 export type QuickActions = {
   [key in QuickActionViewMode]?: QuickActionIds;
 };
+
+export const DEFAULT_QUICK_ACTIONS: QuickActions = {
+  edit: [
+    'editPanel',
+    'clearControl',
+    'pinControl',
+    'ACTION_CONFIGURE_IN_LENS',
+    'ACTION_CUSTOMIZE_PANEL',
+    'ACTION_OPEN_IN_DISCOVER',
+    'ACTION_VIEW_SAVED_SEARCH',
+    'CONVERT_LEGACY_MARKDOWN',
+  ],
+  view: [
+    'clearControl',
+    'ACTION_SHOW_CONFIG_PANEL',
+    'ACTION_OPEN_IN_DISCOVER',
+    'ACTION_VIEW_SAVED_SEARCH',
+    'openInspector',
+    'togglePanel',
+  ],
+} as const;

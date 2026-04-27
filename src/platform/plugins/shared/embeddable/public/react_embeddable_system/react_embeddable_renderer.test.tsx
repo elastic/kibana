@@ -196,7 +196,6 @@ describe('embeddable renderer', () => {
     registerEmbeddablePublicDefinition('error_in_build_embeddable', () =>
       Promise.resolve(errorInInitializeFactory)
     );
-    setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
     // EuiThemeProvider is necessary to get around the complex way the error panel is rendered
@@ -228,7 +227,6 @@ describe('embeddable renderer', () => {
       },
     };
     registerEmbeddablePublicDefinition('error_registers_api', () => Promise.resolve(errorFactory));
-    setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
     render(
@@ -263,7 +261,6 @@ describe('embeddable renderer', () => {
     registerEmbeddablePublicDefinition('error_with_container_parent', () =>
       Promise.resolve(errorFactory)
     );
-    setupPresentationPanelServices();
 
     const parentApi = {
       ...getMockPresentationContainer(),
@@ -299,7 +296,6 @@ describe('reactEmbeddable phase events', () => {
     registerEmbeddablePublicDefinition('immediate_load', () =>
       Promise.resolve(immediateLoadEmbeddableFactory)
     );
-    setupPresentationPanelServices();
 
     const renderedEvent = jest.fn();
     render(
@@ -355,7 +351,6 @@ describe('reactEmbeddable phase events', () => {
     registerEmbeddablePublicDefinition('load_clicker', () =>
       Promise.resolve(dataLoadingEmbeddableFactory)
     );
-    setupPresentationPanelServices();
 
     const phaseFn = jest.fn();
     render(
