@@ -952,7 +952,7 @@ export const DeletePackageDatastreamAssetsRequestSchema = {
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   query: schema.object({
-    packagePolicyId: schema.string(),
+    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
   }),
 };
 
