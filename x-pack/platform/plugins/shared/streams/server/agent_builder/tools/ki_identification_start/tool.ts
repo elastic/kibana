@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { OnboardingStep } from '@kbn/streams-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -40,7 +40,7 @@ export const createKiIdentificationStartTool = ({
 }: {
   getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
-}): BuiltinToolDefinition<typeof onboardingStartSchema> => ({
+}): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`

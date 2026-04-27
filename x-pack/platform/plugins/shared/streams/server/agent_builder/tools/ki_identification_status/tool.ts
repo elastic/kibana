@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
 import { classifyError } from '../error_utils';
@@ -25,7 +25,7 @@ export const createKiIdentificationStatusTool = ({
   getScopedClients,
 }: {
   getScopedClients: GetScopedClients;
-}): BuiltinToolDefinition<typeof onboardingStatusSchema> => ({
+}): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
