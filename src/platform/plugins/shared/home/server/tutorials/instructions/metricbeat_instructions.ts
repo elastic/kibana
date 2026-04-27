@@ -378,7 +378,7 @@ export const createMetricbeatCloudInstructions = memoize(() => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.debTitle', {
@@ -394,7 +394,7 @@ export const createMetricbeatCloudInstructions = memoize(() => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.rpmTitle', {
@@ -410,7 +410,7 @@ export const createMetricbeatCloudInstructions = memoize(() => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -429,7 +429,7 @@ export const createMetricbeatCloudInstructions = memoize(() => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
   },
 }));
@@ -458,7 +458,7 @@ export const createMetricbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     DEB: {
       title: i18n.translate(
@@ -482,7 +482,7 @@ export const createMetricbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     RPM: {
       title: i18n.translate(
@@ -506,7 +506,7 @@ export const createMetricbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -530,7 +530,7 @@ export const createMetricbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
   },
 });

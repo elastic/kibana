@@ -16,7 +16,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -43,6 +43,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
+  bulkScheduleWorkflow: BulkScheduleWorkflow;
   isEventDrivenExecutionEnabled: () => boolean;
   isLogTriggerEventsEnabled: () => boolean;
   getMaxEventChainDepth: () => number;
@@ -100,3 +101,8 @@ export type ScheduleWorkflow = (
   context: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
+
+export type BulkScheduleWorkflow = (
+  items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+  request: KibanaRequest
+) => Promise<BulkScheduleWorkflowResult>;

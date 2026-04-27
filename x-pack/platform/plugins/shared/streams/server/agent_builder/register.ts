@@ -31,7 +31,7 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder });
+  registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry });
 
   const getMemoryService = () =>
     new MemoryServiceImpl({
