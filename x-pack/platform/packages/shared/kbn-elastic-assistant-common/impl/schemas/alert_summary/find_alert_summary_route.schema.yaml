@@ -6,6 +6,13 @@ paths:
   /internal/elastic_assistant/alert_summary/_find:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/internal/elastic_assistant/alert_summary/_find?connector_id=my-connector-id&page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: FindAlertSummary
       description: Get a list of all alert summaries.
@@ -16,54 +23,62 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: A list of fields to include in the response. If omitted, all fields are returned.
           schema:
             type: array
             items:
               type: string
+          example: ["id", "alertId", "summary", "createdAt"]
         - name: 'filter'
           in: query
-          description: Search query
+          description: Search query to filter alert summaries.
           required: false
           schema:
             type: string
+          example: "brute force"
         - name: 'connector_id'
           in: query
-          description: Connector id used for prompt lookup
+          description: Connector id used for prompt lookup.
           required: true
           schema:
             type: string
+          example: "my-connector-id"
         - name: 'sort_field'
           in: query
-          description: Field to sort by
+          description: Field to sort by.
           required: false
           schema:
             $ref: '#/components/schemas/FindAlertSummarySortField'
+          example: "created_at"
         - name: 'sort_order'
           in: query
-          description: Sort order
+          description: Sort order, either `asc` for ascending or `desc` for descending.
           required: false
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
+          example: "desc"
         - name: 'page'
           in: query
-          description: Page number
+          description: Page number for paginated results. Defaults to 1.
           required: false
           schema:
             type: integer
             minimum: 1
             default: 1
+          example: 1
         - name: 'per_page'
           in: query
-          description: Alert Summary per page
+          description: Number of alert summaries to return per page. Defaults to 20.
           required: false
           schema:
             type: integer
             minimum: 0
             default: 20
+          example: 20
 
       responses:
         200:
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -88,8 +103,27 @@ paths:
                   - total
                   - data
                   - prompt
+              examples:
+                FindAlertSummaryResponse200Example:
+                  summary: A successful paginated response of alert summaries.
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 1
+                    prompt: "Summarize the following security alert in 2-3 sentences, highlighting the key threat indicators and recommended actions."
+                    data:
+                      - id: "summary-id-1"
+                        alertId: "alert-id-1"
+                        summary: "This alert indicates a potential brute force login attempt from IP 203.0.113.42 targeting the user admin@example.com."
+                        recommendedActions: "Block the source IP and reset the affected user's credentials."
+                        replacements: {}
+                        createdAt: "2024-01-15T10:00:00.000Z"
+                        createdBy: "user@example.com"
+                        updatedAt: "2024-01-15T10:00:00.000Z"
+                        updatedBy: "user@example.com"
+                        namespace: "default"
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -101,6 +135,13 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                FindAlertSummaryResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "connector_id is required."
 
 components:
   schemas:

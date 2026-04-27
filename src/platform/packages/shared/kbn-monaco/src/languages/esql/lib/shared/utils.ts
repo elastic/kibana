@@ -10,6 +10,7 @@
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
+import type { MonacoMessage } from '../../language';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
@@ -130,3 +131,21 @@ export const filterSuggestionsWithCustomCommands = (suggestions: ISuggestionItem
     )
     .map((suggestion) => suggestion.command!.id); // we know command is defined because of the filter
 };
+/**
+ * Given a marker it returns the editor message from which it was created.
+ * @param messages
+ * @param marker
+ * @returns
+ */
+export const findMessageByMarker = (
+  messages: MonacoMessage[],
+  marker: monaco.editor.IMarkerData
+): MonacoMessage | undefined =>
+  messages.find(
+    (m) =>
+      m.startLineNumber === marker.startLineNumber &&
+      m.startColumn === marker.startColumn &&
+      m.endLineNumber === marker.endLineNumber &&
+      m.endColumn === marker.endColumn &&
+      m.message === marker.message
+  );
