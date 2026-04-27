@@ -281,16 +281,14 @@ describe('RuleCommonExpressions', () => {
   });
 
   test('should not include inclusive range comparators in threshold options', async () => {
-    const wrapper = await setup({ ruleParams: getCommonParams() });
-    wrapper.find('button[data-test-subj="thresholdPopover"]').simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    setup({ ruleParams: getCommonParams() });
 
-    const comparatorOptionValues = wrapper
-      .find('select[data-test-subj="comparatorOptionsComboBox"] option')
-      .map((option) => option.prop('value'));
+    await userEvent.click(screen.getByTestId('thresholdPopover'));
+
+    const comboBox = await screen.findByTestId('comparatorOptionsComboBox');
+    const comparatorOptionValues = Array.from(comboBox.querySelectorAll('option')).map((option) =>
+      option.getAttribute('value')
+    );
 
     expect(comparatorOptionValues).not.toContain(COMPARATORS.BETWEEN_INCLUSIVE);
     expect(comparatorOptionValues).not.toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
