@@ -81,8 +81,7 @@ export const args = ({
     flags.push('--enable-gpu');
   } else {
     // see: https://chromium.googlesource.com/chromium/src/+/refs/tags/147.0.7727.57/docs/gpu/swiftshader.md
-    flags.push('--use-gl=angle', '--use-angle=swiftshader-webgl', '--enable-unsafe-swiftshader');
-    // or try --use-gl=angle --use-angle=swiftshader
+    flags.push('--disable-gpu', '--enable-unsafe-swiftshader');
   }
 
   return [...flags, 'about:blank'];
