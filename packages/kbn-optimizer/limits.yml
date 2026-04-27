@@ -50,7 +50,7 @@ pageLoadAssetSize:
   elasticAssistant: 301540
   elasticAssistantSharedState: 4881
   elasticConsole: 4451
-  embeddable: 16634
+  embeddable: 19698
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
@@ -97,9 +97,9 @@ pageLoadAssetSize:
   interactiveSetup: 36524
   intercepts: 21066
   kibanaOverview: 6339
-  kibanaReact: 21499
+  kibanaReact: 21495
   kibanaUsageCollection: 1736
-  kibanaUtils: 54161
+  kibanaUtils: 54084
   kql: 15428
   kubernetesSecurity: 6807
   lens: 90000

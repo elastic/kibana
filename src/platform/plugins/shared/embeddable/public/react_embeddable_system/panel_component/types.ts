@@ -24,7 +24,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 /** ------------------------------------------------------------------------------------------
  * Panel Types
  * ------------------------------------------------------------------------------------------ */
-export interface PresentationPanelInternalProps<
+export interface PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 > {
@@ -87,10 +87,3 @@ export interface DefaultPresentationPanelApi
         HasPanelCapabilities &
         PublishesHideBorder
     > {}
-
-export type PresentationPanelProps<
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
-> = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component' | 'componentApi'> & {
-  getComponent: () => Promise<{ Component: React.FC<PropsType>; componentApi: ApiType }>;
-};

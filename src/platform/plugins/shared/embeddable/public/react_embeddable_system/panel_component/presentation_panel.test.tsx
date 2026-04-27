@@ -15,40 +15,32 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { PresentationPanel } from '.';
 import { uiActions } from '../../kibana_services';
 import * as openCustomizePanel from '../../ui_actions/customize_panel_action/open_customize_panel';
-import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { EuiThemeProvider } from '@elastic/eui';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PresentationPanel } from './presentation_panel';
 
 describe('Presentation panel', () => {
-  function getComponent(api?: DefaultPresentationPanelApi) {
-    return async () => ({
-      Component: () => (
-        <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
-      ),
-      componentApi: api ?? { uuid: 'test' },
-    });
-  }
+  const defaultProps = {
+    Component: () => (
+      <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
+    ),
+    componentApi: { uuid: 'test' },
+  };
 
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
 
-  const renderPresentationPanel = async ({
-    props,
-    api,
-  }: {
-    props?: Omit<PresentationPanelInternalProps, 'Component' | 'componentApi'>;
-    api?: DefaultPresentationPanelApi;
-  }) => {
-    render(<PresentationPanel {...props} getComponent={getComponent(api)} />);
+  const renderPresentationPanel = async (props: PresentationPanelProps) => {
+    render(<PresentationPanel {...props} />);
     await waitFor(() => {
       expect(screen.getByTestId('embeddablePanel')).toBeInTheDocument();
     });
   };
 
   it('renders internal component', async () => {
-    await renderPresentationPanel({});
+    renderPresentationPanel(defaultProps);
     await waitFor(() =>
       expect(screen.getByTestId('testPresentationPanelInternalComponent')).toBeInTheDocument()
     );
@@ -57,12 +49,11 @@ describe('Presentation panel', () => {
   it('renders a blocking error when one is present', async () => {
     const api: DefaultPresentationPanelApi = {
       uuid: 'test',
-
       blockingError$: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
     };
     render(
       <EuiThemeProvider>
-        <PresentationPanel getComponent={getComponent(api)} />
+        <PresentationPanel {...defaultProps} componentApi={api} />
       </EuiThemeProvider>
     );
     await waitFor(() => expect(screen.getByTestId('embeddableError')).toBeInTheDocument());
@@ -74,14 +65,7 @@ describe('Presentation panel', () => {
       throw new Error('simulated error during rendering');
       return <div />;
     }
-    render(
-      <PresentationPanel
-        getComponent={async () => ({
-          Component: ComponentThatThrows,
-          componentApi: { uuid: 'test' },
-        })}
-      />
-    );
+    render(<PresentationPanel {...defaultProps} Component={ComponentThatThrows} />);
     await waitFor(() => expect(screen.getByTestId('euiErrorBoundary')).toBeInTheDocument());
   });
 
@@ -103,7 +87,10 @@ describe('Presentation panel', () => {
         uuid: 'test',
         title$: new BehaviorSubject<string | undefined>('superTest'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, {
         embeddable: api,
       });
@@ -118,7 +105,10 @@ describe('Presentation panel', () => {
 
     it('calls the custom getActions function when one is provided', async () => {
       const getActions = jest.fn().mockReturnValue([]);
-      await renderPresentationPanel({ props: { getActions } });
+      await renderPresentationPanel({
+        ...defaultProps,
+        getActions,
+      });
       expect(getActions).toHaveBeenCalledTimes(3);
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledTimes(0);
     });
@@ -129,7 +119,11 @@ describe('Presentation panel', () => {
         disabledActionIds$: new BehaviorSubject<string[] | undefined>(['actionA']),
       };
       const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
-      await renderPresentationPanel({ api, props: { getActions } });
+      await renderPresentationPanel({
+        ...defaultProps,
+        getActions,
+        componentApi: api,
+      });
       await userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
       await waitForEuiPopoverOpen();
       await waitFor(() => {
@@ -143,7 +137,10 @@ describe('Presentation panel', () => {
     it('shows badges and notifications', async () => {
       const testAction = mockAction('testAction');
       const getActions = jest.fn().mockReturnValue([testAction]);
-      await renderPresentationPanel({ props: { getActions } });
+      await renderPresentationPanel({
+        ...defaultProps,
+        getActions,
+      });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
       expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
     });
@@ -151,7 +148,11 @@ describe('Presentation panel', () => {
     it('does not show badges when showBadges is false', async () => {
       const testAction = mockAction('testAction');
       const getActions = jest.fn().mockReturnValue([testAction]);
-      await renderPresentationPanel({ props: { getActions, showBadges: false } });
+      await renderPresentationPanel({
+        ...defaultProps,
+        getActions,
+        showBadges: false,
+      });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).not.toBeInTheDocument();
       expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
     });
@@ -159,7 +160,11 @@ describe('Presentation panel', () => {
     it('does not show notifications when showNotifications is false', async () => {
       const testAction = mockAction('testAction');
       const getActions = jest.fn().mockReturnValue([testAction]);
-      await renderPresentationPanel({ props: { getActions, showNotifications: false } });
+      await renderPresentationPanel({
+        ...defaultProps,
+        getActions,
+        showNotifications: false,
+      });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
       expect(
         screen.queryByTestId('embeddablePanelNotification-testAction')
@@ -174,7 +179,10 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         defaultTitle$: new BehaviorSubject<string | undefined>('SO Title'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitle')).toHaveTextContent('SUPER TITLE');
       });
@@ -185,7 +193,10 @@ describe('Presentation panel', () => {
         uuid: 'test',
         defaultTitle$: new BehaviorSubject<string | undefined>('SO Title'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitle')).toHaveTextContent('SO Title');
       });
@@ -196,7 +207,10 @@ describe('Presentation panel', () => {
         uuid: 'test',
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.queryByTestId('embeddablePanelTitleDescriptionIcon')).toBe(null);
       });
@@ -208,7 +222,10 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         description$: new BehaviorSubject<string | undefined>('SUPER DESCRIPTION'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitleDescriptionIcon')).toBeInTheDocument();
       });
@@ -220,7 +237,10 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         defaultDescription$: new BehaviorSubject<string | undefined>('SO Description'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitleDescriptionIcon')).toBeInTheDocument();
       });
@@ -232,7 +252,10 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>(''),
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
@@ -243,7 +266,10 @@ describe('Presentation panel', () => {
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
@@ -257,7 +283,10 @@ describe('Presentation panel', () => {
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
       });
@@ -279,7 +308,10 @@ describe('Presentation panel', () => {
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
       });
@@ -301,7 +333,10 @@ describe('Presentation panel', () => {
         viewMode$: new BehaviorSubject<ViewMode>('view'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
       });
@@ -320,7 +355,10 @@ describe('Presentation panel', () => {
         hideTitle$: new BehaviorSubject<boolean | undefined>(true),
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
@@ -331,7 +369,10 @@ describe('Presentation panel', () => {
         hideTitle$: new BehaviorSubject<boolean | undefined>(true),
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
@@ -345,7 +386,10 @@ describe('Presentation panel', () => {
           ...getMockPresentationContainer(),
         },
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
@@ -359,7 +403,10 @@ describe('Presentation panel', () => {
           ...getMockPresentationContainer(),
         },
       };
-      await renderPresentationPanel({ api });
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
@@ -370,7 +417,7 @@ describe('Presentation panel', () => {
       };
       const { container } = render(
         <EuiThemeProvider>
-          <PresentationPanel getComponent={getComponent(api)} titleHighlight="cpu" />
+          <PresentationPanel {...defaultProps} componentApi={api} titleHighlight="cpu" />;
         </EuiThemeProvider>
       );
       await waitFor(() => {

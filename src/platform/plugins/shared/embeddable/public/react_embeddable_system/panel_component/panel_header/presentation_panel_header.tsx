@@ -11,7 +11,7 @@ import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo } from 'react';
-import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
@@ -24,7 +24,7 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   panelDescription?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
 } & Pick<
-  PresentationPanelInternalProps,
+  PresentationPanelProps,
   'showBadges' | 'getActions' | 'showNotifications' | 'titleHighlight'
 >;
 

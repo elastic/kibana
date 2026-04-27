@@ -9,14 +9,14 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
+import { PresentationPanelError } from './presentation_panel_error';
 import { EuiThemeProvider } from '@elastic/eui';
 
-describe('PresentationPanelErrorInternal', () => {
+describe('PresentationPanelError', () => {
   test('should display error', async () => {
     render(
       <EuiThemeProvider>
-        <PresentationPanelErrorInternal error={new Error('Simulated error')} />
+        <PresentationPanelError error={new Error('Simulated error')} />
       </EuiThemeProvider>
     );
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
@@ -25,7 +25,7 @@ describe('PresentationPanelErrorInternal', () => {
   test('should display error with empty message', async () => {
     render(
       <EuiThemeProvider>
-        <PresentationPanelErrorInternal error={new Error('')} />
+        <PresentationPanelError error={new Error('')} />
       </EuiThemeProvider>
     );
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));

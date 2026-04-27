@@ -36,7 +36,7 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { uiActions } from '../../../kibana_services';
-import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
@@ -83,7 +83,7 @@ const createClickHandler =
 export interface PresentationPanelHoverActionsProps {
   api: DefaultPresentationPanelApi;
   index?: number;
-  getActions: PresentationPanelInternalProps['getActions'];
+  getActions: PresentationPanelProps['getActions'];
   setDragHandle: (id: string, ref: HTMLElement | null) => void;
   actionPredicate?: (actionId: string) => boolean;
   className?: string;
