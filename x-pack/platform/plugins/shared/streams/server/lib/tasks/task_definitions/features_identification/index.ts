@@ -437,11 +437,25 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
 
-                const [
-                  { features: inferredFeatures, tokensUsed: totalTokensUsed },
-                  computedFeatures,
-                ] = await Promise.all([
-                  identifyStreamFeatures({
+                // Attach `.catch` eagerly so this floating promise can never
+                // become an unhandled rejection if `identifyStreamFeatures`
+                // throws before we reach the `await`.
+                const computedFeaturesPromise = generateAllComputedFeatures({
+                  stream,
+                  start,
+                  end,
+                  esClient,
+                  logger: taskContext.logger.get('computed_features', streamName),
+                }).catch((err) => {
+                  taskLogger.error(
+                    `Computed features generation failed: ${parseError(err).message}`,
+                    { error: err } as LogMeta
+                  );
+                  return [] as Awaited<ReturnType<typeof generateAllComputedFeatures>>;
+                });
+
+                const { features: inferredFeatures, tokensUsed: totalTokensUsed } =
+                  await identifyStreamFeatures({
                     streamName: stream.name,
                     esClient,
                     start,
@@ -491,20 +505,12 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                       });
                       hasTrackedIteration = true;
                     },
-                  }),
-                  generateAllComputedFeatures({
-                    stream,
-                    start,
-                    end,
-                    esClient,
-                    logger: taskContext.logger.get('computed_features', streamName),
-                  }),
-                ]);
+                  });
 
                 const durationMs = Date.now() - new Date(_task.created_at).getTime();
 
                 const reconciledComputedFeatures = reconcileComputedFeatures({
-                  computedFeatures,
+                  computedFeatures: await computedFeaturesPromise,
                   streamName,
                 });
 
