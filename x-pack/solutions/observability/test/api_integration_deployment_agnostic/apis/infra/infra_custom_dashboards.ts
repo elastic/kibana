@@ -18,7 +18,6 @@ const getCustomDashboardsUrl = (assetType: string, dashboardSavedObjectId?: stri
     ? `/api/infra/${assetType}/custom-dashboards/${dashboardSavedObjectId}`
     : `/api/infra/${assetType}/custom-dashboards`;
 
-const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_DELAY_MS = 12_000;
 const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS = 20_000;
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
