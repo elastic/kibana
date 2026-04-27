@@ -17,7 +17,6 @@ import { remapStringsToNestedState } from './utils/remap_strings_to_nested_state
 import type { monaco } from '../../../monaco_imports';
 import { ESQL_LANG_ID } from '../../esql/lib/constants';
 
-
 /*
  * This rule is used inside json root to start an esql highlighting sequence.
  * Triple-quoted strings use nextEmbedded to delegate to the @elastic/monaco-esql grammar.
