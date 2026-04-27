@@ -16,6 +16,7 @@ import { EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
 import { ColorPicker } from '@kbn/charts-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { BucketColumns } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;
@@ -116,6 +117,9 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
   return (
     <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
       <EuiWrappingPopover
+        aria-label={i18n.translate('expressionPartitionVis.legendColorPicker.popoverAriaLabel', {
+          defaultMessage: 'Legend color picker',
+        })}
         isOpen
         ownFocus
         display="block"

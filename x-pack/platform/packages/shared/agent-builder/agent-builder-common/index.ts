@@ -13,6 +13,7 @@ export {
 } from './base/namespaces';
 export {
   ToolType,
+  ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,

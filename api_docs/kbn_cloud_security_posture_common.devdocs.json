@@ -703,7 +703,7 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "lineNumber": 170,
@@ -743,6 +743,8 @@
               "getEuidDslFilterBasedOnDocument",
               "; getEuidDocumentsContainsIdFilter: typeof ",
               "getEuidDslDocumentsContainsIdFilter",
+              "; }; kql: { getEuidFilterBasedOnDocument: typeof ",
+              "getEuidKqlFilterBasedOnDocument",
               "; }; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
@@ -786,7 +788,7 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "lineNumber": 188,
@@ -826,6 +828,8 @@
               "getEuidDslFilterBasedOnDocument",
               "; getEuidDocumentsContainsIdFilter: typeof ",
               "getEuidDslDocumentsContainsIdFilter",
+              "; }; kql: { getEuidFilterBasedOnDocument: typeof ",
+              "getEuidKqlFilterBasedOnDocument",
               "; }; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
