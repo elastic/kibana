@@ -653,14 +653,18 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, [queryId, actionId]);
 
   useEffect(() => {
+    const firstRow = data?.[0];
+    const hasAgentsContext =
+      !!agentIds?.length || !!scheduleId || !!(firstRow?.agents && firstRow.agents.length > 0);
+
     const shouldAutoExpand =
       data?.length === 1 &&
-      (agentIds?.length || scheduleId) &&
-      data?.[0].id &&
-      !itemIdToExpandedRowMap[data?.[0].id];
+      hasAgentsContext &&
+      !!firstRow?.id &&
+      !itemIdToExpandedRowMap[firstRow.id];
 
     if (shouldAutoExpand) {
-      getHandleErrorsToggle(data?.[0])();
+      getHandleErrorsToggle(firstRow)();
     }
   }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap, scheduleId]);
 

@@ -18,120 +18,127 @@ import {
   seedAlertForRule,
 } from '../helpers/seed_alert';
 
-test.describe('Osquery parameter substitution from alerts', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
-  let ruleId: string;
-  let ruleName: string;
-  let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;
+test.describe(
+  'Osquery parameter substitution from alerts',
+  { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS },
+  () => {
+    let ruleId: string;
+    let ruleName: string;
+    let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;
 
-  test.beforeAll(async ({ kbnClient }) => {
-    embeddedRuleBody = buildOsqueryAlertTestRule({
-      includeResponseActions: true,
-      nameSuffix: `scout-param-${Date.now()}`,
-    });
-    ruleId = randomUUID();
-    ruleName = embeddedRuleBody.name;
-    await bootstrapSecurityAlertsIndex(kbnClient);
-  });
-
-  test.afterAll(async ({ esClient, log }) => {
-    await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
-      log.debug(`deleteSeededAlerts failed: ${err.message}`)
-    );
-  });
-
-  // IG query text is read-only; substitution is covered via Take action + `{{host.os.name}}`.
-
-  test('runs a take-action query against all enrolled agents with substituted parameters', async ({
-    browserAuth,
-    esClient,
-    kbnClient,
-    page,
-    pageObjects,
-  }) => {
-    test.setTimeout(300_000);
-
-    const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
-    const seed = await seedAlertForRule(esClient, {
-      ruleId,
-      ruleName,
-      agentId,
-      hostName,
-      hostOsName,
-      embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+    test.beforeAll(async ({ kbnClient }) => {
+      embeddedRuleBody = buildOsqueryAlertTestRule({
+        includeResponseActions: true,
+        nameSuffix: `scout-param-${Date.now()}`,
+      });
+      ruleId = randomUUID();
+      ruleName = embeddedRuleBody.name;
+      await bootstrapSecurityAlertsIndex(kbnClient);
     });
 
-    // Need both Docker agents online before "All agents" (second can lag on serverless).
-    await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
-
-    await browserAuth.loginAsOsqueryPowerUser();
-
-    await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
-    await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
-    await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-    await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
-    await pageObjects.osqueryAlertFlyout.inputFlyoutQuery(
-      "SELECT * FROM os_version where name='{{host.os.name}}';"
-    );
-    await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-
-    // eslint-disable-next-line playwright/no-nth-methods -- last visible flyout root (multi-portal)
-    const flyoutOsquery = page.getByTestId('flyout-body-osquery').filter({ visible: true }).last();
-    await expect
-      .poll(async () => flyoutOsquery.locator('[data-grid-row-index]').count(), {
-        timeout: 180_000,
-      })
-      .toBeGreaterThanOrEqual(2);
-    await expect(flyoutOsquery).toContainText(/version/i, {
-      timeout: 60_000,
-    });
-  });
-
-  test('substitutes parameters in osquery launched from timeline-linked alerts', async ({
-    browserAuth,
-    esClient,
-    kbnClient,
-    page,
-    pageObjects,
-  }) => {
-    test.setTimeout(300_000);
-
-    const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
-    const seed = await seedAlertForRule(esClient, {
-      ruleId,
-      ruleName,
-      agentId,
-      hostName,
-      hostOsName,
-      embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+    test.afterAll(async ({ esClient, log }) => {
+      await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
+        log.debug(`deleteSeededAlerts failed: ${err.message}`)
+      );
     });
 
-    await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
+    // IG query text is read-only; substitution is covered via Take action + `{{host.os.name}}`.
 
-    await browserAuth.loginAsOsqueryPowerUser();
+    test('runs a take-action query against all enrolled agents with substituted parameters', async ({
+      browserAuth,
+      esClient,
+      kbnClient,
+      page,
+      pageObjects,
+    }) => {
+      test.setTimeout(300_000);
 
-    await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
-    await pageObjects.osqueryRuleEditor.dismissDocumentFlyoutToExposeAlertsTable();
-    await pageObjects.osqueryAlertFlyout.openFirstAlertInTimelineAndExpand();
-    await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
-    await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-    await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
-    await pageObjects.osqueryAlertFlyout.inputFlyoutQuery(
-      "SELECT * FROM os_version where name='{{host.os.name}}';"
-    );
-    await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
+      const seed = await seedAlertForRule(esClient, {
+        ruleId,
+        ruleName,
+        agentId,
+        hostName,
+        hostOsName,
+        embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+      });
 
-    const flyoutOsqueryTimeline = page
-      .getByTestId('flyout-body-osquery')
-      .filter({ visible: true })
-      // eslint-disable-next-line playwright/no-nth-methods -- last visible flyout (timeline stack)
-      .last();
-    await expect
-      .poll(async () => flyoutOsqueryTimeline.locator('[data-grid-row-index]').count(), {
-        timeout: 300_000,
-      })
-      .toBeGreaterThanOrEqual(2);
-    await expect(flyoutOsqueryTimeline).toContainText(/version/i, {
-      timeout: 60_000,
+      // Need both Docker agents online before "All agents" (second can lag on serverless).
+      await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
+
+      await browserAuth.loginAsOsqueryPowerUser();
+
+      await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
+      await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
+      await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
+      await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
+      await pageObjects.osqueryAlertFlyout.inputFlyoutQuery(
+        "SELECT * FROM os_version where name='{{host.os.name}}';"
+      );
+      await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+
+      const flyoutOsquery = page
+        .getByTestId('flyout-body-osquery')
+        .filter({ visible: true })
+        // eslint-disable-next-line playwright/no-nth-methods -- active osquery flyout = last visible root
+        .last();
+      await expect
+        .poll(async () => flyoutOsquery.locator('[data-grid-row-index]').count(), {
+          timeout: 180_000,
+        })
+        .toBeGreaterThanOrEqual(2);
+      await expect(flyoutOsquery).toContainText(/version/i, {
+        timeout: 60_000,
+      });
     });
-  });
-});
+
+    test('substitutes parameters in osquery launched from timeline-linked alerts', async ({
+      browserAuth,
+      esClient,
+      kbnClient,
+      page,
+      pageObjects,
+    }) => {
+      test.setTimeout(300_000);
+
+      const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
+      const seed = await seedAlertForRule(esClient, {
+        ruleId,
+        ruleName,
+        agentId,
+        hostName,
+        hostOsName,
+        embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+      });
+
+      await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
+
+      await browserAuth.loginAsOsqueryPowerUser();
+
+      await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
+      await pageObjects.osqueryRuleEditor.dismissDocumentFlyoutToExposeAlertsTable();
+      await pageObjects.osqueryAlertFlyout.openFirstAlertInTimelineAndExpand();
+      await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
+      await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
+      await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
+      await pageObjects.osqueryAlertFlyout.inputFlyoutQuery(
+        "SELECT * FROM os_version where name='{{host.os.name}}';"
+      );
+      await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+
+      const flyoutOsqueryTimeline = page
+        .getByTestId('flyout-body-osquery')
+        .filter({ visible: true })
+        // eslint-disable-next-line playwright/no-nth-methods -- last visible flyout (timeline stack)
+        .last();
+      await expect
+        .poll(async () => flyoutOsqueryTimeline.locator('[data-grid-row-index]').count(), {
+          timeout: 300_000,
+        })
+        .toBeGreaterThanOrEqual(2);
+      await expect(flyoutOsqueryTimeline).toContainText(/version/i, {
+        timeout: 60_000,
+      });
+    });
+  }
+);

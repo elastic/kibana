@@ -58,26 +58,33 @@ interface LiveQueryDetailsResponse {
   };
 }
 
-type SetupLog = { info: (msg: string) => void };
+interface SetupLog {
+  info: (msg: string) => void;
+}
 
 /** HTTP status from errors thrown by `KbnClient` (Axios or wrapped `KbnClientRequesterError`). */
 function httpErrorStatus(caught: unknown): number | undefined {
   if (isAxiosResponseError(caught)) {
     return caught.response?.status;
   }
+
   if (caught instanceof KbnClientRequesterError) {
     return caught.axiosError?.status;
   }
+
   return undefined;
 }
 
 /** Fleet output create/update responses expose `item` with at least `id`. */
-type FleetOutputMutationResponse = { item: Output };
+interface FleetOutputMutationResponse {
+  item: Output;
+}
 
 function errorMessage(error: unknown, maxLen: number): string {
   if (error instanceof Error) {
     return error.message.slice(0, maxLen);
   }
+
   return String(error).slice(0, maxLen);
 }
 
@@ -126,9 +133,8 @@ async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
     });
 
     // Count online + degraded (osquery still works in degraded).
-    return data.items.filter(
-      (agent) => agent.status === 'online' || agent.status === 'degraded'
-    ).length;
+    return data.items.filter((agent) => agent.status === 'online' || agent.status === 'degraded')
+      .length;
   } catch {
     return 0;
   }
