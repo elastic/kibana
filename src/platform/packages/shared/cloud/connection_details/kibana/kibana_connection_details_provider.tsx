@@ -72,13 +72,17 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
       hasPermission: async () => {
         if (!http) return false;
 
-        const { areApiKeysEnabled, canManageApiKeys, canManageOwnApiKeys } = await http.get<{
-          areApiKeysEnabled: boolean;
-          canManageApiKeys: boolean;
-          canManageOwnApiKeys: boolean;
-        }>(API_KEY_PRIVILEGES_PATH);
+        try {
+          const { areApiKeysEnabled, canManageApiKeys } = await http.get<{
+            areApiKeysEnabled: boolean;
+            canManageApiKeys: boolean;
+            canManageOwnApiKeys: boolean;
+          }>(API_KEY_PRIVILEGES_PATH);
 
-        return areApiKeysEnabled && canManageApiKeys;
+          return areApiKeysEnabled && canManageApiKeys;
+        } catch {
+          return false;
+        }
       },
       ...options?.apiKeys,
     },
