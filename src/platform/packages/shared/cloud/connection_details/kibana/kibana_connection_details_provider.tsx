@@ -16,7 +16,7 @@ import { ConnectionDetailsOptsProvider } from '../context';
 import type { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
 
-const SEARCH_API_KEYS_PATH = '/internal/search_api_keys';
+const API_KEY_PRIVILEGES_PATH = '/internal/security/api_key/_privileges';
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
@@ -72,18 +72,13 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
       hasPermission: async () => {
         if (!http) return false;
 
-        try {
-          await http.post(SEARCH_API_KEYS_PATH);
-          return true;
-        } catch (err) {
-          // 400 means user has permission but project already has API keys
-          if (err?.response?.status === 400) {
-            return true;
-          }
-          // 403 means user doesn't have permission to manage API keys
-          // Any other error, assume no permission
-          return false;
-        }
+        const { areApiKeysEnabled, canManageApiKeys, canManageOwnApiKeys } = await http.get<{
+          areApiKeysEnabled: boolean;
+          canManageApiKeys: boolean;
+          canManageOwnApiKeys: boolean;
+        }>(API_KEY_PRIVILEGES_PATH);
+
+        return areApiKeysEnabled && (canManageApiKeys || canManageOwnApiKeys);
       },
       ...options?.apiKeys,
     },

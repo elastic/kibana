@@ -9,6 +9,7 @@ import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineHasApiKeysRoutes } from './has_active';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
+import { defineApiKeyPrivilegesRoutes } from './privileges';
 import { defineQueryApiKeysAndAggregationsRoute } from './query';
 import { defineUpdateApiKeyRoutes } from './update';
 import type { RouteDefinitionParams } from '..';
@@ -24,6 +25,7 @@ export type {
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
   defineHasApiKeysRoutes(params);
+  defineApiKeyPrivilegesRoutes(params);
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
