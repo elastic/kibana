@@ -83,7 +83,7 @@ export default function createUnsnoozeAlertInstanceTests({ getService }: FtrProv
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('unmuteAlert', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('unsnooze', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -149,7 +149,7 @@ export default function createUnsnoozeAlertInstanceTests({ getService }: FtrProv
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage(
-                  'unmuteAlert',
+                  'unsnooze',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -207,7 +207,7 @@ export default function createUnsnoozeAlertInstanceTests({ getService }: FtrProv
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage(
-                  'unmuteAlert',
+                  'unsnooze',
                   'test.unrestricted-noop',
                   'alertsFixture'
                 ),
@@ -268,11 +268,7 @@ export default function createUnsnoozeAlertInstanceTests({ getService }: FtrProv
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'unmuteAlert',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('unsnooze', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
