@@ -39,6 +39,9 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+env:
+  PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
 tools:
   github:
     toolsets: [default]
@@ -55,29 +58,29 @@ jobs:
       pull-requests: read
     uses: ./.github/workflows/prefetch-pr-context.yml
     with:
-      pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      pr_number: *pr_number
       repo: ${{ github.repository }}
-      artifact_name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      artifact_name: *pr_context_artifact_name
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
-      name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
 safe-outputs:
   create-pull-request-review-comment:
     max: 10
-    target: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+    target: ${{ env.PR_NUMBER }}
   submit-pull-request-review:
     max: 1
-    target: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+    target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
     footer: none
 ---
 
 # Claude PR Reviewer
 
-Review pull request #${{ github.event.pull_request.number || github.event.inputs.pr_number }} in `${{ github.repository }}` using the imported reviewer instructions.
+Review pull request #${{ env.PR_NUMBER }} in `${{ github.repository }}` using the imported reviewer instructions.
 
 This workflow runs automatically for eligible pull request events and can still be triggered manually for testing.
 
