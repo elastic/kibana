@@ -908,23 +908,33 @@ export class StreamsApp {
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
+  /**
+   * Asserts a preview grid cell eventually contains `value`. Polls the cell's inner text because
+   * the simulation preview can briefly show stale values (e.g. literal "null" from a Set processor)
+   * before refreshed documents render (https://github.com/elastic/kibana/issues/260710).
+   */
   async expectCellValueContains({
     columnName,
     rowIndex,
     value,
     invertCondition = false,
+    timeout = 30_000,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
     invertCondition?: boolean;
+    timeout?: number;
   }) {
     const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
-      await expect(cellLocator).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value, { timeout });
     } else {
-      await expect(cellLocator).toContainText(value);
+      await expect(async () => {
+        const text = (await cellLocator.innerText()).replace(/\s+/g, ' ').trim();
+        expect(text).toContain(value);
+      }).toPass({ timeout, intervals: [100, 200, 400, 800, 1600] });
     }
   }
 
