@@ -42,6 +42,7 @@ export function Card({
 }) {
   const { euiTheme } = useEuiTheme();
   const cardPadding = euiTheme.size.m;
+  const isClickable = Boolean(onClick) && !isDisabled && !isSelected;
 
   const style = css`
     height: 100%;
@@ -57,7 +58,7 @@ export function Card({
   const buttonStyle = css`
     ${style}
     && {
-      cursor: ${isSelected ? 'default' : 'pointer'};
+      cursor: ${isClickable ? 'pointer' : 'default'};
     }
 
     ${isSelected
@@ -88,14 +89,10 @@ export function Card({
             display: none;
           }
 
-          && .euiButtonEmpty__content,
-          &&:hover .euiButtonEmpty__content,
-          &&:focus .euiButtonEmpty__content,
-          &&:active .euiButtonEmpty__content,
-          && .euiButtonEmpty__text,
-          &&:hover .euiButtonEmpty__text,
-          &&:focus .euiButtonEmpty__text,
-          &&:active .euiButtonEmpty__text {
+          && *,
+          &&:hover *,
+          &&:focus *,
+          &&:active * {
             color: inherit;
             text-decoration: none;
           }
@@ -159,8 +156,9 @@ export function Card({
   return onClick ? (
     <EuiButtonEmpty
       isDisabled={isDisabled}
-      onClick={isSelected ? undefined : onClick}
+      onClick={isClickable ? onClick : undefined}
       css={buttonStyle}
+      type="button"
       contentProps={{
         css: css`
           justify-content: flex-start;
