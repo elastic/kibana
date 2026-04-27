@@ -1,0 +1,660 @@
+{
+  "id": "@kbn/agent-builder-tools-base",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.buildVisualizationConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "buildVisualizationConfig",
+        "description": [],
+        "signature": [
+          "({ nlQuery, index, chartType, esql, existingConfig, parsedExistingConfig, includeTimeRange, additionalChartConfigInstructions, modelProvider, logger, events, esClient, }: ",
+          {
+            "pluginId": "@kbn/agent-builder-tools-base",
+            "scope": "server",
+            "docId": "kibKbnAgentBuilderToolsBasePluginApi",
+            "section": "def-server.BuildVisualizationConfigParams",
+            "text": "BuildVisualizationConfigParams"
+          },
+          ") => Promise<BuildVisualizationConfigResult>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.buildVisualizationConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  nlQuery,\n  index,\n  chartType,\n  esql,\n  existingConfig,\n  parsedExistingConfig = null,\n  includeTimeRange = true,\n  additionalChartConfigInstructions,\n  modelProvider,\n  logger,\n  events,\n  esClient,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-tools-base",
+                "scope": "server",
+                "docId": "kibKbnAgentBuilderToolsBasePluginApi",
+                "section": "def-server.BuildVisualizationConfigParams",
+                "text": "BuildVisualizationConfigParams"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 39,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.getChartTypeSelectionPromptContent",
+        "type": "Function",
+        "tags": [],
+        "label": "getChartTypeSelectionPromptContent",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/chart_type_guidance.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.getExecutionState",
+        "type": "Function",
+        "tags": [],
+        "label": "getExecutionState",
+        "description": [
+          "\nReturns the state of a workflow execution."
+        ],
+        "signature": [
+          "({ executionId, spaceId, workflowApi, }: { executionId: string; spaceId: string; workflowApi: ",
+          "WorkflowsManagementApi",
+          "; }) => Promise<",
+          {
+            "pluginId": "@kbn/agent-builder-tools-base",
+            "scope": "server",
+            "docId": "kibKbnAgentBuilderToolsBasePluginApi",
+            "section": "def-server.WorkflowExecutionState",
+            "text": "WorkflowExecutionState"
+          },
+          " | null>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.getExecutionState.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  executionId,\n  spaceId,\n  workflowApi,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 44,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-tools-base",
+                "id": "def-server.getExecutionState.$1.executionId",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+                "lineNumber": 45,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-tools-base",
+                "id": "def-server.getExecutionState.$1.spaceId",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+                "lineNumber": 46,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-tools-base",
+                "id": "def-server.getExecutionState.$1.workflowApi",
+                "type": "Object",
+                "tags": [],
+                "label": "workflowApi",
+                "description": [],
+                "signature": [
+                  "WorkflowsManagementApi"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+                "lineNumber": 47,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.getWorkflowOutput",
+        "type": "Function",
+        "tags": [],
+        "label": "getWorkflowOutput",
+        "description": [
+          "\nRecursively extracts the output from a workflow execution's step executions.\nAt top-level (scopeDepth=0), finds the last step. At nested levels (scopeDepth>0),\nconsiders all steps at that level. If steps have children, recurses into them.\nOtherwise, returns their output(s)."
+        ],
+        "signature": [
+          "(stepExecutions: ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.WorkflowStepExecutionDto",
+            "text": "WorkflowStepExecutionDto"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_workflow_output.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.getWorkflowOutput.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "stepExecutions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowStepExecutionDto",
+                "text": "WorkflowStepExecutionDto"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_workflow_output.ts",
+            "lineNumber": 17,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.BuildVisualizationConfigParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "BuildVisualizationConfigParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.nlQuery",
+            "type": "string",
+            "tags": [],
+            "label": "nlQuery",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.chartType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chartType",
+            "description": [],
+            "signature": [
+              "SupportedChartType",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.esql",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.existingConfig",
+            "type": "string",
+            "tags": [],
+            "label": "existingConfig",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.parsedExistingConfig",
+            "type": "Any",
+            "tags": [],
+            "label": "parsedExistingConfig",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.includeTimeRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeTimeRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.additionalChartConfigInstructions",
+            "type": "string",
+            "tags": [],
+            "label": "additionalChartConfigInstructions",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.modelProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "modelProvider",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ModelProvider",
+                "text": "ModelProvider"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.events",
+            "type": "Object",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolEventEmitter",
+                "text": "ToolEventEmitter"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.BuildVisualizationConfigParams.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "IScopedClusterClient"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/build_visualization_config.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.WorkflowExecutionState",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowExecutionState",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.execution_id",
+            "type": "string",
+            "tags": [],
+            "label": "execution_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.ExecutionStatus",
+                "text": "ExecutionStatus"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.workflow_id",
+            "type": "string",
+            "tags": [],
+            "label": "workflow_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.started_at",
+            "type": "string",
+            "tags": [],
+            "label": "started_at",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.finished_at",
+            "type": "string",
+            "tags": [],
+            "label": "finished_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.output",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.workflow_name",
+            "type": "string",
+            "tags": [],
+            "label": "workflow_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.error_message",
+            "type": "string",
+            "tags": [],
+            "label": "error_message",
+            "description": [
+              "Present when status is FAILED; contains the workflow error message."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-tools-base",
+            "id": "def-server.WorkflowExecutionState.waiting_input",
+            "type": "Object",
+            "tags": [],
+            "label": "waiting_input",
+            "description": [
+              "Present when status is WAITING_FOR_INPUT; describes what input is needed to resume."
+            ],
+            "signature": [
+              "WaitingInputContext",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/agent-builder-tools-base",
+        "id": "def-server.VisualizationConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "VisualizationConfig",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/chart_type_registry.ts",
+        "lineNumber": 152,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

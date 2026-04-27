@@ -14,6 +14,7 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ParsedPart } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
 import { action, type ActionOutput, type ActionBuilderContext } from '../../action';
 
 /** Default i18n-translated column title for the actions column. */
@@ -28,11 +29,16 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
  * These are the declarative attributes consumers pass in JSX. The actions builder
  * reads them directly from the parsed attributes.
  */
-export interface ActionsColumnProps {
-  /** Column width (CSS value like `'100px'`). */
-  width?: string;
+export interface ActionsColumnProps
+  extends Pick<ColumnLayoutProps, 'width' | 'minWidth' | 'maxWidth'> {
   /** Custom column title. Defaults to `'Actions'`. */
   columnTitle?: string;
+  /**
+   * Whether to stick the actions column to the right side during horizontal scroll.
+   *
+   * @default true
+   */
+  sticky?: boolean;
   /**
    * Action children.
    *
@@ -113,7 +119,7 @@ export const buildActionsColumn = (
   attributes: ActionsColumnProps,
   context: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> | undefined => {
-  const { children, width, columnTitle } = attributes;
+  const { children, width, minWidth, maxWidth, columnTitle, sticky = true } = attributes;
 
   // Parse action children from the Column.Actions element.
   const actionParts = children !== undefined ? action.parseChildren(children) : [];
@@ -136,10 +142,22 @@ export const buildActionsColumn = (
     return undefined;
   }
 
+  // Each `EuiButtonIcon` (xs) is `euiTheme.size.l` (24px) wide with a 4px
+  // inline gap — matching `euiButtonSizeMap`'s `xs.height`. `euiButtonSizeMap`
+  // requires a live EUI theme context so we derive the constant here instead.
+  // Add 8px for cell padding so adjacent columns with long content do not
+  // squeeze the actions column.
+  const defaultWidth = `${actions.length * 28 + 8}px`;
+
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
     actions,
-    ...(width && { width }),
+    ...getColumnLayoutProps({
+      width: width ?? defaultWidth,
+      minWidth: minWidth ?? width ?? defaultWidth,
+      maxWidth,
+    }),
+    sticky,
     'data-test-subj': 'content-list-table-column-actions',
   };
 };

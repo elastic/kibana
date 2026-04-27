@@ -38,6 +38,7 @@ export const processorsFormatter = (config: MonitorFields & ProcessorFields) => 
             space_id: spaces.length === 1 ? spaces[0] : spaces,
           },
           ...(isEmpty(labels) ? {} : { labels }),
+          ...(config.kibanaUrl ? { kibanaUrl: config.kibanaUrl } : {}),
         },
         target: '',
       },
