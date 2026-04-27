@@ -43,7 +43,6 @@ test.describe(
 
       await test.step('Opens the flyout when "View full trace" is clicked', async () => {
         await traceWaterfallFlyout.open();
-        await expect(traceWaterfallFlyout.dialog).toBeVisible();
       });
 
       await test.step('Waterfall shows the root service transaction', async () => {

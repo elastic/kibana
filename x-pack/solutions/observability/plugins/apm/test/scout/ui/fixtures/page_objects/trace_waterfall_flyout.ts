@@ -52,6 +52,7 @@ export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyou
     async open() {
       const button = page.getByTestId('apmFullTraceButtonViewFullTraceButton');
       await button.click({ timeout: EXTENDED_TIMEOUT });
+      await dialog.waitFor({ state: 'visible' });
     },
 
     async clickSpan(spanName: string) {
