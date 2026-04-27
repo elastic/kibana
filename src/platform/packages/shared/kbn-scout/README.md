@@ -416,6 +416,46 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 }
 ```
 
+For `security` and `oblt` MKI projects, `productTier` is **required** (one of `complete | essentials | logs_essentials | search_ai_lake`). Example for an Observability "logs essentials" project:
+
+```json
+{
+  "serverless": true,
+  "projectType": "oblt",
+  "productTier": "logs_essentials",
+  "isCloud": true,
+  "cloudHostName": "elastic_cloud_hostname_qa_staging_prod",
+  "cloudUsersFilePath": "/path_to_your_cloud_users/role_users.json",
+  "hosts": {
+    "kibana": "https://my.oblt.project.kb.co",
+    "elasticsearch": "https://my.oblt.project.es.co"
+  },
+  "auth": {
+    "username": "operator_username",
+    "password": "operator_password"
+  }
+}
+```
+
+#### Cloud config validation
+
+`cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them, and any issues are reported in a single message with the full file path and `'<field>'` paths. The required and conditional rules are:
+
+| Field                | Required when                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `serverless`         | always                                                                              |
+| `isCloud`            | always                                                                              |
+| `hosts.{kibana, elasticsearch}` | always (must be valid URLs)                                            |
+| `auth.{username, password}`     | always (must be non-empty)                                             |
+| `cloudUsersFilePath` | always                                                                              |
+| `cloudHostName`      | when `isCloud: true`                                                                 |
+| `projectType`        | when `serverless: true` (one of `es` \| `oblt` \| `security` \| `workplaceai`)       |
+| `productTier`        | when `projectType` is `security` or `oblt` (one of `complete` \| `essentials` \| `logs_essentials` \| `search_ai_lake`) |
+
+`http2`, `uiam`, and `license` are optional and default to `false`, `false`, and `"trial"` respectively.
+
+Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
+
 #### Starting Servers Only
 
 To start the servers locally without running tests, use the following command:
