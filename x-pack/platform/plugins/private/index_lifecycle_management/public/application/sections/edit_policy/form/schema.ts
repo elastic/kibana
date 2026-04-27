@@ -101,7 +101,7 @@ export const searchableSnapshotFields = {
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeOnCloneHelpText',
       {
         defaultMessage:
-          'When force merge is enabled, this controls whether it is performed on a clone of the index with zero replicas. Defaults to true.',
+          'Clone the index with zero replicas first, then perform the force merge on the clone. This avoids performing the force merge redundantly on replica shards.',
       }
     ),
   },
