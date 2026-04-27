@@ -236,13 +236,21 @@ export class WorkflowsService {
     return this.crudService.deleteWorkflows(ids, spaceId, options);
   }
 
-  public async disableAllWorkflows(): Promise<{
+  /**
+   * Disables all enabled workflows. When `spaceId` is set, only workflows in that
+   * space; otherwise across all spaces. Delegated to {@link WorkflowCrudService},
+   * which sets `enabled: false`, patches YAML accordingly, and unschedules any
+   * scheduled tasks.
+   * Used when a user opts out of workflows by toggling the per-space UI setting
+   * off, or when availability (license / config) requires a global bulk disable.
+   */
+  public async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
     await this.ensureInitialized();
-    return this.crudService.disableAllWorkflows();
+    return this.crudService.disableAllWorkflows(spaceId);
   }
 
   public async getWorkflowsSubscribedToTrigger(
