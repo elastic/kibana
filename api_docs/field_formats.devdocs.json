@@ -1442,7 +1442,7 @@
                 "section": "def-common.ReactContextTypeOptions",
                 "text": "ReactContextTypeOptions"
               },
-              " | undefined) => string | number | true | React.JSX.Element | Iterable<React.ReactNode>"
+              " | undefined) => string | number | true | Iterable<React.ReactNode> | React.JSX.Element"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/color.tsx",
             "lineNumber": 73,
@@ -5899,7 +5899,7 @@
                 "section": "def-common.ReactContextTypeOptions",
                 "text": "ReactContextTypeOptions"
               },
-              " | undefined) => string | number | true | React.JSX.Element | Iterable<React.ReactNode>"
+              " | undefined) => string | number | true | Iterable<React.ReactNode> | React.JSX.Element"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/url.tsx",
             "lineNumber": 138,
