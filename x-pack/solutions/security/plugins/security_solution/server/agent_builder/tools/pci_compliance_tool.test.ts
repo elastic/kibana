@@ -259,5 +259,80 @@ describe('pciComplianceTool (consolidated)', () => {
         }
       }
     });
+
+    it('esqlResults entries always contain valid ES|QL in the query field', async () => {
+      mockExecuteEsql.mockResolvedValue({
+        columns: [
+          { name: 'user.name', type: 'keyword' },
+          { name: 'cnt', type: 'long' },
+        ],
+        values: [['jdoe', 15]],
+      } as never);
+
+      const checkResult = (await tool.handler(
+        {
+          mode: 'check',
+          requirements: ['8'],
+          indices: ['logs-*'],
+          timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+          includeEvidence: true,
+          format: 'summary',
+          includeRecommendations: true,
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const reportResult = (await tool.handler(
+        {
+          mode: 'report',
+          requirements: ['all'],
+          indices: ['logs-*'],
+          timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+          format: 'detailed',
+          includeRecommendations: true,
+          includeEvidence: false,
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      for (const { results } of [checkResult, reportResult]) {
+        const esqlEntries = results.filter((r) => r.type === ToolResultType.esqlResults);
+        for (const entry of esqlEntries) {
+          const query = (entry.data as { query?: string }).query ?? '';
+          expect(query).toMatch(/^(FROM|ROW|SHOW|SET|TS)\s/i);
+        }
+      }
+    });
+
+    it('check mode esqlResults include time_range for parameter binding', async () => {
+      mockExecuteEsql.mockResolvedValue({
+        columns: [
+          { name: 'user.name', type: 'keyword' },
+          { name: 'cnt', type: 'long' },
+        ],
+        values: [['jdoe', 15]],
+      } as never);
+
+      const result = (await tool.handler(
+        {
+          mode: 'check',
+          requirements: ['8'],
+          indices: ['logs-*'],
+          timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+          includeEvidence: true,
+          format: 'summary',
+          includeRecommendations: true,
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const esqlEntries = result.results.filter((r) => r.type === ToolResultType.esqlResults);
+      for (const entry of esqlEntries) {
+        const data = entry.data as { time_range?: { from: string; to: string } };
+        expect(data.time_range).toBeDefined();
+        expect(data.time_range!.from).toBe('2024-01-01T00:00:00Z');
+        expect(data.time_range!.to).toBe('2024-01-08T00:00:00Z');
+      }
+    });
   });
 });

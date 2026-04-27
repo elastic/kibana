@@ -250,6 +250,7 @@ export const pciComplianceTool = (
           indexPattern,
           indexList,
           requirements: requestedRaw,
+          timeRange,
         });
       }
 
@@ -271,12 +272,14 @@ function buildCheckResponse({
   indexPattern,
   indexList,
   requirements,
+  timeRange,
 }: {
   rows: EvaluatedRequirement[];
   scopeClaim: ReturnType<typeof buildScopeClaim>;
   indexPattern: string;
   indexList: string[];
   requirements: string[];
+  timeRange?: { from: string; to: string };
 }) {
   const statusCounts = rows.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] ?? 0) + 1;
@@ -293,31 +296,21 @@ function buildCheckResponse({
   }> = [];
 
   const redFindings = rows.filter((r) => r.status === 'RED');
-  if (redFindings.length > 0) {
-    const evidenceRows = redFindings.flatMap((r) =>
-      r.findings
-        .filter((f) => f.evidence && f.evidence.values.length > 0)
-        .flatMap((f) => f.evidence?.values.map((row) => [r.requirement, r.name, ...row]) ?? [])
-    );
-    if (evidenceRows.length > 0) {
-      const firstEvidence = redFindings
-        .flatMap((r) => r.findings)
-        .find((f) => f.evidence && f.evidence.values.length > 0);
-      const evidenceColumns = [
-        { name: 'requirement', type: 'keyword' },
-        { name: 'check', type: 'keyword' },
-        ...(firstEvidence?.evidence?.columns ?? []),
-      ];
-
-      results.push({
-        tool_result_id: getToolResultId(),
-        type: ToolResultType.esqlResults,
-        data: {
-          query: 'PCI DSS v4.0.1 Compliance Check - Violations Found',
-          columns: evidenceColumns,
-          values: evidenceRows.slice(0, 100),
-        },
-      });
+  for (const row of redFindings) {
+    for (const finding of row.findings) {
+      if (finding.evidence && finding.evidence.values.length > 0) {
+        const { from, to } = getTimeRangeForCheck(row.requirement, timeRange);
+        results.push({
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.esqlResults,
+          data: {
+            query: finding.evidence.query,
+            columns: finding.evidence.columns,
+            values: finding.evidence.values,
+            time_range: { from, to },
+          },
+        });
+      }
     }
   }
 
@@ -377,6 +370,8 @@ function buildReportResponse({
     r.evidenceCount,
   ]);
 
+  const scorecardQuery = `ROW overall_score = ${overallScore}, status = "${overallStatus}", green = ${greenCount}, amber = ${amberCount}, red = ${redCount}, not_assessable = ${notAssessableCount}`;
+
   const results: Array<{
     type: ToolResultType;
     data: Record<string, unknown>;
@@ -386,7 +381,7 @@ function buildReportResponse({
       tool_result_id: getToolResultId(),
       type: ToolResultType.esqlResults,
       data: {
-        query: 'PCI DSS v4.0.1 Compliance Scorecard',
+        query: scorecardQuery,
         columns: scorecardColumns,
         values: scorecardValues,
       },
