@@ -35,7 +35,7 @@ interface ChartTypeRegistryEntry {
   supportsDynamicColoring?: boolean;
   /**
    * Number of color stops the LLM should put in `steps[]` for this chart type
-   * (and the number of preview hex codes we sample from each gradient palette
+   * (and the number of preview hex codes we sample from each dynamic palette
    * when describing it in the system prompt).
    *
    * Only meaningful when `supportsDynamicColoring` is true. Picked to match

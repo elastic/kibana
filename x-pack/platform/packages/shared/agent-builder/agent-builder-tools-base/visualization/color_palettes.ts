@@ -22,7 +22,7 @@ const formatPalettePreview = ({
   colors: readonly string[];
 }): string => `- ${name}: ${colors.join(', ')}`;
 
-const getGradientPalettePreviews = (steps: number): string[] =>
+const getDynamicPalettePreviews = (steps: number): string[] =>
   LENS_DYNAMIC_COLOR_PALETTES.map((palette) =>
     formatPalettePreview({ name: palette.name, colors: palette.colors(steps) })
   );
@@ -66,9 +66,9 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
   if (supportsDynamic && supportsCategorical) {
     lines.push(
       `${nextSection()}) CHOOSE the coloring mode based on the column type`,
-      '- Numeric columns (counts, durations, percentages, bytes, etc.) → use the dynamic gradient form: `color: { type: "dynamic", range, steps: [...] }`. Follow the dynamic gradient rules below.',
+      '- Numeric columns (counts, durations, percentages, bytes, etc.) → use the dynamic value-based color form: `color: { type: "dynamic", range, steps: [...] }`. Follow the dynamic palette rules below.',
       '- Keyword / text columns (status, host, service, env, error type, etc.) → use the categorical mapping form: `color: { mode: "categorical", palette: "<palette id>", mapping: [] }`. Follow the categorical mapping rules below.',
-      '- NEVER apply categorical mapping to a numeric column or dynamic gradient steps to a keyword column.',
+      '- NEVER apply categorical mapping to a numeric column or dynamic palette steps to a keyword column.',
       '- NEVER use the deprecated `type: "legacy_dynamic"`.',
       ''
     );
@@ -92,8 +92,8 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
 
   if (supportsDynamic) {
     lines.push(
-      `${nextSection()}) DYNAMIC GRADIENT — pick exactly ONE palette`,
-      '- Choose a single palette from the gradient list below whose semantics match the metric. The chosen palette name MUST come from this list verbatim.',
+      `${nextSection()}) DYNAMIC PALETTE — pick exactly ONE palette`,
+      '- Choose a single palette from the dynamic palette list below whose semantics match the metric. The chosen palette name MUST come from this list verbatim.',
       '  - "Status" — ordered status or threshold bands such as success / warning / danger (SLO compliance, severity).',
       '  - "Temperature" — temperature-style intensity scales where cooler and hotter colors represent opposite ends of the metric.',
       '  - "Complementary" — diverging data around a neutral midpoint (change, delta, deviation from target).',
@@ -110,7 +110,7 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
 
     lines.push(
       '',
-      `${nextSection()}) DYNAMIC GRADIENT — fill \`steps\` from THAT palette ONLY`,
+      `${nextSection()}) DYNAMIC PALETTE — fill \`steps\` from THAT palette ONLY`,
       `- Use exactly ${stepsCount} step${
         stepsCount === 1 ? '' : 's'
       } for a ${chartType} chart. Take a contiguous slice of ${stepsCount} colors from one end of the chosen palette (the end you choose depends on whether low or high values should stand out).`,
@@ -118,7 +118,7 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
       '- This rule applies even to palettes that look visually similar or share tones. For example, building a custom red→green gradient by combining greens from "Positive" with reds from "Status" is FORBIDDEN — even though both palettes contain green-ish and red-ish hues, the exact hex values differ and Lens has tuned each palette as a coherent unit. The same applies to any other pairing: "Negative" + "Cool", "Temperature" + "Status", "Positive" + "Negative", etc. If the chosen palette\'s colors do not look "nice enough" on their own, that means you picked the wrong palette in the previous step — go back and pick a different one.',
       '- Do NOT invent colors, do NOT interpolate between palettes, and do NOT modify hex values (no shading, no opacity tweaks, no shortening `#aabbcc` to `#abc`). If a palette does not match the data, pick a different palette in the previous step — never substitute individual colors.',
       "- By default keep the chosen palette's natural order (low values → first color, high values → last color) so the rendered result matches the Lens UI palette picker.",
-      '- There is no `reverse` field in the schema, so to flip the gradient (e.g. you want LOW success rates highlighted with the most saturated Positive color), reverse the colors yourself in the `steps` array — but still use only colors from the SAME palette.',
+      '- There is no `reverse` field in the schema, so to flip the color order (e.g. you want LOW success rates highlighted with the most saturated Positive color), reverse the colors yourself in the `steps` array — but still use only colors from the SAME palette.',
       '- VERIFY before output: scan your `steps` array. Every `color` value must appear, byte-for-byte, in the preview line of the SINGLE palette you picked. If even one hex is missing from that line, your output is invalid — fix it before producing the final JSON.',
       ''
     );
@@ -137,8 +137,8 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
 
   if (supportsDynamic) {
     lines.push(
-      `Available gradient palettes (canonical ${stepsCount}-stop previews from the Lens UI palette picker, sized to match the ${stepsCount} \`steps\` you must produce for a ${chartType} chart):`,
-      ...getGradientPalettePreviews(stepsCount),
+      `Available dynamic palettes (canonical ${stepsCount}-stop previews from the Lens UI palette picker, sized to match the ${stepsCount} \`steps\` you must produce for a ${chartType} chart):`,
+      ...getDynamicPalettePreviews(stepsCount),
       ''
     );
   }
