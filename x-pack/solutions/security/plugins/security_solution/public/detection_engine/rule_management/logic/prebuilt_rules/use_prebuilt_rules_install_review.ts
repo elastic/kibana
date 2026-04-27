@@ -10,7 +10,7 @@ import type {
   ReviewRuleInstallationResponseBody,
   ReviewRuleInstallationField,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
-import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules_contract.gen';
+import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';

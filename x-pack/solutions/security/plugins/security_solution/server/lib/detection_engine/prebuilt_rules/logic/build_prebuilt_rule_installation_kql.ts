@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules_contract.gen';
+import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from './rule_assets/prebuilt_rule_assets_type';
 

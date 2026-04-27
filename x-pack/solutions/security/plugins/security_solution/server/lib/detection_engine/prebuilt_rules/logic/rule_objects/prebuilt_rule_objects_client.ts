@@ -34,6 +34,10 @@ interface FetchAllInstalledRulesArgs {
 
 interface FetchAllInstalledRuleVersionsArgs {
   filter?: PrebuiltRulesFilter;
+  // Additional raw KQL string AND-ed with the structured `filter` above. Used by callers
+  // that already have a precomputed KQL clause (e.g. the upgrade-review endpoint forwarding
+  // a user-supplied filter) so the saved-objects fetch can be narrowed at the source.
+  kqlFilter?: string;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
 }
@@ -147,18 +151,24 @@ export const createPrebuiltRuleObjectsClient = (
         }
       );
     },
-    fetchInstalledRuleVersions: ({ filter, sortField, sortOrder } = {}) => {
+    fetchInstalledRuleVersions: ({ filter, kqlFilter, sortField, sortOrder } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRuleVersions', async () => {
-        const filterKQL = convertRulesFilterToKQL({
+        const structuredKQL = convertRulesFilterToKQL({
           showElasticRules: true,
           filter: filter?.name,
           tags: filter?.tags,
           customizationStatus: filter?.customization_status,
         });
+        const combinedKQL =
+          kqlFilter && kqlFilter.length > 0
+            ? structuredKQL
+              ? `(${structuredKQL}) AND (${kqlFilter})`
+              : kqlFilter
+            : structuredKQL;
 
         const rulesData = await findRules({
           rulesClient,
-          filter: filterKQL,
+          filter: combinedKQL,
           perPage: MAX_PREBUILT_RULES_COUNT,
           page: 1,
           sortField,
