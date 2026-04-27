@@ -642,7 +642,7 @@ describe('verify_permissions_task', () => {
       expect(result!.runAt.getTime()).toBeLessThanOrEqual(after + TTL_MS + BUFFER_MS + 100);
     });
 
-    it('should NOT request a follow-up run when only one eligible connector existed', async () => {
+    it('should request a follow-up run when only one eligible connector existed (verifier TTL cleanup)', async () => {
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
         .mockResolvedValueOnce({ items: [] } as any);
@@ -661,10 +661,16 @@ describe('verify_permissions_task', () => {
 
       mockSoClient.update.mockResolvedValue({});
 
-      const result = await taskRunner.run();
+      const before = Date.now();
+      const result = (await taskRunner.run()) as { runAt: Date } | undefined;
+      const after = Date.now();
 
-      // Without a return value the task falls back to its 12 h cron.
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result!.runAt).toBeInstanceOf(Date);
+      const TTL_MS = 5 * 60 * 1000;
+      const BUFFER_MS = 30 * 1000;
+      expect(result!.runAt.getTime()).toBeGreaterThanOrEqual(before + TTL_MS + BUFFER_MS - 100);
+      expect(result!.runAt.getTime()).toBeLessThanOrEqual(after + TTL_MS + BUFFER_MS + 100);
     });
 
     it('should request a follow-up run when the gate blocks because a verifier is still in flight', async () => {
