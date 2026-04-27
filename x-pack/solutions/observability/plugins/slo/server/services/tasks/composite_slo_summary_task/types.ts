@@ -8,5 +8,3 @@
 export interface CompositeSloSummaryTaskState {
   lastCompositeListVisitRunSoonAt?: number;
 }
-
-export type TaskState = CompositeSloSummaryTaskState & Record<string, unknown>;
