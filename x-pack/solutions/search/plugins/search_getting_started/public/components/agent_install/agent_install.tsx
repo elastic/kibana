@@ -172,7 +172,7 @@ export const AgentInstallSection = () => {
                 <AgentInstallPanel
                   icon="productAgent"
                   title={i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.title', {
-                    defaultMessage: 'Build with the Elasticsearch Agent',
+                    defaultMessage: 'Build with the Elastic AI Agent',
                   })}
                   description={i18n.translate(
                     'xpack.gettingStarted.agentInstall.agentBuilder.description',
@@ -187,7 +187,7 @@ export const AgentInstallSection = () => {
                     data-test-subj="agentInstallOpenInAgentBuilder"
                   >
                     {i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.cta', {
-                      defaultMessage: 'Open Elastic Agent',
+                      defaultMessage: 'Open Elastic AI Agent',
                     })}
                   </AiButton>
                 </AgentInstallPanel>
