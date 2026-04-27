@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@kbn/react-query';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -17,6 +16,7 @@ import {
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { usePrePromptWorkflows } from '../../hooks/use_pre_prompt_workflows';
 import { PrePromptWorkflowPicker } from './pre_prompt_workflow_picker';
 
 function toStringArray(value: unknown): string[] {
@@ -40,19 +40,8 @@ export const PrePromptWorkflowSection: React.FC = () => {
     agentBuilder && isWorkflowUiEnabled && isAgentBuilderExperimentalFeaturesEnabled;
 
   const field = fields[AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS];
-  const isPickerEnabled = field && shouldRender;
-
-  const { data: workflows = [], isLoading } = useQuery({
-    queryKey: ['genAiSettings', 'prePromptWorkflows'],
-    enabled: isPickerEnabled,
-    queryFn: async () => {
-      if (!agentBuilder) {
-        return [];
-      }
-      const response = await agentBuilder.tools.listWorkflows({ page: 1, limit: 1000 });
-      return response.results.map((workflow) => ({ id: workflow.id, name: workflow.name }));
-    },
-  });
+  const isPickerEnabled = Boolean(field && shouldRender);
+  const { workflows, isLoading } = usePrePromptWorkflows({ enabled: isPickerEnabled });
 
   if (!field || !shouldRender || !agentBuilder) {
     return null;

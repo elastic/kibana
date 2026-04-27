@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { NO_DEFAULT_CONNECTOR } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
@@ -22,37 +22,24 @@ export function useConnectorExists(connectorId: string): {
     services: { genAiSettingsApi },
   } = useKibana();
 
-  const [exists, setExists] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const enabled = Boolean(connectorId) && connectorId !== NO_DEFAULT_CONNECTOR;
 
-  useEffect(() => {
-    if (!connectorId || connectorId === NO_DEFAULT_CONNECTOR) {
-      setExists(true);
-      setLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    setLoading(true);
-
-    genAiSettingsApi('GET /internal/gen_ai_settings/connectors/{connectorId}', {
-      signal: controller.signal,
-      params: { path: { connectorId } },
-    })
-      .then(() => {
-        setExists(true);
-      })
-      .catch((e) => {
-        if (e?.name !== 'AbortError') {
-          setExists(false);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['connectorExists', connectorId],
+    enabled,
+    queryFn: async ({ signal }) => {
+      await genAiSettingsApi('GET /internal/gen_ai_settings/connectors/{connectorId}', {
+        signal,
+        params: { path: { connectorId } },
       });
+      return true;
+    },
+    retry: false,
+  });
 
-    return () => controller.abort();
-  }, [connectorId, genAiSettingsApi]);
+  if (!enabled) {
+    return { exists: true, loading: false };
+  }
 
-  return { exists, loading };
+  return { exists: isError ? false : data ?? true, loading: isLoading };
 }

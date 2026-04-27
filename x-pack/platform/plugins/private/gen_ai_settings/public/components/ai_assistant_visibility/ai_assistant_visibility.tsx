@@ -15,12 +15,14 @@ import {
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { useFieldRowProviderProps } from '../../hooks/use_field_row_provider_props';
 
 export const AIAssistantVisibility: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
-    services: { settings, notifications, docLinks, application },
+    services: { application },
   } = useKibana();
+  const fieldRowProviderProps = useFieldRowProviderProps();
 
   const field = fields[AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE];
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -53,11 +55,7 @@ export const AIAssistantVisibility: React.FC = () => {
     <>
       <EuiSpacer size="l" />
       <EuiSpacer size="l" />
-      <FieldRowProvider
-        links={docLinks.links.management}
-        showDanger={(message: string) => notifications.toasts.addDanger(message)}
-        validateChange={(key: string, value: any) => settings.client.validateValue(key, value)}
-      >
+      <FieldRowProvider {...fieldRowProviderProps}>
         <FieldRow
           field={field}
           isSavingEnabled={!!canEditAdvancedSettings}

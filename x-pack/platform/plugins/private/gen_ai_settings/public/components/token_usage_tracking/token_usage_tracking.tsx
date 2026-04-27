@@ -11,12 +11,14 @@ import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { useFieldRowProviderProps } from '../../hooks/use_field_row_provider_props';
 
 export const TokenUsageTracking: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
-    services: { settings, notifications, docLinks, application },
+    services: { application },
   } = useKibana();
+  const fieldRowProviderProps = useFieldRowProviderProps();
 
   const field = fields[GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING];
 
@@ -29,11 +31,7 @@ export const TokenUsageTracking: React.FC = () => {
   return (
     <>
       <EuiSpacer size="l" />
-      <FieldRowProvider
-        links={docLinks.links.management}
-        showDanger={(message: string) => notifications.toasts.addDanger(message)}
-        validateChange={(key: string, value: any) => settings.client.validateValue(key, value)}
-      >
+      <FieldRowProvider {...fieldRowProviderProps}>
         <FieldRow
           field={field}
           isSavingEnabled={!!canEditAdvancedSettings}

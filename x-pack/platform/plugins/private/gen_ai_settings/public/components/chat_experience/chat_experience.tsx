@@ -9,11 +9,12 @@ import React, { useMemo, useEffect, useRef } from 'react';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { useFieldRowProviderProps } from '../../hooks/use_field_row_provider_props';
+import { isAIChatExperience } from '../../utils/chat_experience';
 
 const TELEMETRY_SOURCE = 'stack_management' as const;
 const SKIP_STEP_REACHED_ONCE_SESSION_STORAGE_KEY =
@@ -33,16 +34,6 @@ const reportTelemetryEvent = (
   payload: Record<string, unknown>
 ): void => {
   analytics?.reportEvent(eventType, payload);
-};
-
-/**
- * Type guard to check if a value is a valid AIChatExperience
- */
-const isAIChatExperience = (value: unknown): value is AIChatExperience => {
-  return (
-    typeof value === 'string' &&
-    (value === AIChatExperience.Classic || value === AIChatExperience.Agent)
-  );
 };
 
 const consumeSkipStepReachedOnce = (
@@ -66,8 +57,9 @@ const consumeSkipStepReachedOnce = (
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
-    services: { settings, notifications, docLinks, application, analytics },
+    services: { docLinks, application, analytics },
   } = useKibana();
+  const fieldRowProviderProps = useFieldRowProviderProps();
 
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
@@ -128,11 +120,7 @@ export const ChatExperience: React.FC = () => {
   return (
     <>
       <EuiSpacer size="l" />
-      <FieldRowProvider
-        links={docLinks.links.management}
-        showDanger={(message: string) => notifications.toasts.addDanger(message)}
-        validateChange={(key: string, value: any) => settings.client.validateValue(key, value)}
-      >
+      <FieldRowProvider {...fieldRowProviderProps}>
         <FieldRow
           field={fieldWithDescription}
           isSavingEnabled={canEditAdvancedSettings}

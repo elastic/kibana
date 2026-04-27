@@ -214,9 +214,7 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
 
-  function cleanUnsavedChanges() {
-    setUnsavedChanges({});
-  }
+  const cleanUnsavedChanges = React.useCallback(() => setUnsavedChanges({}), []);
 
   const setValidationErrors = React.useCallback(
     (errors: ValidationError[] | ((current: ValidationError[]) => ValidationError[])) => {
@@ -244,9 +242,13 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
 export { SettingsContext, useSettingsContext };
 
 /**
- * Field-specific hook for settings context with automatic validation error management
- * @param fieldNames - Array of field names this hook instance is responsible for
- * @param validationFn - Optional validation function that will be called automatically when dependencies change
+ * Field-specific hook for settings context with automatic validation error management.
+ *
+ * @param fieldNames - Array of field names this hook instance is responsible for.
+ *   **Must be a stable reference** (module-level constant or `useMemo`) — the array is used
+ *   directly in dependency arrays and a new array identity on every render will cause
+ *   infinite re-renders.
+ * @param validationFn - Optional validation function called automatically when `validationDeps` change
  * @param validationDeps - Dependencies for the validation function
  * @returns Settings context with field-scoped validation error management
  */
@@ -256,16 +258,12 @@ export const useFieldSettingsContext = <T extends any[]>(
   validationDeps?: T
 ) => {
   const context = useSettingsContext();
+  const { setValidationErrors: contextSetValidationErrors } = context;
 
   // Validate that we have field names
   if (!fieldNames || fieldNames.length === 0) {
     throw new Error('useFieldSettingsContext requires at least one field name');
   }
-
-  // Memoize field names to ensure stable reference
-  const fieldNamesString = JSON.stringify(fieldNames);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableFieldNames = React.useMemo(() => fieldNames, [fieldNamesString]);
 
   // Track last validation errors to prevent unnecessary updates
   const lastValidationErrorsRef = React.useRef<ValidationError[]>([]);
@@ -275,14 +273,14 @@ export const useFieldSettingsContext = <T extends any[]>(
     (errors: ValidationError[]) => {
       // Validate that all errors belong to the allowed fields
       const invalidErrors = errors.filter(
-        (error) => error.field && !stableFieldNames.includes(error.field)
+        (error) => error.field && !fieldNames.includes(error.field)
       );
 
       if (invalidErrors.length > 0) {
         const invalidFields = invalidErrors.map((e) => e.field).join(', ');
         throw new Error(
           `Validation errors contain fields not managed by this hook instance. ` +
-            `Invalid fields: ${invalidFields}. Allowed fields: ${stableFieldNames.join(', ')}`
+            `Invalid fields: ${invalidFields}. Allowed fields: ${fieldNames.join(', ')}`
         );
       }
 
@@ -298,19 +296,15 @@ export const useFieldSettingsContext = <T extends any[]>(
       if (errorsChanged) {
         lastValidationErrorsRef.current = errors;
 
-        // Set the validation errors using the original context method
-        context.setValidationErrors((currentErrors) => {
-          // Remove any existing errors for our fields
+        contextSetValidationErrors((currentErrors) => {
           const otherErrors = currentErrors.filter(
-            (error) => !error.field || !stableFieldNames.includes(error.field)
+            (error) => !error.field || !fieldNames.includes(error.field)
           );
-          // Add the new errors for our fields
           return [...otherErrors, ...errors];
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [context.setValidationErrors, stableFieldNames]
+    [contextSetValidationErrors, fieldNames]
   );
 
   // Auto-run validation function when dependencies change
@@ -327,17 +321,14 @@ export const useFieldSettingsContext = <T extends any[]>(
       : [setValidationErrors, validationFn]
   );
 
-  // Automatically clear errors for our fields when the hook unmounts
   React.useEffect(() => {
     return () => {
-      context.setValidationErrors((currentErrors) =>
-        currentErrors.filter((error) => !error.field || !stableFieldNames.includes(error.field))
+      contextSetValidationErrors((currentErrors) =>
+        currentErrors.filter((error) => !error.field || !fieldNames.includes(error.field))
       );
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context.setValidationErrors, stableFieldNames]);
+  }, [contextSetValidationErrors, fieldNames]);
 
-  // Return the context with our field-scoped validation function
   return {
     ...context,
     setValidationErrors,
