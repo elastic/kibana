@@ -150,7 +150,7 @@ describe('ChangeTrackingService', () => {
               scheduledTaskId: true,
             },
           },
-          fieldsToHash: { attributes: { apiKey: true } },
+          fieldsToHash: { attributes: { apiKey: true, uiamApiKey: true } },
           correlationId: expect.any(String),
         })
       );

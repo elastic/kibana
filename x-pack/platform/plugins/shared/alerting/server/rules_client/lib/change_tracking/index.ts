@@ -32,7 +32,7 @@ const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
 };
 
 const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
-  attributes: { apiKey: true },
+  attributes: { apiKey: true, uiamApiKey: true },
 };
 
 export interface RuleSnapshot {
@@ -97,20 +97,22 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   initialize(elasticsearchClient: ElasticsearchClient) {
     this.logger.debug(`ChangeTrackingService.initialize(esClient)`);
-    void (async () => {
-      // Initialize each change history client (in sequence, using IIFE)
-      for (const [module, client] of Object.entries(this.clients)) {
-        try {
-          await client.initialize(elasticsearchClient);
-        } catch (cause) {
-          const error = new Error(
-            `Unable to initialize change tracking for [${module}, ${this.dataset}]`,
-            { cause }
-          );
-          this.logger.error(error);
-        }
+    void this.initializeAll(elasticsearchClient).catch((err) => this.logger.error(err));
+  }
+
+  async initializeAll(elasticsearchClient: ElasticsearchClient) {
+    // Initialize each change history client (in sequence - better than in parallel)
+    for (const [module, client] of Object.entries(this.clients)) {
+      try {
+        await client.initialize(elasticsearchClient);
+      } catch (cause) {
+        const error = new Error(
+          `Unable to initialize change tracking for [${module}, ${this.dataset}]`,
+          { cause }
+        );
+        this.logger.error(error);
       }
-    })();
+    }
   }
 
   async log(change: RuleChange, opts: LogChangeHistoryOptions) {
