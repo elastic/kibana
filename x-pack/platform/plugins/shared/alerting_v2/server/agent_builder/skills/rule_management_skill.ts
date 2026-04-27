@@ -61,14 +61,14 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 ## State Transition and Recovery
 
-- \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this to reduce noise for flapping conditions.
-- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when you need explicit recovery detection.
+- \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
+- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when the user needs explicit recovery detection.
 
 ## Persistence
 
 The ${alertingTools.manageRule} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
-- **Save as Rule** — create a new V2 rule from the in-memory attachment.
+- **Create rule** — create a new V2 rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
 - **Delete Rule** — delete the origin rule (only for attached saved rules).
 - **Enable / Disable** — toggle the rule's enabled state (only for attached saved rules).

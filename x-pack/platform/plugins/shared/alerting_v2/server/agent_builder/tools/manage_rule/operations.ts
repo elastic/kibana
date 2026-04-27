@@ -11,71 +11,50 @@ import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   metadataSchema,
   ruleKindSchema,
-  scheduleEverySchema,
-  esqlQuerySchema,
+  scheduleSchema,
+  evaluationQuerySchema,
   groupingSchema,
   stateTransitionSchema,
-  recoveryPolicyTypeSchema,
-  durationSchema,
+  recoveryPolicySchema,
   isStateTransitionAllowed,
   isRecoveryPolicyQueryProvided,
 } from '@kbn/alerting-v2-schemas';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
-// Field-level schemas are imported from the shared alerting-v2-schemas package
-// so that tool-level validation matches the CRUD API constraints.
+// Every field-level schema is derived from the shared alerting-v2-schemas
+// parent objects (via .shape / .unwrap()) so that tool-level validation
+// stays in sync with the CRUD API constraints automatically.
 
-const metadataPartial = metadataSchema.partial();
-
-export const setMetadataOperationSchema = z.object({
-  operation: z.literal('set_metadata'),
-  name: metadataPartial.shape.name.describe('Rule name.'),
-  description: metadataPartial.shape.description.describe('Human-readable description.'),
-  tags: metadataPartial.shape.tags.describe('Tags for categorization.'),
-});
+export const setMetadataOperationSchema = metadataSchema
+  .partial()
+  .omit({ owner: true })
+  .extend({ operation: z.literal('set_metadata') });
 
 export const setKindOperationSchema = z.object({
   operation: z.literal('set_kind'),
-  kind: ruleKindSchema.describe('Rule kind.'),
+  kind: ruleKindSchema,
 });
 
-export const setScheduleOperationSchema = z.object({
-  operation: z.literal('set_schedule'),
-  every: scheduleEverySchema.optional().describe('Execution interval, e.g. 1m, 5m.'),
-  lookback: durationSchema.optional().describe('Lookback window for the query, e.g. 5m, 1h.'),
-});
+export const setScheduleOperationSchema = scheduleSchema
+  .partial()
+  .extend({ operation: z.literal('set_schedule') });
 
-export const setQueryOperationSchema = z.object({
+export const setQueryOperationSchema = evaluationQuerySchema.extend({
   operation: z.literal('set_query'),
-  base: esqlQuerySchema.describe(
-    'Base ES|QL query. Must not include time filters — those are applied automatically via the lookback window.'
-  ),
 });
 
-export const setGroupingOperationSchema = z.object({
+export const setGroupingOperationSchema = groupingSchema.extend({
   operation: z.literal('set_grouping'),
-  fields: groupingSchema.shape.fields
-    .describe('Fields to group alerts by (e.g. ["host.name", "service.name"]).'),
 });
 
-const stateTransitionInner = stateTransitionSchema.unwrap().unwrap();
+export const setStateTransitionOperationSchema = stateTransitionSchema
+  .unwrap()
+  .unwrap()
+  .omit({ pending_operator: true, recovering_operator: true })
+  .extend({ operation: z.literal('set_state_transition') });
 
-export const setStateTransitionOperationSchema = z.object({
-  operation: z.literal('set_state_transition'),
-  pending_count: stateTransitionInner.shape.pending_count
-    .describe('Consecutive breaches before transitioning to active.'),
-  pending_timeframe: stateTransitionInner.shape.pending_timeframe
-    .describe('Time window for pending evaluation, e.g. 5m.'),
-  recovering_count: stateTransitionInner.shape.recovering_count
-    .describe('Consecutive recoveries before transitioning to inactive.'),
-  recovering_timeframe: stateTransitionInner.shape.recovering_timeframe
-    .describe('Time window for recovering evaluation, e.g. 5m.'),
-});
-
-export const setRecoveryPolicyOperationSchema = z.object({
+export const setRecoveryPolicyOperationSchema = recoveryPolicySchema.extend({
   operation: z.literal('set_recovery_policy'),
-  type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
-  query: esqlQuerySchema.optional().describe('Recovery ES|QL query. Required when type is "query".'),
 });
 
 // ─── Discriminated union ──────────────────────────────────────────────────────
@@ -99,7 +78,13 @@ interface EsqlColumn {
   type: string;
 }
 
-async function validateEsqlQueryAgainstCluster(
+/**
+ * Executes the query with `| LIMIT 0` appended to catch semantic errors
+ * (unknown index, invalid field, etc.) without returning rows.
+ * Returns the column metadata so downstream operations (e.g. set_grouping)
+ * can validate field references against actual query output.
+ */
+async function validateEsqlQuery(
   esClient: IScopedClusterClient,
   query: string
 ): Promise<EsqlColumn[]> {
@@ -160,7 +145,7 @@ export const executeRuleOperations = async (
 
       case 'set_query':
         if (esClient) {
-          lastQueryColumns = await validateEsqlQueryAgainstCluster(esClient, op.base);
+          lastQueryColumns = await validateEsqlQuery(esClient, op.base);
         }
         next = {
           ...next,
@@ -211,7 +196,7 @@ export const executeRuleOperations = async (
           ...next,
           recovery_policy: {
             type: op.type,
-            ...(op.type === 'query' && op.query ? { query: { base: op.query } } : {}),
+            ...(op.query ? { query: op.query } : {}),
           },
         };
         break;

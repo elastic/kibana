@@ -193,7 +193,7 @@ describe('createRuleAttachmentDefinition', () => {
       expect(getByTestId('mockRuleHeaderDescription')).toBeDefined();
     });
 
-    it('registers Save as Rule button for unsaved attachment', () => {
+    it('registers Create rule button for unsaved attachment', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
       const attachment = createAttachment();
@@ -214,7 +214,7 @@ describe('createRuleAttachmentDefinition', () => {
 
       const buttons =
         registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
-      expect(buttons.find((b: { label: string }) => b.label === 'Save as Rule')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Create rule')).toBeDefined();
       expect(buttons.find((b: { label: string }) => b.label === 'Update Rule')).toBeUndefined();
     });
 
@@ -241,10 +241,10 @@ describe('createRuleAttachmentDefinition', () => {
         registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
       expect(buttons.find((b: { label: string }) => b.label === 'Update Rule')).toBeDefined();
       expect(buttons.find((b: { label: string }) => b.label === 'View in Rules')).toBeDefined();
-      expect(buttons.find((b: { label: string }) => b.label === 'Save as Rule')).toBeUndefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Create rule')).toBeUndefined();
     });
 
-    describe('Save as Rule handler', () => {
+    describe('Create rule handler', () => {
       it('calls createRule and updateOrigin with the new rule id', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
@@ -267,7 +267,7 @@ describe('createRuleAttachmentDefinition', () => {
 
         const buttons =
           registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
-        const saveButton = buttons.find((b: { label: string }) => b.label === 'Save as Rule');
+        const saveButton = buttons.find((b: { label: string }) => b.label === 'Create rule');
         await saveButton.handler();
 
         expect(services.rulesApi.createRule).toHaveBeenCalledWith(

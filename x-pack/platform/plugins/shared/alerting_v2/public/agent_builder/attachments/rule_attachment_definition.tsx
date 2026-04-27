@@ -87,8 +87,8 @@ const RuleCanvasContent = ({
     if (!isSaved) {
       registerActionButtons([
         {
-          label: i18n.translate('xpack.alertingV2.ruleAttachment.saveAsRule', {
-            defaultMessage: 'Save as Rule',
+          label: i18n.translate('xpack.alertingV2.ruleAttachment.createRule', {
+            defaultMessage: 'Create rule',
           }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
@@ -107,8 +107,8 @@ const RuleCanvasContent = ({
             });
             await updateOrigin(created.id);
             notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.ruleAttachment.savedSuccess', {
-                defaultMessage: 'Rule "{name}" saved',
+              i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
+                defaultMessage: 'Rule "{name}" created',
                 values: { name: data.metadata.name },
               })
             );

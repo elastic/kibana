@@ -31,7 +31,9 @@ export const esqlQuerySchema = z
 
 /** Kind */
 
-export const ruleKindSchema = z.enum(['alert', 'signal']).describe('The kind of rule.');
+export const ruleKindSchema = z
+  .enum(['alert', 'signal'])
+  .describe('Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.');
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -39,24 +41,25 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 export const metadataSchema = z
   .object({
-    name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
+    name: z.string().min(1).max(256).describe('Rule name (must be unique within the space).'),
     description: z
       .string()
       .max(1024)
       .optional()
-      .describe('Optional human-readable description of the rule.'),
+      .describe('Human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
     tags: z
       .array(z.string().max(MAX_TAG_LENGTH))
       .max(100)
       .optional()
-      .describe('Tags for categorization.'),
+      .describe('Tags for categorization, e.g. ["production", "infra"].'),
   })
   .strict()
   .describe('Rule metadata.');
 
 /** Schedule (required) */
 
+/** Duration with an additional minimum-interval guard for schedule frequency. */
 export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
   if (error) {
@@ -66,10 +69,10 @@ export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
 
 export const scheduleSchema = z
   .object({
-    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m.'),
+    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m, 1h.'),
     lookback: durationSchema
       .optional()
-      .describe('Lookback window for the query (can also be expressed in ES|QL).'),
+      .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
   })
   .strict()
   .describe('Execution schedule configuration.');
@@ -78,7 +81,7 @@ export const scheduleSchema = z
 
 export const evaluationQuerySchema = z
   .object({
-    base: esqlQuerySchema.describe('Base ES|QL query.'),
+    base: esqlQuerySchema.describe('Base ES|QL query. Time filters are applied automatically via the lookback window.'),
   })
   .strict();
 
@@ -97,14 +100,14 @@ export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
 
 export const recoveryPolicySchema = z
   .object({
-    type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
+    type: recoveryPolicyTypeSchema.describe('Recovery detection type: "query" or "no_breach".'),
     query: z
       .object({
-        base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
+        base: esqlQuerySchema.optional().describe('Recovery ES|QL query. Required when type is "query".'),
       })
       .strict()
       .optional()
-      .describe('Recovery query when type is query.'),
+      .describe('Recovery query configuration; required when type is "query".'),
   })
   .strict()
   .describe('Recovery detection configuration.');
@@ -124,8 +127,8 @@ export const stateTransitionSchema = z
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive breaches before active.'),
-    pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
+      .describe('Consecutive breaches before transitioning to active.'),
+    pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation, e.g. 5m, 15m.'),
     recovering_operator: stateTransitionOperatorSchema
       .optional()
       .describe('How to combine count and timeframe for recovering.'),
@@ -135,10 +138,10 @@ export const stateTransitionSchema = z
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive recoveries before inactive.'),
+      .describe('Consecutive recoveries before transitioning to inactive.'),
     recovering_timeframe: durationSchema
       .optional()
-      .describe('Time window for recovering evaluation.'),
+      .describe('Time window for recovering evaluation, e.g. 5m, 15m.'),
   })
   .strict()
   .describe('Episode state transition thresholds (alert-only).')
@@ -152,7 +155,7 @@ export const groupingSchema = z
     fields: z
       .array(z.string().max(256))
       .max(16)
-      .describe('Fields to group by (convention: use ES|QL GROUP BY fields).'),
+      .describe('Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'),
   })
   .strict()
   .describe('Grouping configuration.');
@@ -165,7 +168,7 @@ const noDataSchema = z
       .enum(['no_data', 'last_status', 'recover'])
       .optional()
       .describe('Behavior when no data is detected.'),
-    timeframe: durationSchema.optional().describe('Time window after which no data is detected.'),
+    timeframe: durationSchema.optional().describe('Time window after which no data is detected, e.g. 10m, 1h.'),
   })
   .strict()
   .describe('No data handling configuration.');

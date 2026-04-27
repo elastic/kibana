@@ -6,4 +6,4 @@
  */
 
 export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID =
-  'observability:alertingv2:experimentalFeatures';
+  'alerting:v2:experimentalFeatures';
