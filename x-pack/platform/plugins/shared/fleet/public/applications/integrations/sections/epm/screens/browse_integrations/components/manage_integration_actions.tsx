@@ -42,13 +42,17 @@ export const ManageIntegrationActions: React.FC<{
   onDelete: (integrationId: string) => Promise<void>;
   DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (
+  onApproveAndInstall: (
     integrationId: string,
     version: string,
-    categories: string[]
+    categories: string[],
+    autoInstallAfterApproval: boolean
   ) => Promise<void>;
   onDownloadZip?: (integrationId: string) => Promise<void>;
-  onInstallToCluster?: (integrationId: string) => Promise<void>;
+  onInstallToCluster?: (
+    integrationId: string,
+    options?: { skipSuccessToast?: boolean }
+  ) => Promise<void>;
 }> = ({
   integration,
   isPackageReady,
@@ -59,7 +63,7 @@ export const ManageIntegrationActions: React.FC<{
   onDelete,
   DataStreamResultsFlyoutComponent,
   onFetchReviewDetails,
-  onApproveAndDeploy,
+  onApproveAndInstall,
   onDownloadZip,
   onInstallToCluster,
 }) => {
@@ -346,7 +350,8 @@ export const ManageIntegrationActions: React.FC<{
         onClose={closeReviewModal}
         onEdit={onEdit}
         onFetchReviewDetails={onFetchReviewDetails}
-        onApproveAndDeploy={onApproveAndDeploy}
+        onApproveAndInstall={onApproveAndInstall}
+        onInstallToCluster={onInstallToCluster}
         DataStreamResultsFlyoutComponent={DataStreamResultsFlyoutComponent}
       />
     </>

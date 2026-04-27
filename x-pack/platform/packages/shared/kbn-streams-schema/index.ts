@@ -206,6 +206,7 @@ export type {
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
+export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
@@ -241,6 +242,8 @@ export {
   ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
+
+export { FeatureAccumulator } from './src/feature_accumulator';
 
 export {
   type BaseSimulationError,
