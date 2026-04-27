@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
+import type {
+  OverviewStatusMetaData,
+  OverviewStatusState,
+} from '../../../../../common/runtime_types';
 import { getStatusByConfig, selectOverviewStatus } from './selectors';
 import type { SyntheticsAppState } from '../root_reducer';
 
@@ -25,9 +28,7 @@ const makeMeta = (
     ...overrides,
   } as OverviewStatusMetaData);
 
-const makeStatus = (
-  overrides: Partial<OverviewStatusState> = {}
-): OverviewStatusState =>
+const makeStatus = (overrides: Partial<OverviewStatusState> = {}): OverviewStatusState =>
   ({
     allMonitorsCount: 0,
     disabledMonitorsCount: 0,
@@ -184,7 +185,9 @@ describe('selectOverviewStatus', () => {
     locations: [{ id: 'loc1', label: 'Loc 1', status: 'up' }],
   });
 
-  const buildState = (groupByField: string): Pick<SyntheticsAppState, 'overviewStatus' | 'overview'> => ({
+  const buildState = (
+    groupByField: string
+  ): Pick<SyntheticsAppState, 'overviewStatus' | 'overview'> => ({
     overviewStatus: {
       loading: false,
       loaded: true,
@@ -249,10 +252,7 @@ describe('selectOverviewStatus', () => {
     const result = selectOverviewStatus(state as SyntheticsAppState);
 
     expect(Object.keys(result.status?.downConfigs ?? {})).toEqual(['mixed-loc1']);
-    expect(Object.keys(result.status?.pendingConfigs ?? {})).toEqual([
-      'mixed-loc2',
-      'mixed-loc3',
-    ]);
+    expect(Object.keys(result.status?.pendingConfigs ?? {})).toEqual(['mixed-loc2', 'mixed-loc3']);
     expect(result.status?.upConfigs).toEqual({});
   });
 

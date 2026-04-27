@@ -35,10 +35,7 @@ export const useMonitorHistogramPerLocation = ({
   // table re-walks `items` and produces a fresh JSON blob — large enough to
   // dominate render time on multi-hundred-monitor pages and noisy enough to
   // mask actual ID changes in the redux ES-search dedupe layer.
-  const idsKey = useMemo(
-    () => (items ?? []).map(({ configId }) => configId).join('|'),
-    [items]
-  );
+  const idsKey = useMemo(() => (items ?? []).map(({ configId }) => configId).join('|'), [items]);
   const { queryParams, minInterval } = useMemo(() => {
     const monitorIds = idsKey ? idsKey.split('|') : [];
     return getQueryParamsPerLocation(dateRangeStart, dateRangeEnd, monitorIds);

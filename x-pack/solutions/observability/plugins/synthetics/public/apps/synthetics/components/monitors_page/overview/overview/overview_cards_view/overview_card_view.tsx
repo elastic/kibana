@@ -88,9 +88,7 @@ const UnGroupedCardView = ({
             {({ width }: EuiAutoSize) => (
               <InfiniteLoader
                 isItemLoaded={(idx: number) =>
-                  listItems[idx].every(
-                    (m) => !!trendData[m.configId + (m.locations[0]?.id ?? '')]
-                  )
+                  listItems[idx].every((m) => !!trendData[m.configId + (m.locations[0]?.id ?? '')])
                 }
                 itemCount={listItems.length}
                 loadMoreItems={(start, stop: number) =>

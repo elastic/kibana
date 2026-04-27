@@ -24,9 +24,7 @@ const makeMeta = (
     ...overrides,
   } as OverviewStatusMetaData);
 
-const makeStatus = (
-  overrides: Partial<OverviewStatusState> = {}
-): OverviewStatusState =>
+const makeStatus = (overrides: Partial<OverviewStatusState> = {}): OverviewStatusState =>
   ({
     allMonitorsCount: 0,
     disabledMonitorsCount: 0,

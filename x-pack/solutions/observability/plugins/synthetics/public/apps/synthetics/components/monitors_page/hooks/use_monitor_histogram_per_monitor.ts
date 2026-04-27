@@ -34,10 +34,7 @@ export const useMonitorHistogramPerMonitor = ({
   // See the sibling `use_monitor_histogram_per_location` for the rationale —
   // stabilizing the cache key avoids a per-render JSON.stringify over the
   // entire visible page.
-  const idsKey = useMemo(
-    () => (items ?? []).map(({ configId }) => configId).join('|'),
-    [items]
-  );
+  const idsKey = useMemo(() => (items ?? []).map(({ configId }) => configId).join('|'), [items]);
   const { queryParams, minInterval } = useMemo(() => {
     const monitorIds = idsKey ? idsKey.split('|') : [];
     return getQueryParams(dateRangeStart, dateRangeEnd, monitorIds);

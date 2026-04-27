@@ -52,9 +52,7 @@ export const GridItemsByGroup = ({
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
     otherValues: {
       label: 'Without any location',
-      items: allConfigs?.filter(
-        (monitor) => !monitor.locations || monitor.locations.length === 0
-      ),
+      items: allConfigs?.filter((monitor) => !monitor.locations || monitor.locations.length === 0),
     },
   };
 

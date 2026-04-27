@@ -79,10 +79,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         const withUrl = result.filter((m) => m.urls);
         const withoutUrl = result.filter((m) => !m.urls);
         withUrl.sort((a, b) => (a.urls ?? '').localeCompare(b.urls ?? ''));
-        return [
-          ...(sortOrder === 'asc' ? withUrl : withUrl.reverse()),
-          ...withoutUrl,
-        ];
+        return [...(sortOrder === 'asc' ? withUrl : withUrl.reverse()), ...withoutUrl];
       }
       case 'type.keyword':
         // Group same-type monitors together (asc gives browser → http → icmp

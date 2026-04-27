@@ -45,11 +45,7 @@ const GroupGridCardContent = ({
   const [activePage, setActivePage] = useState(0);
   const [rowSize, setRowSize] = useState(DEFAULT_ROW_SIZE);
   const visibleMonitors = useMemo(
-    () =>
-      groupMonitors.slice(
-        activePage * rowSize * PER_ROW,
-        (activePage + 1) * rowSize * PER_ROW
-      ),
+    () => groupMonitors.slice(activePage * rowSize * PER_ROW, (activePage + 1) * rowSize * PER_ROW),
     [groupMonitors, activePage, rowSize]
   );
   useOverviewTrendsRequests(visibleMonitors);

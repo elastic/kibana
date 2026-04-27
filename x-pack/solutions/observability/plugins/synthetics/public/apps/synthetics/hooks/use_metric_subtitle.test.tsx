@@ -11,9 +11,7 @@ import { useMetricSubtitle } from './use_metric_subtitle';
 import { WrappedHelper } from '../utils/testing';
 import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 
-const makeMeta = (
-  overrides: Partial<OverviewStatusMetaData> = {}
-): OverviewStatusMetaData =>
+const makeMeta = (overrides: Partial<OverviewStatusMetaData> = {}): OverviewStatusMetaData =>
   ({
     monitorQueryId: 'cfg1',
     configId: 'cfg1',

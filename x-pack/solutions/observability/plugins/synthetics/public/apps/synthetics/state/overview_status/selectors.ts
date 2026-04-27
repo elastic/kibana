@@ -7,7 +7,10 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
-import type { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
+import type {
+  OverviewStatusMetaData,
+  OverviewStatusState,
+} from '../../../../../common/runtime_types';
 import type { SyntheticsAppState } from '../root_reducer';
 
 export const getStatusByConfig = (

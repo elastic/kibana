@@ -6,13 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import type { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';

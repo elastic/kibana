@@ -343,7 +343,8 @@ export class OverviewStatusService {
             locationId,
             timestamp,
             monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
-            error: errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
+            error:
+              errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
             downSince,
           });
         });

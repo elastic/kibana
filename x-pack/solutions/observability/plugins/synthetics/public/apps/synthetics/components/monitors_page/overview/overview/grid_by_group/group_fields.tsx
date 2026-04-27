@@ -23,9 +23,8 @@ export const GroupFields = () => {
   const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
   const dispatch = useDispatch();
   const [urlParams, updateUrlParams] = useUrlParams();
-  const [localStorageGroupBy, setLocalStorageGroupBy] = useLocalStorage<GroupByState>(
-    LOCAL_STORAGE_KEY
-  );
+  const [localStorageGroupBy, setLocalStorageGroupBy] =
+    useLocalStorage<GroupByState>(LOCAL_STORAGE_KEY);
 
   const { groupBy: urlGroupField, groupOrderBy: urlGroupOrderBy } = urlParams();
 

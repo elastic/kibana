@@ -38,12 +38,9 @@ export const MONITOR_HISTORY = i18n.translate(
   }
 );
 
-export const LATEST_ERROR = i18n.translate(
-  'xpack.synthetics.overview.compactView.latestError',
-  {
-    defaultMessage: 'Latest error',
-  }
-);
+export const LATEST_ERROR = i18n.translate('xpack.synthetics.overview.compactView.latestError', {
+  defaultMessage: 'Latest error',
+});
 
 export const NO_ERROR = i18n.translate('xpack.synthetics.overview.compactView.noError', {
   defaultMessage: '—',

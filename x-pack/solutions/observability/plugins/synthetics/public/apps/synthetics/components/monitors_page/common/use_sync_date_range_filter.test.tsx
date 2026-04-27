@@ -40,10 +40,7 @@ describe('useSyncDateRangeFilter', () => {
    * Build a wrapper backed by a memory history we control so we can drive URL
    * changes after the initial render with `history.push(...)`.
    */
-  const renderForUrl = (
-    url: string,
-    state?: Parameters<typeof WrappedHelper>[0]['state']
-  ) => {
+  const renderForUrl = (url: string, state?: Parameters<typeof WrappedHelper>[0]['state']) => {
     const history = createMemoryHistory({ initialEntries: [url] });
     const wrapper = ({ children }: React.PropsWithChildren) => (
       <WrappedHelper history={history} state={state}>

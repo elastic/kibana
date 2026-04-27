@@ -32,8 +32,7 @@ export const useCanUsePublicLocById = (configId: string) => {
     () =>
       allConfigs?.some(
         (mon) =>
-          mon.configId === configId &&
-          mon.locations.some((loc) => managedLocationIds.has(loc.id))
+          mon.configId === configId && mon.locations.some((loc) => managedLocationIds.has(loc.id))
       ) ?? false,
     [allConfigs, configId, managedLocationIds]
   );

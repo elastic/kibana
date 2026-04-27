@@ -79,26 +79,18 @@ const getKibanaAuthAndUrl = () => {
   // YAML supports both `server: { basePath }` and the flat `server.basePath`
   // form — we honour both. Same goes for host/port. Env overrides win.
   const flat = (key: string) => config[key];
-  const host =
-    process.env.KIBANA_HOST ??
-    config.server?.host ??
-    flat('server.host') ??
-    '127.0.0.1';
+  const host = process.env.KIBANA_HOST ?? config.server?.host ?? flat('server.host') ?? '127.0.0.1';
   const resolvedHost = host === '0.0.0.0' ? '127.0.0.1' : host;
   const port = process.env.KIBANA_PORT ?? config.server?.port ?? flat('server.port') ?? 5601;
   const basePath =
-    process.env.KIBANA_BASE_PATH ??
-    config.server?.basePath ??
-    flat('server.basePath') ??
-    '';
+    process.env.KIBANA_BASE_PATH ?? config.server?.basePath ?? flat('server.basePath') ?? '';
   const protocol = process.env.KIBANA_PROTOCOL ?? 'http';
   const username =
     process.env.KIBANA_USERNAME ??
     (config.elasticsearch?.username === 'kibana_system_user'
       ? 'elastic'
       : config.elasticsearch?.username ?? 'elastic');
-  const password =
-    process.env.KIBANA_PASSWORD ?? config.elasticsearch?.password ?? 'changeme';
+  const password = process.env.KIBANA_PASSWORD ?? config.elasticsearch?.password ?? 'changeme';
   const baseUrl = `${protocol}://${resolvedHost}:${port}${basePath}`;
   return { username, password, baseUrl };
 };
@@ -115,8 +107,7 @@ const buildEsClient = () => {
   // honour ES_USERNAME / ES_PASSWORD overrides.
   const rawUser = config.elasticsearch?.username;
   const username =
-    process.env.ES_USERNAME ??
-    (rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser);
+    process.env.ES_USERNAME ?? (rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser);
   const password = process.env.ES_PASSWORD ?? config.elasticsearch?.password;
   const verificationMode = config.elasticsearch?.ssl?.verificationMode;
   return new Client({

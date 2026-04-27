@@ -244,13 +244,7 @@ export function LoadingState() {
   );
 }
 
-function DetailFlyoutStatusHistory({
-  configId,
-  location,
-}: {
-  configId: string;
-  location: string;
-}) {
+function DetailFlyoutStatusHistory({ configId, location }: { configId: string; location: string }) {
   return (
     <EuiPageSection bottomBorder="extended">
       <MonitorStatusPanel

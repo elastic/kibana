@@ -55,10 +55,7 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
       )
     : CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES;
 
-  const onRefreshChange = ({
-    isPaused,
-    refreshInterval: nextIntervalMs,
-  }: OnRefreshChangeProps) => {
+  const onRefreshChange = ({ isPaused, refreshInterval: nextIntervalMs }: OnRefreshChangeProps) => {
     setRefreshPaused(isPaused);
     // EUI exposes ms; the synthetics context stores seconds — same conversion
     // the standalone AutoRefreshButton already does.

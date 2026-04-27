@@ -150,9 +150,12 @@ const POPOVER_TITLE = i18n.translate('xpack.synthetics.overview.displayOptions.t
   defaultMessage: 'Display options',
 });
 
-const FILTERING_HEADING = i18n.translate('xpack.synthetics.overview.displayOptions.filteringHeading', {
-  defaultMessage: 'Filtering',
-});
+const FILTERING_HEADING = i18n.translate(
+  'xpack.synthetics.overview.displayOptions.filteringHeading',
+  {
+    defaultMessage: 'Filtering',
+  }
+);
 
 const DISPLAY_HEADING = i18n.translate('xpack.synthetics.overview.displayOptions.displayHeading', {
   defaultMessage: 'Display',

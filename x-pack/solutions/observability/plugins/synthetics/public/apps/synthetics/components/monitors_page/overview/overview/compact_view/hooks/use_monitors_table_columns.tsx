@@ -112,15 +112,15 @@ export const useMonitorsTableColumns = ({
     const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
 
     return [
-          {
-            field: 'overallStatus',
-            name: STATUS,
-            width: '160px',
-            sortable: true,
-            render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
-              <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
-            ),
-          },
+      {
+        field: 'overallStatus',
+        name: STATUS,
+        width: '160px',
+        sortable: true,
+        render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
+          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
+        ),
+      },
       {
         field: 'name',
         name: NAME,

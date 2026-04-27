@@ -49,7 +49,11 @@ export const MonitorsTable = ({
   const { loaded, status, loading } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
-  const { pageOfItems, pagination, onTableChange: onPaginationChange } = useMonitorsTablePagination({
+  const {
+    pageOfItems,
+    pagination,
+    onTableChange: onPaginationChange,
+  } = useMonitorsTablePagination({
     totalItems: items,
   });
 

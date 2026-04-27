@@ -236,9 +236,12 @@ const URL_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.url.labe
   defaultMessage: 'URL',
 });
 
-const MONITOR_TYPE_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.monitorType.label', {
-  defaultMessage: 'Monitor type',
-});
+const MONITOR_TYPE_LABEL = i18n.translate(
+  'xpack.synthetics.overview.sortPopover.monitorType.label',
+  {
+    defaultMessage: 'Monitor type',
+  }
+);
 
 const ALPHABETICAL_LABEL = i18n.translate(
   'xpack.synthetics.overview.sortPopover.alphabetical.label',
