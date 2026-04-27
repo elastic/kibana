@@ -44,20 +44,8 @@ jest.mock('./cspm_cloud_connector_usage_stats_collector', () => ({
 describe('registerCspmUsageCollector', () => {
   const logger = loggerMock.create();
 
-  const buildCoreServicesMock = () => {
-    const savedObjectsRepository = {
-      ...savedObjectsClientMock.create(),
-      createInternalRepository: jest.fn().mockReturnValue(savedObjectsClientMock.create()),
-    };
-    const coreStart = {
-      savedObjects: {
-        createInternalRepository: jest.fn().mockReturnValue(savedObjectsClientMock.create()),
-      },
-    } as unknown as Parameters<typeof registerCspmUsageCollector>[1] extends Promise<infer T>[0]
-      ? never
-      : any;
-
-    return Promise.resolve([
+  const buildCoreServicesMock = () =>
+    Promise.resolve([
       {
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(savedObjectsClientMock.create()),
@@ -66,7 +54,6 @@ describe('registerCspmUsageCollector', () => {
       {},
       {},
     ] as any);
-  };
 
   const buildFetchContext = (): CollectorFetchContext =>
     ({
