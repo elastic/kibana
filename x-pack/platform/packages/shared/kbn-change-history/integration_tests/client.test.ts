@@ -13,7 +13,7 @@ import { createTestEsCluster } from '@kbn/test';
 import { FLAGS } from '../src/constants';
 import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
-import type { ChangeHistoryDocument, ObjectChange } from '..';
+import type { ObjectChange } from '..';
 import { sha256 } from '../src/utils';
 
 const KIBANA_SPACE = 'default';
@@ -149,7 +149,7 @@ describe('ChangeHistoryClient', () => {
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'id-1');
       expect(result.total).toBe(1);
       expect(result.items.length).toBe(1);
-      const doc = result.items[0] as ChangeHistoryDocument;
+      const doc = result.items[0];
       expect(doc).toMatchObject({
         '@timestamp': expect.any(String),
         ecs: { version: '9.3.0' },
@@ -175,6 +175,7 @@ describe('ChangeHistoryClient', () => {
           version: expect.any(String),
         },
       });
+      expect(doc).not.toHaveProperty('kibana');
     });
   });
 
@@ -288,8 +289,6 @@ describe('ChangeHistoryClient', () => {
     });
   });
 
-  // TODO: Add test for checking kibana space behavior in @kbn-change-history (underneath the hood)
-
   describe('before/after diff', () => {
     let client: ChangeHistoryClient;
 
@@ -313,7 +312,7 @@ describe('ChangeHistoryClient', () => {
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'diff-id');
       expect(result.total).toBe(1);
-      const doc = result.items[0] as ChangeHistoryDocument;
+      const doc = result.items[0];
       expect(doc.object.diff).toEqual({
         type: 'default',
         fields: ['name'],
@@ -353,7 +352,7 @@ describe('ChangeHistoryClient', () => {
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'masked-id');
       expect(result.total).toBe(1);
-      const doc = result.items[0] as ChangeHistoryDocument;
+      const doc = result.items[0];
 
       // Check hash
       const hash = sha256(JSON.stringify(change.after));

@@ -24,7 +24,6 @@ import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { isRecommendedConnector } from '../../../../../../../common/recommended_connectors';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
@@ -168,13 +167,24 @@ export const ConnectorSelector: React.FC<{}> = () => {
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);
 
   const { recommendedConnectors, otherConnectors, customConnectors } = useMemo(() => {
-    const recommended = connectors.filter((c) => isRecommendedConnector(c.id));
-    const notRecommended = connectors.filter((c) => !isRecommendedConnector(c.id));
-    return {
-      recommendedConnectors: recommended,
-      otherConnectors: notRecommended.filter((c) => c.isPreconfigured),
-      customConnectors: notRecommended.filter((c) => !c.isPreconfigured),
-    };
+    const groupedConnectors = connectors.reduce<{
+      recommendedConnectors: typeof connectors;
+      otherConnectors: typeof connectors;
+      customConnectors: typeof connectors;
+    }>(
+      (acc, c) => {
+        if (c.isRecommended) {
+          acc.recommendedConnectors.push(c);
+        } else if (c.isPreconfigured) {
+          acc.otherConnectors.push(c);
+        } else {
+          acc.customConnectors.push(c);
+        }
+        return acc;
+      },
+      { recommendedConnectors: [], otherConnectors: [], customConnectors: [] }
+    );
+    return groupedConnectors;
   }, [connectors]);
 
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);

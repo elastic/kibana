@@ -23759,7 +23759,7 @@
         "label": "RegisterAPIRoutesArgs",
         "description": [],
         "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -23778,7 +23778,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -23800,7 +23800,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -23822,7 +23822,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -23844,7 +23844,30 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.RegisterAPIRoutesArgs.usageCounter",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCounter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.IUsageCounter",
+                "text": "IUsageCounter"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -24119,7 +24142,7 @@
           ", \"http\">) => void"
         ],
         "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-        "lineNumber": 22,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -24139,7 +24162,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-            "lineNumber": 23,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -24176,10 +24199,18 @@
                 "section": "def-common.LensConfigBuilder",
                 "text": "LensConfigBuilder"
               },
-              "; }"
+              "; usageCounter: ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.IUsageCounter",
+                "text": "IUsageCounter"
+              },
+              " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/server/api/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -24918,7 +24949,7 @@
       "label": "LensServerPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-      "lineNumber": 65,
+      "lineNumber": 67,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24937,7 +24968,7 @@
             "LensEmbeddableRegistryDefinition"
           ],
           "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-          "lineNumber": 66,
+          "lineNumber": 68,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24965,7 +24996,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-          "lineNumber": 70,
+          "lineNumber": 72,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24981,7 +25012,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-              "lineNumber": 74,
+              "lineNumber": 76,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -25005,7 +25036,7 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-              "lineNumber": 75,
+              "lineNumber": 77,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,

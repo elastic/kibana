@@ -11732,6 +11732,19 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-search",
+            "id": "def-common.ScoutParallelWorkerFixtures.isSnapshotBuild",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSnapshotBuild",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12545,6 +12558,19 @@
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-search",
+            "id": "def-common.ScoutWorkerFixtures.isSnapshotBuild",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSnapshotBuild",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

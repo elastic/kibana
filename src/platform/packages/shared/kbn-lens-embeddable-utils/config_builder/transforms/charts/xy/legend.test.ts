@@ -84,6 +84,62 @@ describe('XY Legend Transforms', () => {
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },
+    {
+      title: 'series header auto (visible, no custom title)',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: true,
+        title: undefined,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: true },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header custom title',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: true,
+        title: 'My series',
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: true, text: 'My series' },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header none',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: false,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: false },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
   ];
 
   it.each(cases)('$title (State -> API -> State)', ({ api, state, forbiddenApiPaths }) => {

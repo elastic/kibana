@@ -189,7 +189,6 @@ export const AgentOverview: React.FC = () => {
           <EditDetailsFlyout
             agent={agent}
             onClose={() => setIsEditFlyoutOpen(false)}
-            isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
             canChangeVisibility={canChangeVisibility}
             showWorkflowSection={showWorkflowSection}
           />

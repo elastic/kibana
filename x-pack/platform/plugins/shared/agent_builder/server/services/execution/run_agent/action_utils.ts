@@ -35,6 +35,12 @@ import {
   structuredAnswerAction,
 } from './actions';
 
+// LangGraph's ToolNode appends "\n Please fix your mistakes." to tool error
+// messages. The suffix leaks into user-surfaced errors; strip it here.
+const LANGGRAPH_ERROR_SUFFIX = /\n Please fix your mistakes\.$/;
+const stripLangGraphErrorSuffix = (content: string): string =>
+  content.replace(LANGGRAPH_ERROR_SUFFIX, '');
+
 export const processResearchResponse = (
   message: AIMessageChunk
 ): ToolCallAction | HandoverAction | AgentErrorAction => {
@@ -90,7 +96,7 @@ export const processToolNodeResponse = (
       executeToolAction(
         completedMessages.map((msg) => ({
           toolCallId: msg.tool_call_id,
-          content: extractTextContent(msg),
+          content: stripLangGraphErrorSuffix(extractTextContent(msg)),
           artifact: msg.artifact,
         }))
       )

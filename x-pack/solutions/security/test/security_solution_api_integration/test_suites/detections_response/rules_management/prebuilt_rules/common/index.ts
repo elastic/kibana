@@ -16,5 +16,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./non_customizable_fields'));
     loadTestFile(require.resolve('./revert_prebuilt_rules'));
     loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./deprecation'));
   });
 };
