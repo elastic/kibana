@@ -16,7 +16,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
 import { AppEventTypes, type TelemetryServiceStart } from '../../../lib/telemetry';
-import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
+import { type NavigateTo, useKibana, useNavigateTo } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
 import type { LinkInfo } from '../../../links';
@@ -54,7 +54,9 @@ const getLeadingBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   const landingBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
-    href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
+    href: getSecuritySolutionUrl({
+      deepLinkId: SecurityPageName.launchpad,
+    }),
   };
 
   const breadcrumbs: ChromeBreadcrumb[] = parentLinks.map(({ title, id }) => ({

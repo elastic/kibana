@@ -16,7 +16,7 @@ import { getRenderCellValueFn } from './get_render_cell_value';
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  createFormatFieldValueSpy,
+  createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
   buildDataViewMock,
 } from '@kbn/discover-utils/src/__mocks__';
@@ -57,7 +57,10 @@ const mockServices = {
     get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
   },
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+    getDefaultInstance: jest.fn(() => ({
+      convert: (value: unknown) => (value ? value : '-'),
+      reactConvert: (value: unknown) => (value ? value : '-'),
+    })),
   },
 };
 
@@ -732,14 +735,9 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              100,
-            ],
-          }
-        }
-      />
+      >
+        100
+      </span>
     `);
   });
 
@@ -829,14 +827,9 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              ".gz",
-            ],
-          }
-        }
-      />
+      >
+        .gz
+      </span>
     `);
 
     const componentWithDetails = shallow(
@@ -859,15 +852,9 @@ describe('Unified data table cell rendering', function () {
       >
         <EuiFlexItem>
           <DataTablePopoverCellValue>
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": Array [
-                    ".gz",
-                  ],
-                }
-              }
-            />
+            <span>
+              .gz
+            </span>
           </DataTablePopoverCellValue>
         </EuiFlexItem>
         <EuiFlexItem
@@ -942,12 +929,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithDataViewField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "gif",
-          }
-        }
-      />
+      >
+        gif
+      </span>
     `);
     const componentWithCustomESQLField = shallow(
       <DataTableCellValue
@@ -963,12 +947,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 350,
-          }
-        }
-      />
+      >
+        350
+      </span>
     `);
 
     // With enriched DataView, fields.create should NOT be called since var0 is already in the DataView
@@ -977,7 +958,7 @@ describe('Unified data table cell rendering', function () {
 
   describe('enriched DataView handling for _source column', () => {
     it('should use data view field type', () => {
-      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
       const rows = [
@@ -1013,12 +994,12 @@ describe('Unified data table cell rendering', function () {
         />
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
-      formatFieldValueSpy.mockRestore();
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+      formatFieldValueReactSpy.mockRestore();
     });
 
     it('should use enriched DataView field type (ES|QL mode)', () => {
-      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       // Create enriched DataView with bytes field as string/keyword (as ES|QL would provide)
       const enrichedDataView = buildDataViewMock({
         name: 'test-data-view',
@@ -1081,8 +1062,8 @@ describe('Unified data table cell rendering', function () {
         />
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
-      formatFieldValueSpy.mockRestore();
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+      formatFieldValueReactSpy.mockRestore();
     });
   });
 });

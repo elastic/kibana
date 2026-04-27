@@ -40,6 +40,7 @@ import { compact } from 'lodash';
 import { anomalyParamsSchema } from '@kbn/response-ops-rule-params/apm_anomaly';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
+  ANOMALY_DETECTOR_TYPE,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -328,6 +329,7 @@ export function registerAnomalyRuleType({
         const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
 
         const payload = {
+          [ANOMALY_DETECTOR_TYPE]: detectorType,
           [SERVICE_NAME]: serviceName,
           ...getEnvironmentEsField(environment),
           [TRANSACTION_TYPE]: transactionType,

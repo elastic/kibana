@@ -28,12 +28,16 @@ dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
-  - '@kbn/test'
+  - '@kbn/kbn-client'
+  - '@kbn/test-es-server'
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
   - '@kbn/dev-cli-errors'
   - '@kbn/config-schema'
   - '@kbn/evals-common'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/test'
+  - '@kbn/es-errors'
 tags:
   - test-helper
   - package
@@ -44,27 +48,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.json'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

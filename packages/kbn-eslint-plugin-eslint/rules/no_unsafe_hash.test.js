@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const path = require('path');
 const { RuleTester } = require('eslint');
 const { allowedAlgorithms, ...rule } = require('./no_unsafe_hash');
+const findKibanaRoot = require('../helpers/find_kibana_root');
 
 const dedent = require('dedent');
+
+const KIBANA_ROOT = findKibanaRoot();
 
 const joinedAllowedAlgorithms = `[${allowedAlgorithms.join(', ')}]`;
 
@@ -56,6 +60,14 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        const myHash = 'sha256';
        hash(myHash);
       `,
+    },
+    // valid: sha1 in a file that has an allowlist entry for sha1
+    {
+      code: dedent`
+       import { createHash } from 'crypto';
+       createHash('sha1');
+      `,
+      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
     },
   ],
 
@@ -135,6 +147,34 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
         {
           line: 2,
           message: `Usage of hash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
+        },
+      ],
+    },
+    // invalid: sha1 in a file with no allowlist entry
+    {
+      code: dedent`
+       import { createHash } from 'crypto';
+       createHash('sha1');
+      `,
+      filename: path.resolve(KIBANA_ROOT, 'src/some/random/file.ts'),
+      errors: [
+        {
+          line: 2,
+          message: `Usage of createHash with "sha1" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
+        },
+      ],
+    },
+    // invalid: md5 in a file whose allowlist only allows sha1
+    {
+      code: dedent`
+       import { createHash } from 'crypto';
+       createHash('md5');
+      `,
+      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
+      errors: [
+        {
+          line: 2,
+          message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
     },

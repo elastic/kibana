@@ -10,6 +10,7 @@
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
@@ -17,6 +18,7 @@ import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_mod
 import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
 import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
+import { triggerSchemas } from '../../../../../trigger_schemas';
 
 jest.mock('../../../../../features/workflow_context/lib/get_output_schema_for_step_type');
 
@@ -192,5 +194,64 @@ steps: []
     );
 
     expect(result?.isInScheduledTriggerWithBlock).toBe(true);
+  });
+
+  it('should detect triggers[i].on.condition and resolve registered trigger definition', () => {
+    const mockDefinition: PublicTriggerDefinition = {
+      id: 'example.custom_trigger',
+      title: 'Example',
+      description: 'Example trigger',
+      eventSchema: z.object({ severity: z.string() }),
+    };
+    const getDef = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockReturnValue(mockDefinition);
+
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`
+version: "1"
+name: "test"
+enabled: true
+triggers:
+  - type: example.custom_trigger
+    on:
+      condition: "event.severity: hi and |<-foo"
+steps:
+  - name: s1
+    type: wait
+    with:
+      duration: 1s
+`)
+    );
+
+    expect(result?.isInTriggerConditionField).toBe(true);
+    expect(result?.path).toEqual(['triggers', 0, 'on', 'condition']);
+    expect(getDef).toHaveBeenCalledWith('example.custom_trigger');
+    expect(result?.triggerConditionDefinition).toEqual(mockDefinition);
+
+    getDef.mockRestore();
+  });
+
+  it('detects on.condition field but leaves triggerConditionDefinition unset for unregistered type', () => {
+    const getDef = jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
+
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`
+version: "1"
+name: "test"
+triggers:
+  - type: manual
+    on:
+      condition: "event.severity: hi and |<-foo"
+steps: []
+`)
+    );
+
+    expect(result?.isInTriggerConditionField).toBe(true);
+    expect(result?.path).toEqual(['triggers', 0, 'on', 'condition']);
+    expect(getDef).toHaveBeenCalledWith('manual');
+    expect(result?.triggerConditionDefinition).toBeUndefined();
+
+    getDef.mockRestore();
   });
 });

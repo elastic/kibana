@@ -17,7 +17,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
-      machineType: n2-standard-2
+      machineType: n2-standard-4
     env:
       # ensure that the FTR logs all output for these tests
       DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'

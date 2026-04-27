@@ -27,6 +27,7 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { getTimestampUs } from '../../../../../../../../common/utils/get_timestamp_us';
 import { OpenInDiscover } from '../../../../../../shared/links/discover_links/open_in_discover';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -155,7 +156,10 @@ export function SpanFlyout({
               <EuiFlexItem grow={false}>
                 <OpenInDiscover
                   dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
-                  variant="button"
+                  label={i18n.translate('xpack.apm.spanFlyout.openInDiscover', {
+                    defaultMessage: 'Open in Discover',
+                  })}
+                  variant="emptyButton"
                   indexType="traces"
                   rangeFrom={rangeFrom}
                   rangeTo={rangeTo}
@@ -279,7 +283,7 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <Timestamp timestamp={span.timestamp.us / 1000} renderMode="tooltip" />,
+          <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />,
           <>
             <Duration
               duration={span.span.duration.us}

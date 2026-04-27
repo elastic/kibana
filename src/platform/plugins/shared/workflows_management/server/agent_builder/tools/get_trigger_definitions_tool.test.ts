@@ -67,6 +67,14 @@ describe('registerGetTriggerDefinitionsTool', () => {
     expect(data.availableTypes).toContain('manual');
   });
 
+  it('compacts large enums like timezone names in the schema', async () => {
+    const result = await invokeHandler(registeredTool, { triggerType: 'scheduled' }, {});
+    const data = result.results[0].data as any;
+    const schemaStr = JSON.stringify(data.triggerTypes[0].jsonSchema);
+    expect(schemaStr).not.toContain('Pacific/Honolulu');
+    expect(schemaStr).toContain('allowed values');
+  });
+
   it('returns results in expected shape', async () => {
     const result = await invokeHandler(registeredTool, {}, {});
     expect(result).toHaveProperty('results');

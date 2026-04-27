@@ -15,7 +15,7 @@ import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { Logger } from '@kbn/logging';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import type {
@@ -83,7 +83,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   logger: Logger;
 }) => {
   // NOTE: without this parameter, .hits.hits can be empty
-  options.retrieveResults = true;
+  options.returnIntermediateResults = true;
 
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
@@ -111,7 +111,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory: TimelineFactory<T>;
 }) => {
   // NOTE: without this parameter, .hits.hits can be empty
-  options.retrieveResults = true;
+  options.returnIntermediateResults = true;
   const indices = request.defaultIndex ?? request.indexType;
 
   const requestSessionLeaders = {

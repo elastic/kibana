@@ -9,6 +9,7 @@ import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
@@ -46,11 +47,13 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
   const supertestSv = getService('supertest');
   const log = getService('log');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
-  return new (class EndpointTelemetryTestResources {
+  return new (class EndpointArtifactsTestResources {
     readonly supertest = supertestSv;
     readonly log = log;
     readonly esClient = esClient;
+    readonly kibanaServer = kibanaServer;
     readonly exceptionsGenerator = new ExceptionsListItemGenerator();
 
     getHttpResponseFailureHandler(
@@ -67,18 +70,24 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
     /**
      * Deletes an artifact list along with all of its items (if any).
+     *
+     * Uses the SO client to perform deletion in order to reduce test flakiness, in case
+     * a race condition or any other weird scenario results in having multiple lists with the same list_id.
+     * In those cases, exception_list API would delete only one of the lists.
+     *
      * @param listId
      * @param supertest
      */
-    async deleteList(
-      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-      supertest: TestAgent = this.supertest
-    ): Promise<void> {
-      await supertest
-        .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .then(this.getHttpResponseFailureHandler([404]));
+    async deleteList(listId: string): Promise<void> {
+      const allExceptionListObjects = await kibanaServer.savedObjects.find({
+        type: 'exception-list-agnostic',
+      });
+
+      const listObjectsToDelete = allExceptionListObjects.saved_objects.filter(
+        (obj) => obj.attributes.list_id === listId
+      );
+
+      await kibanaServer.savedObjects.bulkDelete({ objects: listObjectsToDelete });
     }
 
     async ensureListExists(
@@ -111,6 +120,36 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
       this.log.info(
         `Created [${artifactAssignment}] exception list item in space [${spaceId}], List ID [${listId}], Item ID [${itemId}]`
+      );
+
+      const cleanup = async () => {
+        await this.deleteExceptionItem(artifact, { supertest, spaceId });
+      };
+
+      return {
+        artifact,
+        cleanup,
+      };
+    }
+
+    async updateExceptionItem(
+      updatePayload: UpdateExceptionListItemSchema,
+      { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
+    ): Promise<ArtifactTestData> {
+      this.log.verbose(`Updating exception item:\n${JSON.stringify(updatePayload)}`);
+
+      const artifact = await supertest
+        .put(addSpaceIdToPath('/', spaceId, EXCEPTION_LIST_ITEM_URL))
+        .set('kbn-xsrf', 'true')
+        .send(updatePayload)
+        .then(this.getHttpResponseFailureHandler())
+        .then((response) => response.body as ExceptionListItemSchema);
+
+      const { item_id: itemId, list_id: listId } = artifact;
+      const artifactAssignment = isArtifactGlobal(artifact) ? 'Global' : 'Per-Policy';
+
+      this.log.info(
+        `Updated [${artifactAssignment}] exception list item in space [${spaceId}], List ID [${listId}], Item ID [${itemId}]`
       );
 
       const cleanup = async () => {
@@ -207,6 +246,34 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       const trustedDevice = this.exceptionsGenerator.generateTrustedDeviceForCreate(overrides);
 
       return this.createExceptionItem(trustedDevice, options);
+    }
+
+    async createList(
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      options: ArtifactCreateOptions = {}
+    ): Promise<void> {
+      switch (listId) {
+        case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+          return this.ensureListExists(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id: {
+          return this.ensureListExists(TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+          return this.ensureListExists(EVENT_FILTER_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+          return this.ensureListExists(BLOCKLISTS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+          return this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id: {
+          return this.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION, options);
+        }
+        default:
+          throw new Error(`Unexpected list id ${listId}`);
+      }
     }
 
     async createArtifact(

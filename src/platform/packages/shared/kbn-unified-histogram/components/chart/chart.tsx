@@ -113,6 +113,20 @@ export function UnifiedHistogramChart({
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
 
+  const lensSaveModalInitialInput = useMemo(() => {
+    if (!visContext?.attributes) {
+      return undefined;
+    }
+    const withTablesRemoved = removeTablesFromLensAttributes(visContext.attributes);
+    return {
+      ...withTablesRemoved,
+      attributes: {
+        ...withTablesRemoved.attributes,
+        title: '',
+      },
+    };
+  }, [visContext?.attributes]);
+
   const {
     dataView,
     query,
@@ -324,9 +338,9 @@ export function UnifiedHistogramChart({
   if (canSaveVisualization) {
     actions.push({
       label: i18n.translate('unifiedHistogram.saveVisualizationButton', {
-        defaultMessage: 'Save visualization',
+        defaultMessage: 'Save visualization to dashboard',
       }),
-      iconType: 'save',
+      iconType: 'dashboardApp',
       'data-test-subj': 'unifiedHistogramSaveVisualization',
       onClick: () => setIsSaveModalVisible(true),
     });
@@ -383,9 +397,9 @@ export function UnifiedHistogramChart({
           </>
         )}
       </ChartSectionTemplate>
-      {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
+      {canSaveVisualization && isSaveModalVisible && lensSaveModalInitialInput && (
         <LensSaveModalComponent
-          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
+          initialInput={lensSaveModalInitialInput}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}

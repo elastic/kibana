@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Figma from './types';
-
 const FIGMA_API_BASE = 'https://api.figma.com';
 
 const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
@@ -27,11 +26,29 @@ export const FigmaConnector: ConnectorSpec = {
         'Browse Figma design files, inspect structure, render images, and explore team projects',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
-    types: [{ type: 'api_key_header', defaults: { headerField: 'X-Figma-Token' } }],
+    types: [
+      { type: 'api_key_header', defaults: { headerField: 'X-Figma-Token' } },
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://www.figma.com/oauth',
+          tokenUrl: 'https://api.figma.com/v1/oauth/token',
+          scope: 'current_user:read file_content:read projects:read',
+        },
+      },
+    ],
   },
 
   actions: {
@@ -39,6 +56,17 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-file-nodes
     // Response always includes components and styles maps alongside the document tree.
     getFile: {
+      isTool: true,
+      description:
+        "Get a Figma file's structure, metadata, components, and styles. " +
+        'File keys appear in Figma URLs as the segment after the file type: ' +
+        'https://www.figma.com/:file_type/:file_key/:file_name — valid file_type values are ' +
+        'design, file, board, proto, and slides. If the user provides a Figma URL, extract the ' +
+        'file key directly from it instead of browsing through teams and projects. ' +
+        'Use depth to control how deep into the document tree to traverse (e.g., depth=1 returns ' +
+        'only pages, depth=2 returns pages and top-level objects). Optionally pass nodeIds to ' +
+        'retrieve only specific nodes and their subtrees. The response includes the document tree, ' +
+        'a components map, and a styles map.',
       input: z.object({
         fileKey: z
           .string()
@@ -78,6 +106,12 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-image
     renderNodes: {
+      isTool: true,
+      description:
+        'Render Figma nodes as images. Provide a file key and one or more node IDs to get ' +
+        'temporary image URLs (valid for 30 days). Supports PNG, JPG, SVG, and PDF formats. ' +
+        'Use scale (0.01 to 4) to control resolution. Node IDs can be found in Figma URLs ' +
+        '(?node-id=1:2) or from the getFile action output.',
       input: z.object({
         fileKey: z.string().describe('File key from the Figma file URL'),
         nodeIds: z
@@ -87,9 +121,14 @@ export const FigmaConnector: ConnectorSpec = {
           ),
         format: z
           .enum(['png', 'jpg', 'svg', 'pdf'])
-          .optional()
+          .default('png')
           .describe('Image format (default: png)'),
-        scale: z.number().optional().describe('Scale factor between 0.01 and 4 (default: 1)'),
+        scale: z
+          .number()
+          .min(0.01)
+          .max(4)
+          .default(1)
+          .describe('Scale factor between 0.01 and 4 (default: 1)'),
       }),
       handler: async (ctx, input: Figma.RenderNodesInput) => {
         const params: Record<string, string | number> = { ids: input.nodeIds };
@@ -109,6 +148,11 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-project-files
     listProjectFiles: {
+      isTool: true,
+      description:
+        'List all files in a Figma project. Returns file names, keys, thumbnail URLs, and ' +
+        'last modified dates. Use the file keys from the results with the getFile or ' +
+        'renderNodes actions to inspect individual files.',
       input: z.object({
         projectId: z
           .string()
@@ -125,6 +169,13 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-team-projects
     listTeamProjects: {
+      isTool: true,
+      description:
+        'List all projects in a Figma team. Returns project names and IDs alongside the ' +
+        'teamId (so it can be reused in later steps). Use the project IDs with listProjectFiles ' +
+        'to browse files. Provide either teamId (from the team page URL, e.g. figma.com/team/123/Team-Name) ' +
+        'or a full Figma team page url from which the team ID will be extracted. If neither is ' +
+        'available in the conversation context, ask the user to provide one.',
       input: z.object({
         teamId: z
           .string()
@@ -163,6 +214,11 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/users-endpoints/#get-me
     whoAmI: {
+      isTool: true,
+      description:
+        'Get the currently authenticated Figma user. Returns the user ID, handle, email, ' +
+        'and profile image URL for the API credentials in use. Useful for verifying which ' +
+        'Figma account is connected.',
       input: z.object({}),
       handler: async (ctx): Promise<Figma.WhoAmIResult> => {
         const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
@@ -176,6 +232,12 @@ export const FigmaConnector: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'Use whoAmI to confirm which Figma account is connected before performing other actions.',
+    'Typical discovery workflow: listTeamProjects → listProjectFiles → getFile → renderNodes.',
+    'If the user provides a Figma URL, extract the file key directly and skip the discovery steps.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.figma.test.description', {

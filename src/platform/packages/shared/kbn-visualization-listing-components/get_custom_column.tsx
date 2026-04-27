@@ -71,7 +71,10 @@ export const getCustomColumn = () => {
       defaultMessage: 'Type',
     }),
     sortable: true,
-    width: '150px',
+    className: 'eui-textNoWrap',
+    minWidth: '6em',
+    width: '6em',
+    maxWidth: '11em',
     render: (field: string, record: VisualizationListItem) => {
       if (!record.error) {
         return (

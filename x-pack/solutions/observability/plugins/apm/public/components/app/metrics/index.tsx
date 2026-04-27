@@ -19,12 +19,23 @@ import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
-  const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
-    useApmServiceContext();
+  const {
+    agentName,
+    runtimeName,
+    runtimeVersion,
+    serverlessType,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+  } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
 
-  const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
+  const hasDashboardFile = hasDashboard({
+    agentName,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+    runtimeVersion,
+  });
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
@@ -50,6 +61,7 @@ export function Metrics() {
         telemetrySdkName={telemetrySdkName}
         telemetrySdkLanguage={telemetrySdkLanguage}
         runtimeName={runtimeName}
+        runtimeVersion={runtimeVersion}
         serverlessType={serverlessType}
         dataView={dataView}
         apmIndices={apmIndices}

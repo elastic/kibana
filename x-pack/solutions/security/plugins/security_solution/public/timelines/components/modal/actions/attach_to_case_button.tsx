@@ -96,7 +96,7 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         disabled={
           timelineStatus === TimelineStatusEnum.draft || timelineType !== TimelineTypeEnum.default

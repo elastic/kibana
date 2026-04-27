@@ -128,9 +128,18 @@ export const useInspect = ({
     [isDisabled, loading, queryId, request, response]
   );
 
+  const adHocDataViews = useMemo(
+    () =>
+      inspect?.indexPattern != null && inspect.indexPattern.length > 0
+        ? inspect.indexPattern
+        : undefined,
+    [inspect]
+  );
+
   return {
     additionalRequests,
     additionalResponses,
+    adHocDataViews,
     handleClick,
     handleCloseModal,
     isButtonDisabled,

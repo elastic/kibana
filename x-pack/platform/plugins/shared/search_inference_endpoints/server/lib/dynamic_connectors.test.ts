@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import { DynamicConnectorsPoller, initialDelayMs } from './dynamic_connectors';
+import { DynamicConnectorsPoller } from './dynamic_connectors';
 import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints';
 
 import { filterPreconfiguredEndpoints, connectorFromEndpoint } from '../utils/in_memory_connectors';
@@ -36,7 +36,7 @@ describe('DynamicConnectorsPoller', () => {
   let poller: DynamicConnectorsPoller;
   const pollingIntervalMins = 1;
   const pollingIntervalMs = pollingIntervalMins * 60 * 1000;
-  const testInitialAdvance = initialDelayMs + 100;
+  const testInitialAdvance = 100;
 
   beforeEach(() => {
     mockLogger = loggingSystemMock.createLogger();
@@ -105,6 +105,47 @@ describe('DynamicConnectorsPoller', () => {
       existingConnector.forEach((connector) =>
         expect(mockActions.registerDynamicConnector).not.toHaveBeenCalledWith(connector)
       );
+    })
+  );
+
+  it(
+    'unregisters dynamic connectors whose inference endpoint is no longer returned',
+    fakeSchedulers(async (advance) => {
+      const filteredEndpoints = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+      const allConnectors = filteredEndpoints.map(connectorFromEndpoint);
+      const removedConnector = allConnectors[0];
+      const remainingEndpoints = mockEISPreconfiguredEndpoints.filter(
+        (endpoint) => endpoint.inference_id !== removedConnector.id
+      );
+      mockInferenceGet.mockResolvedValue({ endpoints: remainingEndpoints });
+      mockActions.inMemoryConnectors = allConnectors;
+
+      poller.start();
+
+      advance(testInitialAdvance); // advance past initial delay
+      await wait();
+      expect(mockActions.unregisterDynamicConnector).toHaveBeenCalledWith(removedConnector.id);
+      expect(mockActions.registerDynamicConnector).not.toHaveBeenCalled();
+    })
+  );
+
+  it(
+    'does not unregister non-dynamic preconfigured connectors',
+    fakeSchedulers(async (advance) => {
+      const filteredEndpoints = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+      const allConnectors = filteredEndpoints.map(connectorFromEndpoint);
+      const nonDynamicConnectors = allConnectors.map((connector) => ({
+        ...connector,
+        isDynamic: false,
+      }));
+      mockInferenceGet.mockResolvedValue({ endpoints: [] });
+      mockActions.inMemoryConnectors = nonDynamicConnectors;
+
+      poller.start();
+
+      advance(testInitialAdvance); // advance past initial delay
+      await wait();
+      expect(mockActions.unregisterDynamicConnector).not.toHaveBeenCalled();
     })
   );
 

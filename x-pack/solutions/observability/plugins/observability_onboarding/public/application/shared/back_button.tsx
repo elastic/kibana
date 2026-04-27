@@ -18,7 +18,7 @@ export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) 
     <>
       <EuiButtonEmpty
         data-test-subj="observabilityOnboardingFlowBackToSelectionButton"
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         flush="left"
         onClick={() => navigate(`../${location.search}`)}
       >

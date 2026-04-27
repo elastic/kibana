@@ -19,6 +19,7 @@ import type {
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
+import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
@@ -43,8 +44,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           allow_no_indices: false,
           expand_wildcards: 'all',
         }),
+        ccsEnabled: hasConnectedRemoteClusters(esClient.asInternalUser),
       }).pipe(
-        mergeMap(({ actionsIndexExists, newDataStreamIndexExists }) => {
+        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled }) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             kuery: request.kuery,
@@ -61,18 +63,20 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               : {}),
             ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
             ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
+            ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
           } as StrategyRequestType<T>;
 
           const dsl = queryFactory.buildDsl({
             ...strictRequest,
             componentTemplateExists: actionsIndexExists,
+            ccsEnabled,
           } as StrategyRequestType<T>);
 
-          // Select internal client for all osquery indices that require it
+          // Select internal client for all osquery indices that require it.
+          // The 'osquery_manager' substring matches both local and CCS-prefixed patterns
+          // (e.g. '*:logs-osquery_manager.action...').
           es =
-            dsl.index?.includes('fleet') ||
-            dsl.index?.includes('logs-osquery_manager.action') ||
-            dsl.index?.includes('logs-osquery_manager.result')
+            dsl.index?.includes('fleet') || dsl.index?.includes('osquery_manager')
               ? data.search.searchAsInternalUser
               : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -94,11 +98,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             mergeMap((legacyIndexResponse) => {
               if (
                 request.factoryQueryType === OsqueryQueries.actionResults &&
-                newDataStreamIndexExists
+                (newDataStreamIndexExists || ccsEnabled)
               ) {
                 const dataStreamDsl = queryFactory.buildDsl({
                   ...strictRequest,
                   componentTemplateExists: actionsIndexExists,
+                  ccsEnabled,
                   useNewDataStream: true,
                 } as StrategyRequestType<T>);
 

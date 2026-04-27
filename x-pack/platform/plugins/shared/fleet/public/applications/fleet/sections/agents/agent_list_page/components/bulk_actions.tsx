@@ -129,7 +129,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           values={{ agentCount }}
         />
       ),
-      icon: 'exportAction',
+      icon: 'upload',
       disabled: !authz.fleet.generateAgentReports || !reporting,
       onClick: () => {
         setIsExportCSVModalOpen(true);
@@ -263,7 +263,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                 values={{ agentCount }}
               />
             ),
-            icon: 'timeRefresh',
+            icon: 'refreshTime',
             disabled: !authz.fleet.allAgents || !isLicenceAllowingScheduleUpgrade,
             onClick: () => {
               setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
@@ -525,7 +525,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             onToggle={setIsMenuOpen}
             button={{
               props: {
-                iconType: 'arrowDown',
+                iconType: 'chevronSingleDown',
                 iconSide: 'right',
                 fill: true,
               },

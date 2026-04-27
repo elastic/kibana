@@ -53,7 +53,7 @@ import {
   fromAPItoLensState as fromDatatableAPItoLensState,
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
-import type { LensApiState } from './schema';
+import type { LensApiConfig } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
 
@@ -62,7 +62,7 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
-  lnsHeatmap: 'heat_map',
+  lnsHeatmap: 'heatmap',
   lnsTagcloud: 'tag_cloud',
   lnsChoropleth: 'region_map',
   lnsPie: 'pie',
@@ -75,7 +75,7 @@ const compatibilityMap: Record<string, string> = {
 type ChartTypeLike =
   | Pick<LensAttributes, 'visualizationType'>
   | Pick<LensConfig, 'chartType'>
-  | Pick<LensApiState, 'type'>
+  | Pick<LensApiConfig, 'type'>
   | { visualizationType: null | undefined }
   | undefined;
 
@@ -115,7 +115,7 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
-  heat_map: {
+  heatmap: {
     fromAPItoLensState: fromHeatmapAPItoLensState,
     fromLensStateToAPI: fromHeatmapLensStateToAPI,
   },
@@ -225,7 +225,7 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  fromAPIFormat(config: LensApiState): LensAttributes {
+  fromAPIFormat(config: LensApiConfig): LensAttributes {
     const chartType = config.type;
 
     if (!(chartType in this.apiConvertersByChart)) {
@@ -234,20 +234,26 @@ export class LensConfigBuilder {
 
     const converter = this.apiConvertersByChart[chartType];
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
+    const { filters, query, references } = filtersAndQueryToLensState(
+      config,
+      attributes.references ?? []
+    );
 
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
+      references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
         query: { language: 'kuery', query: '' },
-        ...filtersAndQueryToLensState(config),
+        ...(query ? { query } : {}),
+        filters,
       },
     };
   }
 
-  toAPIFormat(config: LensAttributes): LensApiState {
+  toAPIFormat(config: LensAttributes): LensApiConfig {
     const visType = config.visualizationType;
     const type = compatibilityMap[visType] ?? visType;
 

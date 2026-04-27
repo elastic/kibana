@@ -15,10 +15,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
-import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
 import type { InferenceUsageInfo } from '../../../../../types';
 import { RenderMessageWithIcon } from '../../component/render_message_with_icon';
@@ -80,17 +80,29 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
       aria-labelledby={confirmModalTitleId}
       titleProps={{ id: confirmModalTitleId }}
       buttonColor="danger"
-      cancelButtonText={i18n.CANCEL}
-      confirmButtonText={i18n.DELETE_ACTION_LABEL}
+      cancelButtonText={i18n.translate('xpack.searchInferenceEndpoints.cancel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate(
+        'xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint',
+        { defaultMessage: 'Delete endpoint' }
+      )}
       defaultFocusedButton="confirm"
       onCancel={onCancel}
       onConfirm={onConfirm}
-      title={i18n.DELETE_TITLE}
+      title={i18n.translate('xpack.searchInferenceEndpoints.confirmDeleteEndpoint.title', {
+        defaultMessage: 'Delete inference endpoint',
+      })}
       confirmButtonDisabled={deleteDisabled}
       data-test-subj="deleteModalForInferenceUI"
     >
       <EuiFlexGroup gutterSize="l" direction="column">
-        <EuiFlexItem grow={false}>{i18n.CONFIRM_DELETE_WARNING}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {i18n.translate('xpack.searchInferenceEndpoints.confirmDeleteEndpoint.confirmQuestion', {
+            defaultMessage:
+              'Deleting an inference endpoint currently in use will cause failures in ingest and query attempts.',
+          })}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText
             size="xs"
@@ -111,13 +123,20 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
               onClick={() => {}}
               isLoading
             >
-              {i18n.SCANNING_USAGE_LABEL}&hellip;
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.scanningMessage',
+                { defaultMessage: 'Scanning for usage' }
+              )}
+              &hellip;
             </EuiButtonEmpty>
           ) : listOfUsages.length === 0 ? (
             <RenderMessageWithIcon
-              icon="checkInCircleFilled"
+              icon="checkCircleFill"
               color="success"
-              label={i18n.NO_USAGE_FOUND_LABEL}
+              label={i18n.translate(
+                'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.noUsageFound',
+                { defaultMessage: 'No Usage Found' }
+              )}
             />
           ) : (
             <ScanUsageResults

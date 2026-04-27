@@ -13,7 +13,7 @@ import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
@@ -91,9 +91,9 @@ export const registerGetTimeFieldRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${TIMEFIELD_ROUTE}{query}`,
+      path: TIMEFIELD_ROUTE,
       security: {
         authz: {
           enabled: false,
@@ -101,13 +101,13 @@ export const registerGetTimeFieldRoute = (
         },
       },
       validate: {
-        params: schema.object({
+        body: schema.object({
           query: schema.string(),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query } = request.params;
+      const { query } = request.body;
 
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;

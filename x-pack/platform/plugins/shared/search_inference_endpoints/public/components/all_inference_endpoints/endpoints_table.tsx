@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { type EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-import { INFERENCE_ENDPOINTS_TABLE_CAPTION } from '../../../common/translations';
 import { useFilteredInferenceEndpoints } from '../../hooks/use_filtered_endpoints';
 import type { FilterOptions } from '../../types';
 import { EndpointStats } from './endpoint_stats';
@@ -48,7 +47,9 @@ export const EndpointsTable = ({
           },
         }}
         data-test-subj="inferenceEndpointTable"
-        tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
+        tableCaption={i18n.translate('xpack.searchInferenceEndpoints.table.caption', {
+          defaultMessage: 'Inference endpoints table',
+        })}
       />
     </>
   );

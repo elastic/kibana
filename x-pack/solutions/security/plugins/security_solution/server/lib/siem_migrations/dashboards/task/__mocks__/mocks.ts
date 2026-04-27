@@ -31,6 +31,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
   };
 
   return {
+    reportSourceQueryKeywords: jest.fn(),
     reportIntegrationsMatch: jest.fn(),
     reportPrebuiltDashboardsMatch: jest.fn(),
     startSiemMigrationTask: jest.fn().mockReturnValue(mockStartSiemMigrationTaskReturn),

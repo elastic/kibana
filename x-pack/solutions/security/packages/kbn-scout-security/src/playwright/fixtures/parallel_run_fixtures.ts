@@ -18,6 +18,7 @@ import {
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
   getTimelineApiService,
+  getAttackDiscoveryApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -34,13 +35,15 @@ export const spaceTest = securityParallelFixtures.extend<
     {
       pageObjects,
       page,
+      config,
     }: {
       pageObjects: SecurityParallelTestFixtures['pageObjects'];
       page: SecurityParallelTestFixtures['page'];
+      config: SecurityParallelWorkerFixtures['config'];
     },
     use: (pageObjects: SecurityParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
   apiServices: [
@@ -81,6 +84,11 @@ export const spaceTest = securityParallelFixtures.extend<
         scoutSpace,
       });
       extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+      });
+      extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
         kbnClient,
         log,
         scoutSpace,

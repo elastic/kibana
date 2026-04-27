@@ -33,15 +33,17 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
-  OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
-  isInputOnlyPolicyTemplate,
   mapPackageReleaseToIntegrationCardRelease,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
+  hasDynamicSignalTypes,
 } from '../../../../../../../../../common/services';
 
 import type {
@@ -59,7 +61,6 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -67,6 +68,7 @@ import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 import { VarGroupSelector } from './var_group_selector';
+import { MigrationTooltip } from './package_policy_input_panel';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -81,9 +83,12 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
-  totalStreams?: number;
+  isUpgrade?: boolean;
+  hasStreamToggle?: boolean;
   showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
+  /** Parent input's `policy_template`; required for correct composable multi-template matching. */
+  inputPolicyTemplate?: string;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -95,9 +100,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
-    totalStreams,
+    isUpgrade,
+    hasStreamToggle = true,
     showDescriptionColumn = true,
     varGroupSelections = {},
+    inputPolicyTemplate,
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
@@ -119,21 +126,22 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-    const shouldShowStreamsToggles = totalStreams ? totalStreams > 1 : true;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
 
-    // Check if package uses dynamic_signal_types
-    const dynamicSignalTypes = useMemo(() => {
-      const inputOnlyTemplate = packageInfo?.policy_templates?.find(
-        (template) =>
-          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
-      ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-      return inputOnlyTemplate?.dynamic_signal_types === true;
-    }, [packageInfo?.policy_templates]);
+    // Check if this specific stream's input allows dynamic signal types.
+    // Works for both input-only packages and composable integration packages
+    // (integration templates with nested OTel inputs).
+    const dynamicSignalTypes = useMemo(
+      () =>
+        hasDynamicSignalTypes(packageInfo, {
+          policyTemplateName: inputPolicyTemplate,
+          inputType: packageInputStream.input,
+        }),
+      [packageInfo, inputPolicyTemplate, packageInputStream.input]
+    );
 
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
@@ -189,32 +197,56 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       ? streamVarGroupSelections
       : varGroupSelections;
 
-    // Split vars into required and advanced, filtering by var_group visibility
+    // Whether use_apm is already present in the package schema. If so, it will be
+    // rendered through the normal var flow and we don't need to inject it.
+    const isUseAPMVarInSchema = useMemo(
+      () => (packageInputStream.vars ?? []).some((v) => v.name === USE_APM_VAR_NAME),
+      [packageInputStream]
+    );
+
+    // Split vars into required and advanced, filtering by var_group visibility.
     const [requiredVars, advancedVars] = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
 
-      if (packageInputStream.vars && packageInputStream.vars.length) {
-        packageInputStream.vars.forEach((varDef) => {
-          // Check if var should be shown based on var_group selections
-          // Use effective var_groups (stream-level if present, otherwise package-level)
-          if (
-            effectiveVarGroups &&
-            effectiveVarGroups.length > 0 &&
-            !shouldShowVar(varDef.name, effectiveVarGroups, effectiveVarGroupSelections)
-          ) {
-            return; // Skip this var, it's hidden by var_group selection
-          }
+      const schemaVars = packageInputStream.vars ?? [];
+      const varsToProcess =
+        !isUseAPMVarInSchema &&
+        shouldIncludeUseAPMVar(
+          packageInputStream.input,
+          customDataStreamTypeVarValue,
+          dynamicSignalTypes
+        )
+          ? [...schemaVars, DATA_STREAM_USE_APM_VAR]
+          : schemaVars;
 
-          if (isAdvancedVar(varDef, effectiveVarGroups, effectiveVarGroupSelections)) {
-            _advancedVars.push(varDef);
-          } else {
-            _requiredVars.push(varDef);
-          }
-        });
-      }
+      varsToProcess.forEach((varDef) => {
+        // Check if var should be shown based on var_group selections
+        // Use effective var_groups (stream-level if present, otherwise package-level)
+        if (
+          effectiveVarGroups &&
+          effectiveVarGroups.length > 0 &&
+          !shouldShowVar(varDef.name, effectiveVarGroups, effectiveVarGroupSelections)
+        ) {
+          return; // Skip this var, it's hidden by var_group selection
+        }
+
+        if (isAdvancedVar(varDef, effectiveVarGroups, effectiveVarGroupSelections)) {
+          _advancedVars.push(varDef);
+        } else {
+          _requiredVars.push(varDef);
+        }
+      });
+
       return [_requiredVars, _advancedVars];
-    }, [packageInputStream, effectiveVarGroups, effectiveVarGroupSelections]);
+    }, [
+      packageInputStream,
+      effectiveVarGroups,
+      effectiveVarGroupSelections,
+      customDataStreamTypeVarValue,
+      dynamicSignalTypes,
+      isUseAPMVarInSchema,
+    ]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -270,105 +302,115 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none" alignItems="flexStart">
-              <EuiFlexItem grow={1} />
-              <EuiFlexItem grow={flexWidth}>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="spaceBetween"
-                >
-                  {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
+          {showDescriptionColumn || hasStreamToggle || hasRequiredVarGroupErrors ? (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="none" alignItems="flexStart">
+                <EuiFlexItem grow={1} />
+                <EuiFlexItem grow={flexWidth}>
+                  {hasStreamToggle && (
+                    <>
+                      <EuiFlexGroup
+                        gutterSize="none"
+                        alignItems="flexStart"
+                        justifyContent="spaceBetween"
+                      >
                         <EuiFlexItem grow={false}>
-                          <EuiSwitch
-                            data-test-subj="streamOptions.switch"
-                            label={packageInputStream.title}
-                            disabled={packagePolicyInputStream.keep_enabled}
-                            checked={packagePolicyInputStream.enabled}
-                            onChange={(e) => {
-                              const enabled = e.target.checked;
-                              updatePackagePolicyInputStream({
-                                enabled,
-                              });
-                            }}
-                          />
-                        </EuiFlexItem>
-                        {showStreamDeprecationIcon && (
-                          <EuiFlexItem grow={false}>
-                            <span data-test-subj="streamOptions.deprecatedIcon">
-                              <EuiIconTip
-                                type="warning"
-                                color="warning"
-                                position="top"
-                                content={streamDeprecationTooltip}
+                          <EuiFlexGroup alignItems="center" gutterSize="s">
+                            <EuiFlexItem grow={false}>
+                              <EuiSwitch
+                                data-test-subj="streamOptions.switch"
+                                label={packageInputStream.title}
+                                disabled={packagePolicyInputStream.keep_enabled}
+                                checked={packagePolicyInputStream.enabled}
+                                onChange={(e) => {
+                                  const enabled = e.target.checked;
+                                  updatePackagePolicyInputStream({
+                                    enabled,
+                                  });
+                                }}
                               />
-                            </span>
+                            </EuiFlexItem>
+                            {showStreamDeprecationIcon && (
+                              <EuiFlexItem grow={false}>
+                                <span data-test-subj="streamOptions.deprecatedIcon">
+                                  <EuiIconTip
+                                    type="warning"
+                                    color="warning"
+                                    position="top"
+                                    content={streamDeprecationTooltip}
+                                  />
+                                </span>
+                              </EuiFlexItem>
+                            )}
+                            {isUpgrade &&
+                              packagePolicyInputStream.migrate_from &&
+                              !showStreamDeprecationIcon && (
+                                <MigrationTooltip
+                                  migrateFrom={packagePolicyInputStream.migrate_from}
+                                  isStream
+                                />
+                              )}
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                        {packageInputStream.data_stream.release &&
+                        packageInputStream.data_stream.release !== 'ga' ? (
+                          <EuiFlexItem grow={false}>
+                            <InlineReleaseBadge
+                              release={mapPackageReleaseToIntegrationCardRelease(
+                                packageInputStream.data_stream.release
+                              )}
+                            />
                           </EuiFlexItem>
-                        )}
+                        ) : null}
                       </EuiFlexGroup>
-                    </EuiFlexItem>
+                      {packageInputStream.description ? (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiText size="s" color="subdued">
+                            <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
+                          </EuiText>
+                        </>
+                      ) : null}
+                    </>
                   )}
-                  {packageInputStream.data_stream.release &&
-                  packageInputStream.data_stream.release !== 'ga' ? (
-                    <EuiFlexItem grow={false}>
-                      <InlineReleaseBadge
-                        release={mapPackageReleaseToIntegrationCardRelease(
-                          packageInputStream.data_stream.release
-                        )}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-                {packageInfo.type !== 'input' &&
-                packageInputStream.description &&
-                shouldShowStreamsToggles ? (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiText size="s" color="subdued">
-                      <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
-                    </EuiText>
-                  </>
-                ) : null}
-                {hasRequiredVarGroupErrors && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiAccordion
-                      id={`${packageInputStream.data_stream.type}-${packageInputStream.data_stream.dataset}-required-vars-group-error`}
-                      paddingSize="s"
-                      buttonContent={
-                        <EuiText color="danger" size="s">
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
-                            defaultMessage="One of these settings groups is required"
-                          />
+                  {hasRequiredVarGroupErrors && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiAccordion
+                        id={`${packageInputStream.data_stream.type}-${packageInputStream.data_stream.dataset}-required-vars-group-error`}
+                        paddingSize="s"
+                        buttonContent={
+                          <EuiText color="danger" size="s">
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
+                              defaultMessage="One of these settings groups is required"
+                            />
+                          </EuiText>
+                        }
+                      >
+                        <EuiText size="xs" color="danger">
+                          {Object.entries(inputStreamValidationResults?.required_vars || {}).map(
+                            ([groupName, vars]) => {
+                              return (
+                                <>
+                                  <strong>{groupName}</strong>
+                                  <ul>
+                                    {vars.map(({ name }) => (
+                                      <li key={`${groupName}-${name}`}>{name}</li>
+                                    ))}
+                                  </ul>
+                                </>
+                              );
+                            }
+                          )}
                         </EuiText>
-                      }
-                    >
-                      <EuiText size="xs" color="danger">
-                        {Object.entries(inputStreamValidationResults?.required_vars || {}).map(
-                          ([groupName, vars]) => {
-                            return (
-                              <>
-                                <strong>{groupName}</strong>
-                                <ul>
-                                  {vars.map(({ name }) => (
-                                    <li key={`${groupName}-${name}`}>{name}</li>
-                                  ))}
-                                </ul>
-                              </>
-                            );
-                          }
-                        )}
-                      </EuiText>
-                    </EuiAccordion>
-                  </>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                      </EuiAccordion>
+                    </>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="m">
               {/* Stream-level Var Group Selectors */}
@@ -433,7 +475,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiButtonEmpty
                           aria-label="Advanced options"
                           size="xs"
-                          iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                          iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                           onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                           flush="left"
                           data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
@@ -553,24 +595,36 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           </EuiFlexItem>
                         );
                       })}
-                      {isPackagePolicyEdit && showPipelinesAndMappings && (
-                        <>
-                          <EuiFlexItem>
-                            <PackagePolicyEditorDatastreamPipelines
-                              packageInputStream={packagePolicyInputStream}
-                              packageInfo={packageInfo}
-                              customDataset={customDatasetVarValue}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <PackagePolicyEditorDatastreamMappings
-                              packageInputStream={packagePolicyInputStream}
-                              packageInfo={packageInfo}
-                              customDataset={customDatasetVarValue}
-                            />
-                          </EuiFlexItem>
-                        </>
-                      )}
+                      {isPackagePolicyEdit &&
+                        showPipelinesAndMappings &&
+                        packagePolicyInputStream.data_stream.type && (
+                          <>
+                            <EuiFlexItem>
+                              <PackagePolicyEditorDatastreamPipelines
+                                packageInputStream={
+                                  packagePolicyInputStream as {
+                                    id?: string;
+                                    data_stream: { dataset: string; type: string };
+                                  }
+                                }
+                                packageInfo={packageInfo}
+                                customDataset={customDatasetVarValue}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <PackagePolicyEditorDatastreamMappings
+                                packageInputStream={
+                                  packagePolicyInputStream as {
+                                    id?: string;
+                                    data_stream: { dataset: string; type: string };
+                                  }
+                                }
+                                packageInfo={packageInfo}
+                                customDataset={customDatasetVarValue}
+                              />
+                            </EuiFlexItem>
+                          </>
+                        )}
                     </>
                   ) : null}
                 </Fragment>

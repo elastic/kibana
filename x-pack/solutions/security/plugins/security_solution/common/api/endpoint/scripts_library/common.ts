@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SCRIPT_TAGS } from '../../../endpoint/service/scripts_library/constants';
+import { SCRIPT_TAGS } from '../../../endpoint/service/script_library/constants';
 import { validateNoDuplicateValues, validateNonEmptyString } from '../schema_utils';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../endpoint/constants';
 

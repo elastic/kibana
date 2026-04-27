@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ScoutPage } from '@kbn/scout-oblt';
 
 interface AlertType {
@@ -31,9 +32,14 @@ export class MonitorDetailsPage {
     const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
     await this.page.testSubj.click(`o11yFilterGroupButton-${filterType}`);
     for (const title of itemList) {
-      await this.page.click(`li[title="${title}"]`);
+      const item = this.page.locator(`li[title="${title}"]`);
+      await expect(item).toBeVisible({ timeout: 10_000 });
+      await item.click();
+      await expect(item).toHaveAttribute('aria-checked', 'true', { timeout: 10_000 });
     }
-    await this.page.testSubj.click('o11yFieldValueSelectionApplyButton');
+    const applyButton = this.page.testSubj.locator('o11yFieldValueSelectionApplyButton');
+    await expect(applyButton).toBeEnabled({ timeout: 10_000 });
+    await applyButton.click();
   }
 
   async setStatusFilterUp(): Promise<void> {

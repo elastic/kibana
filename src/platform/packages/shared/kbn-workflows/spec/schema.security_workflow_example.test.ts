@@ -159,10 +159,7 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
                   },
                   iocs: {
                     type: 'object',
-                    additionalProperties: {
-                      type: 'array',
-                      items: { type: 'string' },
-                    },
+                    additionalProperties: false,
                     description: 'Additional indicators of compromise',
                   },
                 },
@@ -269,9 +266,6 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
     expect(
       parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.affectedSystems.minItems
     ).toBe(1);
-    expect(parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.tags.uniqueItems).toBe(
-      true
-    );
     expect(
       parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.enrichment.properties
         ?.confidence.minimum

@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import { yamlLanguageService } from './yaml_language_service';
+import { sanitizeText } from '../../lib/sanitize_text';
 
 export interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
   onChange: (value: string) => void;
@@ -55,12 +56,13 @@ export const YamlEditor = React.memo(
 
     const onChangeInternal = useCallback(
       (newValue: string) => {
+        const sanitizedValue = sanitizeText(newValue);
         // Update internal state quickly so the change is reflected instantly in the editor
-        setInternalValue(newValue);
+        setInternalValue(sanitizedValue);
         // Notify that the changes are not synced since we have pending changes
         onSyncStateChange?.(false);
         // Debounce the call to onChange to prevent excessive re-renders upstream
-        onChangeDebounced(newValue);
+        onChangeDebounced(sanitizedValue);
       },
       [onChangeDebounced, onSyncStateChange]
     );

@@ -25,10 +25,12 @@ import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
+import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
+import { EsApiKeyStrategy } from './api_key_strategy';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -55,6 +57,8 @@ interface EsError extends Error {
     };
   };
 }
+
+const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
 
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
@@ -109,6 +113,7 @@ describe('TaskPollingLifecycle', () => {
       },
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
+      grant_uiam_api_keys: false,
     },
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
@@ -123,6 +128,8 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
+    apiKeyStrategy: new EsApiKeyStrategy(),
+    eventLogger: eventLoggerMock,
   };
 
   beforeEach(() => {

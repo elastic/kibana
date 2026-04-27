@@ -10,7 +10,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -23,7 +23,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -67,7 +67,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -80,7 +80,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -122,7 +122,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -135,7 +135,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -183,7 +183,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -196,7 +196,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -255,7 +255,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -268,7 +268,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -314,7 +314,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -327,7 +327,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -376,7 +376,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -389,7 +389,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -435,7 +435,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -448,7 +448,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -497,7 +497,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -510,7 +510,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -551,7 +551,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -564,7 +564,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -608,7 +608,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -621,7 +621,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -680,7 +680,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -693,7 +693,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -738,7 +738,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -751,7 +751,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -799,7 +799,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -812,7 +812,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -871,7 +871,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -884,7 +884,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
@@ -929,7 +929,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
@@ -942,7 +942,7 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"

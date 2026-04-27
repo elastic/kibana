@@ -15,7 +15,7 @@ import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLRow } from '@kbn/es-types';
+import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -32,6 +32,31 @@ export interface ESQLDataGridAttrs {
   dataView: DataView;
   columns: DatatableColumn[];
 }
+
+const columnsMatchInOrder = (a: ESQLColumn[], b: ESQLColumn[]) => {
+  return a.length === b.length && a.every((col, i) => col.name === b[i]?.name);
+};
+
+export const buildDisplayRowsFromEsqlValues = ({
+  displayColumns,
+  valueColumns,
+  values,
+}: {
+  displayColumns: ESQLColumn[];
+  valueColumns: ESQLColumn[];
+  values: ESQLRow[];
+}): ESQLRow[] => {
+  if (columnsMatchInOrder(valueColumns, displayColumns)) {
+    return values;
+  }
+
+  // Pre-compute which value column index each display column maps to (-1 if missing)
+  const valueIndexPerGridColumn = displayColumns.map((col) =>
+    valueColumns.findIndex((v) => v.name === col.name)
+  );
+  // For each row, pick values by index; fill null for columns with no data
+  return values.map((row) => valueIndexPerGridColumn.map((i) => (i >= 0 ? row[i] : null)));
+};
 
 const getDSLFilter = (
   queryService: DataPublicPluginStart['query'],
@@ -66,15 +91,18 @@ export const getGridAttrs = async (
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
-    return adHoc.name === indexPattern;
+    return adHoc.title === indexPattern;
   });
 
-  const dataView = dataViewSpec
+  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
+  // which detects the time field via HTTP (with a promise cache to avoid
+  // redundant requests).
+  const dataView = dataViewSpec?.timeFieldName
     ? await data.dataViews.create(dataViewSpec)
     : await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true },
+        options: { skipFetchFields: true, id: dataViewSpec?.id },
         http,
       });
 
@@ -91,17 +119,16 @@ export const getGridAttrs = async (
     timezone,
   });
 
-  let queryColumns = results.response.columns;
-  // Use all_columns property if it exists in the payload
+  const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
+  // Use `all_columns` property if it exists in the payload,
   // which has all columns regardless if they have data or not
-  if (results.response.all_columns) {
-    queryColumns = results.response.all_columns;
-  }
+  const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;
 
-  const columns = formatESQLColumns(queryColumns);
+  const rows = buildDisplayRowsFromEsqlValues({ displayColumns, valueColumns, values });
+  const columns = formatESQLColumns(displayColumns);
 
   return {
-    rows: results.response.values,
+    rows,
     dataView,
     columns,
   };

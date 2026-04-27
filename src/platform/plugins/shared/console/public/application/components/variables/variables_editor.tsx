@@ -211,7 +211,7 @@ export const VariablesEditor = (props: Props) => {
 
         return (
           <EuiButtonIcon
-            iconType={itemIdToExpandedRowMapValues[id] ? 'arrowUp' : 'pencil'}
+            iconType={itemIdToExpandedRowMapValues[id] ? 'chevronSingleUp' : 'pencil'}
             aria-label={i18n.translate('console.variablesPage.variablesTable.columns.editButton', {
               defaultMessage: 'Edit {variable}',
               values: { variable: variable.name },
@@ -285,7 +285,7 @@ export const VariablesEditor = (props: Props) => {
       <div>
         <EuiButton
           data-test-subj="variablesAddButton"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => {
             setIsAddingVariable(true);
             collapseExpandedRows();

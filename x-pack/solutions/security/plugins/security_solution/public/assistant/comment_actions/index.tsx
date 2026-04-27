@@ -11,7 +11,6 @@ import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useAssistantContext } from '@kbn/elastic-assistant';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../use_assistant_availability';
 import { useKibana, useToasts } from '../../common/lib/kibana';
@@ -21,7 +20,6 @@ import { TimelineId } from '../../../common/types';
 import { updateAndAssociateNode } from '../../timelines/components/notes/helpers';
 import { timelineActions } from '../../timelines/store';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface Props {
   message: ClientMessage;
@@ -40,9 +38,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const toasts = useToasts();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
-  const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
-  const { traceOptions } = useAssistantContext();
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: TimelineId.active, noteId })),
@@ -86,45 +82,15 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     });
   }, [selectCaseModal, content]);
 
-  // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
-  // as APM data may not go to the same cluster where the Kibana instance is running
-  // Links to the experimental trace explorer page
-  // Note: There's a bug with URL params being rewritten, so must specify 'query' to filter on transaction id
-  // See: https://github.com/elastic/kibana/issues/171368
-  const apmTraceLink =
-    message.traceData != null && Object.keys(message.traceData).length > 0
-      ? `${traceOptions.apmUrl}/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
-      : undefined;
-
-  // Use this link for routing to the services/transactions view which provides a slightly different view
-  // const apmTraceLink =
-  //     message.traceData != null
-  //         ? `${basePath}/app/apm/services/kibana/transactions/view?kuery=&rangeFrom=now-1y&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&transactionName=POST%20/internal/elastic_assistant/actions/connector/?/_execute&transactionType=request&offset=1d&latencyAggregationType=avg`
-  //         : undefined;
-
   return (
-    // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
     <EuiFlexGroup alignItems="center" gutterSize="none">
-      {isModelEvaluationEnabled && apmTraceLink != null && !hasSearchAILakeConfigurations && (
-        <EuiFlexItem grow={false} data-test-subj="apmTraceButton">
-          <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={i18n.VIEW_APM_TRACE}
-              color="primary"
-              iconType="apmTrace"
-              href={apmTraceLink}
-              target={'_blank'}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
       {!hasSearchAILakeConfigurations && (
         <EuiFlexItem grow={false} data-test-subj="addMessageContentAsTimelineNote">
           <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
             <EuiButtonIcon
               aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
               color="primary"
-              iconType="editorComment"
+              iconType="comment"
               onClick={onAddNoteToTimeline}
             />
           </EuiToolTip>

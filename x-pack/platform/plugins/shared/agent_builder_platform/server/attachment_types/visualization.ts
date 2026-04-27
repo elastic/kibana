@@ -16,9 +16,9 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import {
   LensConfigBuilder,
-  type LensApiSchemaType,
+  type LensApiConfig,
   type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 /**
  * Creates the definition for the unified `visualization` attachment type.
@@ -93,7 +93,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
     isReadonly: false,
 
     getAgentDescription: () => {
-      return 'A visualization attachment contains a Lens visualization configuration. Rendering it inline displays the visualization as a dynamic, interactive chart component in the conversation UI. Visualization attachments can also be added to dashboard compositions through dashboard panel-ingestion operations.';
+      return 'A visualization attachment contains a Lens visualization configuration. Time range can be controled by configuring a time_range property directly on the attachment.data with from and to fields. Rendering it inline displays the visualization as a dynamic, interactive chart component in the conversation UI. Visualization attachments can also be added to dashboard compositions through dashboard panel-ingestion operations.';
     },
 
     getTools: () => [],
@@ -108,7 +108,7 @@ const toLensAttributes = (
   references: references ?? attributes.references ?? [],
 });
 
-const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
+const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
   new LensConfigBuilder().toAPIFormat(attributes);
 
 const extractChartType = (attributes: LensAttributes): string => {

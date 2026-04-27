@@ -8,46 +8,26 @@
  */
 
 import React, { useMemo } from 'react';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
-import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
+import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
-import type {
-  ChromeNavLink,
-  ChromeProjectNavigationNode,
-  NavigationTreeDefinitionUI,
-  SolutionId,
-} from '@kbn/core-chrome-browser';
-import type { IBasePath as BasePath } from '@kbn/core-http-browser';
-import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import useObservable from 'react-use/lib/useObservable';
+import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
-  // sidenav state
   isCollapsed: boolean;
   setWidth: (width: number) => void;
-
-  // kibana deps
-  basePath: BasePath;
-  application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
-
-  // nav state
-  navigation$: Observable<{
-    solutionId: SolutionId;
-    navigationTree: NavigationTreeDefinitionUI;
-    activeNodes: ChromeProjectNavigationNode[][];
-  }>;
-  navLinks$: Observable<Readonly<ChromeNavLink[]>>;
-
-  // collapse toggle callback
-  onToggleCollapsed: (isCollapsed: boolean) => void;
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
-  const state = useNavigationItems(props);
+  const state = useNavigationItems();
 
   if (!state) {
     return null;
@@ -74,21 +54,19 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (
-  props: Pick<ChromeNavigationProps, 'navigation$' | 'navLinks$' | 'basePath'>
-): (NavigationItems & { solutionId: SolutionId }) | null => {
-  const state = useObservable(props.navigation$);
+const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+  const chrome = useChromeService();
+  const basePath = useBasePath();
 
-  const basePath = props.basePath.get();
-  const panelStateManager = useMemo(() => new PanelStateManager(basePath), [basePath]);
+  const items$ = useMemo(() => {
+    const panelStateManager = new PanelStateManager(basePath.get());
+    return chrome.project.getNavigation$().pipe(
+      map((nav) => ({
+        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
+        solutionId: nav.solutionId,
+      }))
+    );
+  }, [chrome, basePath]);
 
-  const memoizedItems = useMemo(() => {
-    if (!state) return null;
-    return {
-      ...toNavigationItems(state.navigationTree, state.activeNodes, panelStateManager),
-      solutionId: state.solutionId,
-    };
-  }, [state, panelStateManager]);
-
-  return memoizedItems;
+  return useObservable(items$, null);
 };

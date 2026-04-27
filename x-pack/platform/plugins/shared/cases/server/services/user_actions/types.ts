@@ -49,7 +49,14 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlertCount?: number;
+      };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };
@@ -103,6 +110,12 @@ export interface BuilderParameters {
       };
     };
   };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
+  template: {
+    parameters: { payload: { template: { id: string; version: number } | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -117,7 +130,7 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -166,6 +179,7 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 export interface PushTimeFrameInfo {
@@ -358,6 +372,11 @@ export interface BuildUserActionsDictParams {
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertCountCountByCaseId: Map<string, number>;
+}
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];

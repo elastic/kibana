@@ -8,24 +8,20 @@
  */
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
-import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows';
+import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import type { RunWorkflowOptions } from '../api/types';
+import { useWorkflowsApi } from '../api/use_workflows_api';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
-export type RunWorkflowParams = RunWorkflowCommand & {
+export type RunWorkflowParams = RunWorkflowOptions & {
   /** Workflow ID to run. */
   id: string;
 };
 
 /**
  * Runs a workflow.
- *
- * Sends `POST /api/workflows/{id}/run` with `{ inputs }`.
- * Call with `{ id, inputs }`:
- * - `id`: workflow ID to run
- * - `inputs`: runtime input values consumed by the workflow
  *
  * @example
  * ```ts
@@ -40,18 +36,11 @@ export type RunWorkflowParams = RunWorkflowCommand & {
 export const useRunWorkflow = <P extends object = {}>(
   options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunWorkflowParams & P>
 ) => {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
 
   return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowParams & P>({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs }) => {
-      if (!http) {
-        return Promise.reject(new Error('Http service is not available'));
-      }
-      return http.post(`/api/workflows/${id}/run`, {
-        body: JSON.stringify({ inputs }),
-      });
-    },
+    mutationFn: ({ id, inputs, metadata }) => api.runWorkflow(id, { inputs, metadata }),
     ...options,
   });
 };

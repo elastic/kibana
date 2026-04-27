@@ -11,7 +11,7 @@ import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
-import { AttachmentRt } from '../attachment/v1';
+import { AttachmentRtV2 } from '../attachment/v2';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
 import { CaseObservableRt } from '../observable/v1';
 
@@ -27,6 +27,20 @@ export const CaseStatusRt = rt.union([
 ]);
 
 export const caseStatuses = Object.values(CaseStatuses);
+
+export const DefaultCloseReasonRt = rt.union([
+  rt.literal('false_positive'),
+  rt.literal('duplicate'),
+  rt.literal('true_positive'),
+  rt.literal('benign_positive'),
+  rt.literal('automated_closure'),
+  rt.literal('other'),
+]);
+
+/**
+ * Close reason
+ */
+export const CaseCloseReasonRt = rt.union([DefaultCloseReasonRt, rt.string]);
 
 /**
  * Severity
@@ -165,7 +179,7 @@ export const CaseRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(AttachmentRt),
+      comments: rt.array(AttachmentRtV2),
     })
   ),
 ]);

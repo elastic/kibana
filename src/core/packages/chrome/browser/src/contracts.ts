@@ -50,11 +50,11 @@ export interface ChromeSetup {
  * ```
  *
  * @example
- * How to set the help dropdown extension (React-first, preferred):
+ * How to set the help dropdown extension:
  * ```tsx
  * core.chrome.setHelpExtension({
  *   appName: 'My App',
- *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+ *   links: [{ linkType: 'documentation', href: docLinks.links.myApp.guide }],
  * });
  * ```
  *
@@ -231,7 +231,6 @@ export interface ChromeStart {
 
   /**
    * Override the current set of custom help content.
-   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
@@ -295,6 +294,16 @@ export interface ChromeStart {
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
+
+    /**
+     * Get an observable of the current width of the side nav.
+     */
+    getWidth$(): Observable<number>;
+
+    /**
+     * Get the current width of the side nav synchronously.
+     */
+    getWidth(): number;
   };
 
   /**

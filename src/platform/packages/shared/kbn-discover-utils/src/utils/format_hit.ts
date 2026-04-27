@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -16,14 +17,14 @@ import type {
   FormattedHit,
   EsHitRecord,
 } from '../types';
-import { formatFieldValue } from './format_value';
+import { formatFieldValueReact } from './format_value';
 
 // We use a special type here allowing formattedValue to be undefined because
 // we want to avoid formatting values which will not be shown to users since
 // it can be costly, and instead only format the ones which will be rendered
-type PartialHitPair = [
+type PartialHitReactPair = [
   fieldDisplayName: string,
-  formattedValue: string | undefined,
+  formattedValue: ReactNode | undefined,
   fieldName: string | null
 ];
 
@@ -33,16 +34,14 @@ const formattedHitCache = new WeakMap<
 >();
 
 /**
- * Returns a formatted document in form of key/value pairs of the fields name and a formatted value.
- * The value returned in each pair is an HTML string which is safe to be applied to the DOM, since
- * it's formatted using field formatters.
+ * Returns a formatted document in form of key/value pairs where the value is a ReactNode
  * @param hit
  * @param dataView - enriched DataView containing ES|QL fields if applicable
  * @param shouldShowFieldHandler
  * @param maxEntries
  * @param fieldFormats
  */
-export function formatHit(
+export function formatHitReact(
   hit: DataTableRecord,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
@@ -57,8 +56,8 @@ export function formatHit(
 
   const highlights = hit.raw.highlight ?? {};
   const flattened = hit.flattened;
-  const renderedPairs: PartialHitPair[] = [];
-  const otherPairs: PartialHitPair[] = [];
+  const renderedPairs: PartialHitReactPair[] = [];
+  const otherPairs: PartialHitReactPair[] = [];
 
   // Add each flattened field into the corresponding array for rendered or other pairs,
   // depending on whether the original hit had a highlight for it. That way we can ensure
@@ -103,7 +102,14 @@ export function formatHit(
 
     // Format the raw value using the regular field formatters for that field
     const field = dataView.getFieldByName(key);
-    pair[1] = formatFieldValue(flattened[key], hit.raw, fieldFormats, dataView, field);
+
+    pair[1] = formatFieldValueReact({
+      value: flattened[key],
+      hit: hit.raw,
+      fieldFormats,
+      dataView,
+      field,
+    });
   }
 
   // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut

@@ -13,17 +13,6 @@ import type { Action } from './actions';
 import { formatAction } from './actions';
 import { getEsqlInstructions } from './prompts/instructions_template';
 
-const getInstructionsWithRowLimit = (rowLimit?: number): string => {
-  if (!rowLimit) {
-    return getEsqlInstructions();
-  }
-
-  const defaultLimit = rowLimit;
-  const maxAllLimit = rowLimit;
-
-  return getEsqlInstructions({ defaultLimit, maxAllLimit });
-};
-
 export const createRequestDocumentationPrompt = ({
   nlQuery,
   resource,
@@ -36,30 +25,35 @@ export const createRequestDocumentationPrompt = ({
   return [
     [
       'system',
-      `You are an assistant that helps with writing ESQL query for Elasticsearch.
+      `You are an Elasticsearch assistant that helps with writing ES|QL queries.
 
 Your current task is to examine the information provided by the user, and to request documentation
 from the ES|QL handbook to help you get the right information needed to generate a query.
 That documentation will be used in a later step to actually generate the query.
 
+## Documentation
+
 Below are the ES|QL syntax and some examples from the official ES|QL documentation.
 
+<syntax-overview>
 ${prompts.syntax}
+</syntax-overview>
 
-${prompts.examples}`,
+<esql-examples>
+${prompts.examples}
+</esql-examples>`,
     ],
     [
       'user',
       `Your task is to write a single, valid ES|QL query based on the following information:
 
-<user_query>
+<user-query>
 ${nlQuery}
-</user_query>
+</user-query>
 
-${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
+${formatResourceWithSampledValues({ resource })}
 
-Now, based on that information, request documentation from the ES|QL handbook
-to help you get the right information needed to generate a query.`,
+Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
     ],
   ];
 };
@@ -72,6 +66,7 @@ export const createGenerateEsqlPrompt = ({
   additionalInstructions,
   additionalContext,
   rowLimit,
+  disableNamedParams,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
@@ -80,11 +75,12 @@ export const createGenerateEsqlPrompt = ({
   additionalInstructions?: string;
   additionalContext?: string;
   rowLimit?: number;
+  disableNamedParams?: boolean;
 }): BaseMessageLike[] => {
   return [
     [
       'system',
-      `You are an assistant that helps with writing ES|QL query for Elasticsearch.
+      `You are an Elasticsearch assistant that helps with writing ES|QL queries.
 Given a natural language query, you will generate an ES|QL query that can be executed against the data source.
 
 # Current task
@@ -95,15 +91,23 @@ Please use the information accessible from your past actions when relevant.
 
 ## Documentation
 
+<syntax-overview>
 ${prompts.syntax}
+</syntax-overview>
 
+<esql-examples>
 ${prompts.examples}
+</esql-examples>
 
-${getInstructionsWithRowLimit(rowLimit)}
+## Instructions
+
+${getEsqlInstructions({ defaultLimit: rowLimit, disableNamedParams })}
 
 ${
   additionalInstructions
-    ? `<additional_instructions>\n${additionalInstructions}\n</additional_instructions>`
+    ? `<user-instructions>\n${additionalInstructions}\n</user-instructions>
+
+*Note: When conflicting, user instructions should take precedence over the default instructions.*`
     : ''
 }
 
@@ -119,13 +123,15 @@ Format any ES|QL query as follows:
       'user',
       `Your task is to write a single, valid ES|QL query based on the following information:
 
-<user_query>
+## Context
+
+<user-query>
 ${nlQuery}
-</user_query>
+</user-query>
 
-${additionalContext ? `<additional_context>\n${additionalContext}\n</<additional_context>` : ''}
+${additionalContext ? `<additional-context>\n${additionalContext}\n</additional-context>` : ''}
 
-${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
+${formatResourceWithSampledValues({ resource })}
 
 Now, based on that information, please generate the ES|QL query.`,
     ],

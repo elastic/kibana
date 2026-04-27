@@ -23,6 +23,7 @@ import {
   logsSynthMalformedMappings,
 } from './custom_mappings/custom_synth_mappings';
 import { logsNginxMappings } from './custom_mappings/custom_integration_mappings';
+import { logsApmAppMappings } from './custom_mappings/custom_apm_mappings';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -59,6 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const apmAppDatasetName = 'apm.app.tug';
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
+  // Custom index template name for APM (2 dash-separated parts for isDedicatedComponentTemplate check)
+  const customIndexTemplateNameApm = `logs-${apmAppDatasetName}`;
+  const customComponentTemplateNameApm = `${customIndexTemplateNameApm}@custom`;
 
   describe('Degraded fields flyout', function () {
     describe('degraded field flyout open-close', () => {
@@ -164,6 +168,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await synthtrace.createComponentTemplate({
           name: customComponentTemplateNameNginx,
           mappings: logsNginxMappings(nginxAccessDatasetName),
+        });
+
+        // Create custom component template for APM to control field count precisely,
+        // avoiding flakiness from @apm-app built-in template changes across ES versions
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateNameApm,
+          mappings: logsApmAppMappings(apmAppDatasetName),
+        });
+
+        // Create custom index template for APM data stream.
+        // Uses _meta.managed: true so areAssetsAvailable resolves to true.
+        await esClient.indices.putIndexTemplate({
+          name: customIndexTemplateNameApm,
+          _meta: {
+            managed: true,
+            description: 'custom apm template created for dataset quality testing.',
+          },
+          priority: 500,
+          index_patterns: [apmAppDataStreamName],
+          composed_of: [
+            customComponentTemplateNameApm,
+            'logs@mappings',
+            'logs@settings',
+            'ecs@mappings',
+          ],
+          allow_auto_create: true,
+          data_stream: {
+            hidden: false,
+          },
         });
 
         await synthtrace.index([
@@ -659,11 +692,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
           );
 
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
-          );
-
           // Should display Edit/Create Component Template Link option
           await testSubjects.existOrFail(
             'datasetQualityManualMitigationsCustomComponentTemplateLink'
@@ -731,11 +759,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Possible Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
-          );
-
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
           );
 
           // Should display Edit/Create Component Template Link option
@@ -957,7 +980,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(linkURL?.includes('mapping')).to.be(true);
         });
 
-        it.skip('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
+        it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apmAppDataStreamName,
             expandedDegradedField: 'cloud.project',
@@ -1263,10 +1286,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
-          );
-
-          await testSubjects.existOrFail(
             'datasetQualityManualMitigationsCustomComponentTemplateLink'
           );
 
@@ -1406,6 +1425,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await synthtrace.deleteComponentTemplate(customComponentTemplateName);
         await PageObjects.observabilityLogsExplorer.uninstallPackage(nginxPkg);
         await synthtrace.deleteComponentTemplate(customComponentTemplateNameNginx);
+        await esClient.indices.deleteIndexTemplate({
+          name: customIndexTemplateNameApm,
+        });
+        await synthtrace.deleteComponentTemplate(customComponentTemplateNameApm);
       });
     });
   });

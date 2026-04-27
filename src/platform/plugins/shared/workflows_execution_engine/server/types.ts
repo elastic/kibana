@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -19,7 +16,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -34,15 +31,23 @@ export interface ExecuteWorkflowStepResponse {
   workflowExecutionId: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExecutionEnginePluginSetup {}
+export interface WorkflowsExecutionEnginePluginSetup {
+  // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
+  [key: string]: unknown;
+}
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
+  cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
+  bulkScheduleWorkflow: BulkScheduleWorkflow;
+  isEventDrivenExecutionEnabled: () => boolean;
+  isLogTriggerEventsEnabled: () => boolean;
+  getMaxEventChainDepth: () => number;
+  getMaxWorkflowDepth: () => number;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -62,14 +67,15 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
 
 export type ExecuteWorkflow = (
   workflow: WorkflowExecutionEngineModel,
-  context: Record<string, any>,
+  context: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type ExecuteWorkflowStep = (
   workflow: WorkflowExecutionEngineModel,
   stepId: string,
-  contextOverride: Record<string, any>,
+  executionContext: Record<string, unknown> | undefined,
+  contextOverride: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowStepResponse>;
 
@@ -77,6 +83,11 @@ export type CancelWorkflowExecution = (
   workflowExecutionId: string,
   spaceId: string
 ) => Promise<void>;
+
+export type CancelAllActiveWorkflowExecutions = (params: {
+  spaceId: string;
+  workflowId: string;
+}) => Promise<void>;
 
 export type ResumeWorkflowExecution = (
   executionId: string,
@@ -87,6 +98,11 @@ export type ResumeWorkflowExecution = (
 
 export type ScheduleWorkflow = (
   workflow: WorkflowExecutionEngineModel,
-  context: Record<string, any>,
+  context: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
+
+export type BulkScheduleWorkflow = (
+  items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+  request: KibanaRequest
+) => Promise<BulkScheduleWorkflowResult>;

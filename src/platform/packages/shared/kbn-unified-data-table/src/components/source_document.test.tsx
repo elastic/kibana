@@ -10,7 +10,7 @@
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  createFormatFieldValueSpy,
+  createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -23,7 +23,9 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 
 const mockServices = {
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+    getDefaultInstance: jest.fn(() => ({
+      reactConvert: (value: unknown) => (value ? value : '-'),
+    })),
   },
 };
 
@@ -63,9 +65,9 @@ describe('Unified data table source document cell rendering', function () {
   });
 
   it('passes values through appropriate formatter when `useTopLevelObjectColumns` is true', () => {
-    const mockConvert = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
+    const mockReactConvert = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
     const mockFieldFormats = {
-      getDefaultInstance: jest.fn(() => ({ convert: mockConvert })),
+      getDefaultInstance: jest.fn(() => ({ reactConvert: mockReactConvert })),
     };
     const row = build({
       _id: '1',
@@ -88,13 +90,13 @@ describe('Unified data table source document cell rendering', function () {
       />
     );
 
-    expect(mockConvert).toHaveBeenCalled();
+    expect(mockReactConvert).toHaveBeenCalled();
     expect(component.html()).toContain('my bar value');
   });
 
   describe('with enriched DataView (ES|QL mode)', () => {
     it('should use data view field type from original data view', () => {
-      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
       const row = buildDataTableRecord(
@@ -120,12 +122,12 @@ describe('Unified data table source document cell rendering', function () {
         />
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
-      formatFieldValueSpy.mockRestore();
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+      formatFieldValueReactSpy.mockRestore();
     });
 
     it('should use enriched field type when DataView has ES|QL overridden field', () => {
-      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       // Create a DataView where bytes is enriched as string/keyword (simulating ES|QL)
       const testDataView = createDataViewWithBytesField();
       // Mock the field to return string type instead
@@ -165,8 +167,8 @@ describe('Unified data table source document cell rendering', function () {
         />
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
-      formatFieldValueSpy.mockRestore();
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+      formatFieldValueReactSpy.mockRestore();
     });
   });
 });

@@ -26,7 +26,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  createFormatFieldValueSpy,
+  createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
   buildDataViewMock,
 } from '@kbn/discover-utils/src/__mocks__';
@@ -284,7 +284,7 @@ describe('SummaryCellPopover', () => {
 
 describe('SummaryColumn with enriched DataView', () => {
   it('should use data view field type', () => {
-    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     const testDataView = createDataViewWithBytesField();
 
     const record = buildDataTableRecord(
@@ -305,12 +305,12 @@ describe('SummaryColumn with enriched DataView', () => {
       />
     );
 
-    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
-    formatFieldValueSpy.mockRestore();
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+    formatFieldValueReactSpy.mockRestore();
   });
 
   it('should use enriched DataView field type (ES|QL mode)', () => {
-    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     // Create enriched DataView with bytes field as string/keyword (as ES|QL would provide)
     const enrichedDataView = buildDataViewMock({
       name: 'test-data-view',
@@ -351,7 +351,7 @@ describe('SummaryColumn with enriched DataView', () => {
       />
     );
 
-    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
-    formatFieldValueSpy.mockRestore();
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueReactSpy.mockRestore();
   });
 });

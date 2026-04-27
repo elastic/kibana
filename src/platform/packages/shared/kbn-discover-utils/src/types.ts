@@ -49,14 +49,16 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
+import type { ReactNode } from 'react';
+
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
-  formattedValue: string,
+  formattedValue: ReactNode,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
- * Pairs array for each field in the hit
+ * Pairs array for each field in the hit where values are ReactNodes
  */
 export type FormattedHit = FormattedHitPair[];
 
@@ -177,15 +179,4 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
-}
-
-export interface TraceDocumentOverview
-  extends TraceFields,
-    Partial<ServiceFields>,
-    Partial<SpanFields>,
-    Partial<UserAgentFields>,
-    Partial<TransactionFields> {
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
 }

@@ -68,12 +68,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   );
 
   const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>
-    ) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
         hit={hit}
@@ -84,8 +79,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
-        onClose={() => expandedDocSetter(undefined)}
-        setExpandedDoc={expandedDocSetter}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDocWithInitialTab}
         initialTabId={initialTabId}
         query={props.query}
         filters={props.filters}
@@ -101,6 +96,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onAddColumn,
       props.query,
       props.filters,
+      setExpandedDocWithInitialTab,
       initialTabId,
     ]
   );

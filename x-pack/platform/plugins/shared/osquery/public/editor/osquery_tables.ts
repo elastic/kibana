@@ -5,33 +5,61 @@
  * 2.0.
  */
 
-import { flatMap, sortBy } from 'lodash';
+import { flatMap, isEqual, sortBy } from 'lodash';
+import { useMemo, useRef } from 'react';
+import type { OsqueryTable } from '../../common/types/schema';
+import { useOsquerySchema } from '../common/hooks/use_osquery_schema';
+// Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
+import bundledSchemaJson from '../common/schemas/osquery/v5.19.0.json';
 
-type TablesJSON = Array<{
-  name: string;
-}>;
-export const normalizeTables = (tablesJSON: TablesJSON) => sortBy(tablesJSON, 'name');
+const normalizeTables = (tablesJSON: OsqueryTable[]) => sortBy(tablesJSON, 'name');
 
-let osqueryTables: TablesJSON | null = null;
+// Sync fallback used while the async API data is loading
+let bundledOsqueryTables: OsqueryTable[] | null = null;
 
-export const getOsqueryTables = () => {
-  if (!osqueryTables) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.19.0.json'));
+const getOsqueryTables = (): OsqueryTable[] => {
+  if (!bundledOsqueryTables) {
+    bundledOsqueryTables = normalizeTables(bundledSchemaJson as OsqueryTable[]);
   }
 
-  return osqueryTables;
+  return bundledOsqueryTables;
 };
 
-const normalizedOsqueryTables = getOsqueryTables();
+/**
+ * React hook that provides osquery tables from the Fleet package (with fallback).
+ * Use this in React components instead of the sync getOsqueryTables().
+ */
+export const useOsqueryTables = () => {
+  const { data, isLoading, osqueryVersion } = useOsquerySchema();
+  const tablesStableRef = useRef<OsqueryTable[] | null>(null);
 
-export const osqueryTablesRecord: Record<string, { columns: Array<{ name: string }> }> =
-  normalizedOsqueryTables.reduce(
-    (acc, table) => ({
-      ...acc,
-      [table.name]: table,
-    }),
-    {}
+  const tables = useMemo(() => {
+    const next = data ?? getOsqueryTables();
+    if (tablesStableRef.current !== null && isEqual(tablesStableRef.current, next)) {
+      return tablesStableRef.current;
+    }
+
+    tablesStableRef.current = next;
+
+    return next;
+  }, [data]);
+
+  const tablesRecord = useMemo(
+    () =>
+      Object.fromEntries(tables.map((table) => [table.name, table])) as Record<
+        string,
+        { columns: Array<{ name: string }> }
+      >,
+    [tables]
   );
 
-export const getOsqueryTableNames = () => flatMap(normalizedOsqueryTables, 'name');
+  const tableNames = useMemo(() => flatMap(tables, 'name'), [tables]);
+
+  return {
+    tables,
+    tablesRecord,
+    tableNames,
+    isLoading,
+    osqueryVersion,
+  };
+};

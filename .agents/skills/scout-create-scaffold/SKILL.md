@@ -5,6 +5,10 @@ description: Generate or repair a Scout test scaffold for a Kibana plugin/packag
 
 # Create Scout Scaffold (Generator-First)
 
+## Related skills
+
+- **`scout-migrate-from-ftr`** — After generating files, wire TypeScript for CI using **Pattern A** or **Pattern B** (*Where Scout tests are typechecked* in that skill). This skill documents layout; the migration skill has the full rules (relative imports, `kbn_references`, `node scripts/type_check --project …`).
+
 ## Inputs to Collect
 
 - Module root (repo-relative path to the plugin/package directory, e.g. `x-pack/platform/plugins/shared/maps`)
@@ -59,10 +63,35 @@ Notes:
   - `test/<scout-root>/ui/parallel_tests/example_two.spec.ts`
   - `test/<scout-root>/ui/parallel_tests/global.setup.ts`
 
+The generator **does not** create **`tsconfig.json`** files. Playwright runs without them, but **`node scripts/type_check`** (CI) must still include Scout specs in a TS project—see **TypeScript layout** below.
+
+## TypeScript layout (`check_types`)
+
+Pick **one** pattern and wire it after `scout.js generate` completes:
+
+### Pattern A — plugin root includes Scout (e.g. `discover_enhanced`)
+
+- In the **plugin or package root** `tsconfig.json`, add **`test/<scout-root>/**/*`** (or broader **`test/**/*`**) to **`include`**.
+- Add **`kbn_references`** for the Scout stack you use:
+  - Platform / generic: **`@kbn/scout`**.
+  - Observability: **`@kbn/scout-oblt`**; for API tests using synthtrace workers, also **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`** (and **`@kbn/rison`** for UI if needed).
+  - Match sibling plugins in the same solution for consistency.
+- **Do not** add nested `test/<scout-root>/{ui,api}/tsconfig.json` when using this pattern (one program for plugin + Scout).
+- **Allows** relative imports from specs/fixtures into **`server/`** or **`common/`** when the test needs shared registration constants or light server utilities.
+
+### Pattern B — dedicated `tsconfig.json` under `test/<scout-root>/{ui,api}/`
+
+- Add **`test/<scout-root>/api/tsconfig.json`** and/or **`test/<scout-root>/ui/tsconfig.json`** with **`extends`**, **`include`**: `["**/*"]`, and scoped **`kbn_references`** (see SLO, `data_views`, infra Scout modules for examples).
+- Keeps the **main** plugin typecheck smaller.
+- **Does not** allow relative imports that climb into **`../../../../server/...`** or **`public/...`** from those folders—TypeScript will treat `server/**` as part of the wrong composite project (`TS6059` / `TS6307`). Use **`fixtures/constants.ts`**, **`common/`**, or switch to **Pattern A**.
+
+### After wiring either pattern
+
+1. Run **`yarn kbn bootstrap`** so `packages/kbn-ts-projects/config-paths.json` picks up added or removed `tsconfig.json` paths.
+2. Validate with **`node scripts/type_check --project <path-to-tsconfig.json>`** (plugin root `tsconfig.json` for **A**, or `test/<scout-root>/api/tsconfig.json` / UI sibling for **B**).
+
 ## After Generating
 
-- Update `.meta` manifests when adding/moving configs or tests:
-  - `node scripts/scout.js update-test-config-manifests`
 - Custom server config sets:
   - If you create/use `test/scout_<configSet>`, you typically also need a matching server config under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<configSet>`.
   - `start-server` requires `--serverConfigSet <configSet>` when using a custom server config set.

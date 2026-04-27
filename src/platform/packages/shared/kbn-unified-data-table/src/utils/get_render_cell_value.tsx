@@ -14,7 +14,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -143,14 +143,15 @@ export const getRenderCellValueFn = ({
     }
 
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        {formatFieldValueReact({
+          value: row.flattened[columnId],
+          hit: row.raw,
+          fieldFormats,
+          dataView,
+          field,
+        })}
+      </span>
     );
   };
 
@@ -221,19 +222,15 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span
-            // formatFieldValue guarantees sanitized values
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: formatFieldValue(
-                row.flattened[columnId],
-                row.raw,
-                fieldFormats,
-                dataView,
-                field
-              ),
-            }}
-          />
+          <span>
+            {formatFieldValueReact({
+              value: row.flattened[columnId],
+              hit: row.raw,
+              fieldFormats,
+              dataView,
+              field,
+            })}
+          </span>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
