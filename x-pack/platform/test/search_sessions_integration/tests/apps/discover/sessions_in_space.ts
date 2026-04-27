@@ -65,10 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const currentToasts = await toasts.getAll();
         if (currentToasts.length > 0) {
+          log.debug(`Session restoration related warnings found: ${currentToasts.length}`);
           const titles = [];
           for (const toast of currentToasts) {
-            const title = await testSubjects.findDescendant('euiToastHeader', toast);
-            titles.push(await title.getVisibleText());
+            titles.push(await toast.getVisibleText());
           }
           log.debug(`Session restoration related warnings found: ${titles.join(', ')}`);
           throw new Error('Session restoration related warnings found');
