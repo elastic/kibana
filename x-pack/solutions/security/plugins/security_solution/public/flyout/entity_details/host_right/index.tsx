@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -80,13 +80,13 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
+export const HostPanel = memo(function HostPanel({
   contextID,
   scopeId,
   isPreviewMode = false,
   hostName,
   entityId,
-}: HostPanelProps) => {
+}: HostPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -346,6 +346,6 @@ export const HostPanel = ({
       )}
     </>
   );
-};
+});
 
 HostPanel.displayName = 'HostPanel';
