@@ -86,6 +86,27 @@ export const useEntityURLState = ({
   const urlFiltersRef = useRef<Filter[]>([]);
   urlFiltersRef.current = urlQuery.filters || [];
 
+  // URL state → Redux global query: keeps the search bar's KQL input in sync
+  // with the query decoded from the `cspq` URL param, mirroring the filter sync
+  // pattern below.  Without this, `SiemSearchBar` (which reads from Redux) would
+  // show an empty query even though data is filtered via `cspq`.
+  const lastAppliedQueryRef = useRef<Query | null>(null);
+  useEffect(() => {
+    const nextQuery = urlQuery.query;
+    if (!nextQuery) return;
+    if (lastAppliedQueryRef.current !== null && deepEqual(lastAppliedQueryRef.current, nextQuery)) {
+      return;
+    }
+    lastAppliedQueryRef.current = nextQuery;
+    dispatch(
+      inputsActions.setFilterQuery({
+        id: InputsModelId.global,
+        query: nextQuery.query as string,
+        language: nextQuery.language as string,
+      })
+    );
+  }, [dispatch, urlQuery.query]);
+
   // URL state → filterManager: keeps filter pills visible in the filter bar.
   // The deepEqual guard defends against reference churn from unrelated URL updates
   // (like `flyout` params), preventing a redundant filterManager emission that would
