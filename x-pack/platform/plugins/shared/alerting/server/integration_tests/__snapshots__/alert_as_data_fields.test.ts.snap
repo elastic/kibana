@@ -184,6 +184,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -297,6 +302,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -412,6 +422,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -525,6 +540,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -1092,6 +1112,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -1153,6 +1178,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -1213,6 +1243,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -1358,6 +1393,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -11746,6 +11786,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -12387,6 +12432,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -12552,6 +12602,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -12719,6 +12774,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -12884,6 +12944,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -13056,6 +13121,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
