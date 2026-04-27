@@ -14,51 +14,54 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The status of the Privilege Monitoring Engine
  */
+export const PrivilegeMonitoringEngineStatus = lazySchema(() =>
+  z.enum(['started', 'error', 'disabled', 'not_installed'])
+);
 export type PrivilegeMonitoringEngineStatus = z.infer<typeof PrivilegeMonitoringEngineStatus>;
-export const PrivilegeMonitoringEngineStatus = z.enum([
-  'started',
-  'error',
-  'disabled',
-  'not_installed',
-]);
 export type PrivilegeMonitoringEngineStatusEnum = typeof PrivilegeMonitoringEngineStatus.enum;
 export const PrivilegeMonitoringEngineStatusEnum = PrivilegeMonitoringEngineStatus.enum;
 
+export const MonitoringEngineDescriptor = lazySchema(() =>
+  z.object({
+    status: PrivilegeMonitoringEngineStatus,
+    error: z
+      .object({
+        /**
+         * Error message typically only present if the engine is in error state
+         */
+        message: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 export type MonitoringEngineDescriptor = z.infer<typeof MonitoringEngineDescriptor>;
-export const MonitoringEngineDescriptor = z.object({
-  status: PrivilegeMonitoringEngineStatus,
-  error: z
-    .object({
-      /**
-       * Error message typically only present if the engine is in error state
-       */
-      message: z.string().optional(),
-    })
-    .optional(),
-});
 
+export const MonitoringEngineComponentResource = lazySchema(() =>
+  z.enum(['privmon_engine', 'index', 'task'])
+);
 export type MonitoringEngineComponentResource = z.infer<typeof MonitoringEngineComponentResource>;
-export const MonitoringEngineComponentResource = z.enum(['privmon_engine', 'index', 'task']);
 export type MonitoringEngineComponentResourceEnum = typeof MonitoringEngineComponentResource.enum;
 export const MonitoringEngineComponentResourceEnum = MonitoringEngineComponentResource.enum;
 
+export const MonitoringEngineComponentStatus = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    installed: z.boolean(),
+    resource: MonitoringEngineComponentResource,
+    health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+    errors: z
+      .array(
+        z.object({
+          title: z.string().optional(),
+          message: z.string().optional(),
+        })
+      )
+      .optional(),
+  })
+);
 export type MonitoringEngineComponentStatus = z.infer<typeof MonitoringEngineComponentStatus>;
-export const MonitoringEngineComponentStatus = z.object({
-  id: z.string(),
-  installed: z.boolean(),
-  resource: MonitoringEngineComponentResource,
-  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
-  errors: z
-    .array(
-      z.object({
-        title: z.string().optional(),
-        message: z.string().optional(),
-      })
-    )
-    .optional(),
-});

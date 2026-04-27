@@ -1,0 +1,42 @@
+---
+# This file is used to generate "Knowledge base artifact settings for AI Assistants" page in the product docs
+
+product: Kibana
+collection: Knowledge base artifact settings for AI Assistants in Kibana
+id: ai-assistant-settings-kb
+page_description: |
+  The `xpack.productDocBase` settings configure how {{kib}} reaches [Elastic's public artifact repository](https://kibana-knowledge-base-artifacts.elastic.co/), from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Most deployments use the default base URL of the artifact repository and only need outbound access to Elastic's CDN.
+
+groups:
+  - group: Knowledge base artifact settings
+    id: ai-assistant-settings-kb
+    note: |
+      When {{kib}} can't use Elastic's public artifact URL, which is common for deployments in air-gapped or restricted networks, you must deploy the knowledge base artifact repository manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) to learn more.
+    settings:
+
+      - setting: xpack.productDocBase.artifactRepositoryUrl
+        description: |
+          The base URL of the artifact repository from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`, Elastic's public artifact host URL. Leave the default when {{kib}} can reach that base URL over the internet.
+
+          If the default host is unreachable or not permitted, set `xpack.productDocBase.artifactRepositoryUrl` to the HTTP or HTTPS base URL of a repository you operate that mirrors Elastic's artifacts, for example, a private mirror or internal endpoint in a restricted or isolated network.
+
+          {applies_to}`self: ga 9.1+` To read artifacts from a directory on the filesystem of the host where {{kib}} runs, use a `file://` base URL (for example `file:///path/to/artifacts`).
+        datatype: string
+        default: "https://kibana-knowledge-base-artifacts.elastic.co"
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.productDocBase.artifactRepositoryProxyUrl
+        description: |
+          The HTTP or HTTPS URL of a proxy server that {{kib}} uses only for traffic to the base URL in `xpack.productDocBase.artifactRepositoryUrl`. It applies to the same outbound requests {{kib}} uses to list available artifacts and download ZIP files from that remote base URL. Unset by default. When unset, {{kib}} sends those requests directly to the host named in `xpack.productDocBase.artifactRepositoryUrl` with no proxy.
+
+          Set this when outbound connections from {{kib}} to the artifact repository base URL (Elastic's CDN, a private mirror, or an internal endpoint) must go through your network's HTTP or HTTPS proxy.
+
+          When `xpack.productDocBase.artifactRepositoryUrl` uses the `file://` scheme, this setting has no effect because {{kib}} reads artifacts from the filesystem on the {{kib}} host and does not issue HTTP or HTTPS requests to that repository base URL.
+        datatype: string
+        applies_to:
+          stack: ga 9.4
+          self: ga
+          ech: unavailable

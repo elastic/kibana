@@ -20,7 +20,10 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 
 export const addMonitorAPIHelper = async (
   supertestAPI: any,
@@ -103,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 

@@ -286,3 +286,17 @@ export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
 export const FIELD_SUBMISSION_ERROR = i18n.translate('xpack.cases.caseView.fieldSubmissionError', {
   defaultMessage: 'Error submitting field',
 });
+
+export const TEMPLATE_CHANGED_SUCCESSFULLY = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToast',
+  {
+    defaultMessage: 'Template changed successfully.',
+  }
+);
+
+export const ERROR_CHANGING_TEMPLATE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.errorToast',
+  {
+    defaultMessage: 'Error changing template',
+  }
+);

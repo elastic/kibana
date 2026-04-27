@@ -157,10 +157,7 @@ apiTest.describe(
       expect(updateRes).toHaveStatusCode(200);
 
       const tw = (updateRes.body as Record<string, unknown>).timeWindow as Record<string, unknown>;
-      const duration = tw.duration as Record<string, unknown>;
-      expect(duration.value).toBe(30);
-      expect(duration.unit).toBe('d');
-      expect(tw.type).toBe('rolling');
+      expect(tw).toStrictEqual({ duration: '30d', type: 'rolling' });
     });
 
     apiTest('updates multiple fields simultaneously', async ({ apiClient }) => {
@@ -200,9 +197,7 @@ apiTest.describe(
       expect(body.enabled).toBe(false);
       expect(body.members as unknown[]).toHaveLength(4);
       const tw = body.timeWindow as Record<string, unknown>;
-      const dur = tw.duration as Record<string, unknown>;
-      expect(dur.value).toBe(30);
-      expect(dur.unit).toBe('d');
+      expect(tw).toStrictEqual({ duration: '30d', type: 'rolling' });
     });
 
     apiTest('updates updatedAt timestamp after modification', async ({ apiClient }) => {

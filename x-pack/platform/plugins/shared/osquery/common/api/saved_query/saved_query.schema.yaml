@@ -139,9 +139,8 @@ paths:
         If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
       operationId: OsqueryCopySavedQuery
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: id
           in: path
@@ -156,3 +155,24 @@ paths:
             application/json:
               schema:
                 $ref: './copy_saved_query.schema.yaml#/components/schemas/CopySavedQueryResponse'
+              examples:
+                copySavedQueryExample:
+                  summary: Example response for copying a saved query
+                  value:
+                    data:
+                      saved_object_id: '42ba1280-2172-11ee-8523-5765fca79a3c'
+                      id: 'my_saved_query_copy'
+                      query: 'select * from uptime;'
+                      description: 'Saved query description'
+                      platform: 'linux,darwin'
+                      interval: '60'
+                      timeout: 120
+                      snapshot: true
+                      removed: false
+                      ecs_mapping:
+                        host.uptime:
+                          field: 'total_seconds'
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: 'elastic'
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: 'elastic'

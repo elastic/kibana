@@ -19,6 +19,7 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
@@ -40,7 +41,6 @@ import { validateToolSelection } from './utils/tools';
 import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
-import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
   hasReadAccess,

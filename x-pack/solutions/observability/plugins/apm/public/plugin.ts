@@ -548,7 +548,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     } else {
       setApmInternalServices({});
     }
-
+    if (plugins.agentBuilder) {
+      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
+        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      });
+    }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
 

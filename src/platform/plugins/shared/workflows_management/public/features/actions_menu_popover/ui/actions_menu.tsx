@@ -30,19 +30,35 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
+import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
 import {
   type ActionOptionData,
+  type EditorCommand,
+  getMenuItemData,
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
   isActionOption,
+  type JumpToStepEntry,
 } from '../types';
+
+export type { EditorCommand, JumpToStepEntry };
 
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
+  commands?: EditorCommand[];
+  jumpToStepEntries?: JumpToStepEntry[];
+  onCommandSelected?: (commandId: string) => void;
+  onJumpToStep?: (lineNumber: number) => void;
 }
 
-export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
+export function ActionsMenu({
+  onActionSelected,
+  commands,
+  jumpToStepEntries,
+  onCommandSelected,
+  onJumpToStep,
+}: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
@@ -72,8 +88,54 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
       setOptions(nextOptions);
     }
   }, [defaultOptions, currentPath]);
-  const renderActionOption = (option: ActionOptionData, searchValue: string) => {
-    const shouldUseGroupStyle = isActionGroup(option);
+
+  const displayOptions = useDisplayOptions({
+    options,
+    searchTerm,
+    commands,
+    jumpToStepEntries,
+    currentPath,
+  });
+
+  const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
+    const itemData = getMenuItemData(rawOption);
+    const effectiveSearch = searchValue.startsWith(STEPS_PREFIX)
+      ? searchValue.slice(STEPS_PREFIX.length).trim()
+      : searchValue.startsWith('#')
+      ? searchValue.slice(1).trim()
+      : searchValue;
+
+    if (itemData?.kind === 'command' || itemData?.kind === 'jump') {
+      return (
+        <EuiText size="s">
+          <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
+        </EuiText>
+      );
+    }
+
+    if (itemData?.kind === 'nav') {
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="xs"
+          css={styles.viewAllLink}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="primary">
+              {rawOption.label}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="arrowRight" size="s" color="primary" aria-hidden={true} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    const action =
+      itemData?.kind === 'action' ? itemData.action : (rawOption as unknown as ActionOptionData);
+    const shouldUseGroupStyle = isActionGroup(action);
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
@@ -84,16 +146,16 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
           ]}
         >
           <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
-            {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
+            {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
               <StepIcon
-                stepType={getBaseConnectorType(option.connectorType)}
+                stepType={getBaseConnectorType(action.connectorType)}
                 executionStatus={undefined}
               />
-            ) : isActionGroup(option) || isActionOption(option) ? (
+            ) : isActionGroup(action) || isActionOption(action) ? (
               <EuiIcon
-                type={option.iconType}
+                type={action.iconType}
                 size="m"
-                color={option.iconColor}
+                color={action.iconColor}
                 aria-hidden={true}
               />
             ) : null}
@@ -105,10 +167,10 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiTitle size="xxxs" css={styles.actionTitle}>
                   <h6>
-                    <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                    <EuiHighlight search={effectiveSearch}>{action.label}</EuiHighlight>
                   </h6>
                 </EuiTitle>
-                {option.stability === 'tech_preview' && (
+                {action.stability === 'tech_preview' && (
                   <EuiBetaBadge
                     iconType="flask"
                     label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
@@ -118,7 +180,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                     css={styles.techPreviewBadge}
                   />
                 )}
-                {option.stability === 'beta' && (
+                {action.stability === 'beta' && (
                   <EuiBetaBadge
                     label={i18n.translate('workflows.actionsMenu.betaBadge', {
                       defaultMessage: 'Beta',
@@ -129,13 +191,13 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 )}
               </EuiFlexGroup>
               <EuiText color="subdued" size="xs">
-                {option.instancesLabel}
+                {action.instancesLabel}
               </EuiText>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-              <EuiHighlight search={searchValue}>{option.description || ''}</EuiHighlight>
+              <EuiHighlight search={effectiveSearch}>{action.description || ''}</EuiHighlight>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -143,17 +205,45 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
-    if (isActionGroup(selectedOption)) {
-      const nextPath = selectedOption.pathIds ?? [...currentPath, selectedOption.id];
+  const handleChange = (
+    _updatedOptions: EuiSelectableOption[],
+    _event: React.BaseSyntheticEvent,
+    selectedOption: EuiSelectableOption
+  ) => {
+    const itemData = getMenuItemData(selectedOption);
+
+    if (itemData?.kind === 'nav') {
+      if (itemData.target === 'viewAll') {
+        const currentQuery = searchTerm.trim();
+        setSearchTerm(`${STEPS_PREFIX}${currentQuery}`);
+      } else {
+        setSearchTerm('#');
+      }
+      return;
+    }
+    if (itemData?.kind === 'command') {
+      onCommandSelected?.(itemData.command.id);
+      return;
+    }
+    if (itemData?.kind === 'jump') {
+      onJumpToStep?.(itemData.entry.lineStart);
+      return;
+    }
+
+    const action =
+      itemData?.kind === 'action'
+        ? itemData.action
+        : (selectedOption as unknown as ActionOptionData);
+    if (isActionGroup(action)) {
+      const nextPath = action.pathIds ?? [...currentPath, action.id];
       setCurrentPath([...nextPath]);
       setSearchTerm('');
-      setOptions(selectedOption.options);
+      setOptions(action.options);
     } else {
-      onActionSelected(selectedOption);
+      onActionSelected(action);
     }
   };
+
   const handleBack = () => {
     const nextPath = currentPath.slice(0, -1);
     let nextOptions: ActionOptionData[] = defaultOptions;
@@ -204,21 +294,33 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
     getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
 
-  const optionMatcher = ({
-    option,
-    searchValue,
-    normalizedSearchValue,
-  }: {
-    option: ActionOptionData;
-    searchValue: string;
-    normalizedSearchValue: string;
-  }) => {
-    const term = searchValue.trim().toLowerCase() || normalizedSearchValue;
-    return isActionSearchMatch(option, term);
-  };
+  // Filtering is handled by handleSearchChange + useDisplayOptions;
+  // override EuiSelectable's built-in matcher so it doesn't double-filter.
+  const optionMatcher = () => true;
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
+
+    if (searchValue.startsWith(STEPS_PREFIX)) {
+      const query = searchValue.slice(STEPS_PREFIX.length).trim().toLowerCase();
+      if (query.length === 0) {
+        setOptions(flatOptions);
+      } else {
+        const matches = flatOptions
+          .filter((option) => isActionSearchMatch(option, query))
+          .sort((a, b) => {
+            const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
+            return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
+          });
+        setOptions(matches);
+      }
+      return;
+    }
+
+    if (searchValue.trimStart().startsWith('#')) {
+      return;
+    }
+
     if (searchValue.length > 0) {
       const term = searchValue.trim().toLowerCase();
       if (term.length === 0) {
@@ -229,10 +331,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
         .filter((option) => isActionSearchMatch(option, term))
         .sort((a, b) => {
           const rankDiff = getActionMatchRank(a, term) - getActionMatchRank(b, term);
-          if (rankDiff !== 0) {
-            return rankDiff;
-          }
-          return a.label.localeCompare(b.label);
+          return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
         });
       setOptions(matches);
     } else {
@@ -242,20 +341,30 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
 
   return (
     <EuiSelectable
-      aria-label="Selectable example with custom list items"
+      aria-label={i18n.translate('workflows.actionsMenu.ariaLabel', {
+        defaultMessage: 'Actions menu',
+      })}
       searchable
-      options={options as EuiSelectableOption<ActionOptionData>[]}
+      options={displayOptions}
       onChange={handleChange}
       optionMatcher={optionMatcher}
       searchProps={{
         id: 'actions-menu-search',
         name: 'actions-menu-search',
+        placeholder: i18n.translate('workflows.actionsMenu.searchPlaceholder', {
+          defaultMessage: 'Search step, command or # to go to a step',
+        }),
         value: searchTerm,
         onChange: handleSearchChange,
       }}
       listProps={{
-        rowHeight: 64,
         showIcons: false,
+        // Normal mode mixes tall action rows (~76px) with compact command/jump
+        // rows (~36px) and has at most ~15 items, so virtualization is off.
+        // "Steps:" mode shows the full step catalog (uniform action rows) and
+        // benefits from virtualization to avoid DOM bloat.
+        isVirtualized: searchTerm.startsWith(STEPS_PREFIX),
+        ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 76 }),
       }}
       renderOption={renderActionOption}
       css={styles.selectable}
@@ -269,8 +378,8 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 {currentPath.length === 0 ? (
                   <h3>
                     <FormattedMessage
-                      id="workflows.actionsMenu.selectAction"
-                      defaultMessage="Select an action"
+                      id="workflows.actionsMenu.title"
+                      defaultMessage="Actions menu"
                     />
                   </h3>
                 ) : (
@@ -305,11 +414,23 @@ const componentStyles = {
         paddingBlock: euiTheme.size.m,
         paddingInline: '16px',
       },
+      '& .euiSelectableListItem.compactOption': {
+        paddingBlock: euiTheme.size.s,
+      },
+      '& .euiSelectableList': {
+        maxHeight: '420px',
+        overflowY: 'auto',
+      },
+      '& .euiSelectableList__groupLabel': {
+        borderBottom: euiTheme.border.thin,
+      },
+      '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
+        marginTop: '24px',
+      },
     }),
   title: css({
     display: 'flex',
     alignItems: 'flex-start',
-    // to avoid layout shift when the header is button
     minHeight: '24px',
   }),
   header: ({ euiTheme }: UseEuiTheme) =>
@@ -319,6 +440,15 @@ const componentStyles = {
   actionOption: css({
     gap: '12px',
   }),
+  viewAllLink: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      cursor: 'pointer',
+      width: '100%',
+      color: euiTheme.colors.primaryText,
+      '& .euiIcon': {
+        color: euiTheme.colors.primaryText,
+      },
+    }),
   iconOuter: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: '40px',
@@ -355,6 +485,6 @@ const componentStyles = {
       lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
     }),
   techPreviewBadge: css({
-    marginBottom: '-4px', // to align with the action title
+    marginBottom: '-4px',
   }),
 };

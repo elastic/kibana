@@ -10,7 +10,7 @@ Page objects wrap UI interactions (navigation, clicking, filling forms) so tests
 Keep page objects focused on **UI interactions**. Don’t hide API setup/teardown inside page objects—use [API services](./api-services.md) or [fixtures](./fixtures.md) instead.
 ::::::
 
-For practical tips, see the page object guidelines in [UI test best practices](./best-practices.md#use-existing-page-objects-to-interact-with-the-kibana-ui).
+For practical tips, see the page object guidelines in [UI test best practices](./ui-best-practices.md#use-existing-page-objects-to-interact-with-the-kibana-ui).
 
 ## Usage [scout-page-objects-usage]
 
@@ -54,6 +54,16 @@ export class NewPage {
     await this.page.gotoApp('myPlugin'); // replace with your app id
   }
 }
+```
+
+`gotoApp` accepts an optional second argument with `params` (query string) and `hash` (URL hash):
+
+```ts
+// Navigate to '/app/myPlugin?_g=(time:(from:now-15m,to:now))'
+await this.page.gotoApp('myPlugin', { params: { _g: '(time:(from:now-15m,to:now))' } });
+
+// Navigate to '/app/dashboards#/view/abc-123'
+await this.page.gotoApp('dashboards', { hash: '/view/abc-123' });
 ```
 
 :::::::::

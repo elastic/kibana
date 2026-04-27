@@ -270,6 +270,35 @@ describe('AlertFlyoutHeader', () => {
     });
   });
 
+  it('shows a callout when _index is a remote (CCS) index', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'remote-cluster:.alerts-security.alerts-default' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'This event originates from a remote cluster. Some features may not be available.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
   it('does not show the callout when both _id and _index are present in hit.raw', async () => {
     const hit = {
       id: '1',
