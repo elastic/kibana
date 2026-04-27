@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { rerankStepCommonDefinition } from '../../../common/steps/rerank/rerank_step';
+import { rerankStepCommonDefinition } from '../../common/step_types/rerank_step';
 
 interface InferenceEndpoint {
   inference_id: string;
