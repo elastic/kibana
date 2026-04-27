@@ -17,20 +17,23 @@ import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tas
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 
 /**
- * Disables all enabled workflows across all spaces. Sets `enabled: false`,
+ * Disables all enabled workflows. When `spaceId` is set, scopes the operation
+ * to that space; otherwise operates across all spaces. Sets `enabled: false`,
  * patches YAML accordingly, and unschedules any scheduled tasks.
- * Used when a user opts out of workflows by toggling the global UI setting off.
+ * Used when a user opts out of workflows by toggling the per-space UI setting off,
+ * or when availability (license / config) requires a global bulk disable.
  */
 export const disableAllWorkflows = async (params: {
   storage: WorkflowStorage;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
+  spaceId?: string;
 }): Promise<{
   total: number;
   disabled: number;
   failures: Array<{ id: string; error: string }>;
 }> => {
-  const { storage, taskScheduler, logger } = params;
+  const { storage, taskScheduler, logger, spaceId } = params;
   const client = storage.getClient();
   const pageSize = 1000;
   const failures: Array<{ id: string; error: string }> = [];
@@ -38,7 +41,7 @@ export const disableAllWorkflows = async (params: {
 
   const query = {
     bool: {
-      must: [{ term: { enabled: true } }],
+      must: [{ term: { enabled: true } }, ...(spaceId ? [{ term: { spaceId } }] : [])],
       must_not: [{ exists: { field: 'deleted_at' } }],
     },
   };
@@ -101,7 +104,9 @@ export const disableAllWorkflows = async (params: {
   );
 
   logger.info(
-    `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
+    `Disabled ${disabledIds.length} workflows${
+      spaceId ? ` in space ${spaceId}` : ' across all spaces'
+    } (${failures.length} failures)`
   );
 
   return {

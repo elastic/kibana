@@ -121,5 +121,28 @@ describe('disableAllWorkflows', () => {
     await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Disabled 1 workflows'));
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('across all spaces'));
+  });
+
+  it('omits the spaceId filter from the query when no spaceId is provided', async () => {
+    const { storage, client } = makeStorageClient([[]]);
+
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
+
+    const searchQuery = client.search.mock.calls[0][0].query;
+    expect(searchQuery.bool.must).toEqual([{ term: { enabled: true } }]);
+  });
+
+  it('scopes the query to the provided spaceId and reports it in the log message', async () => {
+    const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
+
+    await disableAllWorkflows({ storage, taskScheduler: null, logger, spaceId: 'my-space' });
+
+    const searchQuery = client.search.mock.calls[0][0].query;
+    expect(searchQuery.bool.must).toEqual([
+      { term: { enabled: true } },
+      { term: { spaceId: 'my-space' } },
+    ]);
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('in space my-space'));
   });
 });

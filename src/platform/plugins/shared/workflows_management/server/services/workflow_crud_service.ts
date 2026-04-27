@@ -424,7 +424,7 @@ export class WorkflowCrudService {
     });
   }
 
-  async disableAllWorkflows(): Promise<{
+  async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
@@ -433,6 +433,7 @@ export class WorkflowCrudService {
       storage: this.deps.workflowStorage,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
+      spaceId,
     });
   }
 
