@@ -49,16 +49,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // Stateful cloud requests can hit a different Kibana node before the shared
     // advanced settings cache has expired.
     const waitForEnabledCustomDashboardsSetting = async () => {
-      const startedAt = Date.now();
-
       await retry.tryForTime(CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS, async () => {
         const response = await supertestWithAdminScope.get(getCustomDashboardsUrl('host'));
 
         expect(response.status).to.be(200);
-
-        if (Date.now() - startedAt < CUSTOM_DASHBOARDS_SETTING_PROPAGATION_DELAY_MS) {
-          throw new Error('Waiting for custom dashboards setting propagation');
-        }
       });
     };
 
