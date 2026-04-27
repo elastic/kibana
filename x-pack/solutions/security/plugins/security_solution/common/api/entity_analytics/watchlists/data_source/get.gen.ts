@@ -14,20 +14,22 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { MonitoringEntitySource } from './common.gen';
 
+export const GetWatchlistEntitySourceRequestParams = lazySchema(() =>
+  z.object({
+    watchlist_id: z.string(),
+    id: z.string(),
+  })
+);
 export type GetWatchlistEntitySourceRequestParams = z.infer<
   typeof GetWatchlistEntitySourceRequestParams
 >;
-export const GetWatchlistEntitySourceRequestParams = z.object({
-  watchlist_id: z.string(),
-  id: z.string(),
-});
 export type GetWatchlistEntitySourceRequestParamsInput = z.input<
   typeof GetWatchlistEntitySourceRequestParams
 >;
 
+export const GetWatchlistEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
 export type GetWatchlistEntitySourceResponse = z.infer<typeof GetWatchlistEntitySourceResponse>;
-export const GetWatchlistEntitySourceResponse = MonitoringEntitySource;
