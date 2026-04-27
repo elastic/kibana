@@ -20,6 +20,7 @@ type EvaluatePartitionSuggestion = (opts: {
   example: PartitioningEvaluationExample;
   datasetName: string;
   datasetDescription: string;
+  exampleLabel: string;
 }) => Promise<void>;
 
 const evaluate = baseEvaluate.extend<{
@@ -29,11 +30,11 @@ const evaluate = baseEvaluate.extend<{
     { executorClient, kbnClient, esClient, connector, evaluators },
     use
   ) => {
-    await use(async ({ example, datasetName, datasetDescription }) => {
+    await use(async ({ example, datasetName, datasetDescription, exampleLabel }) => {
       await executorClient.runExperiment(
         {
           dataset: {
-            name: datasetName,
+            name: `${datasetName} - ${exampleLabel}`,
             description: datasetDescription,
             examples: [
               {
@@ -75,6 +76,7 @@ evaluate.describe(
               example,
               datasetName: `Partition Suggestion - ${dataset.name}`,
               datasetDescription: dataset.description,
+              exampleLabel: label,
             });
           });
         });

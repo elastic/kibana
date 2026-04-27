@@ -188,6 +188,198 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             'Tests that the LLM follows user guidance to group logs by source system, using body.text content patterns.',
         },
       },
+      {
+        input: {
+          stream_name: 'logs.otel.partition-eval',
+          user_prompt: 'Partition logs by their service.name field',
+        },
+        output: {
+          expected_partitions: [
+            {
+              name: 'hadoop',
+              description: 'Data platform batch logs with service.name=data-platform',
+              key_fields: ['service.name'],
+            },
+            {
+              name: 'proxifier',
+              description: 'Proxifier proxy logs with service.name=proxifier-proxy',
+              key_fields: ['service.name'],
+            },
+            {
+              name: 'android',
+              description: 'Android system logs with service.name=android-system',
+              key_fields: ['service.name'],
+            },
+            {
+              name: 'openstack',
+              description: 'OpenStack Nova logs with service.name=openstack-nova',
+              key_fields: ['service.name'],
+            },
+          ],
+          min_partitions: 3,
+          max_partitions: 5,
+          coverage_threshold: 0.9,
+          max_overlap_threshold: 0.15,
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes:
+            'Direct field-based guidance. The LLM should use service.name to create four clean partitions.',
+        },
+      },
+      {
+        input: {
+          stream_name: 'logs.otel.partition-eval',
+          user_prompt: 'Create two partitions: cloud infrastructure and on-premise systems',
+        },
+        output: {
+          expected_partitions: [
+            {
+              name: 'cloud-infrastructure',
+              description: 'OpenStack cloud infrastructure logs with cloud.provider=openstack',
+              key_fields: ['cloud.provider', 'service.name'],
+            },
+            {
+              name: 'on-premise',
+              description: 'Hadoop, Proxifier, and Android on-premise logs',
+              key_fields: ['body.text', 'service.name'],
+            },
+          ],
+          min_partitions: 2,
+          max_partitions: 3,
+          coverage_threshold: 0.9,
+          max_overlap_threshold: 0.15,
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes:
+            'Tests conceptual grouping guidance. OpenStack is cloud infrastructure; Hadoop, Proxifier, and Android are on-premise. The LLM must infer the grouping from metadata and body.text patterns.',
+        },
+      },
+    ],
+  },
+  {
+    name: 'User-Guided Partitioning - Overlapping Metadata',
+    description:
+      'Hard data with overlapping metadata where user guidance should help the LLM disambiguate systems.',
+    examples: [
+      {
+        input: {
+          stream_name: 'logs.otel.partition-hard',
+          user_prompt: 'Split logs into data platform services and infrastructure monitoring',
+        },
+        output: {
+          expected_partitions: [
+            {
+              name: 'data-platform',
+              description: 'Hadoop and Mac data platform logs with service.name=data-platform',
+              key_fields: ['service.name', 'body.text'],
+            },
+            {
+              name: 'infra-monitoring',
+              description:
+                'Linux and HPC infrastructure monitoring logs with service.name=infra-monitoring',
+              key_fields: ['service.name', 'body.text'],
+            },
+          ],
+          min_partitions: 2,
+          max_partitions: 3,
+          coverage_threshold: 0.85,
+          max_overlap_threshold: 0.15,
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes:
+            'Tests high-level conceptual grouping across overlapping metadata. Hadoop+Mac share service.name=data-platform; Linux+HPC share service.name=infra-monitoring.',
+        },
+      },
+      {
+        input: {
+          stream_name: 'logs.otel.partition-hard',
+          user_prompt:
+            'Group logs by processing layer: batch processing, streaming, and infrastructure monitoring',
+        },
+        output: {
+          expected_partitions: [
+            {
+              name: 'batch',
+              description: 'Hadoop batch processing logs with data_layer=batch',
+              key_fields: ['data_layer', 'body.text'],
+            },
+            {
+              name: 'streaming',
+              description: 'Mac streaming logs with data_layer=streaming',
+              key_fields: ['data_layer', 'body.text'],
+            },
+            {
+              name: 'monitoring',
+              description: 'Linux and HPC infrastructure monitoring logs',
+              key_fields: ['service.name', 'body.text'],
+            },
+          ],
+          min_partitions: 2,
+          max_partitions: 4,
+          coverage_threshold: 0.85,
+          max_overlap_threshold: 0.2,
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes:
+            'Tests multi-category conceptual guidance. Hadoop=batch, Mac=streaming, Linux+HPC=monitoring. The LLM must map guidance to different fields (data_layer vs service.name).',
+        },
+      },
+    ],
+  },
+  {
+    name: 'User-Guided Refinement - Partition Suggestion',
+    description:
+      'Existing partitions with additional user guidance for the remaining unrouted data.',
+    examples: [
+      {
+        input: {
+          stream_name: 'logs.otel.partition-eval',
+          existing_partitions: [
+            {
+              name: 'hadoop',
+              condition: {
+                and: [
+                  { field: 'body.text', contains: 'hadoop' },
+                  { field: 'resource.attributes.process.name', exists: true },
+                ],
+              },
+            },
+          ],
+          user_prompt: 'Partition the remaining logs by service name',
+        },
+        output: {
+          expected_partitions: [
+            {
+              name: 'proxifier',
+              description: 'Proxifier proxy logs with service.name=proxifier-proxy',
+              key_fields: ['service.name'],
+            },
+            {
+              name: 'android',
+              description: 'Android system logs with service.name=android-system',
+              key_fields: ['service.name'],
+            },
+            {
+              name: 'openstack',
+              description: 'OpenStack Nova logs with service.name=openstack-nova',
+              key_fields: ['service.name'],
+            },
+          ],
+          min_partitions: 2,
+          max_partitions: 5,
+          coverage_threshold: 0.85,
+          max_overlap_threshold: 0.2,
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes:
+            'Tests combining existing partitions with user guidance. Hadoop is already partitioned; the LLM should use service.name to partition the remaining three systems.',
+        },
+      },
     ],
   },
   {
