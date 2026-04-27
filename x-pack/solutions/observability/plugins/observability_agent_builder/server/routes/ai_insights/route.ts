@@ -85,6 +85,7 @@ function toErrorForAiInsightStream({
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
 }) {
+  const rawErrorMessage = getRawErrorMessage(error);
   if (isNoMatchingProjectError(error)) {
     const message = i18n.translate(
       'xpack.observabilityAgentBuilder.aiInsight.error.noMatchingProject',
@@ -92,7 +93,6 @@ function toErrorForAiInsightStream({
         defaultMessage: 'AI insights are not supported for data from linked projects.',
       }
     );
-    const rawErrorMessage = getRawErrorMessage(error);
     return aiInsightSseErrorResponse({
       response,
       message: `${message}\n\nError details: ${rawErrorMessage}`,
@@ -108,7 +108,6 @@ function toErrorForAiInsightStream({
         defaultMessage: 'The source index for this data is unavailable.',
       }
     );
-    const rawErrorMessage = getRawErrorMessage(error);
     return aiInsightSseErrorResponse({
       response,
       message: `${message}\n\nError details: ${rawErrorMessage}`,
@@ -117,7 +116,13 @@ function toErrorForAiInsightStream({
       request,
     });
   }
-  throw error;
+  return aiInsightSseErrorResponse({
+    response,
+    message: rawErrorMessage,
+    isCloudEnabled,
+    logger,
+    request,
+  });
 }
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
