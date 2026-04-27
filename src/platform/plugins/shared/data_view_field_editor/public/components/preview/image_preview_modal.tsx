@@ -41,6 +41,8 @@ const componentStyles = {
       padding: euiTheme.size.base,
 
       '& img': {
+        // `!important` is required to override the formatter's inline `max-width: none`
+        // so the image stays constrained to the modal width.
         maxWidth: '100% !important',
       },
     }),
