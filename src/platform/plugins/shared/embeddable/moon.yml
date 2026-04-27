@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/search-errors'
   - '@kbn/shared-ux-markdown'
   - '@kbn/data-views-plugin'
-  - '@kbn/shared-ux-utility'
   - '@kbn/data-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/kibana-react-plugin'
