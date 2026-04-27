@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { getHistogramInterval } from '../common/get_histogram_interval';
-import {
+import type {
   Histogram,
   HistogramPoint,
   OverviewStatusMetaData,

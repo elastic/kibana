@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiIcon, EuiPopover, useGeneratedHtmlId, EuiBadge } from '@elastic/eui';
 import { throttle } from 'lodash';
 import { useMonitorHealthColor } from '../../../hooks/use_monitor_health_color';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const [isPopoverOpen, setPopover] = useState(false);

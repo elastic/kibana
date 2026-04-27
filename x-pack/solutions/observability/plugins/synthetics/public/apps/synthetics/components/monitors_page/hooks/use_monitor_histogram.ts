@@ -7,7 +7,7 @@
 
 import { useMonitorHistogramPerMonitor } from './use_monitor_histogram_per_monitor';
 import { useGetUrlParams } from '../../../hooks';
-import { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
 import { useMonitorHistogramPerLocation } from './use_monitor_histogram_per_location';
 
 export const useMonitorHistogram = ({
