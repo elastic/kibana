@@ -26,11 +26,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import type {
-  NewAgentPolicy,
-  AgentPolicy,
-  GlobalDataTag,
-} from '../../../../../../../../common/types';
+import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../common/types';
 
 interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
