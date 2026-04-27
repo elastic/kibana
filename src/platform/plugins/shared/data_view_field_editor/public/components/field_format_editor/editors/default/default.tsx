@@ -70,10 +70,9 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
     const { format, formatParams, onError } = nextProps;
     const { sampleInputsByType, sampleInputs } = state;
 
-    const converter = format.reactConvert.bind(format);
     const type = typeof sampleInputsByType === 'object' && formatParams.type;
     const inputs = type ? sampleInputsByType[formatParams.type as string] || [] : sampleInputs;
-    const output = convertSampleInput(converter, inputs);
+    const output = convertSampleInput((input) => format.reactConvert(input), inputs);
     onError(output.error);
     return output;
   }
