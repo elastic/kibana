@@ -44,7 +44,6 @@
     "@kbn/features-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/es-query",
-    "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
     "@kbn/inference-prompt-utils",
