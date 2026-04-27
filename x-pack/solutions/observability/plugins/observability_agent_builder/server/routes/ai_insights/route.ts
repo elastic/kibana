@@ -9,8 +9,7 @@ import * as t from 'io-ts';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import { throwError, type Observable } from 'rxjs';
-import type { ServerSentEvent } from '@kbn/sse-utils';
+import { throwError } from 'rxjs';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
@@ -41,9 +40,7 @@ function aiInsightSseErrorResponse({
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
 }) {
-  const err$ = throwError(() =>
-    error instanceof Error ? error : new Error(String(error))
-  ) as Observable<ServerSentEvent>;
+  const err$ = throwError(() => (error instanceof Error ? error : new Error(String(error))));
   return response.ok({
     headers: getSSEResponseHeaders(isCloudEnabled),
     body: observableIntoEventSourceStream(err$, {
@@ -101,6 +98,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
 
         return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
           body: observableIntoEventSourceStream(result.events$, {
             logger,
             signal: getRequestAbortedSignal(request),
@@ -174,6 +172,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
 
         return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
           body: observableIntoEventSourceStream(result.events$, {
             logger,
             signal: getRequestAbortedSignal(request),
