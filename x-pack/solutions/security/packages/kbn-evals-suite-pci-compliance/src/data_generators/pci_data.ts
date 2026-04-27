@@ -71,38 +71,40 @@ async function bulkIndex(esClient: Client, index: string, docs: Doc[]): Promise<
 function buildAuthDocs(): Doc[] {
   const docs: Doc[] = [];
 
-  // 12 failed logins for "jdoe" from the same IP — exceeds PCI 8.3.4 lockout threshold of 10
+  // 12 failed logins for "jdoe" from the same IP — exceeds PCI 8.3.4 lockout threshold of 10.
+  // Placed 5–16 min ago so they're solidly within any "last hour" query window.
   for (let i = 0; i < 12; i++) {
     docs.push({
-      '@timestamp': recentTimestamp(60 - i),
+      '@timestamp': recentTimestamp(5 + i),
       event: { category: 'authentication', outcome: 'failure', action: 'user_login' },
       user: { name: 'jdoe' },
       source: { ip: '192.168.1.100' },
     });
   }
 
-  // Successful logins — "admin" and "root" trigger default-account violation (Req 2.2.4)
+  // Successful logins — "admin" and "root" trigger default-account violation (Req 2.2.4).
+  // Placed 20–23 min ago.
   docs.push(
     {
-      '@timestamp': recentTimestamp(50),
+      '@timestamp': recentTimestamp(20),
       event: { category: 'authentication', outcome: 'success', action: 'user_login' },
       user: { name: 'admin' },
       source: { ip: '10.0.0.5' },
     },
     {
-      '@timestamp': recentTimestamp(49),
+      '@timestamp': recentTimestamp(21),
       event: { category: 'authentication', outcome: 'success', action: 'user_login' },
       user: { name: 'root' },
       source: { ip: '10.0.0.6' },
     },
     {
-      '@timestamp': recentTimestamp(48),
+      '@timestamp': recentTimestamp(22),
       event: { category: 'authentication', outcome: 'success', action: 'user_login' },
       user: { name: 'alice' },
       source: { ip: '10.0.0.7' },
     },
     {
-      '@timestamp': recentTimestamp(47),
+      '@timestamp': recentTimestamp(23),
       event: { category: 'authentication', outcome: 'success', action: 'user_login' },
       user: { name: 'bob' },
       source: { ip: '10.0.0.8' },
@@ -112,13 +114,13 @@ function buildAuthDocs(): Doc[] {
   // IAM events — password change and MFA enroll (Req 8.3.6, 8.3.9)
   docs.push(
     {
-      '@timestamp': recentTimestamp(46),
+      '@timestamp': recentTimestamp(25),
       event: { category: 'iam', action: 'password_change' },
       user: { name: 'alice' },
       source: { ip: '10.0.0.7' },
     },
     {
-      '@timestamp': recentTimestamp(45),
+      '@timestamp': recentTimestamp(26),
       event: { category: 'iam', action: 'mfa_enroll' },
       user: { name: 'bob' },
       source: { ip: '10.0.0.8' },

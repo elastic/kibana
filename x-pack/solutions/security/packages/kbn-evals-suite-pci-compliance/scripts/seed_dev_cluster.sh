@@ -63,16 +63,19 @@ seed() {
   echo ""
 
   # --- Auth index ---
+  # Brute-force events: place well within the last hour (5–16 min ago) so a
+  # "last hour" query always captures all 12, exceeding the >10 threshold.
   local auth_body=""
   for i in $(seq 0 11); do
     local ts
-    ts=$(minute_ago $((60 - i)))
+    ts=$(minute_ago $((5 + i)))
     auth_body+='{"create":{"_index":"logs-pci-auth-eval"}}
 {"@timestamp":"'"$ts"'","event":{"category":"authentication","outcome":"failure","action":"user_login"},"user":{"name":"jdoe"},"source":{"ip":"192.168.1.100"}}
 '
   done
 
-  for pair in "50:admin:10.0.0.5" "49:root:10.0.0.6" "48:alice:10.0.0.7" "47:bob:10.0.0.8"; do
+  # Default/vendor account logins: keep well within the last hour (20–23 min ago).
+  for pair in "20:admin:10.0.0.5" "21:root:10.0.0.6" "22:alice:10.0.0.7" "23:bob:10.0.0.8"; do
     IFS=: read -r offset user ip <<< "$pair"
     local ts
     ts=$(minute_ago "$offset")
@@ -82,11 +85,11 @@ seed() {
   done
 
   local ts
-  ts=$(minute_ago 46)
+  ts=$(minute_ago 25)
   auth_body+='{"create":{"_index":"logs-pci-auth-eval"}}
 {"@timestamp":"'"$ts"'","event":{"category":"iam","action":"password_change"},"user":{"name":"alice"},"source":{"ip":"10.0.0.7"}}
 '
-  ts=$(minute_ago 45)
+  ts=$(minute_ago 26)
   auth_body+='{"create":{"_index":"logs-pci-auth-eval"}}
 {"@timestamp":"'"$ts"'","event":{"category":"iam","action":"mfa_enroll"},"user":{"name":"bob"},"source":{"ip":"10.0.0.8"}}
 '
