@@ -36,8 +36,6 @@ components:
         - updatedBy
         - createdBy
         - lastRunOutcome
-        - lastRunStatus
-        - lastRunStatusReasonType
 
     SearchRulesField:
       type: string
