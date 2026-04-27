@@ -12,6 +12,7 @@ import {
   mockAuthenticationProviderOptions,
   type MockAuthenticationProviderOptions,
 } from './base.mock';
+import { KIBANA_AUTH_FULL_HEADER } from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
@@ -50,8 +51,9 @@ describe('BaseAuthenticationProvider', () => {
 
   describe('getUser', () => {
     describe('minimal authentication mode', () => {
-      const createMinimalAuthcRequest = () =>
+      const createMinimalAuthcRequest = (headers?: Record<string, string>) =>
         httpServerMock.createKibanaRequest({
+          headers,
           kibanaRouteOptions: {
             xsrfRequired: true,
             access: 'internal',
@@ -138,6 +140,21 @@ describe('BaseAuthenticationProvider', () => {
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
         const user = await provider.getUserPublic(request, undefined, undefined);
+
+        expect(mockOptions.client.asScoped).toHaveBeenCalled();
+        expect(user.username).toBe(esUser.username);
+      });
+
+      it('falls back to Elasticsearch _authenticate when KIBANA_AUTH_FULL_HEADER HTTP header is set', async () => {
+        const session = sessionMock.createValue({ username: 'testuser' });
+        const request = createMinimalAuthcRequest({ [KIBANA_AUTH_FULL_HEADER]: 'true' });
+
+        const esUser = mockAuthenticatedUser();
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(esUser);
+        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+        const user = await provider.getUserPublic(request, undefined, session);
 
         expect(mockOptions.client.asScoped).toHaveBeenCalled();
         expect(user.username).toBe(esUser.username);

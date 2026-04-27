@@ -10,6 +10,7 @@ import {
   allRoutes,
   getAgentIdFromPath,
   getEnabledRoutes,
+  getPathWithSwitchedAgent,
   getSidebarViewForRoute,
   getViewIdForPathname,
 } from './route_config';
@@ -103,6 +104,43 @@ describe('route_config', () => {
       expect(getAgentIdFromPath('/manage/tools')).toBeUndefined();
       expect(getAgentIdFromPath('/')).toBeUndefined();
       expect(getAgentIdFromPath('/unknown')).toBeUndefined();
+    });
+  });
+
+  describe('getPathWithSwitchedAgent', () => {
+    const next = 'other-agent';
+
+    it('preserves overview, skills, tools, and plugins paths', () => {
+      expect(getPathWithSwitchedAgent('/agents/agent-a/overview', next)).toBe(
+        '/agents/other-agent/overview'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/skills', next)).toBe(
+        '/agents/other-agent/skills'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/tools', next)).toBe(
+        '/agents/other-agent/tools'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/plugins', next)).toBe(
+        '/agents/other-agent/plugins'
+      );
+    });
+
+    it('preserves agent root', () => {
+      expect(getPathWithSwitchedAgent('/agents/agent-a', next)).toBe('/agents/other-agent');
+    });
+
+    it('opens a new chat when switching from any conversation route', () => {
+      expect(getPathWithSwitchedAgent('/agents/agent-a/conversations/new', next)).toBe(
+        '/agents/other-agent/conversations/new'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/conversations/conv-uuid', next)).toBe(
+        '/agents/other-agent/conversations/new'
+      );
+    });
+
+    it('falls back to agent root when not on an agent-scoped path', () => {
+      expect(getPathWithSwitchedAgent('/', next)).toBe('/agents/other-agent');
+      expect(getPathWithSwitchedAgent('/manage/tools', next)).toBe('/agents/other-agent');
     });
   });
 
