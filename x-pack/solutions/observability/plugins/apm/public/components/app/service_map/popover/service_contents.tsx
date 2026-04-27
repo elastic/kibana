@@ -29,7 +29,13 @@ const INITIAL_STATE: ServiceNodeReturn = {
   previousPeriod: undefined,
 };
 
-export function ServiceContents({ onFocusClick, selection, environment, kuery }: ContentsProps) {
+export function ServiceContents({
+  onFocusClick,
+  selection,
+  environment,
+  kuery,
+  isEmbedded,
+}: ContentsProps) {
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/service-map',
@@ -125,18 +131,20 @@ export function ServiceContents({ onFocusClick, selection, environment, kuery }:
           })}
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButton
-          data-test-subj="apmServiceContentsFocusMapButton"
-          color="success"
-          href={focusUrl}
-          onClick={onFocusClick}
-        >
-          {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
-            defaultMessage: 'Focus map',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
+      {!isEmbedded && (
+        <EuiFlexItem>
+          <EuiButton
+            data-test-subj="apmServiceContentsFocusMapButton"
+            color="success"
+            href={focusUrl}
+            onClick={onFocusClick}
+          >
+            {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
+              defaultMessage: 'Focus map',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </>
   );
 }
