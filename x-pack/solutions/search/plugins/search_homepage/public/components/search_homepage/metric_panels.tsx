@@ -219,6 +219,14 @@ export const MetricPanels = () => {
     return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
   }, [chrome.navLinks, isWorkflowsUiEnabled]);
 
+  const gridColumns = useMemo(() => {
+    const count = panels.length;
+    if (count === 1 || count === 2 || count === 4) {
+      return 2;
+    }
+    return 3;
+  }, [panels.length]);
+
   if (panels.length === 0) {
     return null;
   }
@@ -226,7 +234,11 @@ export const MetricPanels = () => {
   return (
     <EuiFlexItem>
       <EuiSpacer size="l" />
-      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={gridColumns}
+        data-test-subj="searchHomepageNavLinksTabGrid"
+      >
         {panels.map((panel, index) => (
           <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
         ))}
