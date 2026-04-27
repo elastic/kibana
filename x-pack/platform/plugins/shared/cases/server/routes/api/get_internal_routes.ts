@@ -27,10 +27,25 @@ import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
+import { buildGetAnalyticsStatusRoute } from './internal/get_analytics_status';
+import { deleteLegacyAnalyticsIndicesRoute } from './internal/delete_legacy_analytics_indices';
 import type { ConfigType } from '../../config';
+import type { AnalyticsMode, ViewSyncService } from '../../cases_analytics/views';
 import { getTemplateRoutes } from './templates';
 
-export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
+interface InternalRoutesArgs {
+  userProfileService: UserProfileService;
+  config: ConfigType;
+  getAnalyticsMode: () => AnalyticsMode;
+  getViewSyncService: () => ViewSyncService | null;
+}
+
+export const getInternalRoutes = ({
+  userProfileService,
+  config,
+  getAnalyticsMode,
+  getViewSyncService,
+}: InternalRoutesArgs) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -52,5 +67,7 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     similarCaseRoute,
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
+    buildGetAnalyticsStatusRoute({ getAnalyticsMode, getViewSyncService }),
+    deleteLegacyAnalyticsIndicesRoute,
     ...getTemplateRoutes(config),
   ] as CaseRoute[];

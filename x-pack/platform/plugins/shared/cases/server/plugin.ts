@@ -184,7 +184,12 @@ export class CasePlugin
       router,
       routes: [
         ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService, this.caseConfig),
+        ...getInternalRoutes({
+          userProfileService: this.userProfileService,
+          config: this.caseConfig,
+          getAnalyticsMode: () => this.analyticsMode,
+          getViewSyncService: () => this.viewSyncService,
+        }),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,

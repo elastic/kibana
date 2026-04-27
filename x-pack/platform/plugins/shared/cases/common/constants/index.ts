@@ -247,6 +247,20 @@ export const BULK_GET_USER_PROFILES_API_TAG = 'bulkGetUserProfiles';
 export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 
 /**
+ * Granted with cases read access — exposes the analytics mode the plugin
+ * resolved at start (views vs. legacy indices) plus the list of view names
+ * and the latest sync status.
+ */
+export const GET_ANALYTICS_STATUS_API_TAG = 'casesGetAnalyticsStatus';
+
+/**
+ * Granted with cases all access — removes leftover .cases-analytics.* indices
+ * and the lifecycle pivot transform from a prior install. Manual-only; the
+ * plugin never auto-deletes these artifacts.
+ */
+export const DELETE_LEGACY_ANALYTICS_INDICES_API_TAG = 'casesDeleteLegacyAnalyticsIndices';
+
+/**
  * User profiles
  */
 
