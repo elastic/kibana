@@ -166,7 +166,7 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   useYamlFormSync(form, stableFields, onFieldDefaultChange);
 
   return (
-    <FormProvider key={parsedTemplate.name} form={form}>
+    <FormProvider form={form}>
       <FieldsRenderer parsedTemplate={parsedTemplate} form={form} />
     </FormProvider>
   );

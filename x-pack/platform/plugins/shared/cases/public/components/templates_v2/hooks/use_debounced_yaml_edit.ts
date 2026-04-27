@@ -9,7 +9,7 @@ import { debounce } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 
-const DEBOUNCE_DELAY_MS = 300;
+const DEBOUNCE_DELAY_MS = 100;
 const SAVED_INDICATOR_DURATION_MS = 1000;
 
 interface EditStateWithId {
