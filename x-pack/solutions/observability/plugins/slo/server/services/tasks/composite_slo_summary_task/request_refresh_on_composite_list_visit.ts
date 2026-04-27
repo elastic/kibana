@@ -80,6 +80,8 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
 
 function isInCooldown(taskState: CompositeSloSummaryTaskState): boolean {
   const lastAt = taskState.lastCompositeListVisitRunSoonAt;
-  return typeof lastAt === 'number' &&
+  return (
+    typeof lastAt === 'number' &&
     Date.now() - lastAt < COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS
+  );
 }
