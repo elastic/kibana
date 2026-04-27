@@ -48,8 +48,10 @@ export const bulkOperationParamsSchema = z
   .refine((data) => data.ids == null || (data.filter == null && data.search == null), {
     message: 'ids cannot be combined with filter or search.',
   })
-  .refine((data) => data.match_all == null || data.ids == null, {
-    message: 'match_all cannot be combined with ids.',
-  });
+  .refine(
+    (data) =>
+      data.match_all == null || (data.ids == null && data.filter == null && data.search == null),
+    { message: 'match_all cannot be combined with ids, filter, or search.' }
+  );
 
 export type BulkOperationParams = z.infer<typeof bulkOperationParamsSchema>;

@@ -89,7 +89,7 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true', match_all: true });
+    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true' });
   });
 
   it('passes search as a separate field in bulk params', () => {
@@ -105,7 +105,7 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ search: 'prod', match_all: true });
+    expect(result.current.getBulkParams()).toEqual({ search: 'prod' });
   });
 
   it('passes filter and search as separate fields with exclusions', () => {
@@ -128,7 +128,6 @@ describe('useBulkSelect', () => {
     expect(result.current.getBulkParams()).toEqual({
       filter: 'enabled: true AND NOT (id: "rule-1")',
       search: 'x',
-      match_all: true,
     });
   });
 
@@ -151,7 +150,6 @@ describe('useBulkSelect', () => {
     expect(result.current.getBulkParams()).toEqual({
       filter: 'NOT (id: "rule-1")',
       search: 'prod',
-      match_all: true,
     });
   });
 

@@ -196,7 +196,7 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
       return {
         ...(combinedFilter ? { filter: combinedFilter } : {}),
         ...(search ? { search } : {}),
-        match_all: true as const,
+        ...(!combinedFilter && !search ? { match_all: true as const } : {}),
       };
     }
 
