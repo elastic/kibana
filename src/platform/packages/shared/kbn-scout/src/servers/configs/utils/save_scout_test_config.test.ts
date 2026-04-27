@@ -36,12 +36,19 @@ const testServersConfig = {
   },
   serverless: true,
   http2: false,
-  uiam: false,
+  uiam: true,
   projectType: 'oblt' as ServerlessProjectType,
+  productTier: 'complete' as const,
   isCloud: true,
   license: 'trial',
   cloudUsersFilePath: '/path/to/users',
 };
+
+// `uiam` is computed from `serverless` by the schema and intentionally
+// excluded from the JSON written to disk so the file round-trips through
+// `createScoutConfig` without validation errors.
+const { uiam: _uiam, ...persistableServersConfig } = testServersConfig;
+const expectedSerializedConfig = JSON.stringify(persistableServersConfig, null, 2);
 
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
@@ -77,9 +84,10 @@ describe('saveScoutTestConfigOnDisk', () => {
     expect(Fs.existsSync).toHaveBeenCalledWith(MOCKED_SCOUT_SERVERS_ROOT);
     expect(writeFileSyncMock).toHaveBeenCalledWith(
       mockConfigFilePath,
-      JSON.stringify(testServersConfig, null, 2),
+      expectedSerializedConfig,
       'utf-8'
     );
+    expect(writeFileSyncMock.mock.calls[0][1]).not.toMatch(/"uiam"/);
     expect(mockLog.info).toHaveBeenCalledWith(
       `scout: Test server configuration saved at ${mockConfigFilePath}`
     );
@@ -121,7 +129,7 @@ describe('saveScoutTestConfigOnDisk', () => {
     expect(mkdirSyncMock).toHaveBeenCalledWith(MOCKED_SCOUT_SERVERS_ROOT, { recursive: true });
     expect(writeFileSyncMock).toHaveBeenCalledWith(
       mockConfigFilePath,
-      JSON.stringify(testServersConfig, null, 2),
+      expectedSerializedConfig,
       'utf-8'
     );
     expect(mockLog.debug).toHaveBeenCalledWith(

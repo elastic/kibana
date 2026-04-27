@@ -22,7 +22,11 @@ export const saveScoutTestConfigOnDisk = (testServersConfig: ScoutTestConfig, lo
   const configFilePath = path.join(SCOUT_SERVERS_ROOT, `local.json`);
 
   try {
-    const jsonData = JSON.stringify(testServersConfig, null, 2);
+    // `uiam` is computed from `serverless` by the schema; it must not be
+    // present in the persisted JSON, otherwise reading the file back through
+    // `createScoutConfig` would fail validation.
+    const { uiam: _uiam, ...persistable } = testServersConfig;
+    const jsonData = JSON.stringify(persistable, null, 2);
 
     if (!Fs.existsSync(SCOUT_SERVERS_ROOT)) {
       log.debug(`scout: creating configuration directory: ${SCOUT_SERVERS_ROOT}`);

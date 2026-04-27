@@ -117,7 +117,10 @@ export class Config {
     return {
       serverless: isServerless,
       http2: this.get('http2'),
-      uiam: this.get('esServerlessOptions.uiam', false),
+      // `uiam` mirrors `serverless`: serverless deployments are UIAM-only,
+      // stateful deployments are not. Don't read it from server args — the
+      // schema enforces this rule and rejects manual overrides.
+      uiam: isServerless,
       projectType,
       productTier: isServerless ? getProductTier(serverArgs, projectType) : undefined,
       organizationId: isServerless ? getOrganizationId(serverArgs) : undefined,

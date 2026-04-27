@@ -452,7 +452,9 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 | `projectType`        | when `serverless: true` (one of `es` \| `oblt` \| `security` \| `workplaceai`)       |
 | `productTier`        | when `projectType` is `security` or `oblt` (one of `complete` \| `essentials` \| `logs_essentials` \| `search_ai_lake`) |
 
-`http2`, `uiam`, and `license` are optional and default to `false`, `false`, and `"trial"` respectively.
+`http2` and `license` are optional and default to `false` and `"trial"` respectively.
+
+`uiam` is **not user-settable** in the JSON; it is computed from `serverless` (`true` on serverless, `false` on stateful) since serverless deployments are UIAM-only and stateful deployments are not. JSON files that include `uiam` are rejected with a clear error.
 
 Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 

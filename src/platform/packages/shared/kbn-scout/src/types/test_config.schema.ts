@@ -60,7 +60,16 @@ export const ScoutTestConfigSchema = z
   .object({
     serverless: z.boolean({ error: 'is required and must be a boolean' }),
     http2: z.boolean().default(false),
-    uiam: z.boolean().default(false),
+    // `uiam` is intentionally not user-settable: serverless deployments
+    // (notably MKI) are UIAM-only, stateful deployments are not, so the value
+    // is computed in the transform below from `serverless`. JSON files that
+    // include `uiam` are rejected with a clear message to avoid silent
+    // mismatches with auth behavior.
+    uiam: z
+      .never({
+        error: `must not be set in the JSON file; 'uiam' is computed from 'serverless' (true on serverless, false on stateful)`,
+      })
+      .optional(),
     isCloud: z.boolean({ error: 'is required and must be a boolean' }),
     cloudHostName: z.string().min(1).optional(),
     cloudUsersFilePath: z
@@ -119,7 +128,11 @@ export const ScoutTestConfigSchema = z
         message: `is required when 'isCloud' is true (used by SAML against Elastic Cloud)`,
       });
     }
-  });
+  })
+  .transform((cfg) => ({
+    ...cfg,
+    uiam: cfg.serverless,
+  }));
 
 /**
  * Format a Zod validation error from {@link ScoutTestConfigSchema} into a

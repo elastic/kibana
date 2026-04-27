@@ -109,7 +109,7 @@ describe('Config.getScoutTestConfig', () => {
     const expectedConfig = {
       serverless: true,
       http2: false,
-      uiam: false,
+      uiam: true,
       projectType: 'es',
       productTier: undefined,
       isCloud: false,
@@ -132,7 +132,7 @@ describe('Config.getScoutTestConfig', () => {
     expect(scoutConfig).toEqual(expectedConfig);
   });
 
-  it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=es' in UIAM mode`, async () => {
+  it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=es' with organizationId`, async () => {
     const config = new Config({
       serverless: true,
       servers: {
