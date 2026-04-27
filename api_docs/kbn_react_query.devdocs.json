@@ -14172,8 +14172,8 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
+                "plugin": "@kbn/inference-endpoint-ui-common",
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
               },
               {
                 "plugin": "cases",
@@ -14304,34 +14304,6 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_action_types/index.tsx"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/knowledge_base/use_knowledge_base_status.tsx"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/knowledge_base/entries/use_knowledge_base_entries.ts"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/share_conversation/use_suggest_user_profiles.ts"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/evaluate/use_evaluation_data.tsx"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/knowledge_base/knowledge_base_settings_management/use_index_mappings.ts"
-              },
-              {
-                "plugin": "@kbn/inference-endpoint-ui-common",
-                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
-              },
-              {
                 "plugin": "alertingVTwo",
                 "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_rule.ts"
               },
@@ -14357,7 +14329,43 @@
               },
               {
                 "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles.ts"
+              },
+              {
+                "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_suggested_profiles.ts"
+              },
+              {
+                "plugin": "@kbn/alerting-v2-episodes-ui",
                 "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query.ts"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_action_types/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/knowledge_base/use_knowledge_base_status.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/knowledge_base/entries/use_knowledge_base_entries.ts"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/share_conversation/use_suggest_user_profiles.ts"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/evaluate/use_evaluation_data.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/knowledge_base/knowledge_base_settings_management/use_index_mappings.ts"
               },
               {
                 "plugin": "maintenanceWindows",
@@ -14465,15 +14473,15 @@
               },
               {
                 "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/sig_events/significant_events_discovery/hooks/use_fetch_streams.ts"
+              },
+              {
+                "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_features.ts"
               },
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_significant_events.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/sig_events/significant_events_discovery/hooks/use_fetch_streams.ts"
               },
               {
                 "plugin": "osquery",
@@ -14485,15 +14493,15 @@
               },
               {
                 "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
+              },
+              {
+                "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule.ts"
               },
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule_types.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
               },
               {
                 "plugin": "slo",

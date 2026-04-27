@@ -12,9 +12,11 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerRoutes } from './routes';
 import type { ConfigType } from './config';
 
-export class FtrApisPlugin
-  implements Plugin<void, void, object, { taskManager: TaskManagerStartContract }>
-{
+interface FtrApisStartDeps {
+  taskManager: TaskManagerStartContract;
+}
+
+export class FtrApisPlugin implements Plugin<void, void, {}, FtrApisStartDeps> {
   private readonly config: ConfigType;
   private taskManagerStart?: TaskManagerStartContract;
 
@@ -29,7 +31,7 @@ export class FtrApisPlugin
     }
   }
 
-  public start(_core: CoreStart, { taskManager }: { taskManager: TaskManagerStartContract }) {
+  public start(_core: CoreStart, { taskManager }: FtrApisStartDeps) {
     this.taskManagerStart = taskManager;
   }
 }

@@ -10,21 +10,22 @@ import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
 
-const SAMPLE_DOCS_MAX = 50;
-
 const addUniqueHitsToSample = ({
   hits,
   docs,
   seen,
+  size,
 }: {
   hits: Array<SearchHit<Record<string, unknown>>>;
   docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
+  size: number;
 }): void => {
   for (const hit of hits) {
     if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
@@ -38,7 +39,7 @@ const addUniqueHitsToSample = ({
     seen.add(hit._id);
     docs.push(hit);
 
-    if (docs.length >= SAMPLE_DOCS_MAX) {
+    if (docs.length >= size) {
       break;
     }
   }
@@ -48,10 +49,12 @@ export const collectSampleDocuments = async ({
   esClient,
   scenario,
   log,
+  size = DEFAULT_SIG_EVENTS_TUNING_CONFIG.sample_size,
 }: {
   esClient: Client;
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
+  size?: number;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
   const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
@@ -104,6 +107,7 @@ export const collectSampleDocuments = async ({
     hits: samplingFilterResults.flatMap(({ hits }) => hits),
     docs,
     seen,
+    size,
   });
   const criteriaCount = docs.length;
   const duplicateCount = totalFilterHits - criteriaCount;
@@ -114,8 +118,8 @@ export const collectSampleDocuments = async ({
   }
 
   let generalFillCount = 0;
-  if (docs.length < SAMPLE_DOCS_MAX) {
-    const remaining = SAMPLE_DOCS_MAX - docs.length;
+  if (docs.length < size) {
+    const remaining = size - docs.length;
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
@@ -126,7 +130,7 @@ export const collectSampleDocuments = async ({
     });
 
     const beforeFill = docs.length;
-    addUniqueHitsToSample({ hits, docs, seen });
+    addUniqueHitsToSample({ hits, docs, seen, size });
     generalFillCount = docs.length - beforeFill;
   }
 
