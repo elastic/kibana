@@ -21,6 +21,8 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { renderToString } from 'react-dom/server';
+import React from 'react';
 import { debounce } from 'lodash';
 import type { PreviewState, FetchDocError } from './types';
 import type { BehaviorObservable } from '../../state_utils';
@@ -31,8 +33,9 @@ import type { Field } from '../../types';
 import { pluginName } from '../../constants';
 import type { InternalFieldType } from '../../types';
 
-export const defaultValueFormatter = (value: unknown): ReactNode => {
-  return typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  return renderToString(<>{content}</>);
 };
 
 interface PreviewControllerArgs {
