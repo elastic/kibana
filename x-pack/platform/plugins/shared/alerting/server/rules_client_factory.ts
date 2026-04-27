@@ -44,7 +44,7 @@ import {
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_INVALIDATE_TAGS,
 } from './constants';
-export interface RulesClientFactoryOptions {
+export interface RulesClientCreateOptions {
   /**
    * When true and the request uses API key authentication, clone the API key
    * per rule instead of reusing the request's key. The cloned key is independent,
@@ -147,7 +147,7 @@ export class RulesClientFactory {
   public async create(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    options?: RulesClientFactoryOptions
+    options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
@@ -166,7 +166,7 @@ export class RulesClientFactory {
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
     spaceId: string,
-    options?: RulesClientFactoryOptions
+    options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
@@ -254,7 +254,7 @@ export class RulesClientFactory {
     savedObjects: SavedObjectsServiceStart;
     spaceId: string;
     isExplicitSpaceOverride: boolean;
-    options?: RulesClientFactoryOptions;
+    options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const factory = this;
@@ -409,27 +409,19 @@ export class RulesClientFactory {
             const authHeader = HTTPAuthorizationHeader.parseFromRequest(request);
             if (!authHeader || authHeader.scheme.toLowerCase() !== 'apikey') {
               const scheme = authHeader?.scheme ?? 'none';
-              factory.logger.warn(
-                `cloneApiKeys requested but request uses "${scheme}" auth, skipping clone for rule "${name}"`
-              );
-              return { apiKeysEnabled: false };
+              throw new Error(`cloneApiKeys requires ApiKey auth scheme but got "${scheme}"`);
             }
-            try {
-              const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
-                name,
-                metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-              });
-              if (!cloneResult) {
-                return { apiKeysEnabled: false };
-              }
-              return {
-                apiKeysEnabled: true,
-                result: cloneResult,
-              };
-            } catch (error) {
-              factory.logger.error(`Failed to clone API key for rule "${name}": ${error.message}`);
-              return { apiKeysEnabled: false };
+            const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
+              name,
+              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+            });
+            if (!cloneResult) {
+              throw new Error('API key clone returned null (security feature may be disabled)');
             }
+            return {
+              apiKeysEnabled: true,
+              result: cloneResult,
+            };
           }
         : undefined,
       isSystemAction(actionId: string) {

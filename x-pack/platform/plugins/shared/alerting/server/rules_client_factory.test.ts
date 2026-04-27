@@ -881,7 +881,7 @@ describe('RulesClientFactory', () => {
     });
   });
 
-  test('cloneAPIKey returns apiKeysEnabled:false when clone fails', async () => {
+  test('cloneAPIKey throws when clone fails', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -902,12 +902,12 @@ describe('RulesClientFactory', () => {
     await factory.create(request, savedObjectsService, { cloneApiKeys: true });
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    const result = await constructorCall.cloneAPIKey('test-rule-key');
-
-    expect(result).toEqual({ apiKeysEnabled: false });
+    await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
+      'Clone endpoint not available'
+    );
   });
 
-  test('cloneAPIKey returns apiKeysEnabled:false when request uses non-ApiKey auth', async () => {
+  test('cloneAPIKey throws when request uses non-ApiKey auth', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -923,9 +923,9 @@ describe('RulesClientFactory', () => {
     await factory.create(request, savedObjectsService, { cloneApiKeys: true });
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    const result = await constructorCall.cloneAPIKey('test-rule-key');
-
-    expect(result).toEqual({ apiKeysEnabled: false });
+    await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
+      'cloneApiKeys requires ApiKey auth scheme but got "Bearer"'
+    );
     expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
 });

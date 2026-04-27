@@ -368,9 +368,10 @@ export class APIKeys implements NativeAPIKeysType {
 
       this.logger.debug('API key was cloned successfully');
       return result;
-    } catch (error) {
-      this.logger.debug(`Failed to clone API key: ${error.message}`);
-      throw error;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.debug(`Failed to clone API key: ${message}`);
+      throw e;
     }
   }
 

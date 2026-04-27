@@ -57,7 +57,7 @@ import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import type { RulesClientFactoryOptions } from './rules_client_factory';
+import type { RulesClientCreateOptions } from './rules_client_factory';
 import {
   RulesSettingsClientFactory,
   RulesSettingsService,
@@ -179,7 +179,7 @@ export interface AlertingServerStart {
   getAlertIndicesAlias: GetAlertIndicesAlias;
   getRulesClientWithRequest(
     request: KibanaRequest,
-    options?: RulesClientFactoryOptions
+    options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   /**
    * Creates a RulesClient that is bound to the provided spaceId (namespace) while preserving
@@ -188,7 +188,7 @@ export interface AlertingServerStart {
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
     spaceId: string,
-    options?: RulesClientFactoryOptions
+    options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -686,7 +686,7 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequest = async (
       request: KibanaRequest,
-      options?: RulesClientFactoryOptions
+      options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
@@ -699,7 +699,7 @@ export class AlertingPlugin {
     const getRulesClientWithRequestInSpace = async (
       request: KibanaRequest,
       spaceId: string,
-      options?: RulesClientFactoryOptions
+      options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
