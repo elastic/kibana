@@ -318,7 +318,11 @@ describe('deserializer and serializer', () => {
             rollover: {
               max_age: '30d',
               max_primary_shard_size: '50gb',
+              min_age: '1d',
+              min_docs: 100,
+              min_size: '10gb',
               min_primary_shard_size: '5gb',
+              min_primary_shard_docs: 50,
             },
           },
         },
@@ -329,10 +333,13 @@ describe('deserializer and serializer', () => {
     const nextFormInternal = deserializer(cloneDeep(policyWithRolloverMinFields));
     const result = nextSerializer(nextFormInternal);
 
-    expect(result.phases.hot!.actions.rollover!.min_primary_shard_size).toBe('5gb');
-    expect(result.phases.hot!.actions.rollover).toEqual(
-      expect.objectContaining(defaultRolloverAction)
-    );
+    const rollover = result.phases.hot!.actions.rollover!;
+    expect(rollover.min_age).toBe('1d');
+    expect(rollover.min_docs).toBe(100);
+    expect(rollover.min_size).toBe('10gb');
+    expect(rollover.min_primary_shard_size).toBe('5gb');
+    expect(rollover.min_primary_shard_docs).toBe(50);
+    expect(rollover).toEqual(expect.objectContaining(defaultRolloverAction));
   });
 
   it('removes snapshot_repository when it is unset', () => {

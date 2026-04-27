@@ -14,6 +14,7 @@ import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
 import type { FormInternal } from '../../types';
 
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
+import { excludeControlledRolloverThresholds } from './utils';
 
 export const createSerializer =
   (originalPolicy?: SerializedPolicy) =>
@@ -71,27 +72,9 @@ export const createSerializer =
         if (isUsingRollover) {
           if (_meta.hot?.isUsingDefaultRollover) {
             const existingRollover = hotPhaseActions.rollover;
-            const preservedRolloverFields = existingRollover
-              ? Object.entries(existingRollover).reduce<Record<string, unknown>>(
-                  (acc, [key, value]) => {
-                    // When switching to recommended defaults, we intentionally reset the rollover
-                    // thresholds controlled by the UI, but preserve any additional keys that the
-                    // UI does not manage (e.g. min_* settings).
-                    if (
-                      key === 'max_age' ||
-                      key === 'max_docs' ||
-                      key === 'max_primary_shard_size' ||
-                      key === 'max_primary_shard_docs' ||
-                      key === 'max_size'
-                    ) {
-                      return acc;
-                    }
-                    acc[key] = value;
-                    return acc;
-                  },
-                  {}
-                )
-              : {};
+            const preservedRolloverFields = excludeControlledRolloverThresholds(
+              existingRollover ?? {}
+            );
 
             hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
             Object.assign(hotPhaseActions.rollover, preservedRolloverFields);
