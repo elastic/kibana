@@ -9,9 +9,10 @@
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -35,7 +36,7 @@ const tab2 = getPersistedTabMock({
 
 const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
-  columnsMeta: new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined),
+  esqlDataView: new BehaviorSubject<DataView | undefined>(undefined),
   grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
   rowHeight: new BehaviorSubject<number | undefined>(undefined),
   headerRowHeight: new BehaviorSubject<number | undefined>(undefined),

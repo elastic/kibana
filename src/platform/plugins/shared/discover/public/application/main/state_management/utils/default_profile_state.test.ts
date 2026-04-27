@@ -201,13 +201,7 @@ describe('getDefaultProfileState', () => {
 
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
-        },
+        defaultProfileState: createDefaultProfileState(['breakdownField']),
         dataView: emptyDataView, // Original data view doesn't have the field
       }).getPostFetchState({
         defaultColumns: [],

@@ -200,10 +200,11 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
       continue;
     }
 
-    const timeFieldName = await getESQLTimeFieldFromQuery({
-      query: layer.query.esql,
-      http,
-    });
+    const [timeFieldName] =
+      (await getESQLTimeFieldFromQuery({
+        query: layer.query.esql,
+        http,
+      })) ?? [];
 
     if (timeFieldName && layer.index && result[layer.index]) {
       result[layer.index] = { ...result[layer.index], timeFieldName };

@@ -451,7 +451,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue(['@timestamp', 'date']);
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -476,7 +476,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue(['@timestamp', 'date']);
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -501,7 +501,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue(['@timestamp', 'date']);
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -531,7 +531,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue(['@timestamp', 'date']);
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
