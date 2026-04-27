@@ -11,25 +11,38 @@ import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
 import type { Group, TimeRange } from '../../../common/typings';
-import { generateSourceLink } from './get_alert_source_links';
+import { apmSources, generateSourceLink, infraSources } from './get_alert_source_links';
 
-export const ALERT_SOURCE = {
+/**
+ * Identifies the UI section that contains the alert source links.
+ * Used as the `data-ebt-element` value for click telemetry, so
+ * analytics can distinguish clicks coming from the alert details
+ * page vs. the alert flyout.
+ */
+export const ALERT_SOURCES_ELEMENT = {
   ALERT_DETAILS: 'alertDetails',
   ALERT_FLYOUT: 'alertFlyout',
 } as const;
 
-export type AlertSource = (typeof ALERT_SOURCE)[keyof typeof ALERT_SOURCE];
+export type AlertSourcesElement =
+  (typeof ALERT_SOURCES_ELEMENT)[keyof typeof ALERT_SOURCES_ELEMENT];
+
+const getClickActionLabel = (field: string): string => {
+  if (apmSources.includes(field)) return 'openInApm';
+  if (infraSources.includes(field)) return 'openInInfra';
+  return 'navigate';
+};
 
 export function Groups({
   groups,
   timeRange,
   alertRuleTypeId,
-  source,
+  element,
 }: {
   groups: Group[];
   timeRange: TimeRange;
   alertRuleTypeId: string;
-  source: AlertSource;
+  element: AlertSourcesElement;
 }) {
   const {
     http: {
@@ -76,8 +89,9 @@ export function Groups({
               {sourceLinks[group.field] ? (
                 <EuiLink
                   data-test-subj="o11yAlertSourceLink"
-                  data-source={`${source}-${alertRuleTypeId}`}
-                  data-action={`navigateTo-${group.field}`}
+                  data-ebt-action={getClickActionLabel(group.field)}
+                  data-ebt-element={element}
+                  data-ebt-detail={alertRuleTypeId}
                   href={sourceLinks[group.field]}
                 >
                   {group.value}

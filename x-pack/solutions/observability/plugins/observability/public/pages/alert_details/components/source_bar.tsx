@@ -13,7 +13,7 @@ import { ALERT_START, ALERT_END, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils
 import type { TimeRange } from '@kbn/es-query';
 import type { AlertDetailsSource } from '../types';
 import type { TopAlert } from '../../..';
-import { ALERT_SOURCE, Groups } from '../../../components/alert_sources/groups';
+import { ALERT_SOURCES_ELEMENT, Groups } from '../../../components/alert_sources/groups';
 import { getSources } from '../../../components/alert_sources/get_sources';
 
 export interface SourceBarProps {
@@ -51,7 +51,7 @@ export function SourceBar({ alert, sources = [] }: SourceBarProps) {
             groups={groups}
             timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
             alertRuleTypeId={alertRuleTypeId}
-            source={ALERT_SOURCE.ALERT_DETAILS}
+            element={ALERT_SOURCES_ELEMENT.ALERT_DETAILS}
           />
           {sources.map((field, idx) => {
             return (

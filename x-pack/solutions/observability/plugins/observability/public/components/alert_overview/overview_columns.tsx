@@ -20,7 +20,7 @@ import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside
 import type { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
 import { formatCase } from './helpers/format_cases';
 import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
-import { ALERT_SOURCE, Groups } from '../alert_sources/groups';
+import { ALERT_SOURCES_ELEMENT, Groups } from '../alert_sources/groups';
 import type { Group } from '../../../common/typings';
 
 /**
@@ -140,7 +140,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                 groups={groups}
                 timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
                 alertRuleTypeId={alertRuleTypeId}
-                source={ALERT_SOURCE.ALERT_FLYOUT}
+                element={ALERT_SOURCES_ELEMENT.ALERT_FLYOUT}
               />
             </div>
           );
