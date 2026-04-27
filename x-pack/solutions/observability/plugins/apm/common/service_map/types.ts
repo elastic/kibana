@@ -180,6 +180,11 @@ interface BaseNodeData extends Record<string, unknown> {
 
 export interface ServiceNodeData extends BaseNodeData {
   isService: true;
+  /**
+   * Embeddable / focused service map: marks the service the author asked users to
+   * focus on
+   */
+  contextHighlight?: boolean;
   agentName?: AgentName;
   serviceAnomalyStats?: ServiceAnomalyStats;
   /** Active alerts count for service map badges (merged client-side). */
