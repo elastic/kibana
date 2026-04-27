@@ -59,94 +59,9 @@ describe('muteAlertRoute', () => {
       query: {
         validateAlertsExistence: true,
       },
-      body: undefined,
     });
 
     expect(res.noContent).toHaveBeenCalled();
-  });
-
-  it('passes the conditional snooze body through to the rules client', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    muteAlertRoute(router, licenseState);
-
-    const [, handler] = router.post.mock.calls[0];
-
-    rulesClient.muteInstance.mockResolvedValueOnce();
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: {
-          rule_id: '1',
-          alert_id: '2',
-        },
-        query: {
-          validate_alerts_existence: false,
-        },
-        body: {
-          expires_at: '2026-04-14T12:00:00.000Z',
-          conditions: [{ type: 'field_change', field: 'host.name' }],
-          condition_operator: 'all',
-        },
-      },
-      ['noContent']
-    );
-
-    expect(await handler(context, req, res)).toEqual(undefined);
-
-    expect(rulesClient.muteInstance).toHaveBeenCalledWith({
-      params: {
-        alertId: '1',
-        alertInstanceId: '2',
-      },
-      query: {
-        validateAlertsExistence: false,
-      },
-      body: {
-        expiresAt: '2026-04-14T12:00:00.000Z',
-        conditions: [{ type: 'field_change', field: 'host.name' }],
-        conditionOperator: 'all',
-      },
-    });
-  });
-
-  it('treats a null body as backward-compatible no-body mute', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    muteAlertRoute(router, licenseState);
-
-    const [, handler] = router.post.mock.calls[0];
-
-    rulesClient.muteInstance.mockResolvedValueOnce();
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: {
-          rule_id: '1',
-          alert_id: '2',
-        },
-        query: {},
-        body: null,
-      },
-      ['noContent']
-    );
-
-    expect(await handler(context, req, res)).toEqual(undefined);
-
-    expect(rulesClient.muteInstance).toHaveBeenCalledWith({
-      params: {
-        alertId: '1',
-        alertInstanceId: '2',
-      },
-      query: {
-        validateAlertsExistence: true,
-      },
-      body: undefined,
-    });
   });
 
   it('ensures the rule type gets validated for the license', async () => {

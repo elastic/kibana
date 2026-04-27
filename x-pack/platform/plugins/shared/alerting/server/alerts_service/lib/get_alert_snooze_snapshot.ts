@@ -7,7 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+} from '@kbn/rule-data-utils';
 
 export interface GetAlertSnoozeSnapshotParams {
   indices: string[];
@@ -37,7 +42,10 @@ export async function getAlertSnoozeSnapshot({
       _source: fields,
       query: {
         bool: {
-          must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
+          must: [
+            { term: { [ALERT_RULE_UUID]: ruleId } },
+            { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+          ],
           filter: [{ term: { [ALERT_INSTANCE_ID]: alertId } }],
         },
       },

@@ -6,9 +6,11 @@
  */
 
 import type { MuteAlertBody } from '../../../../../../application/rule/methods/mute_alert/types';
-import type { MuteAlertRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/mute_alert';
+import type { SnoozeAlertRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/snooze_alert';
 
-export const transformRequestBodyToApplication = (body: MuteAlertRequestBodyV1): MuteAlertBody => ({
+export const transformRequestBodyToApplication = (
+  body: SnoozeAlertRequestBodyV1
+): MuteAlertBody => ({
   expiresAt: body.expires_at,
   conditions: body.conditions,
   conditionOperator: body.condition_operator,

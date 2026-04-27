@@ -6,56 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ISO_DATE_REGEX } from '../../../../schedule/constants';
-import {
-  MAX_SNOOZED_INSTANCE_CONDITIONS,
-  MAX_SNOOZED_CONDITION_FIELD_LENGTH,
-} from '../../../../../max_alert_limit';
-
-const validateIsoDate = (value: string) => {
-  if (!ISO_DATE_REGEX.test(value) || isNaN(Date.parse(value))) {
-    return `string is not a valid ISO date: ${value}. Use ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ`;
-  }
-};
-
-const snoozeConditionSchema = schema.oneOf([
-  schema.object(
-    {
-      type: schema.literal('field_change'),
-      field: schema.string({
-        maxLength: MAX_SNOOZED_CONDITION_FIELD_LENGTH,
-        meta: { description: 'The alert field path (dot-notation) to watch for changes.' },
-      }),
-    },
-    { meta: { description: 'Expires the snooze when a specific alert field changes value.' } }
-  ),
-  schema.object(
-    {
-      type: schema.literal('severity_change'),
-    },
-    { meta: { description: 'Expires the snooze when the alert severity changes.' } }
-  ),
-  schema.object(
-    {
-      type: schema.literal('severity_equals'),
-      value: schema.oneOf(
-        [
-          schema.literal('critical'),
-          schema.literal('high'),
-          schema.literal('medium'),
-          schema.literal('low'),
-          schema.literal('info'),
-        ],
-        {
-          meta: {
-            description: 'The severity level to match: critical, high, medium, low, or info.',
-          },
-        }
-      ),
-    },
-    { meta: { description: 'Expires the snooze when the alert severity equals a specific level.' } }
-  ),
-]);
 
 export const muteAlertParamsSchema = schema.object({
   rule_id: schema.string({
@@ -76,60 +26,9 @@ export const muteAlertQuerySchema = schema.maybe(
       schema.boolean({
         defaultValue: true,
         meta: {
-          description: 'Whether to validate the existence of the alert.',
+          description: 'Whether to validate the existence of the alert before muting.',
         },
       })
     ),
   })
-);
-
-export const muteAlertBodySchema = schema.object(
-  {
-    expires_at: schema.maybe(
-      schema.string({
-        validate: (value) => validateIsoDate(value),
-        meta: {
-          description:
-            'The datetime at which the snooze expires, in ISO 8601 format ' +
-            'YYYY-MM-DDTHH:mm:ss.sssZ. When omitted the snooze ' +
-            'persists until it is explicitly removed or a matching condition fires.',
-        },
-      })
-    ),
-    conditions: schema.maybe(
-      schema.arrayOf(snoozeConditionSchema, {
-        maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS,
-        meta: {
-          description:
-            'One or more conditions that, when met, automatically expire the snooze. ' +
-            'Supported types: field_change, severity_change, severity_equals.',
-        },
-      })
-    ),
-    condition_operator: schema.maybe(
-      schema.oneOf([schema.literal('any'), schema.literal('all')], {
-        meta: {
-          description:
-            'Logical operator applied to the conditions array. ' +
-            '"any" expires the snooze when at least one condition is met; ' +
-            '"all" requires every condition to be met. Requires conditions to be set.',
-        },
-      })
-    ),
-  },
-  {
-    validate: (value) => {
-      if (value.condition_operator !== undefined && value.conditions === undefined) {
-        return '[condition_operator] requires [conditions]';
-      }
-
-      if (value.expires_at === undefined && value.conditions === undefined) {
-        return 'either [expires_at] or [conditions] must be provided';
-      }
-
-      if (value.conditions !== undefined && value.conditions.length === 0) {
-        return '[conditions] must contain at least one condition';
-      }
-    },
-  }
 );

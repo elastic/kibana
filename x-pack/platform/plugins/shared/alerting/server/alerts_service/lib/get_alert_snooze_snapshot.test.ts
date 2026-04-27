@@ -29,7 +29,10 @@ describe('getAlertSnoozeSnapshot', () => {
       _source: ['host.name', 'kibana.alert.severity'],
       query: {
         bool: {
-          must: [{ term: { ['kibana.alert.rule.uuid']: 'test-rule-id' } }],
+          must: [
+            { term: { ['kibana.alert.rule.uuid']: 'test-rule-id' } },
+            { term: { ['kibana.alert.status']: 'active' } },
+          ],
           filter: [{ term: { ['kibana.alert.instance.id']: 'test-alert-id' } }],
         },
       },

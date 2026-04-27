@@ -3025,7 +3025,10 @@ describe('Alerts Service', () => {
             _source: ['host.name', 'kibana.alert.severity'],
             query: {
               bool: {
-                must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
                 filter: [{ term: { 'kibana.alert.instance.id': 'alert-1' } }],
               },
             },
