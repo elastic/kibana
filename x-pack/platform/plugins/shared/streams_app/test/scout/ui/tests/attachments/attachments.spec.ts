@@ -31,122 +31,100 @@ test.describe(
         endTime: new Date(currentTime).toISOString(),
         docsPerMinute: 1,
       });
-      test.beforeAll(async ({ logsSynthtraceEsClient, kbnClient, apiServices }) => {
-        // Enable attachments feature
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-        });
 
-        const currentTime = Date.now();
-        // Generate some logs to create the stream
-        await generateLogsData(logsSynthtraceEsClient)({
-          index: TEST_STREAM_NAME,
-          startTime: new Date(currentTime - 5 * 60 * 1000).toISOString(),
-          endTime: new Date(currentTime).toISOString(),
-          docsPerMinute: 1,
-        });
-
-        // Create a dashboard
-        await kbnClient.savedObjects.create({
-          type: 'dashboard',
-          id: TEST_DASHBOARD_ID,
-          overwrite: true,
-          attributes: {
-            title: 'Attachments Test Dashboard',
-            description: 'Dashboard for testing attachments',
-          },
-        });
-
-        // Create a rule
-        const ruleResponse = await apiServices.alerting.rules.create({
-          name: TEST_RULE_NAME,
-          ruleTypeId: '.index-threshold',
-          consumer: 'alerts',
-          enabled: false,
-          schedule: { interval: '1m' },
-          actions: [],
-          params: {
-            aggType: 'count',
-            termSize: 5,
-            thresholdComparator: '>',
-            timeWindowSize: 5,
-            timeWindowUnit: 'm',
-            groupBy: 'all',
-            threshold: [1000],
-            index: [TEST_STREAM_NAME],
-            timeField: '@timestamp',
-          },
-        });
-        ruleId = ruleResponse.data.id;
-
-        // Create an SLO
-        const sloResponse = await kbnClient.request<{ id: string }>({
-          path: '/api/observability/slos',
-          method: 'POST',
-          body: {
-            name: 'Attachments Test SLO',
-            description: 'SLO for testing attachments',
-            indicator: {
-              type: 'sli.kql.custom',
-              params: {
-                index: TEST_STREAM_NAME,
-                filter: '',
-                good: 'log.level : "INFO"',
-                total: '',
-                timestampField: '@timestamp',
-              },
-            },
-            budgetingMethod: 'occurrences',
-            timeWindow: {
-              duration: '30d',
-              type: 'rolling',
-            },
-            objective: {
-              target: 0.99,
-            },
-            tags: [],
-            settings: {
-              preventInitialBackfill: true,
-            },
-          },
-        });
-        sloId = sloResponse.data.id;
+      // Create a dashboard
+      await kbnClient.savedObjects.create({
+        type: 'dashboard',
+        id: TEST_DASHBOARD_ID,
+        overwrite: true,
+        attributes: {
+          title: 'Attachments Test Dashboard',
+          description: 'Dashboard for testing attachments',
+        },
       });
 
-      test.beforeEach(async ({ browserAuth }) => {
-        await browserAuth.loginAsAdmin();
+      // Create a rule
+      const ruleResponse = await apiServices.alerting.rules.create({
+        name: TEST_RULE_NAME,
+        ruleTypeId: '.index-threshold',
+        consumer: 'alerts',
+        enabled: false,
+        schedule: { interval: '1m' },
+        actions: [],
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000],
+          index: [TEST_STREAM_NAME],
+          timeField: '@timestamp',
+        },
       });
+      ruleId = ruleResponse.data.id;
 
-      test.afterAll(async ({ apiServices, kbnClient }) => {
-        // Delete the SLO
-        if (sloId) {
-          await kbnClient.request({
-            path: `/api/observability/slos/${sloId}`,
-            method: 'DELETE',
-          });
-        }
+      // Create an SLO
+      const sloResponse = await kbnClient.request<{ id: string }>({
+        path: '/api/observability/slos',
+        method: 'POST',
+        body: {
+          name: 'Attachments Test SLO',
+          description: 'SLO for testing attachments',
+          indicator: {
+            type: 'sli.kql.custom',
+            params: {
+              index: TEST_STREAM_NAME,
+              filter: '',
+              good: 'log.level : "INFO"',
+              total: '',
+              timestampField: '@timestamp',
+            },
+          },
+          budgetingMethod: 'occurrences',
+          timeWindow: {
+            duration: '30d',
+            type: 'rolling',
+          },
+          objective: {
+            target: 0.99,
+          },
+          tags: [],
+          settings: {
+            preventInitialBackfill: true,
+          },
+        },
+      });
+      sloId = sloResponse.data.id;
+    });
 
-        // Delete the rule
-        if (ruleId) {
-          await apiServices.alerting.rules.delete(ruleId);
-        }
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
+    });
 
-        // Delete the dashboard
-        await kbnClient.savedObjects.delete({
-          type: 'dashboard',
-          id: TEST_DASHBOARD_ID,
+    test.afterAll(async ({ apiServices, kbnClient }) => {
+      // Delete the SLO
+      if (sloId) {
+        await kbnClient.request({
+          path: `/api/observability/slos/${sloId}`,
+          method: 'DELETE',
         });
+      }
 
-        // Delete the stream
-        await apiServices.streams.deleteStream(TEST_STREAM_NAME);
+      // Delete the rule
+      if (ruleId) {
+        await apiServices.alerting.rules.delete(ruleId);
+      }
+
+      // Delete the dashboard
+      await kbnClient.savedObjects.delete({
+        type: 'dashboard',
+        id: TEST_DASHBOARD_ID,
       });
+
       // Delete the stream
       await apiServices.streams.deleteStream(TEST_STREAM_NAME);
-
-      // Disable attachments feature
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
-      });
     });
 
     test('shows empty attachments prompt when navigating to attachments tab', async ({
