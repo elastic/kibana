@@ -392,7 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(opampAgent.metrics?.memory_size_byte_avg).to.eql('1500');
-      expect(opampAgent.metrics?.cpu_avg).to.eql('0.1');
+      expect(opampAgent.metrics?.cpu_avg).to.eql('0.16666');
 
       await es.delete({
         id: 'opamp-agent-with-metrics',
