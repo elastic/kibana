@@ -10,7 +10,7 @@
 import React from 'react';
 import { getActionsColumn } from './actions_column';
 import type { RowControlColumn } from '@kbn/discover-utils';
-import { render, within, screen } from '@testing-library/react';
+import { render, within, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as actionsHeader from './actions_header';
 import { UnifiedDataTableContext } from '../../../table_context';
@@ -409,8 +409,10 @@ describe('getActionsColumn', () => {
       expect(screen.getByLabelText('Additional actions')).toBeVisible();
       await user.click(screen.getByLabelText('Additional actions'));
 
-      rowAdditionalLeadingControls.slice(1).forEach((control) => {
-        expect(screen.getByTestId(`unifiedDataTable_rowMenu_${control.id}`)).toBeVisible();
+      await waitFor(() => {
+        rowAdditionalLeadingControls.slice(1).forEach((control) => {
+          expect(screen.getByTestId(`unifiedDataTable_rowMenu_${control.id}`)).toBeVisible();
+        });
       });
     });
   });

@@ -1,0 +1,89 @@
+{
+  "sha1": "c9e08e1f6e5e2df195712a5141cda63dd0f39228",
+  "tests": [
+    {
+      "id": "f6d065371af5227-8e2fb993048f286",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "f6d065371af5227-6c2001b07df0ffc",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy rejects malformed create payloads at the Kibana schema layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
+        "line": 133,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-36a05fbd4d8d379",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should discover OAuth protected resource metadata from Kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-1938dceffe88c67",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should discover authorization server metadata from UIAM OAuth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-ad57d16ac34e2f2",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should return 401 with WWW-Authenticate resource_metadata on unauthenticated MCP request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-dd2663dbe7f9004",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should complete full MCP handshake with OAuth token via SDK client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 148,
+        "column": 12
+      }
+    }
+  ]
+}

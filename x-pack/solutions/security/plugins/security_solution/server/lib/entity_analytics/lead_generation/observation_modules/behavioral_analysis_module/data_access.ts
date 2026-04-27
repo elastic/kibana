@@ -57,6 +57,9 @@ const parseEntityBuckets = (
   }
 };
 
+/** Maximum entity name buckets requested per ES aggregation call. */
+const ENTITY_BUCKET_LIMIT = 500;
+
 export const fetchAlertSummariesForEntities = async (
   esClient: ElasticsearchClient,
   alertsIndexPattern: string,
@@ -98,7 +101,13 @@ export const fetchAlertSummariesForEntities = async (
       aggs: Object.fromEntries(
         Object.keys(namesByType).map((type) => [
           `by_${type}`,
-          { terms: { field: `${type}.name`, size: entities.length }, aggs: alertSubAggs() },
+          {
+            terms: {
+              field: `${type}.name`,
+              size: Math.min(namesByType[type].length, ENTITY_BUCKET_LIMIT),
+            },
+            aggs: alertSubAggs(),
+          },
         ])
       ),
     });

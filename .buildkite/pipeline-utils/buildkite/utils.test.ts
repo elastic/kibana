@@ -11,13 +11,13 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 jest.mock('child_process', () => ({
   execFileSync: jest.fn(),
 }));
 
-import { getPipeline } from './utils';
+import { getPipeline, flushCancelOnGateFailureMetadata, _resetPendingCancelKeys } from './utils';
 
 const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
@@ -27,6 +27,7 @@ describe('getPipeline', () => {
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'buildkite-utils-'));
     execFileSyncMock.mockReset();
+    _resetPendingCancelKeys();
   });
 
   afterEach(() => {
@@ -65,13 +66,13 @@ describe('getPipeline', () => {
 `);
 
     getPipeline(filename, { cancelOnGateFailure: true });
+    flushCancelOnGateFailureMetadata();
 
-    expect(execFileSyncMock).toHaveBeenCalledWith('buildkite-agent', [
-      'meta-data',
-      'set',
-      'cancel_on_gate_failure:test_step',
-      'true',
-    ]);
+    expect(execFileSyncMock).toHaveBeenCalledWith(
+      'buildkite-agent',
+      ['meta-data', 'set', 'cancel_on_gate_failure_batch:pipeline'],
+      { input: JSON.stringify(['test_step']), stdio: ['pipe', 'inherit', 'inherit'] }
+    );
   });
 
   it('still throws when an active step is missing a key', () => {
@@ -91,8 +92,8 @@ describe('getPipeline', () => {
       'utf8'
     );
 
-    // Extract step keys from the manual registration loop in pipeline.ts
-    const manualKeysMatch = pipelineSource.match(/for \(const stepKey of \[([^\]]+)\]\)/s);
+    // Extract step keys from the registerCancelKeys([...]) call in pipeline.ts
+    const manualKeysMatch = pipelineSource.match(/registerCancelKeys\(\[([^\]]+)\]\)/s);
     expect(manualKeysMatch).not.toBeNull();
 
     const manualKeys = [...manualKeysMatch![1].matchAll(/'([^']+)'/g)].map(([, key]) => key);

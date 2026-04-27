@@ -7,60 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTab } from '@elastic/eui';
 import { VIEW_MODE } from '../../../common/constants';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DocumentViewModeToggle } from './view_mode_toggle';
-import { BehaviorSubject } from 'rxjs';
 import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
-import type { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { act } from 'react-dom/test-utils';
 import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
-import type { DiscoverServices } from '../../build_services';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('Document view mode toggle component', () => {
-  const mountComponent = async ({
+  const renderComponent = async ({
     showFieldStatistics = true,
     viewMode = VIEW_MODE.DOCUMENT_LEVEL,
     isEsqlMode = false,
     setDiscoverViewMode = jest.fn(),
     useDataViewWithTextFields = true,
   } = {}) => {
-    const services = {
-      ...createDiscoverServicesMock(),
-      uiSettings: {
-        get: () => showFieldStatistics,
-      },
-      aiops: {
-        getPatternAnalysisAvailable: jest
-          .fn()
-          .mockResolvedValue(jest.fn(() => useDataViewWithTextFields)),
-      },
-    } as unknown as DiscoverServices;
+    const services = createDiscoverServicesMock();
 
-    const dataViewWithTextFields = {
-      fields: [
-        {
-          name: 'field1',
-          esTypes: [ES_FIELD_TYPES.TEXT],
-        },
-      ],
-    } as unknown as DataView;
+    services.uiSettings.get = jest.fn().mockReturnValue(showFieldStatistics);
+    services.aiops!.getPatternAnalysisAvailable = jest
+      .fn()
+      .mockResolvedValue(jest.fn(() => useDataViewWithTextFields));
 
-    const dataViewWithoutTextFields = {
-      fields: [
-        {
-          name: 'field1',
-          esTypes: [ES_FIELD_TYPES.FLOAT],
-        },
-      ],
-    } as unknown as DataView;
+    const dataView = buildDataViewMock({ name: 'logs-*' });
 
     const toolkit = getDiscoverInternalStateMock({ services });
 
@@ -70,105 +44,134 @@ describe('Document view mode toggle component', () => {
       tabId: toolkit.getCurrentTab().id,
     });
 
-    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+    dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: 10,
-    }) as DataTotalHits$;
+    });
 
-    const component = mountWithIntl(
+    renderWithKibanaRenderContext(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
           setDiscoverViewMode={setDiscoverViewMode}
-          dataView={useDataViewWithTextFields ? dataViewWithTextFields : dataViewWithoutTextFields}
+          dataView={dataView}
         />
       </DiscoverToolkitTestProvider>
     );
 
-    await act(async () => {
-      component.update();
+    await waitFor(() => {
+      expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
     });
-    component!.update();
-    return component!;
+
+    return { setDiscoverViewMode };
   };
 
   it('should render if SHOW_FIELD_STATISTICS is true', async () => {
-    const component = await mountComponent();
-    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(true);
-    expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
+    await renderComponent();
 
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').text()).toBe('Documents (10)');
+    expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
+
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toHaveTextContent('Documents (10)');
   });
 
   it('should not render if SHOW_FIELD_STATISTICS is false', async () => {
-    const component = await mountComponent({ showFieldStatistics: false });
-    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(true);
-    expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
+    await renderComponent({ showFieldStatistics: false });
 
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
+    expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
+
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeVisible();
+    expect(screen.queryByTestId('dscViewModeFieldStatsButton')).not.toBeInTheDocument();
   });
 
   it('should not show document and field stats view if ES|QL', async () => {
-    const component = await mountComponent({ isEsqlMode: true });
-    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
-    expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
+    await renderComponent({ isEsqlMode: true });
 
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(false);
-    expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(false);
-    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
-    expect(findTestSubject(component, 'discoverQueryHits').text()).toBe('10');
+    expect(screen.queryByTestId('dscViewModeToggle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
+
+    expect(screen.queryByTestId('dscViewModeDocumentButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscViewModePatternAnalysisButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscViewModeFieldStatsButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('10');
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', async () => {
     const setDiscoverViewMode = jest.fn();
-    const component = await mountComponent({ setDiscoverViewMode });
-    component.find('[data-test-subj="dscViewModeDocumentButton"]').at(0).simulate('click');
+    const user = userEvent.setup();
+
+    await renderComponent({ setDiscoverViewMode });
+    await user.click(screen.getByTestId('dscViewModeDocumentButton'));
+
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL);
   });
 
   it('should set the view mode to VIEW_MODE.PATTERN_LEVEL when dscViewModePatternAnalysisButton is clicked', async () => {
     const setDiscoverViewMode = jest.fn();
-    const component = await mountComponent({ setDiscoverViewMode });
-    component.find('[data-test-subj="dscViewModePatternAnalysisButton"]').at(0).simulate('click');
+    const user = userEvent.setup();
+
+    await renderComponent({ setDiscoverViewMode });
+    await user.click(screen.getByTestId('dscViewModePatternAnalysisButton'));
+
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.PATTERN_LEVEL);
   });
 
   it('should set the view mode to VIEW_MODE.AGGREGATED_LEVEL when dscViewModeFieldStatsButton is clicked', async () => {
     const setDiscoverViewMode = jest.fn();
-    const component = await mountComponent({ setDiscoverViewMode });
-    component.find('[data-test-subj="dscViewModeFieldStatsButton"]').at(0).simulate('click');
+    const user = userEvent.setup();
+
+    await renderComponent({ setDiscoverViewMode });
+    await user.click(screen.getByTestId('dscViewModeFieldStatsButton'));
+
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.AGGREGATED_LEVEL);
   });
 
   it('should select the Documents tab if viewMode is VIEW_MODE.DOCUMENT_LEVEL', async () => {
-    const component = await mountComponent();
-    expect(component.find(EuiTab).at(0).prop('isSelected')).toBe(true);
+    await renderComponent();
+
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('should select the Pattern Analysis tab if viewMode is VIEW_MODE.PATTERN_LEVEL', async () => {
-    const component = await mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
-    expect(component.find(EuiTab).at(1).prop('isSelected')).toBe(true);
+    await renderComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
+
+    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('should select the Field statistics tab if viewMode is VIEW_MODE.AGGREGATED_LEVEL', async () => {
-    const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
-    expect(component.find(EuiTab).at(2).prop('isSelected')).toBe(true);
+    await renderComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
+
+    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('should switch to document and hide pattern tab when there are no text fields', async () => {
     const setDiscoverViewMode = jest.fn();
-    const component = await mountComponent({
+
+    await renderComponent({
       viewMode: VIEW_MODE.PATTERN_LEVEL,
       useDataViewWithTextFields: false,
       setDiscoverViewMode,
     });
+
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL, true);
-    expect(component.find(EuiTab).length).toBe(2);
+    await waitFor(() => {
+      expect(screen.queryByTestId('dscViewModePatternAnalysisButton')).not.toBeInTheDocument();
+    });
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
 });

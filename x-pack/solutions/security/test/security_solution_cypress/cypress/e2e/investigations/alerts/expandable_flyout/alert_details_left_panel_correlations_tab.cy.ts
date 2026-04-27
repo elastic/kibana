@@ -82,7 +82,7 @@ describe('Expandable flyout left panel correlations', { tags: ['@ess', '@serverl
     cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('exist');
     cy.get(CORRELATIONS_SOURCE_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
       'contain.text',
-      'Investigate in timeline'
+      'Investigate in Timeline'
     );
 
     cy.log('related alerts by session');
@@ -91,7 +91,7 @@ describe('Expandable flyout left panel correlations', { tags: ['@ess', '@serverl
     cy.get(CORRELATIONS_SESSION_SECTION_TABLE).should('exist');
     cy.get(CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
       'contain.text',
-      'Investigate in timeline'
+      'Investigate in Timeline'
     );
 
     cy.log('related alerts by ancestry');
@@ -103,7 +103,7 @@ describe('Expandable flyout left panel correlations', { tags: ['@ess', '@serverl
     cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('exist');
     cy.get(CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
       'contain.text',
-      'Investigate in timeline'
+      'Investigate in Timeline'
     );
   });
 });

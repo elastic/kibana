@@ -16,6 +16,7 @@ export const FieldType = {
   DATE_PICKER: 'DATE_PICKER',
   CHECKBOX_GROUP: 'CHECKBOX_GROUP',
   RADIO_GROUP: 'RADIO_GROUP',
+  USER_PICKER: 'USER_PICKER',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -134,6 +135,19 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .optional(),
 });
 
+export const UserPickerDefaultSchema = z.array(z.object({ uid: z.string(), name: z.string() }));
+
+export const UserPickerFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.USER_PICKER),
+  metadata: z
+    .object({
+      multiple: z.boolean().optional(),
+      default: UserPickerDefaultSchema.optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
+});
+
 const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
 
 export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
@@ -153,7 +167,7 @@ export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
     .superRefine((meta, ctx) => {
       if (meta.default === undefined) return;
       const invalidValues = (meta.default as string[]).filter(
-        (v) => !(meta.options as string[]).includes(v)
+        (v) => v !== '' && !(meta.options as string[]).includes(v)
       );
       if (invalidValues.length > 0) {
         ctx.addIssue({
@@ -179,6 +193,7 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
     .superRefine((meta, ctx) => {
       if (
         meta.default !== undefined &&
+        meta.default !== '' &&
         !(meta.options as string[]).includes(meta.default as string)
       ) {
         ctx.addIssue({
@@ -198,6 +213,7 @@ export const FieldSchema = z.discriminatedUnion('control', [
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
 ]);

@@ -16,20 +16,24 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
+const ROOT_STREAM_NAMES = ['logs.ecs', 'logs.otel'];
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
 test.describe('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
+  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);
+    for (const rootStreamName of ROOT_STREAM_NAMES) {
+      await apiServices.streams.restoreDataStream(rootStreamName);
+    }
     await createRootStreamViews(esClient);
     await pageObjects.streams.gotoStreamMainPage();
   });
 
   test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+    await deleteRootStreamViews(esClient);
     for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
       const esqlViewName = `$.${streamName}`;
-      await deleteRootStreamViews(esClient);
       await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
     }
     await disableQueryStreams(kbnClient);
@@ -94,10 +98,6 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
 
     // child query stream created appears in the UI
     await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();
-    // Wait for query mode to be unselected before we click it
-    await expect(
-      pageObjects.streams.childStreamTypeSelector.getByTestId('queryMode')
-    ).toHaveAttribute('aria-pressed', 'false');
     await pageObjects.streams.selectChildStreamType('Query');
     await expect(
       page.getByTestId(`queryStream-${parentStreamName}.${childStreamName}`)
@@ -114,5 +114,21 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     expect(response.views?.length).toBeGreaterThanOrEqual(1);
     expect(response.views![0].name).toBe(viewName);
     expect(response.views![0].query).toBe(esqlQuery);
+  });
+
+  test('rejects invalid child query stream names inline', async ({ page, pageObjects }) => {
+    const parentStreamName = 'logs.ecs';
+
+    await pageObjects.streams.clickStreamNameLink(parentStreamName);
+    await pageObjects.streams.gotoPartitioningTab(parentStreamName);
+    await pageObjects.streams.selectChildStreamType('Query');
+    await pageObjects.streams.clickQueryModeCreateQueryStreamButton();
+
+    await pageObjects.streams.fillRoutingRuleName('InvalidName');
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue('FROM $.logs.ecs');
+
+    const saveButton = page.getByTestId('streamsAppQueryStreamFormSaveButton');
+    await expect(saveButton).toBeDisabled();
   });
 });

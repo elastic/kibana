@@ -17,7 +17,7 @@ import {
   isRootStreamDefinition,
   Streams,
 } from '@kbn/streams-schema';
-import { parseDurationInSeconds } from '../../../../stream_management/data_management/stream_detail_lifecycle/helpers/helpers';
+import { parseDurationInSeconds } from '../../../../../util/parse_duration';
 
 const SORTABLE_FIELDS = ['nameSortKey'] as const;
 
@@ -191,6 +191,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
     data_stream: node.data_stream,
+    privileges: node.privileges,
     nameSortKey,
     documentsCount: 0,
     retentionMs,

@@ -37,13 +37,14 @@ interface RetryServiceLike {
 
 type MaintainerRoutesLike = Pick<
   ReturnType<typeof entityMaintainerRouteHelpersFactory>,
-  'getMaintainers' | 'runMaintainer'
+  'getMaintainers' | 'runMaintainer' | 'runMaintainerSync' | 'startMaintainer' | 'stopMaintainer'
 >;
 
 interface EntityStoreUtilsLike {
   installEntityStoreV2: (body?: {
     entityTypes: string[];
     dataViewPattern?: string;
+    maintainerAutoStart?: boolean;
   }) => Promise<unknown>;
   forceUpdateEntityViaCrud: (params: {
     entityType: EntityType;
@@ -348,15 +349,29 @@ export const riskScoreMaintainerScenarioFactory = ({
   const installAndRunMaintainer = async ({
     entityTypes = ['user', 'host'],
     dataViewPattern,
+    runMode = 'sync',
     minRuns = 1,
     timeoutMs = 60_000,
   }: {
     entityTypes?: string[];
     dataViewPattern?: string;
+    runMode?: 'sync' | 'async';
     minRuns?: number;
     timeoutMs?: number;
   } = {}) => {
-    await entityStoreUtils.installEntityStoreV2({ entityTypes, dataViewPattern });
+    await entityStoreUtils.installEntityStoreV2({
+      entityTypes,
+      dataViewPattern,
+      maintainerAutoStart: false,
+    });
+    await routes.stopMaintainer('risk-score');
+
+    if (runMode === 'sync') {
+      await routes.runMaintainerSync('risk-score');
+      return;
+    }
+
+    await routes.startMaintainer('risk-score');
     await waitForMaintainerRun({ retry, routes, minRuns, timeoutMs });
   };
 
@@ -430,6 +445,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     riskScoreOverride,
     entityTypes = ['user', 'host'],
     dataViewPattern,
+    runMode = 'sync',
     minRuns = 1,
     timeoutMs = 60_000,
   }: {
@@ -440,6 +456,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     riskScoreOverride?: string;
     entityTypes?: string[];
     dataViewPattern?: string;
+    runMode?: 'sync' | 'async';
     minRuns?: number;
     timeoutMs?: number;
   }) => {
@@ -451,7 +468,7 @@ export const riskScoreMaintainerScenarioFactory = ({
       maxSignals,
       riskScoreOverride,
     });
-    await installAndRunMaintainer({ entityTypes, dataViewPattern, minRuns, timeoutMs });
+    await installAndRunMaintainer({ entityTypes, dataViewPattern, runMode, minRuns, timeoutMs });
     return { documentIds, testEntities };
   };
 

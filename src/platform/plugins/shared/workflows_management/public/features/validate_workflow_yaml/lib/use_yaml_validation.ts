@@ -15,6 +15,7 @@ import { collectAllCustomPropertyItems } from './collect_all_custom_property_ite
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
+import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
@@ -146,6 +147,7 @@ export function useYamlValidation(
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
           ? [
+              ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
             ]

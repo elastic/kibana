@@ -294,7 +294,7 @@ export const createRuleAttachmentDefinition = ({
     }),
   getIcon: () => 'securityApp',
   renderInlineContent: (props) => <RuleInlineContent {...props} />,
-  getActionButtons: ({ attachment }) => {
+  getActionButtons: ({ attachment, openSidebarConversation }) => {
     const rule = parseRuleFromAttachment(attachment);
     const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
     if (!rule || !canEditRules) {
@@ -320,6 +320,7 @@ export const createRuleAttachmentDefinition = ({
             application.navigateToApp('securitySolutionUI', {
               path: '/rules/create',
             });
+            openSidebarConversation?.();
           }
         },
       },

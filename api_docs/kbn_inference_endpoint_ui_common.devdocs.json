@@ -11,7 +11,7 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, focusTrapProps, allowedTaskTypes, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, focusTrapProps, allowedTaskTypes, excludeProviders, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
         "lineNumber": 114,
@@ -24,7 +24,7 @@
             "id": "def-public.InferenceFlyoutWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  enableEisPromoTour,\n  focusTrapProps,\n  allowedTaskTypes,\n}",
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  focusTrapProps,\n  allowedTaskTypes,\n  excludeProviders,\n}",
             "description": [],
             "signature": [
               "InferenceFlyoutWrapperProps"
@@ -48,7 +48,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, enableEisPromoTour, allowedTaskTypes, }, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, allowedTaskTypes, excludeProviders, }, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "lineNumber": 124,
@@ -61,7 +61,7 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    enableEisPromoTour,\n    allowedTaskTypes,\n  },\n}",
+            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    allowedTaskTypes,\n    excludeProviders,\n  },\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
@@ -1928,6 +1928,37 @@
                 ]
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.mistral",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.mistral]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.mistral.hidden",
+                "type": "Array",
+                "tags": [],
+                "label": "hidden",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
+                "lineNumber": 141,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1940,7 +1971,7 @@
         "label": "SERVICE_PROVIDERS",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-        "lineNumber": 65,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1953,7 +1984,7 @@
             "label": "[ServiceProviderKeys.amazonbedrock]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 66,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1966,7 +1997,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 67,
+                "lineNumber": 66,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1979,7 +2010,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 68,
+                "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1995,7 +2026,7 @@
                   "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 69,
+                "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2010,7 +2041,7 @@
             "label": "[ServiceProviderKeys.amazon_sagemaker]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 71,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2023,7 +2054,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 72,
+                "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2036,7 +2067,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 73,
+                "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2052,7 +2083,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 74,
+                "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2067,7 +2098,7 @@
             "label": "[ServiceProviderKeys.azureaistudio]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 76,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2080,7 +2111,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 77,
+                "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2093,7 +2124,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 78,
+                "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2109,7 +2140,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 79,
+                "lineNumber": 78,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2124,7 +2155,7 @@
             "label": "[ServiceProviderKeys.azureopenai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 81,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2137,7 +2168,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 82,
+                "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2150,7 +2181,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 83,
+                "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2166,7 +2197,7 @@
                   "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 84,
+                "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2181,7 +2212,7 @@
             "label": "[ServiceProviderKeys.anthropic]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 86,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2194,7 +2225,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 87,
+                "lineNumber": 86,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2207,7 +2238,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 88,
+                "lineNumber": 87,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2223,7 +2254,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 89,
+                "lineNumber": 88,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2238,7 +2269,7 @@
             "label": "[ServiceProviderKeys.cohere]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 91,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2251,7 +2282,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 92,
+                "lineNumber": 91,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2264,7 +2295,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 93,
+                "lineNumber": 92,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2280,7 +2311,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 94,
+                "lineNumber": 93,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2295,7 +2326,7 @@
             "label": "[ServiceProviderKeys.contextualai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 96,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2308,7 +2339,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 97,
+                "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2321,7 +2352,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 98,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2337,7 +2368,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 99,
+                "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2352,7 +2383,7 @@
             "label": "[ServiceProviderKeys.elasticsearch]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 101,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2365,7 +2396,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 102,
+                "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2378,7 +2409,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 103,
+                "lineNumber": 102,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2394,7 +2425,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 104,
+                "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2409,7 +2440,7 @@
             "label": "[ServiceProviderKeys.elastic]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 106,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2422,7 +2453,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 107,
+                "lineNumber": 106,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2435,7 +2466,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 108,
+                "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2451,7 +2482,7 @@
                   "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 109,
+                "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2466,7 +2497,7 @@
             "label": "[ServiceProviderKeys.fireworksai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 111,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2479,7 +2510,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 112,
+                "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2492,7 +2523,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 113,
+                "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2508,7 +2539,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 114,
+                "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2523,7 +2554,7 @@
             "label": "[ServiceProviderKeys.googleaistudio]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 116,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2536,7 +2567,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 117,
+                "lineNumber": 116,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2549,7 +2580,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 118,
+                "lineNumber": 117,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2565,7 +2596,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 119,
+                "lineNumber": 118,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2580,7 +2611,7 @@
             "label": "[ServiceProviderKeys.googlevertexai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 121,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2593,7 +2624,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 122,
+                "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2606,7 +2637,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 123,
+                "lineNumber": 122,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2622,7 +2653,7 @@
                   "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 124,
+                "lineNumber": 123,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2637,7 +2668,7 @@
             "label": "[ServiceProviderKeys.hugging_face]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 126,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2650,7 +2681,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 127,
+                "lineNumber": 126,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2663,7 +2694,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 128,
+                "lineNumber": 127,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2679,7 +2710,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 129,
+                "lineNumber": 128,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2694,7 +2725,7 @@
             "label": "[ServiceProviderKeys.mistral]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 131,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2707,7 +2738,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 132,
+                "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2720,7 +2751,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 133,
+                "lineNumber": 132,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2736,7 +2767,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 134,
+                "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2751,7 +2782,7 @@
             "label": "[ServiceProviderKeys.nvidia]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 136,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2764,7 +2795,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 137,
+                "lineNumber": 136,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2777,7 +2808,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 138,
+                "lineNumber": 137,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2793,7 +2824,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 139,
+                "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2808,7 +2839,7 @@
             "label": "[ServiceProviderKeys.openai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 141,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2821,7 +2852,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 142,
+                "lineNumber": 141,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2834,7 +2865,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 143,
+                "lineNumber": 142,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2850,7 +2881,7 @@
                   "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 144,
+                "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2865,7 +2896,7 @@
             "label": "[ServiceProviderKeys['alibabacloud-ai-search']]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 146,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2878,7 +2909,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 147,
+                "lineNumber": 146,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2891,7 +2922,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 148,
+                "lineNumber": 147,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2907,7 +2938,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 149,
+                "lineNumber": 148,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2922,7 +2953,7 @@
             "label": "[ServiceProviderKeys.watsonxai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 151,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2935,7 +2966,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 152,
+                "lineNumber": 151,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2948,7 +2979,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 153,
+                "lineNumber": 152,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2964,7 +2995,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 154,
+                "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2979,7 +3010,7 @@
             "label": "[ServiceProviderKeys.jinaai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 156,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2992,7 +3023,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 157,
+                "lineNumber": 156,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3005,7 +3036,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 158,
+                "lineNumber": 157,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3021,7 +3052,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 159,
+                "lineNumber": 158,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3036,7 +3067,7 @@
             "label": "[ServiceProviderKeys.voyageai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 161,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3049,7 +3080,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 162,
+                "lineNumber": 161,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3062,7 +3093,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 163,
+                "lineNumber": 162,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3078,7 +3109,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 164,
+                "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3093,7 +3124,7 @@
             "label": "[ServiceProviderKeys.deepseek]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 166,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3106,7 +3137,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 167,
+                "lineNumber": 166,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3119,7 +3150,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 168,
+                "lineNumber": 167,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3135,7 +3166,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 169,
+                "lineNumber": 168,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3150,7 +3181,7 @@
             "label": "[ServiceProviderKeys.ai21]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 171,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3163,7 +3194,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 172,
+                "lineNumber": 171,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3176,7 +3207,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 173,
+                "lineNumber": 172,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3192,7 +3223,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 174,
+                "lineNumber": 173,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3207,7 +3238,7 @@
             "label": "[ServiceProviderKeys.llama]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 176,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3220,7 +3251,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 177,
+                "lineNumber": 176,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3233,7 +3264,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 178,
+                "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3249,7 +3280,7 @@
                   "\"Search\"[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 179,
+                "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3264,7 +3295,7 @@
             "label": "[ServiceProviderKeys.groq]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-            "lineNumber": 181,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3277,7 +3308,7 @@
                 "label": "icon",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 182,
+                "lineNumber": 181,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3290,7 +3321,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 183,
+                "lineNumber": 182,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3306,7 +3337,7 @@
                   "(\"Search\" | \"Observability\" | \"Security\")[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
-                "lineNumber": 184,
+                "lineNumber": 183,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3375,6 +3406,87 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.TASK_TYPE_DESCRIPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "TASK_TYPE_DESCRIPTIONS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+        "lineNumber": 160,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.text_embedding",
+            "type": "string",
+            "tags": [],
+            "label": "text_embedding",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.sparse_embedding",
+            "type": "string",
+            "tags": [],
+            "label": "sparse_embedding",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.rerank",
+            "type": "string",
+            "tags": [],
+            "label": "rerank",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.completion",
+            "type": "string",
+            "tags": [],
+            "label": "completion",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.TASK_TYPE_DESCRIPTIONS.chat_completion",
+            "type": "string",
+            "tags": [],
+            "label": "chat_completion",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/translations.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

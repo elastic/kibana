@@ -676,7 +676,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SaveModalDashboardProps",
-        "description": [],
+        "description": [
+          "Props for the save modal with dashboard options."
+        ],
         "signature": [
           {
             "pluginId": "presentationUtil",
@@ -688,7 +690,7 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-        "lineNumber": 18,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -699,12 +701,14 @@
             "type": "Object",
             "tags": [],
             "label": "documentInfo",
-            "description": [],
+            "description": [
+              "Information about the document being saved."
+            ],
             "signature": [
               "SaveModalDocumentInfo"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -715,9 +719,11 @@
             "type": "boolean",
             "tags": [],
             "label": "canSaveByReference",
-            "description": [],
+            "description": [
+              "Whether the object can be saved by reference."
+            ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -728,9 +734,11 @@
             "type": "string",
             "tags": [],
             "label": "objectType",
-            "description": [],
+            "description": [
+              "The type of object being saved."
+            ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -741,12 +749,14 @@
             "type": "Function",
             "tags": [],
             "label": "onClose",
-            "description": [],
+            "description": [
+              "Callback invoked when the modal is closed."
+            ],
             "signature": [
               "() => void"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 22,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -759,7 +769,9 @@
             "type": "Function",
             "tags": [],
             "label": "onSave",
-            "description": [],
+            "description": [
+              "Callback invoked when the save action is triggered."
+            ],
             "signature": [
               "(props: ",
               {
@@ -772,7 +784,7 @@
               " & { dashboardId: string | null; addToLibrary: boolean; }) => Promise<T>"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 23,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -795,7 +807,7 @@
                   " & { dashboardId: string | null; addToLibrary: boolean; }"
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-                "lineNumber": 24,
+                "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -810,7 +822,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "tagOptions",
-            "description": [],
+            "description": [
+              "Optional tag selector element or render function."
+            ],
             "signature": [
               "React.ReactNode | ((state: ",
               {
@@ -823,7 +837,7 @@
               ") => React.ReactNode)"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -834,15 +848,134 @@
             "type": "string",
             "tags": [],
             "label": "mustCopyOnSaveMessage",
-            "description": [],
+            "description": [
+              "Message displayed when the user must copy on save."
+            ],
             "signature": [
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.customModalTitle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "customModalTitle",
+            "description": [
+              "Custom title for the save modal."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.hideDashboardOptions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideDashboardOptions",
+            "description": [
+              "Whether to hide the dashboard destination options."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.forceSaveByReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forceSaveByReference",
+            "description": [
+              "Whether to always save by reference and hide the add-to-library checkbox."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.initialDashboardOption",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialDashboardOption",
+            "description": [
+              "The initially selected dashboard saving option."
+            ],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.DashboardSavingOption",
+                "text": "DashboardSavingOption"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.onCopyOnSaveChangeCb",
+            "type": "Function",
+            "tags": [],
+            "label": "onCopyOnSaveChangeCb",
+            "description": [
+              "Callback invoked when the copy-on-save option changes."
+            ],
+            "signature": [
+              "((newCopyOnSave: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.SaveModalDashboardProps.onCopyOnSaveChangeCb.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "newCopyOnSave",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -865,6 +998,25 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.DashboardSavingOption",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardSavingOption",
+        "description": [
+          "The options for saving a dashboard."
+        ],
+        "signature": [
+          "\"new\" | \"existing\" | null"
+        ],
+        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "presentationUtil",
         "id": "def-public.PanelSettings",

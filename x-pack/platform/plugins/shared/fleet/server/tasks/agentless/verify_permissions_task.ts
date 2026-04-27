@@ -26,12 +26,16 @@ import { throwIfAborted } from '../utils';
 
 const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
-const TASK_TIMEOUT = '5m';
+const TASK_TIMEOUT = '1d';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const TASK_INTERVAL = '5m';
+const TASK_INTERVAL = '12h';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const VERIFICATION_TTL_MS = 5 * 60 * 1000;
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
+/** Buffer added to VERIFICATION_TTL_MS when computing `runAt` for the next run, so
+ *  Phase 1 cleanup reliably sees the just-created verifier as expired on the
+ *  next fire (protects against clock skew and task-manager polling jitter). */
+const RESCHEDULE_BUFFER_MS = 30 * 1000;
 
 export function registerVerifyPermissionsTask(taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
@@ -47,7 +51,18 @@ export function registerVerifyPermissionsTask(taskManager: TaskManagerSetupContr
       }) => {
         return {
           run: async () => {
-            await runPermissionVerifierTask(abortController);
+            const { shouldReschedule } = await runPermissionVerifierTask(abortController);
+            // If more work remains (either a gating verifier will soon expire, or
+            // additional eligible connectors are waiting), ask task manager to fire
+            // the task again shortly after the current verifier's TTL elapses.
+            // This keeps verifier deployments serial (one at a time) while draining
+            // the backlog in O(N * TTL) instead of O(N * TASK_INTERVAL).
+            if (shouldReschedule) {
+              return {
+                runAt: new Date(Date.now() + VERIFICATION_TTL_MS + RESCHEDULE_BUFFER_MS),
+                state: taskInstance.state,
+              };
+            }
           },
         };
       },
@@ -76,7 +91,8 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
 }
 
 /*
- * Task flow (runs every 5 minutes):
+ * Task flow (fires on a 12 h cron, and self-reschedules at VERIFICATION_TTL_MS
+ * cadence whenever additional work remains):
  *
  * Phase 1 - Cleanup: Delete stale verifier policies. A policy is deleted when:
  *           - TTL expired: has agents but the oldest enrollment exceeds TTL.
@@ -87,24 +103,30 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  *           a map of connector ID -> package policy IDs. Then fetch only the
  *           cloud connectors that have installed packages via KQL id filter.
  *
- * Phase 3 - Verify one eligible connector per task run (one deployment at a time).
- *           Eligibility criteria:
+ * Phase 3 - Verify exactly one eligible connector per task run (one verifier
+ *           deployment active at a time). Eligibility criteria:
  *             1. Never verified (verification_started_at is null)
  *             2. Recently created (created_at within last 5 min)
  *             3. Recently updated (updated_at within last 5 min)
  *             4. Due for re-verification (started_at > 5 min ago, status != failed)
  *             5. Failed with cooldown expired (failed_at > 5 min ago)
  *             6. Backwards compat (verification_status not set)
- *           Each eligible connector gets a verifier policy. On failure the
- *           connector is marked failed; on success the separate status update
- *           task sets the final status.
+ *           On failure the connector is marked failed; on success the separate
+ *           status update task sets the final status.
+ *
+ * Returns `shouldReschedule: true` if there is still work to do (either a
+ * gating verifier that will expire soon, or additional eligible connectors
+ * waiting their turn). The caller uses this to return `runAt = now + TTL` so
+ * task manager fires the task again without waiting for the 12 h cron.
  */
-async function runPermissionVerifierTask(abortController: AbortController) {
+async function runPermissionVerifierTask(
+  abortController: AbortController
+): Promise<{ shouldReschedule: boolean }> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
   if (!appContextService.getExperimentalFeatures()?.enableOTelVerifier) {
     logger.debug(`${VERIFY_PERMISSIONS_TASK} OTel verifier is disabled, skipping`);
-    return;
+    return { shouldReschedule: false };
   }
 
   logger.debug(`${VERIFY_PERMISSIONS_TASK} Task run started`);
@@ -130,6 +152,7 @@ async function runPermissionVerifierTask(abortController: AbortController) {
     const activeVerifiers = await agentPolicyService.list(soClient, {
       kuery: `${saveObjectType}.is_verifier: true`,
       perPage: 1,
+      spaceId: '*',
     });
 
     if (activeVerifiers.items.length > 0) {
@@ -142,7 +165,10 @@ async function runPermissionVerifierTask(abortController: AbortController) {
           `${VERIFY_PERMISSIONS_TASK} Active verifier policy ${policy.id} exists (age: ${ageSec}s), skipping new verifications`
         );
         logger.debug(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
-        return;
+        // Ask for a follow-up run once this verifier's TTL elapses so we can
+        // clean it up and pick up the next eligible connector without waiting
+        // for the 12 h cron.
+        return { shouldReschedule: true };
       }
     }
 
@@ -154,7 +180,7 @@ async function runPermissionVerifierTask(abortController: AbortController) {
     if (packagePolicyMap.size === 0) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} No connectors with installed packages found`);
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
-      return;
+      return { shouldReschedule: false };
     }
 
     const connectorIds = [...packagePolicyMap.keys()].filter((id) => id.length > 0);
@@ -162,7 +188,7 @@ async function runPermissionVerifierTask(abortController: AbortController) {
     if (connectorIds.length === 0) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} No valid connector IDs found after filtering`);
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
-      return;
+      return { shouldReschedule: false };
     }
 
     const SO_TYPE = CLOUD_CONNECTOR_SAVED_OBJECT_TYPE;
@@ -182,7 +208,11 @@ async function runPermissionVerifierTask(abortController: AbortController) {
 
     throwIfAborted(abortController);
 
-    // Phase 3: Verify the first eligible connector (one at a time per task run)
+    // Phase 3: Verify exactly one eligible connector per task run (one verifier
+    // deployment active at a time). If additional eligible connectors remain,
+    // the task runner reschedules the next run for `now + TTL + buffer` so we
+    // drain the backlog at TTL cadence instead of every 12 h.
+    let verifiedConnectorId: string | undefined;
     for (const connector of connectors) {
       throwIfAborted(abortController);
 
@@ -213,14 +243,31 @@ async function runPermissionVerifierTask(abortController: AbortController) {
           `${VERIFY_PERMISSIONS_TASK} Failed to verify connector ${connector.id}: ${error.message}`
         );
       }
+      verifiedConnectorId = connector.id;
       break;
     }
 
     logger.debug(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
+
+    if (!verifiedConnectorId) {
+      return { shouldReschedule: false };
+    }
+
+    // Count remaining eligible connectors other than the one we just processed
+    // (its in-memory attributes do not reflect the just-applied status update,
+    // so it must be explicitly excluded or we would self-reschedule forever).
+    const hasMoreEligible = connectors.some(
+      (c) =>
+        c.id !== verifiedConnectorId &&
+        isConnectorEligible(c.attributes) &&
+        (packagePolicyMap.get(c.id)?.length ?? 0) > 0
+    );
+
+    return { shouldReschedule: hasMoreEligible };
   } catch (error) {
     if (abortController.signal.aborted) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task was aborted`);
-      return;
+      return { shouldReschedule: false };
     }
     logger.error(`${VERIFY_PERMISSIONS_TASK} Task run failed: ${error.message}`);
     throw error;
@@ -244,6 +291,7 @@ async function cleanupExpiredVerifierPolicies(
     const verifierPolicies = await agentPolicyService.list(soClient, {
       kuery: `${saveObjectType}.is_verifier: true`,
       perPage: 50,
+      spaceId: '*',
     });
 
     logger.info(

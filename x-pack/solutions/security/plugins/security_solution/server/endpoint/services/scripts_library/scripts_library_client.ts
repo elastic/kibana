@@ -704,6 +704,11 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         )
       );
 
+    this.logger.debug(
+      () =>
+        `Retrieving download content stream for: [${scriptId}][${scriptSo.attributes.name}] - file ID [${scriptSo.attributes.file_id}][${scriptSo.attributes.file_name}][${file.data.mimeType}]`
+    );
+
     return {
       stream: await file
         .downloadContent()
