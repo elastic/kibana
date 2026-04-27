@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
@@ -57,37 +57,39 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
     return (
       <EuiPageTemplate.EmptyPrompt
         color="subdued"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="policy-artifacts-empty-unexisting"
         title={<h2>{labels.emptyUnexistingTitle}</h2>}
         body={labels.emptyUnexistingMessage}
-        actions={
-          canWriteArtifact ? (
-            <EuiFlexGroup justifyContent="center">
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButton
-                color="primary"
-                fill
-                onClick={onAddClickHandler}
-                href={toAddRouteUrl}
-                data-test-subj="unexisting-manage-artifacts-button"
-              >
-                {labels.emptyUnexistingPrimaryActionButtonTitle}
-              </EuiButton>
-
-              {isEndpointExceptionsMovedUnderManagementFFEnabled && (
-                // eslint-disable-next-line @elastic/eui/href-or-on-click
+        actions={[
+          ...(canWriteArtifact
+            ? [
+                /* eslint-disable-next-line @elastic/eui/href-or-on-click */
                 <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onAddClickHandler}
+                  href={toAddRouteUrl}
+                  data-test-subj="unexisting-manage-artifacts-button"
+                >
+                  {labels.emptyUnexistingPrimaryActionButtonTitle}
+                </EuiButton>,
+              ]
+            : []),
+
+          ...(canWriteArtifact && isEndpointExceptionsMovedUnderManagementFFEnabled
+            ? [
+                // eslint-disable-next-line @elastic/eui/href-or-on-click
+                <EuiButtonEmpty
                   onClick={onImportClickHandler}
                   href={toImportRouteUrl}
                   data-test-subj="unexisting-manage-artifacts-import-button"
                 >
                   {labels.emptyUnexistingImportButtonTitle}
-                </EuiButton>
-              )}
-            </EuiFlexGroup>
-          ) : null
-        }
+                </EuiButtonEmpty>,
+              ]
+            : []),
+        ]}
       />
     );
   }

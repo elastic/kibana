@@ -21,6 +21,10 @@ import type {
 } from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -45,6 +49,7 @@ export interface EntityStoreStartPlugins {
   dataViews: DataViewsPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
@@ -64,16 +69,18 @@ export interface EntityStoreApiRequestHandlerContext {
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
   entityStore: EntityStoreApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
 }>;
 
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
 
 export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
 
-export type EntityStoreCRUDClient = CRUDClient;
+export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
 }
 
 export interface EntityStoreSetupContract {

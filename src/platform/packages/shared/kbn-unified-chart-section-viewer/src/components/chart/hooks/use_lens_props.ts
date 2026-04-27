@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LensConfigBuilder,
+  type LensAttributes,
+  type LensConfig,
+  type LensESQLDataset,
+  type LensSeriesLayer,
+  type LensYBoundsConfig,
+} from '@kbn/lens-embeddable-utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -28,10 +34,6 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
-import type {
-  LensYBoundsConfig,
-  LensESQLDataset,
-} from '@kbn/lens-embeddable-utils/config_builder/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 export type LensProps = Pick<
@@ -44,12 +46,12 @@ export type LensProps = Pick<
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
-  | 'onLoad'
   | 'lastReloadRequestTime'
   | 'userMessages'
 >;
 
 export const useLensProps = ({
+  chartId,
   title,
   query,
   services,
@@ -60,7 +62,9 @@ export const useLensProps = ({
   yBounds,
   error,
   userMessages,
+  profileId,
 }: {
+  chartId: string;
   title: string;
   query: string;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
@@ -69,13 +73,14 @@ export const useLensProps = ({
   yBounds?: LensYBoundsConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, error, userMessages]);
+  }, [query, title, chartLayers, yBounds, error, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -104,6 +109,8 @@ export const useLensProps = ({
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         userMessages,
+        profileId,
+        chartId,
       });
     },
     [
@@ -112,6 +119,8 @@ export const useLensProps = ({
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
       userMessages,
+      profileId,
+      chartId,
     ]
   );
 
@@ -210,6 +219,8 @@ const getLensProps = ({
   lastReloadRequestTime,
   esqlVariables,
   userMessages,
+  profileId,
+  chartId,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
@@ -217,6 +228,8 @@ const getLensProps = ({
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  chartId: string;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
@@ -227,6 +240,11 @@ const getLensProps = ({
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',
+    meta: {
+      profile_id: profileId,
+      metric_id: chartId,
+      metric_type: attributes.visualizationType,
+    },
   },
   lastReloadRequestTime,
   userMessages,

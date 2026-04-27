@@ -15,14 +15,15 @@ import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { flatten, random, times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
+import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services: 2000 } }) => {
-  const numServices = scenarioOpts.services;
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
+  const numServices = getNumberOpt(scenarioOpts, 'services', 2000);
   const transactionName = 'GET /order/{id}';
   const languages = [
     'go',

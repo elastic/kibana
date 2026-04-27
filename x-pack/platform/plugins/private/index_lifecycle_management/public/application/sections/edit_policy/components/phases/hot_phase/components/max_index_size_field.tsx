@@ -46,6 +46,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
                   type="warning"
                   aria-label={i18nTexts.deprecationMessage}
                   content={i18nTexts.deprecationMessage}
+                  disableScreenReaderOutput
                 />
               ),
               append: (

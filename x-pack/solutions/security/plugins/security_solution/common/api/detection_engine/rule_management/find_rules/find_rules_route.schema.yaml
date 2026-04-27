@@ -16,6 +16,10 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: |
+            List of `alert.attributes` field names to return for each rule (for example `name`, `enabled`).
+            If omitted, the default field set is returned. Repeat the parameter to pass multiple field names, or
+            use comma-separated values when supported by your client.
           schema:
             type: array
             items:
@@ -85,6 +89,12 @@ paths:
             type: array
             items:
               $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
+        - name: gap_auto_fill_scheduler_id
+          in: query
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          required: false
+          schema:
+            type: string
       x-codeSamples:
         - lang: cURL
           source: |

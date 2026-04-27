@@ -9,38 +9,41 @@
 
 import type { Type } from '@kbn/config-schema';
 
-import type { LensApiStateChartType } from '../../../schema';
-import { datatableStateSchema, regionMapStateSchema, tagcloudStateSchema } from '../../../schema';
-import { gaugeStateSchema } from '../../../schema/charts/gauge';
-import { legacyMetricStateSchema } from '../../../schema/charts/legacy_metric';
-import { metricStateSchema } from '../../../schema/charts/metric';
-import { mosaicStateSchema } from '../../../schema/charts/mosaic';
-import { pieStateSchema } from '../../../schema/charts/pie';
-import { treemapStateSchema } from '../../../schema/charts/treemap';
-import { waffleStateSchema } from '../../../schema/charts/waffle';
-import { heatmapStateSchema } from '../../../schema/charts/heatmap';
-import { xyStateSchema } from '../../../schema/charts/xy';
+import type { LensApiConfigChartType } from '../../../schema';
+import {
+  datatableConfigSchema,
+  regionMapConfigSchema,
+  tagcloudConfigSchema,
+} from '../../../schema';
+import { gaugeConfigSchema } from '../../../schema/charts/gauge';
+import { legacyMetricConfigSchema } from '../../../schema/charts/legacy_metric';
+import { metricConfigSchema } from '../../../schema/charts/metric';
+import { mosaicConfigSchema } from '../../../schema/charts/mosaic';
+import { pieConfigSchema } from '../../../schema/charts/pie';
+import { treemapConfigSchema } from '../../../schema/charts/treemap';
+import { waffleConfigSchema } from '../../../schema/charts/waffle';
+import { heatmapConfigSchema } from '../../../schema/charts/heatmap';
+import { xyConfigSchema } from '../../../schema/charts/xy';
 
 const compatTypeMap = {
   legacyMetric: 'legacy_metric',
   regionMap: 'region_map',
-} satisfies Record<string, LensApiStateChartType>;
+} satisfies Record<string, LensApiConfigChartType>;
 
 const chartSchemas = {
-  gauge: gaugeStateSchema,
-  tagcloud: tagcloudStateSchema,
-  metric: metricStateSchema,
-  legacy_metric: legacyMetricStateSchema,
-  xy: xyStateSchema,
-  heatmap: heatmapStateSchema,
-  region_map: regionMapStateSchema,
-  datatable: datatableStateSchema,
-  mosaic: mosaicStateSchema,
-  pie: pieStateSchema,
-  donut: pieStateSchema,
-  treemap: treemapStateSchema,
-  waffle: waffleStateSchema,
-} satisfies Record<LensApiStateChartType, Type<any>>;
+  gauge: gaugeConfigSchema,
+  tag_cloud: tagcloudConfigSchema,
+  metric: metricConfigSchema,
+  legacy_metric: legacyMetricConfigSchema,
+  xy: xyConfigSchema,
+  heatmap: heatmapConfigSchema,
+  region_map: regionMapConfigSchema,
+  data_table: datatableConfigSchema,
+  mosaic: mosaicConfigSchema,
+  pie: pieConfigSchema,
+  treemap: treemapConfigSchema,
+  waffle: waffleConfigSchema,
+} satisfies Record<LensApiConfigChartType, Type<any>>;
 
 export function getChartSchema(type: string): Type<any> {
   const chartType = (compatTypeMap as any)[type] ?? type;

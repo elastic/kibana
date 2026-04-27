@@ -188,7 +188,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   });
 
   async function getSearchSessionId(): Promise<string> {
-    await inspector.open();
+    await discover.openInspectorFromTabMenu();
     const searchSessionId = await (
       await testSubjects.find('inspectorRequestSearchSessionId')
     ).getAttribute('data-search-session-id');

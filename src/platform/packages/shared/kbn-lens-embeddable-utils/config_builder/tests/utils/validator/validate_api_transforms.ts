@@ -10,8 +10,8 @@
 import { unset } from 'lodash';
 
 import { LensConfigBuilder } from '../../../config_builder';
-import type { LensApiState, LensApiStateByType, LensApiStateChartType } from '../../../schema';
-import { lensApiStateSchema } from '../../../schema';
+import type { LensApiConfig, LensApiConfigByType, LensApiConfigChartType } from '../../../schema';
+import { lensApiConfigSchema } from '../../../schema';
 import type { ValidateTransform } from './types';
 import { getChartSchema } from './schema';
 
@@ -20,28 +20,28 @@ import { getChartSchema } from './schema';
  *
  * - Starts with LensAPI config format
  * - Validates against the provided schema
- * - Validates against the general lensApiStateSchema
+ * - Validates against the general lensApiConfigSchema
  * - Converts to LensAttributes
  * - Converts LensAttributes back to API format
  * - Validates against the provided schema
- * - Validates against the general lensApiStateSchema
+ * - Validates against the general lensApiConfigSchema
  * - Excludes specified fields from the API config
  * - Checks that the new API config includes the filtered API config
  * - Note: the excluded fields are expected to be omitted during the conversion to LensStateConfig, so they are not included in the new API config
  */
 export function validateApiTransformsFn(
-  chartType: LensApiStateChartType
-): ValidateTransform<LensApiStateByType[typeof chartType]>['fromApi'] {
+  chartType: LensApiConfigChartType
+): ValidateTransform<LensApiConfigByType[typeof chartType]>['fromApi'] {
   const schema = getChartSchema(chartType);
   const builder = new LensConfigBuilder(undefined, true);
 
-  return function validateApiTransforms(apiConfig: LensApiState, excludedFields?: string[]) {
+  return function validateApiTransforms(apiConfig: LensApiConfig, excludedFields?: string[]) {
     expect(() => {
       schema.validate(apiConfig);
     }).not.toThrow();
 
     expect(() => {
-      lensApiStateSchema.validate(apiConfig);
+      lensApiConfigSchema.validate(apiConfig);
     }).not.toThrow();
 
     const lensStateConfig = builder.fromAPIFormat(apiConfig);
@@ -53,7 +53,7 @@ export function validateApiTransformsFn(
     }).not.toThrow();
 
     expect(() => {
-      lensApiStateSchema.validate(newApiConfig);
+      lensApiConfigSchema.validate(newApiConfig);
     }).not.toThrow();
 
     const filteredApiConfig = structuredClone(apiConfig);

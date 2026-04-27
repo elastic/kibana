@@ -31,6 +31,12 @@ jest.mock('@elastic/eui', () => {
 
 jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
+jest.mock('../../../../../../common/components/draggables', () => ({
+  DraggableBadge: ({ value }: { value?: string | number | null }) => <>{value}</>,
+}));
+jest.mock('../netflow', () => ({
+  NetflowRenderer: () => null,
+}));
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();
@@ -86,7 +92,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'Session246alice@zeek-londonconnected usingwget(1490)wget www.example.comwith resultsuccessDestination192.168.216.34:80'
+        'Session246alice@zeek-londonconnected usingwget(1490)wget www.example.comwith resultsuccess'
       );
     });
   });

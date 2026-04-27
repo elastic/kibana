@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensApiState } from '../../../schema';
+import type { LensApiConfig } from '../../../schema';
 import type { LensAttributes } from '../../../types';
 
-export interface ValidateTransform<T extends LensApiState> {
+export interface ValidateTransform<T extends LensApiConfig> {
   fromState: (attributes: LensAttributes, strict?: boolean, excludedFields?: string[]) => void;
   fromApi: (config: T, excludedFields?: string[]) => void;
 }

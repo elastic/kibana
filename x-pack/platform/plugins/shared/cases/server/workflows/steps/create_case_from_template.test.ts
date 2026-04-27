@@ -22,6 +22,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     expect(typeof definition.handler).toBe('function');
     expect(
       definition.inputSchema.safeParse({
+        owner: 'securitySolution',
         case_template_id: 'triage_template',
       }).success
     ).toBe(true);

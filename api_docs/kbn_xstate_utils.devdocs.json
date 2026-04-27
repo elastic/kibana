@@ -98,10 +98,10 @@
         "label": "getPlaceholderFor",
         "description": [],
         "signature": [
-          "<ImplementationFactory extends (...factoryArgs: any[]) => any>(_implementationFactory: ImplementationFactory) => ReturnType<ImplementationFactory>"
+          "<ImplementationFactory>(_implementationFactory: ImplementationFactory) => ExtractReturnType<ImplementationFactory>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -109,7 +109,7 @@
           {
             "parentPluginId": "@kbn/xstate-utils",
             "id": "def-public.getPlaceholderFor.$1",
-            "type": "Function",
+            "type": "Uncategorized",
             "tags": [],
             "label": "_implementationFactory",
             "description": [],
@@ -117,7 +117,7 @@
               "ImplementationFactory"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
-            "lineNumber": 11,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

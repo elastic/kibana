@@ -17,6 +17,7 @@ export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
+  isAffected?: boolean;
   configs: {
     path: string;
     hasTests: boolean;
@@ -62,14 +63,15 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       ? process.env.SCOUT_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build_scout_tests'];
+      : ['build_scout_tests', 'build'];
 
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
+    const affectedPrefix = module.isAffected ? 'affected ' : '';
 
     return {
-      label: `Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
+      label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
       key: module.name,
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       group: module.group,
@@ -109,9 +111,10 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   // so a concurrent gate failure can cancel or short-circuit them immediately.
   // We register child step keys (not the group key) because `buildkite-agent step cancel`
   // does not work on group keys.
-  for (const { key } of scoutCiRunGroups) {
-    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
-  }
+  bk.setMetadata(
+    'cancel_on_gate_failure_batch:scout',
+    JSON.stringify(scoutCiRunGroups.map(({ key }) => key))
+  );
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);

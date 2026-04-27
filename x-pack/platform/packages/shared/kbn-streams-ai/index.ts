@@ -9,13 +9,53 @@ export { generateStreamDescription } from './src/description/generate_descriptio
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+  formatZodPipelineErrors,
+  buildSimulationFeedback,
+  detectTemporaryFields,
   type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
+  type SimulationFeedback,
 } from './workflows/suggest_processing_pipeline';
-export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
+export {
+  generateSignificantEvents,
+  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
+  type ExistingQuerySummary,
+} from './src/significant_events/generate_significant_events';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
-export { sumTokens } from './src/helpers/sum_tokens';
-export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
+export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
+export {
+  identifyFeatures,
+  toPreviouslyIdentifiedFeature,
+  type IdentifyFeaturesOptions,
+  type PreviouslyIdentifiedFeature,
+  type ExcludedFeatureSummary,
+  type IgnoredFeature,
+} from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+
+export {
+  searchKnowledgeIndicators,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+} from './src/knowledge_indicators/search';
+export {
+  featureToKnowledgeIndicatorFeature,
+  queryLinkToKnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/mappers';
+export type {
+  SearchKnowledgeIndicatorsInput,
+  SearchKnowledgeIndicatorsKind,
+  SearchKnowledgeIndicatorsOutput,
+  KnowledgeIndicator,
+  KnowledgeIndicatorFeature,
+  KnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/types';

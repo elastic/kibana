@@ -142,7 +142,7 @@ export const getShareMenuItems =
       name: panelTitle,
       exportType: reportType,
       label: 'CSV',
-      icon: 'tableDensityNormal',
+      icon: 'table',
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage
@@ -174,6 +174,7 @@ export const getShareMenuItems =
         if (totalHits >= maxRows) {
           return (
             <EuiCallOut
+              announceOnMount
               size="s"
               color="warning"
               title={i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.title', {

@@ -60,6 +60,10 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -141,6 +145,7 @@ export interface ElasticAssistantPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
@@ -151,6 +156,7 @@ export interface ElasticAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -182,6 +188,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCheckpointSaver: () => Promise<BaseCheckpointSaver | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;

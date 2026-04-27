@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { z } from '@kbn/zod/v4';
+import type { EventChainContext } from './event_chain_context';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
@@ -19,6 +20,8 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
 /** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
 export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
   CommonTriggerDefinition<EventSchema>;
+
+export type { EventChainContext };
 
 /**
  * Parameters passed to the trigger event handler when an event is emitted.
@@ -29,6 +32,7 @@ export interface TriggerEventHandlerParams {
   spaceId: string;
   payload: Record<string, unknown>;
   request: KibanaRequest;
+  eventChainContext?: EventChainContext;
 }
 
 /**
@@ -89,7 +93,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  registerStepDefinition(definition: ServerStepDefinition): void;
+  registerStepDefinition(definition: ServerStepDefinitionOrLoader): void;
 
   /**
    * Register a workflow trigger definition.
@@ -142,3 +146,11 @@ export interface WorkflowsExtensionsServerPluginStartDeps {
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
 }
+
+export type ServerStepDefinitionOrLoader<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> =
+  | ServerStepDefinition<Input, Output, Config>
+  | (() => Promise<ServerStepDefinition<Input, Output, Config> | undefined>);

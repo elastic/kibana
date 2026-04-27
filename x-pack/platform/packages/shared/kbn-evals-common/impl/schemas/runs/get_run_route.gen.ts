@@ -14,9 +14,9 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
-import { Model, EvaluatorStats } from '../common_attributes.gen';
+import { Model, BuildkiteMetadata, EvaluatorStats } from '../common_attributes.gen';
 
 export type GetEvaluationRunRequestQuery = z.infer<typeof GetEvaluationRunRequestQuery>;
 export const GetEvaluationRunRequestQuery = z.object({
@@ -40,8 +40,12 @@ export type GetEvaluationRunRequestParamsInput = z.input<typeof GetEvaluationRun
 export type GetEvaluationRunResponse = z.infer<typeof GetEvaluationRunResponse>;
 export const GetEvaluationRunResponse = z.object({
   run_id: z.string(),
+  timestamp: z.string().optional(),
   task_model: Model.optional(),
   evaluator_model: Model.optional(),
+  git_branch: z.string().nullable().optional(),
+  git_commit_sha: z.string().nullable().optional(),
+  ci: BuildkiteMetadata.optional(),
   total_repetitions: z.number().int().optional(),
   stats: z.array(EvaluatorStats),
 });

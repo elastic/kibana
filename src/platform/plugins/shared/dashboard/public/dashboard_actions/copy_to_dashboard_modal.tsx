@@ -22,8 +22,9 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls';
-import { embeddableService } from '../services/kibana_services';
+import { coreServices, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { isDashboardLayoutPanel } from '../dashboard_api/layout_manager/types';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
@@ -49,8 +50,20 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const dashboardId = api.parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
-    // TODO handle getDashboardPanelFromId throw
-    const panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
+    let panelToCopy;
+    try {
+      panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
+      // TODO When we implement the ability to duplicate pinned panels,
+      // we should handle copying panels that don't have a `grid` defined
+      if (!isDashboardLayoutPanel(panelToCopy)) throw new Error();
+    } catch {
+      coreServices.notifications.toasts.addDanger({
+        title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(api.uuid),
+        'data-test-subj': 'copyToDashboardPanelNotFound',
+      });
+      closeModal();
+      return;
+    }
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,

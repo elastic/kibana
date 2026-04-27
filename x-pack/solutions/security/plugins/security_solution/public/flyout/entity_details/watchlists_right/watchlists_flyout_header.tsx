@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 
 export interface WatchlistsFlyoutHeaderProps {
   title: string;

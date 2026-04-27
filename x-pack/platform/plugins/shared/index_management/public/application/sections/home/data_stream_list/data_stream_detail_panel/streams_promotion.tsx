@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common';
+import type { StreamsAppLocatorDefinitionParams } from '@kbn/streams-app-plugin/common/locators';
 import { useAppContext } from '../../../../app_context';
 
 export function StreamsPromotion({ dataStreamName }: { dataStreamName: string }) {
@@ -20,7 +20,8 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
     plugins: { streams },
   } = useAppContext();
   const streamsEnabled = useObservable(streams?.navigationStatus$ || EMPTY)?.status === 'enabled';
-  const streamsLocator = url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
+  const streamsLocator =
+    url.locators.get<StreamsAppLocatorDefinitionParams>(STREAMS_APP_LOCATOR_ID);
 
   if (!streamsEnabled || !streamsLocator) {
     return null;

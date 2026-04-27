@@ -15,8 +15,6 @@
             }
         ] */
 
-import { execFileSync } from 'child_process';
-
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
@@ -26,8 +24,11 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  registerCancelKeys,
+  flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
   prHasFIPSLabel,
+  doAllChangesMatch,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -57,8 +58,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
-    if (onlyRunQuickChecks) {
+    if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline(pipeline);
@@ -71,25 +71,22 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    for (const stepKey of [
-      'pick_test_group_run_order',
-      'build_scout_tests',
-      'check_oas_snapshot',
-      'build_api_docs',
-    ]) {
-      execFileSync('buildkite-agent', [
-        'meta-data',
-        'set',
-        `cancel_on_gate_failure:${stepKey}`,
-        'true',
-      ]);
-    }
+    registerCancelKeys(['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
     }
 
-    if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
+    if (await doAnyChangesMatch([/^renovate\.json$/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', cancelable));
+    }
+
+    if (
+      await doAnyChangesMatch([
+        /^src\/platform\/packages\/private\/kbn-handlebars/,
+        /^\.buildkite\/pipelines\/pull_request\/kbn_handlebars\.yml/,
+      ])
+    ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml', cancelable)
       );
@@ -103,6 +100,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -111,7 +109,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/cases/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/cases/,
+        /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -124,6 +125,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^src\/platform\/packages\/shared\/kbn-synthtrace/,
+        /^\.buildkite\/pipelines\/pull_request\/apm_cypress\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -135,6 +137,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       (await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -159,7 +162,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     ];
 
     if (
-      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths])) ||
+      (await doAnyChangesMatch([
+        ...aiInfraPaths,
+        ...aiConnectorPaths,
+        /^\.buildkite\/pipelines\/pull_request\/ai_infra_gen_ai\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -169,7 +176,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      ((await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
+      ((await doAnyChangesMatch([
+        ...aiInfraPaths,
+        ...aiConnectorPaths,
+        ...agentBuilderPaths,
+        /^\.buildkite\/pipelines\/pull_request\/agent_builder_smoke_tests\.yml/,
+      ])) ||
         GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
         GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
         ALL_UI_TEST_SUITES) &&
@@ -238,7 +250,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
+      (await doAnyChangesMatch([
+        /.*stor(ies|y).*/,
+        /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
@@ -257,6 +272,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /\.devdocs\.json$/,
         /\.mdx$/,
         /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
+        /^\.buildkite\/pipelines\/pull_request\/check_next_docs\.yml/,
       ])) &&
         process.env.GITHUB_PR_TARGET_BRANCH === 'main') ||
       GITHUB_PR_LABELS.includes('ci:build-next-docs')
@@ -267,6 +283,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -287,6 +306,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -324,6 +344,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -336,12 +361,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
-      );
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/automatic_import.yml',
-          cancelable
-        )
       );
       pipeline.push(
         getPipeline(
@@ -423,6 +442,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -489,6 +509,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -506,6 +527,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
         ALL_UI_TEST_SUITES) &&
@@ -525,6 +547,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -544,6 +567,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/custom\/cspm_agentless/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cspm_agentless_scout\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:cloud-security-posture-scout') ||
       ALL_UI_TEST_SUITES
@@ -574,10 +598,17 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(evalsYaml);
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/sync_model_labels.yml', cancelable)
+      );
+    }
+
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -597,6 +628,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
+        /^\.buildkite\/pipelines\/pull_request\/prompt_changes\.yml/,
       ])
     ) {
       pipeline.push(
@@ -610,10 +642,26 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
         /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
         /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
+        /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
       ])
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
+      );
+    }
+
+    // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
+    if (
+      GITHUB_PR_LABELS.includes('ci:workflow-oom-test') ||
+      (await doAnyChangesMatch([
+        /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
+        /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
+        /^src\/platform\/packages\/shared\/workflows\//,
+        /^\.buildkite\/pipelines\/pull_request\/workflows_oom_testing\.yml/,
+      ]))
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/workflows_oom_testing.yml', cancelable)
       );
     }
 
@@ -628,6 +676,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
+    flushCancelOnGateFailureMetadata();
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);

@@ -42,7 +42,7 @@ export function AddIntegrationButton(props: AddIntegrationButtonProps) {
     <EuiButtonWithTooltip
       fill
       isDisabled={!userCanInstallPackages}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       href={href}
       onClick={(e) => onClick(e)}
       data-test-subj="addIntegrationPolicyButton"

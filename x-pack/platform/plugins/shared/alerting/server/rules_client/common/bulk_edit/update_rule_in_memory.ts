@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
   getRuleNotifyWhenType,
@@ -16,6 +17,7 @@ import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
   addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
 import type {
@@ -267,10 +269,13 @@ async function updateAttributes({
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted
-  const castedAttributes = attributes;
   const updatedAttributes = updateMeta(context, {
-    ...castedAttributes,
-    ...(apiKeyAttributes ? { ...apiKeyAttributes } : {}),
+    ...(apiKeyAttributes
+      ? {
+          ...omit(attributes, [...API_KEY_ATTRIBUTES_TO_STRIP]),
+          ...apiKeyAttributes,
+        }
+      : attributes),
     tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,

@@ -105,11 +105,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };

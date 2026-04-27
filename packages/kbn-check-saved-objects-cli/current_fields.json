@@ -84,9 +84,70 @@
     "snoozeSchedule.duration",
     "snoozeSchedule.id",
     "snoozeSchedule.skipRecurrences",
+    "snoozedInstances",
+    "snoozedInstances.instanceId",
+    "snoozedInstances.snoozeSnapshot",
     "tags",
     "throttle",
     "uiamApiKey",
+    "updatedAt",
+    "updatedBy"
+  ],
+  "alerting_action_policy": [
+    "auth",
+    "auth.apiKey",
+    "auth.createdByUser",
+    "auth.owner",
+    "createdAt",
+    "createdBy",
+    "createdByUsername",
+    "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
+    "enabled",
+    "groupBy",
+    "groupingMode",
+    "name",
+    "snoozedUntil",
+    "tags",
+    "throttle",
+    "throttle.strategy",
+    "updatedAt",
+    "updatedBy",
+    "updatedByUsername"
+  ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
+  "alerting_rule": [
+    "createdAt",
+    "createdBy",
+    "enabled",
+    "evaluation",
+    "evaluation.query",
+    "evaluation.query.base",
+    "grouping",
+    "grouping.fields",
+    "kind",
+    "metadata",
+    "metadata.description",
+    "metadata.name",
+    "metadata.owner",
+    "metadata.tags",
+    "no_data",
+    "no_data.behavior",
+    "no_data.timeframe",
+    "recovery_policy",
+    "recovery_policy.query",
+    "recovery_policy.query.base",
+    "recovery_policy.type",
+    "schedule",
+    "schedule.every",
+    "schedule.lookback",
+    "time_field",
     "updatedAt",
     "updatedBy"
   ],
@@ -329,13 +390,6 @@
     "title",
     "version"
   ],
-  "data_connector": [
-    "kscIds",
-    "name",
-    "toolIds",
-    "type",
-    "workflowIds"
-  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
@@ -345,7 +399,8 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "result"
+    "result",
+    "title"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -441,6 +496,7 @@
     "install_started_at",
     "install_status",
     "install_version",
+    "installed_as_dependency",
     "installed_es",
     "installed_es.deferred",
     "installed_es.id",
@@ -449,6 +505,7 @@
     "installed_kibana",
     "installed_kibana_space_id",
     "internal",
+    "is_dependency_of",
     "keep_policies_up_to_date",
     "latest_executed_state",
     "latest_install_failed_attempts",
@@ -601,12 +658,15 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_enabled",
     "monitoring_output_id",
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -624,7 +684,10 @@
     "namespace",
     "packagePolicyCount",
     "updated_at",
-    "vars"
+    "vars",
+    "verification_failed_at",
+    "verification_started_at",
+    "verification_status"
   ],
   "fleet-fleet-server-host": [
     "host_urls",
@@ -655,6 +718,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -740,7 +804,9 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_diagnostics",
     "monitoring_enabled",
     "monitoring_http",
@@ -749,6 +815,7 @@
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -793,6 +860,8 @@
     "is_preconfigured",
     "key",
     "name",
+    "otel_disable_beatsauth",
+    "otel_exporter_config_yaml",
     "output_id",
     "partition",
     "password",
@@ -847,6 +916,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -876,6 +946,7 @@
     "use_space_awareness_migration_status"
   ],
   "integration-config": [
+    "connector_id",
     "created_by",
     "created_by_profile_uid",
     "data_stream_count",
@@ -892,6 +963,11 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
+  "lead-generation-config": [
+    "connectorId",
+    "lastError",
+    "lastExecutionUuid"
+  ],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
@@ -966,6 +1042,11 @@
   ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
+  ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
   ],
   "observability-onboarding-state": [
     "progress",
@@ -1102,6 +1183,7 @@
     "provider"
   ],
   "security-rule": [
+    "deprecated",
     "name",
     "risk_score",
     "rule_id",
@@ -1268,7 +1350,6 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
-  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
@@ -1350,7 +1431,8 @@
     "status",
     "taskType",
     "userScope",
-    "userScope.apiKeyId"
+    "userScope.apiKeyId",
+    "userScope.uiamApiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
@@ -1360,6 +1442,13 @@
   ],
   "ui-metric": [
     "count"
+  ],
+  "uiam_api_keys_provisioning_status": [
+    "@timestamp",
+    "entityId",
+    "entityType",
+    "message",
+    "status"
   ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
@@ -1387,6 +1476,11 @@
   "usage-counters": [
     "domainId"
   ],
+  "user_connector_token": [
+    "connectorId",
+    "credentialType",
+    "profileUid"
+  ],
   "visualization": [
     "description",
     "kibanaSavedObjectMeta",
@@ -1398,6 +1492,15 @@
     "managed",
     "name",
     "riskModifier"
+  ],
+  "watchlist-entity-source": [
+    "enabled",
+    "managed",
+    "name",
+    "range",
+    "range.end",
+    "range.start",
+    "type"
   ],
   "workplace_search_telemetry": []
 }

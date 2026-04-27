@@ -9,6 +9,7 @@ import { parseDuration } from '@kbn/alerting-plugin/common';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -23,6 +24,8 @@ import {
 } from '@testing-library/react';
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { BehaviorSubject } from 'rxjs';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
@@ -135,6 +138,18 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+
+const license$ = new BehaviorSubject(
+  licensingMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+);
+
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
@@ -363,6 +378,14 @@ describe('rules_list ', () => {
     jest.clearAllMocks();
     queryClient.clear();
     cleanup();
+  });
+
+  it('sets the CPS picker access to DISABLED', () => {
+    renderWithProviders(<RulesList />);
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.DISABLED,
+      expect.any(Object)
+    );
   });
 
   it('can filter by rule states', async () => {
@@ -1440,6 +1463,7 @@ describe('MaintenanceWindowsMock', () => {
     };
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    useKibanaMock().services.licensing.license$ = license$;
   });
 
   afterEach(() => {

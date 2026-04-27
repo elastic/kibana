@@ -30,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { environment: 'production', message: 'keep-this' },

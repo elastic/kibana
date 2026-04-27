@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { GroupStatsItem } from '../types';
 import { TAKE_ACTION } from '../translations';
 
@@ -137,11 +138,14 @@ const GroupStatsComponent = <T,>({
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="downLeft"
+            aria-label={i18n.translate('grouping.accordion.takeAction', {
+              defaultMessage: 'Take action',
+            })}
             button={
               <EuiButtonEmpty
                 data-test-subj="take-action-button"
                 onClick={onButtonClick}
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
               >
                 {TAKE_ACTION}

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
   DURATION,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
@@ -24,9 +23,9 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
-  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
@@ -39,13 +38,10 @@ import {
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
-  TRANSACTION_MARKS_AGENT,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
-  ATTRIBUTE_HTTP_SCHEME,
-  ATTRIBUTE_HTTP_STATUS_CODE,
 } from '../../../common/es_fields/apm';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { isRumAgentName } from '../../../common/agent_name';
 import type {
   CompressionStrategy,
   TraceItem,
@@ -53,44 +49,10 @@ import type {
 } from '../../../common/waterfall/unified_trace_item';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
-import { getSpanLinksCountById } from '../span_links/get_linked_children';
-import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
-import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { compactMap } from '../../utils/compact_map';
-import { isRumAgentName } from '../../../common/agent_name';
-
-const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
-
-const optionalFields = asMutableArray([
-  SPAN_ID,
-  SPAN_NAME,
-  DURATION,
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-  TRANSACTION_ID,
-  TRANSACTION_NAME,
-  TRANSACTION_RESULT,
-  PROCESSOR_EVENT,
-  PARENT_ID,
-  STATUS_CODE,
-  TIMESTAMP_US,
-  EVENT_OUTCOME,
-  STATUS_CODE,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-  SPAN_SYNC,
-  KIND,
-  OTEL_SPAN_LINKS_TRACE_ID,
-  SPAN_LINKS_TRACE_ID,
-  AGENT_NAME,
-  FAAS_COLDSTART,
-  SPAN_COMPOSITE_COUNT,
-  SPAN_COMPOSITE_SUM,
-  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
-  SERVICE_ENVIRONMENT,
-  ATTRIBUTE_HTTP_SCHEME,
-  ATTRIBUTE_HTTP_STATUS_CODE,
-] as const);
+import { getSpanLinksCountById } from '../span_links/get_linked_children';
+import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
+import { fields, getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<
@@ -126,80 +88,27 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
 export async function getUnifiedTraceItems({
   apmEventClient,
   logsClient,
-  maxTraceItemsFromUrlParam,
+  maxTraceItems,
   traceId,
   start,
   end,
-  config,
   serviceName,
+  ecsOnly = false,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
-  maxTraceItemsFromUrlParam?: number;
+  maxTraceItems: number;
   traceId: string;
   start: number;
   end: number;
-  config: APMConfig;
   serviceName?: string;
+  ecsOnly?: boolean;
 }): Promise<{
   traceItems: TraceItem[];
   unifiedTraceErrors: UnifiedTraceErrors;
   agentMarks: Record<string, number>;
+  traceDocsTotal: number;
 }> {
-  const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
-  const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
-
-  const unifiedTracePromise = apmEventClient.search(
-    'get_unified_trace_items',
-    {
-      apm: {
-        events: [ProcessorEvent.span, ProcessorEvent.transaction],
-      },
-      track_total_hits: true,
-      size,
-      query: {
-        bool: {
-          must: [
-            {
-              bool: {
-                filter: [
-                  ...termQuery(TRACE_ID, traceId),
-                  ...rangeQuery(start, end),
-                  ...termQuery(SERVICE_NAME, serviceName),
-                ],
-                should: { exists: { field: PARENT_ID } },
-              },
-            },
-          ],
-          should: [
-            { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction] } },
-            { bool: { must_not: { exists: { field: PROCESSOR_EVENT } } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      collapse: { field: SPAN_ID },
-      fields: [...fields, ...optionalFields],
-      _source: [TRANSACTION_MARKS_AGENT],
-      sort: [
-        { _score: 'asc' },
-        {
-          _script: {
-            type: 'number',
-            script: {
-              lang: 'painless',
-              source: `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', $('${DURATION}', 0)))`,
-            },
-            order: 'desc',
-          },
-        },
-        { [AT_TIMESTAMP]: 'asc' },
-        { _doc: 'asc' },
-      ] as Sort,
-    },
-    { skipProcessorEventFilter: true }
-  );
-
   const [unifiedTraceErrors, unifiedTraceItems, incomingSpanLinksCountById] = await Promise.all([
     getUnifiedTraceErrors({
       apmEventClient,
@@ -208,7 +117,15 @@ export async function getUnifiedTraceItems({
       start,
       end,
     }),
-    unifiedTracePromise,
+    getUnifiedTraceItemsPaginated({
+      apmEventClient,
+      maxTraceItems,
+      traceId,
+      start,
+      end,
+      serviceName,
+      ecsOnly,
+    }),
     getSpanLinksCountById({
       traceId,
       apmEventClient,
@@ -219,7 +136,7 @@ export async function getUnifiedTraceItems({
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
   const agentMarks: Record<string, number> = {};
-  const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
+  const traceItems = compactMap(unifiedTraceItems.hits, (hit) => {
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
     const isTransactionDocument = event[PROCESSOR_EVENT] === ProcessorEvent.transaction;
     if (isTransactionDocument) {
@@ -282,6 +199,7 @@ export async function getUnifiedTraceItems({
     traceItems,
     unifiedTraceErrors,
     agentMarks,
+    traceDocsTotal: unifiedTraceItems.total,
   };
 }
 

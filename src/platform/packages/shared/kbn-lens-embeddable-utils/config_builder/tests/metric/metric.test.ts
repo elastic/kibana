@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+
 import { validator } from '../utils/validator';
+import type { MetricConfig } from '../../schema/charts/metric';
+import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
 import {
   simpleMetricAttributes,
   breakdownMetricAttributes,
@@ -75,6 +80,56 @@ describe('Metric', () => {
 
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
       validator.metric.fromApi(metricAPIWithTermsRankedBySecondary);
+    });
+  });
+
+  describe('color default application', () => {
+    const baseMetric = {
+      type: 'metric',
+      title: 'Color default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'count',
+          empty_as_null: false,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies MetricConfig;
+
+    it('should emit AUTO_COLOR for primary metric when no color is specified', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseMetric);
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit NO_COLOR for secondary metric when no color is specified', () => {
+      const config = {
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+      } satisfies MetricConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[1].color).toEqual(NO_COLOR);
     });
   });
 });

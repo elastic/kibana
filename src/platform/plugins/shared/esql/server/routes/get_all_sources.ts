@@ -10,7 +10,7 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
@@ -25,6 +25,9 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
             }
           ),
         }),
+        query: schema.object({
+          projectRouting: schema.maybe(schema.string()),
+        }),
       },
       security: {
         authz: {
@@ -36,9 +39,12 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
     async (requestHandlerContext, request, response) => {
       try {
         const { scope } = request.params;
+        const { projectRouting } = request.query;
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getAllIndices(scope);
+        const service = new EsqlService({
+          client: core.elasticsearch.client.asCurrentUser,
+        });
+        const result = await service.getAllIndices(scope, projectRouting);
 
         return response.ok({
           body: result,

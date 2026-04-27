@@ -5,42 +5,72 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
-  EuiHorizontalRule,
-  EuiButton,
-  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import moment from 'moment';
-import { useMutation } from '@kbn/react-query';
-import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
-import { RiskScoreEnableSection } from '../components/risk_score_management/risk_score_enable_section';
-import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory, useParams } from 'react-router-dom';
+
+import { EntityAnalyticsToggle } from '../components/entity_analytics_toggle';
+import { ENTITY_ANALYTICS } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
-import { RiskScoreUsefulLinksSection } from '../components/risk_score_management/risk_score_useful_links_section';
-import { RiskScoreConfigurationSection } from '../components/risk_score_management/risk_score_configuration_section';
-import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import { useScheduleNowRiskEngineMutation } from '../api/hooks/use_schedule_now_risk_engine_mutation';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import * as i18n from '../translations';
-import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_management/risk_score_page_styles';
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
-import { RiskScoreSaveBar } from '../components/risk_score_management/risk_score_save_bar';
-import { RiskScoreGeneralSection } from '../components/risk_score_management/risk_score_general_section';
+import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
+import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
+import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
+import { EntityResolutionTab } from '../components/entity_resolution';
+import { useUiSetting$ } from '../../common/lib/kibana';
+import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
+import { EngineStatus } from '../components/entity_store/components/engines_status';
+import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity_resolution_license';
+import {
+  useDeleteEntityStoreMutation,
+  useEntityStoreStatus,
+} from '../components/entity_store/hooks/use_entity_store';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
+import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
+import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
+import {
+  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
+  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
+  ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID,
+  RISK_SCORE_TAB_TEST_ID,
+  ASSET_CRITICALITY_TAB_TEST_ID,
+  WATCHLISTS_TAB_TEST_ID,
+  ENGINE_STATUS_TAB_TEST_ID,
+  ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
+} from '../test_ids';
 
-const TEN_SECONDS = 10000;
+export enum TabId {
+  RiskScore = 'risk_score',
+  AssetCriticality = 'asset_criticality',
+  Watchlists = 'watchlists',
+  EntityResolution = 'entity_resolution',
+  Status = 'status',
+}
+
+const VALID_TABS = Object.values(TabId);
+
+const isEntityStoreInstalled = (status?: string) => status && status !== 'not_installed';
+const canDeleteEntityEngine = (status?: string) =>
+  !['not_installed', 'installing'].includes(status || '');
 
 export const EntityAnalyticsManagementPage = () => {
-  const { euiTheme } = useEuiTheme();
-  const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
-  const privileges = useMissingRiskEnginePrivileges();
+  const riskEnginePrivileges = useMissingRiskEnginePrivileges();
+
+  const riskEngineSettings = useConfigurableRiskEngineSettings();
   const {
     savedRiskEngineSettings,
     selectedRiskEngineSettings,
@@ -53,104 +83,108 @@ export const EntityAnalyticsManagementPage = () => {
     toggleScoreRetainment,
     setAlertFilters,
     getUIAlertFilters,
-  } = useConfigurableRiskEngineSettings();
-  const { data: riskEngineStatus } = useRiskEngineStatus({
-    refetchInterval: TEN_SECONDS,
-    structuralSharing: false, // Force the component to rerender after every Risk Engine Status API call
-  });
-  const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
-  const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
-  const [isLoadingRunRiskEngine, setIsLoadingRunRiskEngine] = useState(false);
-  const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
-  const { addSuccess, addError } = useAppToasts();
-  const userCanRunEngine =
-    (!privileges.isLoading &&
-      (privileges.hasAllRequiredPrivileges ||
-        (!privileges.hasAllRequiredPrivileges &&
-          privileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
-    false;
-  const riskScoreResetToZeroIsEnabled = useIsExperimentalFeatureEnabled(
-    'enableRiskScoreResetToZero'
-  );
+  } = riskEngineSettings;
 
-  // Create a wrapper mutation that takes no parameters for RiskScoreEnableSection
-  const saveSettingsWrapperMutation = useMutation(async () => {
+  const handleSaveToggleSettings = useCallback(async () => {
     if (selectedRiskEngineSettings) {
       await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
     }
-  });
+  }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
-  const handleRunEngineClick = async () => {
-    setIsLoadingRunRiskEngine(true);
-    try {
-      scheduleNowRiskEngine();
-      if (!isLoadingRunRiskEngine) {
-        addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
-      }
-    } catch (error) {
-      addError(error, {
-        title: i18n.RISK_SCORE_ENGINE_RUN_FAILURE,
-      });
-    } finally {
-      setIsLoadingRunRiskEngine(false);
+  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
+  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
+  const entityStoreStatus = useEntityStoreStatus();
+  const entityTypes = useEntityStoreTypes();
+  const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
+    useEntityEnginePrivileges();
+  const deleteEntityStoreMutation = useDeleteEntityStoreMutation({ entityTypes });
+
+  const userHasRiskEnginePrivileges =
+    !riskEnginePrivileges.isLoading &&
+    'hasAllRequiredPrivileges' in riskEnginePrivileges &&
+    riskEnginePrivileges.hasAllRequiredPrivileges;
+
+  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
+  const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
+
+  const canRunEngine =
+    (!riskEnginePrivileges.isLoading &&
+      (riskEnginePrivileges.hasAllRequiredPrivileges ||
+        (!riskEnginePrivileges.hasAllRequiredPrivileges &&
+          riskEnginePrivileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
+    false;
+
+  const hasReadPermissions = userHasRiskEngineReadPermissions(riskEnginePrivileges);
+
+  const shouldDisplayEngineStatusTab =
+    isEntityStoreInstalled(entityStoreStatus.data?.status) &&
+    entityEnginePrivileges?.has_all_required;
+
+  const history = useHistory();
+  const { tab } = useParams<{ tab?: string }>();
+
+  const selectedTabId = useMemo(() => {
+    if (tab && VALID_TABS.includes(tab as TabId)) {
+      return tab as TabId;
     }
-  };
+    return TabId.RiskScore;
+  }, [tab]);
 
-  const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
+  const handleTabChange = useCallback(
+    (tabId: TabId) => {
+      history.push(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${tabId}`);
+    },
+    [history]
+  );
 
-  const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
+  const isStatusDataLoading = entityStoreStatus.isLoading || isLoadingPrivileges;
 
-  const runEngineBtnIsDisabled =
-    !currentRiskEngineStatus || isLoadingRunRiskEngine || !userCanRunEngine || isRunning;
-
-  const formatTimeFromNow = (time: string | undefined): string => {
-    if (!time) {
-      return '';
+  useEffect(() => {
+    if (selectedTabId === TabId.Status && !isStatusDataLoading && !shouldDisplayEngineStatusTab) {
+      history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-    return i18n.RISK_ENGINE_NEXT_RUN_TIME(moment(time).fromNow(true));
-  };
+    if (
+      selectedTabId === TabId.EntityResolution &&
+      (!isEntityStoreV2Enabled || !hasEntityResolutionLicense)
+    ) {
+      history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
+    }
+  }, [
+    shouldDisplayEngineStatusTab,
+    isStatusDataLoading,
+    isEntityStoreV2Enabled,
+    hasEntityResolutionLicense,
+    selectedTabId,
+    history,
+  ]);
 
-  const countDownText = isRunning
-    ? 'Now running'
-    : formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt);
+  const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
 
   return (
     <>
-      <RiskEnginePrivilegesCallOut privileges={privileges} />
+      <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
       <EuiPageHeader
+        data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID}
         pageTitle={
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            {/* Page Title */}
-            <EuiFlexItem data-test-subj="entityAnalyticsManagementPageTitle" grow={false}>
-              {ENTITY_ANALYTICS_RISK_SCORE}
+            <EuiFlexItem
+              data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID}
+              grow={false}
+            >
+              {ENTITY_ANALYTICS}
             </EuiFlexItem>
 
-            {/* Controls Section */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent={'center'} alignItems="center" gutterSize="m">
-                {runEngineEnabled && (
-                  <>
-                    <EuiButton
-                      size="s"
-                      iconType="play"
-                      disabled={runEngineBtnIsDisabled}
-                      isLoading={isLoadingRunRiskEngine}
-                      onClick={handleRunEngineClick}
-                    >
-                      {i18n.RUN_RISK_SCORE_ENGINE}
-                    </EuiButton>
-                    <styles.VerticalSeparator />
-                    <div>
-                      <EuiText size="s" color="subdued">
-                        {countDownText}
-                      </EuiText>
-                    </div>
-                  </>
-                )}
-                <RiskScoreEnableSection
+              <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
+                <EntityAnalyticsToggle
                   selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-                  saveSelectedSettingsMutation={saveSettingsWrapperMutation}
-                  privileges={privileges}
+                  onSaveSettings={handleSaveToggleSettings}
+                  isSavingSettings={saveSelectedSettingsMutation.isLoading}
+                  hasAllRequiredPrivileges={hasAllRequiredPrivileges}
+                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -158,64 +192,188 @@ export const EntityAnalyticsManagementPage = () => {
         }
       />
 
-      <EuiHorizontalRule />
-      <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-        {!selectedRiskEngineSettings && (
-          <EuiFlexItem>
-            <EuiLoadingSpinner size="m" />
-            <EuiText size="s">
-              <p>{i18n.LOADING_RISK_ENGINE_SETTINGS}</p>
-            </EuiText>
-          </EuiFlexItem>
-        )}
-        {selectedRiskEngineSettings && (
+      {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
+      {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
+        <>
+          <EuiSpacer size="l" />
+          <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {deleteError && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.errors.deleteErrorTitle"
+                defaultMessage="There was a problem deleting the entity store"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <p>{deleteError}</p>
+          </EuiCallOut>
+        </>
+      )}
+
+      {canDeleteEntityEngine(entityStoreStatus.data?.status) &&
+        entityEnginePrivileges?.has_all_required && (
           <>
-            <EuiFlexItem grow={2}>
-              {riskScoreResetToZeroIsEnabled && (
-                <RiskScoreGeneralSection
-                  riskEngineSettings={selectedRiskEngineSettings}
-                  toggleScoreRetainment={toggleScoreRetainment}
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <ClearEntityDataButton
+                  onDelete={async () => {
+                    await deleteEntityStoreMutation.mutateAsync();
+                  }}
+                  isDeleting={deleteEntityStoreMutation.isLoading}
                 />
-              )}
-              <RiskScoreConfigurationSection
-                selectedRiskEngineSettings={selectedRiskEngineSettings}
-                setSelectedDateSetting={setSelectedDateSetting}
-                toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
-                onAlertFiltersChange={setAlertFilters}
-                uiAlertFilters={getUIAlertFilters()}
-              />
-              <EuiHorizontalRule />
-              <RiskScoreUsefulLinksSection />
-            </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <RiskScorePreviewSection
-                privileges={privileges}
-                includeClosedAlerts={selectedRiskEngineSettings.includeClosedAlerts}
-                from={selectedRiskEngineSettings.range.start}
-                to={selectedRiskEngineSettings.range.end}
-                alertFilters={selectedRiskEngineSettings.filters}
-              />
-            </EuiFlexItem>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </>
         )}
-      </EuiFlexGroup>
-      {((savedRiskEngineSettings && !selectedSettingsMatchSavedSettings) ||
-        (!savedRiskEngineSettings &&
-          selectedRiskEngineSettings &&
-          selectedRiskEngineSettings.filters &&
-          selectedRiskEngineSettings.filters.length > 0)) && (
-        <RiskScoreSaveBar
+
+      <EuiSpacer size="m" />
+
+      <EuiTabs data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID}>
+        <EuiTab
+          key={TabId.RiskScore}
+          isSelected={selectedTabId === TabId.RiskScore}
+          onClick={() => handleTabChange(TabId.RiskScore)}
+          data-test-subj={RISK_SCORE_TAB_TEST_ID}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.riskScore.tabTitle"
+            defaultMessage="Entity Risk Score"
+          />
+        </EuiTab>
+        <EuiTab
+          key={TabId.AssetCriticality}
+          isSelected={selectedTabId === TabId.AssetCriticality}
+          onClick={() => handleTabChange(TabId.AssetCriticality)}
+          data-test-subj={ASSET_CRITICALITY_TAB_TEST_ID}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.tabTitle"
+            defaultMessage="Asset Criticality"
+          />
+        </EuiTab>
+        {isWatchlistsEnabled && (
+          <EuiTab
+            key={TabId.Watchlists}
+            isSelected={selectedTabId === TabId.Watchlists}
+            onClick={() => handleTabChange(TabId.Watchlists)}
+            data-test-subj={WATCHLISTS_TAB_TEST_ID}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.watchlists.tabTitle"
+              defaultMessage="Watchlists"
+            />
+          </EuiTab>
+        )}
+        {isEntityStoreV2Enabled && hasEntityResolutionLicense && (
+          <EuiTab
+            key={TabId.EntityResolution}
+            isSelected={selectedTabId === TabId.EntityResolution}
+            onClick={() => handleTabChange(TabId.EntityResolution)}
+            data-test-subj="entityResolutionTab"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.entityResolution.tabTitle"
+              defaultMessage="Entity Resolution"
+            />
+          </EuiTab>
+        )}
+        {shouldDisplayEngineStatusTab && (
+          <EuiTab
+            key={TabId.Status}
+            isSelected={selectedTabId === TabId.Status}
+            onClick={() => handleTabChange(TabId.Status)}
+            data-test-subj={ENGINE_STATUS_TAB_TEST_ID}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.engineStatus.tabTitle"
+              defaultMessage="Engine Status"
+            />
+          </EuiTab>
+        )}
+      </EuiTabs>
+
+      <EuiSpacer size="s" />
+
+      <div hidden={selectedTabId !== TabId.RiskScore}>
+        <RiskScoreTab
+          canRunEngine={canRunEngine}
+          hasReadPermissions={hasReadPermissions}
+          isPrivilegesLoading={riskEnginePrivileges.isLoading}
+          savedRiskEngineSettings={savedRiskEngineSettings}
+          selectedRiskEngineSettings={selectedRiskEngineSettings}
+          selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
           resetSelectedSettings={resetSelectedSettings}
-          saveSelectedSettings={() => {
-            if (selectedRiskEngineSettings) {
-              saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
-            }
-          }}
-          isLoading={isLoadingRiskEngineSettings || saveSelectedSettingsMutation.isLoading}
+          onSaveSettings={(settings) => saveSelectedSettingsMutation.mutateAsync(settings)}
+          isSavingSettings={saveSelectedSettingsMutation.isLoading}
+          setSelectedDateSetting={setSelectedDateSetting}
+          toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
+          isLoadingRiskEngineSettings={isLoadingRiskEngineSettings}
+          toggleScoreRetainment={toggleScoreRetainment}
+          setAlertFilters={setAlertFilters}
+          getUIAlertFilters={getUIAlertFilters}
         />
+      </div>
+
+      <div hidden={selectedTabId !== TabId.AssetCriticality}>
+        <AssetCriticalityTab />
+      </div>
+
+      {isWatchlistsEnabled && (
+        <div hidden={selectedTabId !== TabId.Watchlists}>
+          <WatchlistsTab />
+        </div>
+      )}
+
+      {isEntityStoreV2Enabled && hasEntityResolutionLicense && (
+        <div hidden={selectedTabId !== TabId.EntityResolution}>
+          <EntityResolutionTab />
+        </div>
+      )}
+
+      {shouldDisplayEngineStatusTab && (
+        <div hidden={selectedTabId !== TabId.Status}>
+          <EngineStatus />
+        </div>
       )}
     </>
   );
 };
 
 EntityAnalyticsManagementPage.displayName = 'EntityAnalyticsManagementPage';
+
+const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.featureFlagDisabled"
+            defaultMessage="Entity Store capabilities not available"
+          />
+        }
+        color="primary"
+        iconType="info"
+        data-test-subj={ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID}
+      >
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.featureFlagDisabledDescription"
+            defaultMessage="The full capabilities of the Entity Store have been disabled in this environment. Contact your administrator for further assistance."
+          />
+        </EuiText>
+      </EuiCallOut>
+    </>
+  );
+};

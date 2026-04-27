@@ -12,7 +12,10 @@ import { getOrElse, map } from 'fp-ts/Option';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getProxySettings } from '@kbn/actions-utils';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
@@ -26,6 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,
@@ -34,6 +38,7 @@ import type {
 import type { Result } from '../lib/result_type';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
@@ -44,6 +49,7 @@ import {
   errorResultUnexpectedError,
   retryResult,
   retryResultSeconds,
+  getErrorResponseMessage,
 } from './errors';
 
 const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
@@ -55,7 +61,7 @@ const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
   minimumLicenseRequired: 'gold',
   name: CONNECTOR_NAME,
-  supportedFeatureIds: [WorkflowsConnectorFeatureId],
+  supportedFeatureIds: [WorkflowsConnectorFeatureId, AgentBuilderConnectorFeatureId],
   renderParameterTemplates,
   executor,
 };
@@ -130,7 +136,7 @@ function renderParameterTemplates(
 ): ActionParamsType {
   const renderedParams: ActionParamsType = { ...params };
 
-  if (params.body) {
+  if (typeof params.body === 'string') {
     renderedParams.body = renderMustacheString(logger, params.body, variables, 'json');
   }
 
@@ -176,6 +182,24 @@ function buildQueryString(query?: Record<string, string>): string {
     params.append(key, value);
   }
   return `?${params.toString()}`;
+}
+
+function serializeHttpRequestBody(body: unknown): string {
+  if (typeof body === 'string') {
+    return body;
+  }
+  return safeJsonStringify(body, (error) => {
+    throw new Error(`Error serializing request body: ${error.message}`);
+  }) as string; // will return a string or throw an error if it fails
+}
+
+function processResponseHeaders(headers: object): Record<string, string> {
+  return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (value != null) {
+      acc[key] = String(value);
+    }
+    return acc;
+  }, {});
 }
 
 // action executor
@@ -259,14 +283,14 @@ export async function executor(
     keepAlive = fetcher.keep_alive;
   }
 
-  const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
+  const result: Result<AxiosResponse<ResponseBuffer>, AxiosError<unknown>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
       url,
       logger,
       headers: finalHeaders,
-      data: body,
+      data: serializeHttpRequestBody(body),
       configurationUtilities,
       sslOverrides,
       proxyOverrides,
@@ -277,6 +301,7 @@ export async function executor(
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,
       }),
+      responseType: 'arraybuffer', // Guaranteed to return a buffer data type
       signal,
     })
   );
@@ -286,27 +311,29 @@ export async function executor(
   }
 
   if (isOk(result)) {
-    const {
-      value: { status, statusText, data },
-    } = result;
+    const { status, statusText } = result.value;
     logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-    const headers = Object.entries(result.value.headers || {}).reduce<Record<string, string>>(
-      (acc, [key, value]) => {
-        if (value != null) {
-          acc[key] = String(value);
-        }
-        return acc;
-      },
-      {}
-    );
+    const headers = processResponseHeaders(result.value.headers);
+    const data = processBufferResponse(result.value.data, headers);
 
     return { status: 'ok', actionId, data: { status, statusText, headers, data } };
   } else {
     const { error } = result;
     if (error.response) {
-      const { status, statusText, headers: responseHeaders, data: responseData } = error.response;
-      const responseMessage = responseData?.message;
+      const { status, statusText, data: responseData } = error.response;
+
+      const responseHeaders = processResponseHeaders(error.response.headers);
+
+      // Using `responseType: 'arraybuffer'`, error response bodies also arrive as
+      // raw bytes. Decode them via `processBufferResponse` so the existing
+      // error-message extraction (which expects an object/string body, e.g.
+      // `{ message: '...' }`) continues to work for HTTP errors.
+      if (responseData instanceof ArrayBuffer || ArrayBuffer.isView(responseData)) {
+        error.response.data = processBufferResponse(responseData, responseHeaders);
+      }
+
+      const responseMessage = getErrorResponseMessage(error);
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
       logger.error(`error on ${actionId} http event: ${message}`);

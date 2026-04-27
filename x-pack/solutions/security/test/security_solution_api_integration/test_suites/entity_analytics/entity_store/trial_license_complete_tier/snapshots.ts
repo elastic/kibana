@@ -45,7 +45,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Successfuly create a snapshot', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/236183
+    describe.skip('Successfuly create a snapshot', () => {
       before(async () => {
         await cleanUpEntityStore(providerContext);
         // Initialize security solution by creating a prerequisite index pattern.

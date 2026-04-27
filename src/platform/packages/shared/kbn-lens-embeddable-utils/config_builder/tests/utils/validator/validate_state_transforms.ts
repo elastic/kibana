@@ -8,8 +8,8 @@
  */
 
 import { LensConfigBuilder } from '../../../config_builder';
-import type { LensApiStateByType, LensApiStateChartType } from '../../../schema';
-import { lensApiStateSchema } from '../../../schema';
+import type { LensApiConfigByType, LensApiConfigChartType } from '../../../schema';
+import { lensApiConfigSchema } from '../../../schema';
 import type { ValidateTransform } from './types';
 import { getChartSchema } from './schema';
 import { getChartNormalizer } from './normalizers';
@@ -20,15 +20,15 @@ import { getChartNormalizer } from './normalizers';
  * - Starts with LensAttributes
  * - Converts to API format
  * - Validates against the provided schema
- * - Validates against the general lensApiStateSchema
+ * - Validates against the general lensApiConfigSchema
  * - Converts back to LensAttributes
  * - Converts new LensAttributes to API format
  * - Validates against the provided schema
- * - Validates against the general lensApiStateSchema
+ * - Validates against the general lensApiConfigSchema
  */
 export function validateStateTransformsFn(
-  chartType: LensApiStateChartType
-): ValidateTransform<LensApiStateByType[typeof chartType]>['fromState'] {
+  chartType: LensApiConfigChartType
+): ValidateTransform<LensApiConfigByType[typeof chartType]>['fromState'] {
   const schema = getChartSchema(chartType);
   const normalizer = getChartNormalizer(chartType);
   const builder = new LensConfigBuilder(undefined, true);
@@ -41,7 +41,7 @@ export function validateStateTransformsFn(
     }).not.toThrow();
 
     expect(() => {
-      lensApiStateSchema.validate(newApiConfig);
+      lensApiConfigSchema.validate(newApiConfig);
     }).not.toThrow();
 
     // Temporary strict mode, all checks should eventually be strict

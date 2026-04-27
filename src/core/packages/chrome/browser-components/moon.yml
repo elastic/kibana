@@ -32,10 +32,9 @@ dependsOn:
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-env'
   - '@kbn/react-kibana-context-env'
-  - '@kbn/core-chrome-layout-components'
   - '@kbn/core-chrome-layout-constants'
-  - '@kbn/core-chrome-navigation'
   - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/ui-side-navigation'
   - '@kbn/core-custom-branding-browser'
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-doc-links-browser'
@@ -59,26 +58,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

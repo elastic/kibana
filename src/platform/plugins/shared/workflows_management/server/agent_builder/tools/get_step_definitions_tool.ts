@@ -8,37 +8,71 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import type { BaseStepDefinition, ConnectorContractUnion, StepParamSummary } from '@kbn/workflows';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type {
+  BaseStepDefinition,
+  ConnectorContractUnion,
+  StepDeprecationInfo,
+  StepParamSummary,
+} from '@kbn/workflows';
 import {
   buildBuiltInStepSchema,
   buildConnectorStepSchema,
+  buildOutputSummary,
   buildStepParamsSummary,
   builtInStepDefinitions,
+  getDeprecatedStepMessage,
   StepCategories,
   StepCategory,
 } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
-import { addDynamicConnectorsToCache, getAllConnectors } from '../../../common/schema';
+import { workflowTools } from '../../../common/agent_builder/constants';
+import {
+  addDynamicConnectorsToCache,
+  getAllConnectors,
+  getCachedAllConnectorsMap,
+  getDeprecatedStepMetadata,
+} from '../../../common/schema';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
 interface StepDefinitionForAgent {
   id: string;
   label: string;
   description?: string;
   category: StepCategory;
+  deprecated?: boolean;
+  replacementStepType?: string;
+  deprecationMessage?: string;
   connectorId?: 'required' | 'optional' | 'none';
   inputParams?: StepParamSummary[];
   configParams?: StepParamSummary[];
+  outputSummary?: string;
   examples?: string[];
   stepSchema?: unknown;
 }
 
+export type { StepDefinitionForAgent };
+
+export async function resolveConnectors(
+  api: WorkflowsManagementApi,
+  spaceId: string,
+  request: unknown
+): Promise<{ all: ConnectorContractUnion[]; byType: Map<string, ConnectorContractUnion> }> {
+  const { connectorTypes } = await api.getAvailableConnectors(spaceId, request as never);
+  const enabledConnectorTypes = Object.fromEntries(
+    Object.entries(connectorTypes).filter(([, info]) => info.enabled !== false)
+  );
+  addDynamicConnectorsToCache(enabledConnectorTypes);
+  return {
+    all: getAllConnectors(),
+    byType: getCachedAllConnectorsMap() ?? new Map(),
+  };
+}
+
 function categorizeConnectorType(type: string): StepCategory {
-  if (type.startsWith('kibana.') || type.startsWith('cases.')) return StepCategory.Kibana;
+  if (type.startsWith('kibana.')) return StepCategory.Kibana;
+  if (type.startsWith('cases.')) return StepCategory.KibanaCases;
   if (type.startsWith('elasticsearch.')) return StepCategory.Elasticsearch;
   if (type.startsWith('ai.')) return StepCategory.Ai;
   if (type.startsWith('data.')) return StepCategory.Data;
@@ -57,37 +91,46 @@ function zodToJsonSchemaSafe(schema: z.ZodType): unknown {
   }
 }
 
-function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAgent {
+export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAgent {
   const inputParams = buildStepParamsSummary(step.inputSchema);
   const configParams = step.configSchema ? buildStepParamsSummary(step.configSchema) : undefined;
+  const outputSummary = buildOutputSummary(step.outputSchema);
+  const deprecationMetadata = formatDeprecationMetadata(step.id, step.deprecation);
 
   return {
     id: step.id,
     label: step.label,
     description: step.description,
     category: step.category,
+    ...deprecationMetadata,
     connectorId: 'none',
     ...(inputParams.length > 0 ? { inputParams } : {}),
     ...(configParams && configParams.length > 0 ? { configParams } : {}),
+    ...(outputSummary ? { outputSummary } : {}),
     examples: step.documentation?.examples,
   };
 }
 
-function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
+export function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
   const connectorId = connector.hasConnectorId || 'none';
   const inputParams = buildStepParamsSummary(connector.paramsSchema);
   const configParams = connector.configSchema
     ? buildStepParamsSummary(connector.configSchema)
     : undefined;
+  const outputSummary = buildOutputSummary(connector.outputSchema);
+  const deprecation = connector.deprecation ?? getDeprecatedStepMetadata(connector.type);
+  const deprecationMetadata = formatDeprecationMetadata(connector.type, deprecation);
 
   return {
     id: connector.type,
     label: connector.summary ?? connector.description ?? connector.type,
     description: truncateDescription(connector.description),
     category: categorizeConnectorType(connector.type),
+    ...deprecationMetadata,
     connectorId,
     ...(inputParams.length > 0 ? { inputParams } : {}),
     ...(configParams && configParams.length > 0 ? { configParams } : {}),
+    ...(outputSummary ? { outputSummary } : {}),
     examples: connector.examples?.snippet ? [connector.examples.snippet] : undefined,
   };
 }
@@ -105,12 +148,27 @@ function matchesSearch(search: string, ...fields: Array<string | undefined | nul
   return fields.some((field) => field?.toLowerCase().includes(term));
 }
 
+function formatDeprecationMetadata(
+  stepType: string,
+  deprecation: StepDeprecationInfo | undefined
+): Pick<StepDefinitionForAgent, 'deprecated' | 'replacementStepType' | 'deprecationMessage'> {
+  if (!deprecation) {
+    return {};
+  }
+
+  return {
+    deprecated: true,
+    replacementStepType: deprecation.replacementStepType,
+    deprecationMessage: getDeprecatedStepMessage(stepType, deprecation),
+  };
+}
+
 export function registerGetStepDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: GET_STEP_DEFINITIONS_TOOL_ID,
+    id: workflowTools.getStepDefinitions,
     type: ToolType.builtin,
     description: `Get available workflow step types, their parameters, and usage examples.
 
@@ -118,9 +176,11 @@ export function registerGetStepDefinitionsTool(
 **When NOT to use:** To find connector instances configured in the environment (use get_connectors instead).
 
 Supports filtering by exact step type, keyword search, or category.
+Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
 When a small number of results is returned, input/config parameter summaries and usage examples are included.
 Common step properties (name, type, if, timeout, on-failure) are NOT listed per step -- they apply to all steps (see skill prompt).
-Set includeFullSchema=true to get the full JSON Schema for input params (use sparingly -- only when examples are insufficient).`,
+Set includeOutputSummary=true to get a compact one-line summary of each step's output fields (useful for knowing what data is available via \`{{ steps.name.field }}\`).
+Set includeFullSchema=true to get the full JSON Schema for step input params (use sparingly -- only when examples are insufficient).`,
     schema: z.object({
       stepType: z
         .string()
@@ -132,10 +192,22 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
         .describe(
           'Search term to match against step type IDs, labels, and descriptions (e.g., "case", "slack", "loop")'
         ),
+      includeDeprecated: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, include deprecated step types in discovery results. Exact stepType lookups return deprecated steps even when this is false.'
+        ),
       category: z
         .enum(StepCategories as [StepCategory, ...StepCategory[]])
         .optional()
         .describe('Filter by step category'),
+      includeOutputSummary: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, include a one-line summary of each step\'s output fields (e.g. "object with: id (string), title (string)").'
+        ),
       includeFullSchema: z
         .boolean()
         .optional()
@@ -146,23 +218,21 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
     tags: ['workflows', 'yaml', 'steps'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
       },
       cacheMode: 'space',
     },
-    handler: async ({ stepType, search, category, includeFullSchema }, { spaceId, request }) => {
+    handler: async (
+      { stepType, search, category, includeDeprecated, includeOutputSummary, includeFullSchema },
+      { spaceId, request }
+    ) => {
       const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
-      const { connectorsByType } = await api.getAvailableConnectors(spaceId, request);
-      const enabledConnectorTypes = Object.fromEntries(
-        Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
-      );
-
-      addDynamicConnectorsToCache(enabledConnectorTypes);
-
-      const allConnectors = getAllConnectors();
+      const { all: allConnectors } = await resolveConnectors(api, spaceId, request);
 
       const connectorDefinitions = allConnectors
         .filter((connector) => !builtInTypes.has(connector.type))
@@ -170,6 +240,10 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
       const builtInFormatted = builtInStepDefinitions.map(formatBuiltInStep);
 
       let allDefinitions: StepDefinitionForAgent[] = [...builtInFormatted, ...connectorDefinitions];
+
+      if (includeDeprecated !== true && !stepType) {
+        allDefinitions = allDefinitions.filter((def) => !def.deprecated);
+      }
 
       if (stepType) {
         allDefinitions = allDefinitions.filter((def) => def.id === stepType);
@@ -215,6 +289,16 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
           category: def.category,
         };
 
+        if (def.deprecated) {
+          result.deprecated = true;
+          if (def.replacementStepType) {
+            result.replacementStepType = def.replacementStepType;
+          }
+          if (def.deprecationMessage) {
+            result.deprecationMessage = def.deprecationMessage;
+          }
+        }
+
         if (def.connectorId && def.connectorId !== 'none') {
           result.connectorId = def.connectorId;
         }
@@ -226,6 +310,9 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
         }
         if (def.configParams && def.configParams.length > 0) {
           result.configParams = def.configParams;
+        }
+        if (includeOutputSummary && def.outputSummary) {
+          result.outputSummary = def.outputSummary;
         }
 
         if (includeFullSchema) {
