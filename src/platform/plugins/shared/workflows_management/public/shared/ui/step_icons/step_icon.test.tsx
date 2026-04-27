@@ -207,12 +207,10 @@ describe('StepIcon', () => {
       (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
       (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([]);
 
-      const { container } = render(
-        <StepIcon stepType="workflow" executionStatus={undefined} title="workflow" />
-      );
+      const { container } = render(<StepIcon stepType="workflow" executionStatus={undefined} />);
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
       // The glyph icon is a data URL SVG rendered inline via a masked span, not an EuiIcon.
-      expect(container.querySelector('span[title="workflow"]')).toBeInTheDocument();
+      expect(container.querySelector('span[aria-hidden="true"]')).toBeInTheDocument();
     });
   });
 

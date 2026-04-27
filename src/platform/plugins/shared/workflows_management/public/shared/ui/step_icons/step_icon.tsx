@@ -8,7 +8,7 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -37,14 +37,22 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   onClick?: React.MouseEventHandler;
 }
 
-// EuiIcon drops `title` when `type` is a React component (lazy-loaded connector
-// icons), so wrap every resolved icon in a span[title] to get a consistent native
-// tooltip across branches.
-const tooltipWrapperStyle = css({
+// EuiToolTip clones its child to attach hover handlers, so anchor it to a plain
+// span — works uniformly for EuiIcon, EuiToken, Suspense, and the masked-span glyph.
+const tooltipAnchorStyle = css({
   display: 'inline-flex',
   alignItems: 'center',
   lineHeight: 0,
 });
+
+const withTooltip = (content: React.ReactElement, title?: string): React.ReactElement =>
+  title ? (
+    <EuiToolTip content={title}>
+      <span css={tooltipAnchorStyle}>{content}</span>
+    </EuiToolTip>
+  ) : (
+    content
+  );
 
 export const StepIcon = React.memo(
   ({ stepType, executionStatus, onClick, title, ...rest }: StepIconProps) => {
@@ -72,15 +80,6 @@ export const StepIcon = React.memo(
       );
     }
 
-    const withTooltip = (content: React.ReactElement): React.ReactElement =>
-      title ? (
-        <span title={title} css={tooltipWrapperStyle}>
-          {content}
-        </span>
-      ) : (
-        content
-      );
-
     let iconType: IconType;
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
@@ -94,7 +93,8 @@ export const StepIcon = React.memo(
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
-          </Suspense>
+          </Suspense>,
+          title
         );
       }
 
@@ -103,7 +103,8 @@ export const StepIcon = React.memo(
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
-          </Suspense>
+          </Suspense>,
+          title
         );
       }
 
@@ -128,7 +129,8 @@ export const StepIcon = React.memo(
           `}
           onClick={onClick}
           aria-hidden={true}
-        />
+        />,
+        title
       );
     }
 
@@ -144,7 +146,8 @@ export const StepIcon = React.memo(
           }
           fill="light"
           onClick={onClick}
-        />
+        />,
+        title
       );
     }
 
@@ -171,7 +174,8 @@ export const StepIcon = React.memo(
         onClick={onClick}
         {...rest}
         aria-hidden={true}
-      />
+      />,
+      title
     );
   }
 );
