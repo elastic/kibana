@@ -9,13 +9,18 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { RecentAnomaliesChart } from '../recent_anomalies/recent_anomalies_chart';
+import {
+  RecentAnomaliesChart,
+  RECENT_ANOMALIES_TIME_RANGE,
+} from '../recent_anomalies/recent_anomalies_chart';
 import { useKibana } from '../../../common/lib/kibana';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 const useRecentAnomaliesMlExplorerUrl = () => {
-  const { from, to } = useGlobalTime();
+  // The Entity Analytics home page hides the global date picker; keep the
+  // "Open in Anomaly Explorer" link aligned with the 30-day window used by
+  // the recent anomalies chart instead of reading from the global time.
+  const { from, to } = RECENT_ANOMALIES_TIME_RANGE;
   const { services } = useKibana();
 
   return useMlHref(
