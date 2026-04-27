@@ -47,9 +47,54 @@ apiTest('returns 200 and the expected fields for a viewer', async ({ apiClient }
 });
 ```
 
+✔️ **Do:** use a Scout API test to assert exact values computed by the backend (counts, aggregations, formulas).
+
+```ts
+apiTest('returns the correct count for each included types', async ({ apiClient }) => {
+  const response = await apiClient.post(MANAGEMENT_API.SCROLL_COUNT, {
+    headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+    body: { typesToInclude: ['visualization'] },
+  });
+
+  expect(response).toHaveStatusCode(200);
+  expect(response.body).toStrictEqual({ visualization: 12000 });
+});
+```
+
+The suite seeds a known dataset in `beforeAll` (12,000 visualizations) so the count is deterministic. See [`scroll_count_large.spec.ts`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_large.spec.ts).
+
 ✔️ **Do:** use a Jest integration test for data-migration coverage.
 
-Migration tests typically need to load an Elasticsearch data dir snapshot from a previous version, boot Kibana against it, and assert on the resulting indices. That's a poor fit for a Scout API test: no real user can drive a stack upgrade through an HTTP route, and Scout suites share a single Kibana/Elasticsearch instance — so writing directly to system indices from one test leaks state into the rest of the suite. See examples of Jest integration tests: [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations).
+A Scout API test is the wrong layer here: no real user can drive a stack upgrade through an HTTP route, and Scout suites share a single Kibana/Elasticsearch instance — so writing directly to system indices from one test leaks state into the rest of the suite.
+
+```ts
+import { startElasticsearch, getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
+
+let esServer;
+beforeAll(async () => {
+  esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
+});
+afterAll(async () => esServer?.stop());
+
+it('migrates docs from a previous version', async () => {
+  const { runMigrations, client } = await getKibanaMigratorTestKit({ ...getBaseMigratorParams() });
+  const results = await runMigrations();
+
+  const mappings = await client.indices.getMapping({ index: '.kibana' });
+  expect(results[0].status).toBe('migrated');
+  expect(mappings).toMatchObject({
+    /* expected shape after migration */
+  });
+});
+```
+
+How these tests work:
+
+- They start a real Elasticsearch via `startElasticsearch(...)` from `@kbn/migrator-test-kit` and run the in-process migrator via `getKibanaMigratorTestKit(...).runMigrations()` — no full Kibana HTTP server is booted.
+- "Previous version" data comes from a baseline ES data archive zip (e.g. `BASELINE_TEST_ARCHIVE_LARGE`) passed as `dataArchive`; if you don't need a snapshot, skip it and seed via `savedObjectsRepository.bulkCreate`.
+- Assertions run directly against ES (`client.indices.get` / `getMapping`), the SO repository (`savedObjectsRepository.find`), the returned `MigrationResult[]`, or migration logs.
+
+See [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations) for the full set of examples, and [`group1/v2_migration.test.ts`](https://github.com/elastic/kibana/blob/main/src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts) for a representative archive-based test.
 
 :::::
 
