@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { WorkflowsClientProvider } from '@kbn/workflows/server/types';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { WorkflowsClient, WorkflowsClientProvider } from '@kbn/workflows/server/types';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -32,13 +38,14 @@ export class WorkflowsExtensionsServerPlugin
       WorkflowsExtensionsServerPluginStartDeps
     >
 {
+  private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const logger = initializerContext.logger.get();
-    this.stepRegistry = new ServerStepRegistry(logger);
+    this.logger = initializerContext.logger.get();
+    this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
   }
 
@@ -51,7 +58,7 @@ export class WorkflowsExtensionsServerPlugin
       'workflows',
       (_context, request) => {
         if (!this.workflowsClientProvider) {
-          throw new Error('Workflows client provider not set');
+          return this.getNoopWorkflowsClient();
         }
         return this.workflowsClientProvider(request);
       }
@@ -108,7 +115,7 @@ export class WorkflowsExtensionsServerPlugin
       },
       getClient: async (request) => {
         if (!this.workflowsClientProvider) {
-          throw new Error('Workflows client provider not set');
+          return this.getNoopWorkflowsClient();
         }
         return this.workflowsClientProvider(request);
       },
@@ -116,4 +123,20 @@ export class WorkflowsExtensionsServerPlugin
   }
 
   public stop() {}
+
+  /**
+   * Returns a noop workflows client to avoid errors when the workflows client provider is not set.
+   * This scenario should never happen, but it's a fallback to avoid errors in case not all workflows plugins are enabled.
+   * @returns A noop workflows client
+   */
+  private getNoopWorkflowsClient(): WorkflowsClient {
+    return {
+      isWorkflowsAvailable: false,
+      emitEvent: async () => {
+        this.logger.warn(
+          'No workflows client provider set, using noop emitEvent to avoid errors. Trigger event ignored.'
+        );
+      },
+    };
+  }
 }

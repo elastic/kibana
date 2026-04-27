@@ -485,10 +485,6 @@ describe('Route privilege/ES-operation consistency', () => {
     mockExecutionEngine.scheduleWorkflow.mockResolvedValue({
       workflowExecutionId: 'test-exec-id',
     });
-    // mockExecutionEngine.workflowEventLoggerService.search.mockResolvedValue({
-    //   logs: [],
-    //   total: 0,
-    // });
 
     // ── WorkflowsService ──
 
