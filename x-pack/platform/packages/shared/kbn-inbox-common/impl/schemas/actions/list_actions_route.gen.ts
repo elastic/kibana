@@ -14,58 +14,64 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const InboxAction = lazySchema(() =>
+  z.object({
+    /**
+     * Stable identifier for the action
+     */
+    id: z.string(),
+    /**
+     * Short, human-readable summary of what needs approval
+     */
+    title: z.string(),
+    /**
+     * Longer context about the action
+     */
+    description: z.string().nullable().optional(),
+    status: z.enum(['pending', 'approved', 'rejected']),
+    /**
+     * App id of the system that produced the action (e.g. security_solution, attack_discovery)
+     */
+    source_app: z.string(),
+    /**
+     * Stable id of the originating entity (task/agent/run)
+     */
+    source_id: z.string(),
+    /**
+     * Username/principal that requested the action
+     */
+    requested_by: z.string().nullable().optional(),
+    /**
+     * ISO 8601 timestamp of when the action was created
+     */
+    created_at: z.string(),
+  })
+);
 export type InboxAction = z.infer<typeof InboxAction>;
-export const InboxAction = z.object({
-  /**
-   * Stable identifier for the action
-   */
-  id: z.string(),
-  /**
-   * Short, human-readable summary of what needs approval
-   */
-  title: z.string(),
-  /**
-   * Longer context about the action
-   */
-  description: z.string().nullable().optional(),
-  status: z.enum(['pending', 'approved', 'rejected']),
-  /**
-   * App id of the system that produced the action (e.g. security_solution, attack_discovery)
-   */
-  source_app: z.string(),
-  /**
-   * Stable id of the originating entity (task/agent/run)
-   */
-  source_id: z.string(),
-  /**
-   * Username/principal that requested the action
-   */
-  requested_by: z.string().nullable().optional(),
-  /**
-   * ISO 8601 timestamp of when the action was created
-   */
-  created_at: z.string(),
-});
 
+export const ListInboxActionsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter actions by status
+     */
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+    /**
+     * Filter actions by the originating app id
+     */
+    source_app: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
+  })
+);
 export type ListInboxActionsRequestQuery = z.infer<typeof ListInboxActionsRequestQuery>;
-export const ListInboxActionsRequestQuery = z.object({
-  /**
-   * Filter actions by status
-   */
-  status: z.enum(['pending', 'approved', 'rejected']).optional(),
-  /**
-   * Filter actions by the originating app id
-   */
-  source_app: z.string().optional(),
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
-});
 export type ListInboxActionsRequestQueryInput = z.input<typeof ListInboxActionsRequestQuery>;
 
+export const ListInboxActionsResponse = lazySchema(() =>
+  z.object({
+    actions: z.array(InboxAction),
+    total: z.number().int(),
+  })
+);
 export type ListInboxActionsResponse = z.infer<typeof ListInboxActionsResponse>;
-export const ListInboxActionsResponse = z.object({
-  actions: z.array(InboxAction),
-  total: z.number().int(),
-});
