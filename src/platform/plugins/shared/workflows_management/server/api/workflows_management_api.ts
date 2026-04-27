@@ -13,6 +13,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type {
+  BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
@@ -135,6 +136,14 @@ export interface TestWorkflowParams {
   inputs: Record<string, any>;
   spaceId: string;
   request: KibanaRequest;
+}
+
+export interface BulkScheduleWorkflowItem {
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+  inputs: Record<string, unknown>;
+  triggeredBy: string;
+  metadata?: WorkflowExecutionEventDispatchMetadata;
 }
 
 export class WorkflowsManagementApi {
@@ -357,6 +366,29 @@ export class WorkflowsManagementApi {
       request
     );
     return scheduleResponse.workflowExecutionId;
+  }
+
+  public async bulkScheduleWorkflow(
+    items: BulkScheduleWorkflowItem[],
+    request: KibanaRequest
+  ): Promise<BulkScheduleWorkflowResult> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+
+    const engineItems = items.map((item) => {
+      const { event, ...manualInputs } = item.inputs;
+      const context: Record<string, unknown> = {
+        event,
+        spaceId: item.spaceId,
+        inputs: manualInputs,
+        triggeredBy: item.triggeredBy,
+      };
+      if (item.metadata) {
+        context.metadata = item.metadata;
+      }
+      return { workflow: item.workflow, context };
+    });
+
+    return workflowsExecutionEngine.bulkScheduleWorkflow(engineItems, request);
   }
 
   public async testWorkflow({
