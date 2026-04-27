@@ -238,7 +238,7 @@ export function conditionToStatement(
     // `COALESCE(field != value, TRUE)` and `not(eq)` semantics), so the null-guard is
     // disjunctive (`=== null ||`) rather than conjunctive (`!== null &&`). Every other
     // shorthand binary leaf treats a missing field as a non-match.
-    const isNeq = 'neq' in condition;
+    const isNeq = (condition as ShorthandBinaryFilterCondition).neq !== undefined;
     const nullGuard = isNeq ? '=== null ||' : '!== null &&';
     return `(${safePainlessField(condition, varMap)} ${nullGuard} ${shorthandBinaryToPainless(
       condition as ShorthandBinaryFilterCondition,
