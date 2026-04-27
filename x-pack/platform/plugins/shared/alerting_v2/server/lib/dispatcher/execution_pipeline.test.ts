@@ -232,6 +232,26 @@ describe('DispatcherPipeline', () => {
       });
     });
 
+    it('applies state data from a halt output so downstream consumers can read it on the finalState', async () => {
+      // `fetch_episodes` halts with `no_episodes` but still publishes
+      // `nextEventWatermark` on the way out — that field must survive on
+      // `finalState` even though the pipeline did not continue.
+      const { loggerService } = createLoggerService();
+
+      const haltingStep = createMockDispatcherStep('fetch_episodes', async () => ({
+        type: 'halt',
+        reason: 'no_episodes',
+        data: { nextEventWatermark: '2026-01-22T07:31:00.000Z' },
+      }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [haltingStep]);
+      const result = await pipeline.execute(createDispatcherPipelineInput());
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('no_episodes');
+      expect(result.finalState.nextEventWatermark).toBe('2026-01-22T07:31:00.000Z');
+    });
+
     it('records the halting step with halted=true and no further stage timings', async () => {
       const { loggerService } = createLoggerService();
 

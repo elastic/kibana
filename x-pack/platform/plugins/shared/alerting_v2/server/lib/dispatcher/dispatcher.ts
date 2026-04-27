@@ -31,6 +31,7 @@ export class DispatcherService implements DispatcherServiceContract {
 
   public async run({
     previousStartedAt = new Date(),
+    eventWatermark,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
     // Wall-clock `startedAt`/`finishedAt` drive ISO-8601 timestamps; elapsed
@@ -40,7 +41,11 @@ export class DispatcherService implements DispatcherServiceContract {
 
     let pipelineResult: DispatcherPipelineResult;
     try {
-      pipelineResult = await this.pipeline.execute({ startedAt, previousStartedAt });
+      pipelineResult = await this.pipeline.execute({
+        startedAt,
+        previousStartedAt,
+        eventWatermark,
+      });
     } catch (err) {
       // The pipeline catches step exceptions internally and converts them
       // into `step_error` halts, so reaching this branch means something
@@ -74,6 +79,29 @@ export class DispatcherService implements DispatcherServiceContract {
 
     emitTickSummary(this.logger, tick);
 
-    return { startedAt, tick };
+    return {
+      startedAt,
+      tick,
+      nextEventWatermark: extractAdvanceableWatermark(pipelineResult),
+    };
   }
+}
+
+/**
+ * The watermark may only advance when the tick fully completed or halted
+ * for a controlled, non-error reason. On `step_error` (or any halt that
+ * isn't a known clean outcome) we deliberately return `undefined` so
+ * `task_runner` preserves the prior watermark and the failed window is
+ * re-read on the next tick — that is the invariant that prevents silent
+ * data loss.
+ */
+function extractAdvanceableWatermark(result: DispatcherPipelineResult): string | undefined {
+  if (
+    !result.completed &&
+    result.haltReason !== 'no_episodes' &&
+    result.haltReason !== 'no_actions'
+  ) {
+    return undefined;
+  }
+  return result.finalState.nextEventWatermark;
 }

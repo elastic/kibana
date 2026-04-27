@@ -5,6 +5,23 @@
  * 2.0.
  */
 
+// These integration tests seed `.rule-events` with fixtures whose `@timestamp`
+// values are months in the past relative to wall-clock `now`, and rely on a
+// single dispatcher run draining the entire seeded window. To preserve those
+// semantics under A2's bounded windowing, the cap and settle buffer are
+// effectively disabled for this file only — production constants are
+// unaffected.
+jest.mock('../constants', () => {
+  const actual = jest.requireActual('../constants');
+  const ONE_YEAR_MIN = 60 * 24 * 365;
+  return {
+    ...actual,
+    LOOKBACK_WINDOW_MINUTES: ONE_YEAR_MIN,
+    TICK_LOOKBACK_CAP_MINUTES: ONE_YEAR_MIN * 10,
+    SETTLE_BUFFER_SECONDS: 0,
+  };
+});
+
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';

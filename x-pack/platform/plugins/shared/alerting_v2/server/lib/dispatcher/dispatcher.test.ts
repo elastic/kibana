@@ -28,7 +28,11 @@ import type { RulesSavedObjectServiceContract } from '../services/rules_saved_ob
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { LOOKBACK_WINDOW_MINUTES } from './constants';
+import {
+  LOOKBACK_WINDOW_MINUTES,
+  SETTLE_BUFFER_SECONDS,
+  TICK_LOOKBACK_CAP_MINUTES,
+} from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline } from './execution_pipeline';
 import {
@@ -50,6 +54,17 @@ import {
   StoreActionsStep,
 } from './steps';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
+
+interface TimestampRange {
+  gte?: string;
+  gt?: string;
+  lte?: string;
+}
+
+function extractTimestampRange(esqlRequest: unknown): TimestampRange {
+  const filter = (esqlRequest as { filter: { range: Record<string, TimestampRange> } }).filter;
+  return filter.range['@timestamp'];
+}
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -207,33 +222,38 @@ describe('DispatcherService', () => {
       } as BulkResponse);
 
       const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
+      const before = Date.now();
 
       const result = await dispatcherService.run({
         previousStartedAt,
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
-
-      const expectedLookback = moment(previousStartedAt)
-        .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-        .toISOString();
+      const after = Date.now();
 
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(3);
-      expect(queryEsClient.esql.query).toHaveBeenCalledWith(
-        {
-          query: getDispatchableAlertEventsQuery().query,
-          drop_null_columns: false,
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: expectedLookback,
-              },
-            },
-          },
-          params: undefined,
-        },
-        { signal: undefined }
-      );
+      const [firstCall] = queryEsClient.esql.query.mock.calls[0];
+      expect(firstCall).toMatchObject({
+        query: getDispatchableAlertEventsQuery().query,
+        drop_null_columns: false,
+        params: undefined,
+      });
+      // Cold start (no `eventWatermark`): the window is bounded by
+      // `now − LOOKBACK_WINDOW_MINUTES` (gte) and capped by `now − SETTLE_BUFFER`,
+      // truncated to `windowStart + TICK_LOOKBACK_CAP_MINUTES`.
+      const range = extractTimestampRange(firstCall);
+      expect(range).toHaveProperty('gte');
+      expect(range).toHaveProperty('lte');
+      expect(range).not.toHaveProperty('gt');
+      const gte = new Date(range.gte as string).getTime();
+      const lte = new Date(range.lte as string).getTime();
+      const lookbackMs = LOOKBACK_WINDOW_MINUTES * 60_000;
+      const capMs = TICK_LOOKBACK_CAP_MINUTES * 60_000;
+      const settleMs = SETTLE_BUFFER_SECONDS * 1_000;
+      expect(gte).toBeGreaterThanOrEqual(before - lookbackMs - 5);
+      expect(gte).toBeLessThanOrEqual(after - lookbackMs + 5);
+      expect(lte - gte).toBeLessThanOrEqual(capMs + 5);
+      expect(lte).toBeLessThanOrEqual(after - settleMs + 5);
 
       expect(storageEsClient.bulk).toHaveBeenCalledWith({
         operations: expect.any(Array),
@@ -837,6 +857,83 @@ describe('DispatcherService', () => {
       // Return value mirrors the log.
       expect(result.tick).toEqual(tick);
       expect(storageEsClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('event watermark plumbing', () => {
+    it('returns nextEventWatermark on a fully completed tick', async () => {
+      const alertEpisodes = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          episode_status: 'active' as const,
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse([]))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      // Cold start: watermark = upper bound of the queried window. The
+      // exact value is wall-clock dependent, but it must be a valid ISO
+      // timestamp aligned with the lte sent to ES.
+      expect(result.nextEventWatermark).toEqual(expect.any(String));
+      const [firstCall] = queryEsClient.esql.query.mock.calls[0];
+      const range = extractTimestampRange(firstCall);
+      expect(result.nextEventWatermark).toBe(range.lte);
+    });
+
+    it('returns nextEventWatermark on a no_episodes halt (window was queried but empty)', async () => {
+      queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      expect(result.tick.halt_reason).toBe('no_episodes');
+      expect(result.nextEventWatermark).toEqual(expect.any(String));
+    });
+
+    it('omits nextEventWatermark on a step_error halt to prevent silent data loss', async () => {
+      // The window that fetch_episodes attempted to read is "lost" if the
+      // watermark advances on error. Holding the watermark forces the next
+      // tick to retry the same range.
+      queryEsClient.esql.query.mockRejectedValueOnce(new Error('es unavailable'));
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      expect(result.tick.halt_reason).toBe('step_error');
+      expect(result.nextEventWatermark).toBeUndefined();
+    });
+
+    it('threads eventWatermark from params into the fetch_episodes filter (gt boundary)', async () => {
+      const watermark = moment().subtract(30, 'seconds').toDate();
+
+      queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        eventWatermark: watermark,
+      });
+
+      const [firstCall] = queryEsClient.esql.query.mock.calls[0];
+      const range = extractTimestampRange(firstCall);
+      expect(range).toHaveProperty('gt', watermark.toISOString());
+      expect(range).not.toHaveProperty('gte');
     });
   });
 

@@ -146,7 +146,7 @@ function applyStepOutput(
   state: DispatcherPipelineState,
   output: DispatcherStepOutput
 ): DispatcherPipelineState {
-  if (output.type === 'continue' && output.data) {
+  if (output.data) {
     return { ...state, ...output.data };
   }
   return state;
