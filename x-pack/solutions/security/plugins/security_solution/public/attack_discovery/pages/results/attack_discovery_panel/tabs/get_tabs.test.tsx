@@ -20,9 +20,16 @@ describe('getTabs', () => {
     '3bdc7952-a334-4d95-8092-cd176546e18a': 'bar.username',
   };
 
+  const viewInAiAssistantOverlay = {
+    disabled: false,
+    promptContextId: 'test-prompt-context',
+    showAssistantOverlay: jest.fn(),
+  };
+
   const tabs = getTabs({
     attackDiscovery: mockAttackDiscovery,
     replacements: mockReplacements,
+    viewInAiAssistantOverlay,
   });
 
   describe('Attack discovery tab', () => {

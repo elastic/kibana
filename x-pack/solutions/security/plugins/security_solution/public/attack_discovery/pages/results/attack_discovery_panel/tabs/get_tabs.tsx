@@ -6,12 +6,13 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
 import { AttackDiscoveryTab } from './attack_discovery_tab';
 import { AlertsTab } from './alerts_tab';
 import * as i18n from './translations';
+import type { ViewInAiAssistantOverlay } from '../view_in_ai_assistant/use_view_in_ai_assistant';
 
 export interface TabInfo {
   content: JSX.Element;
@@ -23,10 +24,12 @@ export const getTabs = ({
   attackDiscovery,
   replacements,
   showAnonymized = false,
+  viewInAiAssistantOverlay,
 }: {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
   replacements?: Replacements;
   showAnonymized?: boolean;
+  viewInAiAssistantOverlay: ViewInAiAssistantOverlay;
 }): TabInfo[] => [
   {
     id: 'attackDiscovery--id',
@@ -38,6 +41,7 @@ export const getTabs = ({
           attackDiscovery={attackDiscovery}
           replacements={replacements}
           showAnonymized={showAnonymized}
+          viewInAiAssistantOverlay={viewInAiAssistantOverlay}
         />
       </>
     ),

@@ -14,6 +14,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 
+import { useViewInAiAssistant } from './view_in_ai_assistant/use_view_in_ai_assistant';
 import { ActionableSummary } from './actionable_summary';
 import { PanelHeader } from './panel_header';
 import { Tabs } from './tabs';
@@ -43,6 +44,11 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
 
   const [isOpen, setIsOpen] = useState<'open' | 'closed'>(initialIsOpen ? 'open' : 'closed');
 
+  const viewInAiAssistantOverlay = useViewInAiAssistant({
+    attackDiscovery,
+    replacements,
+  });
+
   return (
     <>
       <EuiPanel data-test-subj={`attackDiscoveryPanel-${attackDiscovery.id}`} hasBorder={true}>
@@ -58,6 +64,7 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
           setIsOpen={setIsOpen}
           setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
           showAnonymized={showAnonymized}
+          viewInAiAssistantOverlay={viewInAiAssistantOverlay}
         />
 
         <EuiSpacer size="s" />
@@ -66,6 +73,7 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
           attackDiscovery={attackDiscovery}
           replacements={replacements}
           showAnonymized={showAnonymized}
+          viewInAiAssistantOverlay={viewInAiAssistantOverlay}
         />
       </EuiPanel>
 
@@ -83,6 +91,7 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
             attackDiscovery={attackDiscovery}
             replacements={replacements}
             showAnonymized={showAnonymized}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </EuiPanel>
       )}

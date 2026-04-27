@@ -7,24 +7,27 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
 import { AlertsBadge } from './alerts_badge';
 import { MiniAttackChain } from './mini_attack_chain';
 import { TakeAction } from '../../../take_action';
 import * as i18n from './translations';
+import type { ViewInAiAssistantOverlay } from '../../view_in_ai_assistant/use_view_in_ai_assistant';
 
 interface Props {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
   replacements?: Replacements;
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  viewInAiAssistantOverlay: ViewInAiAssistantOverlay;
 }
 
 const SummaryActionsComponent: React.FC<Props> = ({
   attackDiscovery,
   replacements,
   setSelectedAttackDiscoveries,
+  viewInAiAssistantOverlay,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -125,6 +128,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
           attackDiscoveries={attackDiscoveries}
           replacements={replacements}
           setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+          viewInAiAssistantOverlay={viewInAiAssistantOverlay}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -12,6 +12,14 @@ import { AttackDiscoveryPanel } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 
+jest.mock('./view_in_ai_assistant/use_view_in_ai_assistant', () => ({
+  useViewInAiAssistant: () => ({
+    disabled: false,
+    promptContextId: 'test-prompt-context',
+    showAssistantOverlay: jest.fn(),
+  }),
+}));
+
 const defaultProps = {
   attackDiscovery: mockAttackDiscovery,
   isSelected: false,

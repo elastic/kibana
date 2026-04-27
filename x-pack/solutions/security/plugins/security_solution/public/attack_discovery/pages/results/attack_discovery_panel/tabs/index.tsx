@@ -5,26 +5,34 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type {
+  AttackDiscovery,
+  AttackDiscoveryAlert,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getTabs } from './get_tabs';
+import type { ViewInAiAssistantOverlay } from '../view_in_ai_assistant/use_view_in_ai_assistant';
 
 interface Props {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
   replacements?: Replacements;
   showAnonymized?: boolean;
+  viewInAiAssistantOverlay: ViewInAiAssistantOverlay;
 }
 
 const TabsComponent: React.FC<Props> = ({
   attackDiscovery,
   replacements,
   showAnonymized = false,
+  viewInAiAssistantOverlay,
 }) => {
   const tabs = useMemo(
-    () => getTabs({ attackDiscovery, replacements, showAnonymized }),
-    [attackDiscovery, replacements, showAnonymized]
+    () =>
+      getTabs({ attackDiscovery, replacements, showAnonymized, viewInAiAssistantOverlay }),
+    [attackDiscovery, replacements, showAnonymized, viewInAiAssistantOverlay]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);

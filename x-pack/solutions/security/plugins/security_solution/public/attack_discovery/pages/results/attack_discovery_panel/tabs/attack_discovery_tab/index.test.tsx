@@ -18,6 +18,12 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 
 jest.mock('../../../../../../common/lib/kibana');
 
+const viewInAiAssistantOverlay = {
+  disabled: false,
+  promptContextId: 'test-prompt-context',
+  showAssistantOverlay: jest.fn(),
+};
+
 describe('AttackDiscoveryTab', () => {
   const mockReplacements: Replacements = {
     '5e454c38-439c-4096-8478-0a55511c76e3': 'foo.hostname',
@@ -36,6 +42,7 @@ describe('AttackDiscoveryTab', () => {
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
             showAnonymized={showAnonymized}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       )
@@ -74,6 +81,7 @@ describe('AttackDiscoveryTab', () => {
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
             showAnonymized={showAnonymized}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       )
@@ -105,6 +113,7 @@ describe('AttackDiscoveryTab', () => {
           <AttackDiscoveryTab
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       )
@@ -171,6 +180,7 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
             attackDiscovery={mockAttackDiscoveryWithMultipleSubstitutions}
             replacements={mockReplacements}
             showAnonymized={false}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );
@@ -191,6 +201,7 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
             <AttackDiscoveryTab
               attackDiscovery={mockAttackDiscovery}
               replacements={mockReplacements}
+              viewInAiAssistantOverlay={viewInAiAssistantOverlay}
             />
           </TestProviders>
         );
@@ -221,6 +232,7 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
           <AttackDiscoveryTab
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );

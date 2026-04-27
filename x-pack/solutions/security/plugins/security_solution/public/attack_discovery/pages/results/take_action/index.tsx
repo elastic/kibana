@@ -27,7 +27,10 @@ import * as agentBuilderI18n from '../../../../agent_builder/components/translat
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
-import { useViewInAiAssistant } from '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
+import {
+  useViewInAiAssistant,
+  type ViewInAiAssistantOverlay,
+} from '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -47,15 +50,28 @@ interface Props {
   refetchFindAttackDiscoveries?: () => void;
   replacements?: Replacements;
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  /**
+   * When set (e.g. from `AttackDiscoveryPanel`), uses this `useViewInAiAssistant` result so
+   * multiple TakeAction / `View in AI Assistant` UIs do not each register a separate
+   * `useAssistantOverlay` for the same attack discovery (which breaks on partial unmount).
+   */
+  viewInAiAssistantOverlay?: ViewInAiAssistantOverlay;
 }
 
-const TakeActionComponent: React.FC<Props> = ({
+type TakeActionBodyProps = Omit<Props, 'viewInAiAssistantOverlay'> & {
+  showAssistantOverlay: () => void;
+  viewInAiAssistantDisabled: boolean;
+};
+
+const TakeActionBody: React.FC<TakeActionBodyProps> = ({
   attackDiscoveries,
   buttonSize = 's',
   buttonText,
   refetchFindAttackDiscoveries,
   replacements,
   setSelectedAttackDiscoveries,
+  showAssistantOverlay,
+  viewInAiAssistantDisabled,
 }) => {
   const [pendingAction, setPendingAction] = useState<'open' | 'acknowledged' | 'closed' | null>(
     null
@@ -204,14 +220,9 @@ const TakeActionComponent: React.FC<Props> = ({
     });
   }, [closePopover, onAddToExistingCase, alertIds, markdown, replacements]);
 
-  const { showAssistantOverlay, disabled: viewInAiAssistantDisabled } = useViewInAiAssistant({
-    attackDiscovery: attackDiscoveries[0],
-    replacements,
-  });
-
   const onViewInAiAssistant = useCallback(() => {
     closePopover();
-    showAssistantOverlay?.();
+    showAssistantOverlay();
   }, [closePopover, showAssistantOverlay]);
 
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
@@ -466,6 +477,39 @@ const TakeActionComponent: React.FC<Props> = ({
       )}
     </>
   );
+};
+
+TakeActionBody.displayName = 'TakeActionBody';
+
+const TakeActionWithLocalViewInAi: React.FC<Omit<Props, 'viewInAiAssistantOverlay'>> = (
+  props
+) => {
+  const { showAssistantOverlay, disabled: viewInAiAssistantDisabled } = useViewInAiAssistant({
+    attackDiscovery: props.attackDiscoveries[0],
+    replacements: props.replacements,
+  });
+
+  return (
+    <TakeActionBody
+      {...props}
+      showAssistantOverlay={showAssistantOverlay}
+      viewInAiAssistantDisabled={viewInAiAssistantDisabled}
+    />
+  );
+};
+
+const TakeActionComponent: React.FC<Props> = (props) => {
+  if (props.viewInAiAssistantOverlay != null) {
+    const { viewInAiAssistantOverlay, ...rest } = props;
+    return (
+      <TakeActionBody
+        {...rest}
+        showAssistantOverlay={viewInAiAssistantOverlay.showAssistantOverlay}
+        viewInAiAssistantDisabled={viewInAiAssistantOverlay.disabled}
+      />
+    );
+  }
+  return <TakeActionWithLocalViewInAi {...props} />;
 };
 
 TakeActionComponent.displayName = 'TakeAction';

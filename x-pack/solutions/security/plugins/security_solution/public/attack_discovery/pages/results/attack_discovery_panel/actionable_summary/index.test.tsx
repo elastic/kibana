@@ -16,6 +16,12 @@ import { SECURITY_FEATURE_ID } from '../../../../../../common';
 
 jest.mock('../../../../../common/lib/kibana');
 
+const viewInAiAssistantOverlay = {
+  disabled: false,
+  promptContextId: 'test-prompt-context',
+  showAssistantOverlay: jest.fn(),
+};
+
 describe('ActionableSummary', () => {
   const mockReplacements = {
     '5e454c38-439c-4096-8478-0a55511c76e3': 'foo.hostname',
@@ -29,6 +35,7 @@ describe('ActionableSummary', () => {
           <ActionableSummary
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );
@@ -50,6 +57,7 @@ describe('ActionableSummary', () => {
           <ActionableSummary
             attackDiscovery={mockAttackDiscovery}
             replacements={{}} // <-- no replacements for the entities
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );
@@ -76,6 +84,7 @@ describe('ActionableSummary', () => {
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
             showAnonymized={true} // <-- show anonymized entities
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );
@@ -101,6 +110,7 @@ describe('ActionableSummary', () => {
           <ActionableSummary
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );
@@ -130,6 +140,7 @@ describe('ActionableSummary', () => {
           <ActionableSummary
             attackDiscovery={mockAttackDiscovery}
             replacements={mockReplacements}
+            viewInAiAssistantOverlay={viewInAiAssistantOverlay}
           />
         </TestProviders>
       );

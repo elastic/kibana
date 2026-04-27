@@ -13,6 +13,12 @@ import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../../mock/mock_attack_discovery';
 import { ATTACK_CHAIN, ALERTS } from './translations';
 
+const viewInAiAssistantOverlay = {
+  disabled: false,
+  promptContextId: 'test-prompt-context',
+  showAssistantOverlay: jest.fn(),
+};
+
 describe('SummaryActions', () => {
   beforeEach(() =>
     render(
@@ -20,6 +26,7 @@ describe('SummaryActions', () => {
         <SummaryActions
           attackDiscovery={mockAttackDiscovery}
           setSelectedAttackDiscoveries={jest.fn()}
+          viewInAiAssistantOverlay={viewInAiAssistantOverlay}
         />
       </TestProviders>
     )

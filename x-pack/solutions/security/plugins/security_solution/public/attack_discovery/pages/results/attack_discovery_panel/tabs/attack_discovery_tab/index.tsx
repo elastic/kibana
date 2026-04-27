@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -23,6 +23,7 @@ import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 import { useAgentBuilderAvailability } from '../../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAttackDiscoveryAttachment } from '../../../use_attack_discovery_attachment';
+import type { ViewInAiAssistantOverlay } from '../../view_in_ai_assistant/use_view_in_ai_assistant';
 
 const scrollable = css`
   overflow-x: auto;
@@ -30,15 +31,17 @@ const scrollable = css`
 `;
 
 interface Props {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
   replacements?: Replacements;
   showAnonymized?: boolean;
+  viewInAiAssistantOverlay: ViewInAiAssistantOverlay;
 }
 
 const AttackDiscoveryTabComponent: React.FC<Props> = ({
   attackDiscovery,
   replacements,
   showAnonymized = false,
+  viewInAiAssistantOverlay,
 }) => {
   const {
     application: { capabilities },
@@ -139,7 +142,11 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               }}
             />
           ) : (
-            <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
+            <ViewInAiAssistant
+              attackDiscovery={attackDiscovery}
+              replacements={replacements}
+              viewInAiAssistantOverlay={viewInAiAssistantOverlay}
+            />
           )}
         </EuiFlexItem>
         <EuiFlexItem

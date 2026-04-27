@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import {
   type AttackDiscovery,
+  type AttackDiscoveryAlert,
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
@@ -20,17 +21,20 @@ import { ViewInAiAssistant } from '../view_in_ai_assistant';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAttackDiscoveryAttachment } from '../../use_attack_discovery_attachment';
+import type { ViewInAiAssistantOverlay } from '../view_in_ai_assistant/use_view_in_ai_assistant';
 
 interface Props {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
   replacements?: Replacements;
   showAnonymized?: boolean;
+  viewInAiAssistantOverlay: ViewInAiAssistantOverlay;
 }
 
 const ActionableSummaryComponent: React.FC<Props> = ({
   attackDiscovery,
   replacements,
   showAnonymized = false,
+  viewInAiAssistantOverlay,
 }) => {
   const {
     application: { capabilities },
@@ -100,6 +104,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
               compact={true}
               attackDiscovery={attackDiscovery}
               replacements={replacements}
+              viewInAiAssistantOverlay={viewInAiAssistantOverlay}
             />
           )}
         </EuiFlexItem>

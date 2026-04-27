@@ -29,6 +29,11 @@ const defaultProps = {
   setIsOpen: mockSetIsOpen,
   setSelectedAttackDiscoveries: mockSetSelectedAttackDiscoveries,
   showAnonymized: false,
+  viewInAiAssistantOverlay: {
+    disabled: false,
+    promptContextId: 'test-prompt-context',
+    showAssistantOverlay: jest.fn(),
+  },
 };
 
 describe('PanelHeader', () => {

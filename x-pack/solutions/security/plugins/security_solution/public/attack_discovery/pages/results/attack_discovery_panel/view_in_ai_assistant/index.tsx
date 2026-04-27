@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import * as i18n from './translations';
-import { useViewInAiAssistant } from './use_view_in_ai_assistant';
+import { useViewInAiAssistant, type ViewInAiAssistantOverlay } from './use_view_in_ai_assistant';
 
-interface Props {
-  attackDiscovery: AttackDiscovery;
-  compact?: boolean;
-  replacements?: Replacements;
+interface ViewInAiAssistantViewProps {
+  compact: boolean;
+  disabled: boolean;
+  showAssistantOverlay: () => void;
 }
 
-const ViewInAiAssistantComponent: React.FC<Props> = ({
-  attackDiscovery,
-  compact = false,
-  replacements,
-}) => {
-  const { showAssistantOverlay, disabled } = useViewInAiAssistant({
-    attackDiscovery,
-    replacements,
-  });
-
-  return compact ? (
+const ViewInAiAssistantView: React.FC<ViewInAiAssistantViewProps> = ({
+  compact,
+  disabled,
+  showAssistantOverlay,
+}) =>
+  compact ? (
     <EuiButtonEmpty
       data-test-subj="viewInAiAssistantCompact"
       disabled={disabled}
@@ -56,6 +51,57 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
       </EuiFlexGroup>
     </EuiButton>
   );
+
+ViewInAiAssistantView.displayName = 'ViewInAiAssistantView';
+
+export type { ViewInAiAssistantOverlay };
+
+interface Props {
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
+  compact?: boolean;
+  replacements?: Replacements;
+  /**
+   * When set (e.g. from `AttackDiscoveryPanel`), uses this state instead of calling
+   * `useViewInAiAssistant` so only one `useAssistantOverlay` exists per discovery id.
+   */
+  viewInAiAssistantOverlay?: ViewInAiAssistantOverlay;
+}
+
+const ViewInAiAssistantWithHook: React.FC<Props> = ({ compact = false, ...rest }) => {
+  const overlay = useViewInAiAssistant({
+    attackDiscovery: rest.attackDiscovery,
+    replacements: rest.replacements,
+  });
+  return (
+    <ViewInAiAssistantView
+      compact={compact}
+      disabled={overlay.disabled}
+      showAssistantOverlay={overlay.showAssistantOverlay}
+    />
+  );
+};
+
+const ViewInAiAssistantWithInjectedOverlay: React.FC<Props> = ({
+  compact = false,
+  viewInAiAssistantOverlay: overlay,
+}) => {
+  if (overlay == null) {
+    return null;
+  }
+  return (
+    <ViewInAiAssistantView
+      compact={compact}
+      disabled={overlay.disabled}
+      showAssistantOverlay={overlay.showAssistantOverlay}
+    />
+  );
+};
+
+const ViewInAiAssistantComponent: React.FC<Props> = (props) => {
+  if (props.viewInAiAssistantOverlay != null) {
+    return <ViewInAiAssistantWithInjectedOverlay {...props} />;
+  }
+  return <ViewInAiAssistantWithHook {...props} />;
 };
 
 ViewInAiAssistantComponent.displayName = 'ViewInAiAssistant';

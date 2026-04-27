@@ -17,6 +17,11 @@ describe('Tabs', () => {
     attackDiscovery: mockAttackDiscovery,
     replacements: undefined,
     showAnonymized: false,
+    viewInAiAssistantOverlay: {
+      disabled: false,
+      promptContextId: 'test-prompt-context',
+      showAssistantOverlay: jest.fn(),
+    },
   };
 
   const renderTabs = (props = {}) =>

@@ -10,6 +10,7 @@ import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import {
   getAttackDiscoveryMarkdown,
   type AttackDiscovery,
+  type AttackDiscoveryAlert,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
@@ -22,7 +23,7 @@ export const useViewInAiAssistant = ({
   attackDiscovery,
   replacements,
 }: {
-  attackDiscovery: AttackDiscovery | undefined;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert | undefined;
   replacements?: Replacements;
 }) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
@@ -32,7 +33,8 @@ export const useViewInAiAssistant = ({
     async () =>
       attackDiscovery != null
         ? getAttackDiscoveryMarkdown({
-            attackDiscovery,
+            // AttackDiscoveryAlert is structurally valid for markdown export
+            attackDiscovery: attackDiscovery as AttackDiscovery,
             // note: we do NOT want to replace the replacements here
           })
         : '',
@@ -64,3 +66,10 @@ export const useViewInAiAssistant = ({
     [promptContextId, disabled, showAssistantOverlay]
   );
 };
+
+/**
+ * State returned from `useViewInAiAssistant` for wiring "View in AI Assistant" in multiple
+ * places without mounting multiple `useAssistantOverlay` instances for the same discovery id
+ * (which would unregister the prompt context on partial unmount).
+ */
+export type ViewInAiAssistantOverlay = ReturnType<typeof useViewInAiAssistant>;

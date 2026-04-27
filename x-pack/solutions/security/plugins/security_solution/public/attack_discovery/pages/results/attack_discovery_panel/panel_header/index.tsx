@@ -15,6 +15,7 @@ import React from 'react';
 
 import { SummaryActions } from './summary_actions';
 import { PrimaryInteractions } from './primary_interactions';
+import type { ViewInAiAssistantOverlay } from '../view_in_ai_assistant/use_view_in_ai_assistant';
 
 interface Props {
   attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
@@ -26,6 +27,7 @@ interface Props {
   setIsOpen: React.Dispatch<React.SetStateAction<'open' | 'closed'>>;
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   showAnonymized?: boolean;
+  viewInAiAssistantOverlay: ViewInAiAssistantOverlay;
 }
 
 const PanelHeaderComponent: React.FC<Props> = ({
@@ -38,6 +40,7 @@ const PanelHeaderComponent: React.FC<Props> = ({
   setIsOpen,
   setSelectedAttackDiscoveries,
   showAnonymized = false,
+  viewInAiAssistantOverlay,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -65,6 +68,7 @@ const PanelHeaderComponent: React.FC<Props> = ({
         attackDiscovery={attackDiscovery}
         replacements={replacements}
         setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+        viewInAiAssistantOverlay={viewInAiAssistantOverlay}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -12,8 +12,32 @@ import { ViewInAiAssistant } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
 import { VIEW_IN_AI_ASSISTANT } from './translations';
+import * as useViewInAiAssistantModule from './use_view_in_ai_assistant';
 
 describe('ViewInAiAssistant', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('does not invoke useViewInAiAssistant when the overlay is provided by the parent', () => {
+    const spy = jest.spyOn(useViewInAiAssistantModule, 'useViewInAiAssistant');
+
+    render(
+      <TestProviders>
+        <ViewInAiAssistant
+          attackDiscovery={mockAttackDiscovery}
+          viewInAiAssistantOverlay={{
+            disabled: false,
+            promptContextId: 'parent-provided',
+            showAssistantOverlay: jest.fn(),
+          }}
+        />
+      </TestProviders>
+    );
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
+  });
   it('renders the assistant avatar', () => {
     render(
       <TestProviders>
