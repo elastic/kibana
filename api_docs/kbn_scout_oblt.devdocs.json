@@ -4041,7 +4041,7 @@
         "tags": [],
         "label": "spaceTest",
         "description": [
-          "\nShould be used test spec files, running in parallel in isolated spaces against the same Kibana instance."
+          "\nDoes not merge `profilingSetupFixture`: it extends non-space `test`; `mergeTests`\nwould overwrite the space-scoped `page` and break `scoutSpace` isolation.\nProfiling stays on single-thread `test` / `apiTest` / global setup."
         ],
         "signature": [
           "TestType",
@@ -4083,33 +4083,7 @@
             "section": "def-common.ObltParallelTestFixtures",
             "text": "ObltParallelTestFixtures"
           },
-          " & { page: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutPage",
-            "text": "ScoutPage"
-          },
-          "; log: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutLogger",
-            "text": "ScoutLogger"
-          },
-          "; } & { pageObjects: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.PageObjects",
-            "text": "PageObjects"
-          },
-          "; } & { perfTracker: ",
-          "PerformanceTracker",
-          "; }, ",
+          ", ",
           "PlaywrightWorkerArgs",
           " & ",
           "PlaywrightWorkerOptions",
@@ -4161,34 +4135,10 @@
             "section": "def-common.ObltParallelWorkerFixtures",
             "text": "ObltParallelWorkerFixtures"
           },
-          " & { esArchiver: ",
-          "EsArchiverFixture",
-          "; } & { linkedProject: ",
-          "LinkedProjectFixture",
-          "; } & { uiSettings: ",
-          "UiSettingsFixture",
-          "; } & { kbnUrl: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.KibanaUrl",
-            "text": "KibanaUrl"
-          },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { profilingSetup: ",
-          "ProfilingSetupFixture",
-          "; }>"
+          ">"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/parallel_run_fixtures.ts",
-        "lineNumber": 41,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11924,22 +11874,6 @@
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
             "lineNumber": 35,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-oblt",
-            "id": "def-common.ObltParallelWorkerFixtures.profilingSetup",
-            "type": "Object",
-            "tags": [],
-            "label": "profilingSetup",
-            "description": [],
-            "signature": [
-              "ProfilingSetupFixture"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
-            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
