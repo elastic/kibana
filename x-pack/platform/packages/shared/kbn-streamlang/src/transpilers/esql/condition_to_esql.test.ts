@@ -24,7 +24,7 @@ describe('conditionToESQLAst', () => {
 
       it('should handle neq (not equals)', () => {
         const condition: Condition = { field: 'status', neq: 'inactive' };
-        expect(prettyPrint(condition)).toBe('COALESCE(status != "inactive", FALSE)');
+        expect(prettyPrint(condition)).toBe('COALESCE(status != "inactive", TRUE)');
       });
     });
 
@@ -372,6 +372,18 @@ describe('conditionToESQLAst', () => {
     });
 
     it('wraps each leaf inside NOT so `NOT leaf` on a missing field is TRUE, not NULL', () => {
+      expect(prettyPrint({ not: { field: 'f', eq: 'x' } })).toBe('NOT COALESCE(f == "x", FALSE)');
+    });
+
+    it('uses TRUE as the COALESCE default for `neq` so missing fields satisfy "not equals"', () => {
+      // `neq` is the only negative leaf: a missing field is "not equal to" any concrete
+      // value, mirroring `not(eq)` and Query DSL semantics. Every other leaf keeps FALSE
+      // as the default (a missing field "doesn't match" the predicate).
+      expect(prettyPrint({ field: 'f', neq: 'x' })).toBe('COALESCE(f != "x", TRUE)');
+    });
+
+    it('keeps `neq` and `not(eq)` interchangeable on missing fields', () => {
+      expect(prettyPrint({ field: 'f', neq: 'x' })).toBe('COALESCE(f != "x", TRUE)');
       expect(prettyPrint({ not: { field: 'f', eq: 'x' } })).toBe('NOT COALESCE(f == "x", FALSE)');
     });
 

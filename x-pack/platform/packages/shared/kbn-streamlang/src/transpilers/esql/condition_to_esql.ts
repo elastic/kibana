@@ -44,9 +44,20 @@ export function esqlLiteralFromAny(value: unknown): ESQLAstItem {
 
 /**
  * Wrap a potentially-null-producing boolean predicate in `COALESCE(<predicate>, FALSE)`
- * so ES|QL's three-valued logic can't leak NULL into downstream `WHERE` / `CASE` callers.*/
+ * so ES|QL's three-valued logic can't leak NULL into downstream `WHERE` / `CASE` callers.
+ *
+ * Positive leaves (`eq`, `gt`, `range`, `contains`, ...) use `FALSE` as the default: a
+ * missing field "doesn't match" the predicate.
+ *
+ * Negative leaves (`neq`) use `TRUE` as the default via coalesceToTrue: a missing
+ * field "is not equal to" any concrete value, which mirrors `not(eq)` and Query DSL
+ * semantics and keeps `neq` and `not(eq)` interchangeable.
+ */
 const coalesceToFalse = (expression: ESQLSingleAstItem): ESQLSingleAstItem =>
   Builder.expression.func.call('COALESCE', [expression, Builder.expression.literal.boolean(false)]);
+
+const coalesceToTrue = (expression: ESQLSingleAstItem): ESQLSingleAstItem =>
+  Builder.expression.func.call('COALESCE', [expression, Builder.expression.literal.boolean(true)]);
 
 export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
   if (isFilterCondition(condition)) {
@@ -58,7 +69,7 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       );
     }
     if ('neq' in condition) {
-      return coalesceToFalse(
+      return coalesceToTrue(
         Builder.expression.func.binary('!=', [field, esqlLiteralFromAny(condition.neq)])
       );
     }

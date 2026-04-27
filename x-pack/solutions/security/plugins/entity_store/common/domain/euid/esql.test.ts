@@ -207,7 +207,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('host');
 
     const expected =
-      'NOT(`host.id` IS NULL) AND COALESCE(`host.id` != "", FALSE) OR NOT(`host.name` IS NULL) AND COALESCE(`host.name` != "", FALSE) OR NOT(`host.hostname` IS NULL) AND COALESCE(`host.hostname` != "", FALSE)';
+      'NOT(`host.id` IS NULL) AND COALESCE(`host.id` != "", TRUE) OR NOT(`host.name` IS NULL) AND COALESCE(`host.name` != "", TRUE) OR NOT(`host.hostname` IS NULL) AND COALESCE(`host.hostname` != "", TRUE)';
     expect(result).toBe(expected);
   });
 
