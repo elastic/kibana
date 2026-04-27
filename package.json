@@ -85,12 +85,8 @@
     "**/@hono/node-server": "1.19.14",
     "**/@langchain/core": "1.1.31",
     "**/@langchain/google-common": "2.1.24",
-<<<<<<< tootallnate/once-resolution
     "**/@tootallnate/once": "3.0.1",
-    "**/@types/node": "22.19.1",
-=======
     "**/@types/node": "24.10.13",
->>>>>>> main
     "**/@types/prop-types": "15.7.5",
     "**/@typescript-eslint/utils": "8.46.3",
     "**/baseline-browser-mapping": "2.9.14",
