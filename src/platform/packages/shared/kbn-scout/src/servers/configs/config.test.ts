@@ -97,6 +97,7 @@ describe('Config.getScoutTestConfig', () => {
         serverArgs: [],
         ssl: true,
       },
+      esServerlessOptions: { uiam: true },
       kbnTestServer: {
         buildArgs: [],
         env: {},
@@ -130,6 +131,74 @@ describe('Config.getScoutTestConfig', () => {
     };
 
     expect(scoutConfig).toEqual(expectedConfig);
+  });
+
+  it(`reflects 'esServerlessOptions.uiam: false' in the produced ScoutTestConfig`, async () => {
+    const config = new Config({
+      serverless: true,
+      servers: {
+        elasticsearch: {
+          protocol: 'https',
+          hostname: 'localhost',
+          port: 9220,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+        kibana: {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: 5620,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+      },
+      dockerServers: {},
+      esTestCluster: {
+        from: 'serverless',
+        files: [],
+        serverArgs: [],
+        ssl: true,
+      },
+      esServerlessOptions: { uiam: false },
+      kbnTestServer: {
+        buildArgs: [],
+        env: {},
+        sourceArgs: [],
+        serverArgs: ['--serverless=es'],
+      },
+    });
+
+    const scoutConfig = config.getScoutTestConfig();
+
+    expect(scoutConfig.serverless).toBe(true);
+    expect(scoutConfig.uiam).toBe(false);
+  });
+
+  it(`forces uiam to false on stateful regardless of any esServerlessOptions`, async () => {
+    const config = new Config({
+      serverless: false,
+      servers: {
+        elasticsearch: {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: 9220,
+          username: 'elastic',
+          password: 'changeme',
+        },
+        kibana: {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: 5620,
+          username: 'elastic',
+          password: 'changeme',
+        },
+      },
+      dockerServers: {},
+      esTestCluster: { from: 'snapshot', files: [], serverArgs: [], ssl: false },
+      kbnTestServer: { buildArgs: [], env: {}, sourceArgs: [], serverArgs: [] },
+    });
+
+    expect(config.getScoutTestConfig().uiam).toBe(false);
   });
 
   it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=es' with organizationId`, async () => {

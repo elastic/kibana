@@ -52,24 +52,25 @@ const LinkedProjectSchema = z.object({
  * - `serverless: true` with `projectType` of `security` or `oblt` requires
  *   `productTier`.
  * - `serverless: false` (stateful) forbids `projectType`, `productTier`,
- *   `organizationId`, and `linkedProject`.
+ *   `organizationId`, `linkedProject`, and `uiam: true` (UIAM is serverless-
+ *   only).
  * - `isCloud: true` requires `cloudHostName` (used by SAML against Elastic
- *   Cloud).
+ *   Cloud), forbids `http2: true`, and forbids any `uiam` value that does not
+ *   match `serverless` (UIAM behavior on cloud is fixed). Local runs may set
+ *   `uiam` freely so TS server configs can drive it via `esServerlessOptions`.
  */
 export const ScoutTestConfigSchema = z
   .object({
     serverless: z.boolean({ error: 'is required and must be a boolean' }),
     http2: z.boolean().default(false),
-    // `uiam` is intentionally not user-settable: serverless deployments
-    // (notably MKI) are UIAM-only, stateful deployments are not, so the value
-    // is computed in the transform below from `serverless`. JSON files that
-    // include `uiam` are rejected with a clear message to avoid silent
-    // mismatches with auth behavior.
-    uiam: z
-      .never({
-        error: `must not be set in the JSON file; 'uiam' is computed from 'serverless' (true on serverless, false on stateful)`,
-      })
-      .optional(),
+    // `uiam` defaults to mirror `serverless` (UIAM-only on serverless, never
+    // on stateful), but local server configs (the TS files under
+    // `servers/configs/config_sets/**`) can opt in/out via
+    // `esServerlessOptions.uiam`, and that choice is persisted into
+    // `local.json`. We therefore accept any boolean here for local runs and
+    // enforce the canonical rule only when `isCloud: true` (UIAM behavior on
+    // Elastic Cloud cannot be overridden) and reject `uiam: true` on stateful.
+    uiam: z.boolean({ error: 'must be a boolean' }).optional(),
     isCloud: z.boolean({ error: 'is required and must be a boolean' }),
     cloudHostName: z.string().min(1).optional(),
     cloudUsersFilePath: z
@@ -138,10 +139,34 @@ export const ScoutTestConfigSchema = z
           `'http2' enables TLS verification bypass and is only meaningful for local development`,
       });
     }
+
+    // UIAM rules:
+    //  - stateful never uses UIAM, so `uiam: true` is invalid;
+    //  - on cloud, UIAM behavior is fixed (UIAM-only on serverless,
+    //    never on stateful) and cannot be overridden;
+    //  - locally, any boolean is allowed so TS server config sets under
+    //    `servers/configs/config_sets/**` can drive the value via
+    //    `esServerlessOptions.uiam` (and round-trip through `local.json`).
+    if (!cfg.serverless && cfg.uiam === true) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['uiam'],
+        message: `must not be true when 'serverless' is false; UIAM is only available for serverless deployments`,
+      });
+    }
+    if (cfg.isCloud && cfg.uiam !== undefined && cfg.uiam !== cfg.serverless) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['uiam'],
+        message:
+          `must equal '${cfg.serverless}' (matches 'serverless') when 'isCloud' is true; ` +
+          `UIAM behavior on Elastic Cloud cannot be overridden`,
+      });
+    }
   })
   .transform((cfg) => ({
     ...cfg,
-    uiam: cfg.serverless,
+    uiam: cfg.uiam ?? cfg.serverless,
   }));
 
 /**

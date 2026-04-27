@@ -44,11 +44,10 @@ const testServersConfig = {
   cloudUsersFilePath: '/path/to/users',
 };
 
-// `uiam` is computed from `serverless` by the schema and intentionally
-// excluded from the JSON written to disk so the file round-trips through
-// `createScoutConfig` without validation errors.
-const { uiam: _uiam, ...persistableServersConfig } = testServersConfig;
-const expectedSerializedConfig = JSON.stringify(persistableServersConfig, null, 2);
+// The full config (including `uiam`) is persisted: `local.json` reflects the
+// exact deployment that was started, and the schema accepts any `uiam` value
+// for local runs (the round-trip stays valid).
+const expectedSerializedConfig = JSON.stringify(testServersConfig, null, 2);
 
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
@@ -87,7 +86,7 @@ describe('saveScoutTestConfigOnDisk', () => {
       expectedSerializedConfig,
       'utf-8'
     );
-    expect(writeFileSyncMock.mock.calls[0][1]).not.toMatch(/"uiam"/);
+    expect(writeFileSyncMock.mock.calls[0][1]).toMatch(/"uiam":\s*true/);
     expect(mockLog.info).toHaveBeenCalledWith(
       `scout: Test server configuration saved at ${mockConfigFilePath}`
     );

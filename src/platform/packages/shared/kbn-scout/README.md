@@ -454,7 +454,7 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 
 `http2` and `license` are optional and default to `false` and `"trial"` respectively. `http2: true` enables TLS verification bypass for local development and is rejected when `isCloud: true`.
 
-`uiam` is **not user-settable** in the JSON; it is computed from `serverless` (`true` on serverless, `false` on stateful) since serverless deployments are UIAM-only and stateful deployments are not. JSON files that include `uiam` are rejected with a clear error.
+`uiam` defaults to mirror `serverless` (UIAM-only on serverless, never on stateful). For **local** runs the value can be set freely in the JSON — that is how local TS server configs under `servers/configs/config_sets/**` (e.g. `uiam_local`, `uiam_oauth_local`) propagate their `esServerlessOptions.uiam` choice into `local.json`. For **cloud** runs (`isCloud: true`) `uiam` cannot deviate from `serverless`: a serverless cloud config must have `uiam: true` (or omit it), and a stateful cloud config must have `uiam: false` (or omit it). `uiam: true` is rejected on stateful regardless of cloud, since UIAM is serverless-only.
 
 Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 

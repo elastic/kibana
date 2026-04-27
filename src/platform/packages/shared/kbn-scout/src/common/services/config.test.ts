@@ -300,20 +300,44 @@ describe('createScoutConfig', () => {
       );
     });
 
-    it('rejects uiam set explicitly in JSON (computed from serverless)', () => {
-      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, uiam: false });
+    it("accepts 'uiam: true' on local serverless configs (matches the started server)", () => {
+      writeConfig('local', { ...baseServerlessLocalConfig, uiam: true });
 
-      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
-        /'uiam' must not be set in the JSON file/
-      );
+      const config = createScoutConfig(tmpDir, 'local', noopLogger);
+
+      expect(config.serverless).toBe(true);
+      expect(config.uiam).toBe(true);
     });
 
-    it('rejects uiam on stateful configs too', () => {
+    it("accepts 'uiam: false' on local serverless configs (UIAM-off variant)", () => {
+      writeConfig('local', { ...baseServerlessLocalConfig, uiam: false });
+
+      const config = createScoutConfig(tmpDir, 'local', noopLogger);
+
+      expect(config.serverless).toBe(true);
+      expect(config.uiam).toBe(false);
+    });
+
+    it("rejects 'uiam: true' on stateful configs (UIAM is serverless-only)", () => {
       writeConfig('local', { ...baseStatefulConfig, uiam: true });
 
       expect(() => createScoutConfig(tmpDir, 'local', noopLogger)).toThrow(
-        /'uiam' must not be set in the JSON file/
+        /'uiam' must not be true when 'serverless' is false/
       );
+    });
+
+    it("rejects 'uiam: false' on cloud serverless configs (UIAM cannot be overridden)", () => {
+      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, uiam: false });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
+        /'uiam' must equal 'true' .*when 'isCloud' is true/
+      );
+    });
+
+    it("accepts 'uiam: true' on cloud serverless configs (matches 'serverless')", () => {
+      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, uiam: true });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).not.toThrow();
     });
   });
 
