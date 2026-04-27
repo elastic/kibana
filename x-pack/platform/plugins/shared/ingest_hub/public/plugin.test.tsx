@@ -148,7 +148,7 @@ describe('IngestHubPlugin', () => {
       await expect(firstValueFrom(appEnabled$)).resolves.toBe(false);
     });
 
-    describe('serverless', () => {
+    describe('serverless build flavor', () => {
       let plugin: IngestHubPlugin;
       let coreStart: ReturnType<typeof coreMock.createStart>;
 
@@ -182,7 +182,7 @@ describe('IngestHubPlugin', () => {
       });
     });
 
-    describe('self-managed', () => {
+    describe('traditional build flavor', () => {
       let plugin: IngestHubPlugin;
       let coreStart: ReturnType<typeof coreMock.createStart>;
 
