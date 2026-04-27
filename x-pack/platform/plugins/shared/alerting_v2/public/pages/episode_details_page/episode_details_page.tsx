@@ -493,18 +493,14 @@ export function EpisodeDetailsPage() {
           {
             id: 'overview',
             'data-test-subj': 'alertingV2EpisodeDetailsMainTabOverview',
-            label: i18n.translate('xpack.alertingV2.episodeDetails.mainTabOverview', {
-              defaultMessage: 'Overview',
-            }),
+            label: i18n.OVERVIEW_TAB_TITLE,
             isSelected: mainPanel === 'overview',
             onClick: () => setMainPanel('overview'),
           },
           {
             id: 'metadata',
             'data-test-subj': 'alertingV2EpisodeDetailsMainTabMetadata',
-            label: i18n.translate('xpack.alertingV2.episodeDetails.mainTabMetadata', {
-              defaultMessage: 'Metadata',
-            }),
+            label: i18n.METADATA_TAB_TITLE,
             isSelected: mainPanel === 'metadata',
             onClick: () => setMainPanel('metadata'),
           },

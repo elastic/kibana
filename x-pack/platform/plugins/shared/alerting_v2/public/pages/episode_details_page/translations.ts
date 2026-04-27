@@ -14,6 +14,20 @@ export const BREADCRUMB_EPISODE_DETAILS_FALLBACK = i18n.translate(
   }
 );
 
+export const OVERVIEW_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabOverview',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
+export const METADATA_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabMetadata',
+  {
+    defaultMessage: 'Metadata',
+  }
+);
+
 export function formatDurationMs(ms: number): string {
   if (ms < 1000) {
     return i18n.translate('xpack.alertingV2.episodeDetails.durationMs', {
