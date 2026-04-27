@@ -61,7 +61,7 @@ describe('AttackDetailsRedirect', () => {
       const expectedSearch = new URLSearchParams({
         query: "(language:kuery,query:'_id: test-attack-id')",
         timerange:
-          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+          "(global:(linkTo:!(timeline),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         [URL_PARAM_KEY.flyout]: resolveAttackFlyoutParams(
           { index: testIndex, attackId: testAttackId },
           null
@@ -100,7 +100,7 @@ describe('AttackDetailsRedirect', () => {
       const expectedSearchParam = new URLSearchParams({
         query: "(language:kuery,query:'_id: test-attack-id')",
         timerange:
-          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+          "(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         [URL_PARAM_KEY.flyout]: resolveAttackFlyoutParams(
           { index: defaultIndex, attackId: testAttackId },
           null
