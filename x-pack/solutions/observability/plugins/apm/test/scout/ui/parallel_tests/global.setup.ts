@@ -21,6 +21,7 @@ import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
+import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -40,6 +41,17 @@ globalSetupHook(
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
+
+    // Generate service map multi-environment data for embeddable tests
+    // Use current time range so the service map shows data in the default "last 15 minutes" view
+    const now = Date.now();
+    const fifteenMinutesAgo = now - 15 * 60 * 1000;
+    const serviceMapMultiEnvData = serviceMapMultiEnv({
+      from: fifteenMinutesAgo,
+      to: now,
+    });
+    await apmSynthtraceEsClient.index(serviceMapMultiEnvData);
+    log.info('Service map multi-environment data indexed');
 
     // Generate span links data for span links tests
     const spanLinksData = generateSpanLinksData();

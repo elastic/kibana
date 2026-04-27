@@ -121,13 +121,16 @@ export const RiskInputsTab = <T extends EntityType>({
   const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
     enabled: Boolean(entityId),
   });
+  const hasRealResolutionGroup = (resolutionGroup?.group_size ?? 0) > 1;
   const resolutionTargetEntityId = useMemo(
     () => (resolutionGroup?.target ? getEntityId(resolutionGroup.target) : undefined),
     [resolutionGroup?.target]
   );
+  const shouldFetchResolutionRiskScore =
+    hasRealResolutionGroup && Boolean(resolutionTargetEntityId);
   const resolutionFilterQuery = useMemo(
     () =>
-      resolutionTargetEntityId
+      shouldFetchResolutionRiskScore && resolutionTargetEntityId
         ? ({
             bool: {
               filter: [
@@ -137,7 +140,7 @@ export const RiskInputsTab = <T extends EntityType>({
             },
           } as ESQuery)
         : undefined,
-    [entityType, resolutionTargetEntityId]
+    [entityType, resolutionTargetEntityId, shouldFetchResolutionRiskScore]
   );
   const {
     data: resolutionRiskScoreData,
@@ -149,7 +152,7 @@ export const RiskInputsTab = <T extends EntityType>({
     filterQuery: resolutionFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: !resolutionTargetEntityId,
+    skip: !shouldFetchResolutionRiskScore,
   });
 
   const entityRiskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
@@ -157,7 +160,7 @@ export const RiskInputsTab = <T extends EntityType>({
     resolutionRiskScoreData && resolutionRiskScoreData.length > 0
       ? resolutionRiskScoreData[0]
       : undefined;
-  const hasResolutionScore = Boolean(resolutionRiskScore);
+  const hasResolutionScore = hasRealResolutionGroup && Boolean(resolutionRiskScore);
 
   useEffect(() => {
     if (!loadingRiskScore && !entityRiskScore && hasResolutionScore) {
