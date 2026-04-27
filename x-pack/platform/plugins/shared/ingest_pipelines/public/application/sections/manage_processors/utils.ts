@@ -8,7 +8,7 @@
 import type { DatabaseType, DatabaseNameOption } from '../../../../common/types';
 import { GEOIP_NAME_OPTIONS, IPINFO_NAME_OPTIONS } from './constants';
 
-const MMDB_EXTENSION = '.mmdb';
+export const MMDB_EXTENSION = '.mmdb';
 const mmdbSuffixRegExp = /(\.mmdb)+$/;
 
 const getDatabaseNameOptions = (type?: DatabaseType): DatabaseNameOption[] => {

@@ -27,10 +27,8 @@ import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 import type { GeoipDatabase } from '../../../../../../../common/types';
+import { getDatabaseOptionLabel, getDatabaseText, getDatabaseValue, normalizeMmdbFilename, MMDB_EXTENSION } from '../../../../../sections/manage_processors/utils';
 import { getTypeLabel } from '../../../../../sections/manage_processors/constants';
-import { getDatabaseOptionLabel, getDatabaseText, getDatabaseValue, normalizeMmdbFilename } from '../../../../../sections/manage_processors/utils';
-
-const extension = '.mmdb';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
@@ -38,7 +36,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.COMBO_BOX,
     deserializer: (v: unknown) =>
   to.arrayOfStrings(v).map((str) => {
-    const databaseName = str.split(extension)[0];
+    const databaseName = str.split(MMDB_EXTENSION)[0];
     const knownDatabaseText = getDatabaseText(databaseName);
     // Known managed DB → return display text (e.g. "ASN" for standard_asn)
     // Local DB → return full filename (e.g. "ASN.mmdb") to match the combo box label
@@ -48,11 +46,11 @@ const fieldsConfig: FieldsConfig = {
   if (v.length) {
     const databaseName = v[0];
     // Local databases have the extension already in the label
-    if (typeof databaseName === 'string' && databaseName.endsWith(extension)) {
+    if (typeof databaseName === 'string' && databaseName.endsWith(MMDB_EXTENSION)) {
       return normalizeMmdbFilename(databaseName);
     }
     const databaseValue = getDatabaseValue(databaseName);
-    return databaseValue ? `${databaseValue}${extension}` : `${databaseName}${extension}`;
+    return databaseValue ? `${databaseValue}${MMDB_EXTENSION}` : `${databaseName}${MMDB_EXTENSION}`;
   }
   return undefined;
 },
