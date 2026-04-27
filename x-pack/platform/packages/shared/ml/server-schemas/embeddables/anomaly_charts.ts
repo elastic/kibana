@@ -21,10 +21,10 @@ export const severityThresholdSchema = schema.object({
 export type SeverityThreshold = TypeOf<typeof severityThresholdSchema>;
 
 export const anomalyChartsEmbeddableRuntimeStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   maxSeriesToPlot: schema.number(),
-  severityThreshold: schema.maybe(schema.arrayOf(severityThresholdSchema)),
-  selectedEntities: schema.maybe(schema.arrayOf(mlEntityFieldSchema)),
+  severityThreshold: schema.maybe(schema.arrayOf(severityThresholdSchema, { maxSize: 10000 })),
+  selectedEntities: schema.maybe(schema.arrayOf(mlEntityFieldSchema, { maxSize: 10000 })),
 });
 
 export type AnomalyChartsEmbeddableRuntimeState = TypeOf<

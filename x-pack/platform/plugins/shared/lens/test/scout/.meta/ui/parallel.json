@@ -1,5 +1,5 @@
 {
-  "sha1": "2f428c9a8e5a15d561b9e46f6a9f1b6b674f0e8d",
+  "sha1": "d00f9afc03ac2f92b6ee6d24a3c43776b4788f67",
   "tests": [
     {
       "id": "a88e11e11af63ac-04de5a79d29d1c0",
@@ -126,6 +126,34 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
         "line": 199,
+        "column": 14
+      }
+    },
+    {
+      "id": "87de2e194eba8a5-085afac13830272",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses inline data view spec",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 81,
+        "column": 14
+      }
+    },
+    {
+      "id": "87de2e194eba8a5-1fa09f3d15077a3",
+      "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses stored data view reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
+        "line": 121,
         "column": 14
       }
     }

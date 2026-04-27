@@ -22,7 +22,7 @@ export const swimlaneTypeSchema = schema.oneOf([
 export type SwimlaneType = TypeOf<typeof swimlaneTypeSchema>;
 
 const commonUserInputProps = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 const anomalySwimlaneOverallSchema = schema.object({
@@ -40,7 +40,7 @@ const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
   ...serializedTimeRangeSchema.getPropSchemas(),
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
   query: schema.maybe(querySchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
 });
@@ -73,7 +73,7 @@ export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
 >;
 
 export const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
   panelTitle: schema.maybe(schema.string()),
@@ -91,7 +91,7 @@ export const anomalySwimlanePropsSchema = schema.object({
 export type AnomalySwimlaneProps = TypeOf<typeof anomalySwimlanePropsSchema>;
 
 export const anomalySwimlaneInitialInputSchema = schema.object({
-  jobIds: schema.maybe(schema.arrayOf(schema.string())),
+  jobIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   swimlaneType: schema.maybe(swimlaneTypeSchema),
   viewBy: schema.maybe(schema.string()),
   title: schema.maybe(schema.string()),
@@ -101,7 +101,7 @@ export const anomalySwimlaneInitialInputSchema = schema.object({
 export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
 
 export const anomalySwimLaneControlsStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
