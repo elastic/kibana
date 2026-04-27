@@ -8,12 +8,13 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TakeAction } from './components/take_action';
+import { IOC_DETAILS_FOOTER_TEST_ID } from './test_ids';
 
 /**
  * Footer content of the IOC details flyout containing the take action button.
  */
 export const Footer = memo(() => (
-  <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+  <EuiFlexGroup justifyContent="flexEnd" alignItems="center" data-test-subj={IOC_DETAILS_FOOTER_TEST_ID}>
     <EuiFlexItem grow={false}>
       <TakeAction />
     </EuiFlexItem>

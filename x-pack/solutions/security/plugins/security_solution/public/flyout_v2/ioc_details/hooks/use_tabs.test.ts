@@ -57,7 +57,7 @@ describe('useTabs', () => {
 
     expect(result.current.selectedTabId).toBe('table');
     expect(mockStorage.set).toHaveBeenCalledWith(
-      'securitySolution.iocDetailsFlyout.rightPanel.selectedTabs',
+      'securitySolution.iocDetailsFlyout.selectedTab',
       'table'
     );
   });
