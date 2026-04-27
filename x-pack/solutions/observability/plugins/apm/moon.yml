@@ -116,6 +116,7 @@ dependsOn:
   - '@kbn/logs-data-access-plugin'
   - '@kbn/ebt-tools'
   - '@kbn/presentation-publishing'
+  - '@kbn/presentation-publishing-schemas'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/security-plugin-types-common'
@@ -160,6 +161,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
+  - '@kbn/presentation-util'
 tags:
   - plugin
   - prod
