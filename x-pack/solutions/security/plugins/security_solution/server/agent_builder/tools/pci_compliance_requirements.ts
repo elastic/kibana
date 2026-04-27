@@ -11,6 +11,17 @@ export type ComplianceConfidence = 'HIGH' | 'MEDIUM' | 'LOW' | 'NOT_ASSESSABLE';
 
 export type VerdictType = 'rows_mean_violation' | 'rows_mean_evidence';
 
+/**
+ * PCI compliance ES|QL queries are built as static templates that reference two named
+ * parameters, `?_tstart` and `?_tend`. The time-range values are **never** interpolated
+ * into the query string — they are bound by the Elasticsearch ES|QL engine via the
+ * `params` array on the request. This is the equivalent of SQL prepared statements and is
+ * the security boundary against ES|QL injection attempts in user-supplied time ranges.
+ *
+ * The index pattern in the `FROM` clause cannot be parameterised by ES|QL today, so the
+ * caller must ensure the value has been validated against {@link pciIndexPatternSchema}
+ * in `./pci_compliance_schemas.ts` before being passed to these builders.
+ */
 export interface PciRequirementDefinition {
   id: string;
   name: string;
@@ -20,21 +31,21 @@ export interface PciRequirementDefinition {
   verdict: VerdictType;
   defaultLookbackDays: number;
   recommendations: string[];
-  buildViolationEsql?: (indexPattern: string, from: string, to: string) => string;
-  buildCoverageEsql: (indexPattern: string, from: string, to: string) => string;
+  buildViolationEsql?: (indexPattern: string) => string;
+  buildCoverageEsql: (indexPattern: string) => string;
 }
 
 export const DEFAULT_PCI_INDEX_PATTERNS = ['logs-*', 'metrics-*', 'endgame-*'] as const;
 
-const escapeEsqlString = (s: string): string => s.replace(/"/g, '\\"');
+/**
+ * Shared WHERE fragment that constrains every PCI compliance query to the caller's time
+ * range. The `?_tstart` / `?_tend` placeholders are bound as ES|QL parameters — see
+ * {@link buildPciTimeRangeParams}.
+ */
+const TIME_WINDOW = '@timestamp >= ?_tstart AND @timestamp <= ?_tend';
 
-const coverageQuery = (
-  indexPattern: string,
-  from: string,
-  to: string,
-  whereClause: string
-): string =>
-  `FROM ${indexPattern} | WHERE @timestamp >= "${escapeEsqlString(from)}" AND @timestamp <= "${escapeEsqlString(to)}" AND ${whereClause} | STATS matching_events = COUNT(*) | LIMIT 1`;
+const coverageQuery = (indexPattern: string, whereClause: string): string =>
+  `FROM ${indexPattern} | WHERE ${TIME_WINDOW} AND ${whereClause} | STATS matching_events = COUNT(*) | LIMIT 1`;
 
 export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
   // ── Top-level coverage checks (requirements 1–12) ──────────────────────
@@ -52,8 +63,7 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure network segmentation and firewall policy updates are continuously logged.',
       'Review denied network traffic trends and tune policies for high-risk paths.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category == "network"'),
+    buildCoverageEsql: (i) => coverageQuery(i, 'event.category == "network"'),
   },
   '2': {
     id: '2',
@@ -67,8 +77,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Centralize secure baseline changes and monitor drift across critical systems.',
       'Track hardening exceptions with expiration and compensating controls.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category == "configuration" OR event.action LIKE "*config*"'),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "configuration" OR event.action LIKE "*config*"'),
   },
   '3': {
     id: '3',
@@ -83,8 +93,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Monitor sensitive data access and verify retention/deletion controls are audited.',
       'Supplement with manual evidence: data-flow diagrams, encryption key inventories, and PAN discovery scans.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category == "database" OR event.action LIKE "*data*access*"'),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "database" OR event.action LIKE "*data*access*"'),
   },
   '4': {
     id: '4',
@@ -98,8 +108,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure TLS metadata is ingested and monitor weak/legacy protocol usage.',
       'Alert on unencrypted transport observed in cardholder-data paths.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'tls.version IS NOT NULL OR network.protocol IS NOT NULL'),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'tls.version IS NOT NULL OR network.protocol IS NOT NULL'),
   },
   '5': {
     id: '5',
@@ -113,8 +123,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Confirm endpoint telemetry for malware prevention and detection is complete.',
       'Investigate hosts repeatedly reporting malware indicators.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category == "malware" OR event.module == "endpoint"'),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "malware" OR event.module == "endpoint"'),
   },
   '6': {
     id: '6',
@@ -128,8 +138,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Track remediation SLAs for critical vulnerabilities and overdue patches.',
       'Correlate vulnerability findings with internet-facing assets.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'vulnerability.id IS NOT NULL OR event.action LIKE "*patch*"'),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'vulnerability.id IS NOT NULL OR event.action LIKE "*patch*"'),
   },
   '7': {
     id: '7',
@@ -143,11 +153,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Review privilege grants and access exceptions for least-privilege alignment.',
       'Monitor unusual privileged access across critical systems.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "iam" OR event.action LIKE "*role*" OR event.action LIKE "*privilege*"'
       ),
   },
@@ -163,13 +171,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure MFA-related events are ingested for interactive user authentication.',
       'Investigate concentrated failed authentication activity by user or source.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(
-        i,
-        f,
-        t,
-        'event.category == "authentication" OR event.action LIKE "*login*"'
-      ),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "authentication" OR event.action LIKE "*login*"'),
   },
   '9': {
     id: '9',
@@ -184,13 +187,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Integrate badge/physical access systems where available for end-to-end traceability.',
       'Document manual evidence collection for physical controls not represented in logs.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(
-        i,
-        f,
-        t,
-        'event.category == "physical_access" OR event.action LIKE "*badge*"'
-      ),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "physical_access" OR event.action LIKE "*badge*"'),
   },
   '10': {
     id: '10',
@@ -204,8 +202,7 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Validate audit logging across critical systems and identity providers.',
       'Monitor ingestion gaps and logging outages as priority control failures.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category IS NOT NULL'),
+    buildCoverageEsql: (i) => coverageQuery(i, 'event.category IS NOT NULL'),
   },
   '11': {
     id: '11',
@@ -219,13 +216,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Track recurring security test cadence and unresolved high-risk findings.',
       'Correlate intrusion alerts with control test outcomes for validation.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(
-        i,
-        f,
-        t,
-        'event.category == "intrusion_detection" OR vulnerability.id IS NOT NULL'
-      ),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "intrusion_detection" OR vulnerability.id IS NOT NULL'),
   },
   '12': {
     id: '12',
@@ -240,8 +232,8 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Maintain periodic policy review records and map owners to each PCI control area.',
       'Supplement telemetry-based checks with documented procedural evidence for audits.',
     ],
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.action LIKE "*policy*" OR event.category == "configuration"'),
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.action LIKE "*policy*" OR event.category == "configuration"'),
   },
 
   // ── Sub-requirement violation checks ───────────────────────────────────
@@ -259,15 +251,13 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure all NSC changes are correlated with approved change tickets.',
       'Flag changes made outside of approved change windows.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "configuration" AND (event.action LIKE "*security_group*" OR event.action LIKE "*firewall*" OR event.action LIKE "*network_acl*" OR event.action LIKE "*rule*")'
       ),
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND event.category == "configuration" AND (event.action LIKE "*security_group*" OR event.action LIKE "*firewall*" OR event.action LIKE "*network_acl*") | STATS change_count = COUNT(*) BY event.action, user.name | SORT change_count DESC | LIMIT 50`,
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND event.category == "configuration" AND (event.action LIKE "*security_group*" OR event.action LIKE "*firewall*" OR event.action LIKE "*network_acl*") | STATS change_count = COUNT(*) BY event.action, user.name | SORT change_count DESC | LIMIT 50`,
   },
 
   '4.2.1': {
@@ -283,10 +273,13 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Disable TLS 1.0 and 1.1 on all systems processing cardholder data.',
       'Upgrade to TLS 1.2 or 1.3 and restrict cipher suites to strong algorithms.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND tls.version IS NOT NULL AND tls.version IN ("1.0", "1.1", "SSLv3", "SSLv2") | STATS connection_count = COUNT(*) BY destination.ip, tls.version | SORT connection_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'tls.version IS NOT NULL'),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND (` +
+      `(tls.version IS NOT NULL AND tls.version IN ("1.0", "1.1", "SSLv3", "SSLv2")) OR ` +
+      `(network.protocol == "http" AND tls.version IS NULL)` +
+      `) | STATS connection_count = COUNT(*) BY destination.ip, tls.version | SORT connection_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'tls.version IS NOT NULL OR network.protocol IS NOT NULL'),
   },
 
   '5.2.1': {
@@ -302,11 +295,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure all in-scope endpoints report anti-malware telemetry.',
       'Investigate hosts missing malware prevention event coverage.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "malware" OR event.module == "endpoint" OR event.action LIKE "*malware*" OR event.action LIKE "*virus*"'
       ),
   },
@@ -324,10 +315,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Prioritize remediation of critical-severity vulnerabilities within 30 days.',
       'Establish compensating controls for vulnerabilities that cannot be patched within the SLA.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND vulnerability.id IS NOT NULL AND vulnerability.severity == "critical" | STATS vuln_count = COUNT(*) BY vulnerability.id, host.name | SORT vuln_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'vulnerability.id IS NOT NULL'),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND vulnerability.id IS NOT NULL AND vulnerability.severity == "critical" | STATS vuln_count = COUNT(*) BY vulnerability.id, host.name | SORT vuln_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) => coverageQuery(i, 'vulnerability.id IS NOT NULL'),
   },
 
   '7.2.2': {
@@ -343,15 +333,13 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Review privilege grants and ensure they align with least-privilege principles.',
       'Alert on role assignments to highly privileged groups outside of change windows.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "iam" AND (event.action LIKE "*role*" OR event.action LIKE "*group*" OR event.action LIKE "*privilege*" OR event.action LIKE "*permission*")'
       ),
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND event.category == "iam" AND (event.action LIKE "*role*assign*" OR event.action LIKE "*group*add*" OR event.action LIKE "*privilege*grant*") | STATS change_count = COUNT(*) BY user.name, event.action | SORT change_count DESC | LIMIT 50`,
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND event.category == "iam" AND (event.action LIKE "*role*assign*" OR event.action LIKE "*group*add*" OR event.action LIKE "*privilege*grant*") | STATS change_count = COUNT(*) BY user.name, event.action | SORT change_count DESC | LIMIT 50`,
   },
 
   '8.2.4': {
@@ -367,15 +355,10 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Disable or remove accounts with no successful authentication in 90+ days.',
       'Implement automated account lifecycle management with periodic reviews.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND event.category == "authentication" AND event.outcome == "success" | STATS last_login = MAX(@timestamp) BY user.name | EVAL days_inactive = DATE_DIFF("day", last_login, NOW()) | WHERE days_inactive > 90 | SORT days_inactive DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(
-        i,
-        f,
-        t,
-        'event.category == "authentication" AND event.outcome == "success"'
-      ),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND event.category == "authentication" AND event.outcome == "success" | STATS last_login = MAX(@timestamp) BY user.name | EVAL days_inactive = DATE_DIFF("day", last_login, NOW()) | WHERE days_inactive > 90 | SORT days_inactive DESC | LIMIT 50`,
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "authentication" AND event.outcome == "success"'),
   },
 
   '8.3.4': {
@@ -391,15 +374,10 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Configure account lockout after no more than 10 invalid login attempts per PCI DSS v4.0.1.',
       'Ensure lockout duration is at least 30 minutes or requires administrator unlock with identity verification.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND event.category == "authentication" AND event.outcome == "failure" | STATS failed_attempts = COUNT(*) BY user.name, source.ip | WHERE failed_attempts > 10 | SORT failed_attempts DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(
-        i,
-        f,
-        t,
-        'event.category == "authentication" AND event.outcome == "failure"'
-      ),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND event.category == "authentication" AND event.outcome == "failure" | STATS failed_attempts = COUNT(*) BY user.name, source.ip | WHERE failed_attempts > 10 | SORT failed_attempts DESC | LIMIT 50`,
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "authentication" AND event.outcome == "failure"'),
   },
 
   '8.4.2': {
@@ -416,11 +394,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Consider phishing-resistant factors (FIDO2/WebAuthn) which satisfy MFA requirements per v4.0.1.',
       'Ensure MFA-related events (challenge, verify, enroll) are ingested into SIEM.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "authentication" AND (event.action LIKE "*mfa*" OR event.action LIKE "*multi_factor*" OR event.action LIKE "*2fa*" OR event.action LIKE "*totp*" OR event.action LIKE "*fido*" OR event.action LIKE "*webauthn*" OR event.action LIKE "*verify*factor*")'
       ),
   },
@@ -438,10 +414,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Investigate any audit log stop, pause, or deletion events immediately.',
       'Implement write-once log storage to prevent tampering.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND (event.action LIKE "*audit*stop*" OR event.action LIKE "*audit*delete*" OR event.action LIKE "*audit*pause*" OR event.action LIKE "*log*clear*" OR event.action LIKE "*log*delete*" OR event.action LIKE "*trail*stop*") | STATS event_count = COUNT(*) BY event.action, host.name, user.name | SORT event_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category IS NOT NULL'),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND (event.action LIKE "*audit*stop*" OR event.action LIKE "*audit*delete*" OR event.action LIKE "*audit*pause*" OR event.action LIKE "*log*clear*" OR event.action LIKE "*log*delete*" OR event.action LIKE "*trail*stop*") | STATS event_count = COUNT(*) BY event.action, host.name, user.name | SORT event_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) => coverageQuery(i, 'event.category IS NOT NULL'),
   },
 
   '10.2.2': {
@@ -457,11 +432,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure all administrative actions including config changes, user management, and system modifications are logged.',
       'Correlate admin actions with change management records.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "configuration" OR event.category == "iam" OR event.action LIKE "*admin*" OR event.action LIKE "*sudo*" OR event.action LIKE "*root*"'
       ),
   },
@@ -479,8 +452,14 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure log retention policies maintain at least 12 months of audit logs.',
       'Verify that the most recent 3 months of logs are immediately available for analysis.',
     ],
-    buildCoverageEsql: (i, _f, _t) =>
-      `FROM ${i} | STATS oldest_log = MIN(@timestamp), newest_log = MAX(@timestamp), total_events = COUNT(*) | EVAL retention_days = DATE_DIFF("day", oldest_log, newest_log) | LIMIT 1`,
+    // Retention intentionally spans the full index rather than the caller-supplied window,
+    // so this query has no WHERE clause on @timestamp — there is no user-supplied time
+    // value to bind. `total_events` is projected first so the evaluator's generic
+    // `values[0][0]` count-based scoring path treats "any events exist" as evidence;
+    // `oldest_log`, `newest_log`, and `retention_days` remain available as context for
+    // reviewers inspecting raw evidence.
+    buildCoverageEsql: (i) =>
+      `FROM ${i} | STATS total_events = COUNT(*), oldest_log = MIN(@timestamp), newest_log = MAX(@timestamp) | EVAL retention_days = DATE_DIFF("day", oldest_log, newest_log)`,
   },
 
   '11.5': {
@@ -496,10 +475,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Investigate and resolve active IDS/IPS alerts promptly.',
       'Tune detection rules to reduce false positives while maintaining coverage.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND event.category == "intrusion_detection" AND event.kind == "alert" | STATS alert_count = COUNT(*) BY host.name, event.action | SORT alert_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category == "intrusion_detection"'),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND event.category == "intrusion_detection" AND event.kind == "alert" | STATS alert_count = COUNT(*) BY host.name, event.action | SORT alert_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) => coverageQuery(i, 'event.category == "intrusion_detection"'),
   },
 
   '2.2.4': {
@@ -515,15 +493,10 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Remove or disable all default and vendor-supplied accounts before deploying systems.',
       'If a default account cannot be removed, change the password and restrict access.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND event.category == "authentication" AND event.outcome == "success" AND (user.name == "admin" OR user.name == "administrator" OR user.name == "root" OR user.name == "guest" OR user.name == "default" OR user.name == "test" OR user.name == "sa" OR user.name == "postgres" OR user.name == "oracle") | STATS login_count = COUNT(*) BY user.name, source.ip | SORT login_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(
-        i,
-        f,
-        t,
-        'event.category == "authentication" AND event.outcome == "success"'
-      ),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND event.category == "authentication" AND event.outcome == "success" AND (user.name == "admin" OR user.name == "administrator" OR user.name == "root" OR user.name == "guest" OR user.name == "default" OR user.name == "test" OR user.name == "sa" OR user.name == "postgres" OR user.name == "oracle") | STATS login_count = COUNT(*) BY user.name, source.ip | SORT login_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category == "authentication" AND event.outcome == "success"'),
   },
 
   '8.3.6': {
@@ -540,11 +513,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'If systems cannot support 12 characters, document compensating controls and enforce 8-character minimum.',
       'Ensure password policy change events are ingested into SIEM for auditability.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "iam" AND (event.action LIKE "*password*policy*" OR event.action LIKE "*password*change*" OR event.action LIKE "*password*reset*" OR event.action LIKE "*credential*")'
       ),
   },
@@ -563,11 +534,9 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'PCI DSS v4.0.1 eliminated the password-only option: MFA is the preferred path.',
       'Ensure password change and MFA enrollment events are ingested for audit evidence.',
     ],
-    buildCoverageEsql: (i, f, t) =>
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.category == "iam" AND (event.action LIKE "*password*change*" OR event.action LIKE "*password*reset*" OR event.action LIKE "*mfa*enroll*" OR event.action LIKE "*mfa*register*" OR event.action LIKE "*2fa*" OR event.action LIKE "*totp*")'
       ),
   },
@@ -578,23 +547,17 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
     description:
       'Verify that audit log entries contain required detail: user ID, event type, date/time, success or failure indication, origination, and identity or name of affected data/resource. Check field fill rates for completeness.',
     pciReference: 'PCI DSS v4.0.1 Section 10.3',
-    requiredFields: [
-      'user.name',
-      'event.category',
-      'event.action',
-      'event.outcome',
-      '@timestamp',
-    ],
+    requiredFields: ['user.name', 'event.category', 'event.action', 'event.outcome', '@timestamp'],
     verdict: 'rows_mean_evidence',
     defaultLookbackDays: 7,
     recommendations: [
       'Ensure all audit log entries include user ID, event type, timestamp, outcome, and source.',
       'Investigate data sources with low field fill rates for required audit trail fields.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" | STATS total = COUNT(*), has_user = COUNT(user.name), has_action = COUNT(event.action), has_outcome = COUNT(event.outcome) | EVAL user_pct = ROUND((has_user * 100.0) / total), action_pct = ROUND((has_action * 100.0) / total), outcome_pct = ROUND((has_outcome * 100.0) / total) | LIMIT 1`,
-    buildCoverageEsql: (i, f, t) =>
-      coverageQuery(i, f, t, 'event.category IS NOT NULL AND user.name IS NOT NULL'),
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} | STATS total = COUNT(*), has_user = COUNT(user.name), has_action = COUNT(event.action), has_outcome = COUNT(event.outcome) | EVAL user_pct = ROUND((has_user * 100.0) / total), action_pct = ROUND((has_action * 100.0) / total), outcome_pct = ROUND((has_outcome * 100.0) / total) | LIMIT 1`,
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'event.category IS NOT NULL AND user.name IS NOT NULL'),
   },
 
   '11.6': {
@@ -611,17 +574,28 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Deploy change-detection mechanisms that alert on unauthorized script or header modifications.',
       'This requirement became mandatory March 31, 2025 per PCI DSS v4.0.1.',
     ],
-    buildViolationEsql: (i, f, t) =>
-      `FROM ${i} | WHERE @timestamp >= "${f}" AND @timestamp <= "${t}" AND (event.action LIKE "*tamper*" OR event.action LIKE "*integrity*violation*" OR event.action LIKE "*csp*violation*" OR event.action LIKE "*script*inject*" OR event.action LIKE "*page*change*" OR event.action LIKE "*skimmer*") | STATS alert_count = COUNT(*) BY url.domain, event.action | SORT alert_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i, f, t) =>
+    buildViolationEsql: (i) =>
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND (event.action LIKE "*tamper*" OR event.action LIKE "*integrity*violation*" OR event.action LIKE "*csp*violation*" OR event.action LIKE "*script*inject*" OR event.action LIKE "*page*change*" OR event.action LIKE "*skimmer*") | STATS alert_count = COUNT(*) BY url.domain, event.action | SORT alert_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) =>
       coverageQuery(
         i,
-        f,
-        t,
         'event.action LIKE "*csp*" OR event.action LIKE "*integrity*" OR event.action LIKE "*tamper*" OR event.action LIKE "*payment*page*"'
       ),
   },
 };
+
+/**
+ * Build the ES|QL `params` array for the shared `?_tstart` / `?_tend` placeholders. Pass
+ * the result straight to {@link executeEsql} so time-range values flow through
+ * parameter binding instead of string interpolation.
+ */
+export const buildPciTimeRangeParams = ({
+  from,
+  to,
+}: {
+  from: string;
+  to: string;
+}): Array<Record<string, string>> => [{ _tstart: from }, { _tend: to }];
 
 export const getTimeRangeForCheck = (
   checkId: string,
@@ -677,3 +651,6 @@ export const getIndexPattern = (indices?: string[]): string => {
   const selected = indices && indices.length > 0 ? indices : [...DEFAULT_PCI_INDEX_PATTERNS];
   return selected.join(',');
 };
+
+export const getIndexList = (indices?: string[]): string[] =>
+  indices && indices.length > 0 ? [...indices] : [...DEFAULT_PCI_INDEX_PATTERNS];

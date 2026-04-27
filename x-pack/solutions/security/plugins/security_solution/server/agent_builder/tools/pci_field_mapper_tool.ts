@@ -12,17 +12,31 @@ import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
+import {
+  pciIndexPatternSchema,
+  pciTimeRangeSchema,
+  buildScopeClaim,
+} from './pci_compliance_schemas';
+
+const DEFAULT_SAMPLE_LOOKBACK_DAYS = 7;
+const SAMPLE_HIT_COUNT = 3;
+const SAMPLE_SOURCE_FIELD_LIMIT = 20;
 
 const pciFieldMapperSchema = z.object({
-  indexPattern: z
-    .string()
-    .describe('Index pattern to inspect for field mapping (e.g. "logs-custom-myapp*").'),
+  indexPattern: pciIndexPatternSchema.describe(
+    'Index pattern to inspect for field mapping (e.g. "logs-custom-myapp*").'
+  ),
   targetFields: z
-    .array(z.string())
+    .array(z.string().min(1).max(256))
     .min(1)
+    .max(50)
+    .optional()
+    .describe('Optional list of ECS fields to map to. Defaults to common PCI-relevant ECS fields.'),
+  timeRange: pciTimeRangeSchema
     .optional()
     .describe(
-      'Optional list of ECS fields to map to. Defaults to common PCI-relevant ECS fields.'
+      'Optional ISO-8601 time range for the sample hit lookup. Defaults to the last 7 days. ' +
+        'Keeping a narrow window avoids scanning frozen/cold data when looking for representative rows.'
     ),
 });
 
@@ -57,8 +71,25 @@ const DEFAULT_ECS_TARGETS = [
 ];
 
 const FIELD_MAPPING_HINTS: Record<string, string[]> = {
-  'user.name': ['username', 'user_name', 'login', 'account', 'principal', 'actor', 'userid', 'user_id'],
-  'source.ip': ['src_ip', 'src_addr', 'source_ip', 'client_ip', 'remote_addr', 'remote_ip', 'origin_ip'],
+  'user.name': [
+    'username',
+    'user_name',
+    'login',
+    'account',
+    'principal',
+    'actor',
+    'userid',
+    'user_id',
+  ],
+  'source.ip': [
+    'src_ip',
+    'src_addr',
+    'source_ip',
+    'client_ip',
+    'remote_addr',
+    'remote_ip',
+    'origin_ip',
+  ],
   'destination.ip': ['dst_ip', 'dst_addr', 'dest_ip', 'server_ip', 'target_ip'],
   'event.outcome': ['outcome', 'result', 'status', 'success', 'auth_result', 'login_result'],
   'event.action': ['action', 'event_type', 'operation', 'activity', 'method', 'api_call'],
@@ -108,6 +139,12 @@ function matchFieldToEcs(
   return null;
 }
 
+const defaultTimeRange = (): { from: string; to: string } => {
+  const to = new Date();
+  const from = new Date(to.getTime() - DEFAULT_SAMPLE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+  return { from: from.toISOString(), to: to.toISOString() };
+};
+
 export const pciFieldMapperTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
@@ -117,7 +154,8 @@ export const pciFieldMapperTool = (
     type: ToolType.builtin,
     description:
       'Inspect non-ECS index fields and suggest mappings to ECS fields for PCI compliance queries. ' +
-      'Use this when the scope discovery tool reports low ECS coverage for an index.',
+      'Use this when the scope discovery tool reports low ECS coverage for an index. Bounded by a ' +
+      'short time window to avoid scanning cold/frozen data when sampling rows.',
     schema: pciFieldMapperSchema,
     availability: {
       cacheMode: 'space',
@@ -125,8 +163,9 @@ export const pciFieldMapperTool = (
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ indexPattern, targetFields }, { esClient }) => {
+    handler: async ({ indexPattern, targetFields, timeRange }, { esClient }) => {
       const ecsTargets = targetFields ?? DEFAULT_ECS_TARGETS;
+      const resolvedRange = timeRange ?? defaultTimeRange();
 
       let allFields: string[];
       try {
@@ -142,7 +181,9 @@ export const pciFieldMapperTool = (
           results: [
             {
               type: ToolResultType.error,
-              data: { message: `Unable to inspect fields for index pattern "${indexPattern}".` },
+              data: {
+                message: `Unable to inspect fields for index pattern "${indexPattern}".`,
+              },
             },
           ],
         };
@@ -163,42 +204,59 @@ export const pciFieldMapperTool = (
       }> = [];
 
       for (const field of nonEcsFields) {
-        if (isSensitiveField(field)) continue;
-
-        for (const ecsTarget of ecsMissing) {
-          const match = matchFieldToEcs(field, ecsTarget);
-          if (match && match.score >= 0.5) {
-            mappings.push({
-              sourceField: field,
-              suggestedEcsField: ecsTarget,
-              confidence: match.score,
-              reason: match.reason,
-            });
+        if (!isSensitiveField(field)) {
+          for (const ecsTarget of ecsMissing) {
+            const match = matchFieldToEcs(field, ecsTarget);
+            if (match && match.score >= 0.5) {
+              mappings.push({
+                sourceField: field,
+                suggestedEcsField: ecsTarget,
+                confidence: match.score,
+                reason: match.reason,
+              });
+            }
           }
         }
       }
 
       mappings.sort((a, b) => b.confidence - a.confidence);
 
+      // Best-effort sample constrained to the provided time window so we don't scan cold/frozen data.
       let sampleFields: string[] = [];
       try {
         const sampleResponse = await esClient.asCurrentUser.search({
           index: indexPattern,
-          size: 3,
+          size: SAMPLE_HIT_COUNT,
           _source_includes: nonEcsFields
             .filter((f) => !isSensitiveField(f))
-            .slice(0, 20),
+            .slice(0, SAMPLE_SOURCE_FIELD_LIMIT),
+          query: {
+            range: {
+              '@timestamp': {
+                gte: resolvedRange.from,
+                lte: resolvedRange.to,
+              },
+            },
+          },
+          ignore_unavailable: true,
+          allow_no_indices: true,
         });
         if (sampleResponse.hits?.hits?.length) {
           sampleFields = [
-            ...new Set(
-              sampleResponse.hits.hits.flatMap((hit) => Object.keys(hit._source ?? {}))
-            ),
+            ...new Set(sampleResponse.hits.hits.flatMap((hit) => Object.keys(hit._source ?? {}))),
           ];
         }
       } catch {
-        // Sample retrieval is best-effort
+        // Sample retrieval is best-effort (e.g. indices without @timestamp will error here).
       }
+
+      const scopeClaim = buildScopeClaim({
+        indices: [indexPattern],
+        from: resolvedRange.from,
+        to: resolvedRange.to,
+        requirementsEvaluated: [],
+        requiredFieldsChecked: ecsTargets,
+      });
 
       return {
         results: [
@@ -209,9 +267,7 @@ export const pciFieldMapperTool = (
               totalFields: allFields.length,
               ecsFieldsPresent,
               ecsMissing,
-              ecsCoveragePercent: Math.round(
-                (ecsFieldsPresent.length / ecsTargets.length) * 100
-              ),
+              ecsCoveragePercent: Math.round((ecsFieldsPresent.length / ecsTargets.length) * 100),
               suggestedMappings: mappings.slice(0, 20),
               sampleFieldNames: sampleFields.slice(0, 30),
               guidance:
@@ -219,6 +275,7 @@ export const pciFieldMapperTool = (
                   ? 'Use the generateEsql tool to create adapted queries using the suggested field mappings above. ' +
                     'For example, if "username" maps to "user.name", use RENAME or reference the source field directly.'
                   : 'No automatic mappings found. Inspect the sample field names and create manual field mappings.',
+              scopeClaim,
             },
           },
         ],

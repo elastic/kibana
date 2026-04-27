@@ -6,12 +6,16 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { pciComplianceSkill } from './pci_compliance_skill';
-import { PCI_COMPLIANCE_CHECK_TOOL_ID } from '../../tools/pci_compliance_check_tool';
-import { PCI_COMPLIANCE_REPORT_TOOL_ID } from '../../tools/pci_compliance_report_tool';
+import { pciComplianceSkill, PCI_COMPLIANCE_SKILL_TOOL_IDS } from './pci_compliance_skill';
+import { PCI_COMPLIANCE_TOOL_ID } from '../../tools/pci_compliance_tool';
 import { PCI_SCOPE_DISCOVERY_TOOL_ID } from '../../tools/pci_scope_discovery_tool';
 import { PCI_FIELD_MAPPER_TOOL_ID } from '../../tools/pci_field_mapper_tool';
 
+/**
+ * Skill-level contract tests. The Agent Builder tool-selection guideline caps skills at
+ * roughly 5 registry tool references because tool-selection accuracy degrades past that.
+ * We assert the cap here rather than relying on a soft guideline.
+ */
 describe('pciComplianceSkill', () => {
   it('has the correct skill id', () => {
     expect(pciComplianceSkill.id).toBe('pci-compliance');
@@ -21,62 +25,58 @@ describe('pciComplianceSkill', () => {
     expect(pciComplianceSkill.basePath).toBe('skills/security/compliance');
   });
 
-  it('has a non-empty description', () => {
+  it('has a non-empty description referencing PCI DSS v4.0.1', () => {
     expect(pciComplianceSkill.description.length).toBeGreaterThan(0);
     expect(pciComplianceSkill.description).toContain('PCI DSS v4.0.1');
   });
 
-  it('has non-empty content with instructions', () => {
-    expect(pciComplianceSkill.content.length).toBeGreaterThan(0);
-  });
-
-  it('references PCI DSS v4.0.1 in content', () => {
+  it('references PCI DSS v4.0.1 and key v4.0.1 clarifications in content', () => {
     expect(pciComplianceSkill.content).toContain('v4.0.1');
-  });
-
-  it('includes compliance workflow guidance', () => {
-    expect(pciComplianceSkill.content).toContain('Compliance Assessment Workflow');
-  });
-
-  it('includes confidence interpretation guidance', () => {
-    expect(pciComplianceSkill.content).toContain('GREEN + HIGH confidence');
-    expect(pciComplianceSkill.content).toContain('RED + HIGH confidence');
-    expect(pciComplianceSkill.content).toContain('NOT_ASSESSABLE');
-  });
-
-  it('documents v4.0.1 clarifications', () => {
     expect(pciComplianceSkill.content).toContain('critical-severity only');
     expect(pciComplianceSkill.content).toContain('ALL CDE access');
     expect(pciComplianceSkill.content).toContain('FIDO2');
   });
 
-  it('includes deduplication guidance', () => {
-    expect(pciComplianceSkill.content).toContain('Deduplication');
+  it('documents confidence interpretation', () => {
+    expect(pciComplianceSkill.content).toContain('GREEN + HIGH confidence');
+    expect(pciComplianceSkill.content).toContain('RED + HIGH confidence');
+    expect(pciComplianceSkill.content).toContain('NOT_ASSESSABLE');
   });
 
-  it('includes non-ECS data workflow', () => {
+  it('includes deduplication guidance and the consolidated tool workflow', () => {
+    expect(pciComplianceSkill.content).toContain('Deduplication');
+    expect(pciComplianceSkill.content).toContain(PCI_COMPLIANCE_TOOL_ID);
+    expect(pciComplianceSkill.content).toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
     expect(pciComplianceSkill.content).toContain(PCI_FIELD_MAPPER_TOOL_ID);
   });
 
-  describe('getRegistryTools', () => {
-    it('returns all PCI tool IDs', () => {
-      const toolIds = pciComplianceSkill.getRegistryTools!();
-      expect(toolIds).toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
-      expect(toolIds).toContain(PCI_COMPLIANCE_CHECK_TOOL_ID);
-      expect(toolIds).toContain(PCI_COMPLIANCE_REPORT_TOOL_ID);
-      expect(toolIds).toContain(PCI_FIELD_MAPPER_TOOL_ID);
-    });
+  it('documents the scopeClaim provenance record', () => {
+    expect(pciComplianceSkill.content).toContain('scopeClaim');
+  });
 
-    it('returns platform core tools for data exploration', () => {
-      const toolIds = pciComplianceSkill.getRegistryTools!();
+  describe('getRegistryTools', () => {
+    const toolIds = pciComplianceSkill.getRegistryTools!() as string[];
+
+    it('exposes the consolidated PCI tool set plus ES|QL generators', () => {
+      expect(toolIds).toEqual(expect.arrayContaining([...PCI_COMPLIANCE_SKILL_TOOL_IDS]));
+      expect(toolIds).toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
+      expect(toolIds).toContain(PCI_COMPLIANCE_TOOL_ID);
+      expect(toolIds).toContain(PCI_FIELD_MAPPER_TOOL_ID);
       expect(toolIds).toContain(platformCoreTools.generateEsql);
       expect(toolIds).toContain(platformCoreTools.executeEsql);
-      expect(toolIds).toContain(platformCoreTools.listIndices);
     });
 
-    it('stays within the 25 registry tool limit', () => {
-      const toolIds = pciComplianceSkill.getRegistryTools!();
-      expect((toolIds as string[]).length).toBeLessThanOrEqual(25);
+    it('does not advertise the deprecated split check/report tool IDs', () => {
+      expect(toolIds).not.toContain('security.pci_compliance_check');
+      expect(toolIds).not.toContain('security.pci_compliance_report');
+    });
+
+    it('stays within the 5 registry tool tool-selection cap', () => {
+      expect(toolIds.length).toBeLessThanOrEqual(5);
+    });
+
+    it('has no duplicate entries', () => {
+      expect(new Set(toolIds).size).toBe(toolIds.length);
     });
   });
 });

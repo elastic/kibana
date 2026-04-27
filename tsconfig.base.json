@@ -1172,6 +1172,8 @@
       "@kbn/evals-suite-obs-ai-assistant/*": ["x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/*"],
       "@kbn/evals-suite-observability-ai": ["x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai"],
       "@kbn/evals-suite-observability-ai/*": ["x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/*"],
+      "@kbn/evals-suite-pci-compliance": ["x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance"],
+      "@kbn/evals-suite-pci-compliance/*": ["x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/*"],
       "@kbn/evals-suite-security-ai-rules": ["x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules"],
       "@kbn/evals-suite-security-ai-rules/*": ["x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/*"],
       "@kbn/evals-suite-significant-events": ["x-pack/platform/packages/shared/kbn-evals-suite-significant-events"],
