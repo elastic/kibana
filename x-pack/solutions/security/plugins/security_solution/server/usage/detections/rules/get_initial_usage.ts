@@ -19,6 +19,7 @@ import type {
   UpgradeableRulesSummary,
   ThreatMatchFeatureTypeUsage,
   RuleCustomizationCounts,
+  DeprecatedRulesSummary,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -174,6 +175,10 @@ export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
   customized: 0,
   enabled: 0,
   disabled: 0,
+});
+
+export const getInitialRuleDeprecatedStatus = (): DeprecatedRulesSummary => ({
+  total: 0,
 });
 
 export const getInitialAiCreatedRulesUsage = (): AiCreatedRulesUsage => ({
