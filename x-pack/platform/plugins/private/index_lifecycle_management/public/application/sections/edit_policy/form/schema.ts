@@ -86,7 +86,7 @@ export const searchableSnapshotFields = {
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.forceMergeIndexHelpText',
       {
         defaultMessage:
-          'Force merges the managed index to one segment before the snapshot is created. Defaults to true.',
+          'Force merge the index to a single segment before creating the snapshot. Fewer segments mean fewer reads when restoring or searching the snapshot.',
       }
     ),
   },
