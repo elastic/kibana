@@ -26,6 +26,7 @@ import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 interface WorkflowsUtilityBarProps {
   totalWorkflows: number;
   selectedWorkflows: WorkflowListItemDto[];
+  allWorkflows: WorkflowListItemDto[];
   deselectWorkflows: () => void;
   onRefresh: () => void;
   showStart: number;
@@ -35,6 +36,7 @@ interface WorkflowsUtilityBarProps {
 export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
   totalWorkflows,
   selectedWorkflows,
+  allWorkflows,
   deselectWorkflows,
   onRefresh,
   showStart,
@@ -52,6 +54,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
 
   const { panels, modals } = useWorkflowBulkActions({
     selectedWorkflows,
+    allWorkflows,
     onAction: closePopover,
     onActionSuccess,
     deselectWorkflows,
@@ -67,6 +70,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
         css={css`
           margin-top: ${euiTheme.size.l};
           padding-bottom: ${euiTheme.size.m};
+          height: ${euiTheme.size.l};
         `}
       >
         <EuiFlexItem grow={false}>
@@ -107,7 +111,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                             onClick={togglePopover}
                             size="s"
                             iconSide="right"
-                            iconType="arrowDown"
+                            iconType="chevronSingleDown"
                             flush="left"
                             data-test-subj="workflows-table-bulk-actions-button"
                             aria-label="Bulk actions"

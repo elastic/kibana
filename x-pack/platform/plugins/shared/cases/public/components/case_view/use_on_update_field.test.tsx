@@ -249,6 +249,37 @@ describe('useOnUpdateField', () => {
       );
     });
 
+    it('normalizes camelCase extendedFields keys to snake_case before merging', () => {
+      // The server returns extendedFields with camelCase keys (via convertToCamelCase).
+      // processExtendedFields must convert them back to snake_case before sending the PATCH.
+      const caseWithCamelCaseFields: CaseUI = {
+        ...basicCase,
+        extendedFields: { riskScoreAsKeyword: 'low' },
+      };
+
+      const { result } = renderHook(() => useOnUpdateField({ caseData: caseWithCamelCaseFields }), {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.onUpdateField({
+          key: CASE_EXTENDED_FIELDS,
+          value: { severity_as_keyword: 'high' },
+        });
+      });
+
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updateKey: CASE_EXTENDED_FIELDS,
+          updateValue: {
+            risk_score_as_keyword: 'low',
+            severity_as_keyword: 'high',
+          },
+        }),
+        expect.anything()
+      );
+    });
+
     it('merges with existing extended fields', () => {
       const caseWithExtendedFields: CaseUI = {
         ...basicCase,

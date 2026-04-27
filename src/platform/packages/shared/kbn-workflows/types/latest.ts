@@ -26,6 +26,7 @@ export type {
   TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -40,6 +41,9 @@ export type {
   WorkflowListItemDto,
   WorkflowAggsDto,
   WorkflowStatsDto,
+  WorkflowStepExecutionListDto,
+  WorkflowMgetResponseDto,
+  ChildWorkflowExecutionItem,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
@@ -60,7 +64,10 @@ export type {
   SelectionOption,
   SelectionDetails,
   SelectionContext,
+  StepSelectionValues,
   RequestOptions,
+  GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
@@ -76,4 +83,9 @@ export {
   NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
+  // shared constants
+  MAX_WORKFLOW_YAML_LENGTH,
+  WORKFLOW_ID_PATTERN,
+  WORKFLOW_ID_MIN_LENGTH,
+  WORKFLOW_ID_MAX_LENGTH,
 } from './v1';

@@ -1074,6 +1074,59 @@ describe('buildStepExecutionsTree', () => {
       expect(result[1].children).toHaveLength(1);
     });
   });
+
+  describe('triggeredBy fallback when context lacks inputs/event keys', () => {
+    it('should fall back to triggeredBy for manual execution when context has no inputs key', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { spaceId: 'default' },
+        ExecutionStatus.FAILED,
+        'manual'
+      );
+
+      const inputsStep = result.find((s) => s.stepType === '__inputs');
+      expect(inputsStep).toBeDefined();
+      expect(inputsStep?.stepId).toBe('Inputs');
+      expect(inputsStep?.isTriggerPseudoStep).toBe(true);
+    });
+
+    it('should fall back to triggeredBy for alert execution when context has no event key', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { spaceId: 'default' },
+        ExecutionStatus.FAILED,
+        'alert'
+      );
+
+      const triggerStep = result.find((s) => s.stepType === '__trigger');
+      expect(triggerStep).toBeDefined();
+      expect(triggerStep?.stepId).toBe('Event');
+      expect(triggerStep?.isTriggerPseudoStep).toBe(true);
+    });
+
+    it('should not use triggeredBy fallback when context already has inputs', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { inputs: { name: 'test' } },
+        ExecutionStatus.FAILED,
+        'manual'
+      );
+
+      const inputsSteps = result.filter(
+        (s) => s.stepType === '__inputs' || s.stepType === '__trigger'
+      );
+      expect(inputsSteps).toHaveLength(1);
+    });
+
+    it('should not create trigger pseudo-step when triggeredBy is undefined', () => {
+      const result = buildStepExecutionsTree([], { spaceId: 'default' }, ExecutionStatus.FAILED);
+
+      const triggerSteps = result.filter(
+        (s) => s.stepType === '__inputs' || s.stepType === '__trigger'
+      );
+      expect(triggerSteps).toHaveLength(0);
+    });
+  });
 });
 
 describe('injectChildWorkflowSteps', () => {

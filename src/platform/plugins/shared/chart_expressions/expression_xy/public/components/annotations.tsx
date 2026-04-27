@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
@@ -28,7 +29,7 @@ import type {
   PointEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -97,7 +98,8 @@ const createCustomTooltip =
     rows: PointEventAnnotationRow[],
     formatFactory: FormatFactory,
     columns: DatatableColumn[] | undefined,
-    timeFormat: string
+    timeFormat: string,
+    isDarkMode: boolean
   ): CustomAnnotationTooltip =>
   () => {
     const lastElement = rows[rows.length - 1];
@@ -118,6 +120,10 @@ const createCustomTooltip =
         <div css={styles.tooltipRows}>
           {rows.slice(0, DISPLAYED_COUNT_OF_ROWS).map((row, index) => {
             const extraFields = getExtraFields(row, formatFactory, columns);
+            const resolvedColor = getResolvedAnnotationColor({
+              color: row.color,
+              isDarkMode,
+            });
 
             return (
               <Fragment key={row.time}>
@@ -133,7 +139,7 @@ const createCustomTooltip =
                     <EuiFlexItem grow={false}>
                       <AnnotationIcon
                         type={hasIcon(row.icon) ? row.icon : 'empty'}
-                        color={row.color}
+                        color={resolvedColor}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -183,13 +189,17 @@ function getCommonProperty<T, K extends keyof ManualPointEventAnnotationArgs>(
   return fallbackValue;
 }
 
-const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
+const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[], isDarkMode: boolean) => {
+  const commonColor = getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
+    configArr,
+    'color',
+    undefined
+  );
   return {
-    color: getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
-      configArr,
-      'color',
-      defaultAnnotationColor
-    ),
+    color: getResolvedAnnotationColor({
+      color: commonColor,
+      isDarkMode,
+    }),
     lineWidth: getCommonProperty(configArr, 'lineWidth', 1),
     lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
     textVisibility: getCommonProperty(configArr, 'textVisibility', false),
@@ -212,7 +222,8 @@ export const getAnnotationsGroupedByInterval = (
   configs: EventAnnotationOutput[] | undefined,
   columns: DatatableColumn[] | undefined,
   formatFactory: FormatFactory,
-  timeFormat: string
+  timeFormat: string,
+  isDarkMode: boolean
 ) => {
   const visibleGroupedConfigs = annotations.reduce<Record<string, PointEventAnnotationRow[]>>(
     (acc, current) => {
@@ -226,6 +237,10 @@ export const getAnnotationsGroupedByInterval = (
   );
   return Object.entries(visibleGroupedConfigs).map(([timebucket, rowsPerBucket]) => {
     const firstRow = rowsPerBucket[0];
+    const resolvedRowColor = getResolvedAnnotationColor({
+      color: firstRow.color,
+      isDarkMode,
+    });
 
     const config = configs?.find((c) => c.id === firstRow.id);
     const textField = config && 'textField' in config && config?.textField;
@@ -237,15 +252,22 @@ export const getAnnotationsGroupedByInterval = (
         : firstRow.label;
     const mergedAnnotation: MergedAnnotation = {
       ...firstRow,
+      color: resolvedRowColor,
       label,
       icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
-      customTooltip: createCustomTooltip(rowsPerBucket, formatFactory, columns, timeFormat),
+      customTooltip: createCustomTooltip(
+        rowsPerBucket,
+        formatFactory,
+        columns,
+        timeFormat,
+        isDarkMode
+      ),
       isGrouped: false,
     };
     if (rowsPerBucket.length > 1) {
-      const commonStyles = getCommonStyles(rowsPerBucket);
+      const commonStyles = getCommonStyles(rowsPerBucket, isDarkMode);
       return {
         ...mergedAnnotation,
         ...commonStyles,
@@ -272,6 +294,9 @@ export const Annotations = ({
   isBarChart,
   outsideDimension,
 }: AnnotationsProps) => {
+  const { colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
+
   return (
     <>
       {groupedLineAnnotations.map((annotation) => {
@@ -327,7 +352,10 @@ export const Annotations = ({
             style={{
               line: {
                 strokeWidth,
-                stroke: annotation.color || defaultAnnotationColor,
+                stroke: getResolvedAnnotationColor({
+                  color: annotation.color,
+                  isDarkMode,
+                }),
                 dash:
                   annotation.lineStyle === 'dashed'
                     ? [strokeWidth * 3, strokeWidth]
@@ -341,6 +369,11 @@ export const Annotations = ({
         );
       })}
       {rangeAnnotations.map(({ id, label, time, color, endTime, outside }) => {
+        const resolvedColor = getResolvedAnnotationColor({
+          color,
+          isDarkMode,
+          isRange: true,
+        });
         return (
           <RectAnnotation
             id={id}
@@ -357,7 +390,7 @@ export const Annotations = ({
                 <div css={styles.tooltipRow}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="stopFilled" color={color} />
+                      <EuiIcon type="stopFill" color={resolvedColor} aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xxxs">
@@ -380,7 +413,7 @@ export const Annotations = ({
                 details: label,
               },
             ]}
-            style={{ fill: color || defaultAnnotationRangeColor, opacity: 1 }}
+            style={{ fill: resolvedColor, opacity: 1 }}
             outside={Boolean(outside)}
             outsideDimension={outsideDimension}
           />

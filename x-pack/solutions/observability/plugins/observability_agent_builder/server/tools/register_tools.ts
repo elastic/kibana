@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -55,12 +55,17 @@ import {
 } from './get_service_topology/tool';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID, createGetLogsTool } from './get_logs/tool';
+import {
+  OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
+  createGetApmCorrelationsTool,
+} from './get_apm_correlations/tool';
 
 export const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.productDocumentation,
+  platformStreamsSigEventsTools.searchKnowledgeIndicators,
 ];
 
 export const OBSERVABILITY_TOOL_IDS = [
@@ -79,6 +84,7 @@ export const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
   OBSERVABILITY_GET_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
 ];
 
 export async function registerTools({
@@ -108,6 +114,7 @@ export async function registerTools({
     createGetIndexInfoTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
     createGetLogsTool({ core, logger }),
+    createGetApmCorrelationsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

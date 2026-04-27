@@ -9,15 +9,17 @@ import { CrowdStrikeTokenManager } from './token_manager';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import {
+  ConnectorUsageCollector,
+  type ConnectorTokenClientContract,
+} from '@kbn/actions-plugin/server/types';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '@kbn/connector-schemas/crowdstrike';
-import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 
 describe('CrowdStrikeTokenManager', () => {
   let csTokenManager: CrowdStrikeTokenManager;
-  let connectorTokenClientMock: jest.Mocked<ConnectorTokenClient>;
+  let connectorTokenClientMock: jest.Mocked<ConnectorTokenClientContract>;
   let usageCollector: ConnectorUsageCollector;
   let mockRequest: jest.Mock;
 
@@ -40,34 +42,47 @@ describe('CrowdStrikeTokenManager', () => {
   beforeEach(() => {
     mockRequest = jest.fn();
     const mockServices = actionsMock.createServices();
-    connectorTokenClientMock =
-      mockServices.connectorTokenClient as jest.Mocked<ConnectorTokenClient>;
+    connectorTokenClientMock = jest.mocked(mockServices.connectorTokenClient);
 
     // Apply connector token client mock behavior
     let cachedTokenMock: ConnectorToken | null = null;
 
     jest
-      .spyOn(connectorTokenClientMock, 'create')
-      .mockImplementation(
-        async ({ connectorId, token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
-          cachedTokenMock = createConnectorTokenMock({
-            connectorId,
-            token,
-            expiresAt,
-            tokenType,
-          });
-          return cachedTokenMock;
-        }
-      );
+      .spyOn(
+        connectorTokenClientMock as unknown as { create: ConnectorTokenClientContract['create'] },
+        'create'
+      )
+      .mockImplementation((async ({
+        connectorId,
+        token,
+        expiresAtMillis: expiresAt,
+        tokenType = 'access_token',
+      }: {
+        connectorId: string;
+        token?: string;
+        expiresAtMillis?: string;
+        tokenType?: string;
+      }) => {
+        cachedTokenMock = createConnectorTokenMock({
+          connectorId,
+          token: token ?? '',
+          expiresAt,
+          tokenType,
+        });
+        return cachedTokenMock;
+      }) as unknown as ConnectorTokenClientContract['create']);
 
     jest
-      .spyOn(connectorTokenClientMock, 'update')
+      .spyOn(
+        connectorTokenClientMock as unknown as { update: ConnectorTokenClientContract['update'] },
+        'update'
+      )
       .mockImplementation(
         async ({ token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
           if (cachedTokenMock) {
             cachedTokenMock = {
               ...cachedTokenMock,
-              token,
+              token: token ?? cachedTokenMock.token,
               expiresAt,
               tokenType,
             };
@@ -83,7 +98,7 @@ describe('CrowdStrikeTokenManager', () => {
     jest.spyOn(connectorTokenClientMock, 'updateOrReplace').mockImplementation(async (options) => {
       // Calculate expiration time based on expiresInSec
       const expiresAt = new Date(
-        options.tokenRequestDate + options.expiresInSec * 1000
+        options.tokenRequestDate + (options.expiresInSec ?? 0) * 1000
       ).toISOString();
       cachedTokenMock = createConnectorTokenMock({
         connectorId: options.connectorId,
@@ -95,7 +110,6 @@ describe('CrowdStrikeTokenManager', () => {
 
     jest.spyOn(connectorTokenClientMock, 'deleteConnectorTokens').mockImplementation(async () => {
       cachedTokenMock = null;
-      return [];
     });
 
     const serviceParams: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets> & {

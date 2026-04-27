@@ -101,10 +101,14 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilterPopoverAriaLabel',
+          { defaultMessage: 'Filter by rule state' }
+        )}
         button={
           <EuiFilterButton
             data-test-subj={buttonDataTestSubj}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedStatuses.length > 0}
             numActiveFilters={selectedStatuses.length}

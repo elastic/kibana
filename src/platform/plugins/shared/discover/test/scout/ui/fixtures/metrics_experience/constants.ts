@@ -41,6 +41,14 @@ export const ESQL_QUERIES = {
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
 
+export const RECOMMENDED_QUERY_LABELS = {
+  SEARCH_ALL_METRICS: 'Search all metrics',
+} as const;
+
+export const METRICS_DIMENSION_FIELDS = {
+  DEFAULT_BREAKDOWN: 'dimension_0',
+} as const;
+
 export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 
 export const KBN_ARCHIVE =
@@ -48,6 +56,17 @@ export const KBN_ARCHIVE =
 
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
+  // TODO: We are experiencing issues with serverless tags. They trigger the appex-qa-main pipeline and generate a lot of false positives.
+  // This will be addressed in: https://github.com/elastic/kibana/issues/261529
+  // ...tags.serverless.observability.complete,
+  // ...tags.serverless.security.complete,
+  '@local-serverless-security_complete',
+  '@local-serverless-observability_complete',
+];
+
+export const RECOMMENDED_QUERY_TAGS = [
+  ...tags.stateful.search,
+  ...tags.stateful.observability,
+  ...tags.stateful.security,
   ...tags.serverless.observability.complete,
-  ...tags.serverless.security.complete,
 ];

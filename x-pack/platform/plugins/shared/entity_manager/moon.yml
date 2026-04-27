@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/entityManager-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-entities'
+  defaultOwner: '@elastic/core-analysis'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/entityManager-plugin'
   description: Moon project for @kbn/entityManager-plugin
   channel: ''
-  owner: '@elastic/obs-entities'
+  owner: '@elastic/core-analysis'
   sourceRoot: x-pack/platform/plugins/shared/entity_manager
 dependsOn:
   - '@kbn/config-schema'
@@ -52,26 +52,6 @@ fileGroups:
     - public/**/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

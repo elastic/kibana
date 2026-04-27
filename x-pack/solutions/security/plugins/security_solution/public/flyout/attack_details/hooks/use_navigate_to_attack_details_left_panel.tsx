@@ -8,11 +8,9 @@
 import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { AttackDetailsLeftPanelKey } from '../constants/panel_keys';
+import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from '../constants/panel_keys';
+import { INSIGHTS_TAB_ID, ENTITIES_TAB_ID } from '../constants/left_panel_paths';
 import { useAttackDetailsContext } from '../context';
-
-const INSIGHTS_TAB_ID = 'insights' as const;
-const ENTITIES_SUB_TAB_ID = 'entity' as const;
 
 export interface UseNavigateToAttackDetailsLeftPanelParams {
   /**
@@ -33,9 +31,9 @@ export interface UseNavigateToAttackDetailsLeftPanelParams {
 export const useNavigateToAttackDetailsLeftPanel = (
   params: UseNavigateToAttackDetailsLeftPanelParams = {}
 ): (() => void) => {
-  const { tab = INSIGHTS_TAB_ID, subTab = ENTITIES_SUB_TAB_ID } = params;
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const { attackId, indexName } = useAttackDetailsContext();
+  const { tab = INSIGHTS_TAB_ID, subTab = ENTITIES_TAB_ID } = params;
+  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
+  const { attackId, indexName, isPreviewMode } = useAttackDetailsContext();
 
   const left: FlyoutPanelProps = useMemo(
     () => ({
@@ -52,7 +50,22 @@ export const useNavigateToAttackDetailsLeftPanel = (
     [attackId, indexName, tab, subTab]
   );
 
+  const right: FlyoutPanelProps = useMemo(
+    () => ({
+      id: AttackDetailsRightPanelKey,
+      params: {
+        attackId,
+        indexName,
+      },
+    }),
+    [attackId, indexName]
+  );
+
   return useCallback(() => {
-    openLeftPanel(left);
-  }, [openLeftPanel, left]);
+    if (isPreviewMode) {
+      openFlyout({ right, left });
+    } else {
+      openLeftPanel(left);
+    }
+  }, [isPreviewMode, openFlyout, openLeftPanel, right, left]);
 };

@@ -15,15 +15,19 @@ import type {
   UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolOrigin,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
+  LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
 } from './types';
@@ -90,35 +94,76 @@ const migrateToolResultType = (result: ToolResult): ToolResult => {
 };
 
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
-  return rounds.map<ConversationRound>((round) => ({
-    ...round,
-    status: round.status ?? ConversationRoundStatus.completed,
-    started_at: round.started_at ?? new Date(0).toISOString(),
-    time_to_first_token: round.time_to_first_token ?? 0,
-    time_to_last_token: round.time_to_last_token ?? 0,
-    model_usage: round.model_usage ?? {
-      llm_calls: 0,
-      input_tokens: 0,
-      output_tokens: 0,
-    },
-    steps: round.steps.map<ConversationRoundStep>((step) => {
-      if (step.type === ConversationRoundStepType.toolCall) {
-        return {
-          ...step,
-          results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
-            return migrateToolResultType({
-              ...result,
-              tool_result_id: result.tool_result_id ?? getToolResultId(),
-            });
-          }),
-          progression: step.progression ?? [],
-        };
-      } else {
-        return step;
-      }
-    }),
-  }));
+  return rounds.map<ConversationRound>((round) => {
+    // Migration: pending_prompt (singular) -> pending_prompts (array)
+    const { pending_prompt: legacyPendingPrompt, ...roundWithoutLegacy } = round;
+    const pendingPrompts =
+      round.pending_prompts ?? (legacyPendingPrompt ? [legacyPendingPrompt] : undefined);
+
+    return {
+      ...roundWithoutLegacy,
+      pending_prompts: pendingPrompts,
+      state: round.state ? migrateRoundState(round.state) : undefined,
+      status: round.status ?? ConversationRoundStatus.completed,
+      started_at: round.started_at ?? new Date(0).toISOString(),
+      time_to_first_token: round.time_to_first_token ?? 0,
+      time_to_last_token: round.time_to_last_token ?? 0,
+      model_usage: round.model_usage ?? {
+        llm_calls: 0,
+        input_tokens: 0,
+        output_tokens: 0,
+      },
+      steps: round.steps.map<ConversationRoundStep>((step) => {
+        if (step.type === ConversationRoundStepType.toolCall) {
+          return {
+            ...step,
+            results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
+              return migrateToolResultType({
+                ...result,
+                tool_result_id: result.tool_result_id ?? getToolResultId(),
+              });
+            }),
+            progression: step.progression ?? [],
+            tool_origin: step.tool_origin ?? inferToolOrigin(step.tool_id),
+          };
+        } else {
+          return step;
+        }
+      }),
+    };
+  });
 }
+
+/**
+ * Migrates legacy RoundState format.
+ * v1 stored a single `node`; current format uses `nodes` (array).
+ */
+function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }): RoundState {
+  const { agent } = state;
+  if (agent.nodes) {
+    return state;
+  }
+  if (agent.node) {
+    const { node, ...agentWithoutLegacy } = agent;
+    return {
+      ...state,
+      agent: {
+        ...agentWithoutLegacy,
+        nodes: [node],
+      },
+    };
+  }
+  return state;
+}
+
+const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
+  // Legacy rounds do not reliably differentiate registry vs inline tools.
+  // Only infer internal tools; leave others undefined for UI-side fallback.
+  if (isInternalTool(toolId)) {
+    return ToolOrigin.internal;
+  }
+  return undefined;
+};
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);

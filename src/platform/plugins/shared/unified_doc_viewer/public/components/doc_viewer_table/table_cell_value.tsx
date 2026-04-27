@@ -19,7 +19,7 @@ import {
   euiFontSize,
   type UseEuiTheme,
 } from '@elastic/eui';
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -97,7 +97,7 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
 
 interface TableFieldValueProps {
   field: string;
-  formattedValue: string;
+  formattedValue: ReactNode;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
@@ -167,7 +167,7 @@ export const TableFieldValue = ({
         {isCollapsible && (
           <EuiFlexItem grow={false} css={styles.collapseButtonWrapper}>
             <EuiButtonIcon
-              iconType={isCollapsed ? 'plusInSquare' : 'minusInSquare'}
+              iconType={isCollapsed ? 'plusSquare' : 'minusSquare'}
               size="xs"
               color="primary"
               data-test-subj={`toggleLongFieldValue-${field}`}
@@ -190,10 +190,9 @@ export const TableFieldValue = ({
             ]}
             id={valueElementId}
             data-test-subj={valueElementId}
-            // Value returned from formatFieldValue is always sanitized
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: formattedValue }}
-          />
+          >
+            {formattedValue}
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>

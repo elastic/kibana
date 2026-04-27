@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -15,7 +16,7 @@ import type {
 } from './types';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
-import { RunnerFactoryImpl } from './runner';
+import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
@@ -71,13 +72,19 @@ export class ServiceManager {
       consumption: createConsumptionService(),
     };
 
+    const skillsSetup = this.services.skills.setup();
+
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
+      tools: this.services.tools.setup({
+        logger: logger.get('tools'),
+        workflowsManagement,
+        config: this.config,
+      }),
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
-      skills: this.services.skills.setup(),
-      plugins: this.services.plugins.setup(),
+      skills: skillsSetup,
+      plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
       sml: this.services.sml.setup({ logger: logger.get('sml') }),
     };
@@ -99,6 +106,7 @@ export class ServiceManager {
     securityPlugin,
     trackingService,
     analyticsService,
+    searchInferenceEndpoints,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -113,7 +121,19 @@ export class ServiceManager {
       return runner;
     };
 
-    const attachments = this.services.attachments.start();
+    // eslint-disable-next-line prefer-const
+    let executionService: AgentExecutionService | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
+    };
+
+    const attachments = this.services.attachments.start({
+      spaces,
+      savedObjects,
+    });
     const sml = this.services.sml.start({
       logger: logger.get('sml'),
       securityAuthz: securityPlugin?.authz,
@@ -133,6 +153,8 @@ export class ServiceManager {
       spaces,
       logger: logger.get('skills'),
       getToolRegistry: tools.getRegistry,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({
@@ -145,6 +167,16 @@ export class ServiceManager {
     });
 
     const hooks = this.services.hooks.start();
+
+    const plugins = this.services.plugins.start({
+      logger: logger.get('plugins'),
+      elasticsearch,
+      spaces,
+      config: this.config,
+      getToolRegistry: tools.getRegistry,
+      analyticsService,
+      trackingService,
+    });
 
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
@@ -159,9 +191,12 @@ export class ServiceManager {
       agentsService: agents,
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
+      pluginsServiceStart: plugins,
       trackingService,
       analyticsService,
       hooks,
+      getExecutionService,
+      searchInferenceEndpoints,
     });
     runner = runnerFactory.getRunner();
 
@@ -190,9 +225,10 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
-    const execution = createAgentExecutionService({
+    executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
       taskManager,
@@ -207,13 +243,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
-    });
-
-    const plugins = this.services.plugins.start({
-      logger: logger.get('plugins'),
-      elasticsearch,
-      spaces,
-      config: this.config,
+      searchInferenceEndpoints,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -226,7 +256,7 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       auditLogService,
-      execution,
+      execution: executionService,
       taskHandler,
       hooks,
       spaces,

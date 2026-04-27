@@ -98,32 +98,7 @@
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -211,30 +186,6 @@
           {
             "plugin": "unifiedDocViewer",
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/solutions/observability/plugins/apm/public/components/app/service_inventory/traces_in_discover_callout/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/solutions/observability/plugins/apm/public/components/app/service_inventory/traces_in_discover_callout/index.tsx"
           },
           {
             "plugin": "unifiedDocViewer",
@@ -325,16 +276,7 @@
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -507,16 +449,7 @@
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_aggregation.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_aggregation.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -591,14 +524,6 @@
           {
             "plugin": "unifiedDocViewer",
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           }
         ],
         "children": [
@@ -798,30 +723,6 @@
           {
             "plugin": "unifiedDocViewer",
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           }
         ],
         "children": [
@@ -888,14 +789,6 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
-          },
           {
             "plugin": "infra",
             "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics_in_discover_callout/index.tsx"
@@ -1045,34 +938,6 @@
           {
             "plugin": "unifiedDocViewer",
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/index.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-chart-section-viewer",
-            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/solutions/observability/plugins/apm/public/components/app/service_inventory/traces_in_discover_callout/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/solutions/observability/plugins/apm/public/components/app/service_inventory/traces_in_discover_callout/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/solutions/observability/plugins/apm/public/components/app/service_inventory/traces_in_discover_callout/index.tsx"
           },
           {
             "plugin": "unifiedDocViewer",

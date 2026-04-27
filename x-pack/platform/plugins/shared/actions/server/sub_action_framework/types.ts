@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
@@ -41,7 +40,7 @@ export interface ServiceParams<Config, Secrets> {
 
 export type SubActionRequestParams<R> = {
   url: string;
-  responseSchema: z3.ZodType<R> | z4.ZodType<R>;
+  responseSchema: z4.ZodType<R>;
   method?: Method;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig;
@@ -117,8 +116,8 @@ export interface SubActionConnectorType<Config, Secrets> {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   schema: {
-    config: z3.ZodType<Config> | z4.ZodType<Config>;
-    secrets: z3.ZodType<Secrets, z3.ZodTypeDef, Secrets | undefined> | z4.ZodType;
+    config: z4.ZodType<Config>;
+    secrets: z4.ZodType<Secrets | undefined>;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
@@ -146,7 +145,7 @@ export type ExtractFunctionKeys<T> = {
 export interface SubAction {
   name: string;
   method: string;
-  schema: z3.ZodType<unknown> | z4.ZodType<unknown> | null;
+  schema: z4.ZodType<unknown> | null;
 }
 
 export interface PushToServiceParams {

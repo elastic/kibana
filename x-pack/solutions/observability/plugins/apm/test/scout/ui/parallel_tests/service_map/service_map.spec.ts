@@ -53,5 +53,37 @@ test.describe(
       await expect(serviceMapPage.noServicesPlaceholder).toHaveText('No services available');
       await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
     });
+
+    test('options panel: find in page, filter placeholders, and Ctrl+K focus', async ({
+      page,
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
+      await serviceMapPage.waitForServiceMapToLoad();
+      await serviceMapPage.settleServiceMapLayout();
+
+      await expect(serviceMapPage.serviceMapOptionsPanel).toBeVisible();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+
+      await expect(page.getByPlaceholder('Alert status')).toBeVisible();
+      await expect(page.getByPlaceholder('SLO Status')).toBeVisible();
+      await expect(page.getByPlaceholder('Anomaly Status')).toBeVisible();
+
+      await serviceMapPage.serviceMapFindInPageInput.fill('opbeans');
+      await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(
+        /[1-9][0-9]*\/[1-9][0-9]*/
+      );
+
+      await page.getByTestId('serviceMapHideControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
+      await serviceMapPage.openFindInPageWithKeyboardShortcut();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeFocused();
+
+      await page.getByTestId('serviceMapHideControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
+      await page.getByTestId('serviceMapShowControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+    });
   }
 );

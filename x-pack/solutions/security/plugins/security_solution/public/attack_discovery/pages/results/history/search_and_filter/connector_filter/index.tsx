@@ -159,7 +159,7 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
         badgeColor="subdued"
         data-test-subj="connectorFilterButton"
         disabled={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isPopoverOpen}
         onClick={onFilterButtonClick}
         hasActiveFilters={!!connectorFilterItems.find((item) => item.checked === 'on')}
@@ -186,6 +186,7 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
   return (
     <EuiFilterGroup compressed={compressed}>
       <EuiPopover
+        aria-label={i18n.CONNECTOR}
         button={button}
         closePopover={closePopover}
         id={filterGroupPopoverId}
@@ -201,6 +202,7 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
         >
           {(list) => (
             <div
+              data-test-subj="connectorFilterSelectable"
               css={css`
                 width: 260px;
               `}

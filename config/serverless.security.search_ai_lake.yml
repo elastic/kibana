@@ -116,6 +116,22 @@ xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations
 xpack.fleet.prereleaseEnabledByDefault: true
 xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
+# Experimental Security Solution features
+
+# Since array configurations here completely override the values from "serverless.security.yml",
+# we must duplicate all disabled experimental features from the base config
+# in addition to any features specifically disabled in EASE.
+xpack.securitySolution.enableExperimental:
+  [
+    riskScoreAssistantToolDisabled,
+    disable:enableRiskScorePrivmonModifier,
+    disable:kubernetesEnabled,
+    trialCompanionEnabled,
+
+    # Alerts and Attacks alignment feature is disabled in EASE
+    disable:enableAlertsAndAttacksAlignment,
+  ]
+
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
   Anthropic-Claude-Sonnet-3-7:

@@ -28,9 +28,9 @@ export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => 
       validate: {
         body: schema.object(
           {
-            tags: schema.arrayOf(schema.string(), { minSize: 1 }),
-            assign: schema.arrayOf(objectReferenceSchema, { defaultValue: [] }),
-            unassign: schema.arrayOf(objectReferenceSchema, { defaultValue: [] }),
+            tags: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+            assign: schema.arrayOf(objectReferenceSchema, { defaultValue: [], maxSize: 1000 }),
+            unassign: schema.arrayOf(objectReferenceSchema, { defaultValue: [], maxSize: 1000 }),
           },
           {
             validate: ({ assign, unassign }) => {

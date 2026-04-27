@@ -122,7 +122,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[0]?.onClick?.(
+    await result.current.items[1]?.onClick?.(
       [
         {
           _id: 'attack-1',
@@ -166,7 +166,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[0]?.onClick?.(
+    await result.current.items[1]?.onClick?.(
       [
         {
           _id: 'attack-1',
@@ -195,7 +195,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[1]?.onClick?.(
+    await result.current.items[0]?.onClick?.(
       [
         {
           _id: 'attack-1',
@@ -239,7 +239,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[1]?.onClick?.(
+    await result.current.items[0]?.onClick?.(
       [
         {
           _id: 'attack-1',

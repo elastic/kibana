@@ -1,0 +1,83 @@
+{
+  "id": "@kbn/dashboard-navigation-options-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dashboard-navigation-options-common",
+        "id": "def-common.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DASHBOARD_NAVIGATION_OPTIONS",
+        "description": [],
+        "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-navigation-options-common",
+            "id": "def-common.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab",
+            "type": "boolean",
+            "tags": [],
+            "label": "open_in_new_tab",
+            "description": [],
+            "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-common/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-navigation-options-common",
+            "id": "def-common.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range",
+            "type": "boolean",
+            "tags": [],
+            "label": "use_time_range",
+            "description": [],
+            "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-common/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-navigation-options-common",
+            "id": "def-common.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters",
+            "type": "boolean",
+            "tags": [],
+            "label": "use_filters",
+            "description": [],
+            "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-common/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

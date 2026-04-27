@@ -23,7 +23,7 @@ export const ActionsLogEmptyState = memo(
     return (
       <ManagementEmptyStateWrapper data-test-subj={dataTestSubj}>
         <EmptyPrompt
-          iconType="editorUnorderedList"
+          iconType="listBullet"
           title={
             <h2>
               {i18n.translate('xpack.securitySolution.responseActionsHistory.empty.title', {

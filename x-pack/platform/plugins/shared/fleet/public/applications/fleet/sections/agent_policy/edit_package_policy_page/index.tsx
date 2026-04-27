@@ -67,11 +67,12 @@ import { StepsWithLessPadding } from '../create_package_policy_page/single_page_
 
 import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
-import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -462,6 +463,7 @@ export const EditPackagePolicyForm = memo<{
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
+              agentPolicies={agentPolicies}
             />
           )}
 
@@ -474,6 +476,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isUpgrade={isUpgrade}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               varGroupSelections={varGroupSelections}
             />
@@ -513,6 +516,7 @@ export const EditPackagePolicyForm = memo<{
       selectedTab,
       tabsViews,
       updatePackagePolicy,
+      isUpgrade,
       validationResults,
       varGroupSelections,
     ]

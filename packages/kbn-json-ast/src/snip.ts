@@ -10,7 +10,13 @@
 type Snip = [start: number, end: number] | [start: number, end: number, replacement: string];
 
 /**
- * Replace or remove specific points of the source code
+ * Replaces or removes specific character ranges in a source string. Snips are
+ * applied in order and non-overlapping deletion snips are automatically merged.
+ * @param source - The source text to modify.
+ * @param snips - An array of `[start, end]` ranges to delete or `[start, end,
+ * replacement]` tuples to replace with `replacement`. Ranges must be
+ * non-reversed (`start <= end`), and replacement snips must not overlap.
+ * @returns The modified source text.
  */
 export function snip(source: string, snips: Snip[]) {
   const queue = snips

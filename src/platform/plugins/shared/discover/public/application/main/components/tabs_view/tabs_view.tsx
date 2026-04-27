@@ -26,7 +26,6 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
-import { useSwitchModesTour } from './use_switch_modes_tour';
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
@@ -40,10 +39,13 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
 
-  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
-    useAppMenuData({ currentDataView });
-
-  const switchModesTourStep = useSwitchModesTour();
+  const {
+    shouldCollapseAppMenu,
+    onResize,
+    getTopTabMenuItems,
+    getAdditionalTabMenuItems,
+    topNavMenuItems,
+  } = useAppMenuData({ currentDataView });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -73,37 +75,35 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   return (
-    <>
-      {switchModesTourStep}
-      {/**
-       * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
-       * where this might not be good enough.
-       */}
-      <EuiResizeObserver onResize={onResize}>
-        {(resizeRef) => (
-          <div ref={resizeRef}>
-            <UnifiedTabs
-              services={services}
-              items={items}
-              selectedItemId={currentTabId}
-              recentlyClosedItems={recentlyClosedItems}
-              unsavedItemIds={unsavedTabIds}
-              maxItemsCount={MAX_SAVED_SEARCH_TABS}
-              hideTabsBar={hideTabsBar}
-              createItem={createItem}
-              getPreviewData={getPreviewData}
-              renderContent={renderContent}
-              onChanged={onChanged}
-              onEBTEvent={onEvent}
-              onClearRecentlyClosed={onClearRecentlyClosed}
-              getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-              appendRight={
-                <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
-              }
-            />
-          </div>
-        )}
-      </EuiResizeObserver>
-    </>
+    /**
+     * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
+     * where this might not be good enough.
+     */
+    <EuiResizeObserver onResize={onResize}>
+      {(resizeRef) => (
+        <div ref={resizeRef} className="eui-fullHeight">
+          <UnifiedTabs
+            services={services}
+            items={items}
+            selectedItemId={currentTabId}
+            recentlyClosedItems={recentlyClosedItems}
+            unsavedItemIds={unsavedTabIds}
+            maxItemsCount={MAX_SAVED_SEARCH_TABS}
+            hideTabsBar={hideTabsBar}
+            createItem={createItem}
+            getPreviewData={getPreviewData}
+            renderContent={renderContent}
+            onChanged={onChanged}
+            onEBTEvent={onEvent}
+            onClearRecentlyClosed={onClearRecentlyClosed}
+            getTopTabMenuItems={getTopTabMenuItems}
+            getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+            appendRight={
+              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+            }
+          />
+        </div>
+      )}
+    </EuiResizeObserver>
   );
 };

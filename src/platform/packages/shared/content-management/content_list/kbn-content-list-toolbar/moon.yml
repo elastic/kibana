@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/content-list-assembly'
   - '@kbn/content-list-provider'
-  - '@kbn/content-list-mock-data'
   - '@kbn/content-management-tags'
   - '@kbn/i18n'
   - '@kbn/shared-ux-utility'
@@ -36,26 +35,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

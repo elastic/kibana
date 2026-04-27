@@ -16,7 +16,11 @@ import {
   type SchemaLike,
   type WhenOptions,
 } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
+import {
+  META_FIELD_X_OAS_AVAILABILITY,
+  META_FIELD_X_OAS_DEPRECATED,
+  META_FIELD_X_OAS_DISCONTINUED,
+} from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -24,6 +28,15 @@ import { Reference } from '../references';
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */
+export interface TypeMetaAvailability {
+  /** @default stable */
+  stability?: 'experimental' | 'beta' | 'stable';
+  /**
+   * The stack version in which this field was introduced (eg: 9.4.0).
+   */
+  since?: string;
+}
+
 export interface TypeMeta {
   /**
    * A unique identifier for this type, reduces duplication.
@@ -48,6 +61,10 @@ export interface TypeMeta {
    * @example 9.0.0
    */
   'x-discontinued'?: string;
+  /**
+   * Availability metadata for this field to be used in generated API docs.
+   */
+  availability?: TypeMetaAvailability;
 }
 
 export interface TypeOptions<T> {
@@ -155,6 +172,9 @@ export abstract class Type<V> {
       }
       if (options.meta.deprecated && options.meta['x-discontinued'])
         schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta['x-discontinued'] });
+      if (options.meta.availability) {
+        schema = schema.meta({ [META_FIELD_X_OAS_AVAILABILITY]: options.meta.availability });
+      }
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

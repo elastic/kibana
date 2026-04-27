@@ -164,21 +164,21 @@ export const ALERTS_HEADERS_SERVICE_CRITICALITY = i18n.translate(
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
 export const ACTION_CANNOT_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.cannotInvestigateInTimelineTitle',
   {
-    defaultMessage: 'Please navigate to a page with timeline to investigate',
+    defaultMessage: 'Please navigate to a page with Timeline to investigate',
   }
 );
 
 export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
   {
-    defaultMessage: 'Send alert to timeline',
+    defaultMessage: 'Send alert to Timeline',
   }
 );
 
@@ -249,7 +249,7 @@ export const ADD_TO_NEW_CASE = i18n.translate(
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -398,6 +398,6 @@ export const RUN_WORKFLOW_BUTTON = i18n.translate(
 export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.select.title',
   {
-    defaultMessage: 'Workflows',
+    defaultMessage: 'Select workflow',
   }
 );

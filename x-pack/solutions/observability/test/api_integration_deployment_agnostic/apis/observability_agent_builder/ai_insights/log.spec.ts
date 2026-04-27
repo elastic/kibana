@@ -21,6 +21,7 @@ import {
 
 const MOCKED_AI_SUMMARY_ERROR = 'This is a mocked AI insight summary for the error log.';
 const MOCKED_AI_SUMMARY_INFO = 'This is a mocked AI insight summary for the info log.';
+const MOCKED_AI_SUMMARY_FIELDS = 'This is a mocked AI insight summary using fields.';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
@@ -131,6 +132,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           }
         });
       }
+
+      it('returns summary when fields are provided instead of index/id (ES|QL mode)', async () => {
+        llmProxy.clear();
+
+        const interceptorName = 'fields-log-ai-insight';
+        void llmProxy.interceptors.userMessage({
+          name: interceptorName,
+          response: MOCKED_AI_SUMMARY_FIELDS,
+        });
+
+        const { status, body } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
+          params: {
+            body: {
+              fields: {
+                '@timestamp': new Date().toISOString(),
+                message: 'Payment request received',
+                'log.level': 'info',
+                'service.name': serviceName,
+                'trace.id': logData.traceId,
+                'host.name': 'payment-host-1',
+              },
+            },
+          },
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(status).to.be(200);
+        expect(body).to.have.property('summary');
+        expect(body).to.have.property('context');
+        expect(body.summary).to.contain(MOCKED_AI_SUMMARY_FIELDS);
+
+        const { user: userMessage } = getLlmMessages(llmProxy, interceptorName);
+        expect(userMessage.content).to.contain('<LogEntryFields>');
+        expect(userMessage.content).to.contain('Payment request received');
+        expect(userMessage.content).not.to.contain('<LogEntryIndex>');
+        expect(userMessage.content).not.to.contain('<LogEntryId>');
+      });
     });
   });
 }

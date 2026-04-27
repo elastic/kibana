@@ -26,11 +26,14 @@ describe('registerBootstrapRoute', () => {
     expect(router.get).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
+        security: {
+          authc: { enabled: 'optional', reason: expect.any(String) },
+          authz: { enabled: false, reason: expect.any(String) },
+        },
         options: {
           access: 'public',
           excludeFromRateLimiter: true,
           tags: ['api'],
-          authRequired: 'optional',
         },
       }),
       expect.any(Function)

@@ -50,6 +50,7 @@ import {
   PaginationLimitToastContent,
   euiProgressCss,
 } from './results_table_shared';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -67,6 +68,10 @@ const legacyResultsTableContainerCss = {
   maxWidth: '1200px',
 };
 
+const legacyResultsTableContainerFullWidthCss = {
+  width: '100%',
+};
+
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
   agentIds,
@@ -79,6 +84,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   scheduleId,
   executionCount,
 }) => {
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const [isLive, setIsLive] = useState(true);
 
   const { data } = useActionResults({
@@ -459,7 +465,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <div css={legacyResultsTableContainerCss}>
+          <div
+            css={
+              isHistoryEnabled
+                ? legacyResultsTableContainerFullWidthCss
+                : legacyResultsTableContainerCss
+            }
+          >
             <EuiDataGrid
               css={euiDataGridCss}
               data-test-subj="osqueryResultsTable"

@@ -48,19 +48,8 @@ export const buildUserDefinedColumnsDefinitions = (
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.variableDefinition', {
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
-    sortText: 'D',
     category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
-
-export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
-  if (!shouldPromote) {
-    return suggestions;
-  }
-  return suggestions.map(({ sortText, ...rest }) => ({
-    ...rest,
-    sortText: `1${sortText}`,
-  }));
-}
 
 export const findFinalWord = (text: string) => {
   const words = text.split(/\s+/);
@@ -77,72 +66,12 @@ export function withinQuotes(text: string) {
   return quoteCount % 2 === 1;
 }
 
-/**
- * This function handles the logic to suggest completions
- * for a given fragment of text in a generic way. A good example is
- * a field name.
- *
- * When typing a field name, there are 2 scenarios
- *
- * 1. field name is incomplete (includes the empty string)
- * KEEP /
- * KEEP fie/
- *
- * 2. field name is complete
- * KEEP field/
- *
- * This function provides a framework for detecting and handling both scenarios in a clean way.
- *
- * @param innerText - the query text before the current cursor position
- * @param isFragmentComplete — return true if the fragment is complete
- * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
- * @param getSuggestionsForComplete - gets suggestions for a complete fragment
- * @returns
- */
-export function handleFragment(
-  innerText: string,
-  isFragmentComplete: (fragment: string) => boolean,
-  getSuggestionsForIncomplete: (
-    fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => ISuggestionItem[] | Promise<ISuggestionItem[]>,
-  getSuggestionsForComplete: (
-    fragment: string,
-    rangeToReplace: { start: number; end: number }
-  ) => ISuggestionItem[] | Promise<ISuggestionItem[]>
-): ISuggestionItem[] | Promise<ISuggestionItem[]> {
-  const { fragment, rangeToReplace } = getFragmentData(innerText);
-  if (!fragment) {
-    return getSuggestionsForIncomplete('');
-  } else {
-    if (isFragmentComplete(fragment)) {
-      return getSuggestionsForComplete(fragment, rangeToReplace);
-    } else {
-      return getSuggestionsForIncomplete(fragment, rangeToReplace);
-    }
-  }
-}
-
-export function getFragmentData(innerText: string) {
-  const fragment = findFinalWord(innerText);
-  if (!fragment) {
-    return { fragment: '', rangeToReplace: { start: 0, end: 0 } };
-  } else {
-    const rangeToReplace = {
-      start: innerText.length - fragment.length,
-      end: innerText.length,
-    };
-    return { fragment, rangeToReplace };
-  }
-}
-
 interface FieldSuggestionsOptions {
   ignoreColumns?: string[];
   values?: boolean;
   addSpaceAfterField?: boolean;
   openSuggestions?: boolean;
   addComma?: boolean;
-  promoteToTop?: boolean;
   canBeMultiValue?: boolean;
 }
 
@@ -157,7 +86,6 @@ export async function getFieldsSuggestions(
     addSpaceAfterField = false,
     openSuggestions = false,
     addComma = false,
-    promoteToTop = true,
     canBeMultiValue = false,
   } = options;
 
@@ -167,14 +95,12 @@ export async function getFieldsSuggestions(
     return ESQLVariableType.FIELDS;
   })();
 
-  const suggestions = await getFieldsByType(types, ignoreColumns, {
+  return (await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
     variableType,
-  });
-
-  return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
+  })) as ISuggestionItem[];
 }
 
 interface FunctionSuggestionOptions {
@@ -327,7 +253,6 @@ export function getControlSuggestion(
             detail: i18n.translate('kbn-esql-language.esql.autocomplete.createControlDetailLabel', {
               defaultMessage: 'Click to create',
             }),
-            sortText: '1',
             category: SuggestionCategory.CUSTOM_ACTION,
             command: {
               id: `esql.control.${type}.create`,
@@ -348,7 +273,6 @@ export function getControlSuggestion(
           i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A',
           undefined,
           undefined,
           SuggestionCategory.USER_DEFINED_COLUMN
@@ -391,7 +315,6 @@ export function createInferenceEndpointToCompletionItem(
     }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
-    sortText: '1',
     text: inferenceEndpoint.inference_id,
     category: SuggestionCategory.VALUE,
   };
@@ -506,8 +429,6 @@ export function getLookupIndexCreateSuggestion(
         defaultMessage: 'Click to create',
       }
     ),
-
-    sortText: '0',
 
     category: SuggestionCategory.CUSTOM_ACTION,
 

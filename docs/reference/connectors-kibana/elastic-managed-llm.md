@@ -26,7 +26,7 @@ The Elastic Managed LLMs use third party service providers for {{infer}}. Refer 
 
 ## Data protection
 
-Customer projects or deployments hosted in any cloud service provider or region have access to Elastic Managed LLMs in the AWS US region `us-east-1`.
+Customer projects or deployments hosted in any cloud service provider or region have access to Elastic Managed LLMs.
 All data is encrypted in transit. The LLMs are configured for zero data retention: none of the prompts or outputs are stored by the service provider.
 
 Only request metadata is logged in AWS CloudWatch.

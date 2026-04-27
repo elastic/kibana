@@ -28,7 +28,11 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const licensingPluginMock = licensingMock.createStart();
   return {
     ...core,
-    actions: { validateEmailAddresses: jest.fn(), enabledEmailServices: ['*'] },
+    actions: {
+      validateEmailAddresses: jest.fn(),
+      enabledEmailServices: ['*'],
+      isEarsEnabled: false,
+    },
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),

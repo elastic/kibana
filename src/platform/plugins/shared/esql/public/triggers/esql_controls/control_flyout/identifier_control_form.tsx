@@ -15,9 +15,10 @@ import { isEqual } from 'lodash';
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, StaticESQLControl } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { ControlLabel } from './shared_form_components';
@@ -47,21 +48,20 @@ export function IdentifierControlForm({
   search,
 }: IdentifierControlFormProps) {
   const isMounted = useMountedState();
+  const { available_options: initialAvailableOptions } = { available_options: [], ...initialState };
 
   const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
     EuiComboBoxOptionOption[]
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.available_options
-      ? initialState.available_options.map((option) => {
-          return {
-            label: option,
-            key: option,
-            'data-test-subj': option,
-          };
-        })
-      : []
+    initialAvailableOptions.map((option) => {
+      return {
+        label: option,
+        key: option,
+        'data-test-subj': option,
+      };
+    })
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
 
@@ -150,13 +150,13 @@ export function IdentifierControlForm({
     // removes the double question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
+      ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
       available_options: availableOptions,
       selected_options: [availableOptions[0]],
       title: label || variableNameWithoutQuestionmark,
       variable_name: variableNameWithoutQuestionmark,
       variable_type: variableType,
-      esql_query: queryString,
-      control_type: EsqlControlType.STATIC_VALUES,
+      control_type: EsqlControlType.STATIC_VALUES as StaticESQLControl['control_type'],
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
