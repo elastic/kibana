@@ -53,7 +53,7 @@ Ground architectural and maintainability findings in local code and clear behavi
 - Keep each inline comment focused on a single issue and explain the practical risk or regression.
 - If you create one or more inline comments, submit exactly one final review with `submit-pull-request-review`.
 - Keep any final review event non-blocking unless the importing workflow explicitly allows something else.
-- If there are no findings, do not call `submit-pull-request-review`; call `noop` with a "No issues found" message instead.
+- If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
 - Do not use other GitHub write paths or ask the workflow to post separate top-level comments.
 
 ## Re-runs
