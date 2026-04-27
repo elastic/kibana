@@ -41,6 +41,23 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/internal/user_profiles/_suggest\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
         "type": "string",
         "tags": [],

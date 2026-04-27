@@ -34,6 +34,9 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.lens.configPanel.chartSwitchPopoverAriaLabel', {
+        defaultMessage: 'Chart type popover',
+      })}
       css={css`
         display: flex;
       `}
