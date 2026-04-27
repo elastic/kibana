@@ -89,12 +89,12 @@ export const ConsoleLang: LangModuleType = {
   onLanguage: async () => {
     workerProxyService.setup();
     setupConsoleErrorsProvider(workerProxyService);
-    // Best-effort: ES|QL is only needed for highlighting/suggestions. Console syntax markers must
-    // remain available even if ES|QL fails to load.
-
     try {
       await ESQLLang.onLanguage();
-    } catch {}
+    } catch {
+      // Best-effort: ES|QL is only needed for highlighting/suggestions. Console syntax markers must
+      // remain available even if ES|QL fails to load.
+    }
   },
   languageThemeResolver: buildConsoleTheme,
   getSuggestionProvider: (
