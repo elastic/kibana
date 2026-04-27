@@ -9,6 +9,7 @@ import { extendLensApiConfigSchema, type LensConfigBuilder } from '@kbn/lens-emb
 import type { LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import {
   serializedTimeRangeSchema,
@@ -88,15 +89,9 @@ export const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSche
   });
 
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object(
-    {
-      ref_id: schema.string(),
-      ...getSharedPanelSchema(getDrilldownsSchema),
-    },
-    {
-      meta: BY_REF_SCHEMA_META,
-    }
-  );
+  asCodeRefIdSchema.extends(getSharedPanelSchema(getDrilldownsSchema), {
+    meta: BY_REF_SCHEMA_META,
+  });
 
 export const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   schema.oneOf(

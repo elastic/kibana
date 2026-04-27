@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
@@ -23,14 +24,7 @@ const linksByValueStateSchema = schema.object({
 });
 
 // Links by-reference state schema (contains ref_id)
-const linksByReferenceStateSchema = schema.object({
-  ref_id: schema.string({
-    meta: {
-      title: 'Reference ID',
-      description: 'The unique identifier of the Links library item',
-    },
-  }),
-});
+const linksByReferenceStateSchema = asCodeRefIdSchema;
 
 // Links by-value embeddable schema (by-value state + titles)
 const linksByValueEmbeddableSchema = schema.allOf(

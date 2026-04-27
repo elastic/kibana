@@ -406,6 +406,7 @@ export const asCodeFilterSchema = schema.discriminatedUnion(
   ],
   {
     meta: {
+      title: 'Filter',
       description:
         'A filter applied to query results. Can be a field condition (`condition`), a logical group of conditions (`group`), a raw Elasticsearch DSL query (`dsl`), or a geo spatial query (`spatial`).',
       id: 'kbn-as-code-filters-schema_asCodeFilterSchema',

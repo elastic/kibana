@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
@@ -19,11 +20,7 @@ export const markdownByValueStateSchema = schema.object({
   }),
 });
 
-const markdownByReferenceStateSchema = schema.object({
-  ref_id: schema.string({
-    meta: { description: 'The unique identifier of the markdown library item.' },
-  }),
-});
+const markdownByReferenceStateSchema = asCodeRefIdSchema;
 
 export const markdownByValueEmbeddableSchema = schema.allOf(
   [markdownByValueStateSchema, serializedTitlesSchema],

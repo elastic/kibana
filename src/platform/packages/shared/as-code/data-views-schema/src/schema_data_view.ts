@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import { compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema } from './schema_runtime_field';
 import { fieldSettingsBaseSchema } from './schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
@@ -19,22 +20,23 @@ export const fieldSettingsSchema = schema.oneOf(
       id: 'kbn-field-settings-entry',
       title: 'Field settings or runtime field',
       description:
-        'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
+        'Display settings for a mapped index field, or a full runtime field definition when `type` is set to a runtime field kind.',
     },
   }
 );
 
-export const dataViewReferenceSchema = schema.object(
+export const dataViewReferenceSchema = asCodeRefIdSchema.extends(
   {
     type: schema.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
-    ref_id: schema.string({
-      meta: {
-        description:
-          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
-      },
-    }),
   },
-  { meta: { id: 'kbn-data-view-reference-schema', title: 'Data view reference' } }
+  {
+    meta: {
+      id: 'kbn-data-view-reference-schema',
+      title: 'Data view reference',
+      description:
+        'Reuses an existing Kibana data view as the data source. Set `ref_id` to the library item identifier of the data view. Choose `data_view_spec` instead if you want to define the index pattern, time field, and field settings inline.',
+    },
+  }
 );
 
 export const dataViewSpecSchema = schema.object(
@@ -55,10 +57,27 @@ export const dataViewSpecSchema = schema.object(
       })
     ),
     field_settings: schema.maybe(
-      schema.recordOf(schema.string({ minLength: 1 }), fieldSettingsSchema)
+      schema.recordOf(
+        schema.string({
+          minLength: 1,
+          meta: {
+            title: 'Field name',
+            description:
+              'Field name this entry applies to. Use a field from the backing indices for display overrides, or the runtime field name when the entry defines a runtime field. Example: "user.name".',
+          },
+        }),
+        fieldSettingsSchema
+      )
     ),
   },
-  { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
+  {
+    meta: {
+      id: 'kbn-data-view-spec-schema',
+      title: 'Data view inline spec',
+      description:
+        'Defines the data source inline with an index pattern (and optional time field and field settings). Choose `data_view_reference` instead to point at an existing Kibana data view by id.',
+    },
+  }
 );
 
 export const dataViewSchema = schema.discriminatedUnion('type', [

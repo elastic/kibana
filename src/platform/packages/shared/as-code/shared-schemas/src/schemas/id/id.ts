@@ -12,6 +12,7 @@ import { isValidId } from './is_valid_id';
 
 export const asCodeIdSchema = schema.string({
   meta: {
+    title: 'Library item identifier',
     description:
       'A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.',
   },
@@ -23,3 +24,20 @@ export const asCodeIdSchema = schema.string({
   minLength: 1,
   maxLength: 250,
 });
+
+/**
+ * Object schema with a single `ref_id` property (reference to another library item by id).
+ */
+export const asCodeRefIdSchema = schema.object(
+  {
+    ref_id: asCodeIdSchema,
+  },
+  {
+    meta: {
+      id: 'kbn-as-code-ref-id',
+      title: 'Library item reference',
+      description:
+        'References another library item by its unique identifier. Set `ref_id` to the unique identifier of the target library item.',
+    },
+  }
+);

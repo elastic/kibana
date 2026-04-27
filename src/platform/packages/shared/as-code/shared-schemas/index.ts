@@ -9,6 +9,7 @@
 
 export {
   asCodeIdSchema,
+  asCodeRefIdSchema,
   asCodeMetaSchema,
   getMeta,
   asCodeQuerySchema,

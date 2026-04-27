@@ -14,6 +14,7 @@ export const asCodeQuerySchema = schema.object(
   {
     expression: schema.string({
       meta: {
+        title: 'KQL/Lucene query',
         description: 'A query expression in KQL or Lucene syntax.',
       },
     }),

@@ -10,7 +10,7 @@
 import type { ObjectType, Props, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
-import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
+import { asCodeQuerySchema, asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import { esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 import {
   BY_REF_SCHEMA_META,
@@ -35,19 +35,26 @@ const columnSettingsEntrySchema = schema.object({
   ),
 });
 
-const sortSchema = schema.object({
-  name: schema.string({
+const sortSchema = schema.object(
+  {
+    name: schema.string({
+      meta: {
+        description: 'The name of the field to sort by.',
+      },
+    }),
+    direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      meta: {
+        description:
+          'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.',
+      },
+    }),
+  },
+  {
     meta: {
-      description: 'The name of the field to sort by.',
+      title: 'Sort configuration',
     },
-  }),
-  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-    meta: {
-      description:
-        'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.',
-    },
-  }),
-});
+  }
+);
 
 export const viewModeSchema = schema.oneOf(
   [
@@ -73,7 +80,7 @@ const dataTableLimitsSchema = schema.object(
         defaultValue: 100,
         meta: {
           description:
-            'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
+            'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting `discover:sampleRowsPerPage`.',
         },
       })
     ),
@@ -84,7 +91,7 @@ const dataTableLimitsSchema = schema.object(
         defaultValue: 500,
         meta: {
           description:
-            'The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
+            'The number of documents to sample for the data table. If omitted, defaults to the advanced setting `discover:sampleSize`.',
         },
       })
     ),
@@ -106,18 +113,27 @@ const dataTableSchema = schema.object(
           defaultValue: [],
           meta: {
             description:
-              'Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.',
+              'Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting `defaultColumns` or the referenced saved object.',
           },
         }
       )
     ),
     column_settings: schema.maybe(
-      schema.recordOf(schema.string(), columnSettingsEntrySchema, {
-        meta: {
-          description:
-            'Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.',
-        },
-      })
+      schema.recordOf(
+        schema.string({
+          meta: {
+            title: 'Field name',
+            description: 'Field name (from `column_order`).',
+          },
+        }),
+        columnSettingsEntrySchema,
+        {
+          meta: {
+            description:
+              'Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.',
+          },
+        }
+      )
     ),
     sort: schema.arrayOf(sortSchema, {
       maxSize: 100,
@@ -137,7 +153,7 @@ const dataTableSchema = schema.object(
           defaultValue: DataGridDensity.COMPACT,
           meta: {
             description:
-              'Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
+              'Data grid density. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
           },
         }
       )
@@ -173,7 +189,7 @@ const dataTableSchema = schema.object(
           defaultValue: 3,
           meta: {
             description:
-              'Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
+              'Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting `discover:rowHeightOption`.',
           },
         }
       )
@@ -202,12 +218,21 @@ const panelOverridesSchema = schema.object(
       )
     ),
     column_settings: schema.maybe(
-      schema.recordOf(schema.string(), columnSettingsEntrySchema, {
-        meta: {
-          description:
-            'Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.',
-        },
-      })
+      schema.recordOf(
+        schema.string({
+          meta: {
+            title: 'Field name',
+            description: 'Field name (from `column_order`).',
+          },
+        }),
+        columnSettingsEntrySchema,
+        {
+          meta: {
+            description:
+              'Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.',
+          },
+        }
+      )
     ),
     sort: schema.maybe(
       schema.arrayOf(sortSchema, {
@@ -248,7 +273,7 @@ const panelOverridesSchema = schema.object(
           defaultValue: 3,
           meta: {
             description:
-              'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+              'Header row height: number (1–5) or "auto" to size based on content. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
           },
         }
       )
@@ -266,7 +291,7 @@ const panelOverridesSchema = schema.object(
           defaultValue: 3,
           meta: {
             description:
-              'Data row height: number (1–20) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
+              'Data row height: number (1–20) or "auto" to size based on content. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting `discover:rowHeightOption`.',
           },
         }
       )
@@ -278,7 +303,7 @@ const panelOverridesSchema = schema.object(
         defaultValue: 100,
         meta: {
           description:
-            'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
+            'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting `discover:sampleRowsPerPage`.',
         },
       })
     ),
@@ -289,46 +314,74 @@ const panelOverridesSchema = schema.object(
         defaultValue: 500,
         meta: {
           description:
-            'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
+            'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting `discover:sampleSize`.',
         },
       })
     ),
   },
-  { defaultValue: {} }
+  {
+    defaultValue: {},
+    meta: {
+      title: 'Panel overrides',
+      description:
+        'Optional overrides for data table layout and sampling (columns, sort, density, row heights, pagination). When set, values take precedence over the referenced Discover session and selected tab.',
+    },
+  }
 );
 
-const classicTabSchema = schema.allOf([
-  dataTableSchema,
-  dataTableLimitsSchema,
-  schema.object({
-    query: schema.maybe(asCodeQuerySchema),
-    filters: schema.arrayOf(asCodeFilterSchema, {
-      maxSize: 100,
-      defaultValue: [],
-      meta: {
-        description: 'List of filters to apply to the data in the tab.',
-      },
+const classicTabSchema = schema.allOf(
+  [
+    dataTableSchema,
+    dataTableLimitsSchema,
+    schema.object({
+      query: schema.maybe(asCodeQuerySchema),
+      filters: schema.arrayOf(asCodeFilterSchema, {
+        maxSize: 100,
+        defaultValue: [],
+        meta: {
+          description: 'List of filters to apply to the data in the tab.',
+        },
+      }),
+      data_source: dataViewSchema,
+      view_mode: viewModeSchema,
     }),
-    data_source: dataViewSchema,
-    view_mode: viewModeSchema,
-  }),
-]);
-
-const esqlTabSchema = schema.allOf([
-  dataTableSchema,
-  schema.object(
-    {
-      data_source: esqlDataSourceSchema,
+  ],
+  {
+    meta: {
+      title: 'Classic tab',
+      description: 'Classic data source configuration.',
     },
-    {
-      meta: {
-        description: 'ES|QL (Elasticsearch Query Language) data source.',
-      },
-    }
-  ),
-]);
+  }
+);
 
-const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
+const esqlTabSchema = schema.allOf(
+  [
+    dataTableSchema,
+    schema.object(
+      {
+        data_source: esqlDataSourceSchema,
+      },
+      {
+        meta: {
+          description: 'ES|QL (Elasticsearch Query Language) data source.',
+        },
+      }
+    ),
+  ],
+  {
+    meta: {
+      title: 'ES|QL tab',
+      description: 'ES|QL data source configuration.',
+    },
+  }
+);
+
+const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema], {
+  meta: {
+    title: 'Tab',
+    description: 'Tab configuration.',
+  },
+});
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -367,8 +420,7 @@ const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
   { meta: BY_VALUE_SCHEMA_META }
 );
 
-const discoverSessionByReferencePropsSchema = schema.object({
-  ref_id: schema.string(),
+const discoverSessionByReferencePropsSchema = asCodeRefIdSchema.extends({
   selected_tab_id: schema.maybe(
     schema.string({
       meta: {

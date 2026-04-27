@@ -6,6 +6,7 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/as-code-shared-schemas",
     "@kbn/config-schema",
     "@kbn/data-views-plugin"
   ]
