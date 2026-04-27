@@ -21,6 +21,7 @@ export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
@@ -199,11 +200,8 @@ export class ReportingPageObject extends FtrService {
     });
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {
-      await this.retry.try(async () => {
-        await this.testSubjects.click('completeReportSuccess > toastCloseButton');
-        // Wait for toast to disappear to confirm it was closed
-        await this.testSubjects.waitForDeleted('completeReportSuccess');
-      });
+      // If close button fails to be clicked, the toast should dismiss regardless.
+      await this.toasts.dismissAll();
     }
 
     return isToastPresent;
