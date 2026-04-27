@@ -55,7 +55,7 @@ import { getColumnFromActiveData } from '../utils';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
-export type ApplyColor = 'background' | 'value';
+export type ApplyColor = 'background' | 'value' | 'none';
 
 export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
