@@ -26,10 +26,6 @@ import type {
   ConversationAccess,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ApplicationStart } from '@kbn/core/public';
-import {
-  AIAgentTourCallout,
-  useAIAgentTourDismissed,
-} from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -65,7 +61,6 @@ export function ChatHeader({
   loading,
   title,
   isConversationOwnedByCurrentUser,
-  isConversationApp,
   onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
@@ -86,7 +81,6 @@ export function ChatHeader({
   loading: boolean;
   title: string;
   isConversationOwnedByCurrentUser: boolean;
-  isConversationApp: boolean;
   onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
@@ -103,7 +97,6 @@ export function ChatHeader({
   const breakpoint = useCurrentEuiBreakpoint();
 
   const [newTitle, setNewTitle] = useState(title);
-  const [aiAgentTourDismissed] = useAIAgentTourDismissed();
 
   useEffect(() => {
     setNewTitle(title);
@@ -124,7 +117,6 @@ export function ChatHeader({
       connectors={connectors}
       disabled={licenseInvalid}
       navigateToModelManagementApp={navigateToModelManagementApp}
-      isConversationApp={isConversationApp}
     />
   );
 
@@ -230,6 +222,17 @@ export function ChatHeader({
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      aria-label={
+                        flyoutPositionMode === 'overlay'
+                          ? i18n.translate(
+                              'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
+                              { defaultMessage: 'Dock conversation' }
+                            )
+                          : i18n.translate(
+                              'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
+                              { defaultMessage: 'Undock conversation' }
+                            )
+                      }
                       anchorPosition="downLeft"
                       button={
                         <EuiToolTip
@@ -262,6 +265,10 @@ export function ChatHeader({
                   {navigateToConversation ? (
                     <EuiFlexItem grow={false}>
                       <EuiPopover
+                        aria-label={i18n.translate(
+                          'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+                          { defaultMessage: 'Navigate to conversations' }
+                        )}
                         anchorPosition="downLeft"
                         button={
                           <EuiToolTip
@@ -288,15 +295,7 @@ export function ChatHeader({
                 </>
               ) : null}
 
-              <EuiFlexItem grow={false}>
-                {aiAgentTourDismissed || !AIAgentTourCallout ? (
-                  actionsMenu
-                ) : (
-                  <AIAgentTourCallout isConversationApp={isConversationApp}>
-                    {actionsMenu}
-                  </AIAgentTourCallout>
-                )}
-              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

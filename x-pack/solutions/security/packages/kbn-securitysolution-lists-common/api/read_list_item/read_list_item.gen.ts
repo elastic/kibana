@@ -14,27 +14,29 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ListId } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
+export const ReadListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Value list item identifier. Required if `list_id` and `value` are not specified.
+     */
+    id: ListId.optional(),
+    /**
+     * Value list item list's `id` identfier. Required if `id` is not specified.
+     */
+    list_id: ListId.optional(),
+    /**
+     * The value used to evaluate exceptions. Required if `id` is not specified.
+     */
+    value: z.string().optional(),
+  })
+);
 export type ReadListItemRequestQuery = z.infer<typeof ReadListItemRequestQuery>;
-export const ReadListItemRequestQuery = z.object({
-  /**
-   * Value list item identifier. Required if `list_id` and `value` are not specified.
-   */
-  id: ListId.optional(),
-  /**
-   * Value list item list's `id` identfier. Required if `id` is not specified.
-   */
-  list_id: ListId.optional(),
-  /**
-   * The value used to evaluate exceptions. Required if `id` is not specified.
-   */
-  value: z.string().optional(),
-});
 export type ReadListItemRequestQueryInput = z.input<typeof ReadListItemRequestQuery>;
 
+export const ReadListItemResponse = lazySchema(() => z.union([ListItem, z.array(ListItem)]));
 export type ReadListItemResponse = z.infer<typeof ReadListItemResponse>;
-export const ReadListItemResponse = z.union([ListItem, z.array(ListItem)]);

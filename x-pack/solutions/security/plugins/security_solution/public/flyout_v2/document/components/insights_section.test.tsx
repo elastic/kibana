@@ -202,7 +202,12 @@ describe('InsightsSection', () => {
 
     fireEvent.click(getByTestId('prevalenceOverviewMock'));
 
-    expect(mockGetColumns).toHaveBeenCalledWith(expect.any(Function), true, '');
+    expect(mockGetColumns).toHaveBeenCalledWith(
+      expect.any(Function),
+      true,
+      '',
+      expect.any(Function)
+    );
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
   });
 
@@ -212,7 +217,12 @@ describe('InsightsSection', () => {
     const { getByTestId } = renderInsightsSection();
     fireEvent.click(getByTestId('prevalenceOverviewMock'));
 
-    expect(mockGetColumns).toHaveBeenCalledWith(expect.any(Function), false, '');
+    expect(mockGetColumns).toHaveBeenCalledWith(
+      expect.any(Function),
+      false,
+      '',
+      expect.any(Function)
+    );
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

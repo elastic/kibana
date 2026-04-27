@@ -22,6 +22,8 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/content-management-favorites-public'
   - '@kbn/content-management-tags'
+  - '@kbn/content-management-content-editor'
+  - '@kbn/i18n'
 tags:
   - shared-browser
   - package

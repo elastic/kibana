@@ -6,7 +6,7 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder, LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { LensConfigBuilder, LensApiConfig } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../../content_management';
 import type {
@@ -27,7 +27,7 @@ export function getLensInternalRequestConfig(
   const useApiFormat = builder.isEnabled && builder.isSupported(chartType);
 
   if (useApiFormat) {
-    const config = request as LensApiSchemaType;
+    const config = request as LensApiConfig;
     const attributes = builder.fromAPIFormat(config);
 
     return {

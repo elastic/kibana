@@ -6,25 +6,25 @@
  */
 
 import type {
-  JSX,
   ComponentClass,
   ComponentProps,
   ComponentType,
   Dispatch,
   FC,
+  JSX,
   Key,
   MutableRefObject,
   ReactNode,
   RefAttributes,
 } from 'react';
 import type {
-  AlertConsumers,
   ALERT_CASE_IDS,
-  ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_STATUS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { EsQuerySnapshot } from '@kbn/alerting-types';
+import type { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -39,11 +39,9 @@ import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
@@ -52,6 +50,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
@@ -540,6 +539,10 @@ export interface PublicAlertsDataGridProps
   minScore?: number;
   trackScores?: boolean;
   consumers?: string[];
+  /**
+   * Value to override the server side search
+   */
+  projectRouting?: ProjectRouting;
   /**
    * If true, shows a button in the table toolbar to inspect the search alerts request
    */
