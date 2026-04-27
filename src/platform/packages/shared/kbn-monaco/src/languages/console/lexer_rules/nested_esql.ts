@@ -17,6 +17,7 @@ import { remapStringsToNestedState } from './utils/remap_strings_to_nested_state
 import type { monaco } from '../../../monaco_imports';
 import { ESQL_LANG_ID } from '../../esql/lib/constants';
 
+
 /*
  * This rule is used inside json root to start an esql highlighting sequence.
  * Triple-quoted strings use nextEmbedded to delegate to the @elastic/monaco-esql grammar.
@@ -44,8 +45,9 @@ export const buildEsqlStartRule = (tripleQuotes: boolean, esqlRoot: string = 'es
 
 /*
  * This function creates a group of rules needed for esql highlighting in console.
- * It reuses the lexer rules from the "esql" language, but since not all rules are referenced in the root
- * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
+ * It reuses the tokenizer rules from esql_lexer_rules (a flat, self-contained set
+ * compatible with the Console tokenizer context), but keywords and functions are
+ * sourced from @elastic/monaco-esql/lib/definitions so they stay in sync automatically.
  */
 export const buildEsqlRules = (
   esqlRoot: string = 'esql_root'
