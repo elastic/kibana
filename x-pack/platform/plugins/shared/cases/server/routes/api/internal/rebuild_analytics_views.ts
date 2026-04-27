@@ -48,7 +48,7 @@ export const buildRebuildAnalyticsViewsRoute = ({ getViewSyncService }: BuildArg
     routerOptions: {
       access: 'internal',
     },
-    handler: async ({ response }) => {
+    handler: async ({ context, response }) => {
       try {
         const viewSyncService = getViewSyncService();
         if (!viewSyncService) {
@@ -65,7 +65,20 @@ export const buildRebuildAnalyticsViewsRoute = ({ getViewSyncService }: BuildArg
           return response.ok({ body });
         }
 
-        await viewSyncService.regenerateNow();
+        /*
+         * Run the regenerate as the current operator instead of as
+         * kibana_system. The PUT _query/view call requires the
+         * `manage_view` index privilege on `cases.*`, which kibana_system
+         * does not carry by default. The route is gated by the
+         * REBUILD_ANALYTICS_VIEWS_API_TAG (cases all privilege only) so
+         * the operator hitting this endpoint is the right scope to bear
+         * that privilege; once the parallel ES role change lands and
+         * kibana_system itself has manage_view, plugin-start regen via
+         * asInternalUser will also work without further code change.
+         */
+        const coreContext = await context.core;
+        const scopedEsClient = coreContext.elasticsearch.client.asCurrentUser;
+        await viewSyncService.regenerateNow(scopedEsClient);
         const status = viewSyncService.getStatus();
         const body: RebuildAnalyticsViewsResponse = {
           rebuilt: status.lastRegenError === null,

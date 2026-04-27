@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { REBUILD_ANALYTICS_VIEWS_API_TAG } from '../../../../common/constants';
 import {
   REBUILD_ANALYTICS_VIEWS_INTERNAL_URL,
@@ -38,16 +38,23 @@ const buildRoute = (
   };
 };
 
-const invoke = async (route: ReturnType<typeof buildRoute>['route']) => {
+const invoke = async (
+  route: ReturnType<typeof buildRoute>['route'],
+  scopedEsClient = elasticsearchServiceMock.createElasticsearchClient()
+) => {
   const response = httpServerMock.createResponseFactory();
   await route.handler({
     response,
     request: httpServerMock.createKibanaRequest(),
-    context: {} as never,
+    context: {
+      core: Promise.resolve({
+        elasticsearch: { client: { asCurrentUser: scopedEsClient } },
+      } as never),
+    } as never,
     logger: {} as never,
     kibanaVersion: '0',
   });
-  return response;
+  return { response, scopedEsClient };
 };
 
 describe('POST /internal/cases/_analytics/views/_rebuild', () => {
@@ -65,10 +72,19 @@ describe('POST /internal/cases/_analytics/views/_rebuild', () => {
     });
   });
 
-  it('forces a regeneration and returns rebuilt=true with the new status', async () => {
+  it('forces a regeneration AS THE CURRENT OPERATOR (asCurrentUser) so the PUT _query/view runs with manage_view-bearing credentials, not kibana_system', async () => {
+    /*
+     * FAILURE SCENARIO: regenerateNow is called without an override
+     * client. The PUTs run as kibana_system, which lacks the
+     * manage_view index privilege on `cases.*`, and ES rejects with a
+     * security_exception. By passing the request's asCurrentUser, the
+     * PUTs run as the operator who already had to clear cases-all auth
+     * to hit this route at all.
+     */
     const { route, syncService } = buildRoute();
-    const response = await invoke(route);
+    const { response, scopedEsClient } = await invoke(route);
     expect(syncService!.regenerateNow).toHaveBeenCalledTimes(1);
+    expect(syncService!.regenerateNow).toHaveBeenCalledWith(scopedEsClient);
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
     expect(body).toEqual({
       rebuilt: true,
@@ -85,7 +101,7 @@ describe('POST /internal/cases/_analytics/views/_rebuild', () => {
      * neutral state.
      */
     const { route } = buildRoute({ syncService: null });
-    const response = await invoke(route);
+    const { response } = await invoke(route);
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
     expect(body).toEqual({
       rebuilt: false,
@@ -112,7 +128,7 @@ describe('POST /internal/cases/_analytics/views/_rebuild', () => {
         })),
       },
     });
-    const response = await invoke(route);
+    const { response } = await invoke(route);
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
     expect(body).toEqual({
       rebuilt: false,

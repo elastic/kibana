@@ -75,14 +75,22 @@ export class ViewSyncService {
    * Force-rebuilds and PUTs all views immediately. Subsequent callers join
    * the same in-flight promise; bursts of regenerates collapse into at
    * most two sequential runs (current + one queued follow-up).
+   *
+   * `overrideEsClient` lets a request-scoped caller (the rebuild route)
+   * run the PUTs as the current operator instead of kibana_system.
+   * `manage_view` is an index-level privilege that kibana_system does
+   * not carry by default — until the parallel ES role change ships, an
+   * operator with cases-all + manage_view is the only way to land views
+   * in production. In dev, the operator is elastic superuser.
    */
-  regenerateNow(): Promise<void> {
+  regenerateNow(overrideEsClient?: ElasticsearchClient): Promise<void> {
     if (this.inFlight) {
       this.regenAfterCurrent = true;
       return this.inFlight;
     }
+    const esClient = overrideEsClient ?? this.esClient;
     this.status.regenInFlight = true;
-    this.inFlight = this.regenerateInternal()
+    this.inFlight = this.regenerateInternal(esClient)
       .then(() => {
         this.status.lastRegenAt = new Date();
         this.status.lastRegenError = null;
@@ -140,15 +148,17 @@ export class ViewSyncService {
     }
   }
 
-  private async regenerateInternal(): Promise<void> {
+  private async regenerateInternal(esClient: ElasticsearchClient): Promise<void> {
     for (const owner of OWNERS) {
-      const fields = await loadExtendedFieldsFromMapping(owner, this.esClient, this.logger);
-      await this.putView(getCAIViewName('case', owner), buildCaseViewQuery(owner, fields));
+      const fields = await loadExtendedFieldsFromMapping(owner, esClient, this.logger);
+      await this.putView(esClient, getCAIViewName('case', owner), buildCaseViewQuery(owner, fields));
       await this.putView(
+        esClient,
         getCAIViewName('case_activity', owner),
         buildActivityViewQuery(owner)
       );
       await this.putView(
+        esClient,
         getCAIViewName('case_lifecycle', owner),
         buildLifecycleViewQuery(owner)
       );
@@ -156,8 +166,12 @@ export class ViewSyncService {
     this.logger.debug(`Regenerated ${CAI_VIEW_NAMES.length} cases analytics ES|QL views`);
   }
 
-  private async putView(name: string, query: string): Promise<void> {
-    await this.esClient.transport.request(
+  private async putView(
+    esClient: ElasticsearchClient,
+    name: string,
+    query: string
+  ): Promise<void> {
+    await esClient.transport.request(
       {
         method: 'PUT',
         path: `/_query/view/${encodeURIComponent(name)}`,
