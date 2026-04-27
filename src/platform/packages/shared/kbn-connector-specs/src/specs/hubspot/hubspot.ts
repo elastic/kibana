@@ -45,6 +45,7 @@ export const HubSpotConnector: ConnectorSpec = {
     types: [
       {
         type: 'bearer',
+        defaults: {},
         overrides: {
           meta: {
             token: {
