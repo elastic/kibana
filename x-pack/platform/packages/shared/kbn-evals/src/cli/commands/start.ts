@@ -41,7 +41,8 @@ import {
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_DEFAULT_TIMEOUT_MS = 600_000;
-const SCOUT_READY_TIMEOUT_MS = Number(process.env.SCOUT_READY_TIMEOUT_MS) || SCOUT_READY_DEFAULT_TIMEOUT_MS;
+const SCOUT_READY_TIMEOUT_MS =
+  Number(process.env.SCOUT_READY_TIMEOUT_MS) || SCOUT_READY_DEFAULT_TIMEOUT_MS;
 
 const fetchCcmApiKey = (log: ToolingLog): string => {
   const envKey = process.env.KIBANA_EIS_CCM_API_KEY;
