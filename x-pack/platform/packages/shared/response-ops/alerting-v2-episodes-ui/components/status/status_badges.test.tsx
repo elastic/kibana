@@ -89,6 +89,7 @@ describe('AlertEpisodeStatusBadges', () => {
           ruleId: '1',
           groupHash: '1',
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
+          lastAssigneeUid: null,
         }}
       />
     );
@@ -105,6 +106,7 @@ describe('AlertEpisodeStatusBadges', () => {
           ruleId: '1',
           groupHash: '1',
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
+          lastAssigneeUid: null,
         }}
       />
     );

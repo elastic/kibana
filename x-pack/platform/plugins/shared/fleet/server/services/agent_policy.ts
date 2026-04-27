@@ -2761,9 +2761,17 @@ class AgentPolicyService {
 
     logger.info(`${VERIFY_PERMISSIONS_TASK} Deploying verifier policy ${agentPolicy.id}`);
 
-    await this.deployPolicy(soClient, agentPolicy.id, undefined, {
-      throwOnAgentlessError: true,
-    });
+    try {
+      await this.deployPolicy(soClient, agentPolicy.id, undefined, {
+        throwOnAgentlessError: true,
+      });
+    } catch (err) {
+      logger.error(
+        `${VERIFY_PERMISSIONS_TASK} Failed to deploy verifier policy ${agentPolicy.id}, rolling back: ${err}`
+      );
+      await this.deleteVerifierPolicy(soClient, esClient, agentPolicy.id);
+      throw err;
+    }
 
     return { policyId: agentPolicy.id };
   }
@@ -2806,7 +2814,7 @@ function buildVerifierCredentialVars(
   } else if (provider === 'gcp') {
     const gcpVars = connectorVars as GcpCloudConnectorVars;
     vars.credentials_service_account_email = gcpVars.service_account;
-    vars.credentials_workload_identity_provider = gcpVars.audience;
+    vars.credentials_audience = gcpVars.audience;
   }
 
   return vars;

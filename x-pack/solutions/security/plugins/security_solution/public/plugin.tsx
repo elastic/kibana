@@ -74,8 +74,14 @@ import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
-import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
-import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
+import {
+  registerAttachmentUiDefinitions,
+  registerEntityAnalyticsDashboardAttachment,
+  registerEntityAttachment,
+  registerRuleAttachment,
+} from './agent_builder/attachment_types';
+import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
+import { registerWorkflowSteps } from './workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -95,6 +101,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _discoverFlyoutServicesPromise?: Promise<StartServices>;
   private _startedSubPluginsPromise?: Promise<StartedSubPlugins>;
   private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
+  private _securityCanvasContextPromise?: Promise<SecurityCanvasEmbeddedBundle>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -127,20 +134,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       share.url.locators.create(new AIValueReportLocatorDefinition());
     }
 
-    // Register workflow steps
     if (workflowsExtensions) {
-      import('./workflows/step_types')
-        .then(async ({ registerWorkflowSteps }) => {
-          const [coreStart] = await core.getStartServices();
-          return registerWorkflowSteps(workflowsExtensions, coreStart);
-        })
-        .catch((error) => {
-          this.logger.error(
-            `Error registering security workflow steps: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
+      registerWorkflowSteps(workflowsExtensions, core);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -314,6 +309,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         aiRuleCreation: this.services.aiRuleCreation,
       });
+      registerEntityAnalyticsDashboardAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+      });
+      registerEntityAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+        searchSession: plugins.data.search.session,
+      });
     }
 
     // Enable CPS picker only for individual dashboard views (not the listing page).
@@ -384,6 +396,35 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._discoverFlyoutStorePromise;
   }
 
+  /**
+   * Lazily resolves the Redux store + flattened `StartServices` bundle used by
+   * `SecurityReduxEmbeddedProvider` on Agent Builder Canvas surfaces. Start-time work
+   * (sub-plugin bootstrap, services generation) is deferred until the user opens the canvas —
+   * the rest of Agent Builder and the label-only/inline paths must not pay that cost.
+   *
+   * Memoized in a class field so concurrent Preview clicks collapse to a single boot; the
+   * cache is cleared on failure so a retry can recover.
+   */
+  private getSecurityCanvasContext(
+    coreStart: CoreStart,
+    startPlugins: StartPluginsDependencies
+  ): Promise<SecurityCanvasEmbeddedBundle> {
+    if (!this._securityCanvasContextPromise) {
+      this._securityCanvasContextPromise = (async () => {
+        const startedSubPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
+        const [store, kibanaServices] = await Promise.all([
+          this.store(coreStart, startPlugins, startedSubPlugins),
+          this.services.generateServices(coreStart, startPlugins),
+        ]);
+        return { store, kibanaServices };
+      })().catch((e) => {
+        this._securityCanvasContextPromise = undefined;
+        throw e;
+      });
+    }
+    return this._securityCanvasContextPromise;
+  }
+
   public async registerDiscoverSharedFeatures(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
@@ -394,8 +435,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const cellRendererFeature: SecuritySolutionCellRendererFeature = {
       id: 'security-solution-cell-renderer',
       getRenderer: async () => {
-        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
-        return getCellRendererForGivenRecord;
+        const [{ getCellRendererForGivenRecord }, services, store] = await Promise.all([
+          this.getLazyDiscoverSharedDeps(),
+          this.getDiscoverFlyoutServices(core),
+          this.getDiscoverFlyoutStore(core),
+        ]);
+        return getCellRendererForGivenRecord(services, store);
       },
     };
     discoverFeatureRegistry.register(cellRendererFeature);

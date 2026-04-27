@@ -1,6 +1,6 @@
 # Logs extraction pagination
 
-This document describes how **local** (LOOKUP-based) logs extraction paginates through raw log documents and through **aggregated entity** rows. It is aimed at engineers changing ESQL, saved-object state, or interrupted-run behavior (when the client **skips the boundary probe**).
+This document describes how **local** (LOOKUP-based) logs extraction paginates through raw log documents and through **aggregated entity** rows. The client runs a **boundary** ESQL on every outer (log-slice) iteration: there is no “skip probe” path. The **first** log slice in a new `extractLogs` run does not apply a persisted `logsPageCursorStart` to the boundary query (the slice is re-established from the time window only); later outer iterations in the same run use the advanced cursor from the previous slice.
 
 For **CCS** (remote-only) extraction, this plugin intentionally keeps the simpler **entity-pagination-only** loop; the same *ideas* (bounding raw scans, compound cursors) apply if that path is extended later.
 
@@ -38,7 +38,7 @@ Together: **outer loop** = advance log slices; **inner loop** = entity pages ins
 | `logsPageCursorEndTimestamp`, `logsPageCursorEndId` | Inclusive end of the current slice; set after a successful **boundary** query; cleared when moving to the next slice. |
 | `paginationTimestamp`, `paginationId` | Entity pagination inside the current slice; cleared when the slice is complete. |
 | `lastExecutionTimestamp` | Updated when a **full** extraction run completes successfully (not `specificWindow`); anchors the next scheduled window with delay. |
-| Corrupt recovery | If `paginationId` is present without a consistent slice, it is passed once as `recoveryId` to the **first boundary** ESQL (inclusive lower time bound); then cleared. When the probe is skipped **mid-entity-page**, the same token may go into the **first bounded extraction** query instead. |
+| Recovery | If `paginationId` is present from a previous run, it is passed once as `recoveryId` to the first bounded extraction query (inclusive lower time bound) and the first boundary ESQL, then cleared. |
 
 `specificWindow` (force APIs / manual runs) **does not** persist `logExtractionState` updates from the loop.
 
@@ -64,25 +64,6 @@ flowchart TD
   moreEntities -->|yes| inner
   moreEntities -->|no| advance
   advance --> outer
-```
-
-### Skip probe (interrupted run)
-
-If both **entity** cursor and **slice end** exist on disk (interrupted run), **`skipProbe`** is true: the **boundary** ESQL is skipped; the inner loop continues with the same `logsPageCursorStart`, `logsPageCursorEnd`, and entity `pagination*`.
-
-```mermaid
-flowchart TD
-  startNode[Read_engine_state]
-  skipProbe{entityPagination_and_sliceEnd?}
-  skipBoundary[Skip_boundary]
-  runBoundary[Run_boundary_ESQL]
-  extract[Run_bounded_extraction_ESQL_loop]
-
-  startNode --> skipProbe
-  skipProbe -->|yes| skipBoundary
-  skipProbe -->|no| runBoundary
-  skipBoundary --> extract
-  runBoundary --> extract
 ```
 
 ### Ordering of raw documents
