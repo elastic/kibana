@@ -19,9 +19,16 @@ interface Props {
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   openFlyout: (tabId: string) => void;
+  hasAssistantPrivilege: boolean;
 }
 
-const ActionsComponent: React.FC<Props> = ({ isLoading, onGenerate, openFlyout, isDisabled }) => {
+const ActionsComponent: React.FC<Props> = ({
+  isLoading,
+  onGenerate,
+  openFlyout,
+  isDisabled,
+  hasAssistantPrivilege,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const runSettingsGroup = css`
@@ -37,7 +44,12 @@ const ActionsComponent: React.FC<Props> = ({ isLoading, onGenerate, openFlyout, 
     <EuiFlexGroup alignItems="center" data-test-subj="actions" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <div css={runSettingsGroup}>
-          <Run isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />
+          <Run
+            hasAssistantPrivilege={hasAssistantPrivilege}
+            isLoading={isLoading}
+            isDisabled={isDisabled}
+            onGenerate={onGenerate}
+          />
           <Settings isLoading={isLoading} openFlyout={openFlyout} />
         </div>
       </EuiFlexItem>

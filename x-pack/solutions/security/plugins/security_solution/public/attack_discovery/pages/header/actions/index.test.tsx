@@ -11,6 +11,7 @@ import React from 'react';
 import { Actions } from '.';
 
 const defaultProps = {
+  hasAssistantPrivilege: true,
   isLoading: false,
   onGenerate: jest.fn(),
   openFlyout: jest.fn(),

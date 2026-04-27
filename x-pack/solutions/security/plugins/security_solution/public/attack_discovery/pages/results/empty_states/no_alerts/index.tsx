@@ -16,6 +16,7 @@ import {
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
+import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { Generate } from '../generate';
 import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
@@ -27,6 +28,7 @@ interface Props {
 }
 
 const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate }) => {
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -97,7 +99,12 @@ const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate 
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <Generate isDisabled={isDisabled} isLoading={isLoading} onGenerate={onGenerate} />
+        <Generate
+          hasAssistantPrivilege={hasAssistantPrivilege}
+          isDisabled={isDisabled || !hasAssistantPrivilege}
+          isLoading={isLoading}
+          onGenerate={onGenerate}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

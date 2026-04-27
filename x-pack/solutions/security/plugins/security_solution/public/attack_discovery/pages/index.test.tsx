@@ -29,6 +29,8 @@ import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
+import { AI_ASSISTANT_PRIVILEGE_CALLOUT_TEST_SUBJ } from './ai_assistant_privilege_callout';
 import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
 import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
 import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
@@ -106,6 +108,9 @@ jest.mock('./use_attack_discovery', () => ({
 
 jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
 const useMovingAttacksCalloutMock = useMovingAttacksCallout as jest.Mock;
+
+jest.mock('../../assistant/use_assistant_availability');
+const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -228,6 +233,7 @@ describe('AttackDiscovery', () => {
     });
 
     useMovingAttacksCalloutMock.mockReturnValue(mockUseMovingAttacksCallout());
+    useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: true });
   });
 
   describe('page layout', () => {
@@ -316,6 +322,24 @@ describe('AttackDiscovery', () => {
         size: 100,
         start: 'now-24h',
       });
+    });
+  });
+
+  describe('when the user has no Elastic AI Assistant privilege', () => {
+    it('renders a callout explaining that attack discovery requires AI assistant access', () => {
+      useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: false });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(AI_ASSISTANT_PRIVILEGE_CALLOUT_TEST_SUBJ)).toBeInTheDocument();
     });
   });
 

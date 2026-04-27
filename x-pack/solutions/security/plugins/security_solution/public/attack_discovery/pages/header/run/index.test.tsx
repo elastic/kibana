@@ -8,10 +8,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
+import { NO_AI_ASSISTANT_PRIVILEGE_CONTROL_TOOLTIP } from '../../../ai_privilege_translations';
 import { RUN, RUN_TOOLTIP, DISABLED_TOOLTIP } from './translations';
 import { Run } from '.';
 
 const defaultProps = {
+  hasAssistantPrivilege: true,
   isLoading: false,
   onGenerate: jest.fn(),
 };
@@ -44,6 +46,18 @@ describe('Run', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('runTooltip')).toHaveTextContent(DISABLED_TOOLTIP);
+    });
+  });
+
+  it('renders the tooltip for missing AI assistant privilege when the user is not allowed to use the assistant', async () => {
+    render(<Run {...defaultProps} hasAssistantPrivilege={false} isDisabled={true} />);
+
+    fireEvent.mouseOver(screen.getByTestId('run'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('runTooltip')).toHaveTextContent(
+        NO_AI_ASSISTANT_PRIVILEGE_CONTROL_TOOLTIP
+      );
     });
   });
 

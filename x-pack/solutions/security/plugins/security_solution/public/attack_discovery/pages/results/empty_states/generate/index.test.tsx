@@ -9,13 +9,16 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { Generate } from '.';
+import { NO_AI_ASSISTANT_PRIVILEGE_CONTROL_TOOLTIP } from '../../../../ai_privilege_translations';
 import * as i18n from '../empty_prompt/translations';
 
 describe('Generate Component', () => {
   it('calls onGenerate when the button is clicked', () => {
     const onGenerate = jest.fn();
 
-    render(<Generate isLoading={false} onGenerate={onGenerate} />);
+    render(
+      <Generate hasAssistantPrivilege={true} isLoading={false} onGenerate={onGenerate} />
+    );
 
     fireEvent.click(screen.getByTestId('generate'));
 
@@ -23,24 +26,55 @@ describe('Generate Component', () => {
   });
 
   it('disables the generate button when isLoading is true', () => {
-    render(<Generate isLoading={true} onGenerate={jest.fn()} />);
+    render(<Generate hasAssistantPrivilege={true} isLoading={true} onGenerate={jest.fn()} />);
 
     expect(screen.getByTestId('generate')).toBeDisabled();
   });
 
   it('disables the generate button when isDisabled is true', () => {
-    render(<Generate isLoading={false} isDisabled={true} onGenerate={jest.fn()} />);
+    render(
+      <Generate
+        hasAssistantPrivilege={true}
+        isLoading={false}
+        isDisabled={true}
+        onGenerate={jest.fn()}
+      />
+    );
 
     expect(screen.getByTestId('generate')).toBeDisabled();
   });
 
-  it('shows tooltip content when the button is disabled', async () => {
-    render(<Generate isLoading={false} isDisabled={true} onGenerate={jest.fn()} />);
+  it('shows tooltip content when the button is disabled because no connector is selected', async () => {
+    render(
+      <Generate
+        hasAssistantPrivilege={true}
+        isLoading={false}
+        isDisabled={true}
+        onGenerate={jest.fn()}
+      />
+    );
 
     fireEvent.mouseOver(screen.getByTestId('generate'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.SELECT_A_CONNECTOR)).toBeInTheDocument();
+    });
+  });
+
+  it('shows the AI assistant privilege tooltip when the user cannot use the assistant', async () => {
+    render(
+      <Generate
+        hasAssistantPrivilege={false}
+        isLoading={false}
+        isDisabled={true}
+        onGenerate={jest.fn()}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByTestId('generate'));
+
+    await waitFor(() => {
+      expect(screen.getByText(NO_AI_ASSISTANT_PRIVILEGE_CONTROL_TOOLTIP)).toBeInTheDocument();
     });
   });
 });

@@ -9,10 +9,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EmptyPrompt } from '.';
-import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { TestProviders } from '../../../../../common/mock';
-
-jest.mock('../../../../../assistant/use_assistant_availability');
 
 describe('EmptyPrompt', () => {
   const aiConnectorsCount = 2;
@@ -23,16 +20,12 @@ describe('EmptyPrompt', () => {
 
   describe('when the user has the assistant privilege', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-
       render(
         <TestProviders>
           <EmptyPrompt
             aiConnectorsCount={aiConnectorsCount}
             attackDiscoveriesCount={attackDiscoveriesCount}
+            hasAssistantPrivilege={true}
             isLoading={false}
             isDisabled={false}
             onGenerate={onGenerate}
@@ -58,16 +51,12 @@ describe('EmptyPrompt', () => {
 
   describe('when loading is true', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-
       render(
         <TestProviders>
           <EmptyPrompt
             aiConnectorsCount={2} // <-- non-null
             attackDiscoveriesCount={0} // <-- no discoveries
+            hasAssistantPrivilege={true}
             isLoading={true} // <-- loading
             isDisabled={false}
             onGenerate={onGenerate}
@@ -85,16 +74,12 @@ describe('EmptyPrompt', () => {
 
   describe('when aiConnectorsCount is null', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-
       render(
         <TestProviders>
           <EmptyPrompt
             aiConnectorsCount={null} // <--  null
             attackDiscoveriesCount={0} // <-- no discoveries
+            hasAssistantPrivilege={true}
             isLoading={false} // <-- not loading
             isDisabled={false}
             onGenerate={onGenerate}
@@ -112,16 +97,12 @@ describe('EmptyPrompt', () => {
 
   describe('when there are attack discoveries', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-
       render(
         <TestProviders>
           <EmptyPrompt
             aiConnectorsCount={2} // <-- non-null
             attackDiscoveriesCount={7} // there are discoveries
+            hasAssistantPrivilege={true}
             isLoading={false} // <-- not loading
             isDisabled={false}
             onGenerate={onGenerate}
@@ -141,16 +122,12 @@ describe('EmptyPrompt', () => {
     const isDisabled = true;
 
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-
       render(
         <TestProviders>
           <EmptyPrompt
             aiConnectorsCount={2} // <-- non-null
             attackDiscoveriesCount={0} // <-- no discoveries
+            hasAssistantPrivilege={true}
             isLoading={false}
             isDisabled={isDisabled}
             onGenerate={onGenerate}
@@ -171,16 +148,13 @@ describe('EmptyPrompt', () => {
       alertsCount: 20,
       aiConnectorsCount: 2,
       attackDiscoveriesCount: 0,
+      hasAssistantPrivilege: true,
       isLoading: false,
       isDisabled: false,
       onGenerate: jest.fn(),
     };
 
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
       jest.clearAllMocks();
       render(
         <TestProviders>

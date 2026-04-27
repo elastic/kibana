@@ -242,7 +242,8 @@ const HistoryComponent: React.FC<Props> = ({
         <EmptyPrompt
           aiConnectorsCount={aiConnectors?.length ?? null}
           attackDiscoveriesCount={data?.total ?? 0}
-          isDisabled={!aiConnectors?.length}
+          hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege}
+          isDisabled={!aiConnectors?.length || !assistantAvailability.hasAssistantPrivilege}
           isLoading={isLoading}
           onGenerate={onGenerate}
         />

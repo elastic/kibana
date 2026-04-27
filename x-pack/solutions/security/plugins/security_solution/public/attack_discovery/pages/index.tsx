@@ -50,6 +50,8 @@ import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
 import { MovingAttacksCallout } from './moving_attacks_callout';
+import { AiAssistantPrivilegeCallout } from './ai_assistant_privilege_callout';
+import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 
 export const ID = 'attackDiscoveryQuery';
 
@@ -180,6 +182,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+
   const onGenerate = useCallback(
     async (overrideOptions?: SettingsOverrideOptions) => {
       const size = getSize({
@@ -254,12 +258,15 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             isLoading={isLoading}
             onGenerate={onGenerate}
             openFlyout={openFlyout}
-            isDisabled={connectorId == null}
+            hasAssistantPrivilege={hasAssistantPrivilege}
+            isDisabled={connectorId == null || !hasAssistantPrivilege}
           />
           <EuiSpacer size={'s'} />
         </HeaderPage>
 
         <EuiSpacer size="s" />
+
+        {!hasAssistantPrivilege && <AiAssistantPrivilegeCallout />}
 
         {enableAlertsAndAttacksAlignment && (
           <>

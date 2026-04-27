@@ -9,10 +9,12 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
+import * as sharedI18n from '../../../ai_privilege_translations';
 import type { SettingsOverrideOptions } from '../../results/history/types';
 import * as i18n from './translations';
 
 interface Props {
+  hasAssistantPrivilege: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   isDisabled?: boolean;
@@ -25,9 +27,22 @@ const runButtonStyles = css`
   width: 74px;
 `;
 
-const RunComponent: React.FC<Props> = ({ isLoading, onGenerate, isDisabled }) => (
+const getTooltip = ({
+  hasAssistantPrivilege,
+  isDisabled,
+}: Pick<Props, 'hasAssistantPrivilege' | 'isDisabled'>) => {
+  if (!hasAssistantPrivilege) {
+    return sharedI18n.NO_AI_ASSISTANT_PRIVILEGE_CONTROL_TOOLTIP;
+  }
+  if (isDisabled) {
+    return i18n.DISABLED_TOOLTIP;
+  }
+  return i18n.RUN_TOOLTIP;
+};
+
+const RunComponent: React.FC<Props> = ({ hasAssistantPrivilege, isLoading, onGenerate, isDisabled }) => (
   <EuiToolTip
-    content={isDisabled ? i18n.DISABLED_TOOLTIP : i18n.RUN_TOOLTIP}
+    content={getTooltip({ hasAssistantPrivilege, isDisabled })}
     data-test-subj="runTooltip"
     position="bottom"
   >
