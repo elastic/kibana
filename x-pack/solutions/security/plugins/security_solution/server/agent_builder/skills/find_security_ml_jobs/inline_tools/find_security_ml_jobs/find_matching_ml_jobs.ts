@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { ActiveMlModules } from './get_security_ml_jobs';
+import type { ActiveMlModules } from './find_security_ml_jobs';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
 
 interface FindMatchingMlJobsOpts {

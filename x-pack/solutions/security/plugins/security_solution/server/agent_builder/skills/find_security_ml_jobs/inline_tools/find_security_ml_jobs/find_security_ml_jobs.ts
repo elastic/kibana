@@ -17,10 +17,10 @@ import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../../../../../../common/c
 import { DEFAULT_ANOMALY_SCORE, ML_GROUP_IDS } from '../../../../../../common/constants';
 import { IdentifierType } from '../../../../../../common/api/entity_analytics/common/common.gen';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
-import type { SecurityMlJobsSkillsContext } from '../../security_ml_jobs_skill';
+import type { FindSecurityMlJobsSkillsContext } from '../../find_security_ml_jobs_skill';
 import { findMatchingMlJobs } from './find_matching_ml_jobs';
 
-export const SECURITY_ML_JOBS_INLINE_TOOL = `security.ml.jobs`;
+export const FIND_SECURITY_ML_JOBS_INLINE_TOOL = `find.security.ml.jobs`;
 
 export const mlJobsToolSchema = z.object({
   entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
@@ -54,7 +54,7 @@ export interface ActiveMlModules {
 
 const getActiveMlModules = async (
   soClient: SavedObjectsClientContract,
-  ml?: SecurityMlJobsSkillsContext['ml']
+  ml?: FindSecurityMlJobsSkillsContext['ml']
 ): Promise<ActiveMlModules[]> => {
   const fakeRequest = Object.create(null) as KibanaRequest;
   const mlModulesProvider = ml?.modulesProvider(fakeRequest, soClient);
@@ -83,13 +83,13 @@ const getActiveMlModules = async (
 
 export const securityMlJobsInlineToolHandler = async (
   toolArgs: MlJobsToolType,
-  toolContext: ToolHandlerContext & SecurityMlJobsSkillsContext
+  toolContext: ToolHandlerContext & FindSecurityMlJobsSkillsContext
 ) => {
   try {
     const { getStartServices, logger, ml, modelProvider, savedObjectsClient } = toolContext;
 
     logger.debug(
-      `${SECURITY_ML_JOBS_INLINE_TOOL} tool called with args: ${JSON.stringify(toolArgs)}`
+      `${FIND_SECURITY_ML_JOBS_INLINE_TOOL} tool called with args: ${JSON.stringify(toolArgs)}`
     );
 
     const [core] = await getStartServices();
@@ -135,8 +135,8 @@ export const securityMlJobsInlineToolHandler = async (
   }
 };
 
-export const getSecurityMlJobsTool = (ctx: SecurityMlJobsSkillsContext): SkillBoundedTool => ({
-  id: SECURITY_ML_JOBS_INLINE_TOOL,
+export const findSecurityMlJobsTool = (ctx: FindSecurityMlJobsSkillsContext): SkillBoundedTool => ({
+  id: FIND_SECURITY_ML_JOBS_INLINE_TOOL,
   type: ToolType.builtin,
   schema: mlJobsToolSchema,
   description: `Call this tool to find relevant security ML jobs and their corresponding indices to investigate anomalous or unusual behavior in your environment`,
