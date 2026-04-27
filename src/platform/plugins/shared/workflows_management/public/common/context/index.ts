@@ -8,4 +8,4 @@
  */
 
 export * from './workflows_context';
-export * from './types';
+export type * from './types';
