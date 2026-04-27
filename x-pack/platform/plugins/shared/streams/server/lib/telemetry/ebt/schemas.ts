@@ -15,6 +15,7 @@ import type {
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  StreamsAgentToolKiIdentificationStartedProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -408,6 +409,29 @@ const streamsAgentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<StreamsAgen
     },
   };
 
+const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentToolKiIdentificationStartedProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether starting KI identification succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI identification start fails',
+        optional: true,
+      },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -417,4 +441,5 @@ export {
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
 };

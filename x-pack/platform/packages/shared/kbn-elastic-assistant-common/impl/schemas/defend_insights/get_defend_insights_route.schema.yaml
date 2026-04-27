@@ -6,6 +6,13 @@ paths:
   /internal/elastic_assistant/defend_insights:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/internal/elastic_assistant/defend_insights?connector_id=my-connector-id' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: DefendInsightsGet
       description: Get relevant data for Defend insights
@@ -16,46 +23,52 @@ paths:
         - name: 'ids'
           in: query
           required: false
-          description: The insight ids for which to get Defend insights
+          description: The insight ids for which to get Defend insights.
           schema:
             type: array
             items:
               $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: ["insight-abc123", "insight-def456"]
         - name: 'connector_id'
           in: query
           required: false
-          description: The connector id for which to get Defend insights
+          description: The connector id for which to get Defend insights.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "my-connector-id"
         - name: 'type'
           in: query
           required: false
-          description: The insight type for which to get Defend insights
+          description: The insight type for which to get Defend insights.
           schema:
             $ref: './common_attributes.schema.yaml#/components/schemas/DefendInsightType'
+          example: "incompatible_antivirus"
         - name: 'status'
           in: query
           required: false
-          description: The status for which to get Defend insights
+          description: The status for which to get Defend insights.
           schema:
             $ref: './common_attributes.schema.yaml#/components/schemas/DefendInsightStatus'
+          example: "succeeded"
         - name: 'endpoint_ids'
           in: query
           required: false
-          description: The endpoint ids for which to get Defend insights
+          description: The endpoint ids for which to get Defend insights.
           schema:
             type: array
             items:
               $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: ["endpoint-id-1", "endpoint-id-2"]
         - name: 'size'
           in: query
           required: false
-          description: The number of Defend insights to return
+          description: The number of Defend insights to return.
           schema:
             type: number
+          example: 10
       responses:
         '200':
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -67,8 +80,40 @@ paths:
                     type: array
                     items:
                       $ref: './common_attributes.schema.yaml#/components/schemas/DefendInsightsResponse'
+              examples:
+                DefendInsightsGetResponse200Example:
+                  summary: A successful response containing a list of Defend insights.
+                  value:
+                    data:
+                      - id: "insight-abc123"
+                        status: succeeded
+                        insightType: incompatible_antivirus
+                        endpointIds:
+                          - "endpoint-id-1"
+                        insights:
+                          - group: "Windows Defender"
+                            events:
+                              - id: "event-1"
+                                endpointId: "endpoint-id-1"
+                                value: "Antivirus conflict detected"
+                        apiConfig:
+                          connectorId: my-connector-id
+                          actionTypeId: .gen-ai
+                        createdAt: "2024-01-15T10:00:00.000Z"
+                        updatedAt: "2024-01-15T10:05:00.000Z"
+                        lastViewedAt: "2024-01-15T10:06:00.000Z"
+                        users:
+                          - id: "user-1"
+                            name: "user@example.com"
+                        namespace: "default"
+                        backingIndex: ".kibana-elastic-ai-assistant-defend-insights-default"
+                        generationIntervals:
+                          - date: "2024-01-15T10:05:00.000Z"
+                            durationMs: 4800
+                        averageIntervalMs: 4800
+                        replacements: {}
         '400':
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -80,3 +125,10 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                DefendInsightsGetResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "Invalid query parameter."

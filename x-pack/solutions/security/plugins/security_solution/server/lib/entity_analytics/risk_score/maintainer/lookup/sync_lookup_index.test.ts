@@ -354,6 +354,77 @@ describe('lookup index utilities', () => {
     expect(operations.upserts).toEqual(expectedUpserts);
   });
 
+  it('deletes stale lookup rows when an entity is unlinked from a resolution target', () => {
+    const page: ScoredEntityPage = {
+      entityIds: ['user:unlinked'],
+      scores: [],
+      entities: new Map([
+        [
+          'user:unlinked',
+          {
+            entity: {
+              id: 'user:unlinked',
+              relationships: {
+                resolution: {},
+              },
+            },
+          },
+        ],
+      ]),
+    };
+
+    const operations = buildLookupSyncOperationsForPage({
+      page,
+      now: '2026-01-01T00:00:00.000Z',
+      notInStoreEntityIds: [],
+    });
+
+    expect(operations).toEqual({
+      upserts: [],
+      deletes: ['user:unlinked'],
+    });
+  });
+
+  it('keeps confirmed targets as self rows during unlink reconciliation', () => {
+    const page: ScoredEntityPage = {
+      entityIds: ['user:target'],
+      scores: [],
+      entities: new Map([
+        [
+          'user:target',
+          {
+            entity: {
+              id: 'user:target',
+              relationships: {
+                resolution: {},
+              },
+            },
+          },
+        ],
+      ]),
+    };
+
+    const operations = buildLookupSyncOperationsForPage({
+      page,
+      now: '2026-01-01T00:00:00.000Z',
+      notInStoreEntityIds: [],
+      resolutionTargetIds: ['user:target'],
+    });
+
+    expect(operations).toEqual({
+      upserts: [
+        {
+          entity_id: 'user:target',
+          resolution_target_id: 'user:target',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+      deletes: [],
+    });
+  });
+
   it('syncs a scored page using one helper call', async () => {
     const page: ScoredEntityPage = {
       entityIds: ['user:alias-4'],
