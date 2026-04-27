@@ -142,6 +142,33 @@ export class SearchSessionsService extends FtrService {
     await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
   }
 
+  public async expectNoErrorsOrWarnings() {
+    expect(await this.hasErrorsOrWarnings()).to.be(false);
+  }
+
+  public async hasErrorsOrWarnings() {
+    const messages = [
+      // Warnings
+      'Your background search is still running',
+      // Errors
+      'Timed out',
+      'Search Error',
+      'Cannot retrieve search results',
+      'Unable to connect to the Kibana server',
+      'Failed to edit name of the background search',
+      'Failed to fetch background search info',
+    ];
+
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (messages.some((message) => text.includes(message))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /*
    * This cleanup function should be used by tests that create new search sessions.
    * Tests should not end with new search sessions remaining in storage since that interferes with functional tests that check the _find API.

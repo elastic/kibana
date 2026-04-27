@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const securityService = getService('security');
   const filterBar = getService('filterBar');
-  const log = getService('log');
-  const testSubjects = getService('testSubjects');
   const { common, header, discover, security, timePicker } = getPageObjects([
     'common',
     'header',
@@ -63,19 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitForDocTableLoadingComplete();
 
-        const currentToasts = await toasts.getAll();
-        if (currentToasts.length > 0) {
-          log.debug(`Session restoration related warnings found: ${currentToasts.length}`);
-          const titles = [];
-          for (const toast of currentToasts) {
-            titles.push(await toast.getVisibleText());
-          }
-          log.debug(`Session restoration related warnings found: ${titles.join(', ')}`);
-          throw new Error('Session restoration related warnings found');
-        }
-
         // Check that session is restored
-        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
+        await searchSessions.expectNoErrorsOrWarnings();
       });
     });
     describe('Disabled storing search sessions in space', () => {
