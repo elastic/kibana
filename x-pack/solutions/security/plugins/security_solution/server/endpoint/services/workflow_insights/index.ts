@@ -27,6 +27,7 @@ import type {
 } from '../../../../common/endpoint/types/workflow_insights';
 import { WorkflowInsightActionType } from '../../../../common/endpoint/types/workflow_insights';
 
+import { ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
 import {
@@ -321,7 +322,19 @@ class SecurityWorkflowInsightsService {
 
     const uniqueInsights = getUniqueInsights(workflowInsights);
 
-    return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
+    const results = await Promise.all(uniqueInsights.map((insight) => this.create(insight)));
+
+    try {
+      const telemetry = this.endpointContext.getTelemetryService();
+      telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT.eventType, {
+        insightType,
+        count: uniqueInsights.length,
+      });
+    } catch (e) {
+      this.logger.debug(`Failed to report insight creation telemetry: ${e.message}`);
+    }
+
+    return results;
   }
 
   public async ensureAgentIdsInCurrentSpace(

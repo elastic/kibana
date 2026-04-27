@@ -11780,7 +11780,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-            "lineNumber": 125,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11812,7 +11812,7 @@
               "<FullDocumentType, Agg>>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-            "lineNumber": 131,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11835,7 +11835,7 @@
                   "<SRM>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-                "lineNumber": 132,
+                "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11853,7 +11853,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-                "lineNumber": 133,
+                "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11981,7 +11981,7 @@
             "tags": [],
             "label": "space",
             "description": [
-              "\nOptional space identifier. When provided, results are filtered to only include\ndocuments belonging to this space. When undefined, only space-agnostic documents\nare returned."
+              "\nOptional space identifier. Controls which documents are included in the search:\n- When undefined: only space-agnostic documents (no `kibana.space_ids` field) are returned.\n-  `default` space **is distinct** from space-agnostic (`undefined`). It should be used to fulfil the same role as `default` space saved objects. Please note: no space authorization checks are performed in this client.\n- When any other space: only documents belonging to that space are returned.\n\nThe `kibana.space_ids` field is a system-managed property and is stripped from `_source` in all responses."
             ],
             "signature": [
               "string | undefined"
@@ -12224,7 +12224,7 @@
           "<TDocument, unknown>, \"index\" | \"operations\"> & { documents: ({ _id?: string | undefined; } & TDocument)[]; space?: string | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
-        "lineNumber": 34,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12241,7 +12241,7 @@
           "BulkResponse"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
-        "lineNumber": 49,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12259,7 +12259,7 @@
           "<TDocument, TSearchRequest>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
-        "lineNumber": 29,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
