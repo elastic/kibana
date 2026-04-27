@@ -57,6 +57,11 @@ interface SiemSearchBarProps {
    * Allows to hide the query menu button displayed to the left of the query input.
    */
   hideQueryMenu?: boolean;
+  /**
+   * Hides the date picker (and the associated Refresh button) from the search bar.
+   * KQL input and pinned filter bar remain visible.
+   */
+  hideDatePicker?: boolean;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -68,6 +73,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     hideFilterBar = false,
     hideQueryInput = false,
     hideQueryMenu = false,
+    hideDatePicker = false,
     id,
     isLoading = false,
     pollForSignalIndex,
@@ -350,7 +356,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}
-          showDatePicker={true}
+          showDatePicker={!hideDatePicker}
           showQueryInput={!hideQueryInput}
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
