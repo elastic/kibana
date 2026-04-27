@@ -17,7 +17,7 @@ import {
   EuiColorPalettePicker,
 } from '@elastic/eui';
 import type { LayoutDirection } from '@elastic/charts';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import {
@@ -704,6 +704,21 @@ function SecondaryMetricEditor({
 const supportingVisualization = (state: MetricVisualizationState) =>
   state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
 
+function useScrollIntoView() {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const scrollIntoView = useCallback(() => {
+    requestAnimationFrame(() => {
+      anchorRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+    });
+  }, []);
+
+  return { anchorRef, scrollIntoView };
+}
+
 function PrimaryMetricEditor({ state, setState, datasource, accessor, frame }: SubProps) {
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
@@ -869,6 +884,12 @@ export function DimensionEditorAdditionalSection({
 }: Props) {
   const euiThemeContext = useEuiTheme();
 
+  const selectedSupportingVisualization = supportingVisualization(state);
+  const colorControlsSectionVisible =
+    selectedSupportingVisualization !== 'panel' || Boolean(state.applyColorTo);
+  const { anchorRef: colorControlsAnchorRef, scrollIntoView: scrollToColorControls } =
+    useScrollIntoView();
+
   const primaryMetricTypeFallback = getColumnFromActiveData({
     accessor: state.metricAccessor,
     activeData: frame?.activeData,
@@ -946,8 +967,6 @@ export function DimensionEditorAdditionalSection({
   }
 
   const buttonIdPrefix = `${idPrefix}--`;
-
-  const selectedSupportingVisualization = supportingVisualization(state);
 
   const hasDynamicColoring = Boolean(isMetricNumeric && state.palette);
 
@@ -1158,12 +1177,13 @@ export function DimensionEditorAdditionalSection({
                 ...state,
                 applyColorTo: clear ? undefined : newApplyColorTo,
               });
+              scrollToColorControls();
             }}
           />
         </EuiFormRow>
       )}
 
-      {(selectedSupportingVisualization !== 'panel' || state.applyColorTo) && (
+      {colorControlsSectionVisible && (
         <>
           {isMetricNumeric && (
             <EuiFormRow
@@ -1173,55 +1193,60 @@ export function DimensionEditorAdditionalSection({
                 defaultMessage: 'Mode',
               })}
             >
-              <EuiButtonGroup
-                isFullWidth
-                buttonSize="compressed"
-                legend={i18n.translate('xpack.lens.metric.colorMode.label', {
-                  defaultMessage: 'Mode',
-                })}
-                data-test-subj="lnsMetric_color_mode_buttons"
-                options={[
-                  {
-                    id: `${idPrefix}static`,
-                    label: i18n.translate('xpack.lens.metric.colorMode.static', {
-                      defaultMessage: 'Static',
-                    }),
-                    value: 'static',
-                    'data-test-subj': 'lnsMetric_color_mode_static',
-                  },
-                  {
-                    id: `${idPrefix}dynamic`,
-                    label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
-                      defaultMessage: 'Dynamic',
-                    }),
-                    value: 'dynamic',
-                    'data-test-subj': 'lnsMetric_color_mode_dynamic',
-                  },
-                ]}
-                idSelected={`${idPrefix}${colorMode}`}
-                onChange={(_id, newColorMode) => {
-                  if (newColorMode === colorMode) return;
+              <div
+                ref={colorControlsAnchorRef}
+                data-test-subj="lnsMetric_dimensionEditor_colorControls"
+              >
+                <EuiButtonGroup
+                  isFullWidth
+                  buttonSize="compressed"
+                  legend={i18n.translate('xpack.lens.metric.colorMode.label', {
+                    defaultMessage: 'Mode',
+                  })}
+                  data-test-subj="lnsMetric_color_mode_buttons"
+                  options={[
+                    {
+                      id: `${idPrefix}static`,
+                      label: i18n.translate('xpack.lens.metric.colorMode.static', {
+                        defaultMessage: 'Static',
+                      }),
+                      value: 'static',
+                      'data-test-subj': 'lnsMetric_color_mode_static',
+                    },
+                    {
+                      id: `${idPrefix}dynamic`,
+                      label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
+                        defaultMessage: 'Dynamic',
+                      }),
+                      value: 'dynamic',
+                      'data-test-subj': 'lnsMetric_color_mode_dynamic',
+                    },
+                  ]}
+                  idSelected={`${idPrefix}${colorMode}`}
+                  onChange={(_id, newColorMode) => {
+                    if (newColorMode === colorMode) return;
 
-                  setState({
-                    ...state,
-                    ...(newColorMode === 'dynamic'
-                      ? {
-                          palette: {
-                            ...activePalette,
-                            params: {
-                              ...activePalette.params,
-                              stops: displayStops,
+                    setState({
+                      ...state,
+                      ...(newColorMode === 'dynamic'
+                        ? {
+                            palette: {
+                              ...activePalette,
+                              params: {
+                                ...activePalette.params,
+                                stops: displayStops,
+                              },
                             },
-                          },
-                          color: undefined,
-                        }
-                      : {
-                          palette: undefined,
-                          color: undefined,
-                        }),
-                  });
-                }}
-              />
+                            color: undefined,
+                          }
+                        : {
+                            palette: undefined,
+                            color: undefined,
+                          }),
+                    });
+                  }}
+                />
+              </div>
             </EuiFormRow>
           )}
           {hasDynamicColoring ? (
