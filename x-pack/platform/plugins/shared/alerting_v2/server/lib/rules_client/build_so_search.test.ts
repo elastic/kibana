@@ -30,9 +30,21 @@ describe('buildSoSearch', () => {
     expect(buildSoSearch('prod    alerts')).toBe('prod* alerts*');
   });
 
-  it('passes through special characters without escaping', () => {
-    expect(buildSoSearch('a--b')).toBe('a--b*');
+  it('escapes simple_query_string operators', () => {
+    expect(buildSoSearch('a--b')).toBe('a\\-\\-b*');
+    expect(buildSoSearch('rule+name')).toBe('rule\\+name*');
+    expect(buildSoSearch('(test)')).toBe('\\(test\\)*');
+    expect(buildSoSearch('"quoted"')).toBe('\\"quoted\\"*');
+    expect(buildSoSearch('wild*card')).toBe('wild\\*card*');
+    expect(buildSoSearch('fuzzy~2')).toBe('fuzzy\\~2*');
+    expect(buildSoSearch('back\\slash')).toBe('back\\\\slash*');
+    expect(buildSoSearch('a|b')).toBe('a\\|b*');
+  });
+
+  it('leaves non-operator special characters as-is', () => {
     expect(buildSoSearch('prod:alerts')).toBe('prod:alerts*');
+    expect(buildSoSearch('#channel')).toBe('#channel*');
+    expect(buildSoSearch('rule@team')).toBe('rule@team*');
   });
 });
 

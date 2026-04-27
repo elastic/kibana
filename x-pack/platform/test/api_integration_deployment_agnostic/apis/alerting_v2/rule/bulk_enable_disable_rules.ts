@@ -365,14 +365,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(400);
       });
 
-      it('should return 400 when neither ids nor filter is provided', async () => {
+      it('should treat empty body as match-all and return 200', async () => {
         const response = await supertestWithoutAuth
           .post(`${RULE_API_PATH}/_bulk_disable`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({});
 
-        expect(response.status).to.be(400);
+        expect(response.status).to.be(200);
       });
     });
 
@@ -449,14 +449,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(400);
       });
 
-      it('should return 400 when neither ids nor filter is provided', async () => {
+      it('should treat empty body as match-all and return 200', async () => {
         const response = await supertestWithoutAuth
           .post(`${RULE_API_PATH}/_bulk_enable`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({});
 
-        expect(response.status).to.be(400);
+        expect(response.status).to.be(200);
       });
     });
   });
