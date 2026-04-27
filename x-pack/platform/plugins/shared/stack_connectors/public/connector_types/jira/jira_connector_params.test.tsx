@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import JiraConnectorFields from './jira_connector_params';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -36,7 +35,7 @@ describe('JiraActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <JiraConnectorFields
           readOnly={false}
@@ -46,10 +45,10 @@ describe('JiraActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="config.apiUrl-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="config.projectKey-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.email-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.apiToken-input"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('config.apiUrl-input')).toBeInTheDocument();
+    expect(screen.getByTestId('config.projectKey-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.email-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.apiToken-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -81,7 +80,7 @@ describe('JiraActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <JiraConnectorFields
             readOnly={false}
@@ -91,7 +90,7 @@ describe('JiraActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({

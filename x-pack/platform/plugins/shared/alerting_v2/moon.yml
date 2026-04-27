@@ -104,6 +104,8 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/core-saved-objects-api-server'
 tags:
   - plugin
   - prod
