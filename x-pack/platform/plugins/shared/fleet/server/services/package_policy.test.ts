@@ -539,6 +539,52 @@ describe('Package policy service', () => {
       ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
     });
 
+    it('should throw validation error when global_data_tags is set on a non-agentless package policy', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      // Mock a non-agentless agent policy
+      mockAgentPolicyGet(undefined, { supports_agentless: false });
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            supports_agentless: false,
+            global_data_tags: [{ name: 'client_id', value: 'acme' }],
+            inputs: [
+              {
+                type: 'logfile',
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrowError(
+        /`global_data_tags` can only be set on agentless integration policies/
+      );
+    });
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
