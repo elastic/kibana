@@ -9,16 +9,22 @@
 
 import { BuildkiteClient } from '#pipeline-utils';
 
-const METADATA_PREFIX = 'cancel_on_gate_failure:';
+const BATCH_PREFIX = 'cancel_on_gate_failure_batch:';
 
 function run(): void {
   const bk = new BuildkiteClient();
 
-  // Discover cancelable step keys from metadata set at pipeline upload time
   const stepKeys = bk
     .getMetadataKeys()
-    .filter((key) => key.startsWith(METADATA_PREFIX))
-    .map((key) => key.slice(METADATA_PREFIX.length));
+    .filter((key) => key.startsWith(BATCH_PREFIX))
+    .flatMap((key) => {
+      const value = bk.getMetadata(key);
+      try {
+        return value ? (JSON.parse(value) as string[]) : [];
+      } catch {
+        return [];
+      }
+    });
 
   if (stepKeys.length === 0) {
     return;

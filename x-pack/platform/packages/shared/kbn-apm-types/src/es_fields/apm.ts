@@ -125,6 +125,9 @@ export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_TYPE = 'error.type';
 export const ERROR_CODE = 'error.code';
 
+// ANOMALY
+export const ANOMALY_DETECTOR_TYPE = 'anomaly.detector_type';
+
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
