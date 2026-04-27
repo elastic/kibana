@@ -78,7 +78,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           canManageOwnApiKeys: boolean;
         }>(API_KEY_PRIVILEGES_PATH);
 
-        return areApiKeysEnabled && (canManageApiKeys || canManageOwnApiKeys);
+        return areApiKeysEnabled && canManageApiKeys;
       },
       ...options?.apiKeys,
     },
