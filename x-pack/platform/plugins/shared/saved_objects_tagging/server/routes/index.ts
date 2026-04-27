@@ -12,6 +12,7 @@ import {
   registerDeleteTagRoute,
   registerCreateTagRoute,
 } from './tags';
+import { registerApiRoutes } from './api';
 import {
   registerFindAssignableObjectsRoute,
   registerUpdateTagsAssignmentsRoute,
@@ -21,7 +22,10 @@ import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from '
 import type { TagsPluginRouter } from '../types';
 
 export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
-  // tags API
+  // public API
+  registerApiRoutes(router);
+
+  // deprecated tags API
   registerCreateTagRoute(router);
   registerUpdateTagRoute(router);
   registerDeleteTagRoute(router);
