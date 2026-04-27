@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
+
+const EVENT_LOG_INDEX = '.kibana-event-log-*';
 
 const INDEX_THRESHOLD_PARAMS = {
   aggType: 'count',
@@ -21,10 +24,7 @@ const INDEX_THRESHOLD_PARAMS = {
   timeField: '@timestamp',
 };
 
-const getAlertAttrs = async (
-  esClient: { get: (params: { index: string; id: string }) => Promise<{ _source?: unknown }> },
-  ruleId: string
-) => {
+const getAlertAttrs = async (esClient: EsClient, ruleId: string) => {
   const { _source } = await esClient.get({
     index: '.kibana_alerting_cases_1',
     id: `alert:${ruleId}`,
@@ -33,8 +33,46 @@ const getAlertAttrs = async (
   return (_source as Record<string, unknown>)?.alert as Record<string, unknown>;
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/264184
-apiTest.describe.skip(
+/**
+ * Waits until the rule's task has finished its first execution. Without this,
+ * an in-flight first run can race with `_update_api_key` and trigger
+ * `retryIfConflicts`, which queues extra orphaned keys for invalidation.
+ *
+ * The `event.action: 'execute'` event is logged after the task commits its
+ * post-execution writes to the rule SO, so observing one in
+ * `.kibana-event-log-*` is a reliable "task has finished writing" signal.
+ * This mirrors the pattern used in FTR alerting tests via `getEventLog`.
+ */
+const waitForFirstRuleExecution = async (
+  esClient: EsClient,
+  ruleId: string,
+  { timeoutMs = 60_000, pollMs = 500 }: { timeoutMs?: number; pollMs?: number } = {}
+): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await esClient.indices.refresh({ index: EVENT_LOG_INDEX }).catch(() => {});
+    const result = await esClient.search({
+      index: EVENT_LOG_INDEX,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'event.provider': 'alerting' } },
+            { term: { 'event.action': 'execute' } },
+            { term: { 'rule.id': ruleId } },
+          ],
+        },
+      },
+    });
+    if (result.hits.hits.length > 0) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, pollMs));
+  }
+  throw new Error(`Rule ${ruleId} did not complete its first execution within ${timeoutMs}ms`);
+};
+
+apiTest.describe(
   'API key invalidation on rule operations',
   { tag: tags.serverless.observability.complete },
   () => {
@@ -112,7 +150,11 @@ apiTest.describe.skip(
             name: 'scout-update-rule-test',
             rule_type_id: '.index-threshold',
             consumer: 'stackAlerts',
-            schedule: { interval: '1m' },
+            // Use a long interval so only the first scheduled run lands
+            // inside the test window. We then wait for that first run to
+            // finish before rotating, so `_update_api_key` has no concurrent
+            // SO writer and `retryIfConflicts` doesn't trigger.
+            schedule: { interval: '1h' },
             enabled: true,
             actions: [],
             params: INDEX_THRESHOLD_PARAMS,
@@ -123,6 +165,8 @@ apiTest.describe.skip(
         expect(createResponse).toHaveStatusCode(200);
         const ruleId = (createResponse.body as { id: string }).id;
         ruleIds.push(ruleId);
+
+        await waitForFirstRuleExecution(esClient, ruleId);
 
         const attrsBefore = await getAlertAttrs(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
@@ -135,7 +179,7 @@ apiTest.describe.skip(
           body: {
             name: 'scout-update-rule-test-updated',
             tags: ['scout-api-key-invalidation'],
-            schedule: { interval: '1m' },
+            schedule: { interval: '1h' },
             params: INDEX_THRESHOLD_PARAMS,
             actions: [],
           },
@@ -143,16 +187,18 @@ apiTest.describe.skip(
         });
         expect(updateResponse).toHaveStatusCode(200);
 
-        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
-          type: 'api_key_pending_invalidation',
-        });
-        expect(pendingInvalidations).toHaveLength(2);
-
         const attrsAfter = await getAlertAttrs(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
         expect(attrsAfter.uiamApiKey).toBeDefined();
         expect(attrsAfter.apiKey).not.toBe(attrsBefore.apiKey);
         expect(attrsAfter.uiamApiKey).not.toBe(attrsBefore.uiamApiKey);
+
+        // Exactly the previous ES + UIAM keys should be queued for
+        // invalidation: one entry each.
+        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
+          type: 'api_key_pending_invalidation',
+        });
+        expect(pendingInvalidations).toHaveLength(2);
       }
     );
 
@@ -167,7 +213,11 @@ apiTest.describe.skip(
             name: 'scout-update-api-key-test',
             rule_type_id: '.index-threshold',
             consumer: 'stackAlerts',
-            schedule: { interval: '1m' },
+            // Use a long interval so only the first scheduled run lands
+            // inside the test window. We then wait for that first run to
+            // finish before rotating, so `_update_api_key` has no concurrent
+            // SO writer and `retryIfConflicts` doesn't trigger.
+            schedule: { interval: '1h' },
             enabled: true,
             actions: [],
             params: INDEX_THRESHOLD_PARAMS,
@@ -178,6 +228,8 @@ apiTest.describe.skip(
         expect(createResponse).toHaveStatusCode(200);
         const ruleId = (createResponse.body as { id: string }).id;
         ruleIds.push(ruleId);
+
+        await waitForFirstRuleExecution(esClient, ruleId);
 
         const attrsBefore = await getAlertAttrs(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
@@ -191,16 +243,18 @@ apiTest.describe.skip(
         );
         expect(updateApiKeyResponse).toHaveStatusCode(204);
 
-        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
-          type: 'api_key_pending_invalidation',
-        });
-        expect(pendingInvalidations).toHaveLength(2);
-
         const attrsAfter = await getAlertAttrs(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
         expect(attrsAfter.uiamApiKey).toBeDefined();
         expect(attrsAfter.apiKey).not.toBe(attrsBefore.apiKey);
         expect(attrsAfter.uiamApiKey).not.toBe(attrsBefore.uiamApiKey);
+
+        // Exactly the previous ES + UIAM keys should be queued for
+        // invalidation: one entry each.
+        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
+          type: 'api_key_pending_invalidation',
+        });
+        expect(pendingInvalidations).toHaveLength(2);
       }
     );
 
