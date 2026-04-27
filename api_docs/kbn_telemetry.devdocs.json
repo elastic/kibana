@@ -13,6 +13,50 @@
     "functions": [
       {
         "parentPluginId": "@kbn/telemetry",
+        "id": "def-server.buildOtelResources",
+        "type": "Function",
+        "tags": [],
+        "label": "buildOtelResources",
+        "description": [
+          "\nUnified function to build the OpenTelemetry resource for all services."
+        ],
+        "signature": [
+          "(serviceName: string) => ",
+          "Resource"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry/src/build_otel_resources.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.buildOtelResources.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [
+              "The service name used to look up APM config (defaults to 'kibana')."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/build_otel_resources.ts",
+            "lineNumber": 23,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The OpenTelemetry resource"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry",
         "id": "def-server.initTelemetry",
         "type": "Function",
         "tags": [],
@@ -24,7 +68,7 @@
           "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-        "lineNumber": 31,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -42,7 +86,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 32,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -61,7 +105,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 33,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -80,7 +124,7 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 34,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -99,7 +143,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 35,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
