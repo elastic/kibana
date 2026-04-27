@@ -761,7 +761,6 @@ describe('TemplatesService', () => {
 
       const result = await service.getTemplateVersionsForExtendedFieldSearch({
         owner: ['securitySolution'],
-        isDeleted: false,
       });
 
       expect(result).toHaveLength(2);
@@ -810,7 +809,6 @@ describe('TemplatesService', () => {
 
       const result = await service.getTemplateVersionsForExtendedFieldSearch({
         owner: ['securitySolution'],
-        isDeleted: false,
       });
 
       expect(result).toHaveLength(3);
@@ -824,7 +822,6 @@ describe('TemplatesService', () => {
 
       const result = await service.getTemplateVersionsForExtendedFieldSearch({
         owner: ['nonexistent'],
-        isDeleted: false,
       });
 
       expect(result).toEqual([]);
