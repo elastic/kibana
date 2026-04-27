@@ -19,22 +19,11 @@ describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
   } as unknown as Logger;
 
   const baseConfig = {
-    isServerless: false,
-    compositeSloExperimentalEnabled: true,
     compositeSloSummaryTaskEnabled: true,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('returns feature_disabled when composite SLO is not enabled in config', async () => {
-    const result = await requestCompositeSloSummaryRefreshOnCompositeListVisit({
-      taskManager: {} as any,
-      logger,
-      config: { ...baseConfig, compositeSloExperimentalEnabled: false },
-    });
-    expect(result).toEqual({ triggered: false, reason: 'feature_disabled' });
   });
 
   it('returns task_disabled when summary task is disabled in config', async () => {

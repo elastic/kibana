@@ -10,7 +10,6 @@ import { z } from '@kbn/zod';
 const postCompositeSloSummaryRefreshParamsSchema = z.object({});
 
 export type CompositeSloSummaryRefreshSkippedReason =
-  | 'feature_disabled'
   | 'task_disabled'
   | 'cooldown'
   | 'task_not_scheduled'

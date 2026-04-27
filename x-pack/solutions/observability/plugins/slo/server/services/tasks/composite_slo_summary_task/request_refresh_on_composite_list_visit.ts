@@ -19,7 +19,7 @@ export const COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS = 10 * 60 * 1
 interface Dependencies {
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  config: SLORoutesDependencies['config'];
+  config: Pick<SLORoutesDependencies['config'], 'compositeSloSummaryTaskEnabled'>;
 }
 
 export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
@@ -27,10 +27,6 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
   logger,
   config,
 }: Dependencies): Promise<PostCompositeSloSummaryRefreshResponse> {
-  if (!config.compositeSloExperimentalEnabled) {
-    return { triggered: false, reason: 'feature_disabled' };
-  }
-
   if (!config.compositeSloSummaryTaskEnabled) {
     return { triggered: false, reason: 'task_disabled' };
   }
