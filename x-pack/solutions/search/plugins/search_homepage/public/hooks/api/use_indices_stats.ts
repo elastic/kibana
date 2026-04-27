@@ -10,6 +10,7 @@ import type { UseQueryResult } from '@kbn/react-query';
 import type { Index } from '@kbn/index-management-shared-types';
 
 import { useKibana } from '../use_kibana';
+import { getErrorCode } from '../../utils/get_error_message';
 
 export interface IndicesStats {
   totalIndices: number;
@@ -19,16 +20,27 @@ export interface IndicesStats {
 
 const API_BASE_PATH = '/api/index_management';
 
-export const useIndicesStats = (): UseQueryResult<IndicesStats> => {
+export const useIndicesStats = (): UseQueryResult<IndicesStats | undefined> => {
   const { http } = useKibana().services;
 
-  const queryResult = useQuery<Index[], Error, IndicesStats>({
+  const queryResult = useQuery<Index[] | undefined, Error, IndicesStats | undefined>({
     queryKey: ['fetchIndicesStats'],
     queryFn: async () => {
-      const response = await http.get<Index[]>(`${API_BASE_PATH}/indices`);
-      return response;
+      try {
+        const response = await http.get<Index[]>(`${API_BASE_PATH}/indices`);
+        return response;
+      } catch (error) {
+        if (getErrorCode(error) === 403) {
+          return undefined;
+        }
+        throw error;
+      }
     },
     select: (indices) => {
+      if (!indices) {
+        return undefined;
+      }
+
       const hiddenIndices = indices.filter((index) => index.hidden).length;
       const normalIndices = indices.filter((index) => !index.hidden).length;
       const totalIndices = indices.length;

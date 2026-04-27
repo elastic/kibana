@@ -7,32 +7,41 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { UseQueryResult } from '@kbn/react-query';
+
 import { useKibana } from '../use_kibana';
+import { getErrorCode } from '../../utils/get_error_message';
 
 export interface DashboardsStats {
   totalDashboards: number;
 }
 
-export const useDashboardsStats = (): UseQueryResult<DashboardsStats> => {
+export const useDashboardsStats = (): UseQueryResult<DashboardsStats | undefined> => {
   const { http } = useKibana().services;
 
-  const queryResult = useQuery<DashboardsStats>({
+  const queryResult = useQuery<DashboardsStats | undefined>({
     queryKey: ['fetchDashboardsStats'],
     queryFn: async () => {
-      const response = await http.get<{
-        saved_objects: Array<{ id: string; type: string }>;
-        total: number;
-      }>('/api/saved_objects/_find', {
-        query: {
-          type: 'dashboard',
-          per_page: 10000,
-          fields: 'title',
-        },
-      });
+      try {
+        const response = await http.get<{
+          saved_objects: Array<{ id: string; type: string }>;
+          total: number;
+        }>('/api/saved_objects/_find', {
+          query: {
+            type: 'dashboard',
+            per_page: 10000,
+            fields: 'title',
+          },
+        });
 
-      return {
-        totalDashboards: response.total,
-      };
+        return {
+          totalDashboards: response.total,
+        };
+      } catch (error) {
+        if (getErrorCode(error) === 403) {
+          return undefined;
+        }
+        throw error;
+      }
     },
   });
 

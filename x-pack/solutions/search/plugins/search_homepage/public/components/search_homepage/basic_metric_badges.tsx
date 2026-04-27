@@ -31,7 +31,7 @@ type BasicMetricPanelType = (typeof BASIC_METRIC_PANEL_TYPES)[number];
 interface BasicMetricPanel {
   type: BasicMetricPanelType;
   title: string;
-  metric?: string | number | Array<string | undefined>;
+  metric?: string | number | Array<string | undefined> | undefined;
   isLoading?: boolean;
   isError?: boolean;
 }
@@ -55,7 +55,7 @@ const BasicMetricPanel = ({
         <EuiTextColor color="subdued">{title}</EuiTextColor>
         &nbsp;&nbsp;
         {isLoading && <EuiLoadingSpinner size="s" />}
-        {!isLoading && isError && '—'}
+        {!isLoading && (isError || metric === undefined) && '—'}
         {!isLoading &&
           !isError &&
           (Array.isArray(metric)
@@ -126,7 +126,7 @@ export const BasicMetricBadges = () => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.indices.title', {
         defaultMessage: 'Indices',
       }),
-      metric: indicesData?.normalIndices ?? 0,
+      metric: indicesData?.normalIndices,
       isLoading: isLoadingIndices,
       isError: isErrorIndicesStats,
     },
@@ -135,7 +135,7 @@ export const BasicMetricBadges = () => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.storage.title', {
         defaultMessage: 'Storage',
       }),
-      metric: storageStats?.size ?? '-',
+      metric: storageStats?.size,
       isLoading: isLoadingStorageStats,
       isError: isErrorStorageStats,
     },
@@ -170,7 +170,7 @@ export const BasicMetricBadges = () => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.discover.title', {
         defaultMessage: 'Dashboards',
       }),
-      metric: dashboardsData?.totalDashboards ?? 0,
+      metric: dashboardsData?.totalDashboards,
       isLoading: isLoadingDashboards,
       isError: isErrorDashboards,
     },

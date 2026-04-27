@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiSpacer,
   EuiSplitPanel,
@@ -218,11 +219,18 @@ export const MetricPanels = () => {
     return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
   }, [chrome.navLinks, isWorkflowsUiEnabled]);
 
+  if (panels.length === 0) {
+    return null;
+  }
+
   return (
-    <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
-      {panels.map((panel, index) => (
-        <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
-      ))}
-    </EuiFlexGrid>
+    <EuiFlexItem>
+      <EuiSpacer size="l" />
+      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
+        {panels.map((panel, index) => (
+          <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
+        ))}
+      </EuiFlexGrid>
+    </EuiFlexItem>
   );
 };
