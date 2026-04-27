@@ -187,6 +187,7 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     bulkUpdate: jest.fn(),
     find: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
+    countAlertsWithinCase: jest.fn(),
     executeCaseActionsAggregations: jest.fn(),
     executeCaseAggregations: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),

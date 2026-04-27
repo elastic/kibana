@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { LEGACY_LENS_ATTACHMENT_TYPE, LENS_ATTACHMENT_TYPE } from '../../constants/attachments';
+import {
+  LEGACY_LENS_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  OWNER_TO_PREFIX_MAP,
+  UNIFIED_ATTACHMENT_TYPES,
+} from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../constants';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
 import {
   isMigratedAttachmentType,
   isPersistableType,
@@ -24,9 +29,18 @@ describe('migration_utils', () => {
       expect(isMigratedAttachmentType('event', owner)).toBe(true);
     });
 
+    it('is true for legacy alert attachment type', () => {
+      expect(isMigratedAttachmentType(AttachmentType.alert, owner)).toBe(true);
+      expect(isMigratedAttachmentType(AttachmentType.alert, OBSERVABILITY_OWNER)).toBe(true);
+      expect(isMigratedAttachmentType(AttachmentType.alert, GENERAL_CASES_OWNER)).toBe(true);
+    });
+
     it('is true for owner-scoped unified attachment types', () => {
       expect(isMigratedAttachmentType('comment', owner)).toBe(true);
       expect(isMigratedAttachmentType('security.event', 'security')).toBe(true);
+      expect(isMigratedAttachmentType('security.alert', owner)).toBe(true);
+      expect(isMigratedAttachmentType('observability.alert', OBSERVABILITY_OWNER)).toBe(true);
+      expect(isMigratedAttachmentType('stack.alert', GENERAL_CASES_OWNER)).toBe(true);
     });
     it('is true for legacy and unified Lens persistable subtype ids', () => {
       expect(isMigratedAttachmentType(LEGACY_LENS_ATTACHMENT_TYPE, owner)).toBe(true);
@@ -34,7 +48,6 @@ describe('migration_utils', () => {
     });
 
     it('is false for non-migrated attachment types', () => {
-      expect(isMigratedAttachmentType(AttachmentType.alert, owner)).toBe(false);
       expect(isMigratedAttachmentType('custom', owner)).toBe(false);
     });
   });
@@ -44,7 +57,28 @@ describe('migration_utils', () => {
       expect(toUnifiedAttachmentType(AttachmentType.event, 'unknownOwner')).toBe(
         AttachmentType.event
       );
+      expect(toUnifiedAttachmentType(AttachmentType.alert, 'unknownOwner')).toBe(
+        AttachmentType.alert
+      );
     });
+
+    it('produces owner-scoped alert types', () => {
+      expect(toUnifiedAttachmentType('alert', SECURITY_SOLUTION_OWNER)).toBe('security.alert');
+      expect(toUnifiedAttachmentType('alert', OBSERVABILITY_OWNER)).toBe('observability.alert');
+      expect(toUnifiedAttachmentType('alert', GENERAL_CASES_OWNER)).toBe('stack.alert');
+    });
+
+    it('produces owner-scoped event types', () => {
+      expect(toUnifiedAttachmentType('event', SECURITY_SOLUTION_OWNER)).toBe('security.event');
+    });
+
+    it.each(Object.keys(OWNER_TO_PREFIX_MAP))(
+      'maps legacy alert to a registered unified attachment type for owner "%s"',
+      (ownerKey) => {
+        const unifiedType = toUnifiedAttachmentType(AttachmentType.alert, ownerKey);
+        expect(UNIFIED_ATTACHMENT_TYPES.has(unifiedType)).toBe(true);
+      }
+    );
   });
 
   describe('isPersistableType', () => {

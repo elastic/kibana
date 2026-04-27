@@ -17,6 +17,8 @@ import { intersection } from 'lodash';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
+  isAlertAttachmentType,
+  isEventAttachmentType,
 } from '../../../common/utils/attachments';
 import type {
   AlertAttachmentPayload,
@@ -302,15 +304,10 @@ export class CaseCommentModel {
         date: createdDate,
       });
 
-      await Promise.all(
-        isLegacyAttachmentRequest(attachment)
-          ? [
-              commentableCase.handleAlertComments([attachment]),
-              this.createCommentUserAction(comment, attachment),
-            ]
-          : // TO-DO: handle alert comments for unified attachments
-            [this.createCommentUserAction(comment, attachment)]
-      );
+      await Promise.all([
+        commentableCase.handleAlertComments([attachment]),
+        this.createCommentUserAction(comment, attachment),
+      ]);
 
       return commentableCase;
     } catch (error) {
@@ -347,41 +344,73 @@ export class CaseCommentModel {
     );
 
     attachments.forEach((attachment) => {
-      if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)) {
-        const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-        const idPositionsThatAlreadyExistInCase: number[] = [];
+      if (isAlertAttachmentType(attachment.type)) {
+        if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)) {
+          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+          const idPositionsThatAlreadyExistInCase: number[] = [];
 
-        ids.forEach((id, index) => {
-          if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
-            idPositionsThatAlreadyExistInCase.push(index);
-          }
+          ids.forEach((id, index) => {
+            if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+              idPositionsThatAlreadyExistInCase.push(index);
+            }
 
-          idsAlreadySeen.add(id);
-        });
-
-        const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
-          ids,
-          idPositionsThatAlreadyExistInCase
-        );
-        const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
-          indices,
-          idPositionsThatAlreadyExistInCase
-        );
-
-        if (
-          alertIdsNotAlreadyAttachedToCase.length > 0 &&
-          alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
-        ) {
-          dedupedAttachments.push({
-            ...attachment,
-            alertId: alertIdsNotAlreadyAttachedToCase,
-            index: alertIndicesNotAlreadyAttachedToCase,
+            idsAlreadySeen.add(id);
           });
+
+          const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
+            ids,
+            idPositionsThatAlreadyExistInCase
+          );
+          const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
+            indices,
+            idPositionsThatAlreadyExistInCase
+          );
+
+          if (
+            alertIdsNotAlreadyAttachedToCase.length > 0 &&
+            alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
+          ) {
+            dedupedAttachments.push({
+              ...attachment,
+              alertId: alertIdsNotAlreadyAttachedToCase,
+              index: alertIndicesNotAlreadyAttachedToCase,
+            });
+          }
+        } else if ('attachmentId' in attachment) {
+          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+          const idPositionsThatAlreadyExistInCase: number[] = [];
+
+          ids.forEach((id, index) => {
+            if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+              idPositionsThatAlreadyExistInCase.push(index);
+            }
+
+            idsAlreadySeen.add(id);
+          });
+
+          const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
+          const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
+
+          if (newIds.length > 0 && newIds.length === newIndices.length) {
+            const existingMetadata =
+              attachment.metadata && typeof attachment.metadata === 'object'
+                ? (attachment.metadata as Record<string, unknown>)
+                : {};
+
+            dedupedAttachments.push({
+              ...attachment,
+              attachmentId: newIds,
+              metadata: {
+                ...existingMetadata,
+                index: newIndices,
+              },
+            });
+          }
         }
         return;
       }
 
-      if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeEvent(attachment)) {
+      if (isEventAttachmentType(attachment.type)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
 
         // filter out events already present in the case
@@ -389,11 +418,27 @@ export class CaseCommentModel {
           return;
         }
 
-        dedupedAttachments.push({
-          ...attachment,
-          eventId: ids,
-          index: indices,
-        });
+        if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeEvent(attachment)) {
+          dedupedAttachments.push({
+            ...attachment,
+            eventId: ids,
+            index: indices,
+          });
+        } else if ('attachmentId' in attachment) {
+          const existingMetadata =
+            attachment.metadata && typeof attachment.metadata === 'object'
+              ? (attachment.metadata as Record<string, unknown>)
+              : {};
+
+          dedupedAttachments.push({
+            ...attachment,
+            attachmentId: ids,
+            metadata: {
+              ...existingMetadata,
+              index: indices,
+            },
+          });
+        }
 
         return;
       }
@@ -413,8 +458,7 @@ export class CaseCommentModel {
 
   private async validateCreateCommentRequest(req: Array<AttachmentRequestV2>) {
     if (this.caseInfo.attributes.status === CaseStatuses.closed) {
-      const alertAttachments = this.getAttachmentsByType(req, AttachmentType.alert);
-      const hasAlertsInRequest = alertAttachments.length > 0;
+      const hasAlertsInRequest = req.some((a) => isAlertAttachmentType(a.type));
 
       if (hasAlertsInRequest) {
         throw Boom.badRequest('Alert cannot be attached to a closed case');
@@ -480,7 +524,7 @@ export class CaseCommentModel {
   }
 
   private async handleAlertComments(attachments: AttachmentRequestV2[]) {
-    const alertAttachments = this.getAttachmentsByType(attachments, AttachmentType.alert);
+    const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
 
     const alerts = getAlertInfoFromComments(alertAttachments);
 
@@ -563,7 +607,6 @@ export class CaseCommentModel {
         },
         mode,
       });
-      // casting alert and event to legacy until they are migrated
       const totalAlerts =
         countAlertsForID({
           comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,

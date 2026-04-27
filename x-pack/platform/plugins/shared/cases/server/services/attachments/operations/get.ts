@@ -9,7 +9,7 @@ import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import { toUnifiedAttachmentType } from '../../../../common/utils/attachments';
+import { toUnifiedAttachmentType, UNIFIED_ALERT_TYPES } from '../../../../common/utils/attachments';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -320,6 +320,7 @@ export class AttachmentGetter {
    * Retrieves all the alerts attached to a case.
    */
   public async getAllAlertIds({ caseId }: { caseId: string }): Promise<Set<string>> {
+    const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
     try {
       this.context.log.debug(`Attempting to GET all alerts ids for case id ${caseId}`);
       const alertsFilter = buildFilter({
@@ -346,8 +347,43 @@ export class AttachmentGetter {
         },
       });
 
-      const alertIds = res.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
-      return new Set(alertIds);
+      const legacyAlertIds = res.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
+      const alertIds = new Set(legacyAlertIds);
+
+      if (isCasesAttachmentsEnabled) {
+        const unifiedAlertFilter = buildFilter({
+          filters: [...UNIFIED_ALERT_TYPES],
+          field: 'type',
+          operator: 'or',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+        });
+
+        const unifiedRes = await this.context.unsecuredSavedObjectsClient.find<
+          unknown,
+          AlertIdsAggsResult
+        >({
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          filter: unifiedAlertFilter,
+          perPage: 0,
+          aggs: {
+            alertIds: {
+              terms: {
+                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                size: MAX_ALERTS_PER_CASE,
+              },
+            },
+          },
+        });
+
+        const unifiedAlertIds =
+          unifiedRes.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
+        for (const id of unifiedAlertIds) {
+          alertIds.add(id);
+        }
+      }
+
+      return alertIds;
     } catch (error) {
       this.context.log.error(`Error on GET all alerts ids for case id ${caseId}: ${error}`);
       throw error;
@@ -544,12 +580,13 @@ export class AttachmentGetter {
           statsMap.set(caseId, {
             ...existing,
             userComments: existing.userComments + unifiedStats.userComments,
+            alerts: existing.alerts + unifiedStats.alerts,
             events: existing.events + unifiedStats.events,
           });
         } else {
           statsMap.set(caseId, {
             userComments: unifiedStats.userComments,
-            alerts: 0,
+            alerts: unifiedStats.alerts,
             events: unifiedStats.events,
           });
         }
@@ -561,7 +598,7 @@ export class AttachmentGetter {
 
   private async getUnifiedAttachmentStatsByCaseId(
     caseIds: string[]
-  ): Promise<Map<string, Pick<AttachmentTotals, 'userComments' | 'events'>>> {
+  ): Promise<Map<string, Pick<AttachmentTotals, 'userComments' | 'events' | 'alerts'>>> {
     interface UnifiedAttachmentAggs {
       refs: {
         caseIds: {
@@ -570,11 +607,24 @@ export class AttachmentGetter {
             reverse: {
               comments: { doc_count: number };
               events: { eventIds: { value: number } };
+              alerts: {
+                buckets: Record<string, { alertIds: { value: number } }>;
+              };
             };
           }>;
         };
       };
     }
+    const alertTypeFilters = [...UNIFIED_ALERT_TYPES].reduce<
+      Record<string, { term: Record<string, string> }>
+    >((acc, alertType) => {
+      acc[alertType] = {
+        term: {
+          [`${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type`]: alertType,
+        },
+      };
+      return acc;
+    }, {});
     const res = await this.context.unsecuredSavedObjectsClient.find<unknown, UnifiedAttachmentAggs>(
       {
         hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
@@ -619,6 +669,18 @@ export class AttachmentGetter {
                           },
                         },
                       },
+                      alerts: {
+                        filters: {
+                          filters: alertTypeFilters,
+                        },
+                        aggregations: {
+                          alertIds: {
+                            cardinality: {
+                              field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                            },
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -629,12 +691,18 @@ export class AttachmentGetter {
       }
     );
 
-    const byCase = new Map<string, Pick<AttachmentTotals, 'userComments' | 'events'>>();
+    const byCase = new Map<string, Pick<AttachmentTotals, 'userComments' | 'events' | 'alerts'>>();
     const buckets = res.aggregations?.refs?.caseIds?.buckets ?? [];
     for (const bucket of buckets) {
+      const alertBuckets = bucket.reverse.alerts?.buckets ?? {};
+      const alertCount = Object.values(alertBuckets).reduce(
+        (sum, typeBucket) => sum + (typeBucket?.alertIds?.value ?? 0),
+        0
+      );
       byCase.set(bucket.key, {
         userComments: bucket.reverse.comments.doc_count,
         events: bucket.reverse.events.eventIds.value,
+        alerts: alertCount,
       });
     }
     return byCase;

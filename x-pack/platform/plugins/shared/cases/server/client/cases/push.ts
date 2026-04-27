@@ -14,7 +14,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type {
   ActionConnector,
-  AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
   ConfigurationAttributes,
@@ -27,9 +26,15 @@ import {
 } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   OWNER_FIELD,
 } from '../../../common/constants';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 
 import {
   createIncident,
@@ -47,7 +52,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
-import { buildFilter } from '../utils';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
 
@@ -66,14 +71,35 @@ function shouldCloseByPush(
 const changeAlertsStatusToClose = async (
   caseId: string,
   caseService: CasesClientArgs['services']['caseService'],
-  alertsService: CasesClientArgs['services']['alertsService']
+  alertsService: CasesClientArgs['services']['alertsService'],
+  isCasesAttachmentsEnabled: boolean
 ) => {
-  const alertAttachments = (await caseService.getAllCaseComments({
+  const legacyAlertFilter = nodeBuilder.is(
+    `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+    AttachmentType.alert
+  );
+  const unifiedAlertFilter = buildFilter({
+    filters: [
+      SECURITY_ALERT_ATTACHMENT_TYPE,
+      OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+      STACK_ALERT_ATTACHMENT_TYPE,
+    ],
+    field: 'type',
+    operator: 'or',
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
+  });
+  const alertFilter = combineFilters(
+    [legacyAlertFilter, unifiedAlertFilter],
+    NodeBuilderOperators.or
+  );
+
+  const alertAttachments = await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
+      filter: alertFilter,
     },
-  })) as SavedObjectsFindResponse<AlertAttachmentPayload>;
+    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
+  });
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
@@ -132,7 +158,10 @@ export const push = async (
     spaceId,
     publicBaseUrl,
     usageCounter,
+    config,
   } = clientArgs;
+
+  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     /* Start of push to external service */
@@ -290,7 +319,12 @@ export const push = async (
       });
 
       if (myCase.attributes.settings.syncAlerts) {
-        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
+        await changeAlertsStatusToClose(
+          myCase.id,
+          caseService,
+          alertsService,
+          isCasesAttachmentsEnabled
+        );
       }
     }
 

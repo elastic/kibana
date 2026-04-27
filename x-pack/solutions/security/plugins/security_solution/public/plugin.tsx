@@ -69,6 +69,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getEventType } from './cases/attachments/event';
+import { getSecurityAlertType } from './cases/attachments/alert';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
@@ -291,6 +292,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
     cases.attachmentFramework.registerUnified(getEventType());
+    cases.attachmentFramework.registerUnified(getSecurityAlertType());
 
     this.registerDiscoverSharedFeatures(core, plugins);
 

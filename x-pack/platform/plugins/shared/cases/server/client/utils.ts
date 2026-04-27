@@ -203,7 +203,7 @@ const decodeUnifiedReferenceAttachment = (
 
   const attachmentType = unifiedRegistry.get(attachment.type);
   if (attachmentType.schemaValidator) {
-    attachmentType.schemaValidator(attachment.metadata ?? null);
+    attachmentType.schemaValidator(attachment.metadata);
   }
 };
 

@@ -18,6 +18,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
+    loadTestFile(require.resolve('./unified_alerts'));
     loadTestFile(require.resolve('./unified_comments'));
     loadTestFile(require.resolve('./unified_events'));
     loadTestFile(require.resolve('./unified_persistable_state'));

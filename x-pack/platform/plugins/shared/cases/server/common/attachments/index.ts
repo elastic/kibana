@@ -11,6 +11,7 @@ import {
   PERSISTABLE_ATTACHMENT_TYPES,
 } from '../../../common/constants/attachments';
 import {
+  isAlertAttachmentType,
   toUnifiedAttachmentType,
   toUnifiedPersistableStateAttachmentType,
 } from '../../../common/utils/attachments';
@@ -23,6 +24,7 @@ import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
 import { persistableStateAttachmentTransformer } from './persistable_state';
 import { eventAttachmentTransformer } from './event';
+import { alertAttachmentTransformer } from './alert';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
@@ -74,6 +76,9 @@ export function getAttachmentTypeTransformers(
   }
   if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
     return eventAttachmentTransformer;
+  }
+  if (isAlertAttachmentType(normalizedType)) {
+    return alertAttachmentTransformer;
   }
   return passThroughTransformer;
 }

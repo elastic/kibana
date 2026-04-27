@@ -63,6 +63,7 @@ import {
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
 import { getEventAttachmentType } from './cases/attachments/event';
+import { securityAlertAttachmentType } from './cases/attachments/alert';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -533,6 +534,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     });
     plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
+    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();

@@ -25,6 +25,7 @@ import {
   MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -1197,25 +1198,35 @@ export class CasesConnectorExecutor {
                   owner: theCase.owner,
                 }
           ) ?? [];
+        const rulePayload = internallyManagedAlerts
+          ? { id: null, name: null }
+          : { id: rule.id, name: rule.name };
+        /**
+         * Map traverses the array in ascending order.
+         * The order is guaranteed to be the same for
+         * both calls by the ECMA-262 spec.
+         */
+        const alertIds = alerts.map((alert) => alert._id);
+        const alertIndices = alerts.map((alert) => alert._index);
+
+        const alertAttachment: AttachmentRequestV2 = this.isCasesAttachmentsEnabled
+          ? {
+              type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
+              attachmentId: alertIds,
+              metadata: { index: alertIndices, rule: rulePayload },
+              owner: theCase.owner,
+            }
+          : {
+              type: AttachmentType.alert,
+              rule: rulePayload,
+              alertId: alertIds,
+              index: alertIndices,
+              owner: theCase.owner,
+            };
+
         return {
           caseId: theCase.id,
-          attachments: [
-            ...extraComments,
-            {
-              type: AttachmentType.alert,
-              rule: internallyManagedAlerts
-                ? { id: null, name: null }
-                : { id: rule.id, name: rule.name },
-              /**
-               * Map traverses the array in ascending order.
-               * The order is guaranteed to be the same for
-               * both calls by the ECMA-262 spec.
-               */
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: theCase.owner,
-            },
-          ],
+          attachments: [...extraComments, alertAttachment],
         };
       }
     );

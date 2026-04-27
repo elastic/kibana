@@ -22,6 +22,7 @@ import {
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import {
   commentExternalReference,
   commentFileExternalReference,
@@ -689,6 +690,64 @@ describe('CaseCommentModel', () => {
       // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
       expect(alertThree.attributes.alertId).toEqual(['test-id-5']);
       expect(alertThree.attributes.index).toEqual(['test-index-5']);
+    });
+
+    it('filters duplicate ids from unified (v2) alert attachments while preserving order', async () => {
+      clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
+        new Set(['test-id-4'])
+      );
+
+      const unifiedMultipleAlert = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        owner: SECURITY_SOLUTION_OWNER,
+        attachmentId: ['test-id-3', 'test-id-4', 'test-id-5'],
+        metadata: {
+          index: ['test-index-3', 'test-index-4', 'test-index-5'],
+          rule: { id: 'rule-id-1', name: 'rule-name-1' },
+        },
+      } as unknown as typeof multipleAlert & { attachmentId: string[] };
+
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            ...unifiedMultipleAlert,
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments.length).toBe(1);
+      const unifiedCall = attachments[0] as unknown as {
+        attributes: { attachmentId: string[]; metadata: { index: string[] } };
+      };
+      // test-id-4 was already on the case → must be filtered out from both attachmentId and metadata.index
+      expect(unifiedCall.attributes.attachmentId).toEqual(['test-id-3', 'test-id-5']);
+      expect(unifiedCall.attributes.metadata.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    it('drops the unified alert attachment entirely when every id is already attached to the case', async () => {
+      clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
+        new Set(['test-id-3', 'test-id-4', 'test-id-5'])
+      );
+
+      const unifiedAllDuplicates = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        owner: SECURITY_SOLUTION_OWNER,
+        attachmentId: ['test-id-3', 'test-id-4', 'test-id-5'],
+        metadata: {
+          index: ['test-index-3', 'test-index-4', 'test-index-5'],
+          rule: { id: 'rule-id-1', name: 'rule-name-1' },
+        },
+      };
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAllDuplicates } as never],
+      });
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
     });
 
     it('remove alerts from multiple attachments with multiple alerts attached to the case', async () => {

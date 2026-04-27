@@ -83,7 +83,7 @@ export const validateUnifiedRegisteredAttachments = ({
   if (isUnifiedValueAttachmentRequest(query)) {
     attachmentType.schemaValidator(query.data);
   } else if (isUnifiedReferenceAttachmentRequest(query)) {
-    attachmentType.schemaValidator(query.metadata ?? null);
+    attachmentType.schemaValidator(query.metadata);
   } else {
     throw Boom.badRequest(
       `Invalid unified attachment request: expected value (data) or reference (attachmentId) shape.`

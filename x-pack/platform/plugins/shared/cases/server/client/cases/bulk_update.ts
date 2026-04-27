@@ -34,17 +34,26 @@ import type {
 import { PatchCasesResponseRt, CasesPatchRequestRt } from '../../../common/types/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { Operations } from '../../authorization';
 import { createCaseError, isSOError } from '../../common/error';
+import { createAlertUpdateStatusRequest, flattenCaseSavedObject } from '../../common/utils';
+import { isAlertAttachmentType } from '../../../common/utils/attachments';
 import {
-  createAlertUpdateStatusRequest,
-  flattenCaseSavedObject,
-  isCommentRequestTypeAlert,
-} from '../../common/utils';
-import { arraysDifference, getCaseToUpdate } from '../utils';
+  arraysDifference,
+  getCaseToUpdate,
+  buildFilter,
+  combineFilters,
+  NodeBuilderOperators,
+} from '../utils';
 import {
   dedupAssignees,
   fillMissingCustomFields,
@@ -186,19 +195,39 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
+  isCasesAttachmentsEnabled,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
+  isCasesAttachmentsEnabled: boolean;
 }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
-  // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
+  const legacyAlertFilter = nodeBuilder.is(
+    `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+    AttachmentType.alert
+  );
+  const unifiedAlertFilter = buildFilter({
+    filters: [
+      SECURITY_ALERT_ATTACHMENT_TYPE,
+      OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+      STACK_ALERT_ATTACHMENT_TYPE,
+    ],
+    field: 'type',
+    operator: 'or',
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
+  });
+  const alertFilter = combineFilters(
+    [legacyAlertFilter, unifiedAlertFilter],
+    NodeBuilderOperators.or
+  );
+
   return (await caseService.getAllCaseComments({
     id: idsOfCasesToSync,
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
+      filter: alertFilter,
     },
-    mode: 'legacy',
+    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
@@ -230,11 +259,13 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
+  isCasesAttachmentsEnabled,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
+  isCasesAttachmentsEnabled: boolean;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -260,11 +291,12 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
+    isCasesAttachmentsEnabled,
   });
 
   const alertsToUpdateByCaseId = totalAlerts.saved_objects.reduce(
     (acc: Map<string, UpdateAlertStatusRequest[]>, alertComment) => {
-      if (isCommentRequestTypeAlert(alertComment.attributes)) {
+      if (isAlertAttachmentType(alertComment.attributes.type)) {
         const caseId = getID(alertComment, CASE_SAVED_OBJECT);
         if (caseId == null) {
           return acc;
@@ -424,7 +456,10 @@ export const bulkUpdate = async (
     logger,
     authorization,
     closeReasonValidator,
+    config,
   } = clientArgs;
+
+  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -592,6 +627,7 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
+      isCasesAttachmentsEnabled,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({

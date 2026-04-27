@@ -50,6 +50,7 @@ import { uiSettings } from './ui_settings';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
+import { observabilityAlertAttachmentType } from './cases/attachments/alert';
 import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -101,6 +102,7 @@ export class ObservabilityPlugin
       plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+      plugins.cases.attachmentFramework.registerUnified(observabilityAlertAttachmentType);
     }
 
     plugins.features.registerKibanaFeature(getLogsFeature());

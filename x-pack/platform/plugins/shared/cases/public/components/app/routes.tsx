@@ -48,13 +48,8 @@ const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
-  ruleDetailsNavigation,
-  showAlertDetails,
-  useFetchAlertData,
-  onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
-  renderAlertsTable,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
@@ -126,13 +121,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           <Suspense fallback={<EuiLoadingSpinner />}>
             <CaseViewLazy
               actionsNavigation={actionsNavigation}
-              ruleDetailsNavigation={ruleDetailsNavigation}
-              showAlertDetails={showAlertDetails}
-              useFetchAlertData={useFetchAlertData}
-              onAlertsTableLoaded={onAlertsTableLoaded}
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
-              renderAlertsTable={renderAlertsTable}
             />
           </Suspense>
         </Route>

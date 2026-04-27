@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { type IKibanaResponse } from '@kbn/core/server';
 import pLimit from 'p-limit';
 import { createCasesRoute } from '../create_cases_route';
-import { INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL } from '../../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+} from '../../../../common/constants';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { type CasesClient } from '../../../client';
 import { type caseApiV1 } from '../../../../common/types/api';
@@ -79,25 +83,44 @@ export const processCase = async (
   caseId: string,
   documentIds: Set<string>
 ) => {
+  const documentIdList = Array.from(documentIds);
+
+  /**
+   * Legacy attachments live in `cases-comments` and store the document id in either
+   * `eventId` or `alertId`, so we OR-match those two fields.
+   */
+  const legacyFilter = combineFilters(
+    [
+      buildFilter({
+        filters: documentIdList,
+        field: 'eventId',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+      buildFilter({
+        filters: documentIdList,
+        field: 'alertId',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+    ],
+    'or' as const
+  );
+
+  /**
+   * Unified attachments live in `cases-attachments` and store the document id in
+   * `attachmentId`.
+   */
+  const unifiedFilter = buildFilter({
+    filters: documentIdList,
+    field: 'attachmentId',
+    operator: 'or',
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
+  });
+
   const documentsForCase = await casesClient.attachments.getAllDocumentsAttachedToCase({
     caseId,
-    filter: combineFilters(
-      [
-        buildFilter({
-          filters: Array.from(documentIds),
-          field: 'eventId',
-          operator: 'or',
-          type: 'cases-comments',
-        }),
-        buildFilter({
-          filters: Array.from(documentIds),
-          field: 'alertId',
-          operator: 'or',
-          type: 'cases-comments',
-        }),
-      ],
-      'or' as const
-    ),
+    filter: combineFilters([legacyFilter, unifiedFilter], 'or' as const),
   });
 
   return documentIds.size === documentsForCase.length ? caseId : null;
