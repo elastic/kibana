@@ -37,7 +37,7 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
 
   const taskId = getCompositeSloSummaryTaskId();
 
-  let task;
+  let task: Awaited<ReturnType<TaskManagerStartContract['get']>>;
   try {
     task = await taskManager.get(taskId);
   } catch (error) {
@@ -49,11 +49,7 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
   }
 
   const state = task.state as CompositeSloSummaryTaskState;
-  const lastAt = state.lastCompositeListVisitRunSoonAt;
-  if (
-    typeof lastAt === 'number' &&
-    Date.now() - lastAt < COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS
-  ) {
+  if (isInCooldown(state)) {
     return { triggered: false, reason: 'cooldown' };
   }
 
@@ -68,6 +64,11 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
   }
 
   try {
+    // Write the cooldown timestamp after runSoon succeeds. There is an inherent race: the task
+    // runner reads taskInstance.state at the start of its run and returns it verbatim, so if the
+    // task starts and completes before bulkUpdateState persists this timestamp, the task's own
+    // state write will overwrite it and the cooldown will not take effect for that cycle.
+    // This is accepted as a best-effort cooldown — the worst case is one extra runSoon call.
     await taskManager.bulkUpdateState([taskId], (previousState) => ({
       ...previousState,
       lastCompositeListVisitRunSoonAt: Date.now(),
@@ -79,4 +80,10 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
   }
 
   return { triggered: true };
+}
+
+function isInCooldown(taskState: CompositeSloSummaryTaskState): boolean {
+  const lastAt = taskState.lastCompositeListVisitRunSoonAt;
+  return typeof lastAt === 'number' &&
+    Date.now() - lastAt < COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS
 }
