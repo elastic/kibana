@@ -16,10 +16,12 @@ import {
   EuiButtonEmpty,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiHealth,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
 
 import { ApiKeyField } from '../../../../../components/api_key_field';
@@ -91,10 +93,7 @@ const TokenActions: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 
   const onConfirmDelete = async () => {
     try {
-      const res = await sendBulkDeleteEnrollmentAPIKeys({
-        tokenIds: [apiKey.id],
-        forceDelete: true,
-      });
+      const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id, { forceDelete: true });
       if (res.error) throw res.error;
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Error' });
@@ -209,6 +208,17 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   const [selectedTokens, setSelectedTokens] = useState<EnrollmentAPIKey[]>([]);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
   const [bulkActionPending, setBulkActionPending] = useState<BulkAction | null>(null);
+
+  const hasNonDefaultFilters =
+    search !== '' || selectedPolicyIds.length > 0 || activeFilter !== 'active';
+
+  const resetFilters = () => {
+    setSearch('');
+    setSelectedPolicyIds([]);
+    setActiveFilter('active');
+    setPagination({ ...pagination, currentPage: 1 });
+    clearSelection();
+  };
 
   const kuery = buildKuery(search, selectedPolicyIds, activeFilter);
 
@@ -363,6 +373,27 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
         ) : null;
       },
+    },
+    {
+      field: 'active',
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.activeTitle', {
+        defaultMessage: 'Active',
+      }),
+      width: '80px',
+      render: (active: boolean) => (
+        <EuiHealth
+          color={active ? 'success' : 'subdued'}
+          aria-label={
+            active
+              ? i18n.translate('xpack.fleet.enrollmentTokensList.activeValue', {
+                  defaultMessage: 'Active',
+                })
+              : i18n.translate('xpack.fleet.enrollmentTokensList.inactiveValue', {
+                  defaultMessage: 'Inactive',
+                })
+          }
+        />
+      ),
     },
     {
       field: 'actions',
@@ -600,10 +631,28 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage="Loading enrollment tokens..."
               />
             ) : (
-              <FormattedMessage
-                id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
-                defaultMessage="No enrollment tokens found."
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
+                  defaultMessage="No enrollment tokens found."
+                />
+                {hasNonDefaultFilters && (
+                  <>
+                    {' '}
+                    <EuiButtonEmpty
+                      size="s"
+                      flush="both"
+                      onClick={resetFilters}
+                      data-test-subj="enrollmentTokensList.clearFiltersButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.enrollmentTokensList.clearFiltersLink"
+                        defaultMessage="Clear filters"
+                      />
+                    </EuiButtonEmpty>
+                  </>
+                )}
+              </>
             )}
             <EuiSpacer size="s" />
           </>
@@ -612,7 +661,13 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         itemId="id"
         columns={columns}
         rowProps={(item: EnrollmentAPIKey) => ({
-          style: !item.active ? { color: euiTheme.colors.subduedText } : undefined,
+          css: !item.active
+            ? css`
+                & td {
+                  color: ${euiTheme.colors.subduedText};
+                }
+              `
+            : undefined,
         })}
         selection={{
           selected: selectionMode === 'query' ? rowItems : selectedTokens,

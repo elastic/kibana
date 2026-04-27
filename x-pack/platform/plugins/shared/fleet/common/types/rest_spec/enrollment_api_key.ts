@@ -32,6 +32,9 @@ export interface DeleteEnrollmentAPIKeyRequest {
   params: {
     keyId: string;
   };
+  query: {
+    forceDelete?: boolean;
+  };
 }
 
 export interface DeleteEnrollmentAPIKeyResponse {

@@ -50,6 +50,9 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
     keyId: schema.string(),
   }),
+  query: schema.object({
+    forceDelete: schema.boolean({ defaultValue: false }),
+  }),
 };
 
 export const DeleteEnrollmentAPIKeyResponseSchema = schema.object({

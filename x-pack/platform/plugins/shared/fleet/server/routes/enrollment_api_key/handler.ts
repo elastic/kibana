@@ -82,17 +82,19 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 };
 
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
-  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
+  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>,
+  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.query>
 > = async (context, request, response) => {
   try {
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
+    const { forceDelete } = request.query;
     await APIKeyService.deleteEnrollmentApiKeys(
       esClient,
       [request.params.keyId],
-      false,
+      forceDelete,
       useSpaceAwareness ? currentNamespace : undefined
     );
 

@@ -42,11 +42,16 @@ export function sendGetOneEnrollmentAPIKey(keyId: string, options?: RequestOptio
   });
 }
 
-export function sendDeleteOneEnrollmentAPIKey(keyId: string, options?: RequestOptions) {
+export function sendDeleteOneEnrollmentAPIKey(
+  keyId: string,
+  query?: { forceDelete?: boolean },
+  options?: RequestOptions
+) {
   return sendRequest({
     method: 'delete',
     path: enrollmentAPIKeyRouteService.getDeletePath(keyId),
     version: API_VERSIONS.public.v1,
+    query,
     ...options,
   });
 }
