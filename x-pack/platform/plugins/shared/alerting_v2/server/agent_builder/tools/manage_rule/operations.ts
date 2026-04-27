@@ -54,28 +54,35 @@ export const setQueryOperationSchema = z.object({
 
 export const setGroupingOperationSchema = z.object({
   operation: z.literal('set_grouping'),
-  fields: groupingSchema.shape.fields
-    .describe('Fields to group alerts by (e.g. ["host.name", "service.name"]).'),
+  fields: groupingSchema.shape.fields.describe(
+    'Fields to group alerts by (e.g. ["host.name", "service.name"]).'
+  ),
 });
 
 const stateTransitionInner = stateTransitionSchema.unwrap().unwrap();
 
 export const setStateTransitionOperationSchema = z.object({
   operation: z.literal('set_state_transition'),
-  pending_count: stateTransitionInner.shape.pending_count
-    .describe('Consecutive breaches before transitioning to active.'),
-  pending_timeframe: stateTransitionInner.shape.pending_timeframe
-    .describe('Time window for pending evaluation, e.g. 5m.'),
-  recovering_count: stateTransitionInner.shape.recovering_count
-    .describe('Consecutive recoveries before transitioning to inactive.'),
-  recovering_timeframe: stateTransitionInner.shape.recovering_timeframe
-    .describe('Time window for recovering evaluation, e.g. 5m.'),
+  pending_count: stateTransitionInner.shape.pending_count.describe(
+    'Consecutive breaches before transitioning to active.'
+  ),
+  pending_timeframe: stateTransitionInner.shape.pending_timeframe.describe(
+    'Time window for pending evaluation, e.g. 5m.'
+  ),
+  recovering_count: stateTransitionInner.shape.recovering_count.describe(
+    'Consecutive recoveries before transitioning to inactive.'
+  ),
+  recovering_timeframe: stateTransitionInner.shape.recovering_timeframe.describe(
+    'Time window for recovering evaluation, e.g. 5m.'
+  ),
 });
 
 export const setRecoveryPolicyOperationSchema = z.object({
   operation: z.literal('set_recovery_policy'),
   type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
-  query: esqlQuerySchema.optional().describe('Recovery ES|QL query. Required when type is "query".'),
+  query: esqlQuerySchema
+    .optional()
+    .describe('Recovery ES|QL query. Required when type is "query".'),
 });
 
 // ─── Discriminated union ──────────────────────────────────────────────────────

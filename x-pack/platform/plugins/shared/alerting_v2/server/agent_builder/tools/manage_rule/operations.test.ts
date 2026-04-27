@@ -33,9 +33,7 @@ describe('executeRuleOperations', () => {
         query: 'FROM metrics-* | STATS avg(cpu) BY host.name | LIMIT 0',
         format: 'json',
       });
-      expect(result.evaluation?.query?.base).toBe(
-        'FROM metrics-* | STATS avg(cpu) BY host.name'
-      );
+      expect(result.evaluation?.query?.base).toBe('FROM metrics-* | STATS avg(cpu) BY host.name');
     });
 
     it('throws with the ES error message when the query is invalid', async () => {
@@ -106,9 +104,7 @@ describe('executeRuleOperations', () => {
     });
 
     it('skips column validation when no prior query validation ran', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_grouping', fields: ['service.name'] },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_grouping', fields: ['service.name'] }];
 
       const result = await executeRuleOperations({}, ops);
 
@@ -135,9 +131,7 @@ describe('executeRuleOperations', () => {
     });
 
     it('throws when recovery_policy type is query but no query is provided', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_recovery_policy', type: 'query' },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_recovery_policy', type: 'query' }];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
         'recovery_policy.query.base is required when recovery_policy.type is "query"'
@@ -164,9 +158,7 @@ describe('executeRuleOperations', () => {
       const existing: Partial<RuleAttachmentData> = {
         metadata: { name: 'Old Name', description: 'Old desc' },
       };
-      const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'New Name' },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'New Name' }];
 
       const result = await executeRuleOperations(existing, ops);
 
@@ -183,9 +175,7 @@ describe('executeRuleOperations', () => {
     });
 
     it('applies set_schedule', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_schedule', every: '1m', lookback: '5m' },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_schedule', every: '1m', lookback: '5m' }];
 
       const result = await executeRuleOperations({}, ops);
 
