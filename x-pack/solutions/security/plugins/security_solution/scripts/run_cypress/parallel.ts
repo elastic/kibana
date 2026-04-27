@@ -437,8 +437,7 @@ ${JSON.stringify(
           const esFromEnv = process.env.CYPRESS_ES_FROM;
           const configEsFrom = config.get('esTestCluster.from');
           const defaultEsFrom = process.env.CI ? 'snapshot' : 'docker';
-          const esFrom =
-            configEsFrom === 'serverless' ? 'serverless' : esFromEnv || defaultEsFrom;
+          const esFrom = configEsFrom === 'serverless' ? 'serverless' : esFromEnv || defaultEsFrom;
 
           try {
             shutdownEs = await pRetry(
