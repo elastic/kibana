@@ -61,7 +61,7 @@ const compareToSchemaShared = schema.object(
       schema.string({
         meta: {
           description:
-            'Color palette name for the comparison indicator. Accepted values: `default`, `elastic_line_optimized`, `neutral`, `severity`, `cool`, `gray`, `red`, `green`, `warm`, `temperature`, `complementary`, `status`, `compare_to`, `log_level`. Defaults to `compare_to`.',
+            "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
         },
         defaultValue: DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
       })
