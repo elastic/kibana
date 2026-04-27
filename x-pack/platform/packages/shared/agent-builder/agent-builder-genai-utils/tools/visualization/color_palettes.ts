@@ -57,7 +57,7 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
 
   lines.push(
     `${nextSection()}) WHEN to apply color`,
-    '- Apply value-based coloring proactively whenever color adds meaning — e.g. utilization / saturation, latency, error rates or counts, success rates, throughput, anything with status or good-vs-bad / hot-vs-cold semantics.',
+    '- Apply value-based coloring proactively whenever color adds meaning — e.g. utilization / saturation, latency, error rates or counts, success rates, throughput, status thresholds, or temperature-style intensity.',
     '- For neutral data with no such meaning (raw counts, IDs, names, arbitrary categorical labels), OMIT the `color` field and let Lens use its defaults.',
     '- When the user explicitly requests a palette or scheme ("color from green to red", "use a temperature palette"), honor that request directly.',
     ''
@@ -74,21 +74,37 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
     );
   }
 
+  if (chartType === SupportedChartType.Metric) {
+    lines.push(
+      `${nextSection()}) METRIC COLOR PLACEMENT`,
+      '- For metric charts, prioritize coloring the metric value itself: set `apply_color_to: "value"`. Do NOT color the background unless the user explicitly asks for background coloring.',
+      ''
+    );
+  }
+
+  if (chartType === SupportedChartType.Datatable) {
+    lines.push(
+      `${nextSection()}) DATATABLE COLOR PLACEMENT`,
+      '- For datatables, prioritize badge coloring: set `apply_color_to: "badge"` on colored row or metric columns. Do NOT use cell background coloring or text/value coloring unless the user explicitly asks for it.',
+      ''
+    );
+  }
+
   if (supportsDynamic) {
     lines.push(
       `${nextSection()}) DYNAMIC GRADIENT — pick exactly ONE palette`,
       '- Choose a single palette from the gradient list below whose semantics match the metric. The chosen palette name MUST come from this list verbatim.',
-      '  - "Status" — good→bad ranges with success / warning / danger zones (SLO compliance, severity).',
-      '  - "Temperature" — diverging cool→hot data with a meaningful middle (latency, response time, anything temperature-like).',
-      '  - "Complementary" — symmetric diverging data with a neutral midpoint.',
-      '  - "Negative" (red) — "lower is better" or alarming metrics (errors, failures, anomalies).',
-      '  - "Positive" (green) — "higher is better" metrics (success rate, conversions, throughput).',
-      '  - "Cool", "Warm", or "Gray" — monochromatic gradients when only magnitude matters and there is no inherent good/bad signal.'
+      '  - "Status" — ordered status or threshold bands such as success / warning / danger (SLO compliance, severity).',
+      '  - "Temperature" — temperature-style intensity scales where cooler and hotter colors represent opposite ends of the metric.',
+      '  - "Complementary" — diverging data around a neutral midpoint (change, delta, deviation from target).',
+      '  - "Negative" (red) — values that should read as adverse, alarming, failure-related, or attention-grabbing.',
+      '  - "Positive" (green) — values that should read as favorable, healthy, successful, or on-track.',
+      '  - "Cool", "Warm", or "Gray" — monochromatic gradients when only magnitude matters and there is no inherent status signal.'
     );
 
     if (chartType === SupportedChartType.Metric) {
       lines.push(
-        '- Metric charts use 3 contiguous bands (low / mid / high or good / warn / bad), so prefer "Status", "Negative", "Positive", or "Temperature" — these carry semantic good→bad meaning that maps cleanly onto 3 bands. Avoid monochromatic palettes ("Cool", "Warm", "Gray") for metric unless the user explicitly asks for them.'
+        '- Metric charts use 3 contiguous bands (low / mid / high, status thresholds, or alert bands), so prefer "Status", "Negative", "Positive", or "Temperature" when the metric has semantic thresholds. Avoid monochromatic palettes ("Cool", "Warm", "Gray") for metric unless the user explicitly asks for them.'
       );
     }
 
