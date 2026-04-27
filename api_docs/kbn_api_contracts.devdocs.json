@@ -47,7 +47,7 @@
           }
         ],
         "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-        "lineNumber": 31,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -70,7 +70,7 @@
               "[]"
             ],
             "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -87,7 +87,7 @@
               "Allowlist"
             ],
             "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -251,7 +251,7 @@
           "Allowlist"
         ],
         "path": "packages/kbn-api-contracts/src/allowlist/load_allowlist.ts",
-        "lineNumber": 29,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -267,7 +267,7 @@
               "string | undefined"
             ],
             "path": "packages/kbn-api-contracts/src/allowlist/load_allowlist.ts",
-            "lineNumber": 29,
+            "lineNumber": 31,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -343,7 +343,7 @@
           "[]"
         ],
         "path": "packages/kbn-api-contracts/src/diff/parse_oasdiff.ts",
-        "lineNumber": 49,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -366,7 +366,7 @@
               "[]"
             ],
             "path": "packages/kbn-api-contracts/src/diff/parse_oasdiff.ts",
-            "lineNumber": 49,
+            "lineNumber": 62,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
@@ -530,6 +530,38 @@
           },
           {
             "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.oasdiffId",
+            "type": "string",
+            "tags": [],
+            "label": "oasdiffId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
             "id": "def-common.BreakingChange.details",
             "type": "Unknown",
             "tags": [],
@@ -539,7 +571,7 @@
               "unknown"
             ],
             "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-            "lineNumber": 23,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -555,7 +587,7 @@
         "label": "FilterResult",
         "description": [],
         "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -578,7 +610,7 @@
               "[]"
             ],
             "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-            "lineNumber": 27,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -601,7 +633,7 @@
               "[]"
             ],
             "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
