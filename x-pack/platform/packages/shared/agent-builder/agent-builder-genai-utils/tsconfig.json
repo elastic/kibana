@@ -2,17 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core-http-server",
     "@kbn/agent-builder-common",
@@ -33,8 +26,9 @@
     "@kbn/utility-types",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
+    "@kbn/esql-server-utils",
     "@kbn/esql-language",
     "@kbn/datemath",
-    "@kbn/es-query",
+    "@kbn/es-query"
   ]
 }

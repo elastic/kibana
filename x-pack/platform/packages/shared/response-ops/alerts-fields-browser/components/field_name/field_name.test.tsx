@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { FieldName } from './field_name';
@@ -17,23 +17,19 @@ const defaultProps = {
 };
 
 describe('FieldName', () => {
-  beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
   test('it renders the field name', () => {
-    const wrapper = mount(<FieldName {...defaultProps} />);
+    render(<FieldName {...defaultProps} />);
 
-    expect(
-      wrapper.find(`[data-test-subj="field-${timestampFieldId}-name"]`).first().text()
-    ).toEqual(timestampFieldId);
+    expect(screen.getByTestId(`field-${timestampFieldId}-name`)).toHaveTextContent(
+      timestampFieldId
+    );
   });
 
   test('it highlights the text specified by the `highlight` prop', () => {
     const highlight = 'stamp';
 
-    const wrapper = mount(<FieldName {...{ ...defaultProps, highlight }} />);
+    render(<FieldName {...{ ...defaultProps, highlight }} />);
 
-    expect(wrapper.find('mark').first().text()).toEqual(highlight);
+    expect(screen.getByText(highlight, { selector: 'mark' })).toHaveTextContent(highlight);
   });
 });

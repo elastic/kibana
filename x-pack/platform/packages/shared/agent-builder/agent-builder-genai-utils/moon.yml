@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
+  - '@kbn/esql-server-utils'
   - '@kbn/esql-language'
   - '@kbn/datemath'
   - '@kbn/es-query'

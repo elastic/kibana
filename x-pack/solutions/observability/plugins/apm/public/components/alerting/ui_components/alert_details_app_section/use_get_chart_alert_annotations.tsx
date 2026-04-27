@@ -7,6 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import type { ReactElement } from 'react';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { ALERT_END, ALERT_EVALUATION_THRESHOLD, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import {
@@ -16,38 +17,33 @@ import {
   AlertThresholdTimeRangeRect,
 } from '@kbn/observability-alert-details';
 import { useEuiTheme } from '@elastic/eui';
+import { isAnomalyRuleType } from './helpers';
 
 interface UseGetChartAlertAnnotationsProps {
   alert: TopAlert;
   dateFormat: string;
+  showAnnotations: boolean;
   customAlertEvaluationThreshold?: number;
-  isMatchingRuleType: (ruleTypeId: string) => boolean;
   normalizeThreshold?: (value: number) => number;
 }
 
 export const useGetChartAlertAnnotations = ({
   alert,
   dateFormat,
+  showAnnotations,
   customAlertEvaluationThreshold,
-  isMatchingRuleType,
   normalizeThreshold,
 }: UseGetChartAlertAnnotationsProps): ReactElement[] | undefined => {
   const { euiTheme } = useEuiTheme();
 
-  if (
-    !isMatchingRuleType(alert.fields[ALERT_RULE_TYPE_ID]) &&
-    customAlertEvaluationThreshold == null
-  ) {
-    return undefined;
-  }
-
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  if (!showAnnotations && customAlertEvaluationThreshold == null) return undefined;
 
   const thresholdAnnotations = (() => {
     const alertEvalThreshold =
       customAlertEvaluationThreshold ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
+    const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType;
 
-    if (alertEvalThreshold == null) return [];
+    if (alertEvalThreshold == null || isAnomalyRuleType(ruleTypeId)) return [];
 
     const normalizedThreshold = normalizeThreshold
       ? normalizeThreshold(alertEvalThreshold)
@@ -68,6 +64,8 @@ export const useGetChartAlertAnnotations = ({
       />,
     ];
   })();
+
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
 
   return [
     <AlertActiveTimeRangeAnnotation
