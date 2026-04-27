@@ -184,9 +184,9 @@ export const ServiceNode = memo(
         ${showContextFrame
           ? `
           padding: ${euiTheme.size.s};
-          border: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.primary};
+          border: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
           border-radius: ${euiTheme.border.radius.medium};
-          background-color: ${euiTheme.colors.lightestShade};
+          background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
         `
           : ''}
       `,

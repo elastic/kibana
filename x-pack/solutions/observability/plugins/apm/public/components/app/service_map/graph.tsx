@@ -90,8 +90,8 @@ interface GraphProps {
   isEmbedded?: boolean;
   /**
    * When set to a service name that exists on the map, that node is visually emphasized
-   * (dashed frame, primary border) and its edges are dimmed/brightened with the same
-   * logic as a selected node, until the user selects another node or edge.
+   * (dashed frame, interactive-select fill, primary border on the circle). Edges stay
+   * default; blue edges are reserved for user selection. Both can show when filter + click.
    */
   highlightedServiceName?: string;
 }
@@ -186,18 +186,6 @@ function GraphInner({
     [layoutedNodes, initialEdges, viewFilters, mapOrientation, onDagreLayoutFailure]
   );
 
-  const contextHighlightIdForEdges = useMemo(() => {
-    if (!highlightedServiceName) {
-      return null;
-    }
-    return nodesAfterFilters.some((n) => n.id === highlightedServiceName && n.type === 'service')
-      ? highlightedServiceName
-      : null;
-  }, [nodesAfterFilters, highlightedServiceName]);
-
-  const contextHighlightIdForEdgesRef = useRef(contextHighlightIdForEdges);
-  contextHighlightIdForEdgesRef.current = contextHighlightIdForEdges;
-
   const nodesWithContextHighlight = useMemo(
     () =>
       nodesAfterFilters.map((n) => {
@@ -217,9 +205,7 @@ function GraphInner({
     setNodes(nodesWithContextHighlight);
     setEdges(
       applyEdgeHighlighting(edgesAfterFilters, {
-        selectedNodeId: selectedEdgeForPopoverRef.current
-          ? null
-          : selectedNodeIdRef.current ?? contextHighlightIdForEdgesRef.current,
+        selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
         selectedEdgeId: selectedEdgeForPopoverRef.current,
       })
     );
@@ -247,7 +233,7 @@ function GraphInner({
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, {
-          selectedNodeId: newSelectedId ?? contextHighlightIdForEdgesRef.current,
+          selectedNodeId: newSelectedId,
           selectedEdgeId: null,
         })
       );
@@ -264,7 +250,7 @@ function GraphInner({
       setSelectedEdgeForPopover(newSelectedEdge);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, {
-          selectedNodeId: newSelectedEdge ? null : contextHighlightIdForEdgesRef.current,
+          selectedNodeId: null,
           selectedEdgeId: newSelectedEdge?.id ?? null,
         })
       );
@@ -282,12 +268,7 @@ function GraphInner({
         selected: false,
       }))
     );
-    setEdges((currentEdges) =>
-      applyEdgeHighlighting(currentEdges, {
-        selectedNodeId: contextHighlightIdForEdgesRef.current,
-        selectedEdgeId: null,
-      })
-    );
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
   const handlePopoverClose = useCallback(() => {
@@ -300,12 +281,7 @@ function GraphInner({
         selected: false,
       }))
     );
-    setEdges((currentEdges) =>
-      applyEdgeHighlighting(currentEdges, {
-        selectedNodeId: contextHighlightIdForEdgesRef.current,
-        selectedEdgeId: null,
-      })
-    );
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
   useEffect(() => {
