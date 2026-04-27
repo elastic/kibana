@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
@@ -260,7 +260,7 @@ export const TableSection = React.memo(
             attack={attack}
             closePopover={props.closePopover}
             telemetrySource="attacks_page_group_take_action"
-            isRemoteDocument={isCCSRemoteIndexName(attack.index ?? '')}
+            isRemoteDocument={isNonLocalIndexName(attack.index ?? '')}
           />
         );
       },

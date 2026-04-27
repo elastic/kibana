@@ -15,6 +15,9 @@ export const getServerMock = () => {
   const serverMock: SyntheticsServerSetup = {
     syntheticsEsClient: { search: jest.fn() },
     stackVersion: null,
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),

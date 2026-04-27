@@ -14329,6 +14329,14 @@
               },
               {
                 "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles.ts"
+              },
+              {
+                "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_suggested_profiles.ts"
+              },
+              {
+                "plugin": "@kbn/alerting-v2-episodes-ui",
                 "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query.ts"
               },
               {
@@ -14485,15 +14493,15 @@
               },
               {
                 "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
+              },
+              {
+                "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule.ts"
               },
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule_types.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
               },
               {
                 "plugin": "slo",

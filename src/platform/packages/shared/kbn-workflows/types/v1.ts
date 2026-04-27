@@ -707,3 +707,13 @@ export interface ChildWorkflowExecutionItem {
   status: ExecutionStatus;
   stepExecutions: WorkflowStepExecutionDto[];
 }
+
+/**
+ * Per-item result of a bulk workflow schedule call. The array is order- and
+ * length-preserving with respect to the input items: `results[i]` corresponds
+ * to `items[i]`.
+ */
+export type BulkScheduleWorkflowResult = Array<
+  | { status: 'scheduled'; workflowExecutionId: string }
+  | { status: 'error'; error: { message: string } }
+>;

@@ -14,8 +14,8 @@ import { registerTaskManagerRoutes } from './task_manager';
 
 export const registerRoutes = (
   router: IRouter,
-  getTaskManagerStart: () => TaskManagerStartContract | undefined
+  getTaskManager: () => TaskManagerStartContract | undefined
 ) => {
   registerKbnClientSoRoutes(router);
-  registerTaskManagerRoutes(router, getTaskManagerStart);
+  registerTaskManagerRoutes(router, getTaskManager);
 };

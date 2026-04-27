@@ -40,6 +40,14 @@ import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/d
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
 import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
+import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
+
+/**
+ * TODO: https://github.com/elastic/rna-program/issues/426
+ * Remove this route and its binding before GA.
+ */
+
+import { ResetResourcesRoute } from '../routes/reset_resources_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -75,4 +83,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
   bind(Route).toConstantValue(NotificationPolicyTagsRoute);
+  bind(Route).toConstantValue(SuggestUserProfilesRoute);
+  // TODO(rna-program#426): remove this binding before GA.
+  bind(Route).toConstantValue(ResetResourcesRoute);
 }
