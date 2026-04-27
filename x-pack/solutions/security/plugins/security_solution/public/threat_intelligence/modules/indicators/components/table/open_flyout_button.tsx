@@ -47,7 +47,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
           services,
           store,
           history,
-          children: <IOCDetails id={indicator._id} />,
+          children: <IOCDetails id={indicator._id as string} />,
         }),
         {
           ...defaultFlyoutProperties,

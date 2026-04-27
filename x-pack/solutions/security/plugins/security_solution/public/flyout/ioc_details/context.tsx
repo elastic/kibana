@@ -13,9 +13,6 @@ import { FlyoutError } from '../shared/components/flyout_error';
 import { IOCDetailsContext } from '../../flyout_v2/ioc_details/context';
 import type { IOCDetailsProps } from './types';
 
-// Re-export context and hook from v2
-export { IOCDetailsContext, useIOCDetailsContext } from '../../flyout_v2/ioc_details/context';
-
 export type IOCDetailsProviderProps = {
   /**
    * React components to render
