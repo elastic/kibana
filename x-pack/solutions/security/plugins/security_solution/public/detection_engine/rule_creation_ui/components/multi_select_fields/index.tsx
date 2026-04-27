@@ -18,6 +18,7 @@ interface MultiSelectAutocompleteProps {
   field: FieldHook;
   fullWidth?: boolean;
   dataTestSubj?: string;
+  isLoading?: boolean;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
@@ -30,6 +31,7 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
   field,
   fullWidth = false,
   dataTestSubj,
+  isLoading,
 }: MultiSelectAutocompleteProps) => {
   const comboBoxRef = useRef<EuiComboBox<unknown>>();
   const fieldEuiFieldProps = useMemo(
@@ -40,10 +42,11 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
       placeholder: FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       ...(fullWidth ? {} : { style: { width: `${FIELD_COMBO_BOX_WIDTH}px` } }),
-      isDisabled,
+      isDisabled: isDisabled || isLoading,
+      isLoading,
       ref: comboBoxRef,
     }),
-    [browserFields, isDisabled, fullWidth, comboBoxRef]
+    [browserFields, isDisabled, isLoading, fullWidth, comboBoxRef]
   );
 
   /**
@@ -54,10 +57,10 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
    * options lits.
    */
   useEffect(() => {
-    if (isDisabled) {
+    if (isDisabled || isLoading) {
       comboBoxRef.current?.closeList();
     }
-  }, [isDisabled]);
+  }, [isDisabled, isLoading]);
 
   return (
     <ComboBoxField
