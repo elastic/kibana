@@ -46,6 +46,8 @@ export {
   type EmbeddableFactory,
 } from './react_embeddable_system';
 
+export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';
+
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
 import type { PresentationPanelErrorProps } from './react_embeddable_system/panel_component/presentation_panel_error';
