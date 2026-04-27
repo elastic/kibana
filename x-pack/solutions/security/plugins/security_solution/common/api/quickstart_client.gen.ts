@@ -339,7 +339,10 @@ import type {
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
-import type { ScheduleRiskEngineNowResponse } from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
+import type {
+  ScheduleRiskEngineNowRequestBodyInput,
+  ScheduleRiskEngineNowResponse,
+} from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
 import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -3122,7 +3125,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   /**
    * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
    */
-  async scheduleRiskEngineNow() {
+  async scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps) {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
     return this.kbnClient
       .request<ScheduleRiskEngineNowResponse>({
@@ -3131,6 +3134,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -4079,6 +4083,9 @@ export interface RulePreviewProps {
 }
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
+}
+export interface ScheduleRiskEngineNowProps {
+  body: ScheduleRiskEngineNowRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
