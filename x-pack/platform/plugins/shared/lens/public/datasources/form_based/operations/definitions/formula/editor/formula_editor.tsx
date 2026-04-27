@@ -866,7 +866,10 @@ export function FormulaEditor({
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
                       <EuiIcon type="documentation" aria-hidden={true} />
-                      <EuiIcon type={isHelpOpen ? 'chevronSingleDown' : 'chevronSingleUp'} aria-hidden={true} />
+                      <EuiIcon
+                        type={isHelpOpen ? 'chevronSingleDown' : 'chevronSingleUp'}
+                        aria-hidden={true}
+                      />
                     </EuiLink>
                   </EuiToolTip>
                 ) : (
