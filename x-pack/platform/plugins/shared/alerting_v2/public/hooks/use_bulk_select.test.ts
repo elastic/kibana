@@ -89,7 +89,7 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true' });
+    expect(result.current.getBulkParams()).toEqual({ filter: '(enabled: true)' });
   });
 
   it('passes search as a separate field in bulk params', () => {
@@ -126,7 +126,7 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.getBulkParams()).toEqual({
-      filter: 'enabled: true AND NOT (id: "rule-1")',
+      filter: '(enabled: true) AND NOT (id: "rule-1")',
       search: 'x',
     });
   });

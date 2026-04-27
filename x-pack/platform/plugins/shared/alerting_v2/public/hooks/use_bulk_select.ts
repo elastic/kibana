@@ -189,7 +189,11 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
           ? excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ')
           : undefined;
 
-      const combinedFilter = [filter, exclusionClauses ? `NOT (${exclusionClauses})` : undefined]
+      const wrappedFilter = filter ? `(${filter})` : undefined;
+      const combinedFilter = [
+        wrappedFilter,
+        exclusionClauses ? `NOT (${exclusionClauses})` : undefined,
+      ]
         .filter(Boolean)
         .join(' AND ');
 
