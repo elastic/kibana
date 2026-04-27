@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
+import { LOOKUP_INDEX_RECREATE_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlServiceTestbed } from './testbed';
 
 describe('ESQL routes', () => {
@@ -108,9 +108,6 @@ describe('ESQL routes', () => {
   });
 
   describe('get timefield route', () => {
-    const getTimefieldUrl = (query: string) =>
-      `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-
     it('should return the time field and timeFieldType: date when specified in the query', async () => {
       const indexName = 'test_extracted_date_index';
       const client = testbed.esClient();
@@ -126,8 +123,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${indexName} | WHERE my_time_field >= ?_tstart`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('my_time_field');
       expect(result.body.timeFieldType).toBe('date');
@@ -151,8 +147,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${indexName} | WHERE my_time_field >= ?_tstart`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('my_time_field');
       expect(result.body.timeFieldType).toBe('date_nanos');
@@ -176,8 +171,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${indexName}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date');
@@ -201,8 +195,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${indexName}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date_nanos');
@@ -227,8 +220,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, ${index2}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date_nanos');
@@ -240,8 +232,7 @@ describe('ESQL routes', () => {
 
     it('should return undefined when no time field in query and index has no @timestamp', async () => {
       const query = 'FROM lookup_index1';
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe(undefined);
     });
@@ -273,8 +264,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, (FROM ${index2})`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date');
@@ -310,8 +300,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, (FROM ${index2})`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe(undefined);
 
@@ -346,8 +335,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, ${index2}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date');
@@ -383,8 +371,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, ${index2}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date');
@@ -418,8 +405,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${viewName}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date');
@@ -456,8 +442,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${viewName}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
       expect(result.body.timeFieldType).toBe('date_nanos');
@@ -494,8 +479,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${viewName}`;
-      const url = getTimefieldUrl(query);
-      const result = await testbed.POST(url).send({ query }).expect(200);
+      const result = await testbed.POST(TIMEFIELD_ROUTE).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe(undefined);
 
