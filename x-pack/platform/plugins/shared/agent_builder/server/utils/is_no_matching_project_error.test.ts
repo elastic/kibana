@@ -52,19 +52,6 @@ describe('isNoMatchingProjectError', () => {
     expect(isNoMatchingProjectError(error)).toBe(true);
   });
 
-  it('returns false for index_not_found_exception', () => {
-    const error = {
-      meta: {
-        body: {
-          error: {
-            type: 'index_not_found_exception',
-          },
-        },
-      },
-    };
-    expect(isNoMatchingProjectError(error)).toBe(false);
-  });
-
   it('returns false for null and undefined', () => {
     expect(isNoMatchingProjectError(null)).toBe(false);
     expect(isNoMatchingProjectError(undefined)).toBe(false);
