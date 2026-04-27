@@ -226,10 +226,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [
-                  { streamName: STREAM_NAME, delete: { id: uuidA } },
-                  { streamName: SECOND_STREAM_NAME, delete: { id: uuidB } },
-                ],
+                operations: [{ delete: { id: uuidA } }, { delete: { id: uuidB } }],
               },
             },
           })
@@ -259,10 +256,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [
-                  { streamName: STREAM_NAME, delete: { id: uuid1 } },
-                  { streamName: STREAM_NAME, delete: { id: uuid2 } },
-                ],
+                operations: [{ delete: { id: uuid1 } }, { delete: { id: uuid2 } }],
               },
             },
           })
@@ -290,10 +284,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [
-                  { streamName: STREAM_NAME, exclude: { id: uuid1 } },
-                  { streamName: STREAM_NAME, exclude: { id: uuid2 } },
-                ],
+                operations: [{ exclude: { id: uuid1 } }, { exclude: { id: uuid2 } }],
               },
             },
           })
@@ -307,10 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [
-                  { streamName: STREAM_NAME, restore: { id: uuid1 } },
-                  { streamName: STREAM_NAME, restore: { id: uuid2 } },
-                ],
+                operations: [{ restore: { id: uuid1 } }, { restore: { id: uuid2 } }],
               },
             },
           })
@@ -331,7 +319,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ streamName: STREAM_NAME, delete: { id: 'non-existent-uuid' } }],
+                operations: [{ delete: { id: 'non-existent-uuid' } }],
               },
             },
           })
