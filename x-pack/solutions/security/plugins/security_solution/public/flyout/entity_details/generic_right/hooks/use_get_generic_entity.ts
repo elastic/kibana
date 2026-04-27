@@ -10,8 +10,9 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
 import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FF_ENABLE_ENTITY_STORE_V2, getLatestEntityIndexPattern } from '@kbn/entity-store/common';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { getLatestEntityIndexPattern } from '@kbn/entity-store/common';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../../../../asset_inventory/constants';
 import type { GenericEntityRecord } from '../../../../asset_inventory/types/generic_entity_record';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -59,7 +60,7 @@ export const fetchGenericEntity = async (
 
 export const useGetGenericEntity = (params: UseGetGenericEntityParams) => {
   const { data: dataService } = useKibana().services;
-  const [entityStoreV2Enabled] = useUiSetting$<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const spaceId = useSpaceId();
 
   const { entityDocId, entityId } = params;
