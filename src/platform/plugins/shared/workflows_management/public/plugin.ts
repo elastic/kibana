@@ -151,11 +151,9 @@ export class WorkflowsPlugin
         })
       )
       .subscribe(() => {
-        core.http
-          .post('/internal/workflows/disable_all_workflows', { version: '1' })
-          .catch((err) => {
-            this.logger.error('Failed to disable all workflows on opt-out', { error: err });
-          });
+        core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
+          this.logger.error('Failed to disable all workflows on opt-out', { error: err });
+        });
       });
   }
 
