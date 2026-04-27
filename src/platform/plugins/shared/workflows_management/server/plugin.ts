@@ -17,6 +17,7 @@ import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { defineRoutes } from './api/routes';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
+import { AvailabilityUpdater } from './availability';
 import { createWorkflowsClientProvider } from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
@@ -48,6 +49,8 @@ export class WorkflowsPlugin
   private readonly logger: Logger;
   private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
   private config: WorkflowsManagementConfig;
+  private availabilityUpdater: AvailabilityUpdater | null = null;
+  private api: WorkflowsManagementApi | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -72,8 +75,7 @@ export class WorkflowsPlugin
     const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
-
-    const spaces = plugins.spaces.spacesService;
+    this.api = api;
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
@@ -91,6 +93,8 @@ export class WorkflowsPlugin
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
 
+    const spaces = plugins.spaces.spacesService;
+
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
     defineRoutes(router, api, this.logger, spaces, workflowsService);
 
@@ -105,6 +109,15 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Start');
 
     stepSchemas.initialize(plugins.workflowsExtensions);
+
+    if (this.api) {
+      this.availabilityUpdater = new AvailabilityUpdater({
+        licensing: plugins.licensing,
+        config: this.config,
+        api: this.api,
+        logger: this.logger,
+      });
+    }
 
     this.logger.debug('Workflows Management: Started');
     return {};
@@ -158,5 +171,7 @@ export class WorkflowsPlugin
       });
   }
 
-  public stop() {}
+  public stop() {
+    this.availabilityUpdater?.stop();
+  }
 }

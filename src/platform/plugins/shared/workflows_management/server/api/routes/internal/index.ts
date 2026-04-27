@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerDisableAllWorkflowsRoute } from './disable_all_workflows';
+import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
 import type { RouteDependencies } from '../types';
 
