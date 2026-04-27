@@ -119,8 +119,14 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
       data += chunk.toString();
     });
 
-    request.on('close', () => {
-      resolve(JSON.parse(data));
+    // Use 'end' (not 'close'). The request body stream completes on 'end'; with keep-alive
+    // the connection stays open and 'close' is not a reliable signal for a full body read.
+    request.on('end', () => {
+      try {
+        resolve(data ? JSON.parse(data) : ({} as ChatCompletionStreamParams));
+      } catch (error) {
+        reject(error);
+      }
     });
 
     request.on('error', (error) => {
