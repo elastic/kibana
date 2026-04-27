@@ -35,6 +35,12 @@ const createMockNestedFormat = (overrides: Partial<IFieldFormat> = {}) =>
     ...overrides,
   } as unknown as IFieldFormat);
 
+const getReactConvertText = (format: IFieldFormat, value: unknown): string => {
+  const result = format.reactConvert(value);
+  const { container } = render(<>{result}</>);
+  return container.textContent ?? '';
+};
+
 describe('getAggsFormats', () => {
   let getFormat: jest.MockedFunction<(mapping: SerializedFieldFormat) => IFieldFormat>;
 
@@ -52,8 +58,13 @@ describe('getAggsFormats', () => {
     expect(format.convert({ from: '2020-05-01', to: '2020-06-01' })).toBe(
       '2020-05-01 to 2020-06-01'
     );
+    expect(getReactConvertText(format, { from: '2020-05-01', to: '2020-06-01' })).toBe(
+      '2020-05-01 to 2020-06-01'
+    );
     expect(format.convert({ to: '2020-06-01' })).toBe('Before 2020-06-01');
+    expect(getReactConvertText(format, { to: '2020-06-01' })).toBe('Before 2020-06-01');
     expect(format.convert({ from: '2020-06-01' })).toBe('After 2020-06-01');
+    expect(getReactConvertText(format, { from: '2020-06-01' })).toBe('After 2020-06-01');
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -62,6 +73,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert(undefined)).toBe('');
+    expect(() => format.reactConvert(undefined)).not.toThrow();
   });
 
   test('creates custom format for ip_range', () => {
@@ -71,9 +83,19 @@ describe('getAggsFormats', () => {
     expect(format.convert({ type: 'range', from: '10.0.0.1', to: '10.0.0.10' })).toBe(
       '10.0.0.1 to 10.0.0.10'
     );
+    expect(getReactConvertText(format, { type: 'range', from: '10.0.0.1', to: '10.0.0.10' })).toBe(
+      '10.0.0.1 to 10.0.0.10'
+    );
     expect(format.convert({ type: 'range', to: '10.0.0.10' })).toBe('-Infinity to 10.0.0.10');
+    expect(getReactConvertText(format, { type: 'range', to: '10.0.0.10' })).toBe(
+      '-Infinity to 10.0.0.10'
+    );
     expect(format.convert({ type: 'range', from: '10.0.0.10' })).toBe('10.0.0.10 to Infinity');
-    format.convert({ type: 'mask', mask: '10.0.0.1/24' });
+    expect(getReactConvertText(format, { type: 'range', from: '10.0.0.10' })).toBe(
+      '10.0.0.10 to Infinity'
+    );
+    expect(format.convert({ type: 'mask', mask: '10.0.0.1/24' })).toBe('10.0.0.1/24');
+    expect(getReactConvertText(format, { type: 'mask', mask: '10.0.0.1/24' })).toBe('10.0.0.1/24');
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -82,6 +104,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert(undefined)).toBe('');
+    expect(() => format.reactConvert(undefined)).not.toThrow();
   });
 
   test('creates custom format for range', () => {
@@ -89,6 +112,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20 })).toBe('≥ 1 and < 20');
+    expect(getReactConvertText(format, { gte: 1, lt: 20 })).toBe('≥ 1 and < 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -97,6 +121,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert(undefined)).toBe('');
+    expect(() => format.reactConvert(undefined)).not.toThrow();
   });
 
   test('creates alternative format for range using the template parameter', () => {
@@ -104,6 +129,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20 })).toBe('1 → 20');
+    expect(getReactConvertText(format, { gte: 1, lt: 20 })).toBe('1 → 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -112,6 +138,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: -Infinity, lt: Infinity })).toBe('≥ −∞ and < +∞');
+    expect(getReactConvertText(format, { gte: -Infinity, lt: Infinity })).toBe('≥ −∞ and < +∞');
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -120,6 +147,9 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: -Infinity, lt: Infinity })).toBe('≥ -Infinity and < Infinity');
+    expect(getReactConvertText(format, { gte: -Infinity, lt: Infinity })).toBe(
+      '≥ -Infinity and < Infinity'
+    );
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -129,7 +159,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20, label: 'custom' })).toBe('custom');
-    // underlying formatter is not called because custom label can be used directly
+    expect(getReactConvertText(format, { gte: 1, lt: 20, label: 'custom' })).toBe('custom');
     expect(getFormat).toHaveBeenCalledTimes(0);
   });
 
@@ -146,8 +176,13 @@ describe('getAggsFormats', () => {
       const format = getAggFormat(termsMapping, getFormat);
 
       expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
+      expect(getReactConvertText(format, 'machine.os.keyword')).toBe('machine.os.keyword');
       expect(format.convert('__other__')).toBe(termsMapping.params.otherBucketLabel);
+      expect(getReactConvertText(format, '__other__')).toBe(termsMapping.params.otherBucketLabel);
       expect(format.convert(MISSING_TOKEN)).toBe(termsMapping.params.missingBucketLabel);
+      expect(getReactConvertText(format, MISSING_TOKEN)).toBe(
+        termsMapping.params.missingBucketLabel
+      );
       expect(getFormat).toHaveBeenCalledTimes(1);
     });
 
@@ -196,6 +231,9 @@ describe('getAggsFormats', () => {
       const format = getAggFormat(multiTermsMapping, getFormat);
 
       expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source › geo.src › geo.dest');
+      expect(getReactConvertText(format, new MultiFieldKey({ key: terms }))).toBe(
+        'source › geo.src › geo.dest'
+      );
       expect(getFormat).toHaveBeenCalledTimes(terms.length);
     });
 
@@ -212,19 +250,17 @@ describe('getAggsFormats', () => {
       const format = getAggFormat(mapping, getFormat);
 
       expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source - geo.src - geo.dest');
+      expect(getReactConvertText(format, new MultiFieldKey({ key: terms }))).toBe(
+        'source - geo.src - geo.dest'
+      );
       expect(getFormat).toHaveBeenCalledTimes(terms.length);
     });
 
     test('returns empty string for non-MultiFieldKey values', () => {
       const format = getAggFormat(multiTermsMapping, getFormat);
+
       expect(format.convert('text')).toBe('');
-    });
-
-    test('returns empty string for non-MultiFieldKey in reactConvert', () => {
-      const mockNestedFormat = createMockNestedFormat();
-      const format = getAggFormat(multiTermsMapping, () => mockNestedFormat);
-
-      expect(format.reactConvert('not-a-multi-field-key')).toBe('');
+      expect(getReactConvertText(format, 'text')).toBe('');
     });
 
     test('returns other bucket label directly without calling nested formatter', () => {
@@ -239,6 +275,7 @@ describe('getAggsFormats', () => {
         () => mockNestedFormat
       );
 
+      expect(format.convert('__other__')).toBe('Other');
       expect(format.reactConvert('__other__')).toBe('Other');
       expect(mockReactConvert).not.toHaveBeenCalled();
     });
