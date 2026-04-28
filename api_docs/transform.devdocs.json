@@ -71,6 +71,7 @@
             "lineNumber": 110,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "RegisterParams",
             "trackAdoption": false,
             "isRequired": true
           }

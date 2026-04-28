@@ -20,7 +20,23 @@
         ],
         "label": "getSpaceNPRE",
         "description": [
-          "\nGet the NPRE for a given space ID or a request carrying a URL.\n\nWhen a request object is provided, the space is taken from a URL pathname via\n{@link getSpaceIdFromPath}. If the request has a `rewrittenUrl` (set by core\nwhen the first `onPreRouting` handler returns `rewriteUrl`), that URL is\nused instead of `url`. This matches HTTP requests after the Spaces plugin\nstrips `/s/:spaceId` from `request.url` during pre-routing: the original\nbrowser path (including the space segment) remains on `rewrittenUrl`.\n\n**Server base path**: {@link getSpaceIdFromPath} is called with the pathname\nonly; a non-root `server.basePath` is not stripped here. CPS is only\navailable on Serverless, where custom base paths are not used, so this\nlimitation is not a practical concern for CPS.\n"
+          "\nGet the NPRE for a given space ID or a request carrying a URL.\n\nWhen a request object is provided, the space is taken from a URL pathname via\n",
+          {
+            "pluginId": "@kbn/cps-server-utils",
+            "scope": "server",
+            "docId": "kibKbnCpsServerUtilsPluginApi",
+            "section": "def-server.getSpaceIdFromPath",
+            "text": "getSpaceIdFromPath"
+          },
+          ". If the request has a `rewrittenUrl` (set by core\nwhen the first `onPreRouting` handler returns `rewriteUrl`), that URL is\nused instead of `url`. This matches HTTP requests after the Spaces plugin\nstrips `/s/:spaceId` from `request.url` during pre-routing: the original\nbrowser path (including the space segment) remains on `rewrittenUrl`.\n\n**Server base path**: ",
+          {
+            "pluginId": "@kbn/cps-server-utils",
+            "scope": "server",
+            "docId": "kibKbnCpsServerUtilsPluginApi",
+            "section": "def-server.getSpaceIdFromPath",
+            "text": "getSpaceIdFromPath"
+          },
+          " is called with the pathname\nonly; a non-root `server.basePath` is not stripped here. CPS is only\navailable on Serverless, where custom base paths are not used, so this\nlimitation is not a practical concern for CPS.\n"
         ],
         "signature": [
           "(spaceIdOrRequest: string | ",
