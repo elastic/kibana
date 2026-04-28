@@ -126,10 +126,7 @@ describe('RuleCanvasContent', () => {
 
     it('Create rule handler calls createRule and updateOrigin', async () => {
       const updateOrigin = jest.fn().mockResolvedValue(undefined);
-      const { services, registerActionButtons } = renderCanvas(
-        {},
-        { updateOrigin }
-      );
+      const { services, registerActionButtons } = renderCanvas({}, { updateOrigin });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const createButton = buttons.find((b) => b.label === 'Create rule')!;

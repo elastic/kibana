@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import type { RuleAttachment } from './rule_attachment_definition';

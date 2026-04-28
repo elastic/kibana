@@ -58,12 +58,9 @@ Use operations[] to:
 
       const currentData: Partial<RuleAttachmentData> = existingRecord?.versions.at(-1)?.data ?? {};
 
-      const updatedData = (await executeRuleOperations(
-        currentData,
-        operations,
-        esClient,
-        { isNew }
-      )) as RuleAttachmentData;
+      const updatedData = (await executeRuleOperations(currentData, operations, esClient, {
+        isNew,
+      })) as RuleAttachmentData;
 
       const attachmentInput = {
         id: attachmentId,

@@ -100,27 +100,21 @@ describe('RuleInlineContent', () => {
   it('does not render tags section when tags are empty', () => {
     const attachment = createAttachment();
     attachment.data.metadata.tags = [];
-    const { queryByText } = render(
-      <RuleInlineContent attachment={attachment} isSidebar={false} />
-    );
+    const { queryByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
     expect(queryByText('tag1')).toBeNull();
   });
 
   it('does not render description when absent', () => {
     const attachment = createAttachment();
     attachment.data.metadata.description = undefined;
-    const { queryByText } = render(
-      <RuleInlineContent attachment={attachment} isSidebar={false} />
-    );
+    const { queryByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
     expect(queryByText('A test rule')).toBeNull();
   });
 
   it('does not render schedule when absent', () => {
     const attachment = createAttachment();
     attachment.data.schedule = undefined;
-    const { queryByText } = render(
-      <RuleInlineContent attachment={attachment} isSidebar={false} />
-    );
+    const { queryByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
     expect(queryByText('Every 5m')).toBeNull();
   });
 });
