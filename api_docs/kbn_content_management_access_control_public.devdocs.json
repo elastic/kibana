@@ -194,6 +194,7 @@
                 "lineNumber": 50,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChangeAccesModeParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -244,6 +245,7 @@
                 "lineNumber": 66,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "CanManageContentControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -294,6 +296,7 @@
                 "lineNumber": 81,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckUserAccessControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -334,6 +337,7 @@
                 "lineNumber": 101,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -393,6 +397,7 @@
             "lineNumber": 83,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -511,6 +516,7 @@
                 "lineNumber": 23,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChangeAccesModeParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -561,6 +567,7 @@
                 "lineNumber": 27,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CanManageContentControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -611,6 +618,7 @@
                 "lineNumber": 28,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckUserAccessControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -651,6 +659,7 @@
                 "lineNumber": 29,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }

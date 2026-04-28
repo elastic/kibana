@@ -54,6 +54,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -76,6 +77,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransformOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -122,6 +124,7 @@
             "lineNumber": 34,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -390,6 +393,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
