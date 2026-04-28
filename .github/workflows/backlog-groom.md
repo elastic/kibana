@@ -5,6 +5,7 @@ description: >-
   Reacts to issues labeled `backlog-groom`, determines if the issue is stale or still valid,
   and either recommends closing or implements a fix with a linked pull request.
 on:
+  workflow_dispatch:
   issues:
     types: [opened, labeled]
   status-comment: true
