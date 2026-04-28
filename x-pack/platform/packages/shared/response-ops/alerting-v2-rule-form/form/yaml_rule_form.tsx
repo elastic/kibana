@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { useFormContext } from 'react-hook-form';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +50,7 @@ export const YamlRuleForm = ({
   setYamlText,
 }: YamlRuleFormProps) => {
   const [error, setError] = useState<string | null>(null);
+  const { reset } = useFormContext<FormValues>();
 
   const esqlCallbacks = useEsqlCallbacks({
     application: services.application,
@@ -56,23 +58,52 @@ export const YamlRuleForm = ({
     search: services.data.search.search,
   });
 
+  // Wraps react-hook-form's `reset(values, options)` — its name implies
+  // "throw away changes" but with values it's RHF's bulk-update API.
+  // keepDirty: true so the form remains dirty after sync (Save isn't disabled).
+  // keepDefaultValues: true so the original initial values stay tracked.
+  const applyYamlValuesToForm = useCallback(
+    (values: FormValues) => {
+      reset(values, { keepDirty: true, keepDefaultValues: true });
+    },
+    [reset]
+  );
+
+  // Shared parse step used by both submit and blur. Returns the parsed
+  // FormValues on success, null on failure (with side-effect of setting error).
+  const parseAndStoreError = useCallback((): FormValues | null => {
+    const result = parseYamlToFormValues(yamlText);
+    if (result.error) {
+      setError(result.error);
+      return null;
+    }
+    if (result.values) {
+      setError(null);
+      return result.values;
+    }
+    return null;
+  }, [yamlText]);
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-
-      const result = parseYamlToFormValues(yamlText);
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-
-      if (result.values) {
-        setError(null);
-        onSubmit(result.values);
+      const values = parseAndStoreError();
+      if (values) {
+        onSubmit(values);
       }
     },
-    [yamlText, onSubmit]
+    [parseAndStoreError, onSubmit]
   );
+
+  const handleBlur = useCallback(() => {
+    const values = parseAndStoreError();
+    if (values) {
+      applyYamlValuesToForm(values);
+    }
+    // On parse failure: error is already set; YAML buffer is preserved (lifted);
+    // form state is left unchanged so the user can either fix YAML and re-blur,
+    // or toggle to Form to see the last valid state.
+  }, [parseAndStoreError, applyYamlValuesToForm]);
 
   const handleYamlChange = useCallback(
     (newYaml: string) => {
@@ -123,6 +154,7 @@ export const YamlRuleForm = ({
           <YamlRuleEditor
             value={yamlText}
             onChange={handleYamlChange}
+            onBlur={handleBlur}
             esqlCallbacks={esqlCallbacks}
             isReadOnly={isReadOnly}
             dataTestSubj="ruleV2FormYamlEditor"

@@ -447,4 +447,36 @@ describe('yaml_form_utils', () => {
       expect(yaml).toContain("time_field: '@timestamp'");
     });
   });
+
+  describe('round-trip stability', () => {
+    // The blur-sync flow relies on parse(serialize(form)) preserving the
+    // structural content. This guards against silent data loss when the
+    // YAML buffer is regenerated from form state after a YAML edit.
+    it('parse(serialize(values)) preserves the same FormValues structure', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'Round-trip rule', enabled: true, description: 'desc' },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '10m' },
+        evaluation: {
+          query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count > 5' },
+        },
+        stateTransition: { pendingCount: 2, recoveringCount: 2 },
+      } as FormValues;
+
+      const yaml = serializeFormToYaml(original);
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values).toBeDefined();
+      // Spot-check the load-bearing fields rather than deep-equal: defaults can
+      // be filled in by the parser, but no input field should be lost.
+      expect(result.values?.kind).toBe(original.kind);
+      expect(result.values?.metadata.name).toBe(original.metadata.name);
+      expect(result.values?.timeField).toBe(original.timeField);
+      expect(result.values?.evaluation.query.base).toBe(original.evaluation.query.base);
+      expect(result.values?.schedule.every).toBe(original.schedule.every);
+      expect(result.values?.schedule.lookback).toBe(original.schedule.lookback);
+    });
+  });
 });

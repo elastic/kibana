@@ -6,8 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { dump } from 'js-yaml';
+import { useFormContext } from 'react-hook-form';
 import { YamlRuleForm, type YamlRuleFormProps } from './yaml_rule_form';
 import { createFormWrapper, createMockServices } from '../test_utils';
 
@@ -28,11 +29,13 @@ jest.mock('@kbn/yaml-rule-editor', () => ({
   YamlRuleEditor: ({
     value,
     onChange,
+    onBlur,
     isReadOnly,
     dataTestSubj,
   }: {
     value: string;
     onChange: (value: string) => void;
+    onBlur?: () => void;
     isReadOnly?: boolean;
     dataTestSubj?: string;
   }) => (
@@ -40,6 +43,7 @@ jest.mock('@kbn/yaml-rule-editor', () => ({
       data-test-subj={dataTestSubj}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      onBlur={onBlur}
       disabled={isReadOnly}
       aria-label="YAML Editor"
     />
@@ -278,5 +282,69 @@ describe('YamlRuleForm component', () => {
     render(<StatefulYamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
     expect(screen.getByTestId('ruleV2FormYamlEditor')).toBeInTheDocument();
+  });
+
+  describe('blur sync', () => {
+    // Renders the current form's metadata.name so tests can observe whether
+    // YAML→Form sync ran (it'll show the YAML's name) or didn't (initial name).
+    const FormNameProbe = () => {
+      const { getValues } = useFormContext();
+      return <div data-test-subj="formNameProbe">{getValues('metadata.name') ?? ''}</div>;
+    };
+
+    it('applies parsed YAML values to form state on valid blur', async () => {
+      const validYaml = dump({
+        kind: 'alert',
+        metadata: { name: 'Blurred Name', enabled: true },
+        time_field: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+      });
+
+      render(
+        <>
+          <StatefulYamlRuleForm {...defaultProps} initialYaml={validYaml} />
+          <FormNameProbe />
+        </>,
+        { wrapper: createFormWrapper({ metadata: { name: 'Initial Name', enabled: true } }) }
+      );
+
+      // Sanity: form starts with the initial name
+      expect(screen.getByTestId('formNameProbe')).toHaveTextContent('Initial Name');
+
+      // Trigger blur on the YAML editor
+      const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
+      act(() => {
+        editor.focus();
+        editor.blur();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('formNameProbe')).toHaveTextContent('Blurred Name');
+      });
+      expect(screen.queryByText('Configuration error')).not.toBeInTheDocument();
+    });
+
+    it('shows error and does not update form state on invalid blur', async () => {
+      render(
+        <>
+          <StatefulYamlRuleForm {...defaultProps} initialYaml="invalid: yaml\n  bad: indentation" />
+          <FormNameProbe />
+        </>,
+        { wrapper: createFormWrapper({ metadata: { name: 'Untouched', enabled: true } }) }
+      );
+
+      const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
+      act(() => {
+        editor.focus();
+        editor.blur();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Configuration error')).toBeInTheDocument();
+      });
+      // Form state not touched
+      expect(screen.getByTestId('formNameProbe')).toHaveTextContent('Untouched');
+    });
   });
 });
