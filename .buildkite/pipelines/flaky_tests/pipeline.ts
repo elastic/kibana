@@ -188,7 +188,6 @@ if (hasScoutSuites) {
     label: 'Discover and plan Scout flaky steps',
     agents: expandAgentQueue('n2-4-spot'),
     key: 'scout_flaky_setup',
-    depends_on: 'build',
     timeout_in_minutes: 30,
     env: {
       SCOUT_FLAKY_REQUESTS: JSON.stringify(scoutFlakyRequests),
