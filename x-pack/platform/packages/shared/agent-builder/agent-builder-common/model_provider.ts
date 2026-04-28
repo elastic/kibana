@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-/**
- * Workflow Insights
- */
+export enum EffortLevels {
+  low = 'low',
+  medium = 'medium',
+  high = 'high',
+}
 
-export const WORKFLOW_INSIGHTS_SURVEY_URL = 'https://ela.st/automatic-troubleshooting-feedback';
+export type EffortLevel = keyof typeof EffortLevels;
