@@ -236,6 +236,19 @@ export interface ChromeStart {
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
   /**
+   * Register an app-specific documentation link to be shown in the app menu.
+   * Falls back to the documentation link from the help extension if not set.
+   */
+  registerAppDocumentationLink(link: string): void;
+
+  /**
+   * Get an observable of the current app documentation link.
+   * Returns the link registered via {@link ChromeStart.registerAppDocumentationLink} if set,
+   * otherwise falls back to the documentation link from the help extension.
+   */
+  getAppDocumentationLink$(): Observable<string | undefined>;
+
+  /**
    * Override the default support URL shown in the help menu
    * @param url The updated support URL
    */

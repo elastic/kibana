@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { type Observable, combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
@@ -138,6 +138,18 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
     registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
     getHelpMenuLinks$: () => services.navControls.getHelpMenuLinks$(),
     setHelpMenuLinks: services.navControls.setHelpMenuLinks,
+    registerAppDocumentationLink: state.appDocumentationLink.set,
+    getAppDocumentationLink$: () =>
+      combineLatest([state.appDocumentationLink.$, state.help.extension.$]).pipe(
+        map(([explicitLink, extension]) => {
+          if (explicitLink) {
+            return explicitLink;
+          }
+          const docLink = extension?.links?.find((link) => link.linkType === 'documentation');
+          return docLink?.href;
+        }),
+        distinctUntilChanged()
+      ),
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,
