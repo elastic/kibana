@@ -22,7 +22,7 @@ import {
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/experimental_features';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';

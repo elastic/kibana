@@ -10,7 +10,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import {
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID,
-} from '../../common/experimental_features';
+} from '../../common/advanced_settings';
 
 interface ExperimentalSettings {
   experimentalFeaturesEnabled: boolean;
