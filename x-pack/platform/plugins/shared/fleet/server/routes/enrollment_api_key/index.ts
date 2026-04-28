@@ -175,6 +175,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       description: `Delete or deactivate multiple enrollment API keys.`,
       options: {
         tags: ['oas-tag:Fleet enrollment API keys'],
+        availability: {
+          stability: ’stable',
+          since: '9.5.0',
+        },
       },
     })
     .addVersion(
@@ -184,11 +188,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: BulkDeleteEnrollmentAPIKeysRequestSchema,
           response: {
             200: {
-              description: 'OK: A successful request.',
+              description: 'OK: A successful request',
               body: () => BulkDeleteEnrollmentAPIKeysResponseSchema,
             },
             400: {
-              description: 'A bad request.',
+              description: 'A bad request',
               body: genericErrorResponse,
             },
           },
