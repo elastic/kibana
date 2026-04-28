@@ -6,68 +6,51 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { act, render } from '@testing-library/react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { AISummarySection } from './ai_summary_section';
 import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
-import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from '../../../../flyout/shared/alert_summary';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
-import { TestProviders } from '../../../../common/mock';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { getRawData } from '../../../../assistant/helpers';
+
+const MOCK_ALERT_SUMMARY_SECTION_STUB_TEST_ID = 'alert-summary-section-stub';
+
+const mockAlertSummarySection = jest.fn();
+
+jest.mock('../../../../flyout/shared/alert_summary', () => ({
+  AlertSummarySection: (props: Record<string, unknown>) => {
+    mockAlertSummarySection(props);
+    return (
+      <div
+        data-test-subj={
+          (props['data-test-subj'] as string) ?? MOCK_ALERT_SUMMARY_SECTION_STUB_TEST_ID
+        }
+      />
+    );
+  },
+}));
 
 jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
   useEventDetails: jest.fn(),
 }));
 
-jest.mock('../../../../flyout/shared/alert_summary/hooks/use_anonymization_toggle', () => ({
-  useAnonymizationToggle: () => ({
-    showAnonymizedValues: false,
-    setShowAnonymizedValues: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [
-      {
-        id: 'test-connector-id',
-        name: 'Test Connector',
-        actionTypeId: '.gen-ai',
-      },
-    ],
-    isLoading: false,
-    error: null,
-  }),
-}));
-
-const mockedUseKibana = {
-  ...mockUseKibana(),
-  services: {
-    ...mockUseKibana().services,
-    application: {
-      ...mockUseKibana().services.application,
-      capabilities: {
-        management: {
-          kibana: {
-            settings: true,
-          },
-        },
-      },
-    },
-    uiSettings: {
-      get: jest.fn().mockReturnValue('default-connector-id'),
-    },
-    featureFlags: {
-      getBooleanValue: jest.fn().mockReturnValue(false),
-    },
+const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
+  {
+    category: 'host',
+    field: 'host.name',
+    values: ['test-host'],
+    originalValue: ['test-host'],
+    isObjectArray: false,
   },
-};
-
-jest.mock('../../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../../common/lib/kibana'),
-  useKibana: () => mockedUseKibana,
-}));
+  {
+    category: 'user',
+    field: 'user.name',
+    values: ['test-user'],
+    originalValue: ['test-user'],
+    isObjectArray: false,
+  },
+];
 
 const createMockHit = (): DataTableRecord =>
   ({
@@ -88,7 +71,7 @@ describe('AISummarySection', () => {
     mockUseEventDetails.mockReturnValue({
       browserFields: {},
       dataAsNestedObject: null,
-      dataFormattedForFieldBrowser: [],
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: jest.fn(),
       loading: false,
       refetchFlyoutData: jest.fn(),
@@ -96,20 +79,42 @@ describe('AISummarySection', () => {
     });
   });
 
-  it('renders the AI summary accordion with title, sparkles icon, and options menu', async () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <IntlProvider locale="en">
-          <AISummarySection hit={createMockHit()} />
-        </IntlProvider>
-      </TestProviders>
-    );
+  it('renders the shared AlertSummarySection with the wrapper data-test-subj', () => {
+    const { getByTestId } = render(<AISummarySection hit={createMockHit()} />);
 
-    await act(async () => {
-      const section = getByTestId(AI_SUMMARY_SECTION_TEST_ID);
-      expect(section).toHaveTextContent('AI summary');
-      expect(section.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
-      expect(getByTestId(ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(AI_SUMMARY_SECTION_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('forwards the alert id and prompt context derived from the document hit', async () => {
+    const hit = createMockHit();
+    render(<AISummarySection hit={hit} />);
+
+    expect(mockAlertSummarySection).toHaveBeenCalledTimes(1);
+    const props = mockAlertSummarySection.mock.calls[0][0];
+
+    expect(props.alertId).toBe(hit.raw._id);
+    expect(props['data-test-subj']).toBe(AI_SUMMARY_SECTION_TEST_ID);
+    expect(typeof props.getPromptContext).toBe('function');
+
+    await expect(props.getPromptContext()).resolves.toEqual(
+      getRawData(mockDataFormattedForFieldBrowser)
+    );
+  });
+
+  it('falls back to an empty payload when useEventDetails returns no fields', async () => {
+    mockUseEventDetails.mockReturnValue({
+      browserFields: {},
+      dataAsNestedObject: null,
+      dataFormattedForFieldBrowser: null,
+      getFieldsData: jest.fn(),
+      loading: false,
+      refetchFlyoutData: jest.fn(),
+      searchHit: undefined,
     });
+
+    render(<AISummarySection hit={createMockHit()} />);
+
+    const props = mockAlertSummarySection.mock.calls[0][0];
+    await expect(props.getPromptContext()).resolves.toEqual({});
   });
 });
