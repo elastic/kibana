@@ -19,6 +19,7 @@ import type { ProductFeaturesService } from '../../../../product_features_servic
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
+  BulkCreatePrebuiltRulesArgs,
   BulkDeleteRulesArgs,
   BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
@@ -33,6 +34,7 @@ import type {
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
+import { bulkCreateRules } from './methods/bulk_create_rules';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
@@ -111,6 +113,20 @@ export const createDetectionRulesClient = ({
             immutable: true,
           },
           mlAuthz,
+        });
+      });
+    },
+
+    async bulkCreatePrebuiltRules({ rules }: BulkCreatePrebuiltRulesArgs) {
+      return withSecuritySpan('DetectionRulesClient.bulkCreatePrebuiltRules', async () => {
+        return bulkCreateRules({
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          rules: rules.map((asset) => ({
+            rule: { ...asset, immutable: true },
+            source: asset,
+          })),
         });
       });
     },
