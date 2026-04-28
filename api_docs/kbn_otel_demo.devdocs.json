@@ -262,6 +262,7 @@
             "lineNumber": 52,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -550,6 +551,7 @@
             "lineNumber": 99,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -610,6 +612,7 @@
             "lineNumber": 110,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -671,6 +674,7 @@
             "lineNumber": 121,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -724,6 +728,7 @@
             "lineNumber": 128,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -785,6 +790,7 @@
             "lineNumber": 135,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -911,6 +917,7 @@
             "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1061,6 +1068,7 @@
             "lineNumber": 177,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1251,6 +1259,7 @@
             "lineNumber": 45,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1321,6 +1330,7 @@
             "lineNumber": 170,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "DemoType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1396,6 +1406,7 @@
             "lineNumber": 24,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2009,6 +2020,7 @@
                 "lineNumber": 142,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ManifestOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2901,7 +2913,9 @@
             "type": "Object",
             "tags": [],
             "label": "'otel-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of all available demo configurations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -2923,7 +2937,9 @@
             "type": "Object",
             "tags": [],
             "label": "'online-boutique'",
-            "description": [],
+            "description": [
+              "\nRegistry of all available demo configurations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -2945,7 +2961,9 @@
             "type": "Object",
             "tags": [],
             "label": "'bank-of-anthos'",
-            "description": [],
+            "description": [
+              "\nRegistry of all available demo configurations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -2967,7 +2985,9 @@
             "type": "Object",
             "tags": [],
             "label": "'quarkus-super-heroes'",
-            "description": [],
+            "description": [
+              "\nRegistry of all available demo configurations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -2989,7 +3009,9 @@
             "type": "Object",
             "tags": [],
             "label": "'aws-retail-store'",
-            "description": [],
+            "description": [
+              "\nRegistry of all available demo configurations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3011,7 +3033,9 @@
             "type": "Object",
             "tags": [],
             "label": "'rust-k8s-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of all available demo configurations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3051,7 +3075,9 @@
             "type": "Object",
             "tags": [],
             "label": "'otel-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific manifest generators"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3073,7 +3099,9 @@
             "type": "Object",
             "tags": [],
             "label": "'online-boutique'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific manifest generators"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3095,7 +3123,9 @@
             "type": "Object",
             "tags": [],
             "label": "'bank-of-anthos'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific manifest generators"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3117,7 +3147,9 @@
             "type": "Object",
             "tags": [],
             "label": "'quarkus-super-heroes'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific manifest generators"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3139,7 +3171,9 @@
             "type": "Object",
             "tags": [],
             "label": "'aws-retail-store'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific manifest generators"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3161,7 +3195,9 @@
             "type": "Object",
             "tags": [],
             "label": "'rust-k8s-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific manifest generators"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3201,7 +3237,9 @@
             "type": "Array",
             "tags": [],
             "label": "'otel-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific failure scenarios"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3224,7 +3262,9 @@
             "type": "Array",
             "tags": [],
             "label": "'online-boutique'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific failure scenarios"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3247,7 +3287,9 @@
             "type": "Array",
             "tags": [],
             "label": "'bank-of-anthos'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific failure scenarios"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3270,7 +3312,9 @@
             "type": "Array",
             "tags": [],
             "label": "'quarkus-super-heroes'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific failure scenarios"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3293,7 +3337,9 @@
             "type": "Array",
             "tags": [],
             "label": "'aws-retail-store'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific failure scenarios"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3316,7 +3362,9 @@
             "type": "Array",
             "tags": [],
             "label": "'rust-k8s-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific failure scenarios"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/otel-demo",
@@ -3357,7 +3405,9 @@
             "type": "Object",
             "tags": [],
             "label": "'otel-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific service defaults (for scenario reset)"
+            ],
             "signature": [
               "{ [x: string]: Record<string, string>; }"
             ],
@@ -3373,7 +3423,9 @@
             "type": "Object",
             "tags": [],
             "label": "'online-boutique'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific service defaults (for scenario reset)"
+            ],
             "signature": [
               "{ [x: string]: Record<string, string>; }"
             ],
@@ -3389,7 +3441,9 @@
             "type": "Object",
             "tags": [],
             "label": "'bank-of-anthos'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific service defaults (for scenario reset)"
+            ],
             "signature": [
               "{ [x: string]: Record<string, string>; }"
             ],
@@ -3405,7 +3459,9 @@
             "type": "Object",
             "tags": [],
             "label": "'quarkus-super-heroes'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific service defaults (for scenario reset)"
+            ],
             "signature": [
               "{ [x: string]: Record<string, string>; }"
             ],
@@ -3421,7 +3477,9 @@
             "type": "Object",
             "tags": [],
             "label": "'aws-retail-store'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific service defaults (for scenario reset)"
+            ],
             "signature": [
               "{ [x: string]: Record<string, string>; }"
             ],
@@ -3437,7 +3495,9 @@
             "type": "Object",
             "tags": [],
             "label": "'rust-k8s-demo'",
-            "description": [],
+            "description": [
+              "\nRegistry of demo-specific service defaults (for scenario reset)"
+            ],
             "signature": [
               "{ [x: string]: Record<string, string>; }"
             ],

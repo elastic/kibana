@@ -2301,7 +2301,29 @@
               "section": "def-common.QueriesGetResponse",
               "text": "QueriesGetResponse"
             },
-            ", undefined>; \"POST /internal/streams/queries/_demote\": ",
+            ", undefined>; \"POST /internal/streams/queries/_bulk_delete\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/queries/_bulk_delete\", ",
+            "ZodObject",
+            "<{ body: ",
+            "ZodObject",
+            "<{ queryIds: ",
+            "ZodArray",
+            "<",
+            "ZodString",
+            ">; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>, ",
+            "StreamsRouteHandlerResources",
+            ", { succeeded: number; failed: number; skipped: number; }, undefined>; \"POST /internal/streams/queries/_demote\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2873,7 +2895,27 @@
             "StreamsRouteHandlerResources",
             ", ",
             "FeaturesIdentificationTaskResult",
-            ", undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+            ", undefined>; \"POST /internal/streams/features/_bulk\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/features/_bulk\", ",
+            "ZodObject",
+            "<{ body: ",
+            "ZodObject",
+            "<{ operations: ",
+            "ZodArray",
+            "<any>; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>; }, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>, ",
+            "StreamsRouteHandlerResources",
+            ", { succeeded: number; failed: number; skipped: number; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -4218,6 +4260,7 @@
               "lineNumber": 40,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "AbortSignal",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4256,6 +4299,7 @@
               "lineNumber": 41,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "AbortSignal",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -6051,7 +6095,29 @@
             "section": "def-common.QueriesGetResponse",
             "text": "QueriesGetResponse"
           },
-          ", undefined>; \"POST /internal/streams/queries/_demote\": ",
+          ", undefined>; \"POST /internal/streams/queries/_bulk_delete\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/queries/_bulk_delete\", ",
+          "ZodObject",
+          "<{ body: ",
+          "ZodObject",
+          "<{ queryIds: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>, ",
+          "StreamsRouteHandlerResources",
+          ", { succeeded: number; failed: number; skipped: number; }, undefined>; \"POST /internal/streams/queries/_demote\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -6623,7 +6689,27 @@
           "StreamsRouteHandlerResources",
           ", ",
           "FeaturesIdentificationTaskResult",
-          ", undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+          ", undefined>; \"POST /internal/streams/features/_bulk\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/features/_bulk\", ",
+          "ZodObject",
+          "<{ body: ",
+          "ZodObject",
+          "<{ operations: ",
+          "ZodArray",
+          "<any>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>, ",
+          "StreamsRouteHandlerResources",
+          ", { succeeded: number; failed: number; skipped: number; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -8301,6 +8387,65 @@
       },
       {
         "parentPluginId": "streams",
+        "id": "def-common.getStreamsLocation",
+        "type": "Function",
+        "tags": [],
+        "label": "getStreamsLocation",
+        "description": [],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "streams",
+            "scope": "common",
+            "docId": "kibStreamsPluginApi",
+            "section": "def-common.StreamsAppLocationParams",
+            "text": "StreamsAppLocationParams"
+          },
+          ") => ",
+          {
+            "pluginId": "streams",
+            "scope": "common",
+            "docId": "kibStreamsPluginApi",
+            "section": "def-common.StreamsAppLocation",
+            "text": "StreamsAppLocation"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.getStreamsLocation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "common",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-common.StreamsAppLocationParams",
+                "text": "StreamsAppLocationParams"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+            "lineNumber": 20,
+            "columnNumber": 36,
+            "deprecated": false,
+            "docsReferencedTypeName": "StreamsAppLocationParams",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
         "id": "def-common.isKqlQueryValid",
         "type": "Function",
         "tags": [],
@@ -8791,6 +8936,116 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.StreamsAppLocation",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamsAppLocation",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamsAppLocation.app",
+            "type": "string",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              "\"streams\""
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamsAppLocation.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.StreamsAppLocationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamsAppLocationParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "streams",
+            "scope": "common",
+            "docId": "kibStreamsPluginApi",
+            "section": "def-common.StreamsAppLocationParams",
+            "text": "StreamsAppLocationParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamsAppLocationParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.StreamsAppLocationParams.managementTab",
+            "type": "string",
+            "tags": [],
+            "label": "managementTab",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/get_streams_location/get_streams_location.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -9170,7 +9425,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nTiered features"
+            ],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
             "lineNumber": 34,
             "columnNumber": 3,
@@ -9183,7 +9440,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "\nTiered features"
+            ],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
             "lineNumber": 35,
             "columnNumber": 3,
@@ -9196,7 +9455,9 @@
             "type": "Array",
             "tags": [],
             "label": "products",
-            "description": [],
+            "description": [
+              "\nTiered features"
+            ],
             "signature": [
               "{ name: \"observability\"; tier: \"complete\"; }[]"
             ],
