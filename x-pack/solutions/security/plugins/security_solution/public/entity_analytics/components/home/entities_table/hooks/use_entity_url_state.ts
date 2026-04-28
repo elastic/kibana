@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { inputsActions } from '../../../../../common/store/inputs';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { inputsActions, inputsSelectors } from '../../../../../common/store/inputs';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useUrlQuery } from './use_url_query';
 import { usePageSize } from './use_page_size';
@@ -106,6 +107,28 @@ export const useEntityURLState = ({
       })
     );
   }, [dispatch, urlQuery.query]);
+
+  // Redux → URL state: syncs search-bar changes back to the `cspq` URL param.
+  // Without this, edits in the `SiemSearchBar` would update Redux but leave the
+  // URL param stale, causing the Refresh button to re-apply the old query.
+  // The first run is skipped because both effects fire in the same commit on
+  // mount: the forward sync above dispatches to Redux, but `reduxQuery` still
+  // holds the pre-dispatch value (DEFAULT_QUERY) until the store update triggers
+  // a re-render.
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const reduxQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const reverseSyncReadyRef = useRef(false);
+
+  useEffect(() => {
+    if (!reduxQuery) return;
+    if (!reverseSyncReadyRef.current) {
+      reverseSyncReadyRef.current = true;
+      return;
+    }
+    if (deepEqual(reduxQuery, lastAppliedQueryRef.current)) return;
+    if (deepEqual(reduxQuery, urlQuery.query)) return;
+    setUrlQuery({ query: reduxQuery });
+  }, [reduxQuery, urlQuery.query, setUrlQuery]);
 
   // URL state → filterManager: keeps filter pills visible in the filter bar.
   // The deepEqual guard defends against reference churn from unrelated URL updates

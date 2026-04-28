@@ -72,6 +72,8 @@ const renderUseEntityURLState = (store: Store = createMockStore()) => {
 describe('useEntityURLState', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUrlQuery.query = { query: '', language: 'kuery' };
+    mockUrlQuery.filters = [];
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -86,6 +88,74 @@ describe('useEntityURLState', () => {
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
+  });
+
+  describe('URL query → Redux sync', () => {
+    it('dispatches setFilterQuery when urlQuery.query has a non-empty KQL query', () => {
+      mockUrlQuery.query = { query: 'resource.id: "test-resource"', language: 'kuery' };
+
+      const store = createMockStore();
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      renderUseEntityURLState(store);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        inputsActions.setFilterQuery({
+          id: InputsModelId.global,
+          query: 'resource.id: "test-resource"',
+          language: 'kuery',
+        })
+      );
+    });
+
+    it('dispatches setFilterQuery with empty query when urlQuery.query is empty', () => {
+      mockUrlQuery.query = { query: '', language: 'kuery' };
+
+      const store = createMockStore();
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      renderUseEntityURLState(store);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        inputsActions.setFilterQuery({
+          id: InputsModelId.global,
+          query: '',
+          language: 'kuery',
+        })
+      );
+    });
+  });
+
+  describe('Redux query → URL sync', () => {
+    it('calls setUrlQuery when Redux query diverges from URL query', () => {
+      mockUrlQuery.query = { query: '', language: 'kuery' };
+
+      const store = createMockStore();
+      renderUseEntityURLState(store);
+      mockSetUrlQuery.mockClear();
+
+      act(() => {
+        store.dispatch(
+          inputsActions.setFilterQuery({
+            id: InputsModelId.global,
+            query: 'host.name: "server-1"',
+            language: 'kuery',
+          })
+        );
+      });
+
+      expect(mockSetUrlQuery).toHaveBeenCalledWith({
+        query: { query: 'host.name: "server-1"', language: 'kuery' },
+      });
+    });
+
+    it('does not call setUrlQuery when Redux query matches URL query (forward-sync guard)', () => {
+      mockUrlQuery.query = { query: 'host.name: "server-1"', language: 'kuery' };
+
+      const store = createMockStore();
+      renderUseEntityURLState(store);
+      mockSetUrlQuery.mockClear();
+
+      expect(mockSetUrlQuery).not.toHaveBeenCalled();
+    });
   });
 
   describe('onResetFilters', () => {
