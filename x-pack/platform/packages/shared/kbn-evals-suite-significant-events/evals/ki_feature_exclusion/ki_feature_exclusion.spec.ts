@@ -119,7 +119,10 @@ evaluate.describe(
                 concurrency: 1,
                 task: async ({ input }: { input: KIFeatureExclusionScenario['input'] }) => {
                   const exampleId = `${input.scenario_id}:exclude-${input.exclude_count}`;
-                  const source = snapshotSources.get(exampleId)!;
+                  const source = snapshotSources.get(exampleId);
+                  if (!source) {
+                    throw new Error(`No snapshot source found for example "${exampleId}"`);
+                  }
 
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);

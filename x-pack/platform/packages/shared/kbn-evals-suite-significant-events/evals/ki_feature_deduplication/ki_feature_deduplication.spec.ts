@@ -159,7 +159,10 @@ evaluate.describe(
                     iterations: number;
                   };
                 }) => {
-                  const source = snapshotSources.get(input.scenario_id)!;
+                  const source = snapshotSources.get(input.scenario_id);
+                  if (!source) {
+                    throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
+                  }
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
                     await replaySignificantEventsSnapshot(
@@ -172,9 +175,12 @@ evaluate.describe(
                     lastReplayedSnapshot = source.snapshotName;
                   }
 
-                  const extractionScenario = extractionScenariosByScenarioId.get(
-                    input.scenario_id
-                  )!;
+                  const extractionScenario = extractionScenariosByScenarioId.get(input.scenario_id);
+                  if (!extractionScenario) {
+                    throw new Error(
+                      `No extraction scenario found for scenario "${input.scenario_id}"`
+                    );
+                  }
 
                   const iterations: Array<{
                     features: BaseFeature[];

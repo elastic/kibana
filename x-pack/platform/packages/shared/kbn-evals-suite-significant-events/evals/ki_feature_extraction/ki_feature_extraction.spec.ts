@@ -127,10 +127,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                     ...scenario.input,
                     snapshot_source: scenario.snapshot_source,
                   },
-                  output: {
-                    ...scenario.output,
-                    criteria: scenario.output.criteria,
-                  },
+                  output: scenario.output,
                   metadata: scenario.metadata,
                 })),
               },

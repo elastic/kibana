@@ -247,7 +247,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   }
                   const { kis, sampleLogs, sampleDocs } = heavy;
 
-                  const source = snapshotSources.get(input.scenario_id)!;
+                  const source = snapshotSources.get(input.scenario_id);
+                  if (!source) {
+                    throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
+                  }
+
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
                     for (const name of ['logs.otel', 'logs.ecs']) {
