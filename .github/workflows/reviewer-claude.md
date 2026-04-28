@@ -64,6 +64,7 @@ env:
 tools:
   github:
     toolsets: [default]
+    min-integrity: none
 network:
   allowed:
     - defaults
