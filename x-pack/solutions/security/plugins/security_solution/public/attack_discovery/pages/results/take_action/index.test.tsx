@@ -328,6 +328,8 @@ describe('TakeAction', () => {
 
   describe('actions when multiple alerts are selected', () => {
     const alerts = getMockAttackDiscoveryAlerts(); // <-- multiple alerts
+    alerts[0].alertWorkflowStatus = 'open';
+    alerts[1].alertWorkflowStatus = 'closed';
     const testCases = [
       {
         testId: 'markAsAcknowledged',
