@@ -99,6 +99,9 @@ export const LegendSizeSettings = ({
       options={options}
       onChange={onLegendSizeOptionChange}
       disabled={!isVerticalLegend}
+      aria-label={i18n.translate('visDefaultEditor.options.legendSizeSetting.selectAriaLabel', {
+        defaultMessage: 'Legend size',
+      })}
     />
   );
 

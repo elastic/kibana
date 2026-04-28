@@ -32,8 +32,8 @@ export function useBreadcrumbs(
       href: '/',
     };
 
-    const notificationPoliciesListBreadcrumb: ChromeBreadcrumb = {
-      ...getAlertingV2Breadcrumb('notification_policies_list'),
+    const actionPoliciesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('action_policies_list'),
       href: '/',
     };
 
@@ -63,24 +63,21 @@ export function useBreadcrumbs(
           }),
         ];
         break;
-      case 'notification_policies_list':
+      case 'action_policies_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('action_policies_list') }];
+        break;
+      case 'action_policy_create':
         breadcrumbs = [
           rootBreadcrumb,
-          { ...getAlertingV2Breadcrumb('notification_policies_list') },
+          actionPoliciesListBreadcrumb,
+          getAlertingV2Breadcrumb('action_policy_create'),
         ];
         break;
-      case 'notification_policy_create':
+      case 'action_policy_edit':
         breadcrumbs = [
           rootBreadcrumb,
-          notificationPoliciesListBreadcrumb,
-          getAlertingV2Breadcrumb('notification_policy_create'),
-        ];
-        break;
-      case 'notification_policy_edit':
-        breadcrumbs = [
-          rootBreadcrumb,
-          notificationPoliciesListBreadcrumb,
-          getAlertingV2Breadcrumb('notification_policy_edit'),
+          actionPoliciesListBreadcrumb,
+          getAlertingV2Breadcrumb('action_policy_edit'),
         ];
         break;
       case 'episodes_list':
