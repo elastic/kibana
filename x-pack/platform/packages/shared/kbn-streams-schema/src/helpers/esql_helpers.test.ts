@@ -100,6 +100,40 @@ describe('stripMetadata', () => {
   it('returns the original string if there is no FROM command', () => {
     expect(stripMetadata('SHOW INFO')).toBe('SHOW INFO');
   });
+
+  it('returns the input unchanged when ES|QL cannot be parsed', () => {
+    const malformed = 'NOT VALID ESQL {{{';
+    expect(stripMetadata(malformed)).toBe(malformed);
+    expect(stripMetadata(malformed, ['_source'])).toBe(malformed);
+  });
+
+  describe('with identifiersToStrip', () => {
+    it('removes only listed identifiers from METADATA', () => {
+      const result = stripMetadata(
+        'FROM logs* METADATA _id, _source | WHERE x > 1',
+        ['_source']
+      );
+      expect(result).toBe('FROM logs* METADATA _id | WHERE x > 1');
+    });
+
+    it('drops the METADATA option when all of its identifiers are stripped', () => {
+      const result = stripMetadata(
+        'FROM logs* METADATA _id, _source | WHERE x > 1',
+        ['_id', '_source']
+      );
+      expect(result).toBe('FROM logs* | WHERE x > 1');
+    });
+
+    it('returns the query unchanged when none of the listed identifiers are present', () => {
+      const query = 'FROM logs* METADATA _id | WHERE x > 1';
+      expect(stripMetadata(query, ['_source'])).toBe(query);
+    });
+
+    it('returns the query unchanged when there is no METADATA option', () => {
+      const query = 'FROM logs* | WHERE x > 1';
+      expect(stripMetadata(query, ['_source'])).toBe(query);
+    });
+  });
 });
 
 describe('extractStatsGroupColumns', () => {

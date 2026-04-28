@@ -187,6 +187,23 @@ function toV2Tags(v1Tags: string[]): string[] {
   return streamName ? [`sigevents:stream:${streamName}`] : v1Tags;
 }
 
+/**
+ * v2 grouping fields for SigEvents MATCH queries.
+ *
+ * Each MATCH row corresponds to one source document; using `_id` makes the group hash
+ * stable across overlapping evaluation windows (with `lookback: 2m` and `every: 1m`,
+ * adjacent runs see the same documents). This mirrors v1's per-document deduplication
+ * via `kibana.alert.uuid` derived from `_id`. Without an explicit grouping, v2 falls
+ * back to a per-row hash that includes the execution UUID, producing a fresh group on
+ * every run and a duplicate signal per document per evaluation.
+ *
+ * The query passed to v2 retains `METADATA _id` (only `_source` is stripped) so that
+ * `_id` is present as a column for v2's `buildGroupHash` to read.
+ */
+const V2_MATCH_GROUPING_FIELDS = ['_id'] as const;
+
+const V2_QUERY_METADATA_TO_STRIP = ['_source'];
+
 function toV2CreateBody(body: CreateRuleBody) {
   return {
     kind: 'signal' as const,
@@ -196,7 +213,10 @@ function toV2CreateBody(body: CreateRuleBody) {
     },
     time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval, lookback: '2m' },
-    evaluation: { query: { base: stripMetadata(body.params.query) } },
+    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
+    evaluation: {
+      query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+    },
   };
 }
 
@@ -207,7 +227,10 @@ function toV2UpdateBody(body: UpdateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     schedule: { every: body.schedule.interval, lookback: '2m' },
-    evaluation: { query: { base: stripMetadata(body.params.query) } },
+    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
+    evaluation: {
+      query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+    },
   };
 }
 

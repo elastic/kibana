@@ -89,7 +89,8 @@ describe('V2RulesHttpClient', () => {
         },
         time_field: '@timestamp',
         schedule: { every: '1m', lookback: '2m' },
-        evaluation: { query: { base: 'FROM logs-* | WHERE level == "error"' } },
+        grouping: { fields: ['_id'] },
+        evaluation: { query: { base: 'FROM logs-* METADATA _id | WHERE level == "error"' } },
       });
     });
 
@@ -99,6 +100,14 @@ describe('V2RulesHttpClient', () => {
 
       const body = lastFetchBody() as Record<string, unknown>;
       expect((body.schedule as Record<string, unknown>).lookback).toBe('2m');
+    });
+
+    it('groups by _id so overlapping windows dedupe per source document', async () => {
+      const client = makeClient();
+      await client.createRule('rule-1', createBody);
+
+      const body = lastFetchBody() as { grouping: { fields: string[] } };
+      expect(body.grouping).toEqual({ fields: ['_id'] });
     });
 
     it('maps updateRule body to v2 partial shape (no kind or time_field)', async () => {
@@ -111,8 +120,17 @@ describe('V2RulesHttpClient', () => {
           tags: ['sigevents:stream:my-stream'],
         },
         schedule: { every: '1m', lookback: '2m' },
-        evaluation: { query: { base: 'FROM logs-* | WHERE level == "error"' } },
+        grouping: { fields: ['_id'] },
+        evaluation: { query: { base: 'FROM logs-* METADATA _id | WHERE level == "error"' } },
       });
+    });
+
+    it('keeps grouping in updateRule bodies so dedup config stays in sync', async () => {
+      const client = makeClient();
+      await client.updateRule('rule-1', updateBody);
+
+      const body = lastFetchBody() as { grouping: { fields: string[] } };
+      expect(body.grouping).toEqual({ fields: ['_id'] });
     });
 
     it('maps v1 tags ["streams", "<name>"] to a single structured v2 tag', async () => {
@@ -134,7 +152,7 @@ describe('V2RulesHttpClient', () => {
       expect(body.metadata.tags).toEqual(['streams']);
     });
 
-    it('strips METADATA _id, _source from queries to avoid oversized Arrow responses', async () => {
+    it('strips _source from METADATA but keeps _id so v2 grouping can dedupe per document', async () => {
       const client = makeClient();
       await client.createRule('rule-1', {
         ...createBody,
@@ -146,11 +164,11 @@ describe('V2RulesHttpClient', () => {
 
       const body = lastFetchBody() as { evaluation: { query: { base: string } } };
       expect(body.evaluation.query.base).toBe(
-        'FROM logs.child, logs.child.* | WHERE KQL("message: error")'
+        'FROM logs.child, logs.child.* METADATA _id | WHERE KQL("message: error")'
       );
     });
 
-    it('strips METADATA from updateRule bodies as well', async () => {
+    it('strips _source from updateRule queries while keeping _id', async () => {
       const client = makeClient();
       await client.updateRule('rule-1', {
         ...updateBody,
@@ -161,7 +179,9 @@ describe('V2RulesHttpClient', () => {
       });
 
       const body = lastFetchBody() as { evaluation: { query: { base: string } } };
-      expect(body.evaluation.query.base).toBe('FROM logs-* | WHERE level == "error"');
+      expect(body.evaluation.query.base).toBe(
+        'FROM logs-* METADATA _id | WHERE level == "error"'
+      );
     });
 
     it('leaves queries without METADATA unchanged', async () => {
