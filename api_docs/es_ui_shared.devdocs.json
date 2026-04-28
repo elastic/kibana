@@ -58,6 +58,7 @@
                 "lineNumber": 67,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Props",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -94,6 +95,7 @@
                 "lineNumber": 72,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Props",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -144,6 +146,7 @@
                 "lineNumber": 82,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Frequency",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -182,6 +185,7 @@
                 "lineNumber": 106,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldToValueMap",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -296,6 +300,7 @@
             "lineNumber": 49,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -364,7 +369,7 @@
             "id": "def-public.JsonEditor.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  label,\n  helpText,\n  onUpdate,\n  value,\n  defaultValue,\n  codeEditorProps,\n  error: propsError,\n  ...rest\n}",
             "description": [],
             "signature": [
               "Props<T>"
@@ -373,6 +378,7 @@
             "lineNumber": 28,
             "columnNumber": 68,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false
           }
         ],
@@ -408,6 +414,7 @@
             "lineNumber": 19,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -611,6 +618,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -634,6 +642,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SendRequestConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -709,6 +718,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -732,6 +742,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseRequestConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -769,6 +780,7 @@
             "lineNumber": 162,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ViewApiRequestFlyoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -806,6 +818,7 @@
             "lineNumber": 48,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1574,6 +1587,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "JsonEditorState",
             "trackAdoption": false
           }
         ],
@@ -1772,6 +1786,7 @@
             "lineNumber": 25,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "EsErrorHandlerParams",
             "trackAdoption": false,
             "isRequired": true
           }

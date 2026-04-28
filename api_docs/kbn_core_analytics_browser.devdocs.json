@@ -230,7 +230,15 @@
             "tags": [],
             "label": "context",
             "description": [
-              "\nThe {@link EventContext} enriched during the processing pipeline."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-public.EventContext",
+                "text": "EventContext"
+              },
+              " enriched during the processing pipeline."
             ],
             "signature": [
               "EventContext"
@@ -270,7 +278,15 @@
         "tags": [],
         "label": "EventContext",
         "description": [
-          "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+          "\nDefinition of the context that can be appended to the events through the ",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-public.IAnalyticsClient.registerContextProvider",
+            "text": "IAnalyticsClient.registerContextProvider"
+          },
+          "."
         ],
         "signature": [
           "EventContext"
@@ -966,6 +982,10 @@
                 "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
               },
               {
+                "plugin": "streams",
+                "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
+              },
+              {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
               },
@@ -1563,6 +1583,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/workflow_insights/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics/get_entity_tool.ts"
               },
               {
@@ -1620,6 +1644,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/update_insight.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/update_insight.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/create_insights.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3079,6 +3111,7 @@
                 "lineNumber": 152,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3098,6 +3131,7 @@
                 "lineNumber": 152,
                 "columnNumber": 71,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventTypeData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3141,6 +3175,7 @@
                 "lineNumber": 157,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventTypeOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3188,6 +3223,7 @@
                 "lineNumber": 164,
                 "columnNumber": 64,
                 "deprecated": false,
+                "docsReferencedTypeName": "ShipperClassConstructor",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3207,6 +3243,7 @@
                 "lineNumber": 164,
                 "columnNumber": 122,
                 "deprecated": false,
+                "docsReferencedTypeName": "ShipperConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3227,6 +3264,7 @@
                 "lineNumber": 164,
                 "columnNumber": 152,
                 "deprecated": false,
+                "docsReferencedTypeName": "RegisterShipperOpts",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3269,6 +3307,7 @@
                 "lineNumber": 170,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "OptInConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3584,6 +3623,7 @@
                 "lineNumber": 177,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContextProviderOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3624,6 +3664,7 @@
                 "lineNumber": 182,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContextProviderName",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3831,6 +3872,7 @@
                 "lineNumber": 21,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4306,7 +4348,14 @@
         "tags": [],
         "label": "ShipperClassConstructor",
         "description": [
-          "\nConstructor of a {@link IShipper}"
+          "\nConstructor of a ",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-public.IShipper",
+            "text": "IShipper"
+          }
         ],
         "signature": [
           "ShipperClassConstructor",
@@ -4367,6 +4416,7 @@
                 "lineNumber": 40,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4386,6 +4436,7 @@
                 "lineNumber": 40,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnalyticsClientInitContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4420,7 +4471,14 @@
             "tags": [],
             "label": "type",
             "description": [
-              "\n{@link TelemetryCounterType}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-public.TelemetryCounterType",
+                "text": "TelemetryCounterType"
+              }
             ],
             "signature": [
               "\"succeeded\" | \"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"dropped\""
@@ -4580,7 +4638,14 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-public.AnalyticsClient",
+            "text": "AnalyticsClient"
+          }
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -4615,7 +4680,14 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-public.AnalyticsClient",
+            "text": "AnalyticsClient"
+          }
         ],
         "signature": [
           "{ optIn: (optInConfig: ",

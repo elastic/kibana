@@ -21,7 +21,7 @@ const FIELD_BOUNDS: Record<keyof SigEventsTuningConfig, FieldBounds> = {
   diverse_ratio: { min: 0, max: 1 },
   max_excluded_features_in_prompt: { min: 0, max: 50, integer: true },
   max_entity_filters: { min: 1, max: 50, integer: true },
-  semantic_min_score: { min: 0, max: 100 },
+  semantic_min_score: { min: 0, max: 1 },
   rrf_rank_constant: { min: 1, max: 100, integer: true },
 };
 
