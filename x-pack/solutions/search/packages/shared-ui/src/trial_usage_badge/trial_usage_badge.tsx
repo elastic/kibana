@@ -14,8 +14,9 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiPopoverFooter,
   EuiPopover,
+  EuiPopoverTitle,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -114,59 +115,58 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
-      panelPaddingSize="none"
       aria-label={title}
       data-test-subj="trialUsagePopover"
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        css={css({ width: 340, padding: `${euiTheme.size.base} ${euiTheme.size.s}` })}
-      >
+      <EuiPopoverTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h4>{title}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="default">{daysLabel}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+      <EuiFlexGroup direction="column" gutterSize="none" css={css({ width: 330 })}>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h4>{title}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{daysLabel}</EuiBadge>
-            </EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            {isServerless ? <ServerlessUsage /> : <CloudHostedUsage />}
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem>{isServerless ? <ServerlessUsage /> : <CloudHostedUsage />}</EuiFlexItem>
+        <EuiPopoverFooter>
+          <EuiFlexItem>
+            <EuiButton
+              data-test-subj="sharedUiTrialUsageBadgeViewSubscriptionPlansButton"
+              href={billingUrl || undefined}
+              fullWidth
+              color="text"
+              iconType="popout"
+              iconSide="right"
+            >
+              {i18n.translate('xpack.searchSharedUi.trialUsageBadge.viewSubscriptionPlans', {
+                defaultMessage: 'View subscription plans',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="m" />
-          <EuiButton
-            data-test-subj="sharedUiTrialUsageBadgeViewSubscriptionPlansButton"
-            href={billingUrl || undefined}
-            fullWidth
-            color="text"
-            iconType="popout"
-            iconSide="right"
-          >
-            {i18n.translate('xpack.searchSharedUi.trialUsageBadge.viewSubscriptionPlans', {
-              defaultMessage: 'View subscription plans',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-
-        <EuiFlexItem css={css({ textAlign: 'center', marginTop: euiTheme.size.s })}>
-          <EuiButtonEmpty
-            data-test-subj="sharedUiTrialUsageBadgeDocumentationButton"
-            href="https://www.elastic.co/docs"
-            target="_blank"
-            size="xs"
-            iconType="documents"
-          >
-            {i18n.translate('xpack.searchSharedUi.trialUsageBadge.documentation', {
-              defaultMessage: 'Documentation',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+          <EuiFlexItem css={css({ textAlign: 'center', marginTop: euiTheme.size.s })}>
+            <EuiButtonEmpty
+              data-test-subj="sharedUiTrialUsageBadgeDocumentationButton"
+              href="https://www.elastic.co/docs"
+              target="_blank"
+              size="xs"
+              iconType="documents"
+            >
+              {i18n.translate('xpack.searchSharedUi.trialUsageBadge.documentation', {
+                defaultMessage: 'Documentation',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiPopoverFooter>
       </EuiFlexGroup>
     </EuiPopover>
   );

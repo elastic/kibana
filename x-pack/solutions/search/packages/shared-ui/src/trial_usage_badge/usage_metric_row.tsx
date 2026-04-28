@@ -7,16 +7,7 @@
 
 import React from 'react';
 
-import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIconTip,
-  EuiProgress,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiProgress, EuiText } from '@elastic/eui';
 
 export interface UsageMetricRowProps {
   label: string;
@@ -41,43 +32,37 @@ export const UsageMetricRow: React.FC<UsageMetricRowProps> = ({
   progressValue,
   progressMax,
   subtitle,
-}) => {
-  const { euiTheme } = useEuiTheme();
+}) => (
+  <EuiFlexGroup gutterSize="xs" direction="column">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{label}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="question" content={tooltip} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">{value}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
 
-  return (
-    <>
-      <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>{label}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip type="iInCircle" content={tooltip} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{value}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    {progressValue !== undefined && progressMax !== undefined && (
+      <EuiProgress
+        value={progressValue}
+        max={progressMax}
+        size="s"
+        color={getProgressColor(progressValue, progressMax)}
+      />
+    )}
 
-      {progressValue !== undefined && progressMax !== undefined && (
-        <EuiProgress
-          value={progressValue}
-          max={progressMax}
-          size="s"
-          color={getProgressColor(progressValue, progressMax)}
-          css={css({ marginTop: euiTheme.size.xs })}
-        />
-      )}
-
-      <EuiText size="xs" color="subdued" css={css({ marginTop: euiTheme.size.xs })}>
-        {subtitle}
-      </EuiText>
-    </>
-  );
-};
+    <EuiText size="xs" color="subdued">
+      {subtitle}
+    </EuiText>
+  </EuiFlexGroup>
+);
