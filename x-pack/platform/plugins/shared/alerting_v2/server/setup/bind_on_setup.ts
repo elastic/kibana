@@ -90,7 +90,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
             logger.info('Rule management skill registered (experimental features enabled)');
           }
         })
-        .catch(() => {});
+        .catch((err) => {
+          logger.warn(
+            `Failed to read alerting V2 experimental features setting; rule management skill not registered: ${err}`
+          );
+        });
     }
 
     if (container.isBound(usageCollectionToken)) {
