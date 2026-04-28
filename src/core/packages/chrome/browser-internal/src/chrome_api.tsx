@@ -138,6 +138,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
     registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
     getHelpMenuLinks$: () => services.navControls.getHelpMenuLinks$(),
     setHelpMenuLinks: services.navControls.setHelpMenuLinks,
+    registerAppDocumentationLink: state.appDocumentationLink.set,
+    getAppDocumentationLink$: () => state.appDocumentationLink.$,
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,

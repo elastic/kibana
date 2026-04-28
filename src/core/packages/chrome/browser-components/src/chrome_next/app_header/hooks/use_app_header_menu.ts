@@ -12,20 +12,59 @@ import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-c
 import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
+import { i18n } from '@kbn/i18n';
 import { useAppMenu, useNextHeader } from '../../../shared/chrome_hooks';
 
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuItemType => ({
-  label: 'Feedback',
+  label: i18n.translate('chrome.appHeader.feedbackMenuItemLabel', {
+    defaultMessage: 'Feedback',
+  }),
   id: 'feedback',
   iconType: 'comment',
   order: 1,
   run: feedbackHandler,
 });
 
+const createDocumentationMenuItem = (href: string): AppMenuItemType => ({
+  label: i18n.translate('chrome.appHeader.documentationMenuItemLabel', {
+    defaultMessage: 'Documentation',
+  }),
+  id: 'documentation',
+  iconType: 'documentation',
+  order: 2,
+  href,
+  target: '_blank',
+});
+
 interface ResolvedAppMenu {
   menu: AppMenuConfig | undefined;
   shareItem: AppMenuItemType | undefined;
 }
+
+const useStaticItems = () => {
+  const chrome = useChromeService();
+  const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
+  const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
+  const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
+
+  return useMemo(() => {
+    const staticItems: AppMenuItemType[] = [];
+
+    if (feedbackHandler) {
+      staticItems.push(createFeedbackMenuItem(feedbackHandler));
+    }
+
+    const docLink =
+      documentationLink ??
+      helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
+
+    if (docLink) {
+      staticItems.push(createDocumentationMenuItem(docLink));
+    }
+
+    return staticItems;
+  }, [feedbackHandler, documentationLink, helpExtension]);
+};
 
 const useResolvedAppMenu = (): ResolvedAppMenu => {
   const config = useNextHeader();
@@ -58,12 +97,11 @@ export function useAppHeaderMenu(): {
   staticItems: AppMenuItemType[];
 } {
   const { menu } = useResolvedAppMenu();
-  const chrome = useChromeService();
-  const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
+  const staticItems = useStaticItems();
 
   return {
     config: menu,
-    staticItems: feedbackHandler ? [createFeedbackMenuItem(feedbackHandler)] : [],
+    staticItems,
   };
 }
 

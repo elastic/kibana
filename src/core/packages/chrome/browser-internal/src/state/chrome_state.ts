@@ -79,6 +79,9 @@ export interface ChromeState {
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
   };
 
+  /** App documentation link registered by the current app */
+  appDocumentationLink: State<string | undefined>;
+
   /** Feedback handler registered by the feedback plugin */
   feedbackHandler: State<(() => void) | undefined>;
 
@@ -131,6 +134,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
 
+  // App Documentation Link
+  const appDocumentationLink = createState<string | undefined>(undefined);
+
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
 
@@ -166,6 +172,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    appDocumentationLink,
     feedbackHandler,
     newsfeedHandler,
   };
