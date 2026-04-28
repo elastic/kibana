@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalySeverityFilter } from './anomaly_severity_filter';
@@ -13,50 +13,26 @@ import { useRecentAnomaliesQuery } from './hooks/recent_anomalies_query_hooks';
 import type { ViewByMode } from './hooks/recent_anomalies_esql_source_query_hooks';
 import { useAnomalyBands } from './anomaly_bands';
 import { EntityNameList } from './entity_name_list';
+import { JobIdList } from './job_id_list';
 import { AnomalyHeatmap } from './anomaly_heatmap';
-import { getAnomalyChartStyling } from './anomaly_chart_styling';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { RecentAnomaliesHeatmapNoResults } from './recent_anomalies_heatmap_no_results';
 
 const RECENT_ANOMALIES_QUERY_ID = 'recent-anomalies-query';
 const RECENT_ANOMALIES_CONTEXT_ID = 'RecentAnomalies-table';
+
+/**
+ * The Entity Analytics home page hides the global date picker. The Recent
+ * Anomalies panel on that page is intentionally pinned to a fixed 30-day
+ * window so it always shows recent ML activity regardless of the hidden
+ * global time state.
+ */
+export const RECENT_ANOMALIES_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
 const VIEW_BY_OPTIONS = [
   { value: 'entity' as const, text: 'Entity' },
   { value: 'jobId' as const, text: 'Job ID' },
 ];
-
-const LabelList: React.FC<{ labels: string[]; compressed?: boolean }> = ({
-  labels,
-  compressed = false,
-}) => {
-  const styling = getAnomalyChartStyling(compressed);
-  return (
-    <EuiFlexItem
-      css={css`
-        margin-top: ${styling.heightOfTopLegend}px;
-        height: ${styling.heightOfEntityNamesList(labels.length)}px;
-      `}
-      grow={false}
-    >
-      <EuiFlexGroup gutterSize={'none'} direction={'column'} justifyContent={'center'}>
-        {labels.map((label) => (
-          <EuiFlexItem
-            key={label}
-            css={css`
-              justify-content: center;
-              height: ${styling.heightOfEachCell}px;
-            `}
-            grow={false}
-          >
-            <EuiText textAlign={'right'} size="s">
-              {label}
-            </EuiText>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-};
 
 interface RecentAnomaliesChartProps {
   watchlistId?: string;
@@ -77,6 +53,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
     viewBy,
     watchlistId,
     spaceId,
+    timeRange: RECENT_ANOMALIES_TIME_RANGE,
   });
 
   useQueryInspector({
@@ -93,7 +70,17 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems="center"
+        responsive={false}
+        wrap
+        css={css`
+          & > .euiFlexItem {
+            flex-shrink: 0;
+          }
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiSelect
             prepend="View by"
@@ -104,7 +91,9 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
             compressed
           />
         </EuiFlexItem>
-        <AnomalySeverityFilter anomalyBands={bands} toggleHiddenBand={toggleHiddenBand} />
+        <EuiFlexItem grow={false}>
+          <AnomalySeverityFilter anomalyBands={bands} toggleHiddenBand={toggleHiddenBand} />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
         {viewBy === 'entity' && entityMetadata ? (
@@ -114,7 +103,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
             compressed
           />
         ) : (
-          <LabelList labels={rowLabels} compressed />
+          <JobIdList jobIds={rowLabels} compressed />
         )}
         <AnomalyHeatmap
           anomalyBands={bands}
@@ -125,6 +114,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
           isLoading={isLoading}
           isError={isError}
           compressed
+          noResultsComponent={<RecentAnomaliesHeatmapNoResults />}
         />
       </EuiFlexGroup>
     </>
