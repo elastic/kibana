@@ -258,7 +258,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
         ],
         min_features: 10,
         max_features: 40,
-        required_types: ['entity'],
+        required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
           'entities=[frontend, userservice, contacts, ledgerwriter, balancereader, transactionhistory, ledger-db, accounts-db], deps=[ledgerwriter->ledger-db, balancereader->ledger-db, transactionhistory->ledger-db, userservice->accounts-db, frontend->balancereader, frontend->ledgerwriter, frontend->userservice, loadgenerator->frontend], infra=[kubernetes]',
