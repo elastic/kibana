@@ -87,8 +87,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
       },
-      summary: `Delete an enrollment API key`,
-      description: `Revoke or delete an enrollment API key by ID. Use forceDelete=true to remove the document.`,
+      summary: 'Revoke or delete an enrollment API key',
+      description:
+        'Revoke or delete an enrollment API key by ID. Use `forceDelete=true` to remove the document.',
       options: {
         tags: ['oas-tag:Fleet enrollment API keys'],
       },
@@ -171,8 +172,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
       },
-      summary: `Bulk delete enrollment API keys`,
-      description: `Delete or deactivate multiple enrollment API keys.`,
+      summary: `Bulk revoke or delete enrollment API keys`,
+      description: `Revoke or delete multiple enrollment API keys.`,
       options: {
         tags: ['oas-tag:Fleet enrollment API keys'],
       },
