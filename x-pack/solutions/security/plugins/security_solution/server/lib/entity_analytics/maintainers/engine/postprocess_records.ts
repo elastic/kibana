@@ -19,15 +19,6 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
-/**
- * Maps raw ES|QL result rows to ProcessedEngineRecord objects.
- *
- * For 'accesses': expects columns actorUserId, accesses_frequently, accesses_infrequently.
- * For 'communicates_with': expects columns actorUserId, communicates_with.
- *
- * Target EUIDs are stored in raw_identifiers['entity.id'] — NOT in ids.
- * The relationship resolver validates them against the entity store later.
- */
 export const postprocessEsqlResults = (
   columns: EsqlColumn[],
   values: unknown[][],
@@ -46,8 +37,8 @@ export const postprocessEsqlResults = (
         entityId: actorUserId,
         entityType: 'user' as const,
         relationships: {
-          accesses_frequently: { 'entity.id': toStringArray(record.accesses_frequently) },
-          accesses_infrequently: { 'entity.id': toStringArray(record.accesses_infrequently) },
+          accesses_frequently: toStringArray(record.accesses_frequently),
+          accesses_infrequently: toStringArray(record.accesses_infrequently),
         },
       };
     }
@@ -56,7 +47,7 @@ export const postprocessEsqlResults = (
       entityId: actorUserId,
       entityType: 'user' as const,
       relationships: {
-        communicates_with: { 'entity.id': toStringArray(record.communicates_with) },
+        communicates_with: toStringArray(record.communicates_with),
       },
     };
   });

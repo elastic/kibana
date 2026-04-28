@@ -87,18 +87,15 @@ export interface RelationshipIntegrationConfig {
 
 /**
  * Output record from the generic postprocessor.
- * Each relationship's targets are stored as raw entity.id values (EUIDs) under
- * raw_identifiers['entity.id']. The relationship resolver later confirms which
- * of these EUIDs exist in the entity store and promotes them to ids.
+ * Each relationship's targets are stored as optimistic EUIDs computed in the ES|QL layer.
  */
 export interface ProcessedEngineRecord {
   /** Full EUID with type prefix, e.g. "user:alice@okta". Null if actor eval failed. */
   entityId: string | null;
   entityType: 'user';
   /**
-   * Map of relationship type key → raw entity.id array.
-   * For 'accesses': keys are 'accesses_frequently' and 'accesses_infrequently'.
-   * For 'communicates_with': key is 'communicates_with'.
+   * relType → euid[]
+   * e.g. { communicates_with: ['host:D3F5C9B9-...', 'user:bob@corp'] }
    */
-  relationships: Record<string, { 'entity.id': string[] }>;
+  relationships: Record<string, string[]>;
 }

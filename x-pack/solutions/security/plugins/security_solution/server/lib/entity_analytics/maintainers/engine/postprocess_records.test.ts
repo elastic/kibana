@@ -28,7 +28,7 @@ describe('postprocessEsqlResults (accesses)', () => {
     expect(rec.entityId).toBeNull();
   });
 
-  it('uses actorUserId directly as entityId (already has type prefix)', () => {
+  it('uses actorUserId directly as entityId', () => {
     const [rec] = postprocessEsqlResults(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, null]],
@@ -37,24 +37,25 @@ describe('postprocessEsqlResults (accesses)', () => {
     expect(rec.entityId).toBe('user:alice@corp');
   });
 
-  it('puts accesses_frequently targets in raw_identifiers["entity.id"]', () => {
+  it('puts accesses_frequently target EUIDs in flat array', () => {
     const [rec] = postprocessEsqlResults(
       ACCESSES_COLUMNS,
-      [['user:alice@corp', ['host:web-01', 'host:web-02'], null]],
+      [['user:alice@corp', ['host:D3F5C9B9-web-01', 'host:D3F5C9B9-web-02'], null]],
       'accesses'
     );
-    expect(rec.relationships.accesses_frequently).toEqual({
-      'entity.id': ['host:web-01', 'host:web-02'],
-    });
+    expect(rec.relationships.accesses_frequently).toEqual([
+      'host:D3F5C9B9-web-01',
+      'host:D3F5C9B9-web-02',
+    ]);
   });
 
-  it('puts accesses_infrequently targets in raw_identifiers["entity.id"]', () => {
+  it('puts accesses_infrequently target EUIDs in flat array', () => {
     const [rec] = postprocessEsqlResults(
       ACCESSES_COLUMNS,
-      [['user:alice@corp', null, 'host:db-01']],
+      [['user:alice@corp', null, 'host:D3F5C9B9-db-01']],
       'accesses'
     );
-    expect(rec.relationships.accesses_infrequently).toEqual({ 'entity.id': ['host:db-01'] });
+    expect(rec.relationships.accesses_infrequently).toEqual(['host:D3F5C9B9-db-01']);
   });
 
   it('wraps null columns as empty arrays', () => {
@@ -63,21 +64,19 @@ describe('postprocessEsqlResults (accesses)', () => {
       [['user:alice@corp', null, null]],
       'accesses'
     );
-    expect(rec.relationships.accesses_frequently).toEqual({ 'entity.id': [] });
-    expect(rec.relationships.accesses_infrequently).toEqual({ 'entity.id': [] });
+    expect(rec.relationships.accesses_frequently).toEqual([]);
+    expect(rec.relationships.accesses_infrequently).toEqual([]);
   });
 });
 
 describe('postprocessEsqlResults (communicates_with)', () => {
-  it('puts communicates_with targets in raw_identifiers["entity.id"]', () => {
+  it('puts communicates_with target EUIDs in flat array', () => {
     const [rec] = postprocessEsqlResults(
       COMM_COLUMNS,
       [['user:alice@okta', ['user:bob@okta', 'user:carol@okta']]],
       'communicates_with'
     );
-    expect(rec.relationships.communicates_with).toEqual({
-      'entity.id': ['user:bob@okta', 'user:carol@okta'],
-    });
+    expect(rec.relationships.communicates_with).toEqual(['user:bob@okta', 'user:carol@okta']);
   });
 
   it('uses actorUserId directly as entityId', () => {

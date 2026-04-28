@@ -18,13 +18,11 @@ interface MergedRelationships {
 }
 
 function hasAnyTargets(record: ProcessedEngineRecord): boolean {
-  return Object.values(record.relationships).some((rel) => rel['entity.id'].length > 0);
+  return Object.values(record.relationships).some((rel) => rel.length > 0);
 }
 
 function filterValid(records: ProcessedEngineRecord[]): ValidRecord[] {
-  return records.filter(
-    (r): r is ValidRecord => r.entityId !== null && hasAnyTargets(r)
-  );
+  return records.filter((r): r is ValidRecord => r.entityId !== null && hasAnyTargets(r));
 }
 
 function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> {
@@ -39,7 +37,7 @@ function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> 
       if (!entity[relType]) {
         entity[relType] = new Set();
       }
-      for (const id of rel['entity.id']) {
+      for (const id of rel) {
         entity[relType].add(id);
       }
     }
@@ -72,20 +70,20 @@ export const writeRawIdentifiers = async (
         relationships[relType] = { raw_identifiers: { 'entity.id': Array.from(idSet) } };
       }
     }
-    if (Object.keys(relationships).length === 0) continue;
-
-    // EntityField.relationships is strict-keyed in the Zod schema; raw_identifiers writes
-    // use partial update docs with arbitrary rel-type keys, so the full Entity type cannot
-    // be satisfied here. BulkObject accepts Entity only for structural typing purposes.
-    objects.push({
-      type: 'user',
-      doc: {
-        entity: {
-          id: entityId,
-          relationships,
-        },
-      } as unknown as Entity,
-    });
+    if (Object.keys(relationships).length > 0) {
+      // EntityField.relationships is strict-keyed in the Zod schema; raw_identifiers writes
+      // use partial update docs with arbitrary rel-type keys, so the full Entity type cannot
+      // be satisfied here. BulkObject accepts Entity only for structural typing purposes.
+      objects.push({
+        type: 'user',
+        doc: {
+          entity: {
+            id: entityId,
+            relationships,
+          },
+        } as unknown as Entity,
+      });
+    }
   }
 
   if (objects.length === 0) return 0;

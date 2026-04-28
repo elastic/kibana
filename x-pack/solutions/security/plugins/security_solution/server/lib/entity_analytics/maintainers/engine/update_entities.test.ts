@@ -26,22 +26,22 @@ describe('writeRawIdentifiers', () => {
   it('skips records with null entityId', async () => {
     const crudClient = makeCrudClient();
     const records: ProcessedEngineRecord[] = [
-      { entityId: null, entityType: 'user', relationships: { communicates_with: { 'entity.id': ['host:foo'] } } },
+      { entityId: null, entityType: 'user', relationships: { communicates_with: ['host:foo'] } },
     ];
     const result = await writeRawIdentifiers(crudClient, loggerMock.create(), records);
     expect(result).toBe(0);
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
-  it('skips records where all relationship raw_identifiers are empty', async () => {
+  it('skips records where all relationship arrays are empty', async () => {
     const crudClient = makeCrudClient();
     const records: ProcessedEngineRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
         relationships: {
-          accesses_frequently: { 'entity.id': [] },
-          accesses_infrequently: { 'entity.id': [] },
+          accesses_frequently: [],
+          accesses_infrequently: [],
         },
       },
     ];
@@ -57,8 +57,8 @@ describe('writeRawIdentifiers', () => {
         entityId: 'user:alice@corp',
         entityType: 'user',
         relationships: {
-          accesses_frequently: { 'entity.id': ['host:web-01'] },
-          accesses_infrequently: { 'entity.id': [] },
+          accesses_frequently: ['host:web-01'],
+          accesses_infrequently: [],
         },
       },
     ];
@@ -76,12 +76,12 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:a'] } },
+        relationships: { communicates_with: ['host:a'] },
       },
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:b'] } },
+        relationships: { communicates_with: ['host:b'] },
       },
     ];
     await writeRawIdentifiers(crudClient, loggerMock.create(), records);
@@ -98,12 +98,12 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:foo'] } },
+        relationships: { communicates_with: ['host:foo'] },
       },
       {
         entityId: 'user:bob@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:bar'] } },
+        relationships: { communicates_with: ['host:bar'] },
       },
     ];
     const result = await writeRawIdentifiers(crudClient, loggerMock.create(), records);
@@ -117,7 +117,7 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:foo'] } },
+        relationships: { communicates_with: ['host:foo'] },
       },
     ];
     await writeRawIdentifiers(crudClient, logger, records);
@@ -132,7 +132,7 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:foo'] } },
+        relationships: { communicates_with: ['host:foo'] },
       },
     ];
     await writeRawIdentifiers(crudClient, logger, records);
@@ -145,7 +145,7 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: { 'entity.id': ['host:foo'] } },
+        relationships: { communicates_with: ['host:foo'] },
       },
     ];
     await writeRawIdentifiers(crudClient, loggerMock.create(), records);
