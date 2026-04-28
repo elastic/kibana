@@ -49,6 +49,7 @@
             "lineNumber": 18,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "RollupDeprecationTooltipProps",
             "trackAdoption": false,
             "isRequired": true
           }

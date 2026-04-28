@@ -7779,6 +7779,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-common-types@link:x-pack/platform/packages/shared/ml/common-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-creation-wizard-utils@link:x-pack/platform/packages/private/ml/creation_wizard_utils":
   version "0.0.0"
   uid ""
@@ -7860,6 +7864,10 @@
   uid ""
 
 "@kbn/ml-runtime-field-utils@link:x-pack/platform/packages/shared/ml/runtime_field_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-server-schemas@link:x-pack/platform/packages/shared/ml/server-schemas":
   version "0.0.0"
   uid ""
 
@@ -9840,6 +9848,10 @@
   uid ""
 
 "@kbn/workflows-ui@link:src/platform/packages/shared/kbn-workflows-ui":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-yaml@link:src/platform/packages/shared/kbn-workflows-yaml":
   version "0.0.0"
   uid ""
 
@@ -16048,9 +16060,9 @@
   integrity sha512-CJDxIgE5I0FH+ttq/Fxy6nRpxP70+e2O048EPe85J2use3XKdatVM7dDVvFNjQudd9B49NPoZ+8PG49zj4Er8Q==
 
 "@xmldom/xmldom@^0.8.10":
-  version "0.8.12"
-  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.12.tgz#cf488a5435fa06c7374ad1449c69cea0f823624b"
-  integrity sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==
+  version "0.8.13"
+  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.13.tgz#00d1dd940b218dff2e49309d410d8bb212159225"
+  integrity sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==
 
 "@xobotyi/scrollbar-width@^1.9.5":
   version "1.9.5"
