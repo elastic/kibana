@@ -60,6 +60,8 @@ describe('findLiveQueryRoute', () => {
       getStartServices: jest
         .fn()
         .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: mockEsClient } } }]),
+      logFactory: { get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
+      experimentalFeatures: { resultCountsEnabled: true },
     } as unknown as OsqueryAppContext;
   });
 
@@ -315,6 +317,48 @@ describe('findLiveQueryRoute', () => {
       ['query-1'],
       'custom-space',
       false
+    );
+  });
+
+  it('skips result_counts when resultCountsEnabled is false even if withResultCounts is true', async () => {
+    (mockOsqueryContext as any).experimentalFeatures = { resultCountsEnabled: false };
+
+    const edges = [
+      {
+        _source: {
+          action_id: 'action-1',
+          queries: [{ action_id: 'query-1', query: 'select 1;', agents: ['agent-1'] }],
+        },
+        fields: { action_id: ['action-1'] },
+      },
+    ];
+
+    const mockSearchFn = jest.fn().mockReturnValue(
+      of({
+        edges,
+        rawResponse: { hits: { total: 1 } },
+        total: 1,
+      })
+    );
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { kuery: undefined, page: 0, pageSize: 20, withResultCounts: true },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+    expect(getResultCountsForActions).not.toHaveBeenCalled();
+    expect(mockResponse.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          data: expect.objectContaining({
+            items: edges,
+          }),
+        }),
+      })
     );
   });
 

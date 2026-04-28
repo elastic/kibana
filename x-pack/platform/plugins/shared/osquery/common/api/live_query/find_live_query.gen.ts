@@ -84,14 +84,26 @@ export const FindLiveQueryResponse = lazySchema(() =>
                     )
                     .optional(),
                   /**
-                   * Result count statistics (present when withResultCounts is true).
-                   */
+      * Result count statistics (present when `withResultCounts` is `true`). Single-query actions include `responded_agents`; pack actions include `queries_with_results` and `queries_total`.
+
+      */
                   result_counts: z
                     .object({
                       total_rows: z.number().int().optional(),
+                      /**
+                       * Number of agents that responded (single-query actions only).
+                       */
                       responded_agents: z.number().int().optional(),
                       successful_agents: z.number().int().optional(),
                       error_agents: z.number().int().optional(),
+                      /**
+                       * Number of sub-queries that returned at least one row (pack actions only).
+                       */
+                      queries_with_results: z.number().int().optional(),
+                      /**
+                       * Total number of sub-queries in the pack (pack actions only).
+                       */
+                      queries_total: z.number().int().optional(),
                     })
                     .optional(),
                 })
@@ -123,6 +135,29 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
          * Global status of the live query (completed, running).
          */
         status: z.enum(['completed', 'running']).optional(),
+        /**
+      * Aggregated result count statistics for the query. May be omitted when aggregation data is unavailable. Single-query actions include `responded_agents`; pack actions include `queries_with_results` and `queries_total`.
+
+      */
+        result_counts: z
+          .object({
+            total_rows: z.number().int().optional(),
+            /**
+             * Number of agents that responded (single-query actions only).
+             */
+            responded_agents: z.number().int().optional(),
+            successful_agents: z.number().int().optional(),
+            error_agents: z.number().int().optional(),
+            /**
+             * Number of sub-queries that returned at least one row (pack actions only).
+             */
+            queries_with_results: z.number().int().optional(),
+            /**
+             * Total number of sub-queries in the pack (pack actions only).
+             */
+            queries_total: z.number().int().optional(),
+          })
+          .optional(),
         /**
          * The queries with their execution status.
          */

@@ -1497,6 +1497,11 @@ components:
               saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
               status: completed
               successful: 0
+          result_counts:
+            error_agents: 0
+            responded_agents: 1
+            successful_agents: 1
+            total_rows: 42
           status: completed
           user_id: elastic
       type: object
@@ -1563,6 +1568,31 @@ components:
                     description: Number of successful agents.
                     type: integer
               type: array
+            result_counts:
+              description: >
+                Aggregated result count statistics for the query. May be omitted
+                when aggregation data is unavailable. Single-query actions
+                include `responded_agents`; pack actions include
+                `queries_with_results` and `queries_total`.
+              type: object
+              properties:
+                error_agents:
+                  type: integer
+                queries_total:
+                  description: Total number of sub-queries in the pack (pack actions only).
+                  type: integer
+                queries_with_results:
+                  description: >-
+                    Number of sub-queries that returned at least one row (pack
+                    actions only).
+                  type: integer
+                responded_agents:
+                  description: Number of agents that responded (single-query actions only).
+                  type: integer
+                successful_agents:
+                  type: integer
+                total_rows:
+                  type: integer
             status:
               description: Global status of the live query (completed, running).
               enum:
@@ -1651,14 +1681,29 @@ components:
                               type: string
                         type: array
                       result_counts:
-                        description: >-
-                          Result count statistics (present when withResultCounts
-                          is true).
+                        description: >
+                          Result count statistics (present when
+                          `withResultCounts` is `true`). Single-query actions
+                          include `responded_agents`; pack actions include
+                          `queries_with_results` and `queries_total`.
                         type: object
                         properties:
                           error_agents:
                             type: integer
+                          queries_total:
+                            description: >-
+                              Total number of sub-queries in the pack (pack
+                              actions only).
+                            type: integer
+                          queries_with_results:
+                            description: >-
+                              Number of sub-queries that returned at least one
+                              row (pack actions only).
+                            type: integer
                           responded_agents:
+                            description: >-
+                              Number of agents that responded (single-query
+                              actions only).
                             type: integer
                           successful_agents:
                             type: integer

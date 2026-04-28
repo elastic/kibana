@@ -28,6 +28,7 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { buildPackResultCounts, buildSingleQueryResultCounts } from '../../lib/build_result_counts';
 import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
@@ -92,7 +93,11 @@ export const findLiveQueryRoute = (
 
           let items = res.edges;
 
-          if (request.query.withResultCounts && items.length > 0) {
+          if (
+            osqueryContext.experimentalFeatures.resultCountsEnabled &&
+            request.query.withResultCounts &&
+            items.length > 0
+          ) {
             try {
               const [coreStartServices] = await osqueryContext.getStartServices();
               const esClient = coreStartServices.elasticsearch.client.asInternalUser;
@@ -121,64 +126,22 @@ export const findLiveQueryRoute = (
                 const action = item._source as ActionDetails | undefined;
                 if (!action?.queries) return item;
 
-                if (action.pack_id) {
-                  let totalRows = 0;
-                  let queriesWithResults = 0;
-                  let successfulAgents = 0;
-                  let errorAgents = 0;
-                  let maxRespondedAgents = 0;
+                const actionQueryIds = action.queries
+                  .map((query) => query.action_id)
+                  .filter((id): id is string => !!id);
 
-                  for (const query of action.queries) {
-                    if (query.action_id) {
-                      const counts = resultCountsMap.get(query.action_id);
-                      if (counts) {
-                        totalRows += counts.totalRows;
-                        if (counts.totalRows > 0) {
-                          queriesWithResults++;
-                        }
-
-                        if (counts.respondedAgents > maxRespondedAgents) {
-                          maxRespondedAgents = counts.respondedAgents;
-                          successfulAgents = counts.successfulAgents;
-                          errorAgents = counts.errorAgents;
-                        }
-                      }
-                    }
-                  }
-
-                  return {
-                    ...item,
-                    _source: {
-                      ...action,
-                      result_counts: {
-                        total_rows: totalRows,
-                        queries_with_results: queriesWithResults,
-                        queries_total: action.queries.length,
-                        successful_agents: successfulAgents,
-                        error_agents: errorAgents,
-                      },
-                    },
-                  };
-                }
-
-                const queryActionId = action.queries[0]?.action_id;
-                const counts = queryActionId ? resultCountsMap.get(queryActionId) : undefined;
+                const resultCounts = action.pack_id
+                  ? buildPackResultCounts(actionQueryIds, resultCountsMap)
+                  : buildSingleQueryResultCounts(actionQueryIds[0], resultCountsMap);
 
                 return {
                   ...item,
-                  _source: {
-                    ...action,
-                    result_counts: {
-                      total_rows: counts?.totalRows ?? 0,
-                      responded_agents: counts?.respondedAgents ?? 0,
-                      successful_agents: counts?.successfulAgents ?? 0,
-                      error_agents: counts?.errorAgents ?? 0,
-                    },
-                  },
+                  _source: { ...action, result_counts: resultCounts },
                 };
               });
-            } catch {
-              // Result counts are supplementary — don't fail the listing if aggregation errors
+            } catch (err) {
+              const logger = osqueryContext.logFactory.get('findLiveQuery');
+              logger.warn(`Failed to enrich result_counts for live query listing: ${String(err)}`);
             }
           }
 

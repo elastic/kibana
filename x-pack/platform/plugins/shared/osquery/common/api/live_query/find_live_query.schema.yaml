@@ -84,16 +84,28 @@ components:
                                 type: string
                       result_counts:
                         type: object
-                        description: 'Result count statistics (present when withResultCounts is true).'
+                        description: >
+                          Result count statistics (present when `withResultCounts` is `true`).
+                          Single-query actions include `responded_agents`; pack actions include
+                          `queries_with_results` and `queries_total`.
                         properties:
                           total_rows:
                             type: integer
                           responded_agents:
+                            description: 'Number of agents that responded (single-query actions only).'
                             type: integer
                           successful_agents:
                             type: integer
                           error_agents:
                             type: integer
+                          queries_with_results:
+                            description: 'Number of sub-queries that returned at least one row (pack actions only).'
+                            type: integer
+                          queries_total:
+                            description: 'Total number of sub-queries in the pack (pack actions only).'
+                            type: integer
+      # Single-query example shown below; for pack actions, result_counts uses
+      # queries_with_results and queries_total instead of responded_agents.
       example:
         data:
           total: 1
@@ -154,6 +166,29 @@ components:
               description: 'Global status of the live query (completed, running).'
               type: string
               enum: [completed, running]
+            result_counts:
+              type: object
+              description: >
+                Aggregated result count statistics for the query. May be omitted
+                when aggregation data is unavailable. Single-query actions include
+                `responded_agents`; pack actions include `queries_with_results` and
+                `queries_total`.
+              properties:
+                total_rows:
+                  type: integer
+                responded_agents:
+                  description: 'Number of agents that responded (single-query actions only).'
+                  type: integer
+                successful_agents:
+                  type: integer
+                error_agents:
+                  type: integer
+                queries_with_results:
+                  description: 'Number of sub-queries that returned at least one row (pack actions only).'
+                  type: integer
+                queries_total:
+                  description: 'Total number of sub-queries in the pack (pack actions only).'
+                  type: integer
             queries:
               description: 'The queries with their execution status.'
               type: array
@@ -193,6 +228,8 @@ components:
                     description: 'Status of this individual query.'
                     type: string
                     enum: [completed, running]
+      # Single-query example shown below; for pack actions, result_counts uses
+      # queries_with_results and queries_total instead of responded_agents.
       example:
         data:
           action_id: "3c42c847-eb30-4452-80e0-728584042334"
@@ -201,6 +238,11 @@ components:
           agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
           user_id: "elastic"
           status: "completed"
+          result_counts:
+            total_rows: 42
+            responded_agents: 1
+            successful_agents: 1
+            error_agents: 0
           queries:
             - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
               id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"

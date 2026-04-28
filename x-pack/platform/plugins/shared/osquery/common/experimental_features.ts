@@ -25,6 +25,12 @@ export const allowedExperimentalValues = Object.freeze({
    * adding KQL search, document flyout, per-row actions, and column curation.
    */
   unifiedDataTable: true,
+  /**
+   * Enables result_counts aggregation in the live query details and list API
+   * responses, providing total rows, agent success/error breakdowns. Required
+   * by the upcoming "About" tab on the query details page.
+   */
+  resultCountsEnabled: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

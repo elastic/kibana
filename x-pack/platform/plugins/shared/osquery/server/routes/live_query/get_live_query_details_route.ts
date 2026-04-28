@@ -31,6 +31,44 @@ import {
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryDetailsResponseSchema } from './response_schemas';
+import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
+import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { buildPackResultCounts, buildSingleQueryResultCounts } from '../../lib/build_result_counts';
+import type { ResultCounts } from '../../../common/api/live_query/result_counts';
+
+const fetchResultCounts = async (
+  osqueryContext: OsqueryAppContext,
+  queryActionIds: string[],
+  spaceId: string,
+  isPack: boolean
+): Promise<ResultCounts | undefined> => {
+  if (!osqueryContext.experimentalFeatures.resultCountsEnabled) {
+    return undefined;
+  }
+
+  try {
+    const [coreStartServices] = await osqueryContext.getStartServices();
+    const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+    const resultCountsMap = await getResultCountsForActions(
+      esClient,
+      queryActionIds,
+      spaceId,
+      ccsEnabled
+    );
+
+    return isPack
+      ? buildPackResultCounts(queryActionIds, resultCountsMap)
+      : buildSingleQueryResultCounts(queryActionIds[0], resultCountsMap);
+  } catch (err) {
+    const logger = osqueryContext.logFactory.get('liveQueryDetails');
+    logger.warn(
+      `Failed to fetch result_counts for actions [${queryActionIds.join(',')}]: ${String(err)}`
+    );
+
+    return undefined;
+  }
+};
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -87,8 +125,14 @@ export const getLiveQueryDetailsRoute = (
             )
           );
 
-          const queries = actionDetails?._source?.queries;
-          const expirationDate = actionDetails?.fields?.expiration?.[0];
+          if (!actionDetails) {
+            return response.notFound({
+              body: { message: `Live query ${request.params.id} not found` },
+            });
+          }
+
+          const queries = actionDetails._source?.queries;
+          const expirationDate = actionDetails.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
@@ -102,6 +146,14 @@ export const getLiveQueryDetailsRoute = (
 
           const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
           const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
+
+          const queryActionIds = map(queries, 'action_id').filter((id): id is string => !!id);
+          const resultCounts = await fetchResultCounts(
+            osqueryContext,
+            queryActionIds,
+            spaceId,
+            !!actionDetails._source?.pack_id
+          );
 
           return response.ok({
             body: {
@@ -120,6 +172,7 @@ export const getLiveQueryDetailsRoute = (
                   'prebuilt_pack',
                   'tags'
                 ),
+                ...(resultCounts ? { result_counts: resultCounts } : {}),
                 queries: reduce<
                   {
                     action_id: string;
