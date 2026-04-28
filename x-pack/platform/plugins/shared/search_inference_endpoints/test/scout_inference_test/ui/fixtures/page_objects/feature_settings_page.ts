@@ -16,10 +16,14 @@ export class FeatureSettingsPage {
   // Content
   readonly content: Locator;
 
-  // Default Model Section
+  // Top settings card rows
   readonly defaultModelSection: Locator;
-  readonly defaultModelComboBox: Locator;
-  readonly disallowOtherModelsCheckbox: Locator;
+  readonly aiCapabilitiesRow: Locator;
+  readonly enableAiSwitch: Locator;
+  readonly globalModelRow: Locator;
+  readonly globalModelComboBox: Locator;
+  readonly featureSpecificModelsRow: Locator;
+  readonly featureSpecificModelsSwitch: Locator;
 
   // Feature Sections
   readonly allFeatureSections: Locator;
@@ -36,9 +40,9 @@ export class FeatureSettingsPage {
   readonly copyToModalApply: Locator;
   readonly copyToModalCancel: Locator;
 
-  // Reset Defaults Modal
-  readonly resetDefaultsModal: Locator;
-  readonly resetDefaultsCancelButton: Locator;
+  // Per-sub-feature confirmation modals
+  readonly disableRecommendedModelsModal: Locator;
+  readonly resetToDefaultsModal: Locator;
 
   // Empty State
   readonly noModelsEmptyPrompt: Locator;
@@ -53,10 +57,14 @@ export class FeatureSettingsPage {
     // Content
     this.content = this.page.testSubj.locator('modelSettingsContent');
 
-    // Default Model Section
+    // Top settings card
     this.defaultModelSection = this.page.testSubj.locator('defaultModelSection');
-    this.defaultModelComboBox = this.page.testSubj.locator('defaultModelComboBox');
-    this.disallowOtherModelsCheckbox = this.page.testSubj.locator('disallowOtherModelsCheckbox');
+    this.aiCapabilitiesRow = this.page.testSubj.locator('aiCapabilitiesRow');
+    this.enableAiSwitch = this.page.testSubj.locator('enableAiSwitch');
+    this.globalModelRow = this.page.testSubj.locator('globalModelRow');
+    this.globalModelComboBox = this.page.testSubj.locator('globalModelComboBox');
+    this.featureSpecificModelsRow = this.page.testSubj.locator('featureSpecificModelsRow');
+    this.featureSpecificModelsSwitch = this.page.testSubj.locator('featureSpecificModelsSwitch');
 
     // Feature Sections
     this.allFeatureSections = this.content.locator('[data-test-subj^="featureSection-"]');
@@ -73,11 +81,11 @@ export class FeatureSettingsPage {
     this.copyToModalApply = this.page.testSubj.locator('copy-to-modal-apply');
     this.copyToModalCancel = this.page.testSubj.locator('copy-to-modal-cancel');
 
-    // Reset Defaults Modal
-    this.resetDefaultsModal = this.page.testSubj.locator('resetDefaultsModal');
-    this.resetDefaultsCancelButton = this.resetDefaultsModal.locator(
-      '[data-test-subj="confirmModalCancelButton"]'
+    // Per-sub-feature confirmation modals
+    this.disableRecommendedModelsModal = this.page.testSubj.locator(
+      'disableRecommendedModelsModal'
     );
+    this.resetToDefaultsModal = this.page.testSubj.locator('resetToDefaultsModal');
 
     // Empty State
     this.noModelsEmptyPrompt = this.page.testSubj.locator('settings-no-models');
@@ -102,6 +110,18 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator(`subFeatureCard-${featureId}`);
   }
 
+  public useRecommendedDefaultsToggle(featureId: string): Locator {
+    return this.page.testSubj.locator(`useRecommendedDefaultsToggle-${featureId}`);
+  }
+
+  public subFeatureOverflowMenu(featureId: string): Locator {
+    return this.page.testSubj.locator(`subFeatureOverflowMenu-${featureId}`);
+  }
+
+  public copyToMenuItem(featureId: string): Locator {
+    return this.page.testSubj.locator(`copyToMenuItem-${featureId}`);
+  }
+
   public endpointRowsFor(featureId: string): Locator {
     return this.subFeatureCard(featureId).locator('[data-test-subj^="endpoint-row-"]');
   }
@@ -118,15 +138,7 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator('add-model-selectable').getByRole('option', { name });
   }
 
-  public copyToButton(featureId: string): Locator {
-    return this.page.testSubj.locator(`copy-to-${featureId}`);
-  }
-
   public copyToModalCheckbox(featureId: string): Locator {
     return this.page.locator(`#copy-target-${featureId}`);
-  }
-
-  public resetLink(parentName: string): Locator {
-    return this.page.testSubj.locator(`reset-${parentName}`);
   }
 }

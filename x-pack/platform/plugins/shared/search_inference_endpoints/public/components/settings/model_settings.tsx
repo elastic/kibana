@@ -22,10 +22,10 @@ import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
 import { NoModelsEmptyPrompt } from './no_models_empty_prompt';
-import { ResetDefaultsModal } from './reset_defaults_modal';
 import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
+import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
@@ -37,21 +37,20 @@ export const ModelSettings: React.FC = () => {
     isSaving: isFeatureSaving,
     isDirty: isFeatureDirty,
     assignments,
+    effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
-    hasSavedObject,
-    dirtyFeatureIds,
     updateEndpoints,
     save: saveFeatures,
-    resetSection,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
-  const globalDefaultId = defaultModelSettings.savedState.defaultModelId;
+  const defaultModelValidation = useDefaultModelValidation(defaultModelSettings.state);
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
     services: { application, http },
   } = useKibana();
+  const usageTracker = useUsageTracker();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
@@ -60,7 +59,6 @@ export const ModelSettings: React.FC = () => {
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
-  const [resetParentKey, setResetParentKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isDirty) {
@@ -80,9 +78,10 @@ export const ModelSettings: React.FC = () => {
     };
   }, [isDirty, history]);
 
-  const usageTracker = useUsageTracker();
-
   const handleSave = useCallback(async () => {
+    if (!defaultModelValidation.isValid) {
+      return;
+    }
     if (isFeatureDirty) {
       saveFeatures();
     }
@@ -90,7 +89,13 @@ export const ModelSettings: React.FC = () => {
       await defaultModelSettings.save();
     }
     usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
-  }, [isFeatureDirty, saveFeatures, defaultModelSettings, usageTracker]);
+  }, [
+    isFeatureDirty,
+    saveFeatures,
+    defaultModelSettings,
+    defaultModelValidation.isValid,
+    usageTracker,
+  ]);
 
   const handleDiscardAndLeave = useCallback(() => {
     defaultModelSettings.reset();
@@ -106,25 +111,19 @@ export const ModelSettings: React.FC = () => {
     setPendingLocation(null);
   }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
-  const handleResetConfirm = useCallback(() => {
-    if (!resetParentKey) return;
-    resetSection(resetParentKey);
-    setResetParentKey(null);
-  }, [resetParentKey, resetSection]);
-
-  const disallowOtherModels = defaultModelSettings.state.disallowOtherModels;
+  const enableAi = defaultModelSettings.state.enableAi;
+  const featureSpecificModels = defaultModelSettings.state.featureSpecificModels;
+  const showFeatureSections = enableAi && featureSpecificModels;
 
   if (connectorsLoading || isLoading) {
     return (
-      <>
-        <EuiPageTemplate.Section
-          paddingSize="none"
-          data-test-subj="modelSettingsContent"
-          restrictWidth={true}
-        >
-          <EuiLoadingSpinner size="l" />
-        </EuiPageTemplate.Section>
-      </>
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="modelSettingsContent"
+        restrictWidth={true}
+      >
+        <EuiLoadingSpinner size="l" />
+      </EuiPageTemplate.Section>
     );
   }
 
@@ -147,7 +146,7 @@ export const ModelSettings: React.FC = () => {
             fill
             onClick={handleSave}
             isLoading={isSaving}
-            isDisabled={!isDirty}
+            isDisabled={!isDirty || !defaultModelValidation.isValid}
             data-test-subj="save-settings-button"
           >
             {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
@@ -175,8 +174,11 @@ export const ModelSettings: React.FC = () => {
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
-        <DefaultModelSection defaultModelSettings={defaultModelSettings} />
-        {disallowOtherModels ? null : (
+        <DefaultModelSection
+          defaultModelSettings={defaultModelSettings}
+          validation={defaultModelValidation}
+        />
+        {showFeatureSections && (
           <>
             {invalidEndpointIds.size > 0 && (
               <>
@@ -242,16 +244,14 @@ export const ModelSettings: React.FC = () => {
                     parentDescription={section.featureDescription}
                     features={section.children.map((f) => ({
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
+                      effectiveRecommendedEndpoints:
+                        effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
                       feature: f,
-                      hasSavedObject: hasSavedObject[f.featureId] ?? false,
-                      isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
-                    onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
-                    globalDefaultId={globalDefaultId}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>
@@ -260,13 +260,6 @@ export const ModelSettings: React.FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
-
-      {resetParentKey && (
-        <ResetDefaultsModal
-          onConfirm={handleResetConfirm}
-          onCancel={() => setResetParentKey(null)}
-        />
-      )}
 
       {pendingLocation && (
         <UnsavedChangesModal
