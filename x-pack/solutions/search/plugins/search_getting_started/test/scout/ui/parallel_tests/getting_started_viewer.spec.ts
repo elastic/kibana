@@ -23,15 +23,13 @@ test.describe(
       await expect(versionBadge).toBeVisible();
     });
 
-    test('verifies viewer has limited access to API keys functionality', async ({
-      pageObjects,
-    }) => {
+    test('verifies viewer API keys access', async ({ pageObjects }) => {
       await test.step('should display no API keys access message', async () => {
         const noAccessMessage = await pageObjects.gettingStarted.getNoApiKeysAccessMessage();
         await expect(noAccessMessage).toBeVisible();
       });
 
-      await test.step('connection details flyout should not show API Keys tab', async () => {
+      await test.step('connection details flyout should show API Keys tab', async () => {
         await pageObjects.gettingStarted.clickViewConnectionDetailsLink();
 
         const modalTitle = await pageObjects.gettingStarted.getConnectionDetailsModalTitle();
@@ -41,9 +39,10 @@ test.describe(
         const endpointsTab = await pageObjects.gettingStarted.getConnectionDetailsEndpointsTab();
         await expect(endpointsTab).toBeVisible();
 
-        // API Keys tab should NOT exist for viewer
+        // API Keys tab IS shown for viewer: manage_own_api_key grants capabilities.api_keys.save,
+        // so viewers can create personal API keys scoped to their own permissions.
         const apiKeysTab = await pageObjects.gettingStarted.getConnectionDetailsApiKeysTab();
-        await expect(apiKeysTab).toBeHidden();
+        await expect(apiKeysTab).toBeVisible();
       });
     });
   }
