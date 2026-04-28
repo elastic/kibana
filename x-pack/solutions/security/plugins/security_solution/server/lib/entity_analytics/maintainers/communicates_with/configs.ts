@@ -6,10 +6,64 @@
  */
 
 import type { RelationshipIntegrationConfig } from '../engine/types';
-import { buildEsqlQuery as azureBuildEsqlQuery } from './integrations/azure_auditlogs/build_esql_query';
-import { AZURE_AUDITLOGS_ACTOR_UPN_FIELD } from './integrations/azure_auditlogs/constants';
-import { OKTA_USER_ADMIN_EVENT_ACTIONS } from './integrations/okta/constants';
-import { HUMAN_IAM_IDENTITY_TYPES } from './integrations/aws_cloudtrail/constants';
+import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
+
+const OKTA_USER_ADMIN_EVENT_ACTIONS = [
+  'user.lifecycle.create',
+  'user.lifecycle.activate',
+  'user.lifecycle.deactivate',
+  'user.lifecycle.suspend',
+  'user.lifecycle.unsuspend',
+  'group.user_membership.add',
+  'group.user_membership.remove',
+  'application.user_membership.add',
+  'application.user_membership.remove',
+  'application.user_membership.change_username',
+];
+
+const HUMAN_IAM_IDENTITY_TYPES = [
+  'IAMUser',
+  'AssumedRole',
+  'Root',
+  'FederatedUser',
+  'IdentityCenterUser',
+];
+
+const AZURE_AUDITLOGS_ACTOR_UPN_FIELD =
+  'azure.auditlogs.properties.initiated_by.user.userPrincipalName';
+
+const AZURE_AUDITLOGS_TARGET_UPN_FIELD =
+  'azure.auditlogs.properties.target_resources.0.user_principal_name';
+
+const AZURE_AUDITLOGS_TARGET_TYPE_FIELD = 'azure.auditlogs.properties.target_resources.0.type';
+
+const AZURE_AUDITLOGS_TARGET_DISPLAY_NAME_FIELD =
+  'azure.auditlogs.properties.target_resources.0.display_name';
+
+function buildAzureEsqlQuery(namespace: string): string {
+  const tType = `\`${AZURE_AUDITLOGS_TARGET_TYPE_FIELD}\``;
+  const tUpn = `\`${AZURE_AUDITLOGS_TARGET_UPN_FIELD}\``;
+  const tDisplayName = `\`${AZURE_AUDITLOGS_TARGET_DISPLAY_NAME_FIELD}\``;
+
+  return `SET unmapped_fields="nullify";
+FROM logs-azure.auditlogs-${namespace}
+| WHERE ${AZURE_AUDITLOGS_ACTOR_UPN_FIELD} IS NOT NULL
+    AND (
+      (${tType} == "User" AND ${tUpn} IS NOT NULL)
+      OR
+      (${tType} == "Device" AND ${tDisplayName} IS NOT NULL)
+    )
+| EVAL actorUserId = CONCAT("user:", ${AZURE_AUDITLOGS_ACTOR_UPN_FIELD}, "@entra_id")
+| EVAL targetEntityId = CASE(
+    ${tType} == "User", CONCAT("user:", ${tUpn}, "@entra_id"),
+    ${tType} == "Device", CONCAT("host:", ${tDisplayName}),
+    NULL
+  )
+| WHERE actorUserId != "user:@entra_id"
+    AND targetEntityId IS NOT NULL AND targetEntityId != "" AND targetEntityId != "host:" AND targetEntityId != "user:@entra_id"
+| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
+| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+}
 
 export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
@@ -53,6 +107,6 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     targetEntityType: 'user',
     esqlWhereClause: '',
     actorFields: [AZURE_AUDITLOGS_ACTOR_UPN_FIELD],
-    esqlQueryOverride: azureBuildEsqlQuery,
+    esqlQueryOverride: buildAzureEsqlQuery,
   },
 ];
