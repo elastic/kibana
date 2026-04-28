@@ -84,11 +84,12 @@ api-docs-overlay: api-docs-fix-required ## Apply all overlays (including bump-sl
 # This target is NOT run by CI. Run it manually whenever you need to update the
 # external hosting repo (https://elastic.github.io/as-code-docs/).
 #
-# Full sequence:
+# Full sequence (run after every Dashboards/Visualizations spec change — external docs
+# will silently drift if you don't):
 #   cd oas_docs
 #   make api-docs-overlay-external    # re-merges the raw spec then applies all overlays
 #                                     # except bump-slim → writes output/kibana.external.yaml
-#   # then copy output/kibana.external.yaml to the external hosting repo and publish
+#   # copy output/kibana.external.yaml to the elastic/as-code-docs repo and publish
 #
 # Note: this target depends on merge-api-docs-stateful to always start from a
 # fresh raw merged kibana.yaml, avoiding any previously applied overlays

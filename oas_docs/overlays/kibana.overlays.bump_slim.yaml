@@ -14,6 +14,12 @@ actions:
   # - Re-inject a minimal shell with the tech-preview notice as the sole description
   # This keeps every endpoint visible in the Bump nav while rendering nothing
   # except the link to the external full reference.
+  #
+  # ⚠️  Ordering dependency: the remove actions MUST run before the update (re-inject)
+  # actions for the same path. The Bump overlay spec processes actions top-to-bottom,
+  # so this ordering is currently guaranteed by the sequence in this file. If Bump ever
+  # changes this behaviour, the re-injected shells would be overwritten by the removes
+  # and the endpoints would disappear from the nav entirely.
   # ──────────────────────────────────────────────
 
   # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
