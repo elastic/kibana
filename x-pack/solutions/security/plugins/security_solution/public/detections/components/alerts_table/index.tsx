@@ -17,13 +17,26 @@ import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils'
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
-import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import {
+  AlertsTable as ResponseOpsAlertsTable,
+  alertsTableQueryClient,
+} from '@kbn/response-ops-alerts-table';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { QueryClientProvider } from '@kbn/react-query';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
@@ -65,7 +78,7 @@ import { AlertTableCellContextProvider } from '../../configurations/security_sol
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 import { DETECTIONS_TABLE_IDS } from '../../constants';
 
-const { updateIsLoading, updateTotalCount } = dataTableActions;
+const { updateIsLoading, updateItemsPerPage, updateTotalCount } = dataTableActions;
 
 // we show a maximum of 6 action buttons
 // - open flyout
@@ -172,7 +185,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     cases,
     agentBuilder,
   } = useKibana().services;
-  const { alertsTableRef } = useAlertsContext();
+  const {
+    alertsTableRef,
+    flyoutAlertIndex,
+    setFlyoutAlertIndex,
+    pageSize,
+    setPageSize,
+    setTotalAlertCount,
+    setIsFlyoutAlertLoading,
+    openAlertFlyoutImplRef,
+  } = useAlertsContext();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const { from, to, setQuery } = useGlobalTime();
 
@@ -209,6 +232,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     viewMode: tableView = eventsDefaultModel.viewMode,
     columns,
     totalCount: count,
+    itemsPerPage: reduxItemsPerPage = tableDefaults.itemsPerPage,
   } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
@@ -289,6 +313,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   const [tableContext, setTableContext] =
     useState<ResponseOpsRenderContext<SecurityAlertsTableContext>>();
 
+  // The user's chosen page in the response-ops alerts table. Owned locally so
+  // that the in-flyout pagination, which spans the entire result set, cannot
+  // shift the underlying table view.
+  const [tablePageIndex, setTablePageIndex] = useState(0);
+
+  // `sort` is lifted up so the parallel `useSearchAlertsQuery` below uses the
+  // same ordering as the response-ops table when the user reorders columns.
+  // Without this, switching sort in the table would cause the cross-page
+  // flyout query to return alerts in a different (stale) order.
+  const [liftedSort, setLiftedSort] = useState<GetSecurityAlertsTableProp<'sort'>>(sort);
+
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
       setTableContext(context);
@@ -304,6 +339,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
           totalCount: context.alertsCount ?? -1,
         })
       );
+      setTotalAlertCount(context.alertsCount ?? 0);
       setQuery({
         id: tableType,
         loading: context.isLoading ?? true,
@@ -311,8 +347,119 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
         inspect: null,
       });
     },
-    [dispatch, setQuery, tableType]
+    [dispatch, setQuery, setTotalAlertCount, tableType]
   );
+
+  const onPageIndexChange = useCallback((newPageIndex: number) => {
+    setTablePageIndex(newPageIndex);
+  }, []);
+
+  const onPageSizeChange = useCallback(
+    (newPageSize: number) => {
+      dispatch(updateItemsPerPage({ id: tableType, itemsPerPage: newPageSize }));
+      setPageSize(newPageSize);
+    },
+    [dispatch, setPageSize, tableType]
+  );
+
+  // Mirror Redux `itemsPerPage` into the AlertsContext so that the in-flyout
+  // pagination can compute `alertIndexInPage` without reaching into Redux.
+  useEffect(() => {
+    if (reduxItemsPerPage !== pageSize) {
+      setPageSize(reduxItemsPerPage);
+    }
+  }, [pageSize, reduxItemsPerPage, setPageSize]);
+
+  // Fields fetched alongside each alert. Same shape that response-ops derives
+  // internally from `columns` (see `useColumns`); reproduced here so the
+  // parallel flyout query stays in sync with the table query and React Query
+  // can dedupe identical requests via its query key.
+  const flyoutQueryFields = useMemo(
+    () => finalColumns.map((col) => ({ field: col.id, include_unmapped: true })),
+    [finalColumns]
+  );
+
+  // The page that holds the alert currently shown in the flyout. When the
+  // user navigates the flyout into another page than the table's current
+  // page, this drives a parallel `useSearchAlertsQuery` so the new alert can
+  // be loaded without moving the table.
+  const flyoutPageIndex = useMemo(
+    () =>
+      flyoutAlertIndex != null && reduxItemsPerPage > 0
+        ? Math.floor(flyoutAlertIndex / reduxItemsPerPage)
+        : tablePageIndex,
+    [flyoutAlertIndex, reduxItemsPerPage, tablePageIndex]
+  );
+
+  // Parallel query for the flyout. When `flyoutPageIndex === tablePageIndex`
+  // the params (and therefore the React Query key) are identical to the
+  // table's `useSearchAlertsQuery`, so no extra request is made — both hooks
+  // share the same cache entry. When the flyout strays onto another page,
+  // this query lazily fetches that page while the table stays put.
+  const { data: flyoutAlertsData, isFetching: isFetchingFlyoutAlerts } = useSearchAlertsQuery({
+    data,
+    ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
+    consumers: ALERT_TABLE_CONSUMERS,
+    projectRouting: PROJECT_ROUTING.ORIGIN,
+    fields: flyoutQueryFields,
+    query: finalBoolQuery,
+    sort: liftedSort,
+    runtimeMappings,
+    pageIndex: flyoutPageIndex,
+    pageSize: reduxItemsPerPage,
+  });
+
+  // Drive the loading state shown by the right panel. We are loading whenever
+  // the user has navigated the flyout to a page that isn't the table's page
+  // and the parallel query hasn't resolved that alert yet.
+  useEffect(() => {
+    if (flyoutAlertIndex == null || flyoutPageIndex === tablePageIndex) {
+      setIsFlyoutAlertLoading(false);
+      return;
+    }
+    const offset = flyoutAlertIndex - flyoutPageIndex * reduxItemsPerPage;
+    const alertOnRequestedPage = flyoutAlertsData?.alerts?.[offset];
+    setIsFlyoutAlertLoading(!alertOnRequestedPage || isFetchingFlyoutAlerts);
+  }, [
+    flyoutAlertIndex,
+    flyoutAlertsData?.alerts,
+    flyoutPageIndex,
+    isFetchingFlyoutAlerts,
+    reduxItemsPerPage,
+    setIsFlyoutAlertLoading,
+    tablePageIndex,
+  ]);
+
+  // Forward an alert id to the expandable flyout once it becomes available
+  // for cross-page navigation. The synchronous in-page case is handled
+  // directly in `openAlertFlyoutImplRef.current` below so that re-clicking
+  // the same row after closing the flyout reliably re-opens it (state
+  // wouldn't change in that case, so an effect-only path would be skipped).
+  useEffect(() => {
+    if (flyoutAlertIndex == null || reduxItemsPerPage <= 0) return;
+    if (flyoutPageIndex === tablePageIndex) return;
+    const offset = flyoutAlertIndex - flyoutPageIndex * reduxItemsPerPage;
+    const alert = flyoutAlertsData?.alerts?.[offset] as Alert | undefined;
+    if (!alert) return;
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: alert._id,
+          indexName: alert._index,
+          scopeId: tableType,
+        },
+      },
+    });
+  }, [
+    flyoutAlertIndex,
+    flyoutAlertsData?.alerts,
+    flyoutPageIndex,
+    openFlyout,
+    reduxItemsPerPage,
+    tablePageIndex,
+    tableType,
+  ]);
   const userProfiles = useFetchUserProfilesFromAlerts({
     alerts: tableContext?.alerts ?? [],
     columns: tableContext?.columns ?? [],
@@ -438,13 +585,45 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const pathway =
-    tableType === TableId.alertsOnRuleDetailsPage
-      ? ('bulk_alerts_rule_details' as const)
-      : ('bulk_alerts_alerts_page' as const);
-  const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
-  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
+  // Register the implementation that opens the document-details flyout for a
+  // given absolute alert index. The in-page path (alert lives on the table's
+  // current page) opens the flyout synchronously here, which means re-clicks
+  // on the same row after the flyout was closed still re-open it (a pure
+  // state-only path would be a no-op when `flyoutAlertIndex` is unchanged).
+  // The cross-page path (alert lives on another page) is handled by the
+  // resolution effect above once the parallel query resolves.
+  useEffect(() => {
+    openAlertFlyoutImplRef.current = (absoluteAlertIndex: number) => {
+      setFlyoutAlertIndex(absoluteAlertIndex);
+      if (reduxItemsPerPage <= 0) return;
+      const targetPageIndex = Math.floor(absoluteAlertIndex / reduxItemsPerPage);
+      if (targetPageIndex !== tablePageIndex) {
+        // Cross-page: defer to the parallel query + resolution effect.
+        return;
+      }
+      const offset = absoluteAlertIndex - tablePageIndex * reduxItemsPerPage;
+      const alert = tableContext?.alerts?.[offset] as Alert | undefined;
+      if (!alert) return;
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: alert._id,
+            indexName: alert._index,
+            scopeId: tableType,
+          },
+        },
+      });
+    };
+  }, [
+    openAlertFlyoutImplRef,
+    openFlyout,
+    reduxItemsPerPage,
+    setFlyoutAlertIndex,
+    tableContext,
+    tablePageIndex,
+    tableType,
+  ]);
 
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
@@ -472,7 +651,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               consumers={ALERT_TABLE_CONSUMERS}
               projectRouting={PROJECT_ROUTING.ORIGIN}
               query={finalBoolQuery}
-              sort={sort}
+              sort={liftedSort}
+              onSortChange={setLiftedSort}
               casesConfiguration={casesConfiguration}
               gridStyle={gridStyle}
               shouldHighlightRow={shouldHighlightRow}
@@ -484,7 +664,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               additionalContext={additionalContext}
               height={alertTableHeight}
               isMutedAlertsEnabled={false}
-              pageSize={50}
+              pageSize={reduxItemsPerPage}
+              onPageSizeChange={onPageSizeChange}
+              pageIndex={tablePageIndex}
+              onPageIndexChange={onPageIndexChange}
+              renderExpandedAlertView={null}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}
@@ -514,4 +698,18 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   );
 };
 
-export const AlertsTable = memo(AlertsTableComponent);
+const MemoizedAlertsTable = memo(AlertsTableComponent);
+
+// Wrapping the table in a `QueryClientProvider` here (rather than relying on
+// the provider rendered inside `<ResponseOpsAlertsTable>`) is what lets the
+// parallel `useSearchAlertsQuery` call inside `AlertsTableComponent` find a
+// `QueryClient` via `AlertsQueryContext`. Reusing `alertsTableQueryClient`
+// keeps the parallel flyout query and the internal table query on the same
+// cache, so identical params dedupe to a single network request.
+export const AlertsTable: FC<Omit<AlertTableProps, 'services' | 'isMutedAlertsEnabled'>> = (
+  props
+) => (
+  <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
+    <MemoizedAlertsTable {...props} />
+  </QueryClientProvider>
+);
