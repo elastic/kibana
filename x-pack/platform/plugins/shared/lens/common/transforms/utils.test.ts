@@ -10,6 +10,30 @@ import type { LensByValueSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { flattenApiConfig, isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
 
+describe('isFlattenedAPIConfig', () => {
+  it('returns true for a flattened config with a type discriminant', () => {
+    expect(isFlattenedAPIConfig({ type: 'xy' })).toBe(true);
+  });
+
+  it('returns false for a by-ref config (no type, no attributes)', () => {
+    expect(isFlattenedAPIConfig({ ref_id: '123' })).toBe(false);
+  });
+
+  it('returns false for a nested config with attributes', () => {
+    expect(isFlattenedAPIConfig({ attributes: { type: 'xy' } })).toBe(false);
+  });
+
+  it('returns false for an empty object', () => {
+    expect(isFlattenedAPIConfig({})).toBe(false);
+  });
+
+  it('returns false for null and non-object values', () => {
+    expect(isFlattenedAPIConfig(null)).toBe(false);
+    expect(isFlattenedAPIConfig(undefined)).toBe(false);
+    expect(isFlattenedAPIConfig('string')).toBe(false);
+  });
+});
+
 describe('flattenApiConfig / unflattenAPIConfig', () => {
   it('round-trips panel metadata and API chart fields', () => {
     const chartFields = { type: 'xy' } as LensApiConfig;

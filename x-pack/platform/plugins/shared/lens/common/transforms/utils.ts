@@ -42,7 +42,9 @@ export function isByRefLensConfig(
 }
 
 export function isFlattenedAPIConfig(config: unknown): config is FlattenedLensByValuePanelSchema {
-  return typeof config === 'object' && config !== null && !('attributes' in config);
+  return (
+    typeof config === 'object' && config !== null && 'type' in config && !('attributes' in config)
+  );
 }
 
 export function unflattenAPIConfig(

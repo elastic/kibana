@@ -48,20 +48,18 @@ export function initializeStateManagement(
 ): StateManagementConfig {
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
+  type ComparatorState = Partial<Pick<LensSerializedState, 'attributes' | 'ref_id'>>;
+
   const resolveAttributes = (
     value: LensSerializedState['attributes'] | undefined,
-    state?: unknown
+    state?: ComparatorState
   ) => {
     if (value) return value;
-    if (typeof state === 'object' && state !== null) {
-      // If the state is a nested object with an 'attributes' property, return the attributes
-      if ('attributes' in state && state.attributes) {
-        return state.attributes;
-      }
-      // If the state is a flattened API config, unflatten it and return the attributes
-      if (isFlattenedAPIConfig(state)) {
-        return unflattenAPIConfig(state).attributes;
-      }
+    if (state?.attributes) {
+      return state.attributes;
+    }
+    if (state && isFlattenedAPIConfig(state)) {
+      return unflattenAPIConfig(state).attributes;
     }
     return value;
   };
