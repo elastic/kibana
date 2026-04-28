@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Update Scout Test Config Manifests'
-node scripts/scout.js update-test-config-manifests
+node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
 echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
 node scripts/scout discover-playwright-configs --include-custom-servers --save

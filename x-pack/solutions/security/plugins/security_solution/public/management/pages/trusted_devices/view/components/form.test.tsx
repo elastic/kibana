@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
+import { screen, cleanup, act, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -46,6 +46,8 @@ jest.mock('../../../../../common/containers/source', () => ({
 import { useFetchIndex } from '../../../../../common/containers/source';
 
 describe('Trusted devices form', () => {
+  jest.setTimeout(10000);
+
   const formPrefix = 'trustedDevices-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
@@ -119,11 +121,9 @@ describe('Trusted devices form', () => {
     textField: HTMLInputElement | HTMLTextAreaElement,
     value: string
   ) => {
-    // For EuiComboBox (has role="combobox"), use userEvent.type
     if (textField.getAttribute('role') === 'combobox') {
       await userEvent.clear(textField);
-      await userEvent.type(textField, value);
-      // Press Enter to create the custom option
+      await userEvent.paste(value);
       await userEvent.keyboard('{Enter}');
     } else {
       // For regular text fields
@@ -298,9 +298,7 @@ describe('Trusted devices form', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253353
-  // FLAKY: https://github.com/elastic/kibana/issues/253563
-  describe.skip('Conditions', () => {
+  describe('Conditions', () => {
     beforeEach(async () => {
       await render();
     });
@@ -455,6 +453,11 @@ describe('Trusted devices form', () => {
     it('should show performance warning when operator is matches and value contains "**"', async () => {
       await userEvent.click(getConditionsOperatorSelect());
       await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
+
+      // Wait for operator popover to close (EuiFocusTrap blocks value field interaction)
+      await waitFor(() => {
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      });
 
       // ensure the component receives the updated item with type: 'wildcard'
       rerenderWithLatestProps();

@@ -505,7 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.KEYWORD,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: '',
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'look me up');
@@ -559,11 +559,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.BOOLEAN,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: '',
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'true');
               await testSubjects.setValue('~staticLookupEditorValue', 'yes');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: 'Empty Value Mapped',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', '');
+              await testSubjects.setValue('~staticLookupEditorValue', 'Empty Value Mapped');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: '(null)',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'some key');
+              await testSubjects.setValue('~staticLookupEditorValue', 'some value');
+              await testSubjects.setValue('staticLookupEditorUnknownValue', 'Custom Unknown');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: 'Custom Unknown',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('staticLookupEditorUnknownValue', 'Custom Unknown');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: 'html_test',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: '<script>alert("test")</script>',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'html_test');
+              await testSubjects.setValue(
+                '~staticLookupEditorValue',
+                '<script>alert("test")</script>'
+              );
+            },
+            expect: async (renderedValueContainer) => {
+              // Verify no script element exists (XSS safety)
+              const scripts = await renderedValueContainer.findAllByTagName('script');
+              expect(scripts).to.have.length(0);
             },
           },
         ]);

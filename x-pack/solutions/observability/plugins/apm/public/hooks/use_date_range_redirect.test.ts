@@ -179,8 +179,7 @@ describe('useDateRangeRedirect', () => {
     });
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/257084
-  describe.skip('error handling', () => {
+  describe('error handling', () => {
     it('swallows inactive history errors', () => {
       setLocation('?otherParam=foo');
       mockReplace.mockImplementation(() => {

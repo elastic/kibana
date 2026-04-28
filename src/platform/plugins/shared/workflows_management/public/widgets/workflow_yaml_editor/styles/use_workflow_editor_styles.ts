@@ -11,6 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
@@ -180,7 +181,9 @@ export const useWorkflowEditorStyles = () => {
     stepActionsContainer: css({
       position: 'absolute',
       zIndex: 1002, // Above the highlighting and pseudo-element
-      transform: 'translateY(4px) translateX(-28px)', // 24px to match width + 4px padding inside decoration
+      transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
+        EDITOR_SCROLLBAR_WIDTH_PX + 2 * FOCUSED_STEP_DECORATION_INSET_PX
+      }px)`, // scrollbar + twice decoration inset (outside and inside)
     }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>

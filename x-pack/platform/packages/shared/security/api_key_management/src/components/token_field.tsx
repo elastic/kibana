@@ -107,6 +107,9 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
           closePopover={closePopover}
+          aria-label={i18n.translate('xpack.security.copyTokenField.tokenFormatSelectorAriaLabel', {
+            defaultMessage: 'Select API key format',
+          })}
         >
           <EuiContextMenuPanel
             initialFocusedItemIndex={selectedIndex}

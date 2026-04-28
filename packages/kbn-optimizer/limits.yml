@@ -104,7 +104,7 @@ pageLoadAssetSize:
   links: 8620
   lists: 5093
   logsDataAccess: 7900
-  logsShared: 101273
+  logsShared: 102400
   logstash: 15882
   maintenanceWindows: 3905
   management: 12951
@@ -181,7 +181,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 192134
   transform: 16515
-  triggersActionsUi: 110000
+  triggersActionsUi: 123512
   uiActions: 24670
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513

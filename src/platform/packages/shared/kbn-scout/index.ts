@@ -17,7 +17,8 @@ export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from 
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
+  coreWorkerFixtures,
+  esArchiverFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
@@ -52,7 +53,6 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
-  SynthtraceFixture,
 } from './src/playwright';
 
 // Service & configuration types
@@ -76,6 +76,3 @@ export type {
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
-
-// Utility for overriding synthtrace clients
-export { getSynthtraceClient } from './src/common/services/synthtrace';

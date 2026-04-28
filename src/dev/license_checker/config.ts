@@ -70,6 +70,7 @@ export const LICENSE_ALLOWED = [
   'Nuclide software',
   'Python-2.0',
   '(Apache-2.0 AND MIT)',
+  'Apache-2.0 AND MIT',
   'BlueOak-1.0.0',
   'WTFPL OR CC0-1.0',
 ];
@@ -90,7 +91,7 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
+  '@elastic/ems-client@8.7.0': ['Elastic License 2.0'],
   '@elastic/eui@111.0.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   '@elastic/eui-theme-borealis@5.2.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry

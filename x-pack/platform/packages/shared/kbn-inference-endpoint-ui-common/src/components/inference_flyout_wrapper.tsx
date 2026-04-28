@@ -18,6 +18,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
 import React, { useCallback } from 'react';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
@@ -26,6 +27,7 @@ import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+import { INTERNAL_OVERRIDE_FIELDS } from '../constants';
 
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
@@ -83,12 +85,17 @@ export const formSerializer = (formData: InferenceEndpoint) => {
       ...restProviderConfig
     } = providerConfig || {};
 
+    // Get hidden fields for the current provider and remove them from the config
+    const provider = formData.config?.provider;
+    const hiddenFields = INTERNAL_OVERRIDE_FIELDS[provider]?.hidden ?? [];
+    const filteredProviderConfig = omit(restProviderConfig, hiddenFields);
+
     return {
       ...formData,
       config: {
         ...formData.config,
         providerConfig: {
-          ...restProviderConfig,
+          ...filteredProviderConfig,
           ...(maxAllocations
             ? {
                 adaptive_allocations: {
@@ -117,6 +124,8 @@ interface InferenceFlyoutWrapperProps {
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
   enableEisPromoTour?: boolean;
+  /** When set, only these task types will be available for selection in the form. */
+  allowedTaskTypes?: InferenceTaskType[];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -128,6 +137,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   onSubmitSuccess,
   inferenceEndpoint,
   enableEisPromoTour,
+  allowedTaskTypes,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -193,6 +203,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               isPreconfigured,
               reenterSecretsOnEdit: false,
               enableEisPromoTour,
+              allowedTaskTypes,
             }}
           />
           <EuiSpacer size="m" />

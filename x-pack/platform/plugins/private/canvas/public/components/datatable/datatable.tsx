@@ -41,7 +41,7 @@ const getIcon = (type: DatatableColumnType | null) => {
       icon = 'question';
   }
 
-  return <EuiIcon type={icon} color="subdued" />;
+  return <EuiIcon type={icon} color="subdued" aria-hidden={true} />;
 };
 
 const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);
