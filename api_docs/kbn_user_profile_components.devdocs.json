@@ -67,6 +67,7 @@
             "lineNumber": 152,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "GetUserDisplayNameParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -333,6 +334,7 @@
             "lineNumber": 39,
             "columnNumber": 82,
             "deprecated": false,
+            "docsReferencedTypeName": "UserProfilesPopoverProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -438,6 +440,7 @@
             "lineNumber": 134,
             "columnNumber": 85,
             "deprecated": false,
+            "docsReferencedTypeName": "UserProfilesSelectableProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -544,6 +547,7 @@
             "lineNumber": 53,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -629,7 +633,15 @@
         "tags": [],
         "label": "UserAvatarProps",
         "description": [
-          "\nProps of {@link UserAvatar} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserAvatar",
+            "text": "UserAvatar"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1071,6 +1083,7 @@
                 "lineNumber": 39,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToMountPointParams",
                 "trackAdoption": false
               }
             ]
@@ -1085,7 +1098,15 @@
         "tags": [],
         "label": "UserProfilesPopoverProps",
         "description": [
-          "\nProps of {@link UserProfilesPopover} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfilesPopover",
+            "text": "UserProfilesPopover"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1161,7 +1182,15 @@
         "tags": [],
         "label": "UserProfilesSelectableProps",
         "description": [
-          "\nProps of {@link UserProfilesSelectable} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfilesSelectable",
+            "text": "UserProfilesSelectable"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1754,7 +1783,15 @@
         "tags": [],
         "label": "UserToolTipProps",
         "description": [
-          "\nProps of {@link UserToolTip} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserToolTip",
+            "text": "UserToolTip"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1901,7 +1938,7 @@
             "id": "def-common.UpdateUserProfileHook.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  notificationSuccess = {},\n  pageReloadChecker,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -1910,6 +1947,7 @@
             "lineNumber": 53,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false
           }
         ],
@@ -1922,7 +1960,15 @@
         "tags": [],
         "label": "UserProfileWithAvatar",
         "description": [
-          "\nConvenience type for a {@link UserProfile} with avatar data"
+          "\nConvenience type for a ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          " with avatar data"
         ],
         "signature": [
           {

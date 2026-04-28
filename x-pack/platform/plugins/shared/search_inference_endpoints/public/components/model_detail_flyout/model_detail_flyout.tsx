@@ -115,7 +115,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         defaultMessage: 'Documentation',
       }),
       description: (
-        <EuiLink href={docLinks.elasticInferenceService} target="_blank" external>
+        <EuiLink
+          data-test-subj="searchInferenceEndpointsModelDetailFlyoutViewDocumentationLink"
+          href={docLinks.elasticInferenceService}
+          target="_blank"
+          external
+        >
           {i18n.translate(
             'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
             { defaultMessage: 'View documentation' }

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { createNotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
+import type { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import { createActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import { createDispatcherPipelineState } from '../fixtures/test_utils';
 import { FetchPoliciesStep } from './fetch_policies_step';
 
 describe('FetchPoliciesStep', () => {
-  let npSoService: NotificationPolicySavedObjectService;
+  let npSoService: ActionPolicySavedObjectService;
   let mockFindAllDecrypted: jest.SpyInstance;
 
   beforeEach(() => {
-    ({ notificationPolicySavedObjectService: npSoService, mockFindAllDecrypted } =
-      createNotificationPolicySavedObjectService());
+    ({ actionPolicySavedObjectService: npSoService, mockFindAllDecrypted } =
+      createActionPolicySavedObjectService());
   });
 
   it('fetches all decrypted policies via findAllDecrypted', async () => {
