@@ -124,6 +124,7 @@
                 "lineNumber": 35,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "DomainDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -171,6 +172,7 @@
                 "lineNumber": 41,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "DomainDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -217,6 +217,7 @@
                 "lineNumber": 99,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -317,7 +318,15 @@
         "tags": [],
         "label": "ServiceStatusLevel",
         "description": [
-          "\nA convenience type that represents the union of each value in {@link ServiceStatusLevels}."
+          "\nA convenience type that represents the union of each value in ",
+          {
+            "pluginId": "@kbn/core-status-server",
+            "scope": "server",
+            "docId": "kibKbnCoreStatusServerPluginApi",
+            "section": "def-server.ServiceStatusLevels",
+            "text": "ServiceStatusLevels"
+          },
+          "."
         ],
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
@@ -336,7 +345,15 @@
         "tags": [],
         "label": "ServiceStatusLevelId",
         "description": [
-          "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
+          "\nPossible values for the ID of a ",
+          {
+            "pluginId": "@kbn/core-status-server",
+            "scope": "server",
+            "docId": "kibKbnCoreStatusServerPluginApi",
+            "section": "def-server.ServiceStatusLevel",
+            "text": "ServiceStatusLevel"
+          },
+          "\n"
         ],
         "signature": [
           "\"critical\" | \"degraded\" | \"unavailable\" | \"available\""

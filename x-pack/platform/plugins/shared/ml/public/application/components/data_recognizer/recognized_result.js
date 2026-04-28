@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexItem } from '@elastic/eui';
 import { LinkCard } from '../link_card';
 import { useMlManagementLocator } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
   const id = savedSearch === null ? `index=${indexPattern.id}` : `savedSearchId=${savedSearch.id}`;
