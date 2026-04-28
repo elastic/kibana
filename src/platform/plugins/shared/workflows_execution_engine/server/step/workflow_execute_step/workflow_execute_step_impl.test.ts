@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 import type { WorkflowExecuteStepImplInit } from './workflow_execute_step_impl';
+import type { WorkflowsExecutionEngineConfig } from '../../config';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -104,7 +105,9 @@ const createMockInit = (
     workflowExecutionRepository,
     stepExecutionRepository,
     workflowLogger,
-    maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    config: {
+      maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    } as WorkflowsExecutionEngineConfig,
     ...overrides,
   };
 };
