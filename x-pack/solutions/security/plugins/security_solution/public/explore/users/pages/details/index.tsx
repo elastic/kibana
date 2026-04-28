@@ -224,7 +224,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const userStoreIdentityFields = useMemo(() => {
     if (entityId) {
@@ -284,8 +284,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     endDate: to,
     startDate: from,
     userName: detailName,
+    entityId: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord?.entity?.id : undefined,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
+    skip: selectedPatterns.length === 0,
   });
 
   const userDetailsForOverview = entityStoreV2Enabled ? observedUser.details : userOverview;

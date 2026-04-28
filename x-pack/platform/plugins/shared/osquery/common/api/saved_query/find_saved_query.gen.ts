@@ -14,10 +14,10 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const FindSavedQueryResponse = lazySchema(() => z.object({}));
 export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
-export const FindSavedQueryResponse = z.object({});
 
+export const FindSavedQueryDetailResponse = lazySchema(() => z.object({}));
 export type FindSavedQueryDetailResponse = z.infer<typeof FindSavedQueryDetailResponse>;
-export const FindSavedQueryDetailResponse = z.object({});

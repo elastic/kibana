@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 45717
+  agentBuilder: 48000
   agentBuilderPlatform: 8886
   aiAssistantManagementSelection: 13590
   aiops: 15227
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardAgent: 5135
+  dashboardAgent: 8000
   dashboardMarkdown: 6151
   data: 496646
   dataQuality: 11469
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 157027
+  securitySolution: 172947
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412

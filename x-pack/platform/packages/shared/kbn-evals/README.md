@@ -207,7 +207,7 @@ See [CLI.md](./CLI.md) for the full command reference with all flags and example
 The CLI uses suite metadata from:
 
 ```
-x-pack/platform/packages/shared/kbn-evals/evals.suites.json
+.buildkite/pipelines/evals/evals.suites.json
 ```
 
 ### CI labels

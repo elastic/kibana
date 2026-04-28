@@ -60,7 +60,7 @@ export const Header: FC<HeaderProps> = memo(
     return (
       <>
         <DocumentSeverity hit={hit}>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </DocumentSeverity>
         <Timestamp hit={hit}>
           <EuiSpacer size="xs" />

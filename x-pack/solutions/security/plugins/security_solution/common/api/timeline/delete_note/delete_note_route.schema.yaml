@@ -8,12 +8,19 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: DeleteNote
-      summary: Delete a note
-      description: Delete a note from a Timeline using the note ID.
+      summary: Delete one or more notes
+      description: |
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+
+        The response has HTTP 200 with an empty body on success.
+
+        Requires the **Timeline and Notes** write privilege (`notes_write`).
       tags:
         - access:securitySolution
       requestBody:
-        description: The ID of the note to delete.
+        description: |
+          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{ "noteIds": ["<id>", ...] }` for bulk delete.
+          `noteIds` may be null in some clients; prefer an empty array or omit unused fields when possible.
         required: true
         content:
           application/json:
@@ -25,6 +32,7 @@ paths:
                   properties:
                     noteId:
                       type: string
+                      description: Saved object ID of the note to delete.
                 - type: object
                   required: [noteIds]
                   nullable: true
@@ -32,8 +40,9 @@ paths:
                     noteIds:
                       type: array
                       nullable: true
+                      description: Saved object IDs of the notes to delete.
                       items:
                         type: string
       responses:
         '200':
-          description: Indicates the note was successfully deleted.
+          description: The notes were deleted successfully. Response body is empty.

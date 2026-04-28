@@ -1879,6 +1879,12 @@ export const labels = {
     editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
       defaultMessage: 'Edit agent settings',
     }),
+    readMore: i18n.translate('xpack.agentBuilder.overview.description.readMore', {
+      defaultMessage: 'Read more',
+    }),
+    readLess: i18n.translate('xpack.agentBuilder.overview.description.readLess', {
+      defaultMessage: 'Read less',
+    }),
     capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
       defaultMessage: 'Capabilities',
     }),
@@ -1984,6 +1990,9 @@ export const labels = {
         defaultMessage: 'Save instructions',
       }
     ),
+    createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
+      defaultMessage: 'Elastic',
+    }),
     byAuthor: (author: string) =>
       i18n.translate('xpack.agentBuilder.overview.byAuthor', {
         defaultMessage: 'By {author}',

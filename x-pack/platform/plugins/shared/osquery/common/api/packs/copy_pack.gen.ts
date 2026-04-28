@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CopyPacksResponse = lazySchema(() => z.object({}));
 export type CopyPacksResponse = z.infer<typeof CopyPacksResponse>;
-export const CopyPacksResponse = z.object({});

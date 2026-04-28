@@ -25,6 +25,8 @@ import { SubFeatureCard } from './sub_feature_card';
 interface FeatureSettingItem {
   endpointIds: string[];
   feature: InferenceFeatureConfig;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 interface FeatureSectionProps {
@@ -36,6 +38,7 @@ interface FeatureSectionProps {
   invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
   isBeta?: boolean;
+  globalDefaultId: string;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
@@ -47,6 +50,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   invalidEndpointIds,
   isTechPreview = false,
   isBeta = false,
+  globalDefaultId,
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
@@ -108,7 +112,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
           </EuiText>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="xl">
-            {features.map(({ endpointIds, feature }) => (
+            {features.map(({ endpointIds, feature, hasSavedObject, isFeatureDirty }) => (
               <EuiFlexItem key={feature.featureId} grow={false}>
                 <SubFeatureCard
                   featureId={feature.featureId}
@@ -116,6 +120,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                   endpointIds={endpointIds}
                   onEndpointsChange={onEndpointsChange}
                   invalidEndpointIds={invalidEndpointIds}
+                  globalDefaultId={globalDefaultId}
+                  hasSavedObject={hasSavedObject}
+                  isFeatureDirty={isFeatureDirty}
                 />
               </EuiFlexItem>
             ))}
