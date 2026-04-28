@@ -9,8 +9,8 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { ChangeTrackingService } from '.';
-import type { RuleChange, RuleSnapshot } from '.';
+import { ChangeTrackingService } from './service';
+import type { RuleChange, RuleSnapshot } from './types';
 
 jest.mock('@kbn/change-history', () => ({
   ChangeHistoryClient: jest.fn(),
