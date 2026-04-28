@@ -9,7 +9,7 @@
 
 import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYState } from '../../../schema';
+import type { XYConfig } from '../../../schema';
 import { legendSizeCompat } from '../legend_sizes';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import type {
@@ -45,7 +45,7 @@ const legendStatisticCompat = getReversibleMappings<LegendStatistic, XYLegendVal
 
 const DEFAULT_LEGEND_POSITON = 'right';
 
-function extractAlignment(legend: XYState['legend']):
+function extractAlignment(legend: XYConfig['legend']):
   | {
       verticalAlignment: 'top' | 'bottom' | undefined;
       horizontalAlignment: 'left' | 'right' | undefined;
@@ -61,7 +61,7 @@ function extractAlignment(legend: XYState['legend']):
   return {};
 }
 
-function isOutsideListLegendLayout(legend: XYState['legend']) {
+function isOutsideListLegendLayout(legend: XYConfig['legend']) {
   return Boolean(
     legend &&
       legend.placement !== 'inside' &&
@@ -79,29 +79,48 @@ function isOutsideListLegendLayoutState(legend: XYVisualizationState['legend']) 
   );
 }
 
-function getLegendTruncation(legend: XYState['legend']): {
-  max_lines?: number;
-  max_pixels?: number;
-  enabled?: boolean;
-} | null {
-  return legend && 'layout' in legend && legend.layout?.truncate ? legend.layout.truncate : null;
+function getLegendTruncation(legend: XYConfig['legend']):
+  | {
+      max_lines?: number;
+      enabled?: boolean;
+    }
+  | undefined {
+  return legend && 'layout' in legend && legend.layout?.type === 'grid'
+    ? legend.layout.truncate
+    : undefined;
 }
 
-function getOutsideLegendSize(legend: XYState['legend']): LegendSizeType | undefined {
+function getOutsideLegendSize(legend: XYConfig['legend']): LegendSizeType | undefined {
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
-export function convertLegendToStateFormat(legend: XYState['legend']): {
+function convertSeriesHeaderFromAPI(
+  legend?: XYConfig['legend']
+): Partial<Pick<XYVisualizationState['legend'], 'title' | 'isTitleVisible'>> {
+  const seriesHeader = legend && 'series_header' in legend ? legend.series_header : undefined;
+  if (!seriesHeader) return {};
+
+  const { text, visible } = seriesHeader;
+  if (visible === false) {
+    return { isTitleVisible: false, title: undefined };
+  }
+  if (text != null && text !== '') {
+    return { isTitleVisible: true, title: text };
+  }
+  return { isTitleVisible: true, title: undefined };
+}
+
+export function convertLegendToStateFormat(legend: XYConfig['legend']): {
   legend: XYVisualizationState['legend'];
 } {
   const isListLegendLayout = isOutsideListLegendLayout(legend);
   const legendTruncation = getLegendTruncation(legend);
   const truncateMaxLines = legendTruncation?.max_lines;
-  const truncateMaxPixels = legendTruncation?.max_pixels;
   const truncateEnabled = legendTruncation?.enabled;
   const outsideLegendSize = getOutsideLegendSize(legend);
 
   const newStateLegend: XYVisualizationState['legend'] = {
+    ...convertSeriesHeaderFromAPI(legend),
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
     shouldTruncate: truncateEnabled,
     ...(legend?.statistics
@@ -126,7 +145,6 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
           ...(isListLegendLayout
             ? {
                 layout: LegendLayout.List,
-                ...(truncateMaxPixels != null ? { maxPixels: truncateMaxPixels } : {}),
               }
             : {
                 ...(truncateMaxLines ? { maxLines: truncateMaxLines } : {}),
@@ -163,7 +181,7 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
 }
 
 function getLegendLayout(legend: XYVisualizationState['legend']) {
-  const { max_pixels, max_lines, enabled } = getApiLegendTruncate(legend);
+  const { max_lines, enabled } = getApiLegendTruncate(legend);
 
   if (isLegendInside(legend)) {
     return {
@@ -193,10 +211,6 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
     layout: isListLayout
       ? {
           type: 'list',
-          truncate: {
-            max_pixels,
-            enabled,
-          },
         }
       : {
           type: 'grid',
@@ -209,26 +223,40 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
 }
 
 function getApiLegendTruncate(
-  legend: Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines' | 'maxPixels'>
+  legend: Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
 ): {
   max_lines?: number;
-  max_pixels?: number;
   enabled?: boolean;
 } {
   if (!legend) return {};
 
-  const { shouldTruncate, maxLines, maxPixels } = legend;
+  const { shouldTruncate, maxLines } = legend;
 
   return {
     max_lines: maxLines ?? 1,
-    max_pixels: maxPixels ?? 250,
     enabled: shouldTruncate,
   };
 }
 
+function convertSeriesHeaderToAPIFormat(legend: XYVisualizationState['legend']): {
+  series_header?: { text?: string; visible?: boolean };
+} {
+  const { title, isTitleVisible } = legend;
+  if (isTitleVisible === false) {
+    return { series_header: stripUndefined({ visible: false, text: undefined }) };
+  }
+  if (title != null && title !== '') {
+    return { series_header: stripUndefined({ visible: true, text: title }) };
+  }
+  if (isTitleVisible === true) {
+    return { series_header: stripUndefined({ visible: true, text: undefined }) };
+  }
+  return {};
+}
+
 export function convertLegendToAPIFormat(
   legend: XYVisualizationState['legend']
-): Pick<XYState, 'legend'> | {} {
+): Pick<XYConfig, 'legend'> | {} {
   const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible';
   const statistics = legend.legendStats?.length
     ? legend.legendStats.map((stat) => legendStatisticCompat.toAPI(stat))
@@ -238,6 +266,7 @@ export function convertLegendToAPIFormat(
     legend: stripUndefined({
       visibility,
       statistics,
+      ...convertSeriesHeaderToAPIFormat(legend),
       ...getLegendAlignment(legend),
       ...getLegendLayout(legend),
     }),

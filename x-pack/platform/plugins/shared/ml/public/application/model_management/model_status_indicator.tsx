@@ -10,7 +10,7 @@ import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
-import { isBaseNLPModelItem } from '../../../common/types/trained_models';
+import { isBaseNLPModelItem } from '@kbn/ml-common-types/trained_models';
 import type { NameOverrides } from './get_model_state';
 import { getModelStateColor } from './get_model_state';
 import { useMlKibana } from '../contexts/kibana';

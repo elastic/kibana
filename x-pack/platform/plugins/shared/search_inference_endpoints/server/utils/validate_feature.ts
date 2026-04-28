@@ -42,6 +42,10 @@ export const validateFeature = (feature: InferenceFeatureConfig): void => {
     throw new Error('featureDescription is required and must not be empty.');
   }
 
+  if (!feature.taskType) {
+    throw new Error('taskType is required and must not be empty.');
+  }
+
   if (feature.maxNumberOfEndpoints !== undefined && feature.maxNumberOfEndpoints < 1) {
     throw new Error('maxNumberOfEndpoints must be >= 1 when specified.');
   }

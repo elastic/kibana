@@ -728,6 +728,51 @@ describe('WorkflowsBaseTelemetry', () => {
     });
   });
 
+  describe('reportWorkflowExecutionsCancelled', () => {
+    it('reports a successful bulk cancellation', () => {
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId: 'wf-1',
+        origin: 'workflow_detail',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowExecutionEventTypes.WorkflowExecutionsCancelled,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowExecutionsCancelled],
+          workflowId: 'wf-1',
+          origin: 'workflow_detail',
+          result: 'success',
+        })
+      );
+    });
+
+    it('reports a failed bulk cancellation', () => {
+      const error = new Error('Bulk cancel failed');
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId: 'wf-1',
+        error,
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowExecutionEventTypes.WorkflowExecutionsCancelled,
+        expect.objectContaining({
+          result: 'failed',
+          errorMessage: 'Bulk cancel failed',
+        })
+      );
+    });
+
+    it('does not include origin when not provided', () => {
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId: 'wf-1',
+      });
+
+      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const eventData = call[1];
+      expect(eventData).not.toHaveProperty('origin');
+    });
+  });
+
   describe('reportWorkflowTestRunInitiated', () => {
     it('reports a successful test run initiation', () => {
       telemetry.reportWorkflowTestRunInitiated({
@@ -1139,6 +1184,45 @@ describe('WorkflowsBaseTelemetry', () => {
       const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedPrivileges', () => {
+    it('reports access denied due to missing read privileges', () => {
+      telemetry.reportWorkflowAccessDeniedPrivileges();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedLicense', () => {
+    it('reports access denied due to license', () => {
+      telemetry.reportWorkflowAccessDeniedLicense();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedLicense,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedServerlessTier', () => {
+    it('reports access denied due to serverless tier with required products', () => {
+      telemetry.reportWorkflowAccessDeniedServerlessTier();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
+        })
+      );
     });
   });
 

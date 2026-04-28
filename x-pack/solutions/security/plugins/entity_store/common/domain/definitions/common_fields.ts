@@ -9,6 +9,31 @@ import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
+/**
+ * Dotted ECS paths collected into `entity.relationships.*.raw_identifiers.<path>`.
+ * Keep `EntityRelationship.raw_identifiers` in `entity.schema.yaml` in sync (same paths plus
+ * `entity.id` on the schema for target hints; ingest maps canonical EUIDs via `.entity.id` → `ids`).
+ */
+export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
+  'host.id',
+  'user.id',
+  'user.email',
+  'host.name',
+  'user.name',
+  'service.name',
+] as const;
+
+const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+  'administers',
+  'communicates_with',
+  'depends_on',
+  'owns_inferred',
+  'accesses_infrequently',
+  'accesses_frequently',
+  'owns',
+  'supervises',
+] as const;
+
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
@@ -82,6 +107,30 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
+    newestValue({
+      source: `${prefix}.attributes.storage_class`,
+      destination: 'entity.attributes.storage_class',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.permissions`,
+      destination: 'entity.attributes.permissions',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.known_redirects`,
+      destination: 'entity.attributes.known_redirects',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.attributes.oauth_consent_restriction`,
+      destination: 'entity.attributes.oauth_consent_restriction',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
 
     // LIFECYCLE ------------------------------------------------------------
     oldestValue({
@@ -121,48 +170,24 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    collectValues({
-      source: `${prefix}.relationships.communicates_with`,
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      fieldHistoryLength: 50,
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.depends_on`,
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns_inferred`,
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_infrequently`,
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_frequently`,
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns`,
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.supervises`,
-      destination: 'entity.relationships.supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
+    // Source logs use flat `host.entity.relationships.<relationship>.<identifier>`; the entity index
+    // stores raw bags under `raw_identifiers` and canonical EUIDs under `ids`.
+    ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((relationship) => [
+      ...ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
+        collectValues({
+          source: `${prefix}.relationships.${relationship}.${idField}`,
+          destination: `entity.relationships.${relationship}.raw_identifiers.${idField}`,
+          mapping: { type: 'keyword' },
+          allowAPIUpdate: true,
+        })
+      ),
+      collectValues({
+        source: `${prefix}.relationships.${relationship}.entity.id`,
+        destination: `entity.relationships.${relationship}.ids`,
+        mapping: { type: 'keyword' },
+        allowAPIUpdate: true,
+      }),
+    ]),
     newestValue({
       source: `${prefix}.relationships.resolution.resolved_to`,
       destination: 'entity.relationships.resolution.resolved_to',

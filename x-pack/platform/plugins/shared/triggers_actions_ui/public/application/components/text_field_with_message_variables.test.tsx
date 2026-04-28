@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 
 describe('TextFieldWithMessageVariables', () => {
@@ -26,18 +27,18 @@ describe('TextFieldWithMessageVariables', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
-  test('renders variables with double braces by default', () => {
-    const wrapper = mountWithIntl(<TextFieldWithMessageVariables {...props} />);
+  test('renders variables with double braces by default', async () => {
+    render(<TextFieldWithMessageVariables {...props} />);
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{myVar}}', props.index);
   });
 
-  test('renders variables with triple braces when specified', () => {
-    const wrapper = mountWithIntl(
+  test('renders variables with triple braces when specified', async () => {
+    render(
       <TextFieldWithMessageVariables
         {...props}
         messageVariables={[
@@ -50,8 +51,8 @@ describe('TextFieldWithMessageVariables', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);

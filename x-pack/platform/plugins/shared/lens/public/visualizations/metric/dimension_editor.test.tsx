@@ -15,10 +15,11 @@ import {
   within,
   fireEvent,
 } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
 import {
@@ -195,14 +196,12 @@ describe('dimension editor', () => {
       };
       const clearIcon = async () => {
         const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
-        // Type 'None' to filter the options list to the "None" option
-        fireEvent.input(iconInput, { target: { value: 'None' } });
-        // Wait for the options list popover to appear
+        await userEvent.click(iconInput);
         const optionsList = await screen.findByTestId(
           'comboBoxOptionsList lns-icon-select-optionsList'
         );
-        // Find the "None" option in the options list
-        const noneOption = within(optionsList).getByText('None', { exact: true });
+        fireEvent.change(iconInput, { target: { value: 'None' } });
+        const noneOption = await within(optionsList).findByRole('option', { name: 'None' });
         // Click the "None" option to clear the icon selection
         if (noneOption) {
           await userEvent.click(noneOption);
@@ -918,14 +917,16 @@ describe('dimension editor', () => {
     describe('data section', () => {
       function renderBreakdownEditorDataSection(overrides = {}) {
         const rtlRender = render(
-          <DimensionEditorDataExtraComponent
-            {...props}
-            groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
-            state={{ ...fullState, breakdownByAccessor: accessor }}
-            accessor={accessor}
-            setState={mockSetState}
-            {...overrides}
-          />
+          <EuiThemeProvider colorMode="light">
+            <DimensionEditorDataExtraComponent
+              {...props}
+              groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
+              state={{ ...fullState, breakdownByAccessor: accessor }}
+              accessor={accessor}
+              setState={mockSetState}
+              {...overrides}
+            />
+          </EuiThemeProvider>
         );
 
         const selectCollapseBy = async (collapseFn: string) => {
@@ -938,14 +939,16 @@ describe('dimension editor', () => {
           selectCollapseBy,
           rerender: (newOverrides = {}) => {
             rtlRender.rerender(
-              <DimensionEditorDataExtraComponent
-                {...props}
-                groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
-                state={{ ...fullState, breakdownByAccessor: accessor }}
-                accessor={accessor}
-                setState={mockSetState}
-                {...newOverrides}
-              />
+              <EuiThemeProvider colorMode="light">
+                <DimensionEditorDataExtraComponent
+                  {...props}
+                  groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
+                  state={{ ...fullState, breakdownByAccessor: accessor }}
+                  accessor={accessor}
+                  setState={mockSetState}
+                  {...newOverrides}
+                />
+              </EuiThemeProvider>
             );
           },
         };
@@ -1380,7 +1383,7 @@ describe('dimension editor', () => {
             color: undefined,
           },
         });
-        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
+        expect(staticColorPicker).toHaveValue(euiThemeVars.euiColorVis2.toUpperCase());
       });
 
       it('fills with default vis text color', async () => {

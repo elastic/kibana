@@ -88,7 +88,7 @@ export const SessionView: FC<SessionViewProps> = memo(
 
     const openAlertDetails = useCallback(
       (alertId: string, alertIndex: string, onClose?: () => void) =>
-        overlays?.openSystemFlyout(
+        overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
@@ -102,7 +102,10 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         ),
       [
         defaultFlyoutProperties,
@@ -167,7 +170,10 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         );
       },
       [
@@ -202,7 +208,7 @@ export const SessionView: FC<SessionViewProps> = memo(
         <EuiFlyoutHeader
           hasBorder
           css={css`
-            padding-block-end: ${euiTheme.size.m} !important;
+            padding-block: ${euiTheme.size.s} !important;
           `}
         >
           <ToolsFlyoutHeader

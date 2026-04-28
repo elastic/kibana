@@ -97,6 +97,7 @@
             "lineNumber": 123,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "BuildContextMenuParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -157,6 +158,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -300,6 +302,7 @@
                 "lineNumber": 71,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -353,6 +356,7 @@
                 "lineNumber": 77,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -406,6 +410,7 @@
                 "lineNumber": 83,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -459,6 +464,7 @@
                 "lineNumber": 88,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -512,6 +518,7 @@
                 "lineNumber": 95,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -565,6 +572,7 @@
                 "lineNumber": 102,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -603,6 +611,7 @@
                 "lineNumber": 107,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -643,6 +652,7 @@
                 "lineNumber": 114,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -918,6 +928,7 @@
                 "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -956,6 +967,7 @@
                 "lineNumber": 41,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -994,6 +1006,7 @@
                 "lineNumber": 47,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1032,6 +1045,7 @@
                 "lineNumber": 54,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1070,6 +1084,7 @@
                 "lineNumber": 60,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1491,7 +1506,14 @@
         "tags": [],
         "label": "ActionExecutionContext",
         "description": [
-          "\nAction methods are executed with Context from trigger + {@link ActionExecutionMeta}"
+          "\nAction methods are executed with Context from trigger + ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionExecutionMeta",
+            "text": "ActionExecutionMeta"
+          }
         ],
         "signature": [
           "Context & ",
@@ -3586,7 +3608,7 @@
       "label": "UiActionsPublicSetup",
       "description": [],
       "signature": [
-        "{ readonly registerAction: <Context extends object>(definition: ",
+        "{ readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3594,31 +3616,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context, {}>) => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.Action",
-          "text": "Action"
-        },
-        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3652,7 +3650,7 @@
           "section": "def-public.Trigger",
           "text": "Trigger"
         },
-        "; readonly registerAction: <Context extends object>(definition: ",
+        "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3660,31 +3658,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context, {}>) => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.Action",
-          "text": "Action"
-        },
-        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3729,7 +3703,7 @@
         "; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
-      "lineNumber": 26,
+      "lineNumber": 24,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

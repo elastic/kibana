@@ -58,6 +58,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PublicStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -284,7 +285,7 @@
           "\nDocumentation information for a workflow step."
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -302,7 +303,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -320,7 +321,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 34,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -338,7 +339,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -522,6 +523,7 @@
               "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicStepDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -575,6 +577,7 @@
               "lineNumber": 56,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicTriggerDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -619,8 +622,7 @@
         "$ZodLooseShape, ",
         "node_modules/zod/v4/core/schemas",
         "$strip>>> & ",
-        "TriggerRegistryStartContract",
-        " & { isReady(): Promise<void>; }"
+        "TriggerRegistryStartContract"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
       "lineNumber": 69,
@@ -707,6 +709,7 @@
                 "lineNumber": 55,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerTriggerDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -923,6 +926,7 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServerStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -937,7 +941,7 @@
         "tags": [],
         "label": "getEventChainContext",
         "description": [
-          "\nReturns the event-chain context from the request if it was set by a workflow run.\nUsed inside emitEvent to infer depth when the emitter is in a workflow-triggered path.\nReads from: (1) the request's symbol (execution-engine fakeRequest path), or\n(2) the x-kibana-event-chain-depth and x-kibana-event-chain-source-execution-id headers (HTTP path)."
+          "\nReturns the event-chain context for the request.\n\nTwo trusted paths:\n 1. In-process (fakeRequest): the execution engine called setWorkflowEventChainContext before\n    any step runs, so the Symbol is present and takes precedence.\n 2. Inbound HTTP from kibana.request step: no Symbol exists, but the step marks its outbound\n    call with x-elastic-internal-origin so request.isInternalApiRequest is true. Only then are\n    the event-chain headers parsed.\n\nNote: isInternalApiRequest is derived from the presence of the x-elastic-internal-origin request\nheader (see KibanaRequest constructor). It is not enforced at the network layer, so a\nsufficiently informed external caller could set it. This gate stops naive spoofing but should\nnot be treated as a hard trust boundary."
         ],
         "signature": [
           "(request: ",
@@ -953,7 +957,7 @@
           " | undefined"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-        "lineNumber": 84,
+        "lineNumber": 87,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -970,9 +974,10 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-            "lineNumber": 90,
+            "lineNumber": 102,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -995,7 +1000,7 @@
           "<unknown, unknown, unknown, any>) => Record<string, string>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-        "lineNumber": 115,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1012,9 +1017,10 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-            "lineNumber": 120,
+            "lineNumber": 135,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1045,7 +1051,7 @@
           ") => void"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-        "lineNumber": 103,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1062,9 +1068,10 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-            "lineNumber": 109,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1085,9 +1092,10 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-            "lineNumber": 110,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventChainContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1184,7 +1192,7 @@
           "\nContext attached to the request when a workflow runs, so that when code\nin that workflow emits an event (e.g. via emitEvent), we can infer the\nevent-chain depth and enforce a cap to prevent infinite loops.\nDepth is incremented for every step in the chain (any workflow); the trigger\nevent handler caps scheduling when depth exceeds the configured max."
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1197,7 +1205,7 @@
             "label": "depth",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-            "lineNumber": 20,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1213,7 +1221,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-            "lineNumber": 21,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1310,6 +1318,7 @@
                 "lineNumber": 112,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "StepHandlerContext",
                 "trackAdoption": false
               }
             ]
@@ -1781,6 +1790,7 @@
                 "lineNumber": 71,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1989,6 +1999,7 @@
             "lineNumber": 58,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "EmitEventParams",
             "trackAdoption": false
           }
         ],
@@ -2007,7 +2018,7 @@
           "\"x-kibana-event-chain-depth\""
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-        "lineNumber": 29,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2026,7 +2037,7 @@
           "\"x-kibana-event-chain-source-execution-id\""
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
-        "lineNumber": 35,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2080,6 +2091,7 @@
             "lineNumber": 122,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "StepHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -2171,6 +2183,7 @@
             "lineNumber": 112,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "StepHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -2209,6 +2222,23 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-server.X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "type": "string",
+        "tags": [],
+        "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "description": [],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -2240,13 +2270,7 @@
           ],
           "signature": [
             "(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "server",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-server.ServerStepDefinition",
-              "text": "ServerStepDefinition"
-            },
+            "ServerStepDefinitionOrLoader",
             "<",
             "ZodType",
             "<unknown, unknown, ",
@@ -2272,20 +2296,14 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerStepDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
                 "- The step server-side definition"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "server",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-server.ServerStepDefinition",
-                  "text": "ServerStepDefinition"
-                },
+                "ServerStepDefinitionOrLoader",
                 "<",
                 "ZodType",
                 "<unknown, unknown, ",
@@ -2306,6 +2324,7 @@
               "lineNumber": 96,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "ServerStepDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2371,6 +2390,7 @@
               "lineNumber": 105,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "ServerTriggerDefinition",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2413,6 +2433,7 @@
               "lineNumber": 113,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "TriggerEventHandler",
               "trackAdoption": false,
               "isRequired": true
             }

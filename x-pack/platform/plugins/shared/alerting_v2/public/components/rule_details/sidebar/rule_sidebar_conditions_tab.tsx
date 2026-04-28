@@ -7,20 +7,15 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleConditions } from './rule_conditions';
 import { RuleMetadata } from './rule_metadata';
 
-export interface RuleSidebarConditionsTabProps {
-  rule: RuleApiResponse;
-}
-
-export const RuleSidebarConditionsTab: React.FC<RuleSidebarConditionsTabProps> = ({ rule }) => {
+export const RuleSidebarConditionsTab: React.FC = () => {
   return (
     <>
-      <RuleConditions rule={rule} />
+      <RuleConditions />
       <EuiHorizontalRule margin="l" />
-      <RuleMetadata rule={rule} />
+      <RuleMetadata />
     </>
   );
 };

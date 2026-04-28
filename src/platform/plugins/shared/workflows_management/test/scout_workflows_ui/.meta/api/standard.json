@@ -1,5 +1,5 @@
 {
-  "sha1": "b2524ccaefc9037e02e9585e7c26994a41c5fddd",
+  "sha1": "3a5093b7332613c7f0d78b7cdac3589d2fc57e10",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -222,6 +222,32 @@
       }
     },
     {
+      "id": "88880ed74902ffd-ddaea7aa387b906",
+      "title": "Hard delete TOCTOU race condition hard delete during a concurrent run should not orphan the execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
+        "line": 95,
+        "column": 12
+      }
+    },
+    {
       "id": "337190238aab48d-18b2bd5c7982ed9",
       "title": "Scheduled workflow execution enabling a scheduled workflow triggers executions automatically",
       "expectedStatus": "skipped",
@@ -380,7 +406,7 @@
     {
       "id": "5c91fe961842041-6824e65248ebe46",
       "title": "Workflow error trigger (workflows.failed) when a workflow fails, a workflow subscribed to workflows.failed runs and receives the event",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -399,14 +425,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 144,
+        "line": 145,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-71ac8908c1a2400",
       "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler runs when name matches condition",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -425,14 +451,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 176,
+        "line": 177,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-0bf21c42a062476",
       "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler does not run when name does not match",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -451,14 +477,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-73f60649b75b068",
       "title": "Workflow error trigger (workflows.failed) filter by failed step: handler runs when event.error.stepId matches condition",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -477,8 +503,138 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 226,
+        "line": 227,
         "column": 14
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-2b23b1395333b73",
+      "title": "GET /api/workflows/aggs returns buckets for valid mapped fields (tags, createdBy)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 73,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-ced00798be93baf",
+      "title": "GET /api/workflows/aggs returns buckets when a single field is passed as a string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-f0c74254168c72c",
+      "title": "GET /api/workflows/aggs returns 200 with absent or empty buckets for a non-existent field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-8626790a407be44",
+      "title": "GET /api/workflows/aggs rejects or returns empty buckets for the ES metadata field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 115,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-91f38d0c70ef22e",
+      "title": "GET /api/workflows/aggs rejects requests with more than 25 fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 121,
+        "column": 12
       }
     },
     {
@@ -504,6 +660,90 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/scheduled_workflow_save_update.spec.ts",
         "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-bdbeae7b09e9467",
+      "title": "Workflows management API availability (serverless tiers) observability logs essentials: workflow API is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-ad99f6c4127439d",
+      "title": "Workflows management API availability (serverless tiers) observability complete: can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-b2646edea4379ca",
+      "title": "Workflows management API availability (serverless tiers) security essentials: workflow API is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-b6684e03b06dc5c",
+      "title": "Workflows management API availability (serverless tiers) security complete: can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-afcd9627695814e",
+      "title": "Workflows management API availability (serverless tiers) security EASE (AI for SOC): can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 99,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-15b182e404f1928",
+      "title": "Workflows management API availability (serverless tiers) search: can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 111,
         "column": 12
       }
     }

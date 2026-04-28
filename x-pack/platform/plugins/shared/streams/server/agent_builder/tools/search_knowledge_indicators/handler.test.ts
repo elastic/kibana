@@ -30,6 +30,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
 function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
   return {
     id: 'query-id',
+    type: 'match',
     title: 'Query title',
     description: 'Query description',
     esql: { query: 'FROM logs-*' },
@@ -122,6 +123,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         kind: 'query',
         query: {
           id: 'q1',
+          type: 'match',
           title: 'Query title',
           description: 'Query description',
           esql: { query: 'FROM logs-*' },
@@ -150,7 +152,9 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       params: { search_text: 'payment' },
     });
 
-    expect(queryClient.findQueries).toHaveBeenCalledWith(['logs.test'], 'payment');
+    expect(queryClient.findQueries).toHaveBeenCalledWith(['logs.test'], 'payment', {
+      ruleUnbacked: 'include',
+    });
     expect(queryClient.getQueryLinks).not.toHaveBeenCalled();
   });
 
@@ -172,7 +176,9 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
     expect(featureClient.getFeatures).toHaveBeenCalledTimes(1);
     expect(featureClient.getFeatures).toHaveBeenCalledWith('logs.allowed', expect.any(Object));
-    expect(queryClient.getQueryLinks).toHaveBeenCalledWith(['logs.allowed']);
+    expect(queryClient.getQueryLinks).toHaveBeenCalledWith(['logs.allowed'], {
+      ruleUnbacked: 'include',
+    });
   });
 
   it('logs a debug message when feature retrieval fails for a stream', async () => {
@@ -200,6 +206,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       params: { kind: ['feature'] },
     });
 
-    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

@@ -8,14 +8,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
-import { Parser } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.appendSeparatorDoc', {
@@ -24,7 +24,6 @@ const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   }),
   kind: 'Reference',
   label: 'APPEND_SEPARATOR',
-  sortText: '1',
   text: 'APPEND_SEPARATOR = ',
 });
 
@@ -39,22 +38,19 @@ export async function autocomplete(
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
   // If cursor is inside a string literal, don't suggest anything
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-  const { node } = findAstPosition(root, innerText.length);
+  const { node } = findAutocompleteAstPosition(query, cursorPosition);
 
   if (node?.type === 'literal' && node.literalType === 'keyword') {
     return [];
   }
 
   // DISSECT field/
-  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
+  if (commandArgs.length === 1 && endsWithWhitespace(innerText)) {
     return buildConstantsDefinitions(
       ['"%{firstWord}"'],
       i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
-      undefined,
       {
         advanceCursorAndOpenSuggestions: true,
       }

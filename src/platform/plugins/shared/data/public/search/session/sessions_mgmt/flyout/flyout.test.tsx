@@ -52,7 +52,6 @@ const setup = () => {
   render(
     <IntlProvider>
       <Flyout
-        flyoutId="test"
         onClose={onClose}
         api={api}
         config={mockConfig}
@@ -70,11 +69,6 @@ const setup = () => {
 };
 
 describe('<Flyout />', () => {
-  it('render the title', () => {
-    setup();
-    expect(screen.getByText('Background searches')).toBeVisible();
-  });
-
   it('renders the table', () => {
     setup();
     expect(screen.getByTestId('searchSessionsMgmtUiTable')).toBeVisible();

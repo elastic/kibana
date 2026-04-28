@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
-import { dataSourceSchema, dataSourceEsqlTableTypeSchema } from './data_source';
+import { dataSourceSchema } from './data_source';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   dataViewSchema,
+  esqlDataSourceSchema,
 } from '@kbn/as-code-data-views-schema';
 
 describe('DataSource Schema', () => {
@@ -57,17 +57,15 @@ describe('DataSource Schema', () => {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
-        runtime_fields: [
-          {
+        field_settings: {
+          my_runtime_field: {
             type: 'keyword',
-            name: 'my_runtime_field',
             format: { type: 'string', params: { id: 'string' } },
           },
-          {
+          another_field: {
             type: 'long',
-            name: 'another_field',
           },
-        ],
+        },
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);
@@ -94,7 +92,7 @@ describe('DataSource Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       } satisfies DataSourceTypeESQL;
 
-      const validated = dataSourceEsqlTableTypeSchema.validate(input);
+      const validated = esqlDataSourceSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -104,36 +102,8 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
-        /\[0.query\]: expected value of type/
-      );
-    });
-  });
-
-  describe('table type', () => {
-    it('validates a valid table configuration', () => {
-      const mockTable: Datatable = {
-        type: 'datatable',
-        columns: [{ id: 'col1', name: 'Column 1', meta: { type: 'string' } }],
-        rows: [{ col1: 'value1' }],
-      };
-
-      const input = {
-        type: 'table',
-        table: mockTable,
-      } satisfies DataSourceTypeESQL;
-
-      const validated = dataSourceEsqlTableTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
-
-    it('throws on missing table', () => {
-      const input = {
-        type: 'table' as const,
-      };
-
-      expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
-        /\[1.table\]: expected value of type/
+      expect(() => esqlDataSourceSchema.validate(input)).toThrow(
+        /\[query\]: expected value of type/
       );
     });
   });
@@ -160,12 +130,12 @@ describe('DataSource Schema', () => {
   });
 
   describe('edge cases', () => {
-    it('validates index configuration with empty runtime fields array', () => {
+    it('validates index configuration with empty field_settings object', () => {
       const input = {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
-        runtime_fields: [],
+        field_settings: {},
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);
@@ -177,10 +147,9 @@ describe('DataSource Schema', () => {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
-        runtime_fields: [
-          {
+        field_settings: {
+          date_field: {
             type: 'date',
-            name: 'date_field',
             format: {
               type: 'date',
               params: {
@@ -188,12 +157,11 @@ describe('DataSource Schema', () => {
               },
             },
           },
-          {
+          number_field: {
             type: 'double',
-            name: 'number_field',
             format: { type: '', params: { decimals: 2 } },
           },
-        ],
+        },
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);

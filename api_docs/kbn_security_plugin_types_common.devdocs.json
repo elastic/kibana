@@ -1554,6 +1554,7 @@
                 "lineNumber": 20,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
