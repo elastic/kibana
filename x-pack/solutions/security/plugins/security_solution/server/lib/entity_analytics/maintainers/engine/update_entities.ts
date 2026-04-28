@@ -45,12 +45,7 @@ function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> 
   return merged;
 }
 
-/**
- * Writes raw_identifiers['entity.id'] to entity documents via bulk update.
- * Target EUIDs are not validated here — the relationship resolver in the
- * entity_store plugin confirms which exist and promotes them to ids.
- */
-export const writeRawIdentifiers = async (
+export const writeEntityIds = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
   records: ProcessedEngineRecord[]
@@ -64,16 +59,13 @@ export const writeRawIdentifiers = async (
 
   const objects: BulkObject[] = [];
   for (const [entityId, mergedRels] of merged) {
-    const relationships: Record<string, { raw_identifiers: { 'entity.id': string[] } }> = {};
+    const relationships: Record<string, { ids: string[] }> = {};
     for (const [relType, idSet] of Object.entries(mergedRels)) {
       if (idSet.size > 0) {
-        relationships[relType] = { raw_identifiers: { 'entity.id': Array.from(idSet) } };
+        relationships[relType] = { ids: Array.from(idSet) };
       }
     }
     if (Object.keys(relationships).length > 0) {
-      // EntityField.relationships is strict-keyed in the Zod schema; raw_identifiers writes
-      // use partial update docs with arbitrary rel-type keys, so the full Entity type cannot
-      // be satisfied here. BulkObject accepts Entity only for structural typing purposes.
       objects.push({
         type: 'user',
         doc: {
@@ -88,7 +80,7 @@ export const writeRawIdentifiers = async (
 
   if (objects.length === 0) return 0;
 
-  logger.info(`Writing raw_identifiers for ${objects.length} entity records`);
+  logger.info(`Writing relationship ids for ${objects.length} entity records`);
   const errors = await crudClient.bulkUpdateEntity({ objects, force: true });
 
   const missingErrors = errors.filter((e) => e.status === 404);
@@ -102,6 +94,6 @@ export const writeRawIdentifiers = async (
     logger.error(`Failed to write ${realErrors.length} records: ${JSON.stringify(realErrors)}`);
   }
 
-  logger.info(`Wrote raw_identifiers for ${updated} entities`);
+  logger.info(`Wrote relationship ids for ${updated} entities`);
   return updated;
 };

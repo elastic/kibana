@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import { writeRawIdentifiers } from './update_entities';
+import { writeEntityIds } from './update_entities';
 import type { ProcessedEngineRecord } from './types';
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
@@ -15,10 +15,10 @@ const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateCli
     bulkUpdateEntity: jest.fn().mockResolvedValue(errors),
   } as unknown as EntityUpdateClient);
 
-describe('writeRawIdentifiers', () => {
+describe('writeEntityIds', () => {
   it('returns 0 immediately when records is empty', async () => {
     const crudClient = makeCrudClient();
-    const result = await writeRawIdentifiers(crudClient, loggerMock.create(), []);
+    const result = await writeEntityIds(crudClient, loggerMock.create(), []);
     expect(result).toBe(0);
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
@@ -26,9 +26,13 @@ describe('writeRawIdentifiers', () => {
   it('skips records with null entityId', async () => {
     const crudClient = makeCrudClient();
     const records: ProcessedEngineRecord[] = [
-      { entityId: null, entityType: 'user', relationships: { communicates_with: ['host:foo'] } },
+      {
+        entityId: null,
+        entityType: 'user',
+        relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
+      },
     ];
-    const result = await writeRawIdentifiers(crudClient, loggerMock.create(), records);
+    const result = await writeEntityIds(crudClient, loggerMock.create(), records);
     expect(result).toBe(0);
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
@@ -45,29 +49,30 @@ describe('writeRawIdentifiers', () => {
         },
       },
     ];
-    const result = await writeRawIdentifiers(crudClient, loggerMock.create(), records);
+    const result = await writeEntityIds(crudClient, loggerMock.create(), records);
     expect(result).toBe(0);
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
-  it('calls bulkUpdateEntity with the raw_identifiers shape', async () => {
+  it('calls bulkUpdateEntity with ids array per relType', async () => {
     const crudClient = makeCrudClient();
     const records: ProcessedEngineRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
         relationships: {
-          accesses_frequently: ['host:web-01'],
+          accesses_frequently: ['host:D3F5C9B9-web-01'],
           accesses_infrequently: [],
         },
       },
     ];
-    await writeRawIdentifiers(crudClient, loggerMock.create(), records);
+    await writeEntityIds(crudClient, loggerMock.create(), records);
     const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
     const doc = objects[0].doc.entity.relationships;
-    expect(doc.accesses_frequently.raw_identifiers['entity.id']).toEqual(['host:web-01']);
+    expect(doc.accesses_frequently.ids).toEqual(['host:D3F5C9B9-web-01']);
+    expect(doc.accesses_infrequently).toBeUndefined();
   });
 
   it('merges records with the same entityId', async () => {
@@ -76,20 +81,22 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:a'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-a'] },
       },
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:b'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-b'] },
       },
     ];
-    await writeRawIdentifiers(crudClient, loggerMock.create(), records);
+    await writeEntityIds(crudClient, loggerMock.create(), records);
     const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
-    const ids = objects[0].doc.entity.relationships.communicates_with.raw_identifiers['entity.id'];
-    expect(ids.sort()).toEqual(['host:a', 'host:b']);
+    expect(objects[0].doc.entity.relationships.communicates_with.ids.sort()).toEqual([
+      'host:D3F5C9B9-a',
+      'host:D3F5C9B9-b',
+    ]);
   });
 
   it('counts only successfully updated entities', async () => {
@@ -98,15 +105,15 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:foo'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
       },
       {
         entityId: 'user:bob@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:bar'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-bar'] },
       },
     ];
-    const result = await writeRawIdentifiers(crudClient, loggerMock.create(), records);
+    const result = await writeEntityIds(crudClient, loggerMock.create(), records);
     expect(result).toBe(1);
   });
 
@@ -117,10 +124,10 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:foo'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
       },
     ];
-    await writeRawIdentifiers(crudClient, logger, records);
+    await writeEntityIds(crudClient, logger, records);
     expect(logger.debug).toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -132,10 +139,10 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:foo'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
       },
     ];
-    await writeRawIdentifiers(crudClient, logger, records);
+    await writeEntityIds(crudClient, logger, records);
     expect(logger.error).toHaveBeenCalled();
   });
 
@@ -145,10 +152,10 @@ describe('writeRawIdentifiers', () => {
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
-        relationships: { communicates_with: ['host:foo'] },
+        relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
       },
     ];
-    await writeRawIdentifiers(crudClient, loggerMock.create(), records);
+    await writeEntityIds(crudClient, loggerMock.create(), records);
     const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
     expect(call[0].force).toBe(true);
   });
