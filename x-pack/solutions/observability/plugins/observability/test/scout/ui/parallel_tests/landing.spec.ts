@@ -16,7 +16,8 @@ import {
 } from '../fixtures/generators';
 import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/253824
+test.describe.skip(
   'Observability Landing Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

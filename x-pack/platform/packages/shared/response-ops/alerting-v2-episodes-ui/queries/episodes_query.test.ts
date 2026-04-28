@@ -216,4 +216,53 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).not.toContain('QSTR');
   });
+
+  it('should apply assigneeUid filter with per-episode INLINE STATS', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { assigneeUid: 'user-123' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('action_type IN ("deactivate", "activate", "tag", "assign")');
+    expect(queryString).toContain('_ep_id = COALESCE(episode_id, episode.id)');
+    expect(queryString).toContain(
+      'last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE (action_type IN ("assign"))'
+    );
+    expect(queryString).toContain('BY _ep_id');
+    expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
+
+  it('should always include assign actions and assignee INLINE STATS regardless of filter', () => {
+    const query = buildEpisodesQuery({ sortField: '@timestamp', sortDirection: 'desc' }, {});
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('action_type IN ("deactivate", "activate", "tag", "assign")');
+    expect(queryString).toContain('_ep_id = COALESCE(episode_id, episode.id)');
+    expect(queryString).toContain('last_assignee_uid');
+    expect(queryString).not.toContain('WHERE last_assignee_uid');
+  });
+
+  it('should combine assigneeUid with other filters', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { assigneeUid: 'user-123', status: 'active', ruleId: 'rule-456' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+    expect(queryString).toContain('WHERE effective_status == "active"');
+    expect(queryString).toContain('WHERE rule.id == "rule-456"');
+  });
+
+  it('should apply queryString with assigneeUid filter', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { assigneeUid: 'user-123', queryString: 'alert.name: "test"' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+    expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
 });
