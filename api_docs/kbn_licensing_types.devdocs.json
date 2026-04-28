@@ -287,6 +287,7 @@
                 "lineNumber": 162,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -353,6 +354,7 @@
                 "lineNumber": 169,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -760,6 +762,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/availability/availability_updater.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/availability/availability_updater.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/availability/availability_updater.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_license_check.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_license_check.test.ts"
               }
             ]
           }
