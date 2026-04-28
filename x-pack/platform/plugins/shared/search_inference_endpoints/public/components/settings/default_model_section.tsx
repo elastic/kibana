@@ -150,7 +150,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
                 onChange={onChangeDefaultModel}
                 isLoading={connectorsLoading}
                 isInvalid={validation.errors.length > 0}
-                isClearable={state.featureSpecificModels}
+                isClearable={false}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
