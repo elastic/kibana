@@ -33,6 +33,7 @@
             "lineNumber": 40,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLDataGridProps",
             "trackAdoption": false,
             "isRequired": true
           }

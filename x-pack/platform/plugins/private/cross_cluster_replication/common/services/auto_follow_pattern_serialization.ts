@@ -37,7 +37,10 @@ export const serializeAutoFollowPattern = ({
   remoteCluster,
   leaderIndexPatterns,
   followIndexPattern,
-}: AutoFollowPattern): AutoFollowPatternToEs => ({
+}: Pick<
+  AutoFollowPattern,
+  'remoteCluster' | 'leaderIndexPatterns' | 'followIndexPattern'
+>): AutoFollowPatternToEs => ({
   remote_cluster: remoteCluster,
   leader_index_patterns: leaderIndexPatterns,
   follow_index_pattern: followIndexPattern,
