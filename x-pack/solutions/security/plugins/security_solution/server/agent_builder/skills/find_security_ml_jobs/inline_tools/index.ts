@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getSecurityMlJobsTool } from './get_security_ml_jobs';
+export { findSecurityMlJobsTool } from './find_security_ml_jobs';
 export { extractEuidFromMlDataTool } from './extract_euid_from_ml_data';

@@ -8,9 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
-import { extractEuidFromMlDataTool, getSecurityMlJobsTool } from './inline_tools';
+import { extractEuidFromMlDataTool, findSecurityMlJobsTool } from './inline_tools';
 import { SECURITY_GET_ENTITY_TOOL_ID } from '../../tools';
-export interface SecurityMlJobsSkillsContext {
+
+export interface FindSecurityMlJobsSkillsContext {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   isEntityStoreV2Enabled: boolean;
   logger: Logger;
@@ -45,12 +46,16 @@ const getAnomalyKeepFields = (isEntityStoreV2Enabled: boolean) => {
   return fields;
 };
 
-export const getSecurityMlJobsSkill = (ctx: SecurityMlJobsSkillsContext) =>
+export const findSecurityMlJobsSkill = (ctx: FindSecurityMlJobsSkillsContext) =>
   defineSkillType({
     id: 'find-security-ml-jobs',
     name: 'find-security-ml-jobs',
     basePath: 'skills/security/ml',
-    description: `Guide to investigating anomalous and unusual behavior in your environment, especially related to security entities (hosts, users, services, generic). Analyze abnormal access patterns, lateral movements, unexpected logins from different locations, suspicious or external domain activities, large downloads.`,
+    description: `Guide to investigating anomalous and unusual behavior in your environment, especially related to security entities
+(hosts, users, services, service accounts, privileged accounts). Detects: unusual or first-time access patterns
+by users or service accounts, access to sensitive data or systems outside working hours, privileged accounts with unusual command
+patterns, logins from multiple or unexpected geographic locations, lateral movement between systems, unusually large data downloads
+or uploads, and data exfiltration to external domains.`,
     content: `# Guide to finding Security ML Jobs
 
 ## When to Use This Skill
@@ -67,7 +72,7 @@ After using this skill, you may want to use:
 ## Process for finding security ML jobs
 
 ### 1. Identify relevant ML jobs
-- Use the 'security.ml.jobs' tool to identify relevant ML jobs that can help answer the user's question or prompt
+- Use the 'find.security.ml.jobs' tool to identify relevant ML jobs that can help answer the user's question or prompt
 - The tool will return:
   - activeJobIds: A list of active ML job IDs that are relevant to the user's query
   - allJobs: A list of all ML jobs (active and inactive) that are relevant to the user's query, along with their descriptions and influencers
@@ -96,8 +101,8 @@ After using this skill, you may want to use:
     * typical: The typical value expected for the field.
 
 ### 3. Recommend other ML jobs to enable
-- If there are no activeJobIds returned by the 'security.ml.jobs' tool but there are jobs in the allJobs list, recommend to the user to enable and start those jobs to get relevant insights for their investigation.
-- If there are activeJobIds returned by the 'security.ml.jobs' tool but allJobs includes additional job IDs, recommend to the user to enable and start those additional jobs to get more comprehensive insights for their investigation.
+- If there are no activeJobIds returned by the 'find.security.ml.jobs' tool but there are jobs in the allJobs list, recommend to the user to enable and start those jobs to get relevant insights for their investigation.
+- If there are activeJobIds returned by the 'find.security.ml.jobs' tool but allJobs includes additional job IDs, recommend to the user to enable and start those additional jobs to get more comprehensive insights for their investigation.
 - When recommending jobs to enable, ALWAYS provide the full job title
 
 ### 4. Execute query to find anomalies
@@ -107,7 +112,7 @@ ${
   ctx.isEntityStoreV2Enabled
     ? `
   ### 5. Extract EUIDs from anomaly results
-- You MUST use the 'security.ml.jobs.extract_euid' tool to extract EUIDs from the anomaly records returned by the 'platform.core.execute_esql' tool.
+- You MUST use the 'find.security.ml.jobs.extract_euid' tool to extract EUIDs from the anomaly records returned by the 'platform.core.execute_esql' tool.
 - Pass the full list of anomaly records as the 'anomalyRecords' input. The tool automatically derives the entity type (host, user) from each record's fields.
 - Use the '~/skills/security/entities/entity-analytics' skill with the 'security.get_entity' tool to look up risk scores and asset criticality for the entities using EUID.
 - The EUIDs will be returned in the same order as the anomaly records.
@@ -135,14 +140,14 @@ ${
 User query: Show users who downloaded unusually large data
 
 Steps:
-1. Use the 'security.ml.jobs' tool to find relevant ML jobs related to data download behavior for users.
+1. Use the 'find.security.ml.jobs' tool to find relevant ML jobs related to data download behavior for users.
 2. The tool returns 3 activeJobIds = ["high_sent_bytes_destination_ip", "high_bytes_written_to_external_device", "high_count_remote_file_transfer"]
 3. Use the 'platform.core.generate_esql' tool to generate the ES|QL query with the context provided above, including filtering by activeJobIds and anomaly score threshold.
 4. Execute the generated ES|QL query using the 'platform.core.execute_esql' tool to get anomaly results.
 ${
   ctx.isEntityStoreV2Enabled
     ? `
-  7. Use the 'security.ml.jobs.extract_euid' tool to extract EUIDs from the combined anomaly records returned by the 'platform.core.execute_esql' tool.
+  7. Use the 'find.security.ml.jobs.extract_euid' tool to extract EUIDs from the combined anomaly records returned by the 'platform.core.execute_esql' tool.
   8. Use the ~/skills/security/entities/entity-analytics skill and the 'security.get_entity' to look up the entity store profiles using the extracted EUIDs
   9. Summarize the findings in a table format and provide key insights based on the anomalies and entities found.
      Table MUST include the EUID column. If multiple EUIDs are extracted for a single anomaly record, include all EUIDs in the table (e.g. separate by comma or list them in the same cell).`
@@ -159,7 +164,7 @@ ${
       return tools;
     },
     getInlineTools: () => {
-      const tools = [getSecurityMlJobsTool(ctx)];
+      const tools = [findSecurityMlJobsTool(ctx)];
       if (ctx.isEntityStoreV2Enabled) {
         tools.push(extractEuidFromMlDataTool());
       }

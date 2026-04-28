@@ -14,7 +14,7 @@ import { compact } from 'lodash';
 
 const ALLOWED_ENTITY_TYPES = ['host', 'user'] as const;
 
-export const EXTRACT_EUID_FROM_SECURITY_ML_JOBS_INLINE_TOOL = `security.ml.jobs.extract_euid`;
+export const EXTRACT_EUID_FROM_SECURITY_ML_JOBS_INLINE_TOOL = `find.security.ml.jobs.extract_euid`;
 
 export const extractEuidToolSchema = z.object({
   anomalyRecords: z

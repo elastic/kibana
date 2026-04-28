@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getSecurityMlJobsSkill } from './security_ml_jobs_skill';
+export { findSecurityMlJobsSkill } from './find_security_ml_jobs_skill';
