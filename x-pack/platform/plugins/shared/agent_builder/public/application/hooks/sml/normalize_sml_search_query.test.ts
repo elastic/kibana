@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '../../../../common/http_api/sml';
+import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/semantic-layer-plugin/common/http_api/sml';
 import { normalizeSmlSearchQuery } from './normalize_sml_search_query';
 
 describe('normalizeSmlSearchQuery', () => {

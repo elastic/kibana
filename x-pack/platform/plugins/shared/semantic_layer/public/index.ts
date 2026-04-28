@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const internalApiPath = '/internal/semantic_layer';
-export const smlSearchPath = `${internalApiPath}/sml/_search`;
+import type { PluginInitializer } from '@kbn/core-plugins-browser';
+
+export const plugin: PluginInitializer<{}, {}> = () => ({
+  setup: () => ({}),
+  start: () => ({}),
+  stop: () => {},
+});

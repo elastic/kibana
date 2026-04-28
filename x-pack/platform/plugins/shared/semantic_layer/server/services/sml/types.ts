@@ -102,6 +102,14 @@ export interface SmlTypeDefinition {
    * Defaults to '10m' if not provided.
    */
   fetchFrequency?: () => string;
+
+  /**
+   * Optional: hidden saved object types that this SML type needs access to
+   * (e.g., `['action']` for connectors). When set, the saved objects client
+   * passed to `getSmlData` and used by `indexAttachment` will include these
+   * hidden types.
+   */
+  includedHiddenTypes?: string[];
 }
 
 /**

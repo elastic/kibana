@@ -16,10 +16,12 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SemanticLayerPluginSetup } from '@kbn/semantic-layer-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
+import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
@@ -293,31 +295,31 @@ export class WorkflowsPlugin
       });
 
     void core.plugins
-      .onSetup<{ semanticLayer: Pick<import('@kbn/semantic-layer-plugin/server').SemanticLayerPluginSetup, 'registerType'> }>('semanticLayer')
+      .onSetup<{
+        semanticLayer: SemanticLayerPluginSetup;
+      }>('semanticLayer')
       .then(({ semanticLayer }) => {
         if (semanticLayer.found) {
-          const { createWorkflowSmlType } = require('./agent_builder/sml_types/workflow');
           semanticLayer.contract.registerType(createWorkflowSmlType(api));
-          this.logger.debug('Workflows Management: Workflow SML type registered with Semantic Layer');
+          this.logger.debug(
+            'Workflows Management: Workflow SML type registered with Semantic Layer'
+          );
         } else {
-          this.logger.warn('Workflows Management: semanticLayer not available — workflow SML type not registered');
+          this.logger.warn(
+            'Workflows Management: semanticLayer not available — workflow SML type not registered'
+          );
         }
       })
       .catch((err) => {
         const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(
-          `Workflows Management: Failed to register workflow SML type: ${message}`
-        );
+        this.logger.warn(`Workflows Management: Failed to register workflow SML type: ${message}`);
       });
 
     void core.plugins
       .onStart<{ semanticLayer: { indexAttachment: SmlIndexAttachmentFn } }>('semanticLayer')
       .then(({ semanticLayer }) => {
         if (semanticLayer.found) {
-          api.setSmlIndexAttachment(
-            semanticLayer.contract.indexAttachment,
-            this.logger.get('sml')
-          );
+          api.setSmlIndexAttachment(semanticLayer.contract.indexAttachment, this.logger.get('sml'));
           this.logger.debug(
             'Workflows Management: SML event-driven indexing wired to workflow CRUD'
           );

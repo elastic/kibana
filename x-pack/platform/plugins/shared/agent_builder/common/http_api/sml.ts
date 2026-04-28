@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * Max length of `query` for POST `/internal/semantic_layer/sml/_search` (route validation + UI).
- * The agent `sml_search` tool uses its own separate limit in its Zod schema.
- */
-export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
-
 /** Max items per `POST /internal/agent_builder/sml/_attach` (matches `sml_attach` tool). */
 export const SML_HTTP_ATTACH_ITEMS_MAX = 50;
 

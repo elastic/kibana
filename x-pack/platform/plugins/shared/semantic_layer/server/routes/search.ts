@@ -10,7 +10,7 @@ import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '../../common/features';
-import { internalApiPath } from '../../common/constants';
+import { smlSearchPath } from '../../common/constants';
 import type { SmlSearchHttpResponse } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '../../common/http_api/sml';
 import type { SmlService } from '../services/sml/types';
@@ -35,7 +35,7 @@ export const registerSearchRoute = ({
 }) => {
   router.post(
     {
-      path: `${internalApiPath}/sml/_search`,
+      path: smlSearchPath,
       validate: {
         body: schema.object({
           query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),

@@ -7,12 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SmlSearchHttpResponse } from '@kbn/semantic-layer-plugin/common/http_api/sml';
-
-/**
- * Must stay in sync with the route registered in
- * `@kbn/semantic-layer-plugin/server/routes/search.ts`.
- */
-const SEMANTIC_LAYER_SEARCH_PATH = '/internal/semantic_layer/sml/_search';
+import { smlSearchPath } from '@kbn/semantic-layer-plugin/common/constants';
 
 /** Browser client for SML search (`/internal/semantic_layer/sml/_search`). */
 export class SmlService {
@@ -27,7 +22,7 @@ export class SmlService {
     size: number;
     skipContent?: boolean;
   }): Promise<SmlSearchHttpResponse> {
-    return await this.http.post<SmlSearchHttpResponse>(SEMANTIC_LAYER_SEARCH_PATH, {
+    return await this.http.post<SmlSearchHttpResponse>(smlSearchPath, {
       body: JSON.stringify({
         query: params.query,
         size: params.size,
