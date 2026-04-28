@@ -49,9 +49,8 @@ export const useMonitorHistogramPerLocation = ({
     }
   );
 
-  const byIdsBuckets = data?.aggregations?.byIds.buckets ?? [];
-
   const histogramsById = useMemo(() => {
+    const byIdsBuckets = data?.aggregations?.byIds.buckets ?? [];
     const result: { [key: string]: Histogram } = {};
     byIdsBuckets.forEach((idBucket) => {
       idBucket.perLocation.buckets.forEach((locationBucket) => {
@@ -70,7 +69,7 @@ export const useMonitorHistogramPerLocation = ({
       });
     });
     return result;
-  }, [byIdsBuckets]);
+  }, [data]);
 
   return { histogramsById, loading, minInterval };
 };

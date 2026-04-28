@@ -48,9 +48,8 @@ export const useMonitorHistogramPerMonitor = ({
     }
   );
 
-  const byIdsBuckets = data?.aggregations?.byIds.buckets ?? [];
-
   const histogramsById = useMemo(() => {
+    const byIdsBuckets = data?.aggregations?.byIds.buckets ?? [];
     const result: { [key: string]: Histogram } = {};
     byIdsBuckets.forEach((idBucket) => {
       const points: HistogramPoint[] = [];
@@ -66,7 +65,7 @@ export const useMonitorHistogramPerMonitor = ({
       result[idBucket.key] = { points };
     });
     return result;
-  }, [byIdsBuckets]);
+  }, [data]);
 
   return { histogramsById, loading, minInterval };
 };
