@@ -28,7 +28,7 @@ export const internalNamespaces = {
  */
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
-  internalNamespaces.platformAlerting, // Owned by alerting_v2 plugin
+  internalNamespaces.platformAlerting,
   internalNamespaces.attachments,
   internalNamespaces.filestore,
   internalNamespaces.observability,

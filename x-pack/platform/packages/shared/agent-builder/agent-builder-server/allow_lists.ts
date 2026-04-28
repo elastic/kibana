@@ -18,7 +18,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Streams / Significant Events
   ...Object.values(platformStreamsSigEventsTools),
 
-  // Alerting V2
+  // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
 
   // Observability
@@ -113,7 +113,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'visualization-creation',
   'graph-creation',
 
-  // Platform – Alerting V2
+  // Platform – Alerting
   'rule-management',
 
   // Platform – Dashboard
