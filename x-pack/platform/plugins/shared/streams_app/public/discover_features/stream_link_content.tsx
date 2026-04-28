@@ -63,9 +63,11 @@ const CpsWarningIcon = ({ existsLocally }: { existsLocally: boolean }) => (
     type="warning"
     size="s"
     color="warning"
-    data-test-subj="cpsStreamsWarningIcon"
     anchorProps={{
       css: { display: 'flex' },
+    }}
+    iconProps={{
+      'data-test-subj': 'cpsStreamsWarningIcon',
     }}
   />
 );
