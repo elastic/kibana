@@ -175,7 +175,7 @@ test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
       await expect(statusCells).toHaveCount(1);
       await expect(statusCells).toHaveText(/active/i);
 
-      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('1');
+      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('2');
     });
   });
 });

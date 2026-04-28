@@ -7,7 +7,7 @@
 
 import type { ApiServicesFixture } from '@kbn/scout';
 
-export const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
+export const ES_QUERY_RULE_TYPE_ID = '.es-query';
 
 /**
  * Rule names used by the unified rules scout specs.
@@ -21,16 +21,21 @@ export const RULE_NAMES = {
   RULE_DETAILS_TEST: '!!! - Scout - Rule Details Test',
 } as const;
 
-const buildIndexThresholdParams = () => ({
-  aggType: 'count',
-  termSize: 5,
-  thresholdComparator: '>',
-  timeWindowSize: 5,
-  timeWindowUnit: 'm',
-  groupBy: 'all',
-  threshold: [1000],
+const buildEsQueryParams = () => ({
+  searchType: 'esQuery',
+  esQuery: JSON.stringify({ query: { match_all: {} } }),
   index: ['.kibana'],
   timeField: '@timestamp',
+  timeWindowSize: 5,
+  timeWindowUnit: 'm',
+  threshold: [1000],
+  thresholdComparator: '>',
+  size: 100,
+  aggType: 'count',
+  groupBy: 'all',
+  termSize: 5,
+  excludeHitsFromPreviousRun: false,
+  sourceFields: [],
 });
 
 /**
@@ -52,11 +57,11 @@ export async function seedRulesForTests(apiServices: ApiServicesFixture): Promis
   for (const name of missing) {
     await apiServices.alerting.rules.create({
       name,
-      ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
-      consumer: 'alerts',
+      ruleTypeId: ES_QUERY_RULE_TYPE_ID,
+      consumer: 'logs',
       schedule: { interval: '1m' },
       actions: [],
-      params: buildIndexThresholdParams(),
+      params: buildEsQueryParams(),
     });
   }
 }
