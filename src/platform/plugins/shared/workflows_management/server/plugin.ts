@@ -16,14 +16,17 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SemanticLayerPluginSetup } from '@kbn/semantic-layer-plugin/server';
+import type {
+  SemanticLayerPluginSetup,
+  SemanticLayerPluginStart,
+} from '@kbn/semantic-layer-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
-import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
 import type { WorkflowsManagementConfig } from './config';
@@ -327,7 +330,7 @@ export class WorkflowsPlugin
       });
 
     void core.plugins
-      .onStart<{ semanticLayer: { indexAttachment: SmlIndexAttachmentFn } }>('semanticLayer')
+      .onStart<{ semanticLayer: SemanticLayerPluginStart }>('semanticLayer')
       .then(({ semanticLayer }) => {
         if (semanticLayer.found) {
           api.setSmlIndexAttachment(semanticLayer.contract.indexAttachment, this.logger.get('sml'));

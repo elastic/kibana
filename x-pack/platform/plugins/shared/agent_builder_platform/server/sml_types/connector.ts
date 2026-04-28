@@ -38,7 +38,6 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
   return {
     id: CONNECTOR_SML_TYPE,
-    includedHiddenTypes: ['action'],
 
     // Connectors are indexed exclusively via event-driven lifecycle hooks.
     // The list method yields nothing — no crawling is performed.

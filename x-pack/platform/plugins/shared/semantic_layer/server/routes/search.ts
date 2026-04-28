@@ -55,9 +55,7 @@ export const registerSearchRoute = ({
           SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isEnabled) {
-          return response.forbidden({
-            body: { message: 'Feature not available' },
-          });
+          return response.notFound();
         }
 
         const sml = getSmlService();

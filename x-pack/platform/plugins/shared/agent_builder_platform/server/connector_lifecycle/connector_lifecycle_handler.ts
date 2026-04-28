@@ -29,7 +29,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
       if (!params.wasSuccessful) {
-        logger.error(
+        logger.debug(
           `Connector lifecycle: onPostCreate called with wasSuccessful=false for connector ${params.connectorId}`
         );
         return;
@@ -53,6 +53,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
             originId: connectorId,
             attachmentType: AttachmentType.connector,
             action: 'create',
+            includedHiddenTypes: ['action'],
           });
           logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
         } catch (smlError) {

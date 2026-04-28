@@ -116,10 +116,9 @@ export class SemanticLayerPlugin
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: async (params) => {
-        const typeDef = smlService.getTypeDefinition(params.attachmentType);
         const soClient = savedObjects.getScopedClient(params.request, {
-          ...(typeDef?.includedHiddenTypes?.length
-            ? { includedHiddenTypes: typeDef.includedHiddenTypes }
+          ...(params.includedHiddenTypes?.length
+            ? { includedHiddenTypes: params.includedHiddenTypes }
             : {}),
         });
         const spaceId =

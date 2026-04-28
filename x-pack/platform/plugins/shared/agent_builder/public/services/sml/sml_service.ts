@@ -6,8 +6,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SmlSearchHttpResponse } from '@kbn/semantic-layer-plugin/common/http_api/sml';
-import { smlSearchPath } from '@kbn/semantic-layer-plugin/common/constants';
+import type { SmlSearchHttpResponse } from '@kbn/semantic-layer-plugin/public';
+import { smlSearchPath } from '@kbn/semantic-layer-plugin/public';
 
 /** Browser client for SML search (`/internal/semantic_layer/sml/_search`). */
 export class SmlService {

@@ -46,17 +46,9 @@ import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
-// Mirrors SmlIndexAction and SmlStart['indexAttachment'] from @kbn/agent-builder-plugin/server.
-// Declared inline to avoid a circular TS project reference: agent_builder already references
-// workflows_management, so a reverse import would create a build cycle.
-export type SmlIndexAction = 'create' | 'update' | 'delete';
+import type { SmlIndexAttachmentParams, SmlIndexAction } from '@kbn/semantic-layer-plugin/server';
 
-export type SmlIndexAttachmentFn = (params: {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-}) => Promise<void>;
+export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';

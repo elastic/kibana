@@ -14,7 +14,11 @@ import type {
 } from './types';
 import { SemanticLayerPlugin } from './plugin';
 
-export type { SemanticLayerPluginSetup, SemanticLayerPluginStart } from './types';
+export type {
+  SemanticLayerPluginSetup,
+  SemanticLayerPluginStart,
+  SmlIndexAttachmentParams,
+} from './types';
 
 export type {
   SmlTypeDefinition,
@@ -26,8 +30,6 @@ export type {
   SmlSearchResult,
   SmlDocument,
   SmlIndexAction,
-  SmlIndexAttachmentParams,
-  SmlService,
 } from './services/sml/types';
 
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';

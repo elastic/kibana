@@ -71,11 +71,9 @@ describe('registerSearchRoute', () => {
     return response;
   };
 
-  it('returns 403 when feature flag is disabled', async () => {
+  it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler({ query: 'test', size: 10 }, false);
-    expect(response.forbidden).toHaveBeenCalledWith({
-      body: { message: 'Feature not available' },
-    });
+    expect(response.notFound).toHaveBeenCalled();
     expect(mockSmlService.search).not.toHaveBeenCalled();
   });
 

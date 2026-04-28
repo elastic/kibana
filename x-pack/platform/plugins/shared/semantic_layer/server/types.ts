@@ -73,11 +73,14 @@ export interface SemanticLayerPluginStart {
     logger: Logger;
   }) => Promise<SmlResolvedItemResult[]>;
 
-  indexAttachment: (params: {
-    request: KibanaRequest;
-    originId: string;
-    attachmentType: string;
-    action: SmlIndexAction;
-    spaceId?: string;
-  }) => Promise<void>;
+  indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
+}
+
+export interface SmlIndexAttachmentParams {
+  request: KibanaRequest;
+  originId: string;
+  attachmentType: string;
+  action: SmlIndexAction;
+  spaceId?: string;
+  includedHiddenTypes?: string[];
 }

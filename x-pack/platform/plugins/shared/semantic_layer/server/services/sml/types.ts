@@ -102,14 +102,6 @@ export interface SmlTypeDefinition {
    * Defaults to '10m' if not provided.
    */
   fetchFrequency?: () => string;
-
-  /**
-   * Optional: hidden saved object types that this SML type needs access to
-   * (e.g., `['action']` for connectors). When set, the saved objects client
-   * passed to `getSmlData` and used by `indexAttachment` will include these
-   * hidden types.
-   */
-  includedHiddenTypes?: string[];
 }
 
 /**
@@ -167,17 +159,6 @@ export interface SmlCrawlerStateDocument {
  * Action to index an SML attachment.
  */
 export type SmlIndexAction = 'create' | 'update' | 'delete';
-
-/**
- * Parameters for the event-driven indexing API.
- */
-export interface SmlIndexAttachmentParams {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-  spaceId?: string;
-}
 
 /**
  * The SML crawler enumerates registered SML types, compares the current state

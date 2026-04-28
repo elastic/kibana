@@ -5,19 +5,4 @@
  * 2.0.
  */
 
-/**
- * Prefix for chat system indices. Matches the `.chat-*` pattern registered
- * in the Elasticsearch `kibana_system` role descriptor
- * (`KibanaOwnedReservedRoleDescriptors.java`).
- *
- * Duplicated from `@kbn/agent-builder-server` to avoid a circular dependency
- * (agent_builder depends on semantic_layer as a requiredPlugin).
- */
-export const chatSystemIndexPrefix = '.chat-';
-
-/**
- * Helper to construct chat system index names.
- */
-export const chatSystemIndex = (suffix: string): string => {
-  return `${chatSystemIndexPrefix}${suffix}`;
-};
+export { chatSystemIndex } from '@kbn/agent-builder-server';
