@@ -18,7 +18,6 @@ import { buildEntityNameFilter } from '../../../../common/search_strategy';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../common/types';
 import {
@@ -122,11 +121,7 @@ export const GenericEntityPanel = memo(function GenericEntityPanel(
     (refetchRiskInputsTab as Refetch | null)?.();
   }, [refetch, refetchRiskInputsTab]);
 
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.generic,
-    genericInsightsValue || '',
-    { onSuccess: refetchRiskScore }
-  );
+  const calculateEntityRiskScore = refetchRiskScore;
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {

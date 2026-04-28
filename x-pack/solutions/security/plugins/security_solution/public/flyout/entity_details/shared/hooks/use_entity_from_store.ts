@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useQuery, type QueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { EntityType, SearchEntitiesFromEntityStoreResponse } from '@kbn/entity-store/public';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
   HostEntity,
   UserEntity,
@@ -17,7 +17,6 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
-import { useUiSetting } from '../../../../common/lib/kibana';
 
 export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -145,8 +144,7 @@ export function useEntityFromStore(
 ): EntityFromStoreResult<HostItem | UserItem> {
   const { entityId, identityFields, entityType, skip } = params;
   const euidApi = useEntityStoreEuidApi();
-  const { fetchEntitiesList, fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
 
   const identityDocument = useMemo(() => {
     if (identityFields == null || Object.keys(identityFields).length === 0) {
@@ -210,36 +208,24 @@ export function useEntityFromStore(
       stableQueryKey,
       entityStoreFilterKey,
       skip,
-      entityStoreV2Enabled,
       entityId ?? '',
     ],
     queryFn: async ({ signal }) => {
-      if (entityStoreV2Enabled) {
-        let filterQuery: string | undefined;
-        if (entityId) {
-          filterQuery = entityIdFilter(entityId);
-        } else if (storeFilter) {
-          filterQuery = JSON.stringify(storeFilter);
-        }
-        return fetchEntitiesListV2({
-          signal,
-          params: {
-            entityTypes: [entityType as EntityType],
-            filterQuery,
-            page: 1,
-            perPage: 1,
-            sortField: '@timestamp',
-            sortOrder: 'desc',
-          },
-        });
+      let filterQuery: string | undefined;
+      if (entityId) {
+        filterQuery = entityIdFilter(entityId);
+      } else if (storeFilter) {
+        filterQuery = JSON.stringify(storeFilter);
       }
-      return fetchEntitiesList({
+      return fetchEntitiesListV2({
         signal,
         params: {
           entityTypes: [entityType as EntityType],
-          filterQuery: storeFilter ? JSON.stringify(storeFilter) : undefined,
+          filterQuery,
           page: 1,
           perPage: 1,
+          sortField: '@timestamp',
+          sortOrder: 'desc',
         },
       });
     },

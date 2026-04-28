@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiCallOut,
   EuiPanel,
@@ -40,7 +40,6 @@ import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
 import { useEntityStoreTypes } from '../../../hooks/use_enabled_entity_types';
 import { useToggleEntityAnalytics } from '../../../hooks/use_toggle_entity_analytics';
 import { EntityAnalyticsErrorPanel } from '../../entity_analytics_toggle';
-import { useConfigurableRiskEngineSettings } from '../../risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 interface EnableEntityStorePanelProps {
   riskEngineStatus?: RiskEngineStatusResponse['risk_engine_status'];
@@ -58,26 +57,10 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
   const [modalVisible, setModalVisible] = useState(false);
 
   const {
-    selectedSettingsMatchSavedSettings,
-    saveSelectedSettingsMutation,
-    selectedRiskEngineSettings,
-  } = useConfigurableRiskEngineSettings();
-
-  const handleSaveSettings = useCallback(async () => {
-    if (selectedRiskEngineSettings) {
-      await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
-    }
-  }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
-
-  const {
     toggle,
     isLoading: isToggling,
     errors: toggleErrors,
-  } = useToggleEntityAnalytics({
-    selectedSettingsMatchSavedSettings,
-    onSaveSettings: handleSaveSettings,
-    isSavingSettings: saveSelectedSettingsMutation.isLoading,
-  });
+  } = useToggleEntityAnalytics();
 
   const storeEnablement = useInstallEntityStoreMutation();
 
@@ -95,7 +78,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
     storeEnablement.mutate({ entityTypes: uninstalledTypes });
   };
 
-  const hasToggleErrors = toggleErrors.riskEngine.length > 0 || toggleErrors.entityStore.length > 0;
+  const hasToggleErrors = toggleErrors.entityStore.length > 0;
 
   if (storeEnablement.error) {
     const errorMessage =
@@ -121,7 +104,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
   if (hasToggleErrors) {
     return (
       <EntityAnalyticsErrorPanel
-        riskEngineErrors={toggleErrors.riskEngine}
+        riskEngineErrors={[]}
         entityStoreErrors={toggleErrors.entityStore}
       />
     );

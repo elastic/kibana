@@ -21,9 +21,6 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import { EntityAnalyticsToggle } from '../components/entity_analytics_toggle';
 import { ENTITY_ANALYTICS } from '../../app/translations';
-import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
-import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
-import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
 import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
@@ -41,7 +38,7 @@ import {
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
-import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
+import { safeErrorMessage } from '../common';
 import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
@@ -68,29 +65,6 @@ const canDeleteEntityEngine = (status?: string) =>
   !['not_installed', 'installing'].includes(status || '');
 
 export const EntityAnalyticsManagementPage = () => {
-  const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-
-  const riskEngineSettings = useConfigurableRiskEngineSettings();
-  const {
-    savedRiskEngineSettings,
-    selectedRiskEngineSettings,
-    selectedSettingsMatchSavedSettings,
-    resetSelectedSettings,
-    saveSelectedSettingsMutation,
-    setSelectedDateSetting,
-    toggleSelectedClosedAlertsSetting,
-    isLoadingRiskEngineSettings,
-    toggleScoreRetainment,
-    setAlertFilters,
-    getUIAlertFilters,
-  } = riskEngineSettings;
-
-  const handleSaveToggleSettings = useCallback(async () => {
-    if (selectedRiskEngineSettings) {
-      await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
-    }
-  }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
-
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
   const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
@@ -102,22 +76,8 @@ export const EntityAnalyticsManagementPage = () => {
     useEntityEnginePrivileges();
   const deleteEntityStoreMutation = useDeleteEntityStoreMutation({ entityTypes });
 
-  const userHasRiskEnginePrivileges =
-    !riskEnginePrivileges.isLoading &&
-    'hasAllRequiredPrivileges' in riskEnginePrivileges &&
-    riskEnginePrivileges.hasAllRequiredPrivileges;
-
   const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
-  const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
-
-  const canRunEngine =
-    (!riskEnginePrivileges.isLoading &&
-      (riskEnginePrivileges.hasAllRequiredPrivileges ||
-        (!riskEnginePrivileges.hasAllRequiredPrivileges &&
-          riskEnginePrivileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
-    false;
-
-  const hasReadPermissions = userHasRiskEngineReadPermissions(riskEnginePrivileges);
+  const hasAllRequiredPrivileges = userHasEntityStorePrivileges;
 
   const shouldDisplayEngineStatusTab =
     isEntityStoreInstalled(entityStoreStatus.data?.status) &&
@@ -165,7 +125,6 @@ export const EntityAnalyticsManagementPage = () => {
 
   return (
     <>
-      <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
       <EuiPageHeader
         data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID}
         pageTitle={
@@ -180,11 +139,8 @@ export const EntityAnalyticsManagementPage = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
                 <EntityAnalyticsToggle
-                  selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-                  onSaveSettings={handleSaveToggleSettings}
-                  isSavingSettings={saveSelectedSettingsMutation.isLoading}
                   hasAllRequiredPrivileges={hasAllRequiredPrivileges}
-                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
+                  isPrivilegesLoading={isLoadingPrivileges}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -306,23 +262,7 @@ export const EntityAnalyticsManagementPage = () => {
       <EuiSpacer size="s" />
 
       <div hidden={selectedTabId !== TabId.RiskScore}>
-        <RiskScoreTab
-          canRunEngine={canRunEngine}
-          hasReadPermissions={hasReadPermissions}
-          isPrivilegesLoading={riskEnginePrivileges.isLoading}
-          savedRiskEngineSettings={savedRiskEngineSettings}
-          selectedRiskEngineSettings={selectedRiskEngineSettings}
-          selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-          resetSelectedSettings={resetSelectedSettings}
-          onSaveSettings={(settings) => saveSelectedSettingsMutation.mutateAsync(settings)}
-          isSavingSettings={saveSelectedSettingsMutation.isLoading}
-          setSelectedDateSetting={setSelectedDateSetting}
-          toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
-          isLoadingRiskEngineSettings={isLoadingRiskEngineSettings}
-          toggleScoreRetainment={toggleScoreRetainment}
-          setAlertFilters={setAlertFilters}
-          getUIAlertFilters={getUIAlertFilters}
-        />
+        <RiskScoreTab />
       </div>
 
       <div hidden={selectedTabId !== TabId.AssetCriticality}>
