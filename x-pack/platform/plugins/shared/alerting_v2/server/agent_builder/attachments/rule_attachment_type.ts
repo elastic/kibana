@@ -96,7 +96,7 @@ export const createRuleAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `A rule attachment represents an Alerting v2 rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill. To enable or disable an attached rule, use the enable_rule / disable_rule tools directly.`,
+    `A rule attachment represents an Alerting v2 rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill.`,
 
   getTools: () => [],
 });
