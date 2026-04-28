@@ -34,6 +34,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
@@ -212,6 +213,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_SEVERITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [ALERT_SEVERITY_IMPROVING]: {
     type: 'boolean',
