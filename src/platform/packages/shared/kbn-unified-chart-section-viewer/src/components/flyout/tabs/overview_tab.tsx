@@ -26,6 +26,7 @@ import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
+import { StreamFieldSection } from './stream_field_section';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -81,6 +82,8 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   return (
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
+
+      <StreamFieldSection sourceName={metricItem.dataStream} />
 
       <OverviewTabMetadata metricItem={metricItem} />
 

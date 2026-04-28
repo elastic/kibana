@@ -12,6 +12,8 @@ import { render } from '@testing-library/react';
 import type { ParsedMetricItem } from '../../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ExternalServicesProvider } from '../../../context/external_services';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -155,6 +157,81 @@ describe('Metric Flyout Overview Tab', () => {
 
       expect(getByTestId('metricsExperienceFlyoutMetricDescription')).toBeInTheDocument();
       expect(getByText('Test description')).toBeInTheDocument();
+    });
+  });
+
+  describe('streams field section', () => {
+    const buildExternalServices = (renderFlyoutStreamFieldByStreamName?: jest.Mock) => {
+      const features = renderFlyoutStreamFieldByStreamName
+        ? { id: 'streams', renderFlyoutStreamFieldByStreamName }
+        : undefined;
+      return {
+        discoverShared: {
+          features: {
+            registry: {
+              getById: jest.fn().mockReturnValue(features),
+            },
+          },
+        } as unknown as DiscoverSharedPublicStart,
+      };
+    };
+
+    it('invokes the streams render function with the metric data stream', () => {
+      const renderFlyoutStreamFieldByStreamName = jest
+        .fn()
+        .mockImplementation(({ streamName }: { streamName: string }) => (
+          <div data-test-subj="streamFieldSectionRendered">{streamName}</div>
+        ));
+      const externalServices = buildExternalServices(renderFlyoutStreamFieldByStreamName);
+      const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
+
+      const { getByTestId } = render(
+        <ExternalServicesProvider externalServices={externalServices}>
+          <OverviewTab metricItem={metricItem} />
+        </ExternalServicesProvider>
+      );
+
+      expect(externalServices.discoverShared!.features.registry.getById).toHaveBeenCalledWith(
+        'streams'
+      );
+      expect(renderFlyoutStreamFieldByStreamName).toHaveBeenCalledWith({
+        streamName: 'logs-foo-default',
+      });
+      expect(getByTestId('streamFieldSectionRendered')).toHaveTextContent('logs-foo-default');
+    });
+
+    it('renders nothing when the streams feature is not registered', () => {
+      const externalServices = buildExternalServices(undefined);
+      const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
+
+      const { queryByTestId } = render(
+        <ExternalServicesProvider externalServices={externalServices}>
+          <OverviewTab metricItem={metricItem} />
+        </ExternalServicesProvider>
+      );
+
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+    });
+
+    it('renders nothing when no external services are provided', () => {
+      const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
+      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+    });
+
+    it('renders nothing when the metric has no data stream', () => {
+      const renderFlyoutStreamFieldByStreamName = jest.fn();
+      const externalServices = buildExternalServices(renderFlyoutStreamFieldByStreamName);
+      const metricItem = createMockMetric({ dataStream: '' });
+
+      render(
+        <ExternalServicesProvider externalServices={externalServices}>
+          <OverviewTab metricItem={metricItem} />
+        </ExternalServicesProvider>
+      );
+
+      expect(renderFlyoutStreamFieldByStreamName).not.toHaveBeenCalled();
     });
   });
 });

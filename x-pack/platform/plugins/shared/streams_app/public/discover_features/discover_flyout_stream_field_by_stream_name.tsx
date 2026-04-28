@@ -5,49 +5,45 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ContentFrameworkSection } from '@kbn/unified-doc-viewer-plugin/public';
 import type { StreamsAppLocator } from '../../common/locators';
-import {
-  adaptDocToResolverInputs,
-  useResolvedDefinitionName,
-} from './use_resolved_definition_name';
+import { useResolvedDefinitionName } from './use_resolved_definition_name';
 import { StreamLinkContent } from './stream_link_content';
 
-export interface DiscoverFlyoutStreamFieldProps {
-  doc: DataTableRecord;
+export interface DiscoverFlyoutStreamFieldByStreamNameProps {
+  streamName: string;
   streamsRepositoryClient: StreamsRepositoryClient;
   locator: StreamsAppLocator;
   renderCpsWarning?: boolean;
 }
 
-export function DiscoverFlyoutStreamField(props: DiscoverFlyoutStreamFieldProps) {
+export function DiscoverFlyoutStreamFieldByStreamName(
+  props: DiscoverFlyoutStreamFieldByStreamNameProps
+) {
   return (
     <ContentFrameworkSection
-      id="discoverFlyoutStreamField"
+      id="discoverFlyoutStreamFieldByStreamName"
       title={i18n.translate('xpack.streams.discoverFlyoutStreamField.title', {
         defaultMessage: 'Stream',
       })}
     >
-      <DiscoverFlyoutStreamFieldContent {...props} />
+      <DiscoverFlyoutStreamFieldByStreamNameContent {...props} />
     </ContentFrameworkSection>
   );
 }
 
-function DiscoverFlyoutStreamFieldContent({
+function DiscoverFlyoutStreamFieldByStreamNameContent({
+  streamName,
   streamsRepositoryClient,
-  doc,
   locator,
   renderCpsWarning,
-}: DiscoverFlyoutStreamFieldProps) {
-  const { index, fallbackStreamName } = adaptDocToResolverInputs(doc);
+}: DiscoverFlyoutStreamFieldByStreamNameProps) {
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
-    index,
-    fallbackStreamName,
+    fallbackStreamName: streamName,
     cpsHasLinkedProjects: renderCpsWarning,
   });
 
