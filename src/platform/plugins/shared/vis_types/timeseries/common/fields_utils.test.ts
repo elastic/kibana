@@ -123,48 +123,7 @@ describe('fields_utils', () => {
     });
   });
 
-  describe('createCachedFieldValueFormatter', () => {
-    let dataView: DataView;
-    let getFormatterForFieldSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      dataView = stubLogstashDataView;
-      getFormatterForFieldSpy = jest.spyOn(dataView, 'getFormatterForField');
-    });
-
-    afterEach(() => {
-      getFormatterForFieldSpy.mockRestore();
-    });
-
-    test('should use data view formatters', () => {
-      const cache = createCachedFieldValueFormatter(dataView);
-
-      cache('bytes', '10001');
-      cache('bytes', '20002');
-
-      expect(getFormatterForFieldSpy).toHaveBeenCalledTimes(1);
-    });
-
-    test('should use default formatters in case of Data view not defined', () => {
-      const fieldFormatServiceMock = {
-        getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
-      } as unknown as FieldFormatsRegistry;
-
-      const cache = createCachedFieldValueFormatter(
-        null,
-        [{ name: 'field', label: 'Label', type: KBN_FIELD_TYPES.STRING }],
-        fieldFormatServiceMock
-      );
-
-      cache('field', '10001');
-      cache('field', '20002');
-
-      expect(fieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledTimes(1);
-      expect(fieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledWith('string');
-    });
-  });
-
-  describe('createCachedReactFieldValueFormatter', () => {
+  describe('createCachedFieldValueFormatter and createCachedReactFieldValueFormatter', () => {
     let dataView: DataView;
     let getFormatterForFieldSpy: jest.SpyInstance;
 
@@ -178,30 +137,50 @@ describe('fields_utils', () => {
     });
 
     test('should use data view formatters and cache them', () => {
-      const cache = createCachedReactFieldValueFormatter(dataView);
+      const textCache = createCachedFieldValueFormatter(dataView);
+      const reactCache = createCachedReactFieldValueFormatter(dataView);
 
-      cache('bytes', '10001');
-      cache('bytes', '20002');
+      textCache('bytes', '10001');
+      textCache('bytes', '20002');
+      expect(getFormatterForFieldSpy).toHaveBeenCalledTimes(1);
 
+      getFormatterForFieldSpy.mockClear();
+
+      reactCache('bytes', '10001');
+      reactCache('bytes', '20002');
       expect(getFormatterForFieldSpy).toHaveBeenCalledTimes(1);
     });
 
     test('should use default formatters in case of Data view not defined', () => {
-      const fieldFormatServiceMock = {
+      const textFieldFormatServiceMock = {
         getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
       } as unknown as FieldFormatsRegistry;
 
-      const cache = createCachedReactFieldValueFormatter(
+      const reactFieldFormatServiceMock = {
+        getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
+      } as unknown as FieldFormatsRegistry;
+
+      const textCache = createCachedFieldValueFormatter(
         null,
         [{ name: 'field', label: 'Label', type: KBN_FIELD_TYPES.STRING }],
-        fieldFormatServiceMock
+        textFieldFormatServiceMock
       );
 
-      cache('field', '10001');
-      cache('field', '20002');
+      const reactCache = createCachedReactFieldValueFormatter(
+        null,
+        [{ name: 'field', label: 'Label', type: KBN_FIELD_TYPES.STRING }],
+        reactFieldFormatServiceMock
+      );
 
-      expect(fieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledTimes(1);
-      expect(fieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledWith('string');
+      textCache('field', '10001');
+      textCache('field', '20002');
+      expect(textFieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledTimes(1);
+      expect(textFieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledWith('string');
+
+      reactCache('field', '10001');
+      reactCache('field', '20002');
+      expect(reactFieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledTimes(1);
+      expect(reactFieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledWith('string');
     });
   });
 });
