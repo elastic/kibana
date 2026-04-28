@@ -65,6 +65,12 @@ jest.mock('../../../flyout_v2/shared/components/alert_header_block', () => ({
   }) => <div data-test-subj={dataTestSubj}>{children}</div>,
 }));
 
+jest.mock('../../../attack_discovery/pages/settings_flyout/schedule/details_flyout', () => ({
+  DetailsFlyout: ({ scheduleId }: { scheduleId: string }) => (
+    <div data-test-subj="details-flyout">{scheduleId}</div>
+  ),
+}));
+
 const mockedUseHeaderData = useHeaderData as jest.Mock;
 const mockedUseAttackDetailsContext = useAttackDetailsContext as jest.Mock;
 const mockedUseNavigateToAttackDetailsLeftPanel = useNavigateToAttackDetailsLeftPanel as jest.Mock;
@@ -152,5 +158,44 @@ describe('HeaderTitle', () => {
 
     expect(screen.getByTestId(HEADER_ASSIGNEES_BLOCK_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId('assignees')).toBeInTheDocument();
+  });
+
+  it('renders the title as a link and opens schedule details when clicked for scheduled attacks', () => {
+    mockedUseHeaderData.mockReturnValue({
+      title: 'Scheduled Attack',
+      timestamp: '2024-10-10T10:00:00.000Z',
+      alertsCount: 1,
+      alertRuleUuid: 'some-schedule-id',
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    const link = screen.getByTestId(`${HEADER_TITLE_TEST_ID}Link`);
+    expect(link).toBeInTheDocument();
+
+    link.click();
+
+    expect(screen.getByTestId('details-flyout')).toHaveTextContent('some-schedule-id');
+  });
+
+  it('does not render the title as a link for ad-hoc attacks', () => {
+    mockedUseHeaderData.mockReturnValue({
+      title: 'Ad-hoc Attack',
+      timestamp: '2024-10-10T10:00:00.000Z',
+      alertsCount: 1,
+      alertRuleUuid: 'attack_discovery_ad_hoc_rule_id',
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId(`${HEADER_TITLE_TEST_ID}Link`)).not.toBeInTheDocument();
   });
 });

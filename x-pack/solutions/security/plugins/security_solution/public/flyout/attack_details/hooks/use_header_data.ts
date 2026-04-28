@@ -14,6 +14,7 @@ const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title' as const;
 const FIELD_TIMESTAMP = '@timestamp' as const;
 const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
 const FIELD_REPLACEMENTS = 'kibana.alert.attack_discovery.replacements' as const;
+const FIELD_ALERT_RULE_UUID = 'kibana.alert.rule.uuid' as const;
 
 const EMPTY_REPLACEMENTS = {};
 
@@ -59,6 +60,11 @@ export const useHeaderData = () => {
     return normalizeToStringArray(value);
   }, [getFieldsData]);
 
+  const alertRuleUuid = useMemo(
+    () => getField(getFieldsData(FIELD_ALERT_RULE_UUID)),
+    [getFieldsData]
+  );
+
   return useMemo(
     () => ({
       title,
@@ -67,7 +73,8 @@ export const useHeaderData = () => {
       alertsCount: alertIds.length,
       replacements,
       assignees,
+      alertRuleUuid,
     }),
-    [title, timestamp, nonDuplicatedAlertIds, alertIds.length, replacements, assignees]
+    [title, timestamp, nonDuplicatedAlertIds, alertIds.length, replacements, assignees, alertRuleUuid]
   );
 };
