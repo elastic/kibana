@@ -210,7 +210,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       const expectedValue = toSlugIdentifier(name || '');
-      setUsingCustomIdentifier(newValue !== expectedValue);
+      setUsingCustomIdentifier(newValue !== '' && newValue !== expectedValue);
       setFieldValue('id', newValue);
     },
     [name, setFieldValue]

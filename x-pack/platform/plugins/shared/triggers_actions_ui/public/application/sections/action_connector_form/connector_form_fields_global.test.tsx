@@ -267,4 +267,44 @@ describe('ConnectorFormFieldsGlobal', () => {
       expect(idValue.endsWith('-')).toBe(false);
     });
   });
+
+  it('resumes auto-populating connector ID if the ID field is cleared', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    const idInput = screen.getByTestId('connectorIdInput');
+
+    await userEvent.type(nameInput, 'My New Connector');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('my-new-connector');
+    });
+
+    // Manually change the ID
+    await userEvent.clear(idInput);
+    await userEvent.type(idInput, 'custom-id');
+
+    // Change the name, ID should not auto-populate
+    await userEvent.clear(nameInput);
+    await userEvent.type(nameInput, 'Another Name');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('custom-id');
+    });
+
+    // Clear the ID field
+    await userEvent.clear(idInput);
+
+    // Change the name again, ID should resume auto-populating
+    await userEvent.clear(nameInput);
+    await userEvent.type(nameInput, 'Final Name');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('final-name');
+    });
+  });
 });
