@@ -78,7 +78,7 @@ export const GetAgentsRequestSchema = {
       ),
       searchAfter: schema.maybe(
         schema.string({
-          meta: { description: 'JSON-encoded array of sort values for search_after pagination' },
+          meta: { description: 'JSON-encoded array of sort values for `search_after` pagination' },
         })
       ),
       openPit: schema.maybe(
@@ -91,7 +91,7 @@ export const GetAgentsRequestSchema = {
       ),
       pitKeepAlive: schema.maybe(
         schema.string({
-          meta: { description: 'Duration to keep the point-in-time alive, e.g. 1m' },
+          meta: { description: 'Duration to keep the point-in-time alive, for example, `1m`' },
         })
       ),
     },

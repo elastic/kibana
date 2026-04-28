@@ -51,7 +51,7 @@ export const GetPackagesRequestSchema = {
     excludeInstallStatus: schema.maybe(
       schema.boolean({
         defaultValue: false,
-        meta: { description: 'When true, exclude install status from the response' },
+        meta: { description: 'When true, exclude the install status from the response' },
       })
     ),
     withPackagePoliciesCount: schema.maybe(
@@ -560,7 +560,7 @@ export const GetInstalledPackagesRequestSchema = {
     searchAfter: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.string(), schema.number()]), {
         maxSize: 10,
-        meta: { description: 'Sort values from the previous page for search_after pagination' },
+        meta: { description: 'Sort values from the previous page for `search_after` pagination' },
       })
     ),
     perPage: schema.number({
@@ -597,7 +597,9 @@ export const GetDataStreamsRequestSchema = {
     }),
     uncategorisedOnly: schema.boolean({
       defaultValue: false,
-      meta: { description: 'When true, only return data streams not associated with a package' },
+      meta: {
+        description: 'When true, only return data streams that are not associated with a package',
+      },
     }),
   }),
 };
@@ -647,7 +649,9 @@ const GetInfoQuerySchema = schema.object({
   ),
   withMetadata: schema.boolean({
     defaultValue: false,
-    meta: { description: 'When true, include package metadata such as whether it has policies' },
+    meta: {
+      description: 'When true, include package metadata such as whether it has package policies',
+    },
   }),
 });
 
@@ -894,7 +898,9 @@ export const DeletePackageRequestSchema = {
   query: schema.object({
     force: schema.maybe(
       schema.boolean({
-        meta: { description: 'When true, delete the package even if it has active policies' },
+        meta: {
+          description: 'When true, delete the package even if it has active package policies',
+        },
       })
     ),
   }),
