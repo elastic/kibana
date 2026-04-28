@@ -40,8 +40,6 @@ import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { useDataSource } from '../../../contexts/ml';
-import { useDataSource } from '../../../contexts/ml';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
