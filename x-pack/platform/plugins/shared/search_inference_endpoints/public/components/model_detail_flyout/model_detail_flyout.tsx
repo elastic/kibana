@@ -61,7 +61,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
-    usageTracker.count([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
+    usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
   }, [usageTracker, modelId]);
 
   const { endpoints, displayName, modelAuthor } = useMemo(() => {
@@ -111,10 +111,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   );
 
   const handleCloseModal = useCallback(() => {
-    usageTracker.count(EventType.MODAL_CLOSED);
+    const modalKind = editingEndpoint ? 'edit_endpoint' : 'add_endpoint';
+    usageTracker.count([EventType.MODAL_CLOSED, `${EventType.MODAL_CLOSED}_${modalKind}`]);
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
-  }, [usageTracker]);
+  }, [usageTracker, editingEndpoint]);
 
   const descriptionListItems = [
     {

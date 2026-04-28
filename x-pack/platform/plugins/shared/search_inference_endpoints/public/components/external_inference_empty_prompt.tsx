@@ -23,7 +23,7 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
 }) => {
   const usageTracker = useUsageTracker();
   useEffect(() => {
-    usageTracker.count(EventType.EMPTY_STATE_VIEWED);
+    usageTracker.load(EventType.EMPTY_STATE_VIEWED);
   }, [usageTracker]);
   return (
     <KibanaPageTemplate.EmptyPrompt
