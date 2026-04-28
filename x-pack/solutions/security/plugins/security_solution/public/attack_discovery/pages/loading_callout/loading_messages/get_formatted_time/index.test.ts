@@ -26,13 +26,33 @@ describe('getFormattedDate', () => {
     expect(result).toBeNull();
   });
 
-  it('returns the original date if it cannot be parsed', () => {
+  it('returns "now" if date is "now"', () => {
     const result = getFormattedDate({
-      date: 'now', // <-- this relative date cannot be parsed
+      date: 'now',
       dateFormat: 'YYYY-MM-DD',
     });
 
     expect(result).toBe('now');
+  });
+
+  it('parses datemath and returns the formatted date', () => {
+    const result = getFormattedDate({
+      date: 'now/w',
+      dateFormat: 'YYYY-MM-DD',
+    });
+
+    // We can't strictly match the current week start because datemath relies on current time,
+    // so we mock or just check it returns a formatted string.
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('returns the original date if it cannot be parsed by moment or datemath', () => {
+    const result = getFormattedDate({
+      date: 'invalid-date',
+      dateFormat: 'YYYY-MM-DD',
+    });
+
+    expect(result).toBe('invalid-date');
   });
 
   it('returns the formatted date if the date is valid', () => {

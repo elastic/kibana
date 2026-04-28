@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import datemath from '@elastic/datemath';
 
 export const getFormattedDate = ({
   date,
@@ -18,13 +19,22 @@ export const getFormattedDate = ({
     return null;
   }
 
+  if (date === 'now') {
+    return date;
+  }
+
   // strictly parse the date, which will fail for dates like formatted like 'now':
   const strictParsed = moment(date, moment.ISO_8601, true);
 
-  if (!strictParsed.isValid()) {
-    return date; // return the original date if it cannot be parsed
+  if (strictParsed.isValid()) {
+    // return the formatted date per the time zone:
+    return strictParsed.format(dateFormat);
   }
 
-  // return the formatted date per the time zone:
-  return moment(date).format(dateFormat);
+  const datemathParsed = datemath.parse(date);
+  if (datemathParsed != null && datemathParsed.isValid()) {
+    return datemathParsed.format(dateFormat);
+  }
+
+  return date; // return the original date if it cannot be parsed
 };
