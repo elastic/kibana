@@ -5146,6 +5146,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-page@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-page":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-provider-client@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client":
   version "0.0.0"
   uid ""
@@ -5159,6 +5163,10 @@
   uid ""
 
 "@kbn/content-list-toolbar@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list@link:src/platform/packages/shared/content-management/content_list/kbn-content-list":
   version "0.0.0"
   uid ""
 

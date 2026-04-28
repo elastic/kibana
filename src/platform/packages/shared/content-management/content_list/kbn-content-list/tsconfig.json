@@ -9,23 +9,22 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx"
   ],
-  "kbn_references": [
-    "@kbn/content-list",
-    "@kbn/content-list-provider",
-    "@kbn/content-list-mock-data",
-    "@kbn/content-management-favorites-public",
-    "@kbn/content-management-table-list-view-common",
-    "@kbn/content-management-tags"
-  ],
   "exclude": [
     "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/content-list-provider",
+    "@kbn/content-list-toolbar",
+    "@kbn/content-list-table",
+    "@kbn/content-list-footer",
+    "@kbn/i18n"
   ]
 }
