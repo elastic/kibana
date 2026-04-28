@@ -9,14 +9,12 @@ export {
   AlertSummarySection,
   ALERT_SUMMARY_SECTION_TEST_ID,
 } from './components/alert_summary_section';
-export type {
-  AlertSummarySectionProps,
-  AlertSummarySectionRenderParts,
-} from './components/alert_summary_section';
+export type { AlertSummarySectionProps } from './components/alert_summary_section';
 
 export {
   AlertSummary,
   ALERT_SUMMARY_TEST_ID,
+  COPY_INSIGHTS_BUTTON_TEST_ID,
   GENERATE_INSIGHTS_BUTTON_TEST_ID,
   REGENERATE_INSIGHTS_BUTTON_TEST_ID,
 } from './components/alert_summary';
