@@ -13,6 +13,7 @@ import React from 'react';
 import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 import type {
   EuiSearchBarProps,
@@ -303,7 +304,7 @@ class SavedObjectFinderUiClass extends React.Component<
               onClick={
                 onChoose
                   ? (e: React.MouseEvent) => {
-                      if (getHref && (e.ctrlKey || e.metaKey)) {
+                      if (getHref && hasActiveModifierKey(e)) {
                         return;
                       }
                       e.preventDefault();
