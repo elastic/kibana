@@ -421,6 +421,7 @@
                 "lineNumber": 59,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -487,6 +488,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }

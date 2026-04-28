@@ -67,6 +67,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImportResolver",
                 "trackAdoption": false,
                 "isRequired": true
               }
