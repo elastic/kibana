@@ -11,3 +11,5 @@ export const MAX_ALERTS_PER_EXECUTION = 1_000;
 // Aligned with the default rule evaluation interval (1 min) with a 2x overlap
 // to avoid missing events that arrive slightly out of order.
 export const MATCH_LOOKBACK_MINUTES = 2;
+// Upper bound on accumulated dedup IDs to prevent unbounded state growth.
+export const MAX_DEDUP_IDS = MAX_ALERTS_PER_EXECUTION * 5;
