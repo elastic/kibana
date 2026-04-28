@@ -248,6 +248,7 @@ export class FeatureClient {
       limit?: number;
       includeExcluded?: boolean;
       includeExpired?: boolean;
+      sort?: Array<Record<string, { order: 'asc' | 'desc' }>>;
     } = {}
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -269,7 +270,7 @@ export class FeatureClient {
           filter: filterClauses,
         },
       },
-      sort: [{ [FEATURE_CONFIDENCE]: { order: 'desc' } }],
+      sort: options.sort ?? [{ [FEATURE_CONFIDENCE]: { order: 'desc' } }],
     });
 
     return {

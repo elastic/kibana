@@ -26,20 +26,20 @@ import { CreateSnoozeAlertActionRoute } from '../routes/alert_actions/create_sno
 import { CreateUnsnoozeAlertActionRoute } from '../routes/alert_actions/create_unsnooze_alert_action_route';
 import { CreateActivateAlertActionRoute } from '../routes/alert_actions/create_activate_alert_action_route';
 import { CreateDeactivateAlertActionRoute } from '../routes/alert_actions/create_deactivate_alert_action_route';
-import { BulkActionNotificationPoliciesRoute } from '../routes/notification_policies/bulk_action_notification_policies_route';
-import { CreateNotificationPolicyRoute } from '../routes/notification_policies/create_notification_policy_route';
-import { DisableNotificationPolicyRoute } from '../routes/notification_policies/disable_notification_policy_route';
-import { EnableNotificationPolicyRoute } from '../routes/notification_policies/enable_notification_policy_route';
-import { GetNotificationPolicyRoute } from '../routes/notification_policies/get_notification_policy_route';
-import { ListNotificationPoliciesRoute } from '../routes/notification_policies/list_notification_policies_route';
-import { SnoozeNotificationPolicyRoute } from '../routes/notification_policies/snooze_notification_policy_route';
-import { UnsnoozeNotificationPolicyRoute } from '../routes/notification_policies/unsnooze_notification_policy_route';
-import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
-import { UpdateNotificationPolicyApiKeyRoute } from '../routes/notification_policies/update_notification_policy_api_key_route';
-import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
+import { BulkActionActionPoliciesRoute } from '../routes/action_policies/bulk_action_action_policies_route';
+import { CreateActionPolicyRoute } from '../routes/action_policies/create_action_policy_route';
+import { DisableActionPolicyRoute } from '../routes/action_policies/disable_action_policy_route';
+import { EnableActionPolicyRoute } from '../routes/action_policies/enable_action_policy_route';
+import { GetActionPolicyRoute } from '../routes/action_policies/get_action_policy_route';
+import { ListActionPoliciesRoute } from '../routes/action_policies/list_action_policies_route';
+import { SnoozeActionPolicyRoute } from '../routes/action_policies/snooze_action_policy_route';
+import { UnsnoozeActionPolicyRoute } from '../routes/action_policies/unsnooze_action_policy_route';
+import { UpdateActionPolicyRoute } from '../routes/action_policies/update_action_policy_route';
+import { UpdateActionPolicyApiKeyRoute } from '../routes/action_policies/update_action_policy_api_key_route';
+import { DeleteActionPolicyRoute } from '../routes/action_policies/delete_action_policy_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
-import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
+import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_route';
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
 
 /**
@@ -69,20 +69,21 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateActivateAlertActionRoute);
   bind(Route).toConstantValue(CreateDeactivateAlertActionRoute);
   bind(Route).toConstantValue(BulkCreateAlertActionRoute);
-  bind(Route).toConstantValue(CreateNotificationPolicyRoute);
-  bind(Route).toConstantValue(GetNotificationPolicyRoute);
-  bind(Route).toConstantValue(UpdateNotificationPolicyRoute);
-  bind(Route).toConstantValue(UpdateNotificationPolicyApiKeyRoute);
-  bind(Route).toConstantValue(DeleteNotificationPolicyRoute);
-  bind(Route).toConstantValue(ListNotificationPoliciesRoute);
-  bind(Route).toConstantValue(EnableNotificationPolicyRoute);
-  bind(Route).toConstantValue(DisableNotificationPolicyRoute);
-  bind(Route).toConstantValue(SnoozeNotificationPolicyRoute);
-  bind(Route).toConstantValue(UnsnoozeNotificationPolicyRoute);
-  bind(Route).toConstantValue(BulkActionNotificationPoliciesRoute);
+  bind(Route).toConstantValue(CreateActionPolicyRoute);
+  bind(Route).toConstantValue(GetActionPolicyRoute);
+  bind(Route).toConstantValue(UpdateActionPolicyRoute);
+  bind(Route).toConstantValue(UpdateActionPolicyApiKeyRoute);
+  bind(Route).toConstantValue(DeleteActionPolicyRoute);
+  bind(Route).toConstantValue(ListActionPoliciesRoute);
+  bind(Route).toConstantValue(EnableActionPolicyRoute);
+  bind(Route).toConstantValue(DisableActionPolicyRoute);
+  bind(Route).toConstantValue(SnoozeActionPolicyRoute);
+  bind(Route).toConstantValue(UnsnoozeActionPolicyRoute);
+  bind(Route).toConstantValue(BulkActionActionPoliciesRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
-  bind(Route).toConstantValue(NotificationPolicyTagsRoute);
+
+  bind(Route).toConstantValue(ActionPolicyTagsRoute);
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
   // TODO(rna-program#426): remove this binding before GA.
   bind(Route).toConstantValue(ResetResourcesRoute);
