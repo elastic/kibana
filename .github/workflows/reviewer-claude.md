@@ -38,11 +38,17 @@ if: >-
       (
         (
           github.event_name == 'pull_request' &&
-          contains(fromJSON('["OWNER","MEMBER"]'), github.event.pull_request.author_association)
+          (
+            github.event.pull_request.author_association == 'OWNER' ||
+            github.event.pull_request.author_association == 'MEMBER'
+          )
         ) ||
         (
           contains(github.event.comment.body, '@claude') &&
-          contains(fromJSON('["OWNER","MEMBER"]'), github.event.comment.author_association) &&
+          (
+            github.event.comment.author_association == 'OWNER' ||
+            github.event.comment.author_association == 'MEMBER'
+          ) &&
           (
             github.event_name == 'pull_request_review_comment' ||
             (
