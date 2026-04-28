@@ -89,6 +89,7 @@ export function MetricAppearanceSettings({
   state: MetricVisualizationState;
   setState: (newState: MetricVisualizationState) => void;
 }) {
+  const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
   const selectedTemplateLayout =
@@ -114,6 +115,7 @@ export function MetricAppearanceSettings({
         selectedTemplate={selectedTemplate}
         onSelectTemplate={(template) => {
           if (template === 'custom') {
+            setIsDetailsOpen(true);
             setState({ ...state, styleTemplate: 'custom' });
             return;
           }
@@ -131,7 +133,8 @@ export function MetricAppearanceSettings({
         buttonContent={i18n.translate('xpack.lens.metric.appearancePopover.details', {
           defaultMessage: 'Details',
         })}
-        initialIsOpen={false}
+        forceState={isDetailsOpen ? 'open' : 'closed'}
+        onToggle={setIsDetailsOpen}
         data-test-subj="lens-metric-appearance-details-accordion"
       >
         <div

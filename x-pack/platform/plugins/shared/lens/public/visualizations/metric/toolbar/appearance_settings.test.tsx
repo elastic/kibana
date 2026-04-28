@@ -292,6 +292,20 @@ describe('appearance settings', () => {
     );
   });
 
+  it('opens details accordion when custom style template is selected', () => {
+    renderComponent({ styleTemplate: 'top' });
+
+    const detailsAccordion = screen.getByTestId('lens-metric-appearance-details-accordion');
+    const detailsButton = detailsAccordion.querySelector('button');
+
+    expect(detailsButton).not.toBeNull();
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-custom'));
+
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('set custom style template when editing layout options manually', () => {
     renderComponent({ styleTemplate: 'top' });
 
