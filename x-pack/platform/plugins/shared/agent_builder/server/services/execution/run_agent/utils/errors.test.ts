@@ -7,6 +7,7 @@
 
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { isAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { createInferenceProviderError } from '@kbn/inference-common';
 import { convertError, isRecoverableError } from './errors';
 
 describe('errors', () => {
@@ -81,6 +82,30 @@ describe('errors', () => {
       it('returns unknownError when inference status code is outside 4xx/5xx range', () => {
         const message = 'Error calling connector: status [200] for inference entity id [some-id]';
         const err = new Error(message);
+        const converted = convertError(err);
+
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.unknownError);
+        expect(
+          'statusCode' in converted.meta ? converted.meta.statusCode : undefined
+        ).toBeUndefined();
+      });
+    });
+
+    describe('InferenceTaskProviderError (structured) errors', () => {
+      it('propagates 410 from a structured inference provider error without a connector prefix', () => {
+        const message =
+          'Received an unsuccessful status code for request from inference entity id [.anthropic-claude-3.7-sonnet-chat_completion] status [410]. Error message: [Model is no longer supported, please use a different model.]';
+        const err = createInferenceProviderError(message, { status: 410 });
+        const converted = convertError(err);
+
+        expect(isAgentExecutionError(converted)).toBe(true);
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.connectorError);
+        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBe(410);
+        expect(converted.message).toBe(message);
+      });
+
+      it('falls back to unknownError when structured provider error has no usable status', () => {
+        const err = createInferenceProviderError('something went wrong');
         const converted = convertError(err);
 
         expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.unknownError);
