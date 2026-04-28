@@ -33,6 +33,7 @@
             "lineNumber": 63,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -130,6 +131,7 @@
             "lineNumber": 43,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -317,6 +319,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -355,6 +358,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -569,6 +573,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -637,6 +642,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -728,6 +734,7 @@
             "lineNumber": 32,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2840,6 +2847,7 @@
               "lineNumber": 40,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "Omit",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2931,6 +2939,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesAdapter",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2950,6 +2959,7 @@
                 "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Pick",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3006,6 +3016,7 @@
                 "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3023,6 +3034,7 @@
                 "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogViewReference",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3040,6 +3052,7 @@
                 "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3097,6 +3110,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3257,6 +3271,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3274,6 +3289,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogViewReference",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3291,6 +3307,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3348,6 +3365,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3536,6 +3554,7 @@
               "lineNumber": 28,
               "columnNumber": 35,
               "deprecated": false,
+              "docsReferencedTypeName": "UsageCollector",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3652,6 +3671,7 @@
                 "lineNumber": 19,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3731,6 +3751,7 @@
                 "lineNumber": 27,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3810,6 +3831,7 @@
                 "lineNumber": 11,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3962,6 +3984,7 @@
             "lineNumber": 11,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlService",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4017,6 +4040,7 @@
             "lineNumber": 18,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeLogsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4191,6 +4215,7 @@
             "lineNumber": 32,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "TraceLogsParams",
             "trackAdoption": false,
             "isRequired": true
           }

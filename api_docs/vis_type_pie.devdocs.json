@@ -51,6 +51,7 @@
             "lineNumber": 13,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "PieTypeProps",
             "trackAdoption": false,
             "isRequired": true
           }
