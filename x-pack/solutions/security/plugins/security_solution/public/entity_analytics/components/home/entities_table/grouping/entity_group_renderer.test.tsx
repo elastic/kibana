@@ -361,6 +361,23 @@ describe('createGroupStatsRenderer', () => {
       expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
+    it('multi-entity group with no group score does NOT fall back to individual score', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'target-id',
+          { name: 'target', type: EntityType.user, riskScore: null, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+      expect(screen.queryByText('42.50')).not.toBeInTheDocument();
+    });
+
     it('group score wins when both group and individual scores are present', () => {
       const metadata: TargetMetadataMap = new Map([
         [

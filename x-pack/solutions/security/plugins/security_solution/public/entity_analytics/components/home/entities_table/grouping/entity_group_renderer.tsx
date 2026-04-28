@@ -200,7 +200,8 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
       const entityId = String(bucket.key_as_string ?? bucket.key);
       const metadata = targetMetadata.get(entityId);
       const groupScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value;
-      const individualScore = metadata?.individualRiskScore;
+      const isSoloGroup = bucket.doc_count === 1;
+      const individualScore = isSoloGroup ? metadata?.individualRiskScore : undefined;
       const riskScore = groupScore ?? individualScore ?? null;
 
       stats.push({
