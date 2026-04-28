@@ -453,7 +453,7 @@ describe('SubFeatureCard', () => {
       renderCard(['ep-1'], undefined, new Set(['ep-1']));
 
       expect(
-        screen.getByLabelText('Inference endpoint Claude is no longer available')
+        screen.getByRole('img', { name: /inference endpoint claude is no longer available/i })
       ).toBeInTheDocument();
     });
   });
