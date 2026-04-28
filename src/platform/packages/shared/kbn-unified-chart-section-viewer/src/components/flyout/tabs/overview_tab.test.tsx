@@ -14,6 +14,11 @@ import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ExternalServicesProvider } from '../../../context/external_services';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import {
+  METRIC_SOURCE_KIND,
+  useMetricSourceKind,
+  type MetricSourceKind,
+} from '../../../hooks/use_metric_source_kind';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -26,6 +31,15 @@ jest.mock('../../../common/utils', () => ({
     return unit ? unitLabels[unit] || unit : undefined;
   }),
 }));
+
+jest.mock('../../../hooks/use_metric_source_kind', () => ({
+  useMetricSourceKind: jest.fn(),
+}));
+
+const mockedUseMetricSourceKind = useMetricSourceKind as jest.Mock;
+const mockSourceKind = (kind: MetricSourceKind) => {
+  mockedUseMetricSourceKind.mockReturnValue({ kind });
+};
 
 describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
@@ -40,6 +54,7 @@ describe('Metric Flyout Overview Tab', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
   });
 
   describe('basic rendering', () => {
@@ -176,7 +191,8 @@ describe('Metric Flyout Overview Tab', () => {
       };
     };
 
-    it('invokes the streams render function with the metric data stream', () => {
+    it('invokes the streams render function when sourceKind is data_stream', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const renderFlyoutStreamFieldByStreamName = jest
         .fn()
         .mockImplementation(({ streamName }: { streamName: string }) => (
@@ -191,16 +207,30 @@ describe('Metric Flyout Overview Tab', () => {
         </ExternalServicesProvider>
       );
 
-      expect(externalServices.discoverShared!.features.registry.getById).toHaveBeenCalledWith(
-        'streams'
-      );
       expect(renderFlyoutStreamFieldByStreamName).toHaveBeenCalledWith({
         streamName: 'logs-foo-default',
       });
       expect(getByTestId('streamFieldSectionRendered')).toHaveTextContent('logs-foo-default');
     });
 
-    it('renders nothing when the streams feature is not registered', () => {
+    it('does not render the stream section when sourceKind is index', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.INDEX);
+      const renderFlyoutStreamFieldByStreamName = jest.fn();
+      const externalServices = buildExternalServices(renderFlyoutStreamFieldByStreamName);
+      const metricItem = createMockMetric({ dataStream: 'metrics-plain-index' });
+
+      const { queryByTestId } = render(
+        <ExternalServicesProvider externalServices={externalServices}>
+          <OverviewTab metricItem={metricItem} />
+        </ExternalServicesProvider>
+      );
+
+      expect(renderFlyoutStreamFieldByStreamName).not.toHaveBeenCalled();
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+    });
+
+    it('renders nothing when the streams feature is not registered even if data_stream', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const externalServices = buildExternalServices(undefined);
       const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
 
@@ -214,24 +244,11 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('renders nothing when no external services are provided', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
       const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
 
       expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
-    });
-
-    it('renders nothing when the metric has no data stream', () => {
-      const renderFlyoutStreamFieldByStreamName = jest.fn();
-      const externalServices = buildExternalServices(renderFlyoutStreamFieldByStreamName);
-      const metricItem = createMockMetric({ dataStream: '' });
-
-      render(
-        <ExternalServicesProvider externalServices={externalServices}>
-          <OverviewTab metricItem={metricItem} />
-        </ExternalServicesProvider>
-      );
-
-      expect(renderFlyoutStreamFieldByStreamName).not.toHaveBeenCalled();
     });
   });
 });

@@ -9,3 +9,9 @@
 
 export { useEsqlQueryInfo } from './use_esql_query_info';
 export { useGridNavigation } from './use_grid_navigation';
+export {
+  useMetricSourceKind,
+  METRIC_SOURCE_KIND,
+  type MetricSourceKind,
+  type UseMetricSourceKindResult,
+} from './use_metric_source_kind';

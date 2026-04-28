@@ -27,6 +27,7 @@ import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { StreamFieldSection } from './stream_field_section';
+import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../../../hooks/use_metric_source_kind';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -40,6 +41,11 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const { kind: sourceKind } = useMetricSourceKind(
+    metricItem.dataStream,
+    METRIC_SOURCE_KIND.DATA_STREAM
+  );
+  const isIndex = sourceKind === METRIC_SOURCE_KIND.INDEX;
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -83,9 +89,12 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <StreamFieldSection sourceName={metricItem.dataStream} />
+      {!isIndex && <StreamFieldSection sourceName={metricItem.dataStream} />}
 
-      <OverviewTabMetadata metricItem={metricItem} />
+      <OverviewTabMetadata
+        metricItem={metricItem}
+        indexName={isIndex ? metricItem.dataStream : undefined}
+      />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

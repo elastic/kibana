@@ -43,16 +43,43 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('basic rendering', () => {
-    it('renders main description list', () => {
+    it('renders the description list and hides the index row when no indexName is provided', () => {
       const metricItem = createMockMetric({
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
       });
-      const { getByTestId, getByText } = render(<OverviewTabMetadata metricItem={metricItem} />);
+      const { getByTestId, getByText, queryByText, queryByTestId } = render(
+        <OverviewTabMetadata metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
-      expect(getByText('my-data-stream')).toBeInTheDocument();
       expect(getByText('long')).toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(queryByText('my-data-stream')).not.toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('index row', () => {
+    it('renders the Index row when indexName is provided', () => {
+      const { getByTestId, getByText } = render(
+        <OverviewTabMetadata metricItem={createMockMetric()} indexName="my-source" />
+      );
+
+      expect(getByText('Index')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).toHaveTextContent(
+        'my-source'
+      );
+    });
+
+    it('hides the Index row when indexName is an empty string', () => {
+      const { queryByTestId, queryByText } = render(
+        <OverviewTabMetadata metricItem={createMockMetric()} indexName="" />
+      );
+
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
     });
   });
 
