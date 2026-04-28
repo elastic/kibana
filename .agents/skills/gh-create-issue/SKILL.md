@@ -66,22 +66,66 @@ For **feature requests**, also probe for these common gaps (even if the field is
 - **Target user**: Who would use this — what role or persona? If not stated, ask.
 - **Dependencies**: Are there issues, features, or infrastructure changes that must land first? If so, capture them in the "Blocked By" field.
 
-## Step 7 — Show the draft and confirm
+## Step 7 — Collect and validate labels
 
-Display the complete proposed issue (title + body) and ask the user to confirm or request changes. **End your response and wait for explicit confirmation before filing.**
+### 7a — Ask about labels
 
-## Step 8 — Create the issue
+Ask the user:
+1. **Team label**: Does a team own this area? If so, which team label should be applied (e.g. `Team:Visualizations`, `Team:Security`)? Accept "none" or "not sure".
+2. **Additional labels**: Are there any other labels they'd like to add (e.g. `accessibility`, `performance`, `tech-debt`)? Accept "none".
+
+The type label (`bug` or `enhancement`) is always added automatically based on the classification in Step 2.
+
+**End your response and wait for the user to reply before proceeding.**
+
+### 7b — Validate every user-provided label
+
+For each label the user provided, verify it exists in the repository:
+
+```bash
+gh label list --repo elastic/kibana --search "<label>" --limit 10 --json name --jq '.[].name'
+```
+
+Apply this logic per label:
+
+- **Exact match found** → keep it.
+- **No exact match but close matches returned** → show the user the closest matches and ask them to pick one or skip. **Wait for the user to reply.**
+- **No matches at all** → inform the user the label doesn't exist and ask whether to skip it or provide an alternative. **Wait for the user to reply.**
+
+Repeat until all labels are resolved. Build the final label list: the type label (`bug` or `enhancement`) plus all validated labels.
+
+## Step 8 — Show the draft and confirm
+
+Display the complete proposed issue in this format:
+
+> **Title:** `<title>`
+> **Labels:** `<label1>`, `<label2>`, ...
+>
+> ---
+> \<issue body\>
+> ---
+
+Ask the user to confirm or request changes. Explicitly mention they can also add, remove, or change labels at this point. If they request new labels, loop back to Step 7b to validate them before continuing.
+
+**End your response and wait for explicit confirmation before filing.**
+
+## Step 9 — Create the issue
 
 After the user confirms, create the issue:
 
 ```bash
+LABEL_ARGS=""
+for label in "<label1>" "<label2>" "..."; do
+  LABEL_ARGS="$LABEL_ARGS --label \"$label\""
+done
+
 ISSUE_BODY=$(cat <<'EOF'
 <formatted body here>
 EOF
 )
-gh issue create --repo elastic/kibana --title "<TITLE>" --body "$ISSUE_BODY" --label "<bug|enhancement>"
+gh issue create --repo elastic/kibana --title "<TITLE>" --body "$ISSUE_BODY" $LABEL_ARGS
 ```
 
-Use label `bug` for bug reports and `enhancement` for feature requests.
+Always include the type label (`bug` for bug reports, `enhancement` for feature requests) plus any validated team and additional labels.
 
 Report the new issue URL to the user when done.
