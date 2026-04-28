@@ -13,7 +13,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
-import type { RiskEngineConfiguration } from '../../types';
+import type { RiskScoreConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 
 export interface SavedObjectsClientArg {
@@ -28,7 +28,7 @@ export const getDefaultRiskEngineConfiguration = ({
   namespace,
 }: {
   namespace: string;
-}): RiskEngineConfiguration => ({
+}): RiskScoreConfiguration => ({
   dataViewId: getAlertsIndex(namespace),
   enabled: false,
   filter: {},
@@ -49,9 +49,9 @@ const getConfigurationSavedObjectById = async ({
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
-}): Promise<SavedObject<RiskEngineConfiguration> | undefined> => {
+}): Promise<SavedObject<RiskScoreConfiguration> | undefined> => {
   try {
-    return await savedObjectsClient.get<RiskEngineConfiguration>(
+    return await savedObjectsClient.get<RiskScoreConfiguration>(
       riskEngineConfigurationTypeName,
       getRiskEngineConfigurationSavedObjectId({ namespace })
     );
@@ -68,8 +68,8 @@ const findLegacyConfigurationSavedObjects = async ({
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
-}): Promise<Array<SavedObject<RiskEngineConfiguration>>> => {
-  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
+}): Promise<Array<SavedObject<RiskScoreConfiguration>>> => {
+  const savedObjectsResponse = await savedObjectsClient.find<RiskScoreConfiguration>({
     type: riskEngineConfigurationTypeName,
     perPage: 100,
   });
@@ -84,10 +84,10 @@ const createConfigurationSavedObject = async ({
   attributes,
 }: SavedObjectsClientArg & {
   namespace: string;
-  attributes: RiskEngineConfiguration;
-}): Promise<SavedObject<RiskEngineConfiguration>> => {
+  attributes: RiskScoreConfiguration;
+}): Promise<SavedObject<RiskScoreConfiguration>> => {
   try {
-    return await savedObjectsClient.create<RiskEngineConfiguration>(
+    return await savedObjectsClient.create<RiskScoreConfiguration>(
       riskEngineConfigurationTypeName,
       attributes,
       {
@@ -96,7 +96,7 @@ const createConfigurationSavedObject = async ({
     );
   } catch (error) {
     if (SavedObjectsErrorHelpers.isConflictError(error)) {
-      return savedObjectsClient.get<RiskEngineConfiguration>(
+      return savedObjectsClient.get<RiskScoreConfiguration>(
         riskEngineConfigurationTypeName,
         getRiskEngineConfigurationSavedObjectId({ namespace })
       );
@@ -110,10 +110,10 @@ const chooseLegacyConfigurationSavedObject = ({
   logger,
   namespace,
 }: {
-  legacyConfigurations: Array<SavedObject<RiskEngineConfiguration>>;
+  legacyConfigurations: Array<SavedObject<RiskScoreConfiguration>>;
   logger?: Logger;
   namespace: string;
-}): SavedObject<RiskEngineConfiguration> => {
+}): SavedObject<RiskScoreConfiguration> => {
   const sortedConfigurations = [...legacyConfigurations].sort((a, b) => {
     const updatedAtCompare = String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? ''));
     if (updatedAtCompare !== 0) {
@@ -157,9 +157,9 @@ const adoptLegacyConfigurationSavedObject = async ({
   allLegacyConfigurations,
 }: SavedObjectsClientArg & {
   namespace: string;
-  chosenConfiguration: SavedObject<RiskEngineConfiguration>;
-  allLegacyConfigurations: Array<SavedObject<RiskEngineConfiguration>>;
-}): Promise<SavedObject<RiskEngineConfiguration>> => {
+  chosenConfiguration: SavedObject<RiskScoreConfiguration>;
+  allLegacyConfigurations: Array<SavedObject<RiskScoreConfiguration>>;
+}): Promise<SavedObject<RiskScoreConfiguration>> => {
   const adoptedConfiguration = await createConfigurationSavedObject({
     savedObjectsClient,
     namespace,
@@ -179,7 +179,7 @@ const getConfigurationSavedObject = async ({
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
-}): Promise<SavedObject<RiskEngineConfiguration> | undefined> => {
+}): Promise<SavedObject<RiskScoreConfiguration> | undefined> => {
   const configuration = await getConfigurationSavedObjectById({ savedObjectsClient, namespace });
   if (configuration) {
     return configuration;
@@ -212,7 +212,7 @@ export const updateSavedObjectAttribute = async ({
   attributes,
 }: SavedObjectsClientArg & {
   namespace: string;
-  attributes: Partial<RiskEngineConfiguration>;
+  attributes: Partial<RiskScoreConfiguration>;
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({
     savedObjectsClient,
@@ -284,7 +284,7 @@ export const getConfiguration = async ({
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
-}): Promise<RiskEngineConfiguration | null> => {
+}): Promise<RiskScoreConfiguration | null> => {
   try {
     const savedObjectConfiguration = await getConfigurationSavedObject({
       savedObjectsClient,
@@ -305,8 +305,8 @@ export const getConfiguration = async ({
 
 export const getAllSpaceConfigurations = async ({
   savedObjectsClient,
-}: SavedObjectsClientArg): Promise<Array<SavedObjectsFindResult<RiskEngineConfiguration>>> => {
-  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
+}: SavedObjectsClientArg): Promise<Array<SavedObjectsFindResult<RiskScoreConfiguration>>> => {
+  const savedObjectsResponse = await savedObjectsClient.find<RiskScoreConfiguration>({
     type: riskEngineConfigurationTypeName,
     namespaces: ['*'],
   });

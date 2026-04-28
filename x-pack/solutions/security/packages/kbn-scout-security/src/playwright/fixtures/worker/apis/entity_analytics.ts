@@ -16,8 +16,6 @@ const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
-const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
-const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
 
 const API_VERSIONS = {
   public: {
@@ -115,9 +113,9 @@ export const getEntityAnalyticsApiService = ({
       await measurePerformanceAsync(log, 'security.entityAnalytics.initRiskEngine', async () => {
         await kbnClient.request({
           method: 'POST',
-          path: `${basePath}${RISK_ENGINE_INIT_URL}`,
+          path: `${basePath}${ENTITY_STORE_ENGINES_URL}/host/init`,
           headers: {
-            'elastic-api-version': API_VERSIONS.internal.v1,
+            'elastic-api-version': API_VERSIONS.public.v1,
           },
           body: {},
         });
@@ -129,14 +127,14 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.getRiskEngineStatus',
         async () => {
-          const response = await kbnClient.request<RiskEngineStatusResponse>({
-            method: 'GET',
-            path: `${basePath}${RISK_ENGINE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.internal.v1,
-            },
-          });
-          return response.data;
+          const entityStoreStatus = await service.getEntityStoreStatus();
+          const riskEngineStatus: RiskEngineStatusResponse =
+            entityStoreStatus.status === 'running'
+              ? { risk_engine_status: 'ENABLED' }
+              : entityStoreStatus.status === 'stopped'
+              ? { risk_engine_status: 'DISABLED' }
+              : { risk_engine_status: 'NOT_INSTALLED' };
+          return riskEngineStatus;
         }
       );
     },

@@ -14,7 +14,7 @@ import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
   EntityAnalyticsConfig,
   EntityAnalyticsRoutesDeps,
-  RiskEngineConfiguration,
+  RiskScoreConfiguration,
 } from '../../types';
 import { DEFAULT_RISK_SCORE_PAGE_SIZE } from '../../../../../common/constants';
 import {
@@ -27,11 +27,11 @@ import {
   initSavedObjects,
   getConfiguration,
   getDefaultRiskEngineConfiguration,
-} from '../../risk_engine/utils/saved_object_configuration';
+} from '../configuration/saved_object_configuration';
 import {
   buildScopedInternalSavedObjectsClientUnsafe,
   buildInternalSavedObjectsClientUnsafe,
-} from '../tasks/helpers';
+} from '../../utils/internal_clients';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
@@ -76,7 +76,7 @@ interface InitializedRunContext {
 }
 
 interface LoadedRunConfig {
-  configuration: RiskEngineConfiguration;
+  configuration: RiskScoreConfiguration;
   alertsIndex: string;
   idBasedRiskScoringEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
@@ -281,7 +281,7 @@ const loadRunConfiguration = async ({
   logger: Logger;
   entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<LoadedRunConfig> => {
-  const configuration: RiskEngineConfiguration =
+  const configuration: RiskScoreConfiguration =
     (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);

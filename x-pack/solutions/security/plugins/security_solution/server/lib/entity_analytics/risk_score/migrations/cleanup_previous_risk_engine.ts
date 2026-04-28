@@ -7,7 +7,7 @@
 
 import { first } from 'lodash/fp';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import type { RiskEngineConfiguration } from '../../types';
+import type { RiskScoreConfiguration } from '../../types';
 import { stopTransform, deleteTransform, getLatestTransformId } from '../../utils/transforms';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 import { MAX_PER_PAGE } from './update_risk_score_mappings';
@@ -35,7 +35,7 @@ export const cleanupLegacyRiskEngine = async ({
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
 
-    const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
+    const savedObjectsResponse = await soClientKibanaUser.find<RiskScoreConfiguration>({
       type: riskEngineConfigurationTypeName,
       perPage: MAX_PER_PAGE,
       namespaces: ['*'],
@@ -66,7 +66,6 @@ export const cleanupLegacyRiskEngine = async ({
             `Failed to delete legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
           );
         });
-
       }
     }
   } catch (err: unknown) {

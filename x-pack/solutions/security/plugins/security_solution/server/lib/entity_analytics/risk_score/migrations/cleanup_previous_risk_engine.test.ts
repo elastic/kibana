@@ -12,17 +12,11 @@ import { getLatestTransformId } from '../../utils/transforms';
 
 const mockStopTransform = jest.fn();
 const mockDeleteTransform = jest.fn();
-const mockRemoveRiskScoringTask = jest.fn();
 
 jest.mock('../../utils/transforms', () => ({
   ...jest.requireActual('../../utils/transforms'),
   stopTransform: (...args: unknown[]) => mockStopTransform(...args),
   deleteTransform: (...args: unknown[]) => mockDeleteTransform(...args),
-}));
-
-jest.mock('../../risk_score/tasks/risk_scoring_task', () => ({
-  ...jest.requireActual('../../risk_score/tasks/risk_scoring_task'),
-  removeRiskScoringTask: (...args: unknown[]) => mockRemoveRiskScoringTask(...args),
 }));
 
 describe('cleanupLegacyRiskEngine', () => {
@@ -54,7 +48,6 @@ describe('cleanupLegacyRiskEngine', () => {
     jest.clearAllMocks();
     mockStopTransform.mockResolvedValue(undefined);
     mockDeleteTransform.mockResolvedValue(undefined);
-    mockRemoveRiskScoringTask.mockResolvedValue(undefined);
     getStartServicesMock.mockResolvedValue([
       {
         ...coreStart,
@@ -67,7 +60,7 @@ describe('cleanupLegacyRiskEngine', () => {
     ]);
   });
 
-  it('stops and deletes the latest transform and removes the risk scoring task per namespace', async () => {
+  it('stops and deletes the latest transform per namespace', async () => {
     soClient.find.mockResolvedValue({
       ...mockSavedObjectsResponseDefaults,
       saved_objects: [buildSavedObject('default'), buildSavedObject('space-a')],
@@ -82,7 +75,6 @@ describe('cleanupLegacyRiskEngine', () => {
 
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
     expect(mockDeleteTransform).toHaveBeenCalledTimes(2);
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(2);
 
     expect(mockStopTransform).toHaveBeenCalledWith({
       esClient,
@@ -106,16 +98,6 @@ describe('cleanupLegacyRiskEngine', () => {
       transformId: getLatestTransformId('space-a'),
     });
 
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledWith({
-      logger,
-      namespace: 'default',
-      taskManager,
-    });
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledWith({
-      logger,
-      namespace: 'space-a',
-      taskManager,
-    });
   });
 
   it('does nothing when no risk engine configurations exist', async () => {
@@ -130,7 +112,6 @@ describe('cleanupLegacyRiskEngine', () => {
 
     expect(mockStopTransform).not.toHaveBeenCalled();
     expect(mockDeleteTransform).not.toHaveBeenCalled();
-    expect(mockRemoveRiskScoringTask).not.toHaveBeenCalled();
   });
 
   it('logs a warning and skips cleanup when Task Manager is unavailable', async () => {
@@ -162,10 +143,9 @@ describe('cleanupLegacyRiskEngine', () => {
     expect(soClient.find).not.toHaveBeenCalled();
     expect(mockStopTransform).not.toHaveBeenCalled();
     expect(mockDeleteTransform).not.toHaveBeenCalled();
-    expect(mockRemoveRiskScoringTask).not.toHaveBeenCalled();
   });
 
-  it('continues when stopTransform fails and still deletes the transform and removes the task', async () => {
+  it('continues when stopTransform fails and still deletes the transform', async () => {
     mockStopTransform.mockRejectedValueOnce(new Error('stop failed'));
     soClient.find.mockResolvedValue({
       ...mockSavedObjectsResponseDefaults,
@@ -183,13 +163,10 @@ describe('cleanupLegacyRiskEngine', () => {
       expect.stringContaining('Failed to stop legacy latest transform')
     );
     expect(mockDeleteTransform).toHaveBeenCalledTimes(1);
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(1);
   });
 
-  it('processes the next namespace when one namespace hits a failure during task removal', async () => {
-    mockRemoveRiskScoringTask
-      .mockRejectedValueOnce(new Error('remove failed'))
-      .mockResolvedValueOnce(undefined);
+  it('processes the next namespace when one namespace hits a transform stop failure', async () => {
+    mockStopTransform.mockRejectedValueOnce(new Error('stop failed'));
     soClient.find.mockResolvedValue({
       ...mockSavedObjectsResponseDefaults,
       saved_objects: [buildSavedObject('default'), buildSavedObject('space-b')],
@@ -202,8 +179,9 @@ describe('cleanupLegacyRiskEngine', () => {
       kibanaVersion: '9.0.0',
     });
 
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('remove failed'));
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to stop legacy latest transform')
+    );
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
   });
 });

@@ -10,9 +10,9 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { StartPlugins } from '../../../plugin';
 import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_criticality/migrations/schedule_ecs_compliancy_migration';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
-import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
-import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
-import { cleanupLegacyRiskEngine } from '../risk_engine/migrations/cleanup_previous_risk_engine';
+import { updateRiskScoreMappings } from '../risk_score/migrations/update_risk_score_mappings';
+import { renameRiskScoreComponentTemplate } from '../risk_score/migrations/rename_risk_score_component_templates';
+import { cleanupLegacyRiskEngine } from '../risk_score/migrations/cleanup_previous_risk_engine';
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
@@ -32,7 +32,7 @@ export interface EntityAnalyticsMigrationsParams {
  * ### How to add a new field to the risk score index and template mappings?
 
  * - Update the mapping object [here](../risk_score/configurations.ts)
- * - Pump the `mappingsVersion` version [here](../risk_engine/utils/saved_object_configuration.ts)
+ * - Pump the `mappingsVersion` version [here](../risk_score/configuration/saved_object_configuration.ts)
  *
  * ### How to add a new field to the asset criticality index?
  * - Update the mapping object [here](../asset_criticality/constants.ts)

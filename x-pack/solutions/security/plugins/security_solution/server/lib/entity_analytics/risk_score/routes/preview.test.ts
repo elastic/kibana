@@ -16,7 +16,7 @@ import {
 } from '../../../detection_engine/routes/__mocks__';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { calculateScoresWithESQLV2 } from './calculate_scores_v2';
-import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
+import { getConfiguration } from '../configuration/saved_object_configuration';
 import { riskScorePreviewRoute } from './preview';
 import type {
   MockClients,
@@ -25,7 +25,7 @@ import type {
 
 jest.mock('./calculate_scores_v2');
 jest.mock('../get_risk_inputs_index');
-jest.mock('../../risk_engine/utils/saved_object_configuration');
+jest.mock('../configuration/saved_object_configuration');
 
 describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;

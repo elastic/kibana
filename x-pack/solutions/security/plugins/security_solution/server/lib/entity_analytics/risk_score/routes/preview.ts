@@ -22,7 +22,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { calculateScoresWithESQLV2 } from './calculate_scores_v2';
-import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
+import { getConfiguration } from '../configuration/saved_object_configuration';
 
 export const riskScorePreviewRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

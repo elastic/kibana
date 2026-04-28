@@ -33,7 +33,7 @@ import {
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
-import { buildFakeScopedRequest } from '../../risk_score/tasks/helpers';
+import { buildFakeScopedRequest } from '../../utils/internal_clients';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
 

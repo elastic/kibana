@@ -86,12 +86,15 @@ evaluate.describe(
         riskScore: 25,
       });
 
-      await quickApiClient.initRiskEngine();
+      await quickApiClient.initEntityEngine({
+        params: { entityType: 'host' },
+        body: {},
+      });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 3 });
     });
 
     evaluate.afterAll(async ({ esClient, log, quickApiClient, supertest }) => {
-      await quickApiClient.cleanUpRiskEngine();
+      await quickApiClient.deleteEntityStoreEngines();
       await deleteAllRiskScores(log, esClient);
       await deleteAllAlerts(supertest, log, esClient);
       await deleteAllRules(supertest, log);

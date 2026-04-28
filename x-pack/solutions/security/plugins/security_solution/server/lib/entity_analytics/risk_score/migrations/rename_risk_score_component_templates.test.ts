@@ -16,14 +16,14 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 const mockCreateComponentTemplate = jest.fn();
 const mockCreateIndexTemplate = jest.fn();
 
-jest.mock('../../risk_score/risk_score_data_client', () => ({
+jest.mock('../risk_score_data_client', () => ({
   RiskScoreDataClient: jest.fn().mockImplementation(() => ({
     createOrUpdateRiskScoreComponentTemplate: () => mockCreateComponentTemplate(),
     createOrUpdateRiskScoreIndexTemplate: () => mockCreateIndexTemplate(),
   })),
 }));
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
+jest.mock('../../utils/internal_clients', () => ({
   buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
 }));
 

@@ -30,8 +30,8 @@ jest.mock('../../utils/create_datastream', () => ({
 
 const mockGetDefaultRiskEngineConfiguration = jest.fn();
 const mockUpdateSavedObjectAttribute = jest.fn();
-jest.mock('../utils/saved_object_configuration', () => ({
-  ...jest.requireActual('../utils/saved_object_configuration'),
+jest.mock('../configuration/saved_object_configuration', () => ({
+  ...jest.requireActual('../configuration/saved_object_configuration'),
   getDefaultRiskEngineConfiguration: () => mockGetDefaultRiskEngineConfiguration(),
   updateSavedObjectAttribute: (...params: unknown[]) => mockUpdateSavedObjectAttribute(...params),
 }));

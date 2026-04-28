@@ -239,81 +239,6 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
   },
 };
 
-export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
-  scoresWritten: number;
-  taskDurationInSeconds: number;
-  interval: string;
-  alertSampleSizePerShard: number;
-}> = {
-  eventType: 'risk_score_execution_success',
-  schema: {
-    scoresWritten: {
-      type: 'long',
-      _meta: {
-        description: 'Number of risk scores written during this scoring task execution',
-      },
-    },
-    taskDurationInSeconds: {
-      type: 'long',
-      _meta: {
-        description: 'Duration (in seconds) of the current risk scoring task execution',
-      },
-    },
-    interval: {
-      type: 'keyword',
-      _meta: {
-        description: `Configured interval for the current risk scoring task`,
-      },
-    },
-    alertSampleSizePerShard: {
-      type: 'long',
-      _meta: {
-        description: `Number of alerts to sample per shard for the current risk scoring task`,
-      },
-    },
-  },
-};
-
-export const RISK_SCORE_EXECUTION_ERROR_EVENT: EventTypeOpts<{}> = {
-  eventType: 'risk_score_execution_error',
-  schema: {},
-};
-
-export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
-  scoresWritten: number;
-  taskDurationInSeconds: number;
-  interval: string;
-  alertSampleSizePerShard: number;
-}> = {
-  eventType: 'risk_score_execution_cancellation',
-  schema: {
-    scoresWritten: {
-      type: 'long',
-      _meta: {
-        description: 'Number of risk scores written during this scoring task execution',
-      },
-    },
-    taskDurationInSeconds: {
-      type: 'long',
-      _meta: {
-        description: 'Duration (in seconds) of the current risk scoring task execution',
-      },
-    },
-    interval: {
-      type: 'keyword',
-      _meta: {
-        description: `Configured interval for the current risk scoring task`,
-      },
-    },
-    alertSampleSizePerShard: {
-      type: 'long',
-      _meta: {
-        description: `Number of alerts to sample per shard for the current risk scoring task`,
-      },
-    },
-  },
-};
-
 export type RiskScoreMaintainerStatus = 'success' | 'error' | 'skipped' | 'aborted';
 export type RiskScoreMaintainerSkipReason =
   | 'license_insufficient'
@@ -2060,9 +1985,6 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
-  RISK_SCORE_EXECUTION_SUCCESS_EVENT,
-  RISK_SCORE_EXECUTION_ERROR_EVENT,
-  RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
   RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,

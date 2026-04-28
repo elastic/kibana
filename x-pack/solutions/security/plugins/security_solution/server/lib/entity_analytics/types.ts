@@ -73,7 +73,7 @@ export interface RiskScoreBucket {
   };
 }
 
-export interface RiskEngineConfiguration {
+export interface RiskScoreConfiguration {
   dataViewId: string;
   enabled: boolean;
   filter: unknown;

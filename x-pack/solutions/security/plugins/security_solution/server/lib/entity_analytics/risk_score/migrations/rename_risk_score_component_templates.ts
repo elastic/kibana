@@ -6,11 +6,11 @@
  */
 
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
-import type { RiskEngineConfiguration } from '../../types';
+import { RiskScoreDataClient } from '../risk_score_data_client';
+import type { RiskScoreConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
-import { mappingComponentName } from '../../risk_score/configurations';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../utils/internal_clients';
+import { mappingComponentName } from '../configurations';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -39,7 +39,7 @@ export const renameRiskScoreComponentTemplate = async ({
   }
 
   // Get all installed Risk Engine Configurations
-  const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
+  const savedObjectsResponse = await soClientKibanaUser.find<RiskScoreConfiguration>({
     type: riskEngineConfigurationTypeName,
     perPage: MAX_PER_PAGE,
     namespaces: ['*'],

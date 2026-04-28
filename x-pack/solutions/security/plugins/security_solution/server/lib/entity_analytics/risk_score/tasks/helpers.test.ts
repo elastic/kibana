@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { convertDateToISOString } from './helpers';
+import { convertDateToISOString } from '../../utils/internal_clients';
 
 moment.suppressDeprecationWarnings = true;
 
