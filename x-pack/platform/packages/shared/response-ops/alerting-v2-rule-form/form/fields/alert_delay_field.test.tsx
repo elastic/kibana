@@ -125,6 +125,30 @@ describe('AlertDelayField', () => {
     expect(screen.getByTestId('stateTransitionDelayMode')).toBeInTheDocument();
   });
 
+  it('uses default count when switching from immediate (pendingCount: 0) to breaches', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <AlertDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransitionAlertDelayMode: 'immediate',
+          stateTransition: { pendingCount: 0 },
+        }),
+      }
+    );
+
+    const alertRow = screen.getByTestId('alertDelayFormRow');
+    fireEvent.click(within(alertRow).getByText('Breaches'));
+
+    const values = getFormValues!();
+    expect(values.stateTransitionAlertDelayMode).toBe('breaches');
+    expect(values.stateTransition?.pendingCount).toBe(2);
+  });
+
   it('clears alert delay (pending) when switching to immediate while recovery delay stays on breaches', () => {
     getFormValues = undefined;
     render(
@@ -158,6 +182,7 @@ describe('AlertDelayField', () => {
     expect(values.stateTransition?.recoveringCount).toBe(3);
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
+      pending_count: 0,
       recovering_count: 3,
     });
   });

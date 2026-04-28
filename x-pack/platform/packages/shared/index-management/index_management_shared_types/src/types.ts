@@ -8,7 +8,6 @@
 import type {
   IlmExplainLifecycleLifecycleExplain,
   HealthStatus,
-  IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedHistory } from '@kbn/core-application-browser';
@@ -147,7 +146,8 @@ export interface IndexAttributes {
   // The types from here below represent information returned from the index stats API;
   // treated optional as the stats API is not available on serverless
   health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
+  // Some consumers (e.g. the indices list UI) display user-friendly status text.
+  status?: string;
   uuid?: Uuid;
   documents?: number;
   size?: number;

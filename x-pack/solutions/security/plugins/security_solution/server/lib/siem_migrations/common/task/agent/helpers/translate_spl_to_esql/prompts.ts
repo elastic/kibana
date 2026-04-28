@@ -23,12 +23,12 @@ Here are some context for you to reference for your task, read it carefully as y
 <splunk_query>
 {splunk_query}
 </splunk_query>
-<index_mapping>
-The following is the mapping for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
+<index_knowledge_base>
+The following is the sample documents and more knowledge for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
 \`\`\`json
-{index_mapping}
+{index_knowledge_base}
 \`\`\`
-</index_mapping>
+</index_knowledge_base>
 <placeholders_syntax>
 If you encounter any placeholders for macros or lookups in the SPL query, leave them as-is in the ES|QL query output. They are markers that need to be preserved.
 They are wrapped in brackets ("[]") and always start with "macro:" or "lookup:". Mention all placeholders you left in the final summary.

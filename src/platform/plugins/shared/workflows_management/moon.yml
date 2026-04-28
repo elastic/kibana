@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
   - '@kbn/monaco'
@@ -96,6 +97,12 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
+  - '@kbn/std'
+  - '@kbn/use-observable'
+  - '@kbn/cloud-plugin'
+  - '@kbn/kbn-client'
+  - '@kbn/rule-data-utils'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

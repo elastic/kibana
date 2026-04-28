@@ -35,6 +35,7 @@
             "lineNumber": 62,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "CaseViewPathParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -224,7 +225,7 @@
           "Props for case-level attachment tabs (Alerts/Events/… table hosts)."
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -400,7 +401,7 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -739,7 +740,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 123,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1297,6 +1298,7 @@
                 "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CasesClientArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1426,7 +1428,15 @@
         "tags": [],
         "label": "CloseReasonValidator",
         "description": [
-          "\nValidates a close reason.\nRegister via {@link CasesServerSetup.registerCloseReasonValidator}."
+          "\nValidates a close reason.\nRegister via ",
+          {
+            "pluginId": "cases",
+            "scope": "server",
+            "docId": "kibCasesPluginApi",
+            "section": "def-server.CasesServerSetup.registerCloseReasonValidator",
+            "text": "CasesServerSetup.registerCloseReasonValidator"
+          },
+          "."
         ],
         "signature": [
           "(closeReason: string, request: ",
@@ -1472,6 +1482,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -1587,6 +1598,7 @@
               "lineNumber": 123,
               "columnNumber": 49,
               "deprecated": false,
+              "docsReferencedTypeName": "CloseReasonValidator",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1657,12 +1669,20 @@
               "lineNumber": 109,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
           ],
           "returnComment": [
-            "a {@link CasesClient }"
+            "a ",
+            {
+              "pluginId": "cases",
+              "scope": "server",
+              "docId": "kibCasesPluginApi",
+              "section": "def-server.CasesClient",
+              "text": "CasesClient"
+            }
           ]
         },
         {
@@ -1848,6 +1868,7 @@
             "lineNumber": 24,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Owner",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1961,6 +1982,7 @@
             "lineNumber": 30,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2426,6 +2448,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttachmentRequestV2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2735,6 +2758,7 @@
             "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttachmentRequestV2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2774,6 +2798,7 @@
             "lineNumber": 13,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorFactory",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3588,6 +3613,57 @@
     "misc": [
       {
         "parentPluginId": "cases",
+        "id": "def-common.AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiops.change_point_chart\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiops.log_rate_analysis\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiops.pattern_analysis\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.APP_ID",
         "type": "string",
         "tags": [],
@@ -3616,7 +3692,7 @@
           "\"cases_assign\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 228,
+        "lineNumber": 227,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3977,7 +4053,7 @@
           "\"cases-comments\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 43,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4423,7 +4499,7 @@
           "\"cases_connectors\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 225,
+        "lineNumber": 224,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4440,7 +4516,7 @@
           "\"case_reopen\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 226,
+        "lineNumber": 225,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4457,7 +4533,7 @@
           "\"cases_settings\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 224,
+        "lineNumber": 223,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4476,7 +4552,7 @@
           "\"/api/cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 66,
+        "lineNumber": 65,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5146,7 +5222,7 @@
           "\"create_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 219,
+        "lineNumber": 218,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5163,7 +5239,7 @@
           "\"create_comment\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 227,
+        "lineNumber": 226,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5180,7 +5256,7 @@
           "\"delete_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 222,
+        "lineNumber": 221,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5269,7 +5345,7 @@
           "\"casesGetConnectorsConfigure\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 248,
+        "lineNumber": 247,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5311,7 +5387,7 @@
           "\"/internal/cases/{case_id}/attachments/_bulk_create\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 93,
+        "lineNumber": 92,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5328,7 +5404,7 @@
           "\"/internal/cases/_bulk_get\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 100,
+        "lineNumber": 99,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5342,10 +5418,10 @@
         "label": "LENS_ATTACHMENT_TYPE",
         "description": [],
         "signature": [
-          "\".lens\""
+          "\"lens\""
         ],
-        "path": "x-pack/platform/plugins/shared/cases/common/constants/visualizations.ts",
-        "lineNumber": 8,
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5362,7 +5438,58 @@
           "\"cases_manage_templates\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 229,
+        "lineNumber": 228,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ML_ANOMALY_CHARTS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_CHARTS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml.anomaly_charts\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml.anomaly_swimlane\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml.single_metric_viewer\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5396,7 +5523,7 @@
           "\"push_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 223,
+        "lineNumber": 222,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5413,7 +5540,7 @@
           "\"read_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 220,
+        "lineNumber": 219,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5455,7 +5582,7 @@
           "\"security.event\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
-        "lineNumber": 12,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5508,7 +5635,7 @@
           "\"update_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 221,
+        "lineNumber": 220,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5544,7 +5671,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"extended_fields\"; payload: { extended_fields: { [x: string]: string; }; }; } | { type: \"comment\"; payload: { comment: { type: ",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"extended_fields\"; payload: { extended_fields: { [x: string]: string; }; }; } | { type: \"template\"; payload: { template: { id: string; version: number; } | null; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { splitSizeAndUnits, toMillis } from '../../helpers/format_size_units';
+import { splitSizeAndUnits, toMillis } from '../../../../../../util/format_size_units';
 import type { PreservedTimeUnit } from './time_unit_types';
 
 export interface DoubledDurationResult {

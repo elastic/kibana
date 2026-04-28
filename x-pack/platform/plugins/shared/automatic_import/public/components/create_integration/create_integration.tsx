@@ -8,6 +8,7 @@ import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useLocation } from 'react-router-dom';
+import { AvailabilityWrapper } from '../../common/components/availability_wrapper/availability_wrapper';
 import type { Services } from '../../services/types';
 import { IntegrationManagement } from '../integration_management/integration_management';
 import { UIStateProvider } from '../integration_management/contexts';
@@ -32,11 +33,13 @@ CreateIntegrationContents.displayName = 'CreateIntegrationContents';
 export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services }) => (
   <QueryClientProvider client={queryClient}>
     <KibanaContextProvider services={services}>
-      <TelemetryContextProvider>
-        <UIStateProvider>
-          <CreateIntegrationContents />
-        </UIStateProvider>
-      </TelemetryContextProvider>
+      <AvailabilityWrapper>
+        <TelemetryContextProvider>
+          <UIStateProvider>
+            <CreateIntegrationContents />
+          </UIStateProvider>
+        </TelemetryContextProvider>
+      </AvailabilityWrapper>
     </KibanaContextProvider>
   </QueryClientProvider>
 ));

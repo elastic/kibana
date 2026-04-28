@@ -27,7 +27,7 @@ export interface BaseUiSettingsDefaultsClientOptions {
  * Base implementation of the {@link IUiSettingsClient}.
  */
 export abstract class BaseUiSettingsClient implements IUiSettingsClient {
-  private readonly defaults: Record<string, UiSettingsParams>;
+  protected readonly defaults: Record<string, UiSettingsParams>;
   protected readonly overrides: Record<string, any>;
   protected readonly log: Logger;
 
@@ -35,7 +35,6 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     const { defaults = {}, overrides = {}, log } = options;
     this.log = log;
     this.overrides = overrides;
-
     this.defaults = defaults;
   }
 
@@ -48,8 +47,31 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   async get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T> {
-    const all = await this.getAll(context);
-    return all[key] as T;
+    // Check for user-provided override first
+    const userProvided = await this.getUserProvided();
+    if (userProvided[key]?.userValue !== undefined) {
+      const value = userProvided[key].userValue as T;
+      return value;
+    }
+
+    // Fall back to default value
+    const definition = this.defaults[key];
+    if (definition?.getValue) {
+      try {
+        const value = (await definition.getValue(context)) as T;
+        return value;
+      } catch (error) {
+        this.log.error(`[UiSettingsClient] Failed to get value for key "${key}": ${error}`);
+        // Fallback to `value` prop if `getValue()` fails
+        const fallback = definition.value as T;
+        this.log.info(
+          `[UiSettings] get("${key}") = ${JSON.stringify(fallback)} (fallback after error)`
+        );
+        return fallback;
+      }
+    }
+    const defaultValue = definition?.value as T;
+    return defaultValue;
   }
 
   async getAll<T = any>(context?: GetUiSettingsContext) {

@@ -1,0 +1,30 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postRequestDiagnosticsRequestExample:
+          description: 'Request a diagnostics bundle from an agent'
+          value:
+            additional_metrics:
+              - 'CPU'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postRequestDiagnosticsExample:
+            description: 'Diagnostics action result'
+            value:
+              actionId: 'action-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'Agent agent-id-1 does not support request diagnostics action.'

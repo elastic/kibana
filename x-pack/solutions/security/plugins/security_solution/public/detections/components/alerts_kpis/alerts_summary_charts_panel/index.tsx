@@ -64,12 +64,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   );
 
   return (
-    <KpiPanel
-      $toggleStatus={isExpanded}
-      data-test-subj="alerts-charts-panel"
-      hasBorder
-      height={panelHeight}
-    >
+    <KpiPanel $toggleStatus={isExpanded} data-test-subj="alerts-charts-panel" hasBorder>
       <HeaderSection
         alignHeader={alignHeader}
         outerDirection="row"
@@ -82,12 +77,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         toggleQuery={toggleQuery}
       />
       {isExpanded && (
-        <StyledFlexGroup
-          data-test-subj="alerts-charts-container"
-          className="eui-yScroll"
-          wrap
-          gutterSize="m"
-        >
+        <StyledFlexGroup data-test-subj="alerts-charts-container" wrap gutterSize="m">
           <StyledFlexItem>
             <SeverityLevelPanel
               filters={filters}

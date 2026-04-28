@@ -14,6 +14,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   CheckboxGroupFieldSchema,
   ConditionRenderProps,
@@ -72,17 +73,16 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
     (field: FieldHook<string>) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const selected = toArray(field.value);
+      const handleChange = (id: string) => {
+        const next = selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
+        field.setValue(JSON.stringify(next));
+      };
       return (
         <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
           <EuiCheckboxGroup
             options={options}
             idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
-            onChange={(id) => {
-              const next = selected.includes(id)
-                ? selected.filter((s) => s !== id)
-                : [...selected, id];
-              field.setValue(JSON.stringify(next));
-            }}
+            onChange={handleChange}
           />
         </EuiFormRow>
       );
@@ -91,7 +91,11 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={config}
+    >
       {renderField}
     </UseField>
   );

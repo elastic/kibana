@@ -51,6 +51,10 @@ export interface MemoryUpdateContext {
    * Insight client for triggers that need to read insights/KIs.
    */
   insightClient?: InsightClient;
+  /**
+   * An optional AbortSignal that triggers can check to support task cancellation.
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**

@@ -85,6 +85,7 @@
                 "lineNumber": 31,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "MlLocatorParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -247,6 +248,7 @@
                 "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MlLocatorParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -510,6 +512,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MlLocatorParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -527,6 +530,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -625,6 +629,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MlLocatorParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1672,7 +1677,7 @@
         " | undefined; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
-      "lineNumber": 386,
+      "lineNumber": 390,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2244,7 +2249,7 @@
         " & React.RefAttributes<{}>>; }; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
-      "lineNumber": 387,
+      "lineNumber": 391,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

@@ -520,6 +520,24 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  reportWorkflowAccessDeniedPrivileges = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+    });
+  };
+
+  reportWorkflowAccessDeniedLicense = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedLicense, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+    });
+  };
+
+  reportWorkflowAccessDeniedServerlessTier = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
+    });
+  };
+
   // Import/Export actions
 
   /**

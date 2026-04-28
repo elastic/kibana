@@ -36,7 +36,13 @@ export interface LicenseManagementUIPluginSetup {
 export type LicenseManagementUIPluginStart = void;
 
 export class LicenseManagementUIPlugin
-  implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any>
+  implements
+    Plugin<
+      LicenseManagementUIPluginSetup,
+      LicenseManagementUIPluginStart,
+      PluginsDependenciesSetup,
+      PluginsDependenciesStart
+    >
 {
   private breadcrumbService = new BreadcrumbService();
   private locator?: LicenseManagementLocator;

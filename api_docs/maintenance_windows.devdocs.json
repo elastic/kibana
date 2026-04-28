@@ -74,6 +74,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -121,6 +122,7 @@
                 "lineNumber": 27,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -144,6 +146,7 @@
                 "lineNumber": 27,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "MaintenanceWindowsPublicSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -483,6 +486,8 @@
               },
               ") => void; registerApiKeyInvalidateFn: (fn?: ",
               "ApiKeyInvalidationFn",
+              " | undefined) => void; registerUiamApiKeyInvalidateFn: (fn?: ",
+              "UiamApiKeyInvalidationFn",
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
@@ -758,6 +763,7 @@
               "lineNumber": 41,
               "columnNumber": 38,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -798,6 +804,7 @@
               "lineNumber": 42,
               "columnNumber": 38,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -838,6 +845,7 @@
               "lineNumber": 43,
               "columnNumber": 41,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
