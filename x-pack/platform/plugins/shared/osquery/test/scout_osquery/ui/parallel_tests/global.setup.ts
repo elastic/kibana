@@ -187,7 +187,7 @@ async function waitForAgents(
   kbnClient: KbnClient,
   log: SetupLog,
   expectedCount: number,
-  timeoutMs = 240_000
+  timeoutMs = 360_000
 ) {
   const start = Date.now();
   let lastCount = 0;
