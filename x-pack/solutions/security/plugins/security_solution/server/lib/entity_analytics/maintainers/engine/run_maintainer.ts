@@ -18,7 +18,7 @@ import type {
 import { buildCompositeAgg, buildBucketFilter } from './build_composite_agg';
 import { buildEsqlQuery } from './build_esql_query';
 import { postprocessEsqlResults } from './postprocess_records';
-import { writeRawIdentifiers } from './update_entities';
+import { writeEntityIds } from './update_entities';
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 
 interface CompositeAggregations {
@@ -49,10 +49,8 @@ function errMsg(err: unknown): string {
  * Generic run loop for relationship maintainers.
  * Iterates over the provided integration configs and runs the composite agg +
  * ES|QL pipeline for each, collecting ProcessedEngineRecord objects.
- * After all integrations complete, writes raw_identifiers to entity documents.
- *
- * The relationship resolver in the entity_store plugin later validates those
- * raw entity.ids and promotes confirmed ones to ids.
+ * After all integrations complete, writes optimistic EUIDs directly to
+ * entity.relationships[relType].ids.
  */
 export const runGenericMaintainer = async ({
   esClient,
@@ -164,9 +162,9 @@ export const runGenericMaintainer = async ({
   }
 
   if (!abortController?.signal.aborted) {
-    totalWritten = await writeRawIdentifiers(crudClient, logger, allRecords);
+    totalWritten = await writeEntityIds(crudClient, logger, allRecords);
   } else {
-    logger.info('Generic maintainer aborted, skipping entity write');
+    logger.info('Generic maintainer aborted, skipping entity id write');
   }
 
   return { totalBuckets, totalRecords, totalWritten, lastRunTimestamp: new Date().toISOString() };
