@@ -23,7 +23,9 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
         }),
         body: schema.object({
           title: schema.string(),
-          duration: schema.number(),
+          start: schema.maybe(schema.number()),
+          end: schema.number(),
+          tags: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
       security: {
@@ -33,8 +35,8 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
       },
     },
     async (ctx, req, res) => {
-      console.log('here!!!', { ctx, req, res, test: req.route.options });
       const user = (await ctx.core).security.authc.getCurrentUser();
+      const duration = req.body.start !== undefined ? req.body.end - req.body.start : 0;
       coreServices.userActivity.trackUserAction({
         message: `User ${
           user ? `"${user.username}" (id: ${user.profile_uid})` : ''
@@ -42,19 +44,18 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
         event: {
           action: 'dashboard_view',
           type: 'access',
-          start: '',
-          end: '',
-          duration: 0,
+          start: new Date(req.body.start ?? 0).toString(),
+          end: new Date(req.body.end).toString(),
+          duration,
         },
-        object: { id: req.id, name: req.body.title, type: 'dashboard', tags: [] },
+        object: await getUserActivityObject({ id: req.id, data: req.body }, req),
         metadata: {
           userId: user?.profile_uid,
           username: user?.username,
           dashboardId: req.id,
           dashboardTitle: req.body.title,
-          duration: 0,
+          duration,
         },
-        // object: await getUserActivityObject(result, request),
       });
       return res.ok({ body: {} });
     }

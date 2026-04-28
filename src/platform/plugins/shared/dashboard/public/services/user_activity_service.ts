@@ -9,58 +9,43 @@
 
 import { coreServices } from './kibana_services';
 
-let userActivityService;
-const sessions: { [id: string]: { startTime: number; pauseTime: number } } = {};
+const sessions: { [id: string]: DashboardViewSession } = {};
 
-let startPause: number | undefined;
-const onBlur = () => {
-  console.log('on blur');
-  startPause = Date.now();
-};
-const onFocus = (id: string) => {
-  console.log('on focus', id);
-  if (startPause !== undefined) {
-    const endPause = Date.now();
-    if (sessions[id]) {
-      sessions[id].pauseTime += endPause - startPause;
-    }
-    console.log({ test: sessions[id] });
+export const getDashboardUserActivityService = (id: string) => {
+  if (!sessions[id]) {
+    sessions[id] = new DashboardViewSession(id);
   }
-  startPause = undefined;
+  return sessions[id];
 };
 
-let onFocusId;
+class DashboardViewSession {
+  private id: string;
+  private startTime: number | undefined;
 
-export const getDashboardUserActivityService = () => {
-  return userActivityService
-    ? userActivityService
-    : {
-        startDashboardView: (id: string) => {
-          console.log('startDashboardView', id);
-          if (!sessions[id]) sessions[id] = { startTime: Date.now(), pauseTime: 0 };
-          onFocusId = () => onFocus(id);
-          window.addEventListener('focus', onFocusId);
-          window.addEventListener('blur', onBlur);
-        },
-        endDashboardView: async (id: string, title: string) => {
-          console.log('END', id, title);
-          const startTime = sessions[id].startTime;
-          const endTime = Date.now();
-          const result = await coreServices.http.post(
-            `/internal/dashboard/user_activity/view/${id}`,
-            {
-              body: JSON.stringify({
-                title,
-                duration: startTime ? Math.abs(endTime - startTime) : 0,
-              }),
-              method: 'POST',
-              asSystemRequest: true,
-            }
-          );
-          delete sessions[id];
-          if (onFocusId) window.removeEventListener('focus', onFocusId);
-          window.removeEventListener('blur', onBlur);
-          return result;
-        },
-      };
-};
+  constructor(id: string) {
+    this.id = id;
+  }
+
+  startDashboardView() {
+    this.startTime = Date.now();
+    console.log('START', this.startTime);
+  }
+
+  async endDashboardView(title: string) {
+    console.log('END', this.id, title, this.startTime);
+    const result = await coreServices.http.post(
+      `/internal/dashboard/user_activity/view/${this.id}`,
+      {
+        body: JSON.stringify({
+          title,
+          start: this.startTime,
+          end: Date.now(),
+        }),
+        method: 'POST',
+        asSystemRequest: true,
+      }
+    );
+    this.startTime = undefined;
+    return result;
+  }
+}

@@ -133,7 +133,7 @@ export async function loadDashboardApi({
     contentInsightsClient.track(savedObjectId, 'viewed');
   }
 
-  getDashboardUserActivityService().startDashboardView(api.uuid);
+  getDashboardUserActivityService(api.uuid).startDashboardView();
 
   return {
     api,
@@ -141,10 +141,7 @@ export async function loadDashboardApi({
       cleanup();
       if (savedObjectId) {
         (async () => {
-          await getDashboardUserActivityService().endDashboardView(
-            api.uuid,
-            api.title$.value ?? ''
-          );
+          await getDashboardUserActivityService(api.uuid).endDashboardView(api.title$.value ?? '');
         })();
       }
       if (onApiCleanup) {
