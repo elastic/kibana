@@ -10,17 +10,19 @@
 import { Parser } from '@elastic/esql';
 import type { ICommandContext, ISuggestionItem } from '../../../commands/registry/types';
 import { getOverlapRange } from '../../../commands/definitions/utils/shared';
+import {
+  containsWhitespace,
+  findFirstNonWhitespaceIndex,
+  isOnlyWhitespace,
+  startsWithWordChar,
+} from '../../../commands/definitions/utils/regex';
 
 interface SuggestionRangeToReplace {
   start: number;
   end: number;
 }
 
-const NON_WHITESPACE_REGEX = /\S/;
-const ONLY_WHITESPACE_REGEX = /^\s+$/;
 const ENDS_WITH_WHITESPACE_REGEX = /\s$/;
-const STARTS_WITH_WORD_CHAR = /^\w/;
-const CONTAINS_WHITESPACE_REGEX = /\s/;
 
 interface LexerToken {
   text: string;

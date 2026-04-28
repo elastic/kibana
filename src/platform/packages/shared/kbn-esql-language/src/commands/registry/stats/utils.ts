@@ -29,8 +29,8 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
-import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
+import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 
 /**
  * Position of the caret in the sort command:
@@ -190,7 +190,7 @@ export const getCommaAndPipe = (
   });
 
   // does the query end with whitespace?
- if (endsWithWhitespace(innerText)) {
+  if (endsWithWhitespace(innerText)) {
     commaSuggestion.replacementRangeStrategy = {
       kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };

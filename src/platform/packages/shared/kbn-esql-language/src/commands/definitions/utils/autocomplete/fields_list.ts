@@ -107,7 +107,7 @@ export async function suggestFieldsList(
     if (options?.includePipeAndCommaSuggestions !== false) {
       const commaSuggestion = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
 
-     if (endsWithWhitespace(innerText)) {
+      if (endsWithWhitespace(innerText)) {
         commaSuggestion.replacementRangeStrategy = {
           kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
         };

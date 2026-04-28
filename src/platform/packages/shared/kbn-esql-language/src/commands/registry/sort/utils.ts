@@ -13,6 +13,7 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ISuggestionItem } from '../types';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
+import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 
 export type SortPosition =
   | 'expression'
@@ -115,7 +116,7 @@ export const getSuggestionsAfterCompleteExpression = (
   });
 
   // does the query end with whitespace?
- if (endsWithWhitespace(innerText)) {
+  if (endsWithWhitespace(innerText)) {
     commaSuggestion.replacementRangeStrategy = {
       kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };
