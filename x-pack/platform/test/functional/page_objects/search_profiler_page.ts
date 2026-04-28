@@ -6,6 +6,7 @@
  */
 
 import { compressToEncodedURIComponent } from 'lz-string';
+import { fipsIsEnabled } from '@kbn/test';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
@@ -48,9 +49,11 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       return await monacoEditor.getCurrentMarkers(editorTestSubjectSelector);
     },
     async editorHasErrorNotification() {
-      const notification = await testSubjects.find('noShardsNotification');
-      const text = await notification.getVisibleText();
-      return text.includes('Unable to profile');
+      // In FIPS mode ES throws no_such_index for _all with no indices rather
+      // than returning _shards.total === 0, so the error reaches the catch
+      // path and renders as a profilerErrorNotification toast instead.
+      const subject = fipsIsEnabled() ? 'profilerErrorNotification' : 'noShardsNotification';
+      return await testSubjects.exists(subject);
     },
     async editorHasJsonParseErrorNotification() {
       return await testSubjects.exists('jsonParseErrorToast');
