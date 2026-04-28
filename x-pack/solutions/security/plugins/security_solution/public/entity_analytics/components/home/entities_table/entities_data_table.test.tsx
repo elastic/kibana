@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { EntitiesDataTable } from './entities_data_table';
 import { DataViewContext } from '.';
 import { TestProviders } from '../../../../common/mock';
@@ -29,11 +30,16 @@ const mockUseUserPrivileges = jest.mocked(useUserPrivileges);
 const mockUseGlobalTime = jest.mocked(useGlobalTime);
 const mockUseKibana = jest.mocked(useKibana);
 
+const capturedProps: { externalCustomRenderers?: CustomCellRenderer } = {};
+
 jest.mock('@kbn/unified-data-table', () => {
   const actual = jest.requireActual('@kbn/unified-data-table');
   return {
     ...actual,
-    UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
+    UnifiedDataTable: (props: { externalCustomRenderers?: CustomCellRenderer }) => {
+      capturedProps.externalCustomRenderers = props.externalCustomRenderers;
+      return <div data-test-subj="unifiedDataTable" />;
+    },
   };
 });
 
@@ -234,5 +240,57 @@ describe('EntitiesDataTable', () => {
         pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
       })
     );
+  });
+
+  describe('entity.source column renderer', () => {
+    const renderCell = (value: unknown) => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([
+        { flattened: { 'entity.source': value } },
+      ]);
+
+      renderWithProviders(state);
+
+      const renderer = capturedProps.externalCustomRenderers?.['entity.source'];
+      if (!renderer) throw new Error('entity.source renderer was not registered');
+
+      const row = { flattened: { 'entity.source': value } } as never;
+      // The renderer only consumes `row`, so we can pass minimal stubs for the other props.
+      return render(
+        <TestProviders>
+          {renderer({
+            row,
+            columnId: 'entity.source',
+            rowIndex: 0,
+            colIndex: 0,
+            setCellProps: jest.fn(),
+            isDetails: false,
+            isExpanded: false,
+            isExpandable: false,
+            dataView: mockDataView,
+            fieldFormats: {},
+          } as never)}
+        </TestProviders>
+      );
+    };
+
+    it('renders the empty placeholder when entity.source is missing', () => {
+      const { container } = renderCell(undefined);
+      expect(container.textContent).toContain('—');
+    });
+
+    it('renders a single source formatted (capitalized) without the "+N" overflow badge', () => {
+      const { getByText, queryByText, queryByTestId } = renderCell('entityanalytics_okta');
+      expect(getByText('Entityanalytics Okta')).toBeInTheDocument();
+      expect(queryByText('entityanalytics_okta')).not.toBeInTheDocument();
+      expect(queryByTestId('entitySourceValue-more')).not.toBeInTheDocument();
+    });
+
+    it('renders the first formatted source and a "+N" overflow badge for array values', () => {
+      const { getByText, queryByText, getByTestId } = renderCell(['okta', 'entityanalytics_okta']);
+      expect(getByText('Okta')).toBeInTheDocument();
+      expect(queryByText('okta')).not.toBeInTheDocument();
+      expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
+    });
   });
 });
