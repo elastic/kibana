@@ -239,6 +239,13 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       return ef;
     }, [exception]);
 
+    const [initialExceptions] = useState(() => [
+      endpointExceptionItem,
+      ...(additionalEntries
+        ? additionalEntries.map((entries) => ({ ...endpointExceptionItem, entries }))
+        : []),
+    ]);
+
     const handleOnChangeName = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
@@ -414,10 +421,15 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
             ));
 
         if (isCalledWithoutChanges) {
-          // todo: for OR groups
-          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+          const addedFieldGroups: string[][] = arg.exceptionItems.map(
+            (item) => item?.entries.map((e) => e.field) || ['']
+          );
 
-          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
+          setHasDuplicateFields(
+            addedFieldGroups.some((addedFields) =>
+              computeHasDuplicateFields(getAddedFieldsCounts(addedFields))
+            )
+          );
           return;
         } else {
           setHasDuplicateFields(false);
@@ -465,7 +477,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
           allowLargeValueLists: false,
           httpService: http,
           autocompleteService: autocompleteSuggestions,
-          exceptionListItems: [endpointExceptionItem as ExceptionListItemSchema],
+          exceptionListItems: initialExceptions as ExceptionListItemSchema[],
           listType: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.type,
           listId: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.list_id,
           listNamespaceType: 'agnostic',
@@ -482,7 +494,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       [
         http,
         autocompleteSuggestions,
-        endpointExceptionItem,
+        initialExceptions,
         indexPatterns,
         handleOnBuilderChange,
         exception.os_types,
