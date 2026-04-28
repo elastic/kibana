@@ -77,10 +77,9 @@ export const serverlessProjectTypes = ['es', 'oblt', 'security', 'workplaceai'] 
 export type ServerlessProjectType = (typeof serverlessProjectTypes)[number];
 
 export const esServerlessProjectTypes = [
+  'elasticsearch',
   'elasticsearch_general_purpose',
-  'elasticsearch_search',
   'elasticsearch_vector',
-  'elasticsearch_timeseries',
   'observability',
   'security',
   'workplaceai',
@@ -123,10 +122,9 @@ export const esSettingsProjectTypeFromKbn = new Map<string, string>([
 ]);
 
 export const kbnProjectTypeFromEs = new Map<string, string>([
+  ['elasticsearch', 'es'],
   ['elasticsearch_general_purpose', 'es'],
-  ['elasticsearch_search', 'es'],
   ['elasticsearch_vector', 'es'],
-  ['elasticsearch_timeseries', 'es'],
   ['observability', 'oblt'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],

@@ -1777,6 +1777,8 @@ x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/feature
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
+# common
+x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -2285,7 +2287,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
-/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
+/src/platform/packages/private/kbn-validate-oas/src/oas_error_baseline.json
 # Exclude usage collection schemas from @elastic/kibana-core ownership
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
@@ -2733,6 +2735,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
 
 ## Security Solution sub teams - Cloud Security Posture
 
@@ -2762,7 +2769,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 /x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting
@@ -2785,7 +2791,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting
@@ -3077,11 +3082,6 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
