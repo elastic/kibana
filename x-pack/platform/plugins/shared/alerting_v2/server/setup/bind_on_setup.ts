@@ -47,7 +47,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
     uiSettingsSetup.registerGlobal(dispatcherUiSettings);
-    uiSettingsSetup.register(experimentalFeaturesUiSettings);
+    uiSettingsSetup.registerGlobal(experimentalFeaturesUiSettings);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
