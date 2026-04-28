@@ -32,8 +32,8 @@ export const registerInferenceFeatures = ({
   searchInferenceEndpoints.features.register({
     parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
     featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
-    featureName: 'Agent Builder',
-    featureDescription: 'Models available for agent builder (selectable from the UI)',
+    featureName: 'Main models',
+    featureDescription: 'List of models selectable from the UI',
     taskType: 'chat_completion',
     recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
   });
@@ -42,8 +42,9 @@ export const registerInferenceFeatures = ({
   searchInferenceEndpoints.features.register({
     parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
     featureId: AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-    featureName: 'Agent Builder - Fast model',
-    featureDescription: 'Model used for "fast" tasks',
+    featureName: 'Fast models (experimental)',
+    featureDescription:
+      'Models used for fast and low effort tasks (experimental - only used when the `agentBuilder:experimentalFeatures` uiSetting is enabled)',
     taskType: 'chat_completion',
     recommendedEndpoints: AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS,
   });
