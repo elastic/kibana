@@ -35,7 +35,7 @@ import { positionSchema } from '../alignments';
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
   visibility: baseLegendVisibilitySchema,
-  position: positionSchema(),
+  position: schema.maybe(positionSchema()),
   size: legendSizeSchema,
 };
 
