@@ -29,8 +29,13 @@ import type { Group } from '../../../common/typings';
  */
 const formatComparator = (comparator: string): string => {
   if (comparator === COMPARATORS.NOT_BETWEEN || comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE) {
-    // No need for i18n as we are using the enum value, we only need a space.
     return 'NOT BETWEEN';
+  }
+  if (comparator === COMPARATORS.BETWEEN_INCLUSIVE) {
+    return 'BETWEEN (INCLUSIVE)';
+  }
+  if (comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE) {
+    return 'NOT BETWEEN (INCLUSIVE)';
   }
   return comparator.toUpperCase();
 };
