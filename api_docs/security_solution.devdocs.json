@@ -78,6 +78,7 @@
                 "lineNumber": 106,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -146,6 +147,7 @@
                 "lineNumber": 125,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -163,6 +165,7 @@
                 "lineNumber": 126,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupPlugins",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -210,6 +213,7 @@
                 "lineNumber": 300,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -227,6 +231,7 @@
                 "lineNumber": 300,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "StartPlugins",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -306,6 +311,7 @@
                 "lineNumber": 429,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -323,6 +329,7 @@
                 "lineNumber": 430,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupPlugins",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2099,6 +2106,7 @@
               "lineNumber": 239,
               "columnNumber": 27,
               "deprecated": false,
+              "docsReferencedTypeName": "ProductFeatureKeys",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2153,6 +2161,7 @@
               "lineNumber": 17,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "ContractComponents",
               "trackAdoption": false
             }
           ]
@@ -2220,7 +2229,7 @@
               "id": "def-public.PluginStart.setOnboardingSettings.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n    userUrl,\n    isAgentlessAvailable,\n    projectUrl,\n    deploymentUrl,\n  }",
               "description": [],
               "signature": [
                 "{ userUrl: UserUrl; isAgentlessAvailable: boolean; projectUrl?: string | undefined; deploymentUrl?: string | undefined; }"
@@ -2349,6 +2358,7 @@
                 "lineNumber": 28,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConfigType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2406,6 +2416,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "BuildFlavor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2642,6 +2653,7 @@
                 "lineNumber": 212,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2689,6 +2701,7 @@
                 "lineNumber": 293,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SecuritySolutionPluginCoreSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2706,6 +2719,7 @@
                 "lineNumber": 294,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SecuritySolutionPluginSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2753,6 +2767,7 @@
                 "lineNumber": 843,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SecuritySolutionPluginCoreStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2770,6 +2785,7 @@
                 "lineNumber": 844,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SecuritySolutionPluginStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3136,6 +3152,7 @@
                 "lineNumber": 74,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3710,6 +3727,7 @@
               "lineNumber": 122,
               "columnNumber": 41,
               "deprecated": false,
+              "docsReferencedTypeName": "ProductFeaturesConfigurator",
               "trackAdoption": false
             }
           ]

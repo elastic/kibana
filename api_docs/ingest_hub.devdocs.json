@@ -199,6 +199,7 @@
               "lineNumber": 32,
               "columnNumber": 24,
               "deprecated": false,
+              "docsReferencedTypeName": "IngestFlow",
               "trackAdoption": false,
               "isRequired": true
             }

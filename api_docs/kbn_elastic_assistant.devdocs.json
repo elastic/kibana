@@ -34,6 +34,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -135,6 +136,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -171,6 +173,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -304,6 +307,7 @@
             "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -327,6 +331,7 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConversationsBulkActions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -345,6 +350,7 @@
             "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IToasts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -386,6 +392,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -403,6 +410,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformPromptsBulkActionRequestBody",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -421,6 +429,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IToasts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -461,6 +470,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -687,6 +697,7 @@
             "lineNumber": 37,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "GetConversationByIdParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -902,6 +913,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -942,6 +954,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -980,6 +993,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -1032,6 +1046,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -1404,6 +1419,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFetchAnonymizationFieldsParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1448,6 +1464,7 @@
             "lineNumber": 84,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFetchCurrentUserConversationsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1491,6 +1508,7 @@
             "lineNumber": 40,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFindPromptsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1507,7 +1525,23 @@
         "tags": [],
         "label": "useMaybeAssistantContext",
         "description": [
-          "\nSame context as {@link useAssistantContext}, but returns `undefined` when no provider is present.\nPrefer {@link useAssistantContext} for assistant UI; use this only when a hook must degrade\ngracefully outside `AssistantProvider` (e.g. embedded previews)."
+          "\nSame context as ",
+          {
+            "pluginId": "@kbn/elastic-assistant",
+            "scope": "public",
+            "docId": "kibKbnElasticAssistantPluginApi",
+            "section": "def-public.useAssistantContext",
+            "text": "useAssistantContext"
+          },
+          ", but returns `undefined` when no provider is present.\nPrefer ",
+          {
+            "pluginId": "@kbn/elastic-assistant",
+            "scope": "public",
+            "docId": "kibKbnElasticAssistantPluginApi",
+            "section": "def-public.useAssistantContext",
+            "text": "useAssistantContext"
+          },
+          " for assistant UI; use this only when a hook must degrade\ngracefully outside `AssistantProvider` (e.g. embedded previews)."
         ],
         "signature": [
           "() => ",

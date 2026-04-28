@@ -27,11 +27,11 @@ Follow `.agents/skills/scout-best-practices-reviewer/SKILL.md` for the checklist
 
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
-## Non-negotiable UI test checks
+## Non-negotiable checks
 
-These rules must be verified on every applicable UI test file. Do not skip them:
+These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
-- **Test behavior, not data correctness (UI)**: if a test case is validating data (exact computed values, API response shape, edge-case data), the test belongs in a different layer. Recommend the target layer explicitly in the inline comment — "move to a Scout API test" or "move to an RTL/Jest unit test" — and suggest what the UI test should assert instead.
+- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md`
 
 ## Output
 
