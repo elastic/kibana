@@ -34,13 +34,23 @@ describe('Generate Component', () => {
     expect(screen.getByTestId('generate')).toBeDisabled();
   });
 
-  it('shows tooltip content when the button is disabled', async () => {
-    render(<Generate isLoading={false} isDisabled={true} onGenerate={jest.fn()} />);
+  it('shows SELECT_A_CONNECTOR tooltip content when the button is disabled and has privileges', async () => {
+    render(<Generate isLoading={false} isDisabled={true} hasConnectorsPrivilege={true} onGenerate={jest.fn()} />);
 
     fireEvent.mouseOver(screen.getByTestId('generate'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.SELECT_A_CONNECTOR)).toBeInTheDocument();
+    });
+  });
+
+  it('shows NO_CONNECTORS_PRIVILEGE tooltip content when the button is disabled and lacks privileges', async () => {
+    render(<Generate isLoading={false} isDisabled={true} hasConnectorsPrivilege={false} onGenerate={jest.fn()} />);
+
+    fireEvent.mouseOver(screen.getByTestId('generate'));
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.NO_CONNECTORS_PRIVILEGE)).toBeInTheDocument();
     });
   });
 });

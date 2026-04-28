@@ -51,6 +51,7 @@ interface Props {
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onToggleShowAnonymized: () => void;
   showAnonymized: boolean;
+  hasConnectorsPrivilege?: boolean;
 }
 
 const HistoryComponent: React.FC<Props> = ({
@@ -59,6 +60,7 @@ const HistoryComponent: React.FC<Props> = ({
   onGenerate,
   onToggleShowAnonymized,
   showAnonymized,
+  hasConnectorsPrivilege = true,
 }) => {
   const { assistantAvailability, http } = useAssistantContext();
 
@@ -243,6 +245,7 @@ const HistoryComponent: React.FC<Props> = ({
           aiConnectorsCount={aiConnectors?.length ?? null}
           attackDiscoveriesCount={data?.total ?? 0}
           isDisabled={!aiConnectors?.length}
+          hasConnectorsPrivilege={hasConnectorsPrivilege}
           isLoading={isLoading}
           onGenerate={onGenerate}
         />

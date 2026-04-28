@@ -16,6 +16,7 @@ interface Props {
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   isDisabled?: boolean;
+  hasConnectorsPrivilege?: boolean;
 }
 
 const runButtonStyles = css`
@@ -25,9 +26,9 @@ const runButtonStyles = css`
   width: 74px;
 `;
 
-const RunComponent: React.FC<Props> = ({ isLoading, onGenerate, isDisabled }) => (
+const RunComponent: React.FC<Props> = ({ isLoading, onGenerate, isDisabled, hasConnectorsPrivilege = true }) => (
   <EuiToolTip
-    content={isDisabled ? i18n.DISABLED_TOOLTIP : i18n.RUN_TOOLTIP}
+    content={isDisabled ? (hasConnectorsPrivilege ? i18n.DISABLED_TOOLTIP : i18n.NO_CONNECTORS_PRIVILEGE) : i18n.RUN_TOOLTIP}
     data-test-subj="runTooltip"
     position="bottom"
   >

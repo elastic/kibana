@@ -27,3 +27,10 @@ export const DISABLED_TOOLTIP = i18n.translate(
     defaultMessage: 'To run ad-hoc Attack discoveries, select a connector in settings',
   }
 );
+
+export const NO_CONNECTORS_PRIVILEGE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.header.run.noConnectorsPrivilege',
+  {
+    defaultMessage: 'You do not have permission to use connectors. Reach out to your admin to get access.',
+  }
+);

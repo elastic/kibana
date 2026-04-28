@@ -55,3 +55,10 @@ export const SELECT_A_CONNECTOR = i18n.translate(
     defaultMessage: 'Select a connector',
   }
 );
+
+export const NO_CONNECTORS_PRIVILEGE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.noConnectorsPrivilege',
+  {
+    defaultMessage: 'You do not have permission to use connectors. Reach out to your admin to get access.',
+  }
+);

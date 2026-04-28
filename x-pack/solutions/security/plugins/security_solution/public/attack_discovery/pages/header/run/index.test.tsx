@@ -8,7 +8,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { RUN, RUN_TOOLTIP, DISABLED_TOOLTIP } from './translations';
+import { RUN, RUN_TOOLTIP, DISABLED_TOOLTIP, NO_CONNECTORS_PRIVILEGE } from './translations';
 import { Run } from '.';
 
 const defaultProps = {
@@ -37,13 +37,23 @@ describe('Run', () => {
     });
   });
 
-  it('renders the tooltip on hover with the disabled text when isDisabled is true', async () => {
-    render(<Run {...defaultProps} isDisabled={true} />);
+  it('renders the tooltip on hover with the disabled text when isDisabled is true and has privileges', async () => {
+    render(<Run {...defaultProps} isDisabled={true} hasConnectorsPrivilege={true} />);
 
     fireEvent.mouseOver(screen.getByTestId('run'));
 
     await waitFor(() => {
       expect(screen.getByTestId('runTooltip')).toHaveTextContent(DISABLED_TOOLTIP);
+    });
+  });
+
+  it('renders the tooltip on hover with the no privileges text when isDisabled is true and lacks privileges', async () => {
+    render(<Run {...defaultProps} isDisabled={true} hasConnectorsPrivilege={false} />);
+
+    fireEvent.mouseOver(screen.getByTestId('run'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('runTooltip')).toHaveTextContent(NO_CONNECTORS_PRIVILEGE);
     });
   });
 

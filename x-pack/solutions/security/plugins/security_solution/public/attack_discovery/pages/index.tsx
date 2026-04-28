@@ -55,7 +55,7 @@ export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { uiSettings, settings },
+    services: { uiSettings, settings, application },
   } = useKibana();
 
   const { http } = useAssistantContext();
@@ -64,6 +64,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     featureId: 'attack_discovery',
     settings,
   });
+
+  const hasConnectorsPrivilege = application.capabilities.actions?.show === true;
 
   // for showing / hiding anonymized data:
   const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -250,12 +252,13 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     >
       <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
-          <Actions
-            isLoading={isLoading}
-            onGenerate={onGenerate}
-            openFlyout={openFlyout}
-            isDisabled={connectorId == null}
-          />
+        <Actions
+          isLoading={isLoading}
+          onGenerate={onGenerate}
+          openFlyout={openFlyout}
+          isDisabled={connectorId == null}
+          hasConnectorsPrivilege={hasConnectorsPrivilege}
+        />
           <EuiSpacer size={'s'} />
         </HeaderPage>
 
@@ -274,6 +277,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           onGenerate={onGenerate}
           onToggleShowAnonymized={onToggleShowAnonymized}
           showAnonymized={showAnonymized}
+          hasConnectorsPrivilege={hasConnectorsPrivilege}
         />
 
         {showFlyout && (

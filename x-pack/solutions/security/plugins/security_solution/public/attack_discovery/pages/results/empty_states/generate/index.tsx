@@ -13,16 +13,17 @@ import type { SettingsOverrideOptions } from '../../history/types';
 
 interface Props {
   isDisabled?: boolean;
+  hasConnectorsPrivilege?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
-const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onGenerate }) => {
+const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, hasConnectorsPrivilege = true, onGenerate }) => {
   const disabled = isLoading || isDisabled;
 
   return (
     <EuiToolTip
-      content={disabled ? i18n.SELECT_A_CONNECTOR : null}
+      content={disabled ? (hasConnectorsPrivilege ? i18n.SELECT_A_CONNECTOR : i18n.NO_CONNECTORS_PRIVILEGE) : null}
       data-test-subj="generateTooltip"
     >
       <EuiButton

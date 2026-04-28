@@ -22,11 +22,12 @@ import * as i18n from './translations';
 
 interface Props {
   isDisabled: boolean;
+  hasConnectorsPrivilege?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
-const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate }) => {
+const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, hasConnectorsPrivilege = true, onGenerate }) => {
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -97,7 +98,7 @@ const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate 
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <Generate isDisabled={isDisabled} isLoading={isLoading} onGenerate={onGenerate} />
+        <Generate isDisabled={isDisabled} isLoading={isLoading} hasConnectorsPrivilege={hasConnectorsPrivilege} onGenerate={onGenerate} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

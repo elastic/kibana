@@ -25,6 +25,7 @@ interface Props {
   aiConnectorsCount: number | null; // null when connectors are not configured
   attackDiscoveriesCount: number;
   isDisabled?: boolean;
+  hasConnectorsPrivilege?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
@@ -34,6 +35,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
   attackDiscoveriesCount,
   isLoading,
   isDisabled = false,
+  hasConnectorsPrivilege = true,
   onGenerate,
 }) => {
   const historyTitle = useMemo(
@@ -96,8 +98,8 @@ const EmptyPromptComponent: React.FC<Props> = ({
   );
 
   const actions = useMemo(() => {
-    return <Generate isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />;
-  }, [isDisabled, isLoading, onGenerate]);
+    return <Generate isLoading={isLoading} isDisabled={isDisabled} hasConnectorsPrivilege={hasConnectorsPrivilege} onGenerate={onGenerate} />;
+  }, [isDisabled, isLoading, hasConnectorsPrivilege, onGenerate]);
 
   if (isLoading || aiConnectorsCount == null || attackDiscoveriesCount > 0) {
     return null;
