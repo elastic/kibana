@@ -61,60 +61,69 @@ describe('loadExtendedFieldsFromMapping', () => {
     return { esClient, logger };
   };
 
-  const makeHit = (id: string, extended: Record<string, unknown>) =>
-    ({
-      _id: id,
-      _source: { cases: { extended_fields: extended } },
-    } as never);
-
-  const mockSearch = (
+  const mockAgg = (
     esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
-    hits: ReturnType<typeof makeHit>[]
+    bucketKeys: string[]
   ) => {
     esClient.search.mockResolvedValueOnce({
       took: 0,
       timed_out: false,
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-      hits: { total: { value: hits.length, relation: 'eq' }, max_score: 0, hits },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {
+        keys: {
+          buckets: bucketKeys.map((key) => ({ key, doc_count: 1 })),
+        },
+      },
     } as never);
   };
 
-  it('issues a per-owner search scoped to cases SOs that actually have extended_fields populated', async () => {
+  it('issues a per-owner search with a runtime-field keyword aggregation, scoped to cases SOs that have extended_fields populated', async () => {
     const { esClient, logger } = setup();
-    mockSearch(esClient, []);
+    mockAgg(esClient, []);
 
     await loadExtendedFieldsFromMapping('securitySolution', esClient, logger);
 
-    expect(esClient.search).toHaveBeenCalledWith({
-      index: '.kibana_alerting_cases',
-      size: 200,
-      _source: ['cases.extended_fields'],
-      sort: [{ 'cases.updated_at': { order: 'desc' } }],
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'cases' } },
-            { term: { 'cases.owner': 'securitySolution' } },
-            { exists: { field: 'cases.extended_fields' } },
-          ],
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.kibana_alerting_cases',
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'cases' } },
+              { term: { 'cases.owner': 'securitySolution' } },
+              { exists: { field: 'cases.extended_fields' } },
+            ],
+          },
         },
-      },
-    });
+      })
+    );
+    const callArg = esClient.search.mock.calls[0][0] as {
+      runtime_mappings?: Record<string, unknown>;
+      aggregations?: Record<string, unknown>;
+    };
+    expect(callArg.runtime_mappings).toBeDefined();
+    expect(callArg.aggregations).toEqual(
+      expect.objectContaining({
+        keys: { terms: expect.objectContaining({ size: 10_000 }) },
+      })
+    );
   });
 
-  it('returns the deduplicated (name, type) pairs unioned across the sampled cases', async () => {
+  it('returns the deduplicated (name, type) pairs unioned across every key emitted by the agg', async () => {
     const { esClient, logger } = setup();
-    mockSearch(esClient, [
-      makeHit('case-1', { riskScore_as_long: 42, summary_as_keyword: 'hello' }),
-      makeHit('case-2', { incidentDate_as_date: '2026-04-27', riskScore_as_long: 99 }),
-      makeHit('case-3', { summary_as_keyword: 'again' }),
+    mockAgg(esClient, [
+      'riskScore_as_long',
+      'incidentDate_as_date',
+      'summary_as_keyword',
     ]);
 
     const out = await loadExtendedFieldsFromMapping('securitySolution', esClient, logger);
     expect(out).toEqual([
       { name: 'riskScore', type: 'long' },
-      { name: 'summary', type: 'keyword' },
       { name: 'incidentDate', type: 'date' },
+      { name: 'summary', type: 'keyword' },
     ]);
   });
 
@@ -126,25 +135,18 @@ describe('loadExtendedFieldsFromMapping', () => {
      * a wrong cast. Skipping is the safe degradation.
      */
     const { esClient, logger } = setup();
-    mockSearch(esClient, [
-      makeHit('case-1', {
-        riskScore_as_long: 42,
-        legacy_no_suffix: 'value',
-        foo_as_unknown_type: 'x',
-      }),
-    ]);
+    mockAgg(esClient, ['riskScore_as_long', 'legacy_no_suffix', 'foo_as_unknown_type']);
 
     expect(await loadExtendedFieldsFromMapping('securitySolution', esClient, logger)).toEqual([
       { name: 'riskScore', type: 'long' },
     ]);
   });
 
-  it('returns an empty array and logs a warning when search rejects, so plugin start is never aborted by a transient ES error', async () => {
+  it('returns an empty array and logs a warning when the search rejects, so plugin start is never aborted by a transient ES error', async () => {
     /*
-     * FAILURE SCENARIO: ES returns 503, the cluster is initializing, or
-     * the index has not been created yet on a fresh install. The view
-     * sync runs at plugin start; we must degrade to "no extended fields
-     * yet" rather than throwing and leaving the analytics surface broken.
+     * FAILURE SCENARIO: ES returns 503 / cluster initializing / inline
+     * scripts disabled. The view sync runs at plugin start; we must
+     * degrade to "no extended fields yet" rather than throwing.
      */
     const { esClient, logger } = setup();
     esClient.search.mockRejectedValueOnce(new Error('cluster_block'));
@@ -159,24 +161,24 @@ describe('loadExtendedFieldsFromMapping', () => {
     );
   });
 
-  it('returns an empty array when there are no cases for the owner yet', async () => {
+  it('returns an empty array when there are no buckets (no cases for the owner have extended_fields populated yet)', async () => {
     const { esClient, logger } = setup();
-    mockSearch(esClient, []);
+    mockAgg(esClient, []);
     expect(
       await loadExtendedFieldsFromMapping('observability', esClient, logger)
     ).toEqual([]);
   });
 
-  it('tolerates hits whose _source is missing or malformed without crashing', async () => {
+  it('tolerates a missing aggregations key in the response', async () => {
     const { esClient, logger } = setup();
-    mockSearch(esClient, [
-      { _id: 'case-1' } as never, // no _source at all
-      { _id: 'case-2', _source: {} } as never, // no cases.extended_fields
-      { _id: 'case-3', _source: { cases: { extended_fields: null } } } as never,
-      makeHit('case-4', { ok_as_keyword: 'value' }),
-    ]);
-    expect(await loadExtendedFieldsFromMapping('securitySolution', esClient, logger)).toEqual([
-      { name: 'ok', type: 'keyword' },
-    ]);
+    esClient.search.mockResolvedValueOnce({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    } as never);
+    expect(
+      await loadExtendedFieldsFromMapping('securitySolution', esClient, logger)
+    ).toEqual([]);
   });
 });

@@ -33,7 +33,7 @@ describe('esqlCastFunctionForType', () => {
 });
 
 describe('extendedFieldsToEval', () => {
-  it('emits one EVAL per (name, type) pair with the camelCase output column and the matching cast', () => {
+  it('emits one EVAL per (name, type) pair with the snake_case output column matching the flattened key 1:1, and the matching cast', () => {
     const out = extendedFieldsToEval([
       { name: 'riskScore', type: 'long' },
       { name: 'incidentDate', type: 'date' },
@@ -43,27 +43,27 @@ describe('extendedFieldsToEval', () => {
     expect(out).toEqual([
       {
         snakeKey: 'riskScore_as_long',
-        camelKey: 'riskScoreAsLong',
+        columnKey: 'riskScore_as_long',
         evalLine:
-          'riskScoreAsLong = TO_LONG(JSON_EXTRACT(_source, "cases.extended_fields.riskScore_as_long"))',
+          'riskScore_as_long = TO_LONG(JSON_EXTRACT(_source, "cases.extended_fields.riskScore_as_long"))',
       },
       {
         snakeKey: 'incidentDate_as_date',
-        camelKey: 'incidentDateAsDate',
+        columnKey: 'incidentDate_as_date',
         evalLine:
-          'incidentDateAsDate = TO_DATETIME(JSON_EXTRACT(_source, "cases.extended_fields.incidentDate_as_date"))',
+          'incidentDate_as_date = TO_DATETIME(JSON_EXTRACT(_source, "cases.extended_fields.incidentDate_as_date"))',
       },
       {
         snakeKey: 'summary_as_keyword',
-        camelKey: 'summaryAsKeyword',
+        columnKey: 'summary_as_keyword',
         evalLine:
-          'summaryAsKeyword = JSON_EXTRACT(_source, "cases.extended_fields.summary_as_keyword")',
+          'summary_as_keyword = JSON_EXTRACT(_source, "cases.extended_fields.summary_as_keyword")',
       },
       {
         snakeKey: 'lossUsd_as_double',
-        camelKey: 'lossUsdAsDouble',
+        columnKey: 'lossUsd_as_double',
         evalLine:
-          'lossUsdAsDouble = TO_DOUBLE(JSON_EXTRACT(_source, "cases.extended_fields.lossUsd_as_double"))',
+          'lossUsd_as_double = TO_DOUBLE(JSON_EXTRACT(_source, "cases.extended_fields.lossUsd_as_double"))',
       },
     ]);
   });
@@ -76,9 +76,9 @@ describe('extendedFieldsToEval', () => {
       { name: 'riskScore', type: 'long' }, // exact dupe — collapses
       { name: 'riskScore', type: 'keyword' }, // same name, different type — kept
     ]);
-    expect(out.map((e) => e.camelKey)).toEqual([
-      'riskScoreAsLong',
-      'riskScoreAsKeyword',
+    expect(out.map((e) => e.columnKey)).toEqual([
+      'riskScore_as_long',
+      'riskScore_as_keyword',
     ]);
   });
 
@@ -92,10 +92,10 @@ describe('extendedFieldsToEval', () => {
       { name: 'a', type: 'keyword' },
       { name: 'c', type: 'date' },
     ];
-    expect(extendedFieldsToEval(input).map((e) => e.camelKey)).toEqual([
-      'bAsLong',
-      'aAsKeyword',
-      'cAsDate',
+    expect(extendedFieldsToEval(input).map((e) => e.columnKey)).toEqual([
+      'b_as_long',
+      'a_as_keyword',
+      'c_as_date',
     ]);
   });
 });

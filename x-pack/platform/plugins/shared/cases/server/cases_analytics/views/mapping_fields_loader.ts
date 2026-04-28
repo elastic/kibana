@@ -53,29 +53,49 @@ export const parseExtendedFieldSubkey = (fullPath: string): TemplateFieldRef | n
 };
 
 /**
- * How many recent cases per owner to inspect when discovering which
- * extended-field keys have been written. The cases SO `extended_fields`
- * field is mapped as `flattened`, and ES `_field_caps` returns only the
- * parent for flattened types — sub-keys are not enumerated. Sampling
- * `_source` is the reliable cross-version path. 200 is enough to cover
- * any realistically active template-field set; raise if a deployment
- * reports missed columns.
+ * Maximum distinct extended-field keys we expect to discover per owner.
+ * Matches ES default `search.max_buckets` for terms aggs. Raise if a
+ * deployment legitimately exceeds this many template fields.
  */
-const SAMPLE_SIZE = 200;
+const MAX_DISTINCT_KEYS = 10_000;
 
-interface CaseSourceShape {
-  cases?: {
-    extended_fields?: Record<string, unknown>;
-  };
+const RUNTIME_FIELD_NAME = '_cai_extended_field_keys';
+
+/**
+ * Painless source: emits one keyword per key present in
+ * `_source.cases.extended_fields` per doc. Used as a runtime field that
+ * we then aggregate on with a `terms` agg, giving us exact-distinct
+ * coverage of every key written for the owner — no sampling gap.
+ */
+const RUNTIME_KEY_EMITTER = `
+  if (params._source != null
+      && params._source.cases != null
+      && params._source.cases.extended_fields != null
+      && params._source.cases.extended_fields instanceof Map) {
+    for (def key : ((Map) params._source.cases.extended_fields).keySet()) {
+      emit(key);
+    }
+  }
+`;
+
+interface KeysAggregation {
+  buckets: Array<{ key: string; doc_count: number }>;
 }
 
 /**
  * Discovers the extended-field `(name, type)` pairs for a given owner by
- * sampling recent case SO docs and unioning the keys present in
- * `_source.cases.extended_fields`. The cases SO mapping is `dynamic:false`
+ * unioning every distinct key written under `_source.cases.extended_fields`
+ * for that owner's case docs. The cases SO mapping is `dynamic:false`
  * with `extended_fields` typed `flattened`, so neither `_field_caps` nor
  * the index mapping enumerate sub-paths — `_source` is the only place
  * the keys are observable.
+ *
+ * The discovery uses a runtime field that emits one keyword per key per
+ * doc, plus a terms aggregation on it. This is deterministic across the
+ * entire document population (not a recent-N sample) at the cost of a
+ * single Painless evaluation per doc at agg time. The query runs at
+ * plugin start and from the manual rebuild route — never on a hot
+ * user-facing path.
  *
  * Reactive (a key shows up only after the first case uses it) but
  * resilient: deleted templates don't strand stale columns, and
@@ -87,11 +107,9 @@ export const loadExtendedFieldsFromMapping = async (
   logger: Logger
 ): Promise<TemplateFieldRef[]> => {
   try {
-    const response = await esClient.search<CaseSourceShape>({
+    const response = await esClient.search({
       index: CAI_VIEW_SOURCE_INDEX,
-      size: SAMPLE_SIZE,
-      _source: [FLATTENED_PARENT_PATH],
-      sort: [{ 'cases.updated_at': { order: 'desc' } }],
+      size: 0,
       query: {
         bool: {
           filter: [
@@ -101,21 +119,30 @@ export const loadExtendedFieldsFromMapping = async (
           ],
         },
       },
+      runtime_mappings: {
+        [RUNTIME_FIELD_NAME]: {
+          type: 'keyword',
+          script: { lang: 'painless', source: RUNTIME_KEY_EMITTER },
+        },
+      },
+      aggregations: {
+        keys: {
+          terms: { field: RUNTIME_FIELD_NAME, size: MAX_DISTINCT_KEYS },
+        },
+      },
     });
 
+    const aggregation = response.aggregations?.keys as KeysAggregation | undefined;
+    const buckets = aggregation?.buckets ?? [];
     const seen = new Set<string>();
     const out: TemplateFieldRef[] = [];
-    for (const hit of response.hits.hits ?? []) {
-      const extended = hit._source?.cases?.extended_fields;
-      if (!extended || typeof extended !== 'object') continue;
-      for (const subKey of Object.keys(extended)) {
-        const parsed = parseExtendedFieldSubkey(`${FLATTENED_PARENT_PATH}.${subKey}`);
-        if (!parsed) continue;
-        const dedupeKey = `${parsed.name}::${parsed.type}`;
-        if (seen.has(dedupeKey)) continue;
-        seen.add(dedupeKey);
-        out.push(parsed);
-      }
+    for (const bucket of buckets) {
+      const parsed = parseExtendedFieldSubkey(`${FLATTENED_PARENT_PATH}.${bucket.key}`);
+      if (!parsed) continue;
+      const dedupeKey = `${parsed.name}::${parsed.type}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+      out.push(parsed);
     }
     return out;
   } catch (err) {

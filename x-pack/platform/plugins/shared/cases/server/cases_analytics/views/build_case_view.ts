@@ -122,7 +122,7 @@ const CASE_BASE_KEEP_COLUMNS = [
 export const buildCaseViewQuery = (owner: Owner, templateFields: TemplateFieldRef[]): string => {
   const extendedEvals = extendedFieldsToEval(templateFields);
   const allEvals = [...CASE_BASE_EVALS, ...extendedEvals.map((e) => e.evalLine)];
-  const allKeepColumns = [...CASE_BASE_KEEP_COLUMNS, ...extendedEvals.map((e) => e.camelKey)];
+  const allKeepColumns = [...CASE_BASE_KEEP_COLUMNS, ...extendedEvals.map((e) => e.columnKey)];
   return [
     `FROM ${CAI_VIEW_SOURCE_INDEX} METADATA _id, _source`,
     `| WHERE type == "cases" AND cases.owner == "${owner}"`,

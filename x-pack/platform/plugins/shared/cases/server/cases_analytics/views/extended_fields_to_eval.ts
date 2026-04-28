@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils/template_fields';
+import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 
 /**
  * The set of `type` values that template fields can declare. Mirrors the
@@ -49,8 +49,12 @@ export interface TemplateFieldRef {
 interface ExtendedFieldEval {
   /** `${name}_as_${type}` — flattened sub-key in `cases.extended_fields`. */
   snakeKey: string;
-  /** camelCased output column, e.g. `riskScoreAsLong`. */
-  camelKey: string;
+  /**
+   * Output column name in the view. Same as snakeKey: matching the
+   * underlying flattened key 1:1 keeps Discover / Lens lookups intuitive
+   * (the column name is what you'd see in the SO doc).
+   */
+  columnKey: string;
   /** Full EVAL fragment to drop into the view query. */
   evalLine: string;
 }
@@ -73,11 +77,10 @@ export const extendedFieldsToEval = (
     const snakeKey = getFieldSnakeKey(field.name, field.type);
     if (seen.has(snakeKey)) continue;
     seen.add(snakeKey);
-    const camelKey = getFieldCamelKey(field.name, field.type);
     const cast = esqlCastFunctionForType(field.type);
     const ref = `JSON_EXTRACT(_source, "cases.extended_fields.${snakeKey}")`;
-    const evalLine = cast === null ? `${camelKey} = ${ref}` : `${camelKey} = ${cast}(${ref})`;
-    out.push({ snakeKey, camelKey, evalLine });
+    const evalLine = cast === null ? `${snakeKey} = ${ref}` : `${snakeKey} = ${cast}(${ref})`;
+    out.push({ snakeKey, columnKey: snakeKey, evalLine });
   }
   return out;
 };
