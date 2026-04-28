@@ -11,7 +11,6 @@ import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
-  FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
@@ -19,17 +18,13 @@ import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
-  ConfigureRiskEngineSavedObjectRequestBodyInput,
   CreateEntitySourceResponse,
   CreatePrivilegesImportIndexResponse,
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
-  DisableRiskEngineResponse,
-  EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
   FindAssetCriticalityRecordsResponse,
   InitMonitoringEngineResponse,
-  InitRiskEngineResponse,
   InternalUploadAssetCriticalityV2CsvResponse,
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
@@ -37,8 +32,6 @@ import type {
   PrivMonHealthResponse,
   PrivMonPrivilegesResponse,
   PrivmonBulkUploadUsersCSVResponse,
-  ReadRiskEngineSettingsResponse,
-  RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
@@ -67,7 +60,6 @@ import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
-  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
@@ -80,15 +72,6 @@ import {
   PRIVMON_HEALTH_URL,
   PRIVMON_INDICES_URL,
   PRIVMON_PRIVILEGE_CHECK_API,
-  RISK_ENGINE_CLEANUP_URL,
-  RISK_ENGINE_CONFIGURE_SO_URL,
-  RISK_ENGINE_DISABLE_URL,
-  RISK_ENGINE_ENABLE_URL,
-  RISK_ENGINE_INIT_URL,
-  RISK_ENGINE_PRIVILEGES_URL,
-  RISK_ENGINE_SCHEDULE_NOW_URL,
-  RISK_ENGINE_SETTINGS_URL,
-  RISK_ENGINE_STATUS_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
@@ -115,7 +98,6 @@ import type {
 } from '../../../common/entity_analytics/lead_generation/types';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -129,18 +111,8 @@ const ENTITY_SOURCE_NAME = 'User Monitored Indices';
 const RISK_SCORE_MAINTAINER_ID = 'risk-score';
 const ENTITY_STORE_V2_QUERY = { apiVersion: ENTITY_STORE_API_VERSIONS.internal.v2 } as const;
 
-const getMaintainerRouteWithId = (route: string, id: string): string =>
-  route.replace('{id}', encodeURIComponent(id));
-
 export const useEntityAnalyticsRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
-  const isEntityStoreV2UiSettingEnabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
-  const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsEntityStoreV2'
-  );
-  const isMaintainerRiskScoreV2Enabled =
-    isEntityStoreV2UiSettingEnabled && isEntityAnalyticsEntityStoreV2Enabled;
+  const { http } = useKibana().services;
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
@@ -231,141 +203,31 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = async ({ signal }: { signal?: AbortSignal }) => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        const riskScoreMaintainer = await fetchRiskScoreMaintainer();
-        const riskEngineStatus = !riskScoreMaintainer
-          ? 'NOT_INSTALLED'
-          : riskScoreMaintainer.taskStatus === 'started'
-          ? 'ENABLED'
-          : riskScoreMaintainer.taskStatus === 'stopped'
-          ? 'DISABLED'
-          : 'NOT_INSTALLED';
-        const runAt = riskScoreMaintainer?.nextRunAt;
+      const riskScoreMaintainer = await fetchRiskScoreMaintainer();
+      const riskEngineStatus = !riskScoreMaintainer
+        ? 'NOT_INSTALLED'
+        : riskScoreMaintainer.taskStatus === 'started'
+        ? 'ENABLED'
+        : riskScoreMaintainer.taskStatus === 'stopped'
+        ? 'DISABLED'
+        : 'NOT_INSTALLED';
+      const runAt = riskScoreMaintainer?.nextRunAt;
 
-        // The maintainer API doesn't expose the underlying TaskManager status directly,
-        // so we infer 'running' vs 'idle' based on whether nextRunAt is in the past.
-        // This is a heuristic, but it avoids leaking TaskManager internals into the maintainer API.
-        const isRunning = runAt ? new Date(runAt).getTime() <= Date.now() : false;
-        const status = isRunning ? 'running' : 'idle';
+      // The maintainer API doesn't expose the underlying TaskManager status directly,
+      // so we infer 'running' vs 'idle' based on whether nextRunAt is in the past.
+      // This is a heuristic, but it avoids leaking TaskManager internals into the maintainer API.
+      const isRunning = runAt ? new Date(runAt).getTime() <= Date.now() : false;
+      const status = isRunning ? 'running' : 'idle';
 
-        return {
-          risk_engine_status: riskEngineStatus,
-          risk_engine_task_status: runAt
-            ? {
-                status,
-                runAt,
-              }
-            : undefined,
-        } as RiskEngineStatusResponse;
-      }
-
-      return http.fetch<RiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
-        version: '1',
-        method: 'GET',
-        signal,
-      });
-    };
-
-    /**
-     * Init risk score engine
-     */
-    const initRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
-          method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
-          body: JSON.stringify({}),
-        });
-
-        return {
-          result: {
-            risk_engine_enabled: true,
-            risk_engine_resources_installed: true,
-            risk_engine_configuration_created: true,
-            errors: [],
-          },
-        } as InitRiskEngineResponse;
-      }
-
-      return http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
-        version: '1',
-        method: 'POST',
-      });
-    };
-
-    /**
-     * Enable risk score engine
-     */
-    const enableRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'PUT',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as EnableRiskEngineResponse;
-      }
-
-      return http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
-        version: '1',
-        method: 'POST',
-      });
-    };
-
-    /**
-     * Disable risk score engine
-     */
-    const disableRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'PUT',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as DisableRiskEngineResponse;
-      }
-
-      return http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
-        version: '1',
-        method: 'POST',
-      });
-    };
-
-    /**
-     * Enable risk score engine
-     */
-    const scheduleNowRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'POST',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as RiskEngineScheduleNowResponse;
-      }
-
-      return http.fetch<RiskEngineScheduleNowResponse>(RISK_ENGINE_SCHEDULE_NOW_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-      });
+      return {
+        risk_engine_status: riskEngineStatus,
+        risk_engine_task_status: runAt
+          ? {
+              status,
+              runAt,
+            }
+          : undefined,
+      } as RiskEngineStatusResponse;
     };
 
     /**
@@ -378,15 +240,6 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
     };
-
-    /**
-     * Get risk engine privileges
-     */
-    const fetchRiskEnginePrivileges = () =>
-      http.fetch<EntityAnalyticsPrivileges>(RISK_ENGINE_PRIVILEGES_URL, {
-        version: '1',
-        method: 'GET',
-      });
 
     /**
      * Get asset criticality privileges
@@ -563,43 +416,10 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
-      if (isEntityAnalyticsEntityStoreV2Enabled && isEntityStoreV2UiSettingEnabled) {
-        const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
-          ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
-          {
-            version: API_VERSIONS.internal.v1,
-            method: 'POST',
-            headers: {
-              'Content-Type': undefined, // Lets the browser set the appropriate content type
-            },
-            body,
-          }
-        );
-
-        return {
-          errors: compact(
-            response.items.map((item, ndx) => {
-              if (item.error) {
-                return {
-                  index: ndx,
-                  message: item.error,
-                };
-              }
-              return null;
-            })
-          ),
-          stats: {
-            successful: response.successful,
-            failed: response.failed,
-            total: response.total,
-          },
-        };
-      }
-
-      return http.fetch<UploadAssetCriticalityRecordsResponse>(
-        ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+      const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
+        ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
         {
-          version: API_VERSIONS.public.v1,
+          version: API_VERSIONS.internal.v1,
           method: 'POST',
           headers: {
             'Content-Type': undefined, // Lets the browser set the appropriate content type
@@ -607,6 +427,25 @@ export const useEntityAnalyticsRoutes = () => {
           body,
         }
       );
+
+      return {
+        errors: compact(
+          response.items.map((item, ndx) => {
+            if (item.error) {
+              return {
+                index: ndx,
+                message: item.error,
+              };
+            }
+            return null;
+          })
+        ),
+        stats: {
+          successful: response.successful,
+          failed: response.failed,
+          total: response.total,
+        },
+      };
     };
 
     /**
@@ -668,34 +507,6 @@ export const useEntityAnalyticsRoutes = () => {
       http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
-      });
-
-    /**
-     * Fetches risk engine settings
-     */
-    const fetchRiskEngineSettings = () =>
-      http.fetch<ReadRiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
-        version: '1',
-        method: 'GET',
-      });
-
-    /**
-     * Deletes Risk engine installation and associated data
-     */
-
-    const cleanUpRiskEngine = () =>
-      http.fetch(RISK_ENGINE_CLEANUP_URL, {
-        version: '1',
-        method: 'DELETE',
-      });
-
-    const updateSavedObjectConfiguration = (
-      params: ConfigureRiskEngineSavedObjectRequestBodyInput
-    ) =>
-      http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'PUT',
-        body: JSON.stringify(params),
       });
 
     const fetchEntityDetailsHighlights = (
@@ -912,11 +723,6 @@ export const useEntityAnalyticsRoutes = () => {
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
-      initRiskEngine,
-      enableRiskEngine,
-      disableRiskEngine,
-      scheduleNowRiskEngine,
-      fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
       fetchEntityStoreV2Privileges,
@@ -944,12 +750,9 @@ export const useEntityAnalyticsRoutes = () => {
       deleteWatchlistEntitySource,
       searchWatchlistIndices,
       uploadWatchlistCsv,
-      fetchRiskEngineSettings,
       calculateEntityRiskScore,
-      cleanUpRiskEngine,
       fetchEntitiesList,
       fetchEntitiesListV2,
-      updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
       fetchWatchlists,
@@ -961,12 +764,7 @@ export const useEntityAnalyticsRoutes = () => {
       enableLeadGeneration,
       disableLeadGeneration,
     };
-  }, [
-    http,
-    isEntityStoreV2UiSettingEnabled,
-    isEntityAnalyticsEntityStoreV2Enabled,
-    isMaintainerRiskScoreV2Enabled,
-  ]);
+  }, [http]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;

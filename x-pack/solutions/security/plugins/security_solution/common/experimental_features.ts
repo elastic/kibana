@@ -68,11 +68,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enable resetting risk scores to zero for outdated entities
-   */
-  enableRiskScoreResetToZero: true,
-
-  /**
    * Enable privmon modifier in risk scoring calculation
    */
   enableRiskScorePrivmonModifier: true,

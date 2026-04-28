@@ -8,10 +8,10 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isEmpty } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { RiskEngineConfiguration } from '../../../types';
+import type { RiskScoreConfiguration } from '../../../types';
 import type { EntityType } from '../../../../../../common/search_strategy';
 import { filterFromRange } from '../../helpers';
-import { convertRangeToISO } from '../../tasks/helpers';
+import { convertRangeToISO } from '../../../utils/internal_clients';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface BuildCommonAlertFiltersParams {
@@ -19,7 +19,7 @@ interface BuildCommonAlertFiltersParams {
   filter?: unknown;
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
-  filters?: RiskEngineConfiguration['filters'];
+  filters?: RiskScoreConfiguration['filters'];
 }
 
 export const buildCommonAlertFilters = (
@@ -82,7 +82,7 @@ export const buildCommonAlertFilters = (
 };
 
 export const buildAlertFilters = (
-  configuration: RiskEngineConfiguration,
+  configuration: RiskScoreConfiguration,
   entityType: EntityType,
   logger?: ScopedLogger
 ): QueryDslQueryContainer[] => {

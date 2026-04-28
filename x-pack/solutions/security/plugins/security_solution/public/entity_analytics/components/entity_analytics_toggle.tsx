@@ -78,23 +78,13 @@ export const EntityAnalyticsErrorPanel: React.FC<{
 interface EntityAnalyticsToggleProps {
   hasAllRequiredPrivileges: boolean;
   isPrivilegesLoading: boolean;
-  selectedSettingsMatchSavedSettings: boolean;
-  onSaveSettings: () => Promise<void>;
-  isSavingSettings: boolean;
 }
 
 export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   hasAllRequiredPrivileges,
   isPrivilegesLoading,
-  selectedSettingsMatchSavedSettings,
-  onSaveSettings,
-  isSavingSettings,
 }) => {
-  const { status, isLoading, toggle, errors } = useToggleEntityAnalytics({
-    selectedSettingsMatchSavedSettings,
-    onSaveSettings,
-    isSavingSettings,
-  });
+  const { status, isLoading, toggle, errors } = useToggleEntityAnalytics();
 
   const isDisabled =
     isPrivilegesLoading || !hasAllRequiredPrivileges || status === 'enabling' || status === 'error';
@@ -104,7 +94,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   return (
     <>
       <EntityAnalyticsErrorPanel
-        riskEngineErrors={errors.riskEngine}
+        riskEngineErrors={[]}
         entityStoreErrors={errors.entityStore}
       />
       <EuiSpacer size="m" />

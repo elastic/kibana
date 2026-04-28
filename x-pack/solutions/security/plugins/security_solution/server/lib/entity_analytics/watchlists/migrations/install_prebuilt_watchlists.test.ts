@@ -39,7 +39,7 @@ jest.mock('../management/watchlist_config', () => ({
   })),
 }));
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
+jest.mock('../../utils/internal_clients', () => ({
   buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
 }));
 

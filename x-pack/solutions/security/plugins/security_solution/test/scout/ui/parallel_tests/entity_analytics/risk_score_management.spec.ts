@@ -75,6 +75,7 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await apiServices.entityAnalytics.initRiskEngine();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusToChange();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
 
@@ -92,6 +93,7 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await apiServices.entityAnalytics.initRiskEngine();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusToChange();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
 
@@ -109,6 +111,7 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await apiServices.entityAnalytics.initRiskEngine();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusToChange();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
 
@@ -131,6 +134,7 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await apiServices.entityAnalytics.initRiskEngine();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusToChange();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
 

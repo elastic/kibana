@@ -19,7 +19,7 @@ import {
   cleanAssetCriticality,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
-  riskEngineRouteHelpersFactory,
+  EntityStoreUtils,
   waitForRiskScoresToBePresent,
 } from '../../utils';
 import {
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       index: 'ecs_compliant',
       log,
     });
-    const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+    const entityStoreUtils = EntityStoreUtils(getService);
     let agentPolicyId: string;
     let packagePolicyId: string;
 
@@ -126,7 +126,11 @@ export default function ({ getService }: FtrProviderContext) {
         maxSignals: 100,
       });
 
-      await riskEngineRoutes.init();
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        waitForEntities: false,
+        maintainerAutoStart: false,
+      });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
@@ -176,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await riskEngineRoutes.cleanUp();
+      await entityStoreUtils.cleanEngines();
       await cleanAssetCriticality({ log, es });
       await deleteAllRiskScores(log, es);
       await deleteAllAlerts(supertest, log, es);

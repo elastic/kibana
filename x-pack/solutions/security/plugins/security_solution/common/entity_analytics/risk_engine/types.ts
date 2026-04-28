@@ -7,12 +7,6 @@
 
 import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
 
-export interface InitRiskEngineResult {
-  riskEngineResourcesInstalled: boolean;
-  riskEngineConfigurationCreated: boolean;
-  riskEngineEnabled: boolean;
-  errors: string[];
-}
 export interface EcsRiskScore {
   '@timestamp': string;
   host?: {

@@ -335,27 +335,12 @@ import type {
   UpdatePrivMonUserResponse,
 } from './entity_analytics/monitoring/users/update.gen';
 import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/monitoring/users/upload_csv.gen';
-import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
-import type {
-  ConfigureRiskEngineSavedObjectRequestBodyInput,
-  ConfigureRiskEngineSavedObjectResponse,
-} from './entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
-import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
-import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
-import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
-import type {
-  ScheduleRiskEngineNowRequestBodyInput,
-  ScheduleRiskEngineNowResponse,
-} from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
-import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
-import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
 import type {
   DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
   DeprecatedTriggerRiskScoreCalculationResponse,
   TriggerRiskScoreCalculationRequestBodyInput,
   TriggerRiskScoreCalculationResponse,
 } from './entity_analytics/risk_engine/entity_calculation_route.gen';
-import type { RiskEngineGetPrivilegesResponse } from './entity_analytics/risk_engine/get_risk_engine_privileges.gen';
 import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
@@ -720,37 +705,6 @@ If asset criticality records already exist for the specified entities, those rec
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
-   */
-  async cleanUpRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API CleanUpRiskEngine`);
-    return this.kbnClient
-      .request<CleanUpRiskEngineResponse>({
-        path: '/api/risk_score/engine/dangerously_delete_data',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Configuring the Risk Engine Saved Object
-   */
-  async configureRiskEngineSavedObject(props: ConfigureRiskEngineSavedObjectProps) {
-    this.log.info(`${new Date().toISOString()} Calling API ConfigureRiskEngineSavedObject`);
-    return this.kbnClient
-      .request<ConfigureRiskEngineSavedObjectResponse>({
-        path: '/api/risk_score/engine/saved_object/configure',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'PATCH',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -1354,30 +1308,6 @@ The entity will be immediately deleted from the latest index.  It will remain av
         path: '/api/entity_analytics/monitoring/engine/disable',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async disableRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API DisableRiskEngine`);
-    return this.kbnClient
-      .request<DisableRiskEngineResponse>({
-        path: '/internal/risk_score/engine/disable',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async enableRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API EnableRiskEngine`);
-    return this.kbnClient
-      .request<EnableRiskEngineResponse>({
-        path: '/internal/risk_score/engine/enable',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -2096,21 +2026,6 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
-   */
-  async getRiskEngineStatus() {
-    this.log.info(`${new Date().toISOString()} Calling API GetRiskEngineStatus`);
-    return this.kbnClient
-      .request<GetRiskEngineStatusResponse>({
-        path: '/internal/risk_score/engine/status',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Retrieves the rule migration document stored in the system given the rule migration id
    */
   async getRuleMigration(props: GetRuleMigrationProps) {
@@ -2444,21 +2359,6 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
         path: '/api/entity_analytics/monitoring/engine/init',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
-   */
-  async initRiskEngine() {
-    this.log.info(`${new Date().toISOString()} Calling API InitRiskEngine`);
-    return this.kbnClient
-      .request<InitRiskEngineResponse>({
-        path: '/internal/risk_score/engine/init',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -2947,18 +2847,6 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async readRiskEngineSettings() {
-    this.log.info(`${new Date().toISOString()} Calling API ReadRiskEngineSettings`);
-    return this.kbnClient
-      .request<ReadRiskEngineSettingsResponse>({
-        path: '/internal/risk_score/engine/settings',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
     * Retrieve a detection rule using the `rule_id` or `id` field.
 
@@ -3029,18 +2917,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'GET',
 
         query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async riskEngineGetPrivileges() {
-    this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
-    return this.kbnClient
-      .request<RiskEngineGetPrivilegesResponse>({
-        path: '/internal/risk_engine/privileges',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3123,22 +2999,6 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-   */
-  async scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps) {
-    this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
-    return this.kbnClient
-      .request<ScheduleRiskEngineNowResponse>({
-        path: '/api/risk_score/engine/schedule_now',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3766,9 +3626,6 @@ export interface CancelActionProps {
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
 }
-export interface ConfigureRiskEngineSavedObjectProps {
-  body: ConfigureRiskEngineSavedObjectRequestBodyInput;
-}
 export interface CopyTimelineProps {
   body: CopyTimelineRequestBodyInput;
 }
@@ -4103,9 +3960,6 @@ export interface RulePreviewProps {
 }
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
-}
-export interface ScheduleRiskEngineNowProps {
-  body: ScheduleRiskEngineNowRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;

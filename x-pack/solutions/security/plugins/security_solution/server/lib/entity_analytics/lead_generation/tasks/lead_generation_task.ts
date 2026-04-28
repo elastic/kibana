@@ -26,7 +26,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 import type { StartPlugins } from '../../../../plugin_contract';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../utils/internal_clients';
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
 import {
   defaultState,
