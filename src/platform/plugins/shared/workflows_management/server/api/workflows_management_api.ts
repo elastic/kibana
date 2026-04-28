@@ -156,8 +156,12 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    public readonly isWorkflowsAvailable: boolean
   ) {}
+
+  private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
+    return this.workflowsService.getWorkflowsExecutionEngine();
+  }
 
   public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
     this.smlIndexAttachment = fn;
