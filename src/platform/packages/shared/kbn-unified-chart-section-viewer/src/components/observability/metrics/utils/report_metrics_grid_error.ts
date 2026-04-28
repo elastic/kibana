@@ -80,7 +80,31 @@ export const reportMetricsGridError = ({
     }
   }
 
-  apm.captureError(error, { labels });
+  // `apm.captureError` on its own does not flip the surrounding RUM
+  // transaction to `outcome: 'failure'`. Mirror the pattern in
+  // `x-pack/platform/plugins/shared/lens/public/react_embeddable/data_loader.ts`
+  // (PR #265354) by attaching a child span, capturing the error inside it,
+  // and explicitly marking the span as failed so APM dashboards correlate
+  // the error with a failed unit of work. If there is no active transaction
+  // (e.g. unit-test environments or callers outside a managed transaction)
+  // fall back to a plain capture so the error is never dropped.
+  const transaction = apm.getCurrentTransaction();
+  if (transaction) {
+    const span = transaction.startSpan('metrics-grid-non-render-error', 'metrics-grid');
+    if (span) {
+      span.addLabels(labels);
+      apm.captureError(error, { labels });
+      // @ts-expect-error RUM types do not expose `outcome` on Span, but the
+      // RUM agent reads it when present (see lens data_loader for the same
+      // workaround).
+      span.outcome = 'failure';
+      span.end();
+    } else {
+      apm.captureError(error, { labels });
+    }
+  } else {
+    apm.captureError(error, { labels });
+  }
 
   if (!analytics) {
     return;

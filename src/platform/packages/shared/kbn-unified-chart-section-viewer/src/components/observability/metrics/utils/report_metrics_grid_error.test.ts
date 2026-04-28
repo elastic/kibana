@@ -15,10 +15,33 @@ import { METRICS_GRID_ERROR_TYPE_LABEL, reportMetricsGridError } from './report_
 jest.mock('@elastic/apm-rum', () => ({
   apm: {
     captureError: jest.fn(),
+    getCurrentTransaction: jest.fn(),
   },
 }));
 
 const captureErrorMock = apm.captureError as jest.MockedFunction<typeof apm.captureError>;
+const getCurrentTransactionMock = apm.getCurrentTransaction as jest.MockedFunction<
+  typeof apm.getCurrentTransaction
+>;
+
+interface MockSpan {
+  addLabels: jest.Mock;
+  end: jest.Mock;
+  outcome?: string;
+}
+
+interface MockTransaction {
+  startSpan: jest.Mock;
+}
+
+const createMockSpan = (): MockSpan => ({
+  addLabels: jest.fn(),
+  end: jest.fn(),
+});
+
+const createMockTransaction = (span: MockSpan | undefined): MockTransaction => ({
+  startSpan: jest.fn().mockReturnValue(span),
+});
 
 describe('reportMetricsGridError', () => {
   let reportEvent: jest.Mock;
@@ -28,6 +51,10 @@ describe('reportMetricsGridError', () => {
     jest.clearAllMocks();
     reportEvent = jest.fn();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    // Default: no active transaction. Tests that exercise the span path
+    // override this explicitly so the default keeps existing assertions
+    // (which only check `apm.captureError`) honest.
+    getCurrentTransactionMock.mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -180,6 +207,66 @@ describe('reportMetricsGridError', () => {
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('marks the active APM transaction as failure via a child span', () => {
+    const span = createMockSpan();
+    const transaction = createMockTransaction(span);
+    getCurrentTransactionMock.mockReturnValue(
+      transaction as unknown as ReturnType<typeof apm.getCurrentTransaction>
+    );
+
+    const plainError = new Error('build failed');
+
+    reportMetricsGridError({
+      error: plainError,
+      source: 'useLensProps',
+      analytics: { reportEvent },
+    });
+
+    expect(transaction.startSpan).toHaveBeenCalledTimes(1);
+    expect(transaction.startSpan).toHaveBeenCalledWith(
+      'metrics-grid-non-render-error',
+      'metrics-grid'
+    );
+    expect(span.addLabels).toHaveBeenCalledWith({
+      error_type: METRICS_GRID_ERROR_TYPE_LABEL,
+      metrics_grid_source: 'useLensProps',
+    });
+    // captureError must run inside the span lifecycle so the RUM agent
+    // associates the captured error with the failed span.
+    expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
+      labels: {
+        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
+        metrics_grid_source: 'useLensProps',
+      },
+    });
+    expect(span.outcome).toBe('failure');
+    expect(span.end).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to a plain captureError when startSpan returns undefined', () => {
+    const transaction = createMockTransaction(undefined);
+    getCurrentTransactionMock.mockReturnValue(
+      transaction as unknown as ReturnType<typeof apm.getCurrentTransaction>
+    );
+
+    const plainError = new Error('build failed');
+
+    reportMetricsGridError({
+      error: plainError,
+      source: 'useLensProps',
+      analytics: { reportEvent },
+    });
+
+    expect(transaction.startSpan).toHaveBeenCalledTimes(1);
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
+    expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
+      labels: {
+        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
+        metrics_grid_source: 'useLensProps',
+      },
+    });
   });
 
   it('swallows errors thrown by analytics.reportEvent', () => {
