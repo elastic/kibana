@@ -80,7 +80,7 @@ actions:
 
         All examples on this page use [Kibana sample datasets](https://www.elastic.co/docs/explore-analyze/index#add-sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `FROM` pattern and field references.
 
-        ## Dashboard structure
+        ### Dashboard structure
 
         A [dashboard](https://www.elastic.co/docs/explore-analyze/dashboards) is structured as follows:
 
@@ -93,7 +93,7 @@ actions:
         - **`pinned_panels`**: filter controls pinned at the top of the dashboard that apply to all panels. Filter controls placed in `panels` apply only to panels in the same section.
         - **`filters`**, **`query`**, **`time_range`**: filter the data displayed across all panels.
 
-        ## Panel types
+        ### Panel types
 
         The `type` field in each panel determines what it contains and the structure of its `config`:
 
@@ -122,7 +122,7 @@ actions:
         > info
         > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `links`, `field_stats_table`, `aiops_change_point_chart`, `aiops_log_rate_analysis`, `aiops_pattern_analysis`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
-        ## Embedding library items
+        ### Embedding library items
 
         `vis`, `discover_session`, and `markdown` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
@@ -175,7 +175,7 @@ actions:
           }
           ```
 
-        ## ES|QL visualizations
+        ### ES|QL visualizations
 
         To create ES|QL-based charts, embed them inline as `vis` panels and set `data_source.type` to `"esql"`.
 

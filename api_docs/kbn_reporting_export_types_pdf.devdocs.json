@@ -218,6 +218,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -290,6 +291,7 @@
                 "lineNumber": 57,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobParamsPDFV2",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -363,6 +365,7 @@
                 "lineNumber": 74,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunTaskOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -592,6 +595,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -654,6 +658,7 @@
                 "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobParamsPDFDeprecated",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -723,6 +728,7 @@
                 "lineNumber": 74,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunTaskOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }

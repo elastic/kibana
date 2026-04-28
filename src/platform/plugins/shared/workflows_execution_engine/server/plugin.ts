@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -1120,16 +1120,9 @@ export class WorkflowsExecutionEnginePlugin
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
       }
 
-      if (
-        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-          workflowExecution.status
-        )
-      ) {
-        // Already in a terminal state or being canceled
+      if (isTerminalStatus(workflowExecution.status)) {
         return;
       }
-
-      const cancelledAt = new Date().toISOString();
 
       if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
         await cancelWaitingWorkflow({
@@ -1144,9 +1137,12 @@ export class WorkflowsExecutionEnginePlugin
 
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
+        ...(workflowExecution.status === ExecutionStatus.PENDING
+          ? { status: ExecutionStatus.CANCELLED }
+          : {}),
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt,
+        cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
