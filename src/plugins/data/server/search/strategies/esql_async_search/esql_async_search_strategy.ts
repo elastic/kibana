@@ -59,7 +59,11 @@ export const esqlAsyncSearchStrategyProvider = (
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    const { dropNullColumns, ...requestParams } = request.params ?? {};
+    const requestParams = { ...(request.params ?? {}) };
+    const dropNullColumns = requestParams.dropNullColumns;
+    delete requestParams.dropNullColumns;
+    // The ES|QL async submit endpoint does not accept `version`.
+    delete requestParams.version;
     const search = async () => {
       const params = id
         ? {

@@ -144,11 +144,21 @@ describe('ES|QL async search strategy', () => {
               wait_for_completion_timeout: '100ms',
               keep_on_completion: false,
               query: 'from logs',
-              version: ESQL_LATEST_VERSION,
             },
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
         );
+      });
+
+      it('does not send version on async submit requests', async () => {
+        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
+        const params = { query: 'from logs', version: ESQL_LATEST_VERSION };
+        const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+
+        await firstValueFrom(esSearch.search({ params }, {}, mockDeps));
+
+        const request = mockApiCaller.mock.calls[0][0];
+        expect(request.body).not.toHaveProperty('version');
       });
 
       it('sets transport options on GET requests', async () => {
