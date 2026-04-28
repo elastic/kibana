@@ -165,6 +165,7 @@ Use the solution-specific skill's page object and API service templates as start
 | `ftrConfig` (serverless tiers) | Scout test tags |
 | `ftrConfig` (feature flags) | Kibana Core APIs (MKI/cloud) or custom server config (stateless) |
 | `esArchiver` (system indices) | **Forbidden** — use `kbnClient` |
+| `Promise.all([...playwright actions/waits/expects])` | **Avoid** — serialize awaits or iterate; see `references/flakiness-risk-patterns.md` |
 
 ### Step 3b: Data cleanup audit `[low freedom — must be thorough]`
 
@@ -229,6 +230,7 @@ After the Scout test is verified:
 - Using `page.waitForLoadState('networkidle')` — anti-pattern, actively removed from Scout tests; wait for specific elements instead
 - Using short custom timeouts on `waitFor()` (e.g., 3s) — causes CI flakiness; use the default (10s)
 - Adding explicit waits before `clear()`, `fill()`, `click()` — these auto-wait; the extra wait is redundant
+- Using **`Promise.all`** with Playwright APIs — see `docs/extend/scout/ui-best-practices.md` § "Don't use `Promise.all` with Playwright APIs" (and `references/flakiness-risk-patterns.md` for the migration triage entry).
 - Specifying `{ state: 'visible' }` on `waitFor()` — it's the default, omit it
 - Missing Scout tags (validated at runtime)
 - Using `esArchiver` for system indices (use `kbnClient`)

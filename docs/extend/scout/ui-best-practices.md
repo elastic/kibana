@@ -86,6 +86,39 @@ await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
 
 :::::
 
+## Don't use `Promise.all` with Playwright APIs [dont-use-promise-all-with-playwright-apis]
+
+Don't run multiple Playwright actions, locator waits, or `expect()` assertions through `Promise.all`. Each parallel wait starts its timeout at the same moment, and when the underlying UI fans out to backend work, the requests contend for the same Kibana/ES resources — they don't finish faster, they race each other, and the slowest one runs out of budget. The result looks like random flake. Sequential awaits give each operation the backend mostly to itself.
+
+:::::{dropdown} Examples
+❌ **Don't:** parallelize Playwright waits or assertions:
+
+```ts
+await Promise.all([
+  expect(panelA).toBeVisible(),
+  expect(panelB).toBeVisible(),
+  expect(panelC).toBeVisible(),
+]);
+```
+
+✔️ **Do:** await one at a time, or iterate:
+
+```ts
+for (const panel of [panelA, panelB, panelC]) {
+  await expect(panel).toBeVisible();
+}
+```
+
+:::::
+
+::::::{tip}
+**Exception — listener-then-trigger pairs.** The official Playwright pattern `Promise.all([page.waitForEvent('popup'), action.click()])` is intentional: the event listener must be registered _before_ the action that fires it. Use it as documented (or prefer the callback form: `await page.waitForEvent('popup', () => action.click())`).
+::::::
+
+::::::{note}
+**Not affected — non-Playwright work.** `Promise.all` over plain HTTP calls (e.g. parallel `apiServices` / `kbnClient` calls in `beforeAll`) runs as real concurrent I/O and is fine.
+::::::
+
 ## Don't use manual retry loops [dont-use-manual-retry-loops]
 
 If an action fails, don't wrap it in a retry loop. Playwright already waits for actionability; repeated failures usually point to an app issue (unstable DOM, non-unique selectors, re-render bugs). Fix the component or make your waiting/locators explicit and stable.

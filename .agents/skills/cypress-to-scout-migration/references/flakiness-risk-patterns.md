@@ -1,6 +1,7 @@
 # Flakiness Risk Patterns for Migration
 
 ## Table of Contents
+
 - [Critical — Will cause flakiness in Scout](#critical--will-cause-flakiness-in-scout)
 - [High — Likely to cause issues](#high--likely-to-cause-issues)
 - [Medium — Address during rewrite](#medium--address-during-rewrite)
@@ -21,6 +22,13 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 - **Look for:** Tests with no `afterEach`/`after` cleanup; `esArchiverLoad` without unload; API resources created but never deleted; global mutable state.
 - **Why:** Cypress runs each spec in a clean browser. Scout shares the environment across specs in a worker — leftover data causes cascading failures.
 - **Scout approach:** Explicit cleanup in `afterAll`/`afterEach`, defensive cleanup in `beforeAll`, unique identifiers per worker (`scoutSpace.id`).
+
+### `Promise.all` with Playwright APIs
+
+- **Look for:** `await Promise.all([...])` whose entries are Playwright actions, locator `waitFor`s, or `expect()` assertions.
+- **Why:** Each parallel wait starts its timeout at the same wall-clock moment. When the UI fans out to backend work, the requests contend for the same Kibana/ES resources — they don't finish faster, they race each other, and the slowest one runs out of budget, producing flake that looks random.
+- **Scout approach:** Serialize the awaits, or iterate with a `for` loop.
+- **Exception:** the official `Promise.all([page.waitForEvent('popup'), action.click()])` listener-then-trigger pair — fine, the listener must register before the trigger (or use the callback form `page.waitForEvent('popup', () => action.click())`).
 
 ### Force interactions
 

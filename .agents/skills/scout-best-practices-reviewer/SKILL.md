@@ -55,6 +55,7 @@ Open only the docs relevant to the test type(s) under review.
 - **[general]** **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
 - **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
+- **[ui]** **`Promise.all` with Playwright APIs**: flag `await Promise.all([...])` whose entries are Playwright actions, locator `waitFor`s, or `expect()` assertions. Recommend serializing the awaits or using a `for` loop — parallel waits all share their timeout window and amplify backend contention. Exception: the listener-then-trigger pair `Promise.all([page.waitForEvent('...'), action])`. `Promise.all` over non-Playwright work (`apiServices`, `kbnClient`, raw HTTP) is fine — don't flag it.
 - **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
 - **[general]** **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 

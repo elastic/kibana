@@ -239,6 +239,7 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Migrating near-identical stateful and serverless FTR files as two separate Scout specs instead of combining them into one spec with appropriate tags (see step 3).
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
 - Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
+- Using **`Promise.all`** with Playwright APIs — see `docs/extend/scout/ui-best-practices.md` § "Don't use `Promise.all` with Playwright APIs".
 - Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
 - Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
 - Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).
