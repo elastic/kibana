@@ -42,7 +42,12 @@ export class FeatureSettingsPage {
 
   // Per-sub-feature confirmation modals
   readonly disableRecommendedModelsModal: Locator;
+  readonly disableRecommendedModelsConfirm: Locator;
   readonly resetToDefaultsModal: Locator;
+  readonly resetToDefaultsConfirm: Locator;
+
+  // Combobox primitives
+  readonly globalModelClearButton: Locator;
 
   // Empty State
   readonly noModelsEmptyPrompt: Locator;
@@ -85,7 +90,18 @@ export class FeatureSettingsPage {
     this.disableRecommendedModelsModal = this.page.testSubj.locator(
       'disableRecommendedModelsModal'
     );
+    this.disableRecommendedModelsConfirm = this.disableRecommendedModelsModal.getByRole('button', {
+      name: /turn off recommended defaults/i,
+    });
     this.resetToDefaultsModal = this.page.testSubj.locator('resetToDefaultsModal');
+    this.resetToDefaultsConfirm = this.resetToDefaultsModal.getByRole('button', {
+      name: /reset to default/i,
+    });
+
+    // Combobox primitives
+    this.globalModelClearButton = this.globalModelComboBox.locator(
+      '[data-test-subj="comboBoxClearButton"]'
+    );
 
     // Empty State
     this.noModelsEmptyPrompt = this.page.testSubj.locator('settings-no-models');
@@ -140,5 +156,24 @@ export class FeatureSettingsPage {
 
   public copyToModalCheckbox(featureId: string): Locator {
     return this.page.locator(`#copy-target-${featureId}`);
+  }
+
+  // --- Composite actions ---
+
+  /**
+   * Switches a sub-feature into custom mode by toggling "Use recommended defaults" off and
+   * confirming the disable modal. Waits for the editable list to render before returning.
+   */
+  public async disableRecommendedDefaults(featureId: string): Promise<void> {
+    await this.useRecommendedDefaultsToggle(featureId).click();
+    await this.disableRecommendedModelsConfirm.click();
+    await this.disableRecommendedModelsModal.waitFor({ state: 'hidden' });
+    await this.addModelButton(featureId).waitFor({ state: 'visible' });
+  }
+
+  /** Picks a connector by visible name in the Global model combobox. */
+  public async selectGlobalModel(name: string): Promise<void> {
+    await this.globalModelComboBox.click();
+    await this.page.getByRole('option', { name }).click();
   }
 }

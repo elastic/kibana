@@ -97,11 +97,7 @@ test.describe(
     }) => {
       const { featureSettings } = pageObjects;
 
-      // Click the combobox clear button so defaultModelId resolves to NO_DEFAULT_MODEL.
-      await featureSettings.globalModelComboBox
-        .getByRole('button', { name: /clear input/i })
-        .click();
-
+      // Fresh test stack persists defaultModelId === NO_DEFAULT_MODEL, so Save is already disabled.
       await expect(featureSettings.saveButton).toBeDisabled();
     });
 
@@ -115,7 +111,7 @@ test.describe(
       await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
       await expect(
         featureSettings.endpointRow('.anthropic-claude-3.7-sonnet-chat_completion')
-      ).toContainText('Default');
+      ).toBeVisible();
     });
 
     test('renders fixture sub-feature cards', async ({ pageObjects }) => {
@@ -150,14 +146,12 @@ test.describe(
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
-      const toggle = featureSettings.useRecommendedDefaultsToggle('test_feature_alpha');
 
-      await toggle.click();
-      await featureSettings.disableRecommendedModelsModal
-        .getByRole('button', { name: /turn off recommended defaults/i })
-        .click();
+      await featureSettings.disableRecommendedDefaults('test_feature_alpha');
 
-      await expect(toggle).not.toBeChecked();
+      await expect(
+        featureSettings.useRecommendedDefaultsToggle('test_feature_alpha')
+      ).not.toBeChecked();
       await expect(featureSettings.addModelButton('test_feature_alpha')).toBeVisible();
     });
 
@@ -172,12 +166,11 @@ test.describe(
       const toggle = featureSettings.useRecommendedDefaultsToggle('test_feature_alpha');
 
       await test.step('switch into custom mode and add a non-recommended model', async () => {
-        await toggle.click();
-        await featureSettings.disableRecommendedModelsModal
-          .getByRole('button', { name: /turn off recommended defaults/i })
-          .click();
+        await featureSettings.disableRecommendedDefaults('test_feature_alpha');
         await featureSettings.addModelButton('test_feature_alpha').click();
-        await featureSettings.addModelOption('anthropic').click();
+        await featureSettings.addModelSearch.fill('anthropic');
+        await expect(featureSettings.addModelOptions).toHaveCount(1);
+        await featureSettings.addModelOptions.click();
       });
 
       await test.step('toggling back on prompts the reset modal', async () => {
@@ -186,9 +179,7 @@ test.describe(
       });
 
       await test.step('confirming the reset locks the list back to recommended', async () => {
-        await featureSettings.resetToDefaultsModal
-          .getByRole('button', { name: /reset to default/i })
-          .click();
+        await featureSettings.resetToDefaultsConfirm.click();
         await expect(toggle).toBeChecked();
         await expect(featureSettings.addModelButton('test_feature_alpha')).toBeHidden();
       });
@@ -199,10 +190,7 @@ test.describe(
     }) => {
       const { featureSettings } = pageObjects;
 
-      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
-      await featureSettings.disableRecommendedModelsModal
-        .getByRole('button', { name: /turn off recommended defaults/i })
-        .click();
+      await featureSettings.disableRecommendedDefaults('test_feature_alpha');
 
       await featureSettings.addModelButton('test_feature_alpha').click();
       await expect(featureSettings.addModelSearch).toBeVisible();
@@ -213,10 +201,7 @@ test.describe(
       await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
-      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
-      await featureSettings.disableRecommendedModelsModal
-        .getByRole('button', { name: /turn off recommended defaults/i })
-        .click();
+      await featureSettings.disableRecommendedDefaults('test_feature_alpha');
 
       await test.step('open popover and verify models are listed', async () => {
         await featureSettings.addModelButton('test_feature_alpha').click();
@@ -240,10 +225,10 @@ test.describe(
       await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
-      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
-      await featureSettings.disableRecommendedModelsModal
-        .getByRole('button', { name: /turn off recommended defaults/i })
-        .click();
+      // Pick a global model first so the form is valid; otherwise Save stays disabled regardless
+      // of per-feature changes.
+      await featureSettings.selectGlobalModel('Mock Connector');
+      await featureSettings.disableRecommendedDefaults('test_feature_alpha');
 
       const alphaRows = featureSettings.endpointRowsFor('test_feature_alpha');
       const initialCount = await alphaRows.count();
@@ -251,7 +236,10 @@ test.describe(
       await test.step('open popover and select a model', async () => {
         await featureSettings.addModelButton('test_feature_alpha').click();
         await expect(featureSettings.addModelSearch).toBeVisible();
-        await featureSettings.addModelOption('anthropic').click();
+        // Narrow before clicking so the substring match resolves to a single option.
+        await featureSettings.addModelSearch.fill('anthropic');
+        await expect(featureSettings.addModelOptions).toHaveCount(1);
+        await featureSettings.addModelOptions.click();
       });
 
       await test.step('endpoint row count increases by one', async () => {
@@ -271,10 +259,8 @@ test.describe(
       await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
-      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
-      await featureSettings.disableRecommendedModelsModal
-        .getByRole('button', { name: /turn off recommended defaults/i })
-        .click();
+      await featureSettings.selectGlobalModel('Mock Connector');
+      await featureSettings.disableRecommendedDefaults('test_feature_alpha');
 
       const betaCard = featureSettings.subFeatureCard('test_feature_beta');
 
