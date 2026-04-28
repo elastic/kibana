@@ -131,7 +131,7 @@ test.describe(
       await expect(suggestWidget).toBeVisible();
       await page.keyboard.type('ind');
 
-      await expect(suggestWidget.getByRole('option', { name: 'index' })).toBeVisible();
+      await expect(suggestWidget.getByRole('option', { name: /^index\b/ })).toBeVisible();
     });
 
     test('should show root-level property suggestions on empty lines', async ({ pageObjects }) => {

@@ -39,7 +39,8 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       width: 100%;
       min-width: 500px;
       max-width: 800px;
-      padding: 12px 16px;
+      border-radius: ${euiTheme.border.radius.medium};
+      ${euiShadow(euiThemeContext, 'm')}
     }
 
     .monaco-editor
@@ -107,7 +108,8 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       max-height: 120px;
     }
 
-    .monaco-editor .suggest-widget {
+    .monaco-editor .suggest-widget,
+    .monaco-editor .suggest-details {
       border-radius: 6px !important;
       ${euiShadow(euiThemeContext, 'm')}
       border-width: 0 !important;
@@ -135,6 +137,35 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
 
     .monaco-editor .suggest-widget .monaco-list .monaco-list-row .suggest-icon {
       color: ${euiTheme.colors.textParagraph} !important;
+    }
+
+    .monaco-editor .suggest-details > .monaco-scrollable-element > .body > .header {
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s} !important;
+    }
+
+    // prevent too large height for suggestion details
+    .monaco-editor .suggest-details > .monaco-scrollable-element > .body > .docs {
+      max-height: 400px !important;
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s} !important;
+    }
+
+    .monaco-editor .suggest-details > .monaco-scrollable-element > .body > .docs.markdown-docs p {
+      overflow-x: hidden !important;
+    }
+
+    // make source code scrollable
+    .monaco-editor
+      .suggest-details
+      > .monaco-scrollable-element
+      > .body
+      > .docs.markdown-docs
+      .monaco-tokenized-source {
+      overflow: auto !important;
+    }
+
+    // break long words in source code
+    .monaco-editor .suggest-details code {
+      overflow-wrap: break-word !important;
     }
   `;
 };

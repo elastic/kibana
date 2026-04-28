@@ -97,6 +97,10 @@ import {
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
 import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
+import {
+  monkeyPatchSuggestWidget,
+  resetSuggestWidgetPatch,
+} from '../lib/monkey_patch_suggest_widget';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
@@ -429,6 +433,8 @@ export const WorkflowYAMLEditor = ({
         const httpHandler = new HttpMonacoConnectorStepHandler();
         registerMonacoConnectorHandler(httpHandler);
 
+        monkeyPatchSuggestWidget(editor);
+
         // Create unified providers with template expression support
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
@@ -460,6 +466,7 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
+    resetSuggestWidgetPatch();
     unregisterHoverCommands();
   }, [unregisterKeyboardCommands, unregisterHoverCommands]);
 
