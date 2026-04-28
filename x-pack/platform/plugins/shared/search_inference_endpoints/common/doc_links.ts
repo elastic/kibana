@@ -13,6 +13,7 @@ class InferenceEndpointsDocLinks {
   public semanticSearchElser: string = '';
   public semanticSearchE5: string = '';
   public featureSettings: string = '';
+  public externalInference: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -21,6 +22,7 @@ class InferenceEndpointsDocLinks {
     this.semanticSearchElser = newDocLinks.enterpriseSearch.elser;
     this.semanticSearchE5 = newDocLinks.enterpriseSearch.e5Model;
     this.featureSettings = newDocLinks.inferenceManagement.featureSettings;
+    this.externalInference = newDocLinks.inferenceManagement.externalInference;
   }
 }
 
