@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LensApiConfigChartType } from '../../../../schema';
 import type { AttributesNormalizer } from './normalize';
 import { normalizeHeatmap } from './heatmap';
 
@@ -14,6 +15,8 @@ const chartNormalizers = {
   heatmap: normalizeHeatmap,
 } satisfies Record<string, AttributesNormalizer<any>>;
 
-export function getChartNormalizer(chartType: string): AttributesNormalizer | undefined {
+export function getChartNormalizer(
+  chartType: LensApiConfigChartType
+): AttributesNormalizer | undefined {
   return (chartNormalizers as any)[chartType];
 }

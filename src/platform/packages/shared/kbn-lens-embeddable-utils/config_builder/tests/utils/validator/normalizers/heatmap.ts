@@ -28,7 +28,7 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
 
     // Set defaults added by the transform that the original doesn't have
     // https://github.com/elastic/kibana/issues/246078
-    attributes.state.visualization.legend.isVisible = isVisible ?? true;
+    attributes.state.visualization.legend.isVisible = isVisible ?? false;
     attributes.state.visualization.legend.shouldTruncate = shouldTruncate ?? false;
     if (!shouldTruncate) delete attributes.state.visualization.legend.maxLines; // not needed if false
     attributes.state.visualization.gridConfig.isXAxisTitleVisible = isXAxisTitleVisible ?? false;

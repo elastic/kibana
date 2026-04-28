@@ -30,7 +30,6 @@ export function validateStateTransformsFn(
   chartType: LensApiConfigChartType
 ): ValidateTransform<LensApiConfigByType[typeof chartType]>['fromState'] {
   const schema = getChartSchema(chartType);
-  const normalizer = getChartNormalizer(chartType);
   const builder = new LensConfigBuilder(undefined, true);
 
   return function validateStateTransforms(attributes, strict = false, excludedFields = []) {
@@ -46,6 +45,7 @@ export function validateStateTransformsFn(
 
     // Temporary strict mode, all checks should eventually be strict
     if (strict) {
+      const normalizer = getChartNormalizer(chartType);
       const newAttributes = builder.fromAPIFormat(newApiConfig);
       const normalizedAttributes = normalizer?.({
         original: attributes,

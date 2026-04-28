@@ -133,6 +133,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
   transformed: (attributes: T) => {
     removeEmptyProperties(attributes);
 
+    // remove as-code filter references
+    attributes.references = attributes.references.filter((reference) => {
+      return !(reference.type === 'index-pattern' && reference.name.startsWith('filter-ref-'));
+    });
+
     return attributes;
   },
 });
