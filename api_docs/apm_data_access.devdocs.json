@@ -75,6 +75,7 @@
                 "lineNumber": 107,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMEventClientConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -136,6 +137,7 @@
                 "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -228,6 +230,7 @@
                 "lineNumber": 197,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -344,6 +347,7 @@
                 "lineNumber": 288,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMEventEqlSearchRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -401,6 +405,7 @@
                 "lineNumber": 307,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMEventFieldCapsRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -458,6 +463,7 @@
                 "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMEventTermsEnumRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -508,6 +514,7 @@
                 "lineNumber": 358,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProcessorEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2277,6 +2284,7 @@
               "lineNumber": 19,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "SavedObjectsClientContract",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2370,6 +2378,7 @@
               "lineNumber": 18,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "ApmDataAccessServicesParams",
               "trackAdoption": false
             }
           ]

@@ -214,7 +214,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 44,
+      "lineNumber": 47,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -230,7 +230,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 45,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -250,7 +250,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 48,
+      "lineNumber": 51,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
