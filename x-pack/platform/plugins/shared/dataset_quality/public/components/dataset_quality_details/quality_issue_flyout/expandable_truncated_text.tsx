@@ -44,6 +44,7 @@ export const ExpandableTruncatedText = ({
           color: euiTheme.colors.textParagraph,
           overflowWrap: 'break-word',
         }}
+        paddingSize='s'
       >
         {displayText}
       </EuiCodeBlock>
