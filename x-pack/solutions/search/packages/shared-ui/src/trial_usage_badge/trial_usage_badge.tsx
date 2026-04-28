@@ -29,12 +29,20 @@ interface TrialUsageBadgeProps {
   billingUrl?: string;
   isServerless?: boolean;
   trialDaysLeft?: number;
+  storageUsage?: string;
+  mlNodeCount?: number;
+  mlMemoryLimit?: string;
+  llmTotalTokens?: number;
 }
 
 export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
   billingUrl,
   isServerless = false,
-  trialDaysLeft = 12,
+  trialDaysLeft = 0,
+  storageUsage,
+  mlNodeCount,
+  mlMemoryLimit,
+  llmTotalTokens,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -133,7 +141,16 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
       <EuiFlexGroup direction="column" gutterSize="none" css={css({ width: 330 })}>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
-            {isServerless ? <ServerlessUsage /> : <CloudHostedUsage />}
+            {isServerless ? (
+              <ServerlessUsage llmTotalTokens={llmTotalTokens} />
+            ) : (
+              <CloudHostedUsage
+                storageUsage={storageUsage}
+                mlNodeCount={mlNodeCount}
+                mlMemoryLimit={mlMemoryLimit}
+                llmTotalTokens={llmTotalTokens}
+              />
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 

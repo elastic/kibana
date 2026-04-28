@@ -13,8 +13,13 @@ import type {
   IRouter,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
 import { defineRoutes } from './routes';
+
+interface SearchHomepageSetupDeps {
+  cloud?: CloudSetup;
+}
 
 export interface RouteDependencies {
   http: CoreSetup<SearchHomepagePluginSetup>['http'];
@@ -23,7 +28,8 @@ export interface RouteDependencies {
   getSecurity: () => Promise<SecurityPluginStart>;
 }
 export class SearchHomepagePlugin
-  implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
+  implements
+    Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, SearchHomepageSetupDeps, {}>
 {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
@@ -33,13 +39,14 @@ export class SearchHomepagePlugin
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
+  public setup(core: CoreSetup<{}, SearchHomepagePluginStart>, deps: SearchHomepageSetupDeps) {
     this.logger.debug('searchHomepage: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
     defineRoutes(router, this.logger, {
       isServerless: this.isServerless,
+      trialEndDate: deps.cloud?.trialEndDate,
     });
     return {};
   }

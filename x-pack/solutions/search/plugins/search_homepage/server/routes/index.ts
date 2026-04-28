@@ -12,6 +12,7 @@ import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys-server';
 import { registerStatusRoutes } from './status';
 import { registerApiKeyRoutes } from './api_key_routes';
 import { registerStatsRoutes } from './size_stats';
+import { registerTrialUsageRoute } from './trial_usage';
 import type { RouterContextData } from '../types';
 
 export function defineRoutes(
@@ -23,4 +24,5 @@ export function defineRoutes(
   registerSearchApiKeysRoutes(router, logger);
   registerStatusRoutes(router, logger);
   registerStatsRoutes(router, logger, routerContextData);
+  registerTrialUsageRoute(router, logger, routerContextData);
 }

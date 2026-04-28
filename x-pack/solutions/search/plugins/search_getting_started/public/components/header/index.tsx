@@ -23,6 +23,7 @@ import {
 
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
+import { useTrialUsageData } from '../../hooks/use_trial_usage_data';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
 
 export const SearchGettingStartedHeader: React.FC = () => {
@@ -32,6 +33,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
   } = useKibana();
 
   const isTrialBadgeEnabled = uiSettings.get<boolean>(TRIAL_USAGE_BADGE_ENABLED_ID, false);
+  const { data: trialUsageData } = useTrialUsageData();
 
   const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
@@ -72,6 +74,11 @@ export const SearchGettingStartedHeader: React.FC = () => {
                 <TrialUsageBadge
                   billingUrl={billingUrl}
                   isServerless={cloud?.isServerlessEnabled}
+                  trialDaysLeft={trialUsageData?.trialDaysLeft}
+                  storageUsage={trialUsageData?.storageUsage}
+                  mlNodeCount={trialUsageData?.mlNodeCount}
+                  mlMemoryLimit={trialUsageData?.mlMemoryLimit}
+                  llmTotalTokens={trialUsageData?.llmTotalTokens}
                 />
               </EuiFlexItem>
             )}
