@@ -36,6 +36,24 @@ jobs:
             gh api "$endpoint" --paginate --jq '.[]' | jq -s '.' > "$output_file"
           }
 
+          build_pr_diff_from_files() {
+            local files_json="$1"
+            local output_file="$2"
+
+            jq -r '
+              def old_filename: .previous_filename // .filename;
+
+              .[] |
+              [
+                "diff --git a/\(old_filename) b/\(.filename)",
+                (
+                  .patch //
+                    "# GitHub did not provide a patch for this file. See pr-files.json for metadata."
+                )
+              ] | join("\n")
+            ' "$files_json" > "$output_file"
+          }
+
           mkdir -p /tmp/pr-context
           gh pr view "$PR_NUMBER" --repo "$REPO" \
             --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels \
@@ -52,8 +70,10 @@ jobs:
           fetch_paginated_array \
             "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" \
             /tmp/pr-context/pr-reviews.json
-          gh pr diff "$PR_NUMBER" --repo "$REPO" \
-            > /tmp/pr-context/pr-diff.txt
+          # Build from pr-files.json because the full PR diff endpoint fails for large PRs.
+          build_pr_diff_from_files \
+            /tmp/pr-context/pr-files.json \
+            /tmp/pr-context/pr-diff.txt
       - name: Upload PR context artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
