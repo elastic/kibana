@@ -103,8 +103,10 @@ export const createModelProvider = ({
         AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
         request
       );
-      if (endpoints.length > 0) {
-        connectorId = endpoints[0].connectorId;
+
+      const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
+      if (recommendedEndpoint.length > 0) {
+        connectorId = recommendedEndpoint[0].connectorId;
       }
     }
 
@@ -118,6 +120,8 @@ export const createModelProvider = ({
 
     return connectorId;
   });
+
+  getFastModelConnectorId().catch(() => undefined);
 
   const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
     const { effortLevel = EffortLevels.medium } = opts;

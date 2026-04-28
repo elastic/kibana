@@ -24,8 +24,10 @@ const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as jest.Mocked
   typeof resolveSelectedConnectorId
 >;
 
+type FastEndpointMock = { connectorId: string; isRecommended?: boolean };
+
 const createSearchInferenceEndpointsMock = (
-  endpoints: Array<{ connectorId: string }> = []
+  endpoints: FastEndpointMock[] = []
 ): jest.Mocked<SearchInferenceEndpointsPluginStart> => {
   return {
     features: {} as any,
@@ -45,11 +47,11 @@ const createTrackingServiceMock = (): jest.Mocked<Pick<TrackingService, 'trackLL
 
 const setupDeps = ({
   fastModelEnabled = false,
-  fastEndpoints = [] as Array<{ connectorId: string }>,
+  fastEndpoints = [] as FastEndpointMock[],
   defaultConnectorId,
 }: {
   fastModelEnabled?: boolean;
-  fastEndpoints?: Array<{ connectorId: string }>;
+  fastEndpoints?: FastEndpointMock[];
   defaultConnectorId?: string;
 } = {}) => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
@@ -186,14 +188,13 @@ describe('createModelProvider', () => {
   });
 
   describe('getModelById', () => {
-    it('uses the provided connectorId without going through the default resolution', async () => {
+    it('uses the provided connectorId verbatim', async () => {
       const deps = setupDeps();
       setupChatAndClient(deps.inference);
 
       const provider = createModelProvider(deps);
       await provider.getModelById({ connectorId: 'specific-connector' });
 
-      expect(resolveSelectedConnectorIdMock).not.toHaveBeenCalled();
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'specific-connector' })
       );
@@ -229,10 +230,10 @@ describe('createModelProvider', () => {
       );
     });
 
-    it('uses the fast model endpoint when effortLevel is low and feature is enabled', async () => {
+    it('uses the recommended fast model endpoint when effortLevel is low and feature is enabled', async () => {
       const deps = setupDeps({
         fastModelEnabled: true,
-        fastEndpoints: [{ connectorId: 'fast-connector' }],
+        fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
       });
       setupChatAndClient(deps.inference);
 
@@ -245,6 +246,43 @@ describe('createModelProvider', () => {
       );
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'fast-connector' })
+      );
+    });
+
+    it('picks the first recommended endpoint when several are returned', async () => {
+      const deps = setupDeps({
+        fastModelEnabled: true,
+        fastEndpoints: [
+          { connectorId: 'non-recommended', isRecommended: false },
+          { connectorId: 'first-recommended', isRecommended: true },
+          { connectorId: 'second-recommended', isRecommended: true },
+        ],
+      });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'first-recommended' })
+      );
+    });
+
+    it('falls back to the default connector when no fast endpoint is recommended', async () => {
+      const deps = setupDeps({
+        fastModelEnabled: true,
+        fastEndpoints: [
+          { connectorId: 'fast-connector', isRecommended: false },
+          { connectorId: 'other-connector' },
+        ],
+      });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'default-connector' })
       );
     });
 
@@ -263,7 +301,7 @@ describe('createModelProvider', () => {
     it('falls back to the default connector when fast feature is disabled', async () => {
       const deps = setupDeps({
         fastModelEnabled: false,
-        fastEndpoints: [{ connectorId: 'fast-connector' }],
+        fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
       });
       setupChatAndClient(deps.inference);
 
@@ -279,7 +317,7 @@ describe('createModelProvider', () => {
     it('memoizes the fast connector resolution across calls', async () => {
       const deps = setupDeps({
         fastModelEnabled: true,
-        fastEndpoints: [{ connectorId: 'fast-connector' }],
+        fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
       });
       setupChatAndClient(deps.inference);
 
