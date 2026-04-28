@@ -53,6 +53,8 @@ Use review mode when the importing workflow is triggered by a pull request event
 
 - Use `create-pull-request-review-comment` only for concrete, line-specific findings.
 - Keep each inline comment focused on a single issue and explain the practical risk or regression.
+- When a finding has a small, directly applicable fix, include a GitHub suggested change in the inline comment using a `suggestion` code block.
+- Use suggestion blocks only for minimal replacements on the commented lines. Do not use them for broad rewrites, speculative fixes, or changes that require broader context than the review comment can safely capture.
 - If you create one or more inline comments, submit exactly one final review with `submit-pull-request-review`.
 - Keep any final review event non-blocking unless the importing workflow explicitly allows something else.
 - If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
