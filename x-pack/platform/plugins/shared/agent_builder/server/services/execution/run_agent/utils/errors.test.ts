@@ -24,7 +24,7 @@ describe('errors', () => {
         expect(converted.message).toBe(message);
       });
 
-      it('returns unknownError when status is missing', () => {
+      it('returns unknownError when status is missing, preserving the message', () => {
         const err = createInferenceProviderError('something went wrong');
         const converted = convertError(err);
 
@@ -32,9 +32,10 @@ describe('errors', () => {
         expect(
           'statusCode' in converted.meta ? converted.meta.statusCode : undefined
         ).toBeUndefined();
+        expect(converted.message).toBe('something went wrong');
       });
 
-      it('returns unknownError when status is outside 4xx/5xx range', () => {
+      it('returns unknownError when status is outside 4xx/5xx range, preserving the message', () => {
         const err = createInferenceProviderError('unexpected status', { status: 200 });
         const converted = convertError(err);
 
@@ -42,6 +43,7 @@ describe('errors', () => {
         expect(
           'statusCode' in converted.meta ? converted.meta.statusCode : undefined
         ).toBeUndefined();
+        expect(converted.message).toBe('unexpected status');
       });
     });
 
