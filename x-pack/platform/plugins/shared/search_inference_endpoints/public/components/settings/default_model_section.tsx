@@ -77,14 +77,12 @@ const getSelectedOptions = (
   return options.flatMap(findInOptions);
 };
 
-const enabledLabel = () =>
-  i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.enabled', {
-    defaultMessage: 'Enabled',
-  });
-const disabledLabel = () =>
-  i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.disabled', {
-    defaultMessage: 'Disabled',
-  });
+const ENABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.enabled', {
+  defaultMessage: 'Enabled',
+});
+const DISABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.disabled', {
+  defaultMessage: 'Disabled',
+});
 
 export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, validation }) => {
   const { state, setEnableAi, setDefaultModelId, setFeatureSpecificModels } = defaultModelSettings;
@@ -136,7 +134,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
         >
           <EuiSwitch
             data-test-subj="enableAiSwitch"
-            label={state.enableAi ? enabledLabel() : disabledLabel()}
+            label={state.enableAi ? ENABLED_LABEL : DISABLED_LABEL}
             checked={state.enableAi}
             onChange={(e) => setEnableAi(e.target.checked)}
           />
@@ -237,7 +235,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
             >
               <EuiSwitch
                 data-test-subj="featureSpecificModelsSwitch"
-                label={state.featureSpecificModels ? enabledLabel() : disabledLabel()}
+                label={state.featureSpecificModels ? ENABLED_LABEL : DISABLED_LABEL}
                 checked={state.featureSpecificModels}
                 onChange={(e) => setFeatureSpecificModels(e.target.checked)}
               />

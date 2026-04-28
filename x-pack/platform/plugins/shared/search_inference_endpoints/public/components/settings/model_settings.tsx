@@ -45,6 +45,7 @@ export const ModelSettings: React.FC = () => {
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
+  const { enableAi, featureSpecificModels } = defaultModelSettings.state;
   const defaultModelValidation = useDefaultModelValidation(defaultModelSettings.state);
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
@@ -53,7 +54,6 @@ export const ModelSettings: React.FC = () => {
   const usageTracker = useUsageTracker();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
-  const isSaving = isFeatureSaving;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
 
   const history = useHistory();
@@ -111,8 +111,6 @@ export const ModelSettings: React.FC = () => {
     setPendingLocation(null);
   }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
-  const enableAi = defaultModelSettings.state.enableAi;
-  const featureSpecificModels = defaultModelSettings.state.featureSpecificModels;
   const showFeatureSections = enableAi && featureSpecificModels;
 
   if (connectorsLoading || isLoading) {
@@ -145,7 +143,7 @@ export const ModelSettings: React.FC = () => {
           <EuiButton
             fill
             onClick={handleSave}
-            isLoading={isSaving}
+            isLoading={isFeatureSaving}
             isDisabled={!isDirty || !defaultModelValidation.isValid}
             data-test-subj="save-settings-button"
           >

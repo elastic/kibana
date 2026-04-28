@@ -235,7 +235,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 <h4>{feature.featureName}</h4>
               </EuiTitle>
             </EuiFlexItem>
-            {isTechPreview || isBeta ? (
+            {(isTechPreview || isBeta) && (
               <EuiFlexItem grow={false}>
                 <EuiBadgeGroup>
                   {isTechPreview && (
@@ -254,7 +254,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   )}
                 </EuiBadgeGroup>
               </EuiFlexItem>
-            ) : null}
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">

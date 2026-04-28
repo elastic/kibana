@@ -54,7 +54,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
               <h3>{parentName}</h3>
             </EuiTitle>
           </EuiFlexItem>
-          {isTechPreview || isBeta ? (
+          {(isTechPreview || isBeta) && (
             <EuiFlexItem grow={false}>
               <EuiBadgeGroup>
                 {isTechPreview && (
@@ -73,7 +73,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                 )}
               </EuiBadgeGroup>
             </EuiFlexItem>
-          ) : null}
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">

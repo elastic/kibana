@@ -158,18 +158,14 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [settingsData]
   );
 
-  const dirtyFeatureIds = useMemo<ReadonlySet<string>>(() => {
-    const ids = new Set<string>();
-    for (const [featureId, currentIds] of Object.entries(assignments)) {
-      const defaults = defaultAssignments[featureId];
-      if (!defaults || !arraysEqual(currentIds, defaults)) {
-        ids.add(featureId);
-      }
-    }
-    return ids;
-  }, [assignments, defaultAssignments]);
-
-  const isDirty = dirtyFeatureIds.size > 0;
+  const isDirty = useMemo(
+    () =>
+      Object.entries(assignments).some(([featureId, currentIds]) => {
+        const defaults = defaultAssignments[featureId];
+        return !defaults || !arraysEqual(currentIds, defaults);
+      }),
+    [assignments, defaultAssignments]
+  );
 
   const updateEndpoints = useCallback((featureId: string, endpointIds: string[]) => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
