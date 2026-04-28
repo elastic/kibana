@@ -123,6 +123,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Storage",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -176,7 +177,15 @@
             "tags": [],
             "label": "getIncomingEditorState",
             "description": [
-              "\nFetches an {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id\n"
+              "\nFetches an ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorState",
+                "text": "editor state"
+              },
+              " from the sessionStorage for the provided app id\n"
             ],
             "signature": [
               "(appId: string, removeAfterFetch?: boolean | undefined) => ",
@@ -243,7 +252,15 @@
             "tags": [],
             "label": "clearEditorState",
             "description": [
-              "\nClears the {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id\n"
+              "\nClears the ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorState",
+                "text": "editor state"
+              },
+              " from the sessionStorage for the provided app id\n"
             ],
             "signature": [
               "(appId?: string | undefined) => void"
@@ -283,7 +300,15 @@
             "tags": [],
             "label": "getIncomingEmbeddablePackage",
             "description": [
-              "\nFetches an {@link EmbeddablePackageState | embeddable package} from the sessionStorage for the given AppId\n"
+              "\nFetches an ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePackageState",
+                "text": "embeddable package"
+              },
+              " from the sessionStorage for the given AppId\n"
             ],
             "signature": [
               "(appId: string, removeAfterFetch?: boolean | undefined) => ",
@@ -350,7 +375,22 @@
             "tags": [],
             "label": "navigateToEditor",
             "description": [
-              "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith {@link EmbeddableEditorState | embeddable editor state}"
+              "\nA wrapper around the ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ApplicationStart.navigateToApp",
+                "text": "ApplicationStart.navigateToApp"
+              },
+              " method which navigates to the specified appId\nwith ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorState",
+                "text": "embeddable editor state"
+              }
             ],
             "signature": [
               "(appId: string, options?: { path?: string | undefined; openInNewTab?: boolean | undefined; skipAppLeave?: boolean | undefined; state: ",
@@ -481,7 +521,22 @@
             "tags": [],
             "label": "navigateToWithEmbeddablePackages",
             "description": [
-              "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith multiple {@link EmbeddablePackageState | embeddable package state}"
+              "\nA wrapper around the ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ApplicationStart.navigateToApp",
+                "text": "ApplicationStart.navigateToApp"
+              },
+              " method which navigates to the specified appId\nwith multiple ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePackageState",
+                "text": "embeddable package state"
+              }
             ],
             "signature": [
               "<SerializedStateType extends object = object>(appId: string, options?: { path?: string | undefined; state: ",
@@ -904,6 +959,7 @@
                     "lineNumber": 42,
                     "columnNumber": 21,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Api",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1052,6 +1108,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1110,6 +1167,7 @@
             "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1168,6 +1226,7 @@
             "lineNumber": 94,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1226,6 +1285,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1439,6 +1499,7 @@
                 "lineNumber": 133,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1649,6 +1710,7 @@
                 "lineNumber": 147,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedDrilldowns",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1899,6 +1961,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "BuildEmbeddableProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2690,7 +2753,7 @@
               "id": "def-public.EmbeddableSetup.registerAddFromLibraryType.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n  onAdd,\n  savedObjectType,\n  savedObjectName,\n  getIconForSavedObject,\n  getSavedObjectSubType,\n  getTooltipForSavedObject,\n}",
               "description": [],
               "signature": [
                 "{ onAdd: (container: ",
@@ -2760,7 +2823,15 @@
           "tags": [],
           "label": "registerDrilldown",
           "description": [
-            "\nRegisters an async {@link DrilldownDefintion} getter."
+            "\nRegisters an async ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.DrilldownDefintion",
+              "text": "DrilldownDefintion"
+            },
+            " getter."
           ],
           "signature": [
             "(type: string, getFn: () => Promise<",
@@ -2828,7 +2899,15 @@
           "tags": [],
           "label": "registerEmbeddablePublicDefinition",
           "description": [
-            "\nRegisters an async {@link ReactEmbeddableFactory} getter."
+            "\nRegisters an async ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ReactEmbeddableFactory",
+              "text": "ReactEmbeddableFactory"
+            },
+            " getter."
           ],
           "signature": [
             "<SerializedState extends object = object, Api extends ",
@@ -3113,6 +3192,7 @@
               "lineNumber": 92,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "Storage",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -3606,6 +3686,7 @@
               "lineNumber": 35,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "EmbeddableRegistryDefinition",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3694,6 +3775,7 @@
               "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "DrilldownSetup",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3752,6 +3834,7 @@
               "lineNumber": 52,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "EmbeddableServerDefinition",
               "trackAdoption": false,
               "isRequired": true
             }
