@@ -67,6 +67,7 @@ export interface TraceWaterfallContextProps {
   ebt?: {
     row: { element: string };
     errorBadge: { element: string };
+    serviceBadge: { element: string };
   };
 }
 

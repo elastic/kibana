@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-/**
- * EBT element name constants for the APM trace waterfall.
- *
- * These values populate `data-ebt-element` HTML attributes.
- * Actions are fixed by the components: rows emit 'viewSpan', error badges emit 'viewError'.
- * Use context.pageName to segment by surface (apm vs discover).
- */
-
-/** Clickable row in the main APM transaction details waterfall. */
 export const EBT_ELEMENT_WATERFALL_ROW = 'waterfallRow';
-
-/** Error badge in the main APM transaction details waterfall. */
 export const EBT_ELEMENT_WATERFALL_ERROR_BADGE = 'waterfallErrorBadge';
-
-/** Clickable row in the full-trace flyout opened from within APM. */
+export const EBT_ELEMENT_WATERFALL_SERVICE_BADGE = 'waterfallServiceBadge';
 export const EBT_ELEMENT_FLYOUT_WATERFALL_ROW = 'flyoutWaterfallRow';
-
-/** Error badge in the full-trace flyout opened from within APM. */
 export const EBT_ELEMENT_FLYOUT_WATERFALL_ERROR_BADGE = 'flyoutWaterfallErrorBadge';
+export const EBT_ELEMENT_FLYOUT_WATERFALL_SERVICE_BADGE = 'flyoutWaterfallServiceBadge';
+export const EBT_ELEMENT_WATERFALL_VIEW_FULL_TRACE = 'waterfallSummaryViewFullTrace';
+export const EBT_CLICK_ACTION_VIEW_FULL_TRACE = 'viewFullTrace';

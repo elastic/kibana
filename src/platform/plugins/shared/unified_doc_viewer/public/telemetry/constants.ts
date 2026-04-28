@@ -21,7 +21,6 @@
  */
 
 // --- Actions ---
-export const EBT_CLICK_ACTION_VIEW_SERVICE = 'viewService';
 export const EBT_CLICK_ACTION_VIEW_TRANSACTION = 'viewTransaction';
 export const EBT_CLICK_ACTION_VIEW_DEPENDENCY = 'viewDependency';
 export const EBT_CLICK_ACTION_VIEW_TRACE = 'viewTrace';
@@ -41,6 +40,7 @@ export const EBT_ELEMENT_DOC_VIEWER_LOGS = 'docViewerLogs';
 export const EBT_ELEMENT_DOC_VIEWER_SIMILAR_SPANS = 'docViewerSimilarSpans';
 export const EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW = 'docViewerWaterfallRow';
 export const EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE = 'docViewerWaterfallErrorBadge';
+export const EBT_ELEMENT_DOC_VIEWER_WATERFALL_SERVICE_BADGE = 'docViewerWaterfallServiceBadge';
 
 // --- Details ---
 

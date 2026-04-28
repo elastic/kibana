@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AgentIcon } from '@kbn/custom-icons';
-import { EBT_CLICK_ACTION_VIEW_ERROR } from '@kbn/ebt-click-actions';
+import { EBT_CLICK_ACTION_VIEW_ERROR, EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click-actions';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -109,6 +109,8 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             <EuiBadge
               color="hollow"
               data-test-subj="apmBarDetailsServiceNameBadge"
+              data-ebt-action={getServiceBadgeHref ? EBT_CLICK_ACTION_VIEW_SERVICE : undefined}
+              data-ebt-element={getServiceBadgeHref ? ebt?.serviceBadge.element : undefined}
               href={getServiceBadgeHref?.(item.serviceName) as any}
               {...(getServiceBadgeHref
                 ? ({

@@ -10,7 +10,7 @@
 import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
-import { EBT_CLICK_ACTION_VIEW_SERVICE } from '../../../../telemetry/constants';
+import { EBT_CLICK_ACTION_VIEW_SERVICE } from '@kbn/ebt-click-actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { ServiceNameWithIcon } from './service_name_with_icon';
 

@@ -20,6 +20,7 @@ import { FullTraceWaterfallRenderer } from '../../../../shared/trace_waterfall/f
 import {
   EBT_ELEMENT_FLYOUT_WATERFALL_ROW,
   EBT_ELEMENT_FLYOUT_WATERFALL_ERROR_BADGE,
+  EBT_ELEMENT_FLYOUT_WATERFALL_SERVICE_BADGE,
 } from '../../../../shared/trace_waterfall/ebt_constants';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
@@ -125,6 +126,7 @@ export function TraceWaterfallFlyout({
           ebt={{
             row: { element: EBT_ELEMENT_FLYOUT_WATERFALL_ROW },
             errorBadge: { element: EBT_ELEMENT_FLYOUT_WATERFALL_ERROR_BADGE },
+            serviceBadge: { element: EBT_ELEMENT_FLYOUT_WATERFALL_SERVICE_BADGE },
           }}
         />
       </EuiFlyoutBody>

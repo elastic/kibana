@@ -31,6 +31,7 @@ import type { TraceDocFlyoutType } from '../../common/types';
 import {
   EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW,
   EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE,
+  EBT_ELEMENT_DOC_VIEWER_WATERFALL_SERVICE_BADGE,
 } from '../../../../../telemetry/constants';
 
 export interface FullScreenWaterfallProps {
@@ -187,6 +188,7 @@ export const FullScreenWaterfall = ({
             ebt={{
               row: { element: EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW },
               errorBadge: { element: EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE },
+              serviceBadge: { element: EBT_ELEMENT_DOC_VIEWER_WATERFALL_SERVICE_BADGE },
             }}
           />
         </div>
