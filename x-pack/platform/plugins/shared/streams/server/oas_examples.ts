@@ -294,6 +294,51 @@ export const getWiredIngestResponse: { ingest: Streams.WiredStream.Definition['i
 };
 
 // ---------------------------------------------------------------------------
+// PUT /api/streams/{name}/queries/{queryId}
+// ---------------------------------------------------------------------------
+
+export const upsertStreamQueryRequest = {
+  title: 'Error count by host',
+  description: 'Count error-level log events grouped by host name',
+  esql: {
+    query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/streams/{name}/queries/_bulk
+// ---------------------------------------------------------------------------
+
+export const bulkStreamQueriesRequest = {
+  operations: [
+    {
+      index: {
+        id: 'error-count-by-host',
+        title: 'Error count by host',
+        description: 'Count error-level log events grouped by host name',
+        esql: {
+          query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+        },
+      },
+    },
+    {
+      delete: { id: 'old-query-id' },
+    },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/streams/{name}/content/export
+// ---------------------------------------------------------------------------
+
+export const exportContentRequest = {
+  name: 'nginx-pack',
+  description: 'Nginx stream content pack',
+  version: '1.0.0',
+  include: { objects: { all: {} } },
+};
+
+// ---------------------------------------------------------------------------
 // GET /api/streams  –  stream list response
 // ---------------------------------------------------------------------------
 

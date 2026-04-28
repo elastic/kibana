@@ -14,6 +14,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
+import { upsertStreamQueryRequest, bulkStreamQueriesRequest } from '../../../oas_examples';
 import {
   EsqlQueryValidationError,
   validateEsqlQueryForStreamOrThrow,
@@ -46,10 +47,17 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'List of queries linked to the stream.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   security: {
@@ -85,6 +93,22 @@ const upsertQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertQuery: { value: upsertStreamQueryRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The query was added or updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -93,8 +117,8 @@ const upsertQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query.'),
     }),
     body: upsertStreamQueryRequestSchema,
   }),
@@ -140,6 +164,13 @@ const deleteQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'The query was removed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -148,8 +179,8 @@ const deleteQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query to remove.'),
     }),
   }),
   handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
@@ -190,6 +221,22 @@ const bulkQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              bulkQueries: { value: bulkStreamQueriesRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Bulk operation completed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -198,7 +245,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: z.object({
       operations: z.array(
