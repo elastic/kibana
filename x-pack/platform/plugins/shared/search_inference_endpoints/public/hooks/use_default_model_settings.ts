@@ -30,23 +30,41 @@ export interface UseDefaultModelSettingsReturn {
   reset: () => void;
 }
 
+/**
+ * Persisted ↔ UI state mapping
+ *
+ * Kibana stores two UI settings (shared across many plugins):
+ *   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR        → connector ID or 'NO_DEFAULT_CONNECTOR'
+ *   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY → boolean ("default only" mode)
+ *
+ * This hook exposes three UI controls:
+ *   enableAi              → virtual toggle (not stored directly)
+ *   defaultModelId        → maps 1:1 to DEFAULT_AI_CONNECTOR
+ *   featureSpecificModels → inverse of DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
+ *
+ * "AI disabled" is encoded as:
+ *   defaultModelId = NO_DEFAULT_MODEL  AND  defaultOnly = true
+ *
+ * derive()     reads persisted → UI state
+ * toPersisted() writes UI state → persisted
+ */
 interface PersistedDefaultModelState {
   defaultModelId: string;
-  disallowOtherModels: boolean;
+  defaultOnly: boolean;
 }
 
-const isAiDisabled = ({ defaultModelId, disallowOtherModels }: PersistedDefaultModelState) =>
-  defaultModelId === NO_DEFAULT_MODEL && disallowOtherModels === true;
+const isAiDisabled = ({ defaultModelId, defaultOnly }: PersistedDefaultModelState) =>
+  defaultModelId === NO_DEFAULT_MODEL && defaultOnly === true;
 
 const derive = (persisted: PersistedDefaultModelState): DefaultModelSettingsState => ({
   enableAi: !isAiDisabled(persisted),
   defaultModelId: persisted.defaultModelId,
-  featureSpecificModels: !persisted.disallowOtherModels,
+  featureSpecificModels: !persisted.defaultOnly,
 });
 
 const toPersisted = (state: DefaultModelSettingsState): PersistedDefaultModelState => ({
   defaultModelId: state.defaultModelId,
-  disallowOtherModels: !state.featureSpecificModels,
+  defaultOnly: !state.featureSpecificModels,
 });
 
 export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
@@ -59,11 +77,11 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
       NO_DEFAULT_MODEL
     );
-    const disallowOtherModels = settingsClient.get<boolean>(
+    const defaultOnly = settingsClient.get<boolean>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
       false
     );
-    return { defaultModelId, disallowOtherModels };
+    return { defaultModelId, defaultOnly };
   }, [settingsClient]);
 
   const [savedState, setSavedState] = useState<DefaultModelSettingsState>(() =>
@@ -71,14 +89,15 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   );
   const [state, setState] = useState<DefaultModelSettingsState>(() => derive(getPersistedState()));
 
-  // Remember the last known "AI enabled" configuration so toggling the master switch
-  // OFF and back ON in the same session restores what the user had before.
-  const lastEnabledRef = useRef<PersistedDefaultModelState | null>(null);
+  // Remembers the last "AI enabled" config so toggling the master switch OFF and
+  // back ON in the same session restores what the user had before.
+  // Stored as UI shape (DefaultModelSettingsState) to avoid back-and-forth conversions.
+  const lastEnabledRef = useRef<DefaultModelSettingsState | null>(null);
   if (lastEnabledRef.current === null) {
     const persisted = getPersistedState();
     lastEnabledRef.current = isAiDisabled(persisted)
-      ? { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: false }
-      : persisted;
+      ? { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: true }
+      : derive(persisted);
   }
 
   useEffect(() => {
@@ -105,9 +124,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   const setEnableAi = useCallback((enabled: boolean) => {
     setState((prev) => {
       if (prev.enableAi && !enabled) {
-        // Turning AI off: remember the current configuration so we can restore it later
-        // in the same session, and collapse to the disabled persisted form.
-        lastEnabledRef.current = toPersisted(prev);
+        lastEnabledRef.current = prev;
         return {
           enableAi: false,
           defaultModelId: NO_DEFAULT_MODEL,
@@ -116,13 +133,14 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       }
       if (!prev.enableAi && enabled) {
         const remembered = lastEnabledRef.current ?? {
+          enableAi: true,
           defaultModelId: NO_DEFAULT_MODEL,
-          disallowOtherModels: false,
+          featureSpecificModels: true,
         };
         return {
           enableAi: true,
           defaultModelId: remembered.defaultModelId,
-          featureSpecificModels: !remembered.disallowOtherModels,
+          featureSpecificModels: remembered.featureSpecificModels,
         };
       }
       return prev;
@@ -146,17 +164,17 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       if (persisted.defaultModelId !== savedPersisted.defaultModelId) {
         await settingsClient.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, persisted.defaultModelId);
       }
-      if (persisted.disallowOtherModels !== savedPersisted.disallowOtherModels) {
+      if (persisted.defaultOnly !== savedPersisted.defaultOnly) {
         await settingsClient.set(
           GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-          persisted.disallowOtherModels
+          persisted.defaultOnly
         );
       }
       const newSaved = derive(getPersistedState());
       setSavedState(newSaved);
       setState(newSaved);
       if (newSaved.enableAi) {
-        lastEnabledRef.current = toPersisted(newSaved);
+        lastEnabledRef.current = newSaved;
       }
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess', {
