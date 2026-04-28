@@ -15,7 +15,7 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
-  
+
   // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   // Skipped by https://github.com/elastic/kibana/pull/242259
   describe.skip('ES deprecation logs flyout', function () {
