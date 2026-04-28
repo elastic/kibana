@@ -20,6 +20,7 @@ import { SuggestionCategory } from '../../../..';
 import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
 import { type ICommandCallbacks, type ICommandContext, type ISuggestionItem } from '../types';
 import { getCompletionItemsBySettingName } from './utils';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 
 // SET <setting> = <value>;
 export async function autocomplete(
@@ -83,11 +84,17 @@ export async function autocomplete(
         return [];
       }
 
+      const valueStartOffset = settingRightSide.location.min + 1;
+      const closingQuoteOffset = query.indexOf('"', valueStartOffset);
+      const valueEndOffset = closingQuoteOffset === -1 ? query.length : closingQuoteOffset;
+      const typedValue = query.substring(valueStartOffset, valueEndOffset);
+
       return settingsValueCompletions.map((item) => ({
         ...item,
-        rangeToReplace: {
-          start: settingRightSide.location.min + 1,
-          end: innerText.length,
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.WHOLE_SCOPE,
+          scopeText: typedValue,
+          startOffset: valueStartOffset,
         },
       }));
     }
