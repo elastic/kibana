@@ -68,7 +68,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
-  const [savedValue, setSavedValue] = useState(initialValue);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
   const {
@@ -83,8 +82,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-
-  const hasChanges = yamlValue !== savedValue;
+  const hasChanges = yamlValue.trimEnd() !== initialValue.trimEnd();
 
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
@@ -151,7 +149,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       async (data) => {
         try {
           await onCreate(data, isEnabled);
-          setSavedValue(data.definition);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
