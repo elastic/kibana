@@ -21,10 +21,23 @@ import {
 import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
 import { getRegistryDataStreamAssetBaseName } from '../../../../common/services';
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 import { throwIfAborted } from '../../../tasks/utils';
 
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
+
+/**
+ * Returns true if any of the data stream's streams use the OTel collector input type
+ * AND OTel integrations are enabled. Mirrors the check in `installTemplateForDataStream`.
+ */
+function isOtelDataStream(dataStream: RegistryDataStream): boolean {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  return (
+    !!experimentalFeature?.enableOtelIntegrations &&
+    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE)
+  );
+}
 
 /**
  * Returns true if namespace-level customization is opted in for `namespace` on
@@ -147,14 +160,20 @@ function buildNamespaceTemplate({
   dataStream,
   namespace,
   templateName,
+  isOtelInputType,
 }: {
   baseTemplate: IndexTemplate;
   dataStream: RegistryDataStream;
   namespace: string;
   templateName: string;
+  isOtelInputType?: boolean;
 }): { name: string; template: IndexTemplate } {
   const nsTemplateName = generateNamespaceTemplateName(templateName, namespace);
-  const nsIndexPattern = generateNamespaceTemplateIndexPattern(dataStream, namespace);
+  const nsIndexPattern = generateNamespaceTemplateIndexPattern(
+    dataStream,
+    namespace,
+    isOtelInputType
+  );
   const nsPriority = getNamespaceTemplatePriority(dataStream);
 
   const composedOf = insertNamespaceCustomTemplate(
@@ -207,7 +226,8 @@ async function createNamespaceTemplatesForPackage({
     dataStreams,
     async (dataStream) => {
       if (abortController) throwIfAborted(abortController);
-      const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+      const isOtelInputType = isOtelDataStream(dataStream);
+      const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
       const baseTemplate = await fetchBaseTemplate(
         esClient,
         templateName,
@@ -222,6 +242,7 @@ async function createNamespaceTemplatesForPackage({
           dataStream,
           namespace,
           templateName,
+          isOtelInputType,
         });
 
         await esClient.indices.putIndexTemplate(
@@ -286,7 +307,10 @@ async function deleteNamespaceTemplatesForPackage({
     dataStreams,
     async (dataStream) => {
       if (abortController) throwIfAborted(abortController);
-      const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+      const templateName = getRegistryDataStreamAssetBaseName(
+        dataStream,
+        isOtelDataStream(dataStream)
+      );
       for (const namespace of namespaces) {
         const nsName = generateNamespaceTemplateName(templateName, namespace);
         try {

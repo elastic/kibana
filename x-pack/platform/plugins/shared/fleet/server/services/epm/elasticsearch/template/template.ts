@@ -903,12 +903,14 @@ export function generateNamespaceTemplateName(baseName: string, namespace: strin
  *
  * Example (non-prefix): `logs-nginx.access-production`
  * Example (dataset_is_prefix): `metrics-test.*-production`
+ * Example (OTel): `traces-generic.otel-production`
  */
 export function generateNamespaceTemplateIndexPattern(
   dataStream: RegistryDataStream,
-  namespace: string
+  namespace: string,
+  isOtelInputType?: boolean
 ): string {
-  const baseName = getRegistryDataStreamAssetBaseName(dataStream);
+  const baseName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
   if (!dataStream.dataset_is_prefix) {
     return `${baseName}-${namespace}`;
   } else {
