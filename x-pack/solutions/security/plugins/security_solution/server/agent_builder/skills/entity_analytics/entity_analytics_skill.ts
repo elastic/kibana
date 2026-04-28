@@ -141,6 +141,12 @@ Use this skill when:
 - Discovering the riskiest entities in the environment based on risk scores and criticality levels.
 - Surfacing entities that require further investigation based on their attributes and behaviors.
 
+## Related Skills
+When asked to investigate unusual or anomalous behavior by entities, use:
+- '~/skills/security/ml/find-security-ml-jobs' to find the appropriate ML jobs that will answer the user's question.
+  - This skill returns the EUIDs (entity IDs) of entities exhibiting anomalous behavior that matches the user's query.
+    Use those EUIDs as input to the 'security.get_entity' tool to retrieve the profiles for those entities and include them in your analysis.
+
 ## Available Tools
 
 ### Get Entity Tool
@@ -462,6 +468,10 @@ Use this skill when:
 - A user asks to find the riskiest entities (hosts, users, services, generic) in their environment
 - A user wants to understand whether any entities have had a significant change in risk score
 - You want to look up the asset criticality level for an entity
+
+## Related Skills
+When asked to investigate unusual or anomalous behavior by entities, use:
+- '~/skills/security/ml/find-security-ml-jobs' to find the appropriate ML jobs that will answer the user's question
 
 ## Entity Analysis Process
 

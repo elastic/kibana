@@ -162,6 +162,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/presentation-util'
+  - '@kbn/unified-doc-viewer-plugin'
 tags:
   - plugin
   - prod

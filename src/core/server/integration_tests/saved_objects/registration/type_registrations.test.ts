@@ -196,9 +196,10 @@ const previouslyRegisteredTypes = [
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
   'streams-significant-events-settings',
-  'alerting_notification_policy',
+  'alerting_notification_policy', // renamed in 9.4 https://github.com/elastic/kibana/pull/264182 for alerting_action_policy
   'alerting_api_key_pending_invalidation',
   'alerting_rule',
+  'alerting_action_policy',
 ].sort();
 
 describe('SO type registrations', () => {
