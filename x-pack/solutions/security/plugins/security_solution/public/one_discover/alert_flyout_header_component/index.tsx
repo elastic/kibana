@@ -8,10 +8,11 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
@@ -21,7 +22,7 @@ import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout
 import { NotesDetails } from '../../flyout_v2/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { createDiscoverCellActionRenderer } from '../cell_actions';
+import { DiscoverCellActions } from '../cell_actions';
 
 export const MISSING_METADATA_CALLOUT = i18n.translate(
   'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
@@ -81,14 +82,16 @@ export const AlertFlyoutHeader = ({
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const renderCellActions = useMemo(
-    () =>
-      createDiscoverCellActionRenderer({
-        columns,
-        filter,
-        onAddColumn,
-        onRemoveColumn,
-      }),
+  const renderCellActions = useCallback<CellActionRenderer>(
+    (props) => (
+      <DiscoverCellActions
+        {...props}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    ),
     [columns, filter, onAddColumn, onRemoveColumn]
   );
 

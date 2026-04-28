@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer } from '@elastic/eui';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
-import { createDiscoverCellActionRenderer } from '../cell_actions';
+import { DiscoverCellActions } from '../cell_actions';
 
 export interface AlertFlyoutOverviewTabProps {
   /**
@@ -63,14 +64,16 @@ export const AlertFlyoutOverviewTab = ({
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
-  const renderCellActions = useMemo(
-    () =>
-      createDiscoverCellActionRenderer({
-        columns,
-        filter,
-        onAddColumn,
-        onRemoveColumn,
-      }),
+  const renderCellActions = useCallback<CellActionRenderer>(
+    (props) => (
+      <DiscoverCellActions
+        {...props}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    ),
     [columns, filter, onAddColumn, onRemoveColumn]
   );
 

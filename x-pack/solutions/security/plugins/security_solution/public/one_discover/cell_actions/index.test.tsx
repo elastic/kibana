@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createDiscoverCellActionRenderer } from './cell_actions';
+import { DiscoverCellActions } from '.';
 
 const renderDiscoverCellActions = ({
   columns,
@@ -23,23 +23,18 @@ const renderDiscoverCellActions = ({
   onRemoveColumn?: jest.Mock;
   value?: string | string[] | undefined;
 }) => {
-  const renderCellActions = createDiscoverCellActionRenderer({
-    columns,
-    filter,
-    onAddColumn,
-    onRemoveColumn,
-  });
-
   const result = render(
     <IntlProvider locale="en">
-      <>
-        {renderCellActions({
-          children: <button type="button">{'Value'}</button>,
-          field: 'host.name',
-          value,
-          scopeId: '',
-        })}
-      </>
+      <DiscoverCellActions
+        field="host.name"
+        value={value}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      >
+        <button type="button">{'Value'}</button>
+      </DiscoverCellActions>
     </IntlProvider>
   );
 
@@ -53,7 +48,7 @@ const renderDiscoverCellActions = ({
   };
 };
 
-describe('createDiscoverCellActionRenderer', () => {
+describe('DiscoverCellActions', () => {
   it('uses Discover filter callbacks for value and exists actions', () => {
     const filter = jest.fn();
     const { trigger } = renderDiscoverCellActions({ filter });

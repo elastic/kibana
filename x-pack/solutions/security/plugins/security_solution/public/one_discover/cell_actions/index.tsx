@@ -9,15 +9,29 @@ import React, { useEffect, useRef, useState } from 'react';
 import { copyToClipboard, EuiButtonIcon, EuiFlexGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type {
-  CellActionRenderer,
-  CellActionRendererProps,
-} from '../flyout_v2/shared/components/cell_actions';
+import type { CellActionRendererProps } from '../../flyout_v2/shared/components/cell_actions';
 
 type DiscoverCellActionRendererDeps = Pick<
   DocViewRenderProps,
   'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
 >;
+
+interface DiscoverCellActionsProps {
+  /** Cell value content rendered as the popover anchor. */
+  children: CellActionRendererProps['children'];
+  /** Name of the Discover field for the current cell. */
+  field: CellActionRendererProps['field'];
+  /** Raw value from the current Discover cell. */
+  value: CellActionRendererProps['value'];
+  /** Fields currently displayed as Discover table columns. */
+  columns: DiscoverCellActionRendererDeps['columns'];
+  /** Adds include, exclude, or exists filters for the field value. */
+  filter: DiscoverCellActionRendererDeps['filter'];
+  /** Adds the field to the Discover table columns. */
+  onAddColumn: DiscoverCellActionRendererDeps['onAddColumn'];
+  /** Removes the field from the Discover table columns. */
+  onRemoveColumn: DiscoverCellActionRendererDeps['onRemoveColumn'];
+}
 
 const filterForValueLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.filterForValue',
@@ -63,7 +77,8 @@ const fieldValueActionsLabel = i18n.translate(
 
 const closePopoverPlaceholder = () => {};
 
-const DiscoverCellActions = ({
+// Wraps Discover cell values with hover actions for filtering, column toggling, and copying.
+export const DiscoverCellActions = ({
   children,
   field,
   value,
@@ -71,7 +86,7 @@ const DiscoverCellActions = ({
   filter,
   onAddColumn,
   onRemoveColumn,
-}: CellActionRendererProps & DiscoverCellActionRendererDeps) => {
+}: DiscoverCellActionsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -179,23 +194,4 @@ const DiscoverCellActions = ({
       </EuiPopover>
     </span>
   );
-};
-
-export const createDiscoverCellActionRenderer = ({
-  columns,
-  filter,
-  onAddColumn,
-  onRemoveColumn,
-}: DiscoverCellActionRendererDeps): CellActionRenderer => {
-  const Renderer: React.FC<CellActionRendererProps> = (props) => (
-    <DiscoverCellActions
-      {...props}
-      columns={columns}
-      filter={filter}
-      onAddColumn={onAddColumn}
-      onRemoveColumn={onRemoveColumn}
-    />
-  );
-  Renderer.displayName = 'DiscoverCellActionRenderer';
-  return Renderer as CellActionRenderer;
 };
