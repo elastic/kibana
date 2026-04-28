@@ -80,7 +80,7 @@ function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationSta
     legend: {
       isVisible: layer.legend?.visibility !== 'hidden',
       type: 'heatmap_legend',
-      position: 'right',
+      position: layer.legend?.position ?? 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: legendSizeCompat.toState(layer.legend?.size),
