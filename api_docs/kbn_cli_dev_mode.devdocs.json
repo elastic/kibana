@@ -41,6 +41,7 @@
             "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "BootstrapArgs",
             "trackAdoption": false,
             "isRequired": true
           }

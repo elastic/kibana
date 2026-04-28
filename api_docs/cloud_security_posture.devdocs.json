@@ -47,6 +47,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CspPage",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -177,6 +178,7 @@
                 "lineNumber": 94,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseOnCloseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }

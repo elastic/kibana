@@ -182,6 +182,7 @@
               "lineNumber": 17,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "NodeMetricsTableProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -220,6 +221,7 @@
               "lineNumber": 18,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "NodeMetricsTableProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -334,6 +336,7 @@
                 "lineNumber": 23,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetMetricIndicesOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -386,6 +389,7 @@
                 "lineNumber": 37,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateMetricIndicesOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -436,6 +440,7 @@
                 "lineNumber": 48,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "DefaultMetricIndicesHandler",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -499,6 +504,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESSearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -522,6 +528,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MetricsAPIRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -655,6 +662,7 @@
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CallWithRequestParams",
             "trackAdoption": false
           }
         ],
@@ -847,6 +855,7 @@
             "lineNumber": 61,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "InventoryItemType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3982,6 +3991,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4019,6 +4029,7 @@
             "lineNumber": 50,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "InventoryItemType",
             "trackAdoption": false,
             "isRequired": true
           }
