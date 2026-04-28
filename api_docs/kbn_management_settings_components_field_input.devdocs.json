@@ -47,7 +47,15 @@
             "tags": [],
             "label": "props",
             "description": [
-              "The props for the {@link FieldInput } component."
+              "The props for the ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.FieldInput",
+                "text": "FieldInput"
+              },
+              " component."
             ],
             "signature": [
               "P"
@@ -56,6 +64,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -85,7 +94,15 @@
             "tags": [],
             "label": "notifications",
             "description": [
-              "The portion of the {@link ToastsStart} contract used by this component."
+              "The portion of the ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.ToastsStart",
+                "text": "ToastsStart"
+              },
+              " contract used by this component."
             ],
             "signature": [
               "{ toasts: Pick<",
@@ -126,7 +143,15 @@
         "tags": [],
         "label": "FieldInputProps",
         "description": [
-          "\nThe props that are passed to the {@link FieldInput} component."
+          "\nThe props that are passed to the ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -151,7 +176,15 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The {@link FieldDefinition} for the component."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              " for the component."
             ],
             "signature": [
               "{ id: string; type: T; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
@@ -169,7 +202,15 @@
             "tags": [],
             "label": "unsavedChange",
             "description": [
-              "An {@link UnsavedFieldChange} for the component, if any."
+              "An ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              " for the component, if any."
             ],
             "signature": [
               {
@@ -235,6 +276,7 @@
                 "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]
@@ -282,7 +324,15 @@
         "tags": [],
         "label": "FieldInputServices",
         "description": [
-          "\nContextual services used by a {@link FieldInput} component."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
         "lineNumber": 20,
@@ -395,7 +445,15 @@
         "tags": [],
         "label": "InputProps",
         "description": [
-          "\nProps passed to a {@link FieldInput} component."
+          "\nProps passed to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -529,6 +587,7 @@
                 "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]

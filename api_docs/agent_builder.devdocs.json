@@ -276,6 +276,7 @@
               "lineNumber": 114,
               "columnNumber": 14,
               "deprecated": false,
+              "docsReferencedTypeName": "OpenConversationSidebarOptions",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -319,6 +320,7 @@
               "lineNumber": 120,
               "columnNumber": 16,
               "deprecated": false,
+              "docsReferencedTypeName": "OpenConversationSidebarOptions",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -357,6 +359,7 @@
               "lineNumber": 121,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "EmbeddableConversationProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -418,6 +421,7 @@
               "lineNumber": 129,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "AttachmentInput",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -931,6 +935,7 @@
                 "lineNumber": 274,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConversationListOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2342,6 +2347,7 @@
                 "lineNumber": 249,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "SmlIndexAttachmentParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2499,6 +2505,7 @@
                 "lineNumber": 85,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "SmlContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2576,6 +2583,7 @@
                 "lineNumber": 90,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "SmlContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2626,6 +2634,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SmlDocument",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2649,6 +2658,7 @@
                 "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SmlToAttachmentContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2785,6 +2795,7 @@
                 "lineNumber": 15,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "StaticToolRegistration",
                 "trackAdoption": false
               }
             ]
@@ -2863,6 +2874,7 @@
                 "lineNumber": 199,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunToolParams",
                 "trackAdoption": false
               }
             ]
@@ -2972,7 +2984,15 @@
         "tags": [],
         "label": "SmlSearchResult",
         "description": [
-          "\nAn SML search result — same fields as {@link SmlDocument} plus relevance score.\n`content` is optional when the query excluded it from `_source` (e.g. `skipContent`)."
+          "\nAn SML search result — same fields as ",
+          {
+            "pluginId": "agentBuilder",
+            "scope": "server",
+            "docId": "kibAgentBuilderPluginApi",
+            "section": "def-server.SmlDocument",
+            "text": "SmlDocument"
+          },
+          " plus relevance score.\n`content` is optional when the query excluded it from `_source` (e.g. `skipContent`)."
         ],
         "signature": [
           "Omit<",
@@ -3009,7 +3029,9 @@
             "type": "string",
             "tags": [],
             "label": "dynamic",
-            "description": [],
+            "description": [
+              "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
+            ],
             "signature": [
               "\"strict\""
             ],
@@ -3025,7 +3047,9 @@
             "type": "Object",
             "tags": [],
             "label": "properties",
-            "description": [],
+            "description": [
+              "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
+            ],
             "signature": [
               "{ id: ",
               "MappingKeywordProperty",
