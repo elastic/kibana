@@ -650,6 +650,23 @@ describe('params validation', () => {
       ...params,
     });
   });
+
+  test('params validation passes when form_data is provided', () => {
+    const params: Record<string, any> = {
+      form_data: {
+        file: {
+          content: 'hello world',
+          filename: 'hello.txt',
+          content_type: 'text/plain',
+        },
+        description: { content: 'monthly sync' },
+      },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
 });
 
 describe('execute()', () => {
@@ -979,6 +996,124 @@ describe('execute()', () => {
         connectorUsageCollector,
       })
     ).rejects.toThrow('Error serializing request body: foo is not serializable');
+  });
+
+  describe('form_data (multipart/form-data)', () => {
+    const baseConfig: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+
+    test('sends a FormData body with multipart Content-Type when form_data is set', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: '{"a":1}\n',
+              filename: 'export.ndjson',
+              content_type: 'application/ndjson',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const call = requestMock.mock.calls[0][0];
+      expect(call.data).toBeDefined();
+      // form-data exposes getBoundary(); presence is enough to assert it's a FormData instance
+      expect(typeof call.data.getBoundary).toBe('function');
+      expect(call.headers['content-type']).toMatch(/^multipart\/form-data; boundary=/);
+    });
+
+    test('multipart Content-Type overrides any user-supplied Content-Type header', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: { ...baseConfig, headers: { 'content-type': 'application/json' } },
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          headers: { 'content-type': 'text/plain' },
+          form_data: {
+            file: { content: 'hello', filename: 'h.txt' },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock.mock.calls[0][0].headers['content-type']).toMatch(
+        /^multipart\/form-data; boundary=/
+      );
+    });
+
+    test('appends a file part when filename is provided and a plain field when it is not', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: { content: 'binary-ish', filename: 'a.bin', content_type: 'application/x-bin' },
+            description: { content: 'monthly sync' },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      // Serialize the form to inspect the resulting multipart body.
+      const form = requestMock.mock.calls[0][0].data;
+      const buffer: Buffer = await new Promise((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        form.on('data', (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
+        form.on('end', () => resolve(Buffer.concat(chunks)));
+        form.on('error', reject);
+        form.resume();
+      });
+      const body = buffer.toString('utf-8');
+
+      // File field carries Content-Disposition with filename and the user's content_type.
+      expect(body).toContain('Content-Disposition: form-data; name="file"; filename="a.bin"');
+      expect(body).toContain('Content-Type: application/x-bin');
+      // Plain text field has no filename and no per-part Content-Type.
+      expect(body).toContain('Content-Disposition: form-data; name="description"');
+      expect(body).not.toContain('Content-Disposition: form-data; name="description"; filename=');
+      expect(body).toContain('monthly sync');
+    });
+
+    test('returns an error when both body and form_data are provided', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          body: 'some data',
+          form_data: { file: { content: 'x', filename: 'x.txt' } },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Cannot set both body and form_data');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
   });
 
   test('renders parameter templates as expected', async () => {

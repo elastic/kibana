@@ -6,6 +6,7 @@
  */
 
 import type { AxiosError, AxiosResponse } from 'axios';
+import FormData from 'form-data';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
@@ -217,12 +218,24 @@ export async function executor(
     signal,
   } = execOptions;
 
-  const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
+  const {
+    method,
+    path,
+    body,
+    form_data: formData,
+    query,
+    headers: paramsHeaders,
+    fetcher,
+  } = params;
 
   // params always takes precedence over config
   const baseUrl = params.url || config.url;
   if (!baseUrl) {
     return errorResultInvalid(actionId, 'URL is required');
+  }
+
+  if (body != null && formData != null) {
+    return errorResultInvalid(actionId, 'Cannot set both body and form_data');
   }
 
   // Combine base url and path
@@ -251,8 +264,32 @@ export async function executor(
 
   const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
 
-  // Merge headers: params headers take precedence over config headers
-  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  // Build the request body. For multipart/form-data we hand axios a FormData
+  // instance and let it set the Content-Type with the right boundary; for
+  // anything else, fall back to the existing JSON/string serialization.
+  let requestData: unknown;
+  let multipartHeaders: Record<string, string> | undefined;
+  if (formData) {
+    const form = new FormData();
+    for (const [fieldName, spec] of Object.entries(formData)) {
+      if (spec.filename !== undefined) {
+        form.append(fieldName, spec.content, {
+          filename: spec.filename,
+          contentType: spec.content_type,
+        });
+      } else {
+        form.append(fieldName, spec.content);
+      }
+    }
+    requestData = form;
+    multipartHeaders = form.getHeaders();
+  } else {
+    requestData = serializeHttpRequestBody(body);
+  }
+
+  // Merge headers: params headers take precedence over config headers; the
+  // multipart Content-Type (with boundary) must win over any user-supplied one.
+  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}), ...multipartHeaders };
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({
@@ -290,7 +327,7 @@ export async function executor(
       url,
       logger,
       headers: finalHeaders,
-      data: serializeHttpRequestBody(body),
+      data: requestData,
       configurationUtilities,
       sslOverrides,
       proxyOverrides,

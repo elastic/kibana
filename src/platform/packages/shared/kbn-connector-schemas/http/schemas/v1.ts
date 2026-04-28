@@ -61,12 +61,22 @@ export const HttpRequestBodySchema = z.union([
   z.record(z.string(), z.unknown()),
 ]);
 
+export const HttpFormDataFieldSchema = z.record(
+  z.string(),
+  z.object({
+    content: z.string(),
+    filename: z.string().optional(),
+    content_type: z.string().optional(),
+  })
+);
+
 export const ParamsSchema = z
   .object({
     url: z.string().url().optional(),
     path: z.string().optional(),
     method: HttpMethodSchema,
     body: HttpRequestBodySchema.optional(),
+    form_data: HttpFormDataFieldSchema.optional(),
     query: z.record(z.string(), z.string()).optional(),
     headers: z.record(z.string(), z.string()).optional(),
     fetcher: z
