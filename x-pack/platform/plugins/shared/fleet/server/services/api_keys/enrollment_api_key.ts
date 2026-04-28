@@ -289,23 +289,10 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
   esClient: ElasticsearchClient,
   agentPolicyId: string
 ) {
-  let hasMore = true;
-  while (hasMore) {
-    const { items } = await listEnrollmentApiKeys(esClient, {
-      page: 1,
-      perPage: 100,
-      kuery: `policy_id:"${agentPolicyId}"`,
-    });
-
-    if (items.length === 0) {
-      hasMore = false;
-    } else {
-      await deleteEnrollmentApiKeys(
-        esClient,
-        items.map((k) => k.id)
-      );
-    }
-  }
+  await bulkDeleteEnrollmentApiKeys(esClient, {
+    kuery: `policy_id:"${agentPolicyId}"`,
+    forceDelete: true,
+  });
 }
 
 export async function bulkDeleteEnrollmentApiKeys(
@@ -326,21 +313,28 @@ export async function bulkDeleteEnrollmentApiKeys(
     successCount = result.successCount;
     errorCount = result.errorCount;
   } else if (kuery) {
+    const allIds: string[] = [];
+    let page = 1;
     let hasMore = true;
     while (hasMore) {
       const { items } = await listEnrollmentApiKeys(esClient, {
-        page: 1,
-        perPage: 1000,
+        page: page++,
+        perPage: 10000,
         kuery,
         spaceId,
       });
       if (items.length === 0) {
         hasMore = false;
-        break;
+      } else {
+        allIds.push(...items.map((k) => k.id));
       }
+    }
+
+    const BATCH_SIZE = 1000;
+    for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
       const result = await deleteEnrollmentApiKeys(
         esClient,
-        items.map((k) => k.id),
+        allIds.slice(i, i + BATCH_SIZE),
         forceDelete,
         spaceId
       );
