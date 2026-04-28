@@ -99,6 +99,7 @@ describe('RulesClientFactory', () => {
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
       changeTrackingService: {
+        asScoped: jest.fn(),
         log: jest.fn(),
         logBulk: jest.fn(),
         getHistory: jest.fn(),
