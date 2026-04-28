@@ -73,38 +73,42 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   const { isLoading, data, isError } = useQuery(
     [filterQuery, topRowsEsqlSource],
     async ({ signal }) => {
-      if (!topRowsEsqlSource) return [];
-      return esqlResponseToRecords<Record<string, string>>(
-        (
-          await getESQLResults({
-            esqlQuery: topRowsEsqlSource,
-            search,
-            signal,
-            filter: filterQuery,
-          })
-        )?.response
-      );
+      if (!topRowsEsqlSource) return { records: [], rawResponse: undefined };
+      const esqlResult = await getESQLResults({
+        esqlQuery: topRowsEsqlSource,
+        search,
+        signal,
+        filter: filterQuery,
+      });
+      return {
+        records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
+        rawResponse: esqlResult?.response,
+      };
     },
     { enabled: !!topRowsEsqlSource }
   );
 
+  const records = data?.records;
+
   const entityMetadata: EntityMetadata[] | undefined = useMemo(
     () =>
       params.viewBy === 'entity'
-        ? data?.map((record) => ({
+        ? records?.map((record) => ({
             entityId: record.entity_id,
             entityName: record.entity_name,
             entityType: record.entity_type,
           }))
         : undefined,
-    [data, params.viewBy]
+    [records, params.viewBy]
   );
 
   return {
     isLoading,
-    rowLabels: data?.map((each) => each[rowField]),
+    rowLabels: records?.map((each) => each[rowField]),
     entityMetadata,
     isError,
+    rawResponse: data?.rawResponse,
+    esqlSource: topRowsEsqlSource,
   };
 };
 
@@ -127,6 +131,8 @@ export const useRecentAnomaliesQuery = (params: {
     entityMetadata,
     isError: isTopRowsError,
     isLoading: isTopRowsLoading,
+    rawResponse: topRowsRawResponse,
+    esqlSource: topRowsEsqlSource,
   } = useRecentAnomaliesTopRowsQuery(params);
 
   const anomalyDataEsqlSource = useRecentAnomaliesDataEsqlSource({
@@ -134,6 +140,8 @@ export const useRecentAnomaliesQuery = (params: {
     rowLabels,
     timeRange: params.timeRange,
   });
+
+  const hasAnomaliesData = rowLabels && rowLabels.length > 0;
 
   const {
     isLoading: isAnomaliesLoading,
@@ -148,7 +156,7 @@ export const useRecentAnomaliesQuery = (params: {
   }>(
     [filterQuery, anomalyDataEsqlSource, rowLabels],
     async ({ signal }) => {
-      if (!anomalyDataEsqlSource || !rowLabels || rowLabels.length === 0) {
+      if (!anomalyDataEsqlSource || !hasAnomaliesData) {
         return { anomalyRecords: [], rowLabels: [] };
       }
       const esqlResult = await getESQLResults({
@@ -176,20 +184,30 @@ export const useRecentAnomaliesQuery = (params: {
   );
 
   const inspect = useMemo(() => {
+    // when there are no anomalies, rowLabels comes back empty from the top-rows query,
+    // so the main query never actually runs. In that case, we use the top-rows query's esql source and raw response.
+    const esqlSource = hasAnomaliesData ? anomalyDataEsqlSource : topRowsEsqlSource;
+    const rawResponse = hasAnomaliesData ? data?.rawResponse : topRowsRawResponse;
     return {
       dsl: [
         JSON.stringify(
           {
             index: [ML_ANOMALIES_INDEX],
-            body: prettifyQuery(anomalyDataEsqlSource ?? ''),
+            body: prettifyQuery(esqlSource ?? ''),
           },
           null,
           2
         ),
       ],
-      response: data?.rawResponse ? [JSON.stringify(data.rawResponse, null, 2)] : [],
+      response: rawResponse ? [JSON.stringify(rawResponse, null, 2)] : [],
     };
-  }, [data?.rawResponse, anomalyDataEsqlSource]);
+  }, [
+    data?.rawResponse,
+    anomalyDataEsqlSource,
+    topRowsRawResponse,
+    topRowsEsqlSource,
+    hasAnomaliesData,
+  ]);
 
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.recentAnomalies.queryError', {
