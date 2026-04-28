@@ -6,15 +6,22 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { AlertStatusConfigs } from '../../../../common/runtime_types/alert_rules/common';
 import { calculateIsValidPing, getPendingConfigs } from './helpers';
 
 describe('helpers', () => {
   describe('getPendingConfigs', () => {
     const logger = loggerMock.create();
 
-    const makeMonitorSO = (soId, monitorQueryId, name, locationIds = ['loc-1']) => ({
+    const makeMonitorSO = (
+      soId: string,
+      monitorQueryId: string,
+      name: string,
+      locationIds: string[] = ['loc-1']
+    ) => ({
       id: soId,
-      type: 'synthetics-monitor',
+      type: 'synthetics-monitor' as const,
+      score: 1,
       attributes: {
         id: monitorQueryId,
         name,
@@ -45,7 +52,7 @@ describe('helpers', () => {
           latestPing: {},
           checks: { downWithinXChecks: 1, down: 1 },
         },
-      };
+      } as unknown as AlertStatusConfigs;
 
       const result = getPendingConfigs({
         monitorQueryIds: [journeyId],
@@ -55,7 +62,7 @@ describe('helpers', () => {
         monitorsData: {
           [journeyId]: { scheduleInMs: 60000, locations: [locationId], type: 'http' },
         },
-        monitors,
+        monitors: monitors as any,
         logger,
       });
 
@@ -78,7 +85,7 @@ describe('helpers', () => {
         monitorsData: {
           [journeyId]: { scheduleInMs: 60000, locations: [locationId], type: 'http' },
         },
-        monitors,
+        monitors: monitors as any,
         logger,
       });
 
@@ -103,7 +110,7 @@ describe('helpers', () => {
         monitorsData: {
           [monitorId]: { scheduleInMs: 60000, locations: [locationId], type: 'http' },
         },
-        monitors,
+        monitors: monitors as any,
         logger,
       });
 
