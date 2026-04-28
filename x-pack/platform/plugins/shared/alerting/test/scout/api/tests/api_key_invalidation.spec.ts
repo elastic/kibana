@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
-
-const EVENT_LOG_INDEX = '.kibana-event-log-*';
+import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
 
 const INDEX_THRESHOLD_PARAMS = {
   aggType: 'count',
@@ -24,52 +22,16 @@ const INDEX_THRESHOLD_PARAMS = {
   timeField: '@timestamp',
 };
 
-const getAlertAttrs = async (esClient: EsClient, ruleId: string) => {
+const getAlertAttrs = async (
+  esClient: { get: (params: { index: string; id: string }) => Promise<{ _source?: unknown }> },
+  ruleId: string
+) => {
   const { _source } = await esClient.get({
     index: '.kibana_alerting_cases_1',
     id: `alert:${ruleId}`,
   });
   expect(_source).toBeDefined();
   return (_source as Record<string, unknown>)?.alert as Record<string, unknown>;
-};
-
-/**
- * Waits until the rule's task has finished its first execution. Without this,
- * an in-flight first run can race with `_update_api_key` and trigger
- * `retryIfConflicts`, which queues extra orphaned keys for invalidation.
- *
- * The `event.action: 'execute'` event is logged after the task commits its
- * post-execution writes to the rule SO, so observing one in
- * `.kibana-event-log-*` is a reliable "task has finished writing" signal.
- * This mirrors the pattern used in FTR alerting tests via `getEventLog`.
- */
-const waitForFirstRuleExecution = async (
-  esClient: EsClient,
-  ruleId: string,
-  { timeoutMs = 60_000, pollMs = 500 }: { timeoutMs?: number; pollMs?: number } = {}
-): Promise<void> => {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    await esClient.indices.refresh({ index: EVENT_LOG_INDEX }).catch(() => {});
-    const result = await esClient.search({
-      index: EVENT_LOG_INDEX,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'event.provider': 'alerting' } },
-            { term: { 'event.action': 'execute' } },
-            { term: { 'rule.id': ruleId } },
-          ],
-        },
-      },
-    });
-    if (result.hits.hits.length > 0) {
-      return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, pollMs));
-  }
-  throw new Error(`Rule ${ruleId} did not complete its first execution within ${timeoutMs}ms`);
 };
 
 apiTest.describe(
@@ -166,7 +128,10 @@ apiTest.describe(
         const ruleId = (createResponse.body as { id: string }).id;
         ruleIds.push(ruleId);
 
-        await waitForFirstRuleExecution(esClient, ruleId);
+        await waitForSuccessfulEventLogEntry(apiClient, ruleId, {
+          ...COMMON_HEADERS,
+          ...cookieHeader,
+        });
 
         const attrsBefore = await getAlertAttrs(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
@@ -229,7 +194,10 @@ apiTest.describe(
         const ruleId = (createResponse.body as { id: string }).id;
         ruleIds.push(ruleId);
 
-        await waitForFirstRuleExecution(esClient, ruleId);
+        await waitForSuccessfulEventLogEntry(apiClient, ruleId, {
+          ...COMMON_HEADERS,
+          ...cookieHeader,
+        });
 
         const attrsBefore = await getAlertAttrs(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
