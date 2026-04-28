@@ -38,6 +38,10 @@ test('base case', () => {
     ],
     discriminator: {
       propertyName: 'type',
+      mapping: {
+        str: '#/components/schemas/my-str-my-team',
+        num: '#/components/schemas/my-num-team',
+      },
     },
   });
 
@@ -87,6 +91,10 @@ test('with default case', () => {
     ],
     discriminator: {
       propertyName: 'type',
+      mapping: {
+        str: '#/components/schemas/my-str-my-team',
+        num: '#/components/schemas/my-num-team',
+      },
     },
   });
 

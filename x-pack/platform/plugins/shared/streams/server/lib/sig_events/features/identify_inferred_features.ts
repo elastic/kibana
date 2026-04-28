@@ -18,6 +18,7 @@ import {
   isFeatureWithFilter,
 } from '@kbn/streams-schema';
 import {
+  EMPTY_TOKENS,
   identifyFeatures,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
@@ -27,7 +28,6 @@ import { fetchSampleDocuments } from '../../tasks/task_definitions/features_iden
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
 import type { SigEventsTuningConfig } from '../../../../common/sig_events_tuning_config';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../common/sig_events_tuning_config';
-import { EMPTY_TOKENS } from './iteration_state';
 import {
   reconcileInferredFeatures,
   toFeatureSummary,

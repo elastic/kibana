@@ -42,7 +42,10 @@ export const regionMapConfigSchemaNoESQL = schema.object(
     /**
      * Configure how to break down to regions
      */
-    region: mergeAllBucketsWithChartDimensionSchema(regionMapConfigRegionOptionsSchema),
+    region: mergeAllBucketsWithChartDimensionSchema(
+      regionMapConfigRegionOptionsSchema,
+      'regionMapRegion'
+    ),
   },
   { meta: { id: 'regionMapNoESQL', title: 'Region Map (DSL)' } }
 );
