@@ -22,6 +22,8 @@ import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useConnectors } from '../../hooks/use_connectors';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
 import type { DefaultModelValidationResult } from '../../hooks/use_default_model_validation';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
@@ -87,6 +89,7 @@ const disabledLabel = () =>
 export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, validation }) => {
   const { state, setEnableAi, setDefaultModelId, setFeatureSpecificModels } = defaultModelSettings;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const usageTracker = useUsageTracker();
 
   const options = useMemo(() => getOptions(connectors), [connectors]);
   const selectedOptions = useMemo(
@@ -95,6 +98,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
   );
 
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
+    usageTracker.count(EventType.DEFAULT_MODEL_CHANGED);
     setDefaultModelId(selected[0]?.value ?? NO_DEFAULT_MODEL);
   };
 

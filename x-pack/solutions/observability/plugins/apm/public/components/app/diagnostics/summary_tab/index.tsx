@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiDescriptionList, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { isNonLocalIndexName } from '@kbn/es-query';
 
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
@@ -51,10 +52,15 @@ export function DiagnosticsSummary() {
 
 function CrossClusterSearchCallout() {
   return (
-    <EuiCallOut title="Cross cluster search not supported" color="warning">
-      The APM index settings is targetting remote clusters. Please note that this is not currently
-      supported by the Diagnostics Tool and functionality will therefore be limited.
-    </EuiCallOut>
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.apm.crossClusterSearchCallout.euiCallOut.crossClusterSearchNotLabel',
+        { defaultMessage: 'Cross cluster search not supported' }
+      )}
+      color="warning"
+    >
+      {i18n.translate('xpack.apm.crossClusterSearchCallout.theAPMIndexSettingsCallOutLabel', { defaultMessage: 'The APM index settings is targetting remote clusters. Please note that this is not currently
+      supported by the Diagnostics Tool and functionality will therefore be limited.' })}</EuiCallOut>
   );
 }
 
@@ -69,9 +75,8 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
 
   return (
     <>
-      <EuiCallOut title="Insufficient access" color="warning">
-        Not all features are available due to missing privileges.
-        <br />
+      <EuiCallOut title={i18n.translate('xpack.apm.privilegesCallout.euiCallOut.insufficientAccessLabel', { defaultMessage: 'Insufficient access' })} color="warning">
+        {i18n.translate('xpack.apm.privilegesCallout.notAllFeaturesAreCallOutLabel', { defaultMessage: 'Not all features are available due to missing privileges.' })}<br />
         <br />
         <EuiDescriptionList
           listItems={[
@@ -101,6 +106,6 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
 
 export function getIsCrossCluster(diagnosticsBundle?: DiagnosticsBundle) {
   return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) => {
-    return isCCSRemoteIndexName(indicies);
+    return isNonLocalIndexName(indicies);
   });
 }

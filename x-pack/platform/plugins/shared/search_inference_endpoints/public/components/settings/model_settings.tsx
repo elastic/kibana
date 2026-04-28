@@ -28,6 +28,8 @@ import { useDefaultModelSettings } from '../../hooks/use_default_model_settings'
 import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -48,6 +50,7 @@ export const ModelSettings: React.FC = () => {
   const {
     services: { application, http },
   } = useKibana();
+  const usageTracker = useUsageTracker();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
@@ -85,7 +88,14 @@ export const ModelSettings: React.FC = () => {
     if (defaultModelSettings.isDirty) {
       await defaultModelSettings.save();
     }
-  }, [isFeatureDirty, saveFeatures, defaultModelSettings, defaultModelValidation.isValid]);
+    usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
+  }, [
+    isFeatureDirty,
+    saveFeatures,
+    defaultModelSettings,
+    defaultModelValidation.isValid,
+    usageTracker,
+  ]);
 
   const handleDiscardAndLeave = useCallback(() => {
     defaultModelSettings.reset();

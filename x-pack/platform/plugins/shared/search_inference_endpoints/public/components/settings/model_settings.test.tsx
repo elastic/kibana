@@ -61,6 +61,8 @@ const defaultFormState = {
   isDirty: false,
   assignments: { child_1: ['ep-1'] },
   effectiveRecommendedEndpoints: { child_1: ['ep-1'] },
+  hasSavedObject: { child_1: false },
+  dirtyFeatureIds: new Set<string>(),
   sections: [
     {
       featureId: 'search',

@@ -63,32 +63,34 @@ describe('Uncommon Process Columns', () => {
   });
 
   describe('#getUncommonColumnsCurated', () => {
+    const openHostFlyout = jest.fn();
+
     test('on hosts page, we expect to get all columns', () => {
-      expect(getUncommonColumnsCurated(HostsType.page).length).toEqual(6);
+      expect(getUncommonColumnsCurated(HostsType.page, openHostFlyout).length).toEqual(6);
     });
 
     test('on host details page, we expect to remove two columns', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
+      const columns = getUncommonColumnsCurated(HostsType.details, openHostFlyout);
       expect(columns.length).toEqual(4);
     });
 
     test('on host page, we should have hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.page);
+      const columns = getUncommonColumnsCurated(HostsType.page, openHostFlyout);
       expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(true);
     });
 
     test('on host page, we should have number of hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.page);
+      const columns = getUncommonColumnsCurated(HostsType.page, openHostFlyout);
       expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
     });
 
     test('on host details page, we should not have hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
+      const columns = getUncommonColumnsCurated(HostsType.details, openHostFlyout);
       expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(false);
     });
 
     test('on host details page, we should not have number of hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
+      const columns = getUncommonColumnsCurated(HostsType.details, openHostFlyout);
       expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
     });
   });

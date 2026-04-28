@@ -113,7 +113,7 @@ export function SuggestedStreamPanel({
   };
 
   const { isStreamNameValid, setLocalStreamName, partitionName, prefix, helpText, errorMessage } =
-    useChildStreamInput(currentSuggestion.name, false);
+    useChildStreamInput({ streamName: currentSuggestion.name, readOnly: false });
 
   if (isEditing) {
     return (
@@ -179,7 +179,7 @@ export function SuggestedStreamPanel({
           </EuiFlexItem>
         ) : matchRate.value !== undefined ? (
           <>
-            <EuiIcon type="check" color="success" size="s" />
+            <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
             <EuiText size="s" color="success">
               {matchRate.value}
             </EuiText>

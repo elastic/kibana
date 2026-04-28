@@ -32,7 +32,7 @@ const tagcloudStylingSchema = schema.object(
   {
     orientation: schema.maybe(
       builderEnums.orientation({
-        meta: { description: 'Orientation of the tagcloud' },
+        meta: { description: 'Orientation of the tagcloud.' },
         defaultValue: 'horizontal',
       })
     ),
@@ -42,15 +42,15 @@ const tagcloudStylingSchema = schema.object(
           min: schema.number({
             defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
             min: 1,
-            meta: { description: 'Minimum font size' },
+            meta: { description: 'Minimum font size.' },
           }),
           max: schema.number({
             defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
             max: 120,
-            meta: { description: 'Maximum font size' },
+            meta: { description: 'Maximum font size.' },
           }),
         },
-        { meta: { description: 'Minimum and maximum font size for the tags' } }
+        { meta: { description: 'Font size range for tags.' } }
       )
     ),
     /**
@@ -60,7 +60,7 @@ const tagcloudStylingSchema = schema.object(
       schema.object(
         {
           visible: schema.boolean({
-            meta: { description: 'Show caption' },
+            meta: { description: 'When `true`, displays the caption.' },
             defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
           }),
         },
@@ -93,13 +93,22 @@ export const tagcloudConfigSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}),
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}, 'tagcloudMetric'),
     /**
      * Configure how to break down to tags
      */
-    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudConfigTagsByOptionsSchema),
+    tag_by: mergeAllBucketsWithChartDimensionSchema(
+      tagcloudConfigTagsByOptionsSchema,
+      'tagcloudTag'
+    ),
   },
-  { meta: { id: 'tagcloudNoESQL', title: 'Tag Cloud Chart (DSL)' } }
+  {
+    meta: {
+      id: 'tagcloudNoESQL',
+      title: 'Tag Cloud Chart (DSL)',
+      description: 'Tag Cloud configuration using a data view.',
+    },
+  }
 );
 
 export const tagcloudConfigSchemaESQL = schema.object(
@@ -118,13 +127,23 @@ export const tagcloudConfigSchemaESQL = schema.object(
      */
     tag_by: esqlColumnWithFormatSchema.extends(tagcloudConfigTagsByOptionsSchema),
   },
-  { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
+  {
+    meta: {
+      id: 'tagcloudESQL',
+      title: 'Tag Cloud Chart (ES|QL)',
+      description: 'Tag Cloud configuration using an ES|QL query.',
+    },
+  }
 );
 
 export const tagcloudConfigSchema = objectUnion(
   [tagcloudConfigSchemaNoESQL, tagcloudConfigSchemaESQL],
   {
-    meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },
+    meta: {
+      id: 'tagcloudChart',
+      title: 'Tag Cloud Chart',
+      description: 'A word cloud with terms sized by metric value.',
+    },
   }
 );
 

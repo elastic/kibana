@@ -25,6 +25,7 @@ interface PolicyProps {
   spaceIds?: string[];
   mws?: MaintenanceWindow[];
   packageVersion?: string;
+  kibanaUrl?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
@@ -142,6 +143,7 @@ export const getHttpInput = ({
   spaceIds,
   namespace,
   mws,
+  kibanaUrl,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;
@@ -217,6 +219,7 @@ export const getHttpInput = ({
                 : {}),
               'monitor.interval': 300,
               meta: { space_id: spaceIds ? spaceIds[0] : 'default' },
+              ...(kibanaUrl ? { kibanaUrl } : {}),
             },
             target: '',
           },
@@ -324,6 +327,7 @@ export const getHttpInput = ({
             meta: {
               space_id: spaceIds ? spaceIds[0] : 'default',
             },
+            ...(kibanaUrl ? { kibanaUrl } : {}),
           },
           target: '',
         },
