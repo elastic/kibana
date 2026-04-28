@@ -8,7 +8,7 @@
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { appContextService } from '../services';
-import { syncNamespaceTemplates } from '../services/package_policies';
+import { syncNamespaceTemplates } from '../services/epm/packages';
 
 import {
   registerSyncNamespaceTemplatesTask,
@@ -16,7 +16,7 @@ import {
 } from './sync_namespace_templates_task';
 
 jest.mock('../services');
-jest.mock('../services/package_policies');
+jest.mock('../services/epm/packages');
 
 const mockedSyncNamespaceTemplates = syncNamespaceTemplates as jest.MockedFunction<
   typeof syncNamespaceTemplates

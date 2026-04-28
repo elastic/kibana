@@ -231,6 +231,10 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
       }
 
       const current = installation[0].namespace_customization_enabled_for ?? [];
+      // Tracks the persisted state across the try block: starts at `current`, advances
+      // to `newList` once `updatePackage` has committed. The catch handler returns this
+      // so the response always reflects what's actually in the SO.
+      let persistedList = current;
 
       try {
         const afterEnable = [...new Set([...current, ...enable])];
@@ -257,6 +261,7 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
           pkgName: packageName,
           namespace_customization_enabled_for: newList,
         });
+        persistedList = newList;
 
         if (
           namespaceCustomizationDiff.addedNamespaces.length > 0 ||
@@ -279,7 +284,7 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
         return {
           name: packageName,
           success: false,
-          namespace_customization_enabled_for: current,
+          namespace_customization_enabled_for: persistedList,
           error: err instanceof Error ? err.message : String(err),
         };
       }

@@ -13,7 +13,7 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 
 import { appContextService } from '../services';
-import { syncNamespaceTemplates } from '../services/package_policies';
+import { syncNamespaceTemplates } from '../services/epm/packages';
 
 const TASK_TYPE = 'fleet:sync_namespace_templates';
 

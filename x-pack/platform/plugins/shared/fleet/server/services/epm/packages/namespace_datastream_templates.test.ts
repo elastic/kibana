@@ -9,11 +9,12 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import { ElasticsearchAssetType } from '../../../common/types';
-import { appContextService } from '../app_context';
-import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
-import { getInstalledPackageWithAssets, getInstallation } from '../epm/packages/get';
-import { updateEsAssetReferences } from '../epm/packages/es_assets_reference';
+import { ElasticsearchAssetType } from '../../../../common/types';
+import { appContextService } from '../../app_context';
+import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
+
+import { getInstalledPackageWithAssets, getInstallation } from './get';
+import { updateEsAssetReferences } from './es_assets_reference';
 
 import {
   handleNamespaceTemplateRestoreAfterPackageInstall,
@@ -22,16 +23,16 @@ import {
   syncNamespaceTemplates,
 } from './namespace_datastream_templates';
 
-jest.mock('../epm/packages/get');
-jest.mock('../epm/elasticsearch/template/template', () => {
-  const actual = jest.requireActual('../epm/elasticsearch/template/template');
+jest.mock('./get');
+jest.mock('../elasticsearch/template/template', () => {
+  const actual = jest.requireActual('../elasticsearch/template/template');
   return {
     ...actual,
     updateCurrentWriteIndices: jest.fn(),
   };
 });
-jest.mock('../epm/packages/es_assets_reference');
-jest.mock('../app_context');
+jest.mock('./es_assets_reference');
+jest.mock('../../app_context');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({

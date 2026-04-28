@@ -12,7 +12,7 @@ import {
   SO_SEARCH_LIMIT,
   FLEET_INSTALL_FORMAT_VERSION,
 } from '../../../../../constants';
-import { handleNamespaceTemplateRestoreAfterPackageInstall } from '../../../../package_policies';
+import { handleNamespaceTemplateRestoreAfterPackageInstall } from '../..';
 import type { Installation } from '../../../../../types';
 
 import { packagePolicyService } from '../../../../package_policy';

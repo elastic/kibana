@@ -9,21 +9,22 @@ import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import type { IndexTemplate, IndexTemplateEntry, RegistryDataStream } from '../../types';
-import { ElasticsearchAssetType } from '../../../common/types';
-import { appContextService } from '../app_context';
+import type { IndexTemplate, IndexTemplateEntry, RegistryDataStream } from '../../../types';
+import { ElasticsearchAssetType } from '../../../../common/types';
+import { appContextService } from '../../app_context';
 import {
   updateCurrentWriteIndices,
   generateNamespaceTemplateName,
   generateNamespaceTemplateIndexPattern,
   getNamespaceTemplatePriority,
-} from '../epm/elasticsearch/template/template';
-import { getInstalledPackageWithAssets, getInstallation } from '../epm/packages/get';
-import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
-import { isUserSettingsTemplate } from '../epm/elasticsearch/template/utils';
-import { updateEsAssetReferences } from '../epm/packages/es_assets_reference';
-import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../constants';
-import { throwIfAborted } from '../../tasks/utils';
+} from '../elasticsearch/template/template';
+import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
+import { getRegistryDataStreamAssetBaseName } from '../../../../common/services';
+import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
+import { throwIfAborted } from '../../../tasks/utils';
+
+import { updateEsAssetReferences } from './es_assets_reference';
+import { getInstalledPackageWithAssets, getInstallation } from './get';
 
 /**
  * Returns true if namespace-level customization is opted in for `namespace` on

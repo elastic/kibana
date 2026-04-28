@@ -1395,7 +1395,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
-          namespace_customization_enabled_for: { type: 'keyword' },
+          namespace_customization_enabled_for: { type: 'keyword', index: false },
         },
       },
       modelVersions: {
@@ -1507,7 +1507,7 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                namespace_customization_enabled_for: { type: 'keyword' },
+                namespace_customization_enabled_for: { type: 'keyword', index: false },
               },
             },
           ],

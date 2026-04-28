@@ -895,8 +895,14 @@ export function generateNamespaceTemplateName(baseName: string, namespace: strin
 
 /**
  * Returns the index pattern for a namespace-scoped template.
- * Example (non-prefix): `logs-nginx.access-production*`
- * Example (dataset_is_prefix): `metrics-test.*-production*`
+ *
+ * The pattern matches the data stream name exactly (no trailing wildcard on the
+ * namespace segment) so that namespaces with shared prefixes do not collide —
+ * e.g. the template for namespace `production` must not also match data streams
+ * for `production_eu` or `production_us`.
+ *
+ * Example (non-prefix): `logs-nginx.access-production`
+ * Example (dataset_is_prefix): `metrics-test.*-production`
  */
 export function generateNamespaceTemplateIndexPattern(
   dataStream: RegistryDataStream,
@@ -904,9 +910,9 @@ export function generateNamespaceTemplateIndexPattern(
 ): string {
   const baseName = getRegistryDataStreamAssetBaseName(dataStream);
   if (!dataStream.dataset_is_prefix) {
-    return `${baseName}-${namespace}*`;
+    return `${baseName}-${namespace}`;
   } else {
-    return `${baseName}.*-${namespace}*`;
+    return `${baseName}.*-${namespace}`;
   }
 }
 
@@ -917,7 +923,7 @@ export function generateNamespaceTemplateIndexPattern(
  * Note: for data streams with `dataset_is_prefix: true`, the base template priority is 150
  * and the namespace template priority is 200 — the same numeric value as a regular base
  * template. This is intentional: Elasticsearch resolves priority ties by index pattern
- * specificity, so the more specific namespace pattern (e.g. `metrics-test.*-production*`)
+ * specificity, so the more specific namespace pattern (e.g. `metrics-test.*-production`)
  * wins over the regular base pattern (e.g. `metrics-test.*-*`) even at equal priority.
  */
 export function getNamespaceTemplatePriority(dataStream: RegistryDataStream): number {
