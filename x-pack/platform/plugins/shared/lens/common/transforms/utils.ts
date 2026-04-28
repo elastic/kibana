@@ -14,6 +14,7 @@ import type {
 } from '@kbn/lens-common';
 import type {
   LensByRefSerializedAPIConfig,
+  LensByValueFlattenedSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
   LensSerializedAPIConfig,
 } from '@kbn/lens-common-2';
@@ -34,13 +35,21 @@ export function isByRefLensState(state: LensSerializedState): state is LensByRef
 }
 
 export function isByRefLensConfig(
-  config: LensByRefSerializedAPIConfig | LensSerializedAPIConfig | FlattenedLensByValuePanelSchema
+  config:
+    | LensByRefSerializedAPIConfig
+    | LensSerializedAPIConfig
+    | LensByValueFlattenedSerializedAPIConfig
+    | FlattenedLensByValuePanelSchema
 ): config is LensByRefSerializedAPIConfig {
   return 'ref_id' in config && !!config.ref_id;
 }
 
 export function isFlattenedAPIConfig(
-  config: LensSerializedAPIConfig | FlattenedLensByValuePanelSchema | LensByValueSerializedState
+  config:
+    | LensSerializedAPIConfig
+    | FlattenedLensByValuePanelSchema
+    | LensByValueSerializedState
+    | LensByValueFlattenedSerializedAPIConfig
 ): config is FlattenedLensByValuePanelSchema {
   return !('attributes' in config);
 }
@@ -60,4 +69,18 @@ export function unflattenAPIConfig(
     drilldowns,
     attributes,
   };
+}
+
+/**
+ * Inverse of {@link unflattenAPIConfig}: merges nested `attributes` (Lens API chart shape)
+ * into the root object for dashboard app wire format when `lens.apiFormat` is enabled.
+ */
+export function flattenApiConfig(
+  config: LensByValueSerializedAPIConfig
+): LensByValueFlattenedSerializedAPIConfig {
+  const { attributes, ...panelState } = config;
+  return {
+    ...panelState,
+    ...attributes,
+  } as LensByValueFlattenedSerializedAPIConfig;
 }

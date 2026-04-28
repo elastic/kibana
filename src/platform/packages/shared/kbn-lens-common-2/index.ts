@@ -55,6 +55,12 @@ export type LensByValueSerializedAPIConfig = LensPersistableState & {
   ref_id?: string; // really should be never but creates type issues
 };
 
+/**
+ * By-value Lens panel config in flattened wire shape (dashboard app API with `lens.apiFormat`).
+ * Chart API fields from {@link LensApiConfig} sit at the root next to panel metadata.
+ */
+export type LensByValueFlattenedSerializedAPIConfig = LensPersistableState & LensApiConfig;
+
 export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
 
 /**
@@ -65,7 +71,10 @@ export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
  * - Panel settings
  * - other props from the embeddable
  */
-export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;
+export type LensSerializedAPIConfig =
+  | LensByRefSerializedAPIConfig
+  | LensByValueSerializedAPIConfig
+  | LensByValueFlattenedSerializedAPIConfig;
 
 export interface LegacyLensStateApi {
   /**
