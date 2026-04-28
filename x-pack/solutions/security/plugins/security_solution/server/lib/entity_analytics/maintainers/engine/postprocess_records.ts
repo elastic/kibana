@@ -33,7 +33,7 @@ export const postprocessEsqlResults = (
   values: unknown[][],
   relationshipType: RelationshipType
 ): ProcessedEngineRecord[] => {
-  return values.map((row) => {
+  return values.map((row): ProcessedEngineRecord => {
     const record: Record<string, unknown> = {};
     columns.forEach((col, idx) => {
       record[col.name] = row[idx];
