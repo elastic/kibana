@@ -249,6 +249,32 @@ describe('ConnectorFormFieldsGlobal', () => {
     });
   });
 
+  it('re-applies auto-generated connector ID after name and id were cleared', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    const idInput = screen.getByTestId('connectorIdInput');
+
+    await userEvent.type(nameInput, 'First Name');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('first-name');
+    });
+
+    await userEvent.clear(nameInput);
+    await userEvent.clear(idInput);
+
+    await userEvent.type(nameInput, 'Second Name');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('second-name');
+    });
+  });
+
   it('truncates auto-populated connector ID to 36 characters', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit}>

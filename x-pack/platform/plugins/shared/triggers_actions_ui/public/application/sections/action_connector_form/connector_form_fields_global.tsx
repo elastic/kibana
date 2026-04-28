@@ -196,8 +196,15 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
 }) => {
   const { http } = useKibana().services;
   const { setFieldValue } = useFormContext();
-  const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
+  const [{ name, id }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
+
+  useEffect(() => {
+    const isEmpty = (value: string | undefined) => value == null || value === '';
+    if (!isEdit && isEmpty(name) && isEmpty(id)) {
+      setUsingCustomIdentifier(false);
+    }
+  }, [name, id, isEdit]);
 
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
