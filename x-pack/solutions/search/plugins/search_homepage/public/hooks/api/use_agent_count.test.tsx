@@ -93,12 +93,12 @@ describe('useAgentCount', () => {
       });
     });
 
-    it('should not fetch data and return zero values with isError true', async () => {
+    it('should not fetch data and return undefined values with isError true', async () => {
       const { result } = renderHook(() => useAgentCount(), { wrapper });
 
       await waitFor(() => expect(result.current.isLoading).toBeFalsy());
-      expect(result.current.agents).toBe(0);
-      expect(result.current.tools).toBe(0);
+      expect(result.current.agents).toBeUndefined();
+      expect(result.current.tools).toBeUndefined();
       expect(result.current.isError).toBe(true);
       expect(mockAgentsService.list).not.toHaveBeenCalled();
       expect(mockToolsService.list).not.toHaveBeenCalled();
@@ -140,19 +140,19 @@ describe('useAgentCount', () => {
   });
 
   describe('with 403 forbidden error', () => {
-    it('should return isError true when API returns 403', async () => {
+    it('should return null data when API returns 403', async () => {
       const error = { body: { message: 'Forbidden', statusCode: 403 } };
       mockAgentsService.list.mockRejectedValue(error);
 
       const { result } = renderHook(() => useAgentCount(), { wrapper });
 
       await waitFor(() => expect(result.current.isLoading).toBeFalsy());
-      expect(result.current.isError).toBe(true);
-      expect(result.current.agents).toBe(0);
-      expect(result.current.tools).toBe(0);
+      expect(result.current.isError).toBe(false);
+      expect(result.current.agents).toBeUndefined();
+      expect(result.current.tools).toBeUndefined();
     });
 
-    it('should throw error for non-403 errors', async () => {
+    it('should set isError for non-403 errors', async () => {
       const error = { body: { message: 'Internal Server Error', statusCode: 500 } };
       mockAgentsService.list.mockRejectedValue(error);
 
