@@ -34,6 +34,8 @@ export async function update(
     isDashboardAppRequest
   );
 
+  transformInTimer?.end();
+
   let isCreateRequest = false;
   try {
     await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
@@ -52,7 +54,6 @@ export async function update(
   if (isCreateRequest) {
     asCodeIdSchema.validate(id);
   }
-  transformInTimer?.end();
 
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
