@@ -12,6 +12,7 @@ import {
   toSanitizedFieldType,
   getMultiFieldLabel,
   createCachedFieldValueFormatter,
+  createCachedReactFieldValueFormatter,
 } from './fields_utils';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
@@ -124,14 +125,18 @@ describe('fields_utils', () => {
 
   describe('createCachedFieldValueFormatter', () => {
     let dataView: DataView;
+    let getFormatterForFieldSpy: jest.SpyInstance;
 
     beforeEach(() => {
       dataView = stubLogstashDataView;
+      getFormatterForFieldSpy = jest.spyOn(dataView, 'getFormatterForField');
+    });
+
+    afterEach(() => {
+      getFormatterForFieldSpy.mockRestore();
     });
 
     test('should use data view formatters', () => {
-      const getFormatterForFieldSpy = jest.spyOn(dataView, 'getFormatterForField');
-
       const cache = createCachedFieldValueFormatter(dataView);
 
       cache('bytes', '10001');
@@ -146,6 +151,47 @@ describe('fields_utils', () => {
       } as unknown as FieldFormatsRegistry;
 
       const cache = createCachedFieldValueFormatter(
+        null,
+        [{ name: 'field', label: 'Label', type: KBN_FIELD_TYPES.STRING }],
+        fieldFormatServiceMock
+      );
+
+      cache('field', '10001');
+      cache('field', '20002');
+
+      expect(fieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledTimes(1);
+      expect(fieldFormatServiceMock.getDefaultInstance).toHaveBeenCalledWith('string');
+    });
+  });
+
+  describe('createCachedReactFieldValueFormatter', () => {
+    let dataView: DataView;
+    let getFormatterForFieldSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      dataView = stubLogstashDataView;
+      getFormatterForFieldSpy = jest.spyOn(dataView, 'getFormatterForField');
+    });
+
+    afterEach(() => {
+      getFormatterForFieldSpy.mockRestore();
+    });
+
+    test('should use data view formatters and cache them', () => {
+      const cache = createCachedReactFieldValueFormatter(dataView);
+
+      cache('bytes', '10001');
+      cache('bytes', '20002');
+
+      expect(getFormatterForFieldSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should use default formatters in case of Data view not defined', () => {
+      const fieldFormatServiceMock = {
+        getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
+      } as unknown as FieldFormatsRegistry;
+
+      const cache = createCachedReactFieldValueFormatter(
         null,
         [{ name: 'field', label: 'Label', type: KBN_FIELD_TYPES.STRING }],
         fieldFormatServiceMock
