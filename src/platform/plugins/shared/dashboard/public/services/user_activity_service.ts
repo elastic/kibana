@@ -13,7 +13,10 @@ const sessions: { [id: string]: DashboardViewSession } = {};
 
 export const getDashboardUserActivityService = (id: string) => {
   if (!sessions[id]) {
+    console.log('create new');
     sessions[id] = new DashboardViewSession(id);
+  } else {
+    console.log('return old');
   }
   return sessions[id];
 };
@@ -21,18 +24,25 @@ export const getDashboardUserActivityService = (id: string) => {
 class DashboardViewSession {
   private id: string;
   private startTime: number | undefined;
+  private bindedVisibilityHandler;
 
   constructor(id: string) {
     this.id = id;
+    this.bindedVisibilityHandler = this.onVisibilityChange.bind(this);
+    document.addEventListener('visibilitychange', this.bindedVisibilityHandler);
   }
 
-  startDashboardView() {
+  public startDashboardView() {
     this.startTime = Date.now();
-    console.log('START', this.startTime);
   }
 
-  async endDashboardView(title: string) {
-    console.log('END', this.id, title, this.startTime);
+  public async endDashboardView(title: string) {
+    const result = await this.logDashboardView(title);
+    this.cleanup();
+    return result;
+  }
+
+  private async logDashboardView(title: string) {
     const result = await coreServices.http.post(
       `/internal/dashboard/user_activity/view/${this.id}`,
       {
@@ -42,10 +52,24 @@ class DashboardViewSession {
           end: Date.now(),
         }),
         method: 'POST',
+        keepalive: true,
         asSystemRequest: true,
       }
     );
-    this.startTime = undefined;
     return result;
+  }
+
+  private cleanup() {
+    delete sessions[this.id];
+    document.removeEventListener('visibilitychange', this.bindedVisibilityHandler);
+  }
+
+  private async onVisibilityChange() {
+    // window.alert(`on visibility change: ${document.visibilityState}`);
+    if (document.visibilityState === 'visible') {
+      this.startTime = Date.now();
+    } else {
+      await this.logDashboardView('title');
+    }
   }
 }
