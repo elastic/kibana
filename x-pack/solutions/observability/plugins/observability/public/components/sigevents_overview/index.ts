@@ -11,7 +11,11 @@ export type {
   SigEventSeverity,
   ImpactedCardItem,
   HealthyMetricCardItem,
+  VerdictDocument,
 } from './sigevents_overview';
+
+export { LowerPriorityVerdicts } from './lower_priority_verdicts';
+export type { LowerPriorityVerdictsProps } from './lower_priority_verdicts';
 
 export { StatusHeader } from './status_header';
 export type { StatusHeaderProps, StatusHeaderVariant } from './status_header';

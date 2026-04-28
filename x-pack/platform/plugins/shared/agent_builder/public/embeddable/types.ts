@@ -84,6 +84,12 @@ export interface EmbeddableConversationProps {
    */
   autoSendInitialMessage?: boolean;
   /**
+   * Whether to automatically focus the input when the conversation loads.
+   * @default true
+   */
+  autoFocus?: boolean;
+
+  /**
    * Optional attachments with lazy content loading.
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.

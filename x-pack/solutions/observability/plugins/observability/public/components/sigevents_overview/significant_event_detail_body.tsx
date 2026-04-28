@@ -21,6 +21,7 @@ import { InfoPanel } from './info_panel';
 import { RecommendationsPlanPanel } from './recommendations_plan_panel';
 import { RootCausePanel } from './root_cause_panel';
 import { SignificantEventDetailHeader } from './significant_event_detail_header';
+import { DevModePlaceholder } from './dev_mode_placeholder';
 import type { RecommendationStep } from '.';
 
 export interface SignificantEventDetailFields {
@@ -68,22 +69,29 @@ const DEFAULT_IMPACTING_LABEL = i18n.translate(
   { defaultMessage: '4 services' }
 );
 
-export function SignificantEventDetailBody({
-  event,
-  detectedAtLabel,
-  hideHeader = false,
-  criticalityLabel = DEFAULT_CRITICALITY_LABEL,
-  criticalityColor,
-  impactLabel = DEFAULT_IMPACT_LABEL,
-  impactColor = 'danger',
-  recommendedActionLabel,
-  recommendedActionIconType,
-  confidenceLabel = DEFAULT_CONFIDENCE_LABEL,
-  impactingLabel = DEFAULT_IMPACTING_LABEL,
-  recommendationSteps,
-  onRemediate,
-  onOpenDetails,
-}: SignificantEventDetailBodyProps) {
+export function SignificantEventDetailBody(props: SignificantEventDetailBodyProps) {
+  const {
+    event,
+    detectedAtLabel,
+    hideHeader = false,
+    criticalityLabel = DEFAULT_CRITICALITY_LABEL,
+    criticalityColor,
+    impactLabel = DEFAULT_IMPACT_LABEL,
+    impactColor = 'danger',
+    recommendedActionLabel,
+    recommendedActionIconType,
+    confidenceLabel = DEFAULT_CONFIDENCE_LABEL,
+    impactingLabel = DEFAULT_IMPACTING_LABEL,
+    recommendationSteps,
+    onRemediate,
+    onOpenDetails,
+  } = props;
+
+  const hasPlaceholderData =
+    props.criticalityLabel === undefined ||
+    props.impactLabel === undefined ||
+    props.confidenceLabel === undefined ||
+    props.impactingLabel === undefined;
   const summaryPanelTitle = i18n.translate(
     'xpack.observability.sigeventsOverview.sigEvents.childSummaryTitle',
     { defaultMessage: 'Summary' }
@@ -170,65 +178,67 @@ export function SignificantEventDetailBody({
   ]);
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="m"
-      data-test-subj="sigeventsOverviewSignificantEventDetailBody"
-    >
-      {!hideHeader ? (
+    <DevModePlaceholder hasPlaceholderData={hasPlaceholderData}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        data-test-subj="sigeventsOverviewSignificantEventDetailBody"
+      >
+        {!hideHeader ? (
+          <EuiFlexItem grow={false}>
+            <SignificantEventDetailHeader
+              title={event.label}
+              detectedAtLabel={detectedAtLabel}
+              severityLabel={event.severityLabel}
+              severityColor={event.severityColor}
+              criticalityLabel={criticalityLabel}
+              criticalityColor={resolvedCriticalityColor}
+              impactLabel={impactLabel}
+              impactColor={impactColor}
+              recommendedActionLabel={recommendedActionLabel}
+              recommendedActionIconType={recommendedActionIconType}
+            />
+          </EuiFlexItem>
+        ) : null}
+
         <EuiFlexItem grow={false}>
-          <SignificantEventDetailHeader
-            title={event.label}
-            detectedAtLabel={detectedAtLabel}
-            severityLabel={event.severityLabel}
-            severityColor={event.severityColor}
-            criticalityLabel={criticalityLabel}
-            criticalityColor={resolvedCriticalityColor}
-            impactLabel={impactLabel}
-            impactColor={impactColor}
-            recommendedActionLabel={recommendedActionLabel}
-            recommendedActionIconType={recommendedActionIconType}
+          <InfoPanel title={generalInfoTitle} collapsible initialCollapsed>
+            {generalInfoDescriptionItems.map((listItem, index) => (
+              <React.Fragment key={listItem.title}>
+                <EuiDescriptionList
+                  type="column"
+                  columnWidths={[1, 2]}
+                  compressed
+                  listItems={[listItem]}
+                />
+                {index < generalInfoDescriptionItems.length - 1 ? (
+                  <EuiHorizontalRule margin="m" />
+                ) : null}
+              </React.Fragment>
+            ))}
+          </InfoPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <InfoPanel title={summaryPanelTitle}>
+            <EuiText size="s">
+              <p>{summaryBody}</p>
+            </EuiText>
+          </InfoPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <RootCausePanel />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <RecommendationsPlanPanel
+            steps={recommendationSteps}
+            onRemediate={onRemediate}
+            onOpenDetails={onOpenDetails}
           />
         </EuiFlexItem>
-      ) : null}
-
-      <EuiFlexItem grow={false}>
-        <InfoPanel title={generalInfoTitle} collapsible initialCollapsed>
-          {generalInfoDescriptionItems.map((listItem, index) => (
-            <React.Fragment key={listItem.title}>
-              <EuiDescriptionList
-                type="column"
-                columnWidths={[1, 2]}
-                compressed
-                listItems={[listItem]}
-              />
-              {index < generalInfoDescriptionItems.length - 1 ? (
-                <EuiHorizontalRule margin="m" />
-              ) : null}
-            </React.Fragment>
-          ))}
-        </InfoPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <InfoPanel title={summaryPanelTitle}>
-          <EuiText size="s">
-            <p>{summaryBody}</p>
-          </EuiText>
-        </InfoPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <RootCausePanel />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <RecommendationsPlanPanel
-          steps={recommendationSteps}
-          onRemediate={onRemediate}
-          onOpenDetails={onOpenDetails}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </DevModePlaceholder>
   );
 }

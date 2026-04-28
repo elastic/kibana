@@ -22,9 +22,7 @@ describe('SignificantEventDetailHeader', () => {
   it('renders the title as an h2 and the default detected-at label', () => {
     renderWithIntl(<SignificantEventDetailHeader {...baseProps} />);
 
-    expect(
-      screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 2, name: 'Fleet Server Dependency Chain' })
     ).toBeInTheDocument();

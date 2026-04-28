@@ -16,6 +16,11 @@ import type { ImpactedService } from './main_significant_event';
 import { ImpactedCard } from './impacted_card';
 import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
+import { LowerPriorityVerdicts } from './lower_priority_verdicts';
+import type { VerdictDocument } from '../../hooks/use_fetch_system_overview';
+
+// Re-export VerdictDocument for convenience
+export type { VerdictDocument };
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -43,25 +48,35 @@ export interface SigeventsOverviewProps {
   title?: string;
   description?: string;
   mainEventTitle?: string;
+  mainEventDescription?: string;
+  severityLabel?: string;
+  severityColor?: 'danger' | 'warning' | 'primary' | 'subdued';
   impactedServices?: ImpactedService[];
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
+  lowerPriorityVerdicts?: VerdictDocument[];
+  lastUpdatedLabel?: React.ReactNode;
   onRemediate?: () => void;
   onViewDetails?: () => void;
 }
 
-export const SigeventsOverview = ({
+export function SigeventsOverview({
   state = 'critical',
   blastRadiusScore,
   title,
   description,
   mainEventTitle,
+  mainEventDescription,
+  severityLabel,
+  severityColor,
   impactedServices,
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
+  lowerPriorityVerdicts,
+  lastUpdatedLabel,
   onRemediate,
   onViewDetails,
-}: SigeventsOverviewProps) => {
+}: SigeventsOverviewProps) {
   const { euiTheme } = useEuiTheme();
 
   const containerCss = css`
@@ -144,6 +159,7 @@ export const SigeventsOverview = ({
   ];
 
   const resolvedHealthyMetrics = healthyMetrics ?? defaultHealthyMetrics;
+  const hasLowerPriorityVerdicts = lowerPriorityVerdicts && lowerPriorityVerdicts.length > 0;
 
   if (state === 'healthy') {
     return (
@@ -172,6 +188,13 @@ export const SigeventsOverview = ({
             )
           )}
         </EuiFlexGroup>
+
+        {hasLowerPriorityVerdicts && (
+          <>
+            <EuiSpacer size="l" />
+            <LowerPriorityVerdicts verdicts={lowerPriorityVerdicts} />
+          </>
+        )}
       </div>
     );
   }
@@ -218,10 +241,14 @@ export const SigeventsOverview = ({
       <MainSignificantEvent
         blastRadiusScore={blastRadiusScore}
         title={mainEventTitle}
+        description={mainEventDescription}
+        severityLabel={severityLabel}
+        severityColor={severityColor}
         impactedServices={impactedServices}
+        lastUpdatedLabel={lastUpdatedLabel}
         onRemediate={onRemediate}
         onViewDetails={onViewDetails}
       />
     </div>
   );
-};
+}

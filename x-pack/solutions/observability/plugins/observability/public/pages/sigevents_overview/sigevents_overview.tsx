@@ -7,19 +7,26 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
+import { useFetchLatestSignificantEvent } from '../../hooks/use_fetch_latest_significant_event';
+import { useFetchSystemOverview } from '../../hooks/use_fetch_system_overview';
 import { SigeventsOverview } from '../../components/sigevents_overview';
+import type { HealthyMetricCardItem } from '../../components/sigevents_overview';
 import { SignificantEventDetailBody } from '../../components/sigevents_overview/significant_event_detail_body';
-import type { SignificantEventDetailFields } from '../../components/sigevents_overview/significant_event_detail_body';
 import { SignificantEventDetailHeader } from '../../components/sigevents_overview/significant_event_detail_header';
 
 const MAX_CONTENT_WIDTH = 900;
@@ -39,34 +46,159 @@ const contentColumnStyles = css`
   min-height: 0;
 `;
 
-const DEFAULT_DETAIL_EVENT: SignificantEventDetailFields = {
-  id: 'main-significant-event',
-  label:
-    'Dropped payments on oteldemo.com and video streams on otelfix.com due to unavailable Auth Service',
-  subtitle: 'logs · checkout',
-  severityLabel: 'Critical',
-  severityColor: 'danger',
-};
-
 export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
   const { agentBuilder } = services;
+  const { euiTheme } = useEuiTheme();
+
+  const { loading, error, data: eventData } = useFetchLatestSignificantEvent();
+  const { loading: overviewLoading, data: overviewData } = useFetchSystemOverview();
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
+  const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
 
   const openDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(true), []);
   const closeDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(false), []);
+
+  const handleRemediate = useCallback(() => {
+    const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
+    setRemediationPrompt(
+      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
+        defaultMessage:
+          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
+        values: { eventTitle },
+      })
+    );
+  }, [eventData?.mainEventTitle]);
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
     [agentBuilder]
   );
 
+  const detailFields = eventData?.detailFields;
+
+  const lastUpdatedLabel = useMemo(() => {
+    if (!eventData?.timestamp) {
+      return undefined;
+    }
+    const timestampMs = new Date(eventData.timestamp).getTime();
+    const nowMs = Date.now();
+    const diffSeconds = Math.round((timestampMs - nowMs) / 1000);
+    return (
+      <>
+        (<FormattedRelativeTime value={diffSeconds} numeric="auto" updateIntervalInSeconds={60} />)
+      </>
+    );
+  }, [eventData?.timestamp]);
+
+  const healthyMetrics: HealthyMetricCardItem[] | undefined = useMemo(() => {
+    if (!overviewData) {
+      return undefined;
+    }
+
+    const bigValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.textHeading};
+    `;
+
+    const successValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.severity.success};
+    `;
+
+    const accentValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.textAccent};
+    `;
+
+    const warningValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.severity.warning};
+    `;
+
+    const serviceCount = overviewData.services.length;
+    const lowPriorityCount = overviewData.lowCount + overviewData.mediumCount;
+
+    return [
+      {
+        id: 'services',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.services', {
+          defaultMessage: 'Services',
+        }),
+        value: <span css={bigValueCss}>{serviceCount}</span>,
+        iconType: 'package',
+        iconBackground: euiTheme.colors.backgroundBaseSubdued,
+        iconColor: euiTheme.colors.textParagraph,
+      },
+      {
+        id: 'detections',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.detections', {
+          defaultMessage: 'Detections',
+        }),
+        value: <span css={bigValueCss}>{overviewData.detectionCount}</span>,
+        iconType: 'eye',
+        iconBackground: euiTheme.colors.backgroundBaseSubdued,
+        iconColor: euiTheme.colors.textParagraph,
+      },
+      {
+        id: 'criticalRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.critical', {
+          defaultMessage: 'Critical',
+        }),
+        value: <span css={successValueCss}>{overviewData.criticalCount}</span>,
+        iconType: 'minusInCircle',
+        iconBackground: euiTheme.colors.backgroundLightSuccess,
+        iconColor: euiTheme.colors.severity.success,
+      },
+      {
+        id: 'highRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.high', {
+          defaultMessage: 'High',
+        }),
+        value: (
+          <span css={overviewData.highCount > 0 ? warningValueCss : successValueCss}>
+            {overviewData.highCount}
+          </span>
+        ),
+        iconType: overviewData.highCount > 0 ? 'warning' : 'minusInCircle',
+        iconBackground:
+          overviewData.highCount > 0
+            ? euiTheme.colors.backgroundLightWarning
+            : euiTheme.colors.backgroundLightSuccess,
+        iconColor:
+          overviewData.highCount > 0
+            ? euiTheme.colors.severity.warning
+            : euiTheme.colors.severity.success,
+      },
+      {
+        id: 'lowerPriority',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.lowMed', {
+          defaultMessage: 'Low / Med',
+        }),
+        value: (
+          <span css={lowPriorityCount > 0 ? accentValueCss : bigValueCss}>{lowPriorityCount}</span>
+        ),
+        iconType: lowPriorityCount > 0 ? 'search' : 'minusInCircle',
+        iconBackground:
+          lowPriorityCount > 0
+            ? euiTheme.colors.backgroundLightAccent
+            : euiTheme.colors.backgroundBaseSubdued,
+        iconColor:
+          lowPriorityCount > 0 ? euiTheme.colors.textAccent : euiTheme.colors.textParagraph,
+      },
+    ];
+  }, [overviewData, euiTheme]);
+
   return (
     <ObservabilityPageTemplate
-      isPageDataLoaded={true}
+      isPageDataLoaded={!loading && !overviewLoading}
       data-test-subj="obltSigeventsOverviewPageHeader"
       pageSectionProps={{
         grow: true,
@@ -88,7 +220,52 @@ export function SigeventsOverviewPage() {
             data-test-subj="obltSigeventsConversation"
           >
             <EuiFlexItem grow={false}>
-              <SigeventsOverview onViewDetails={openDetailFlyout} />
+              {loading || overviewLoading ? (
+                <EuiEmptyPrompt
+                  icon={<EuiLoadingSpinner size="xl" />}
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.observability.sigeventsOverview.loadingTitle', {
+                        defaultMessage: 'Loading significant events...',
+                      })}
+                    </h2>
+                  }
+                />
+              ) : error ? (
+                <EuiEmptyPrompt
+                  iconType="warning"
+                  color="danger"
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.observability.sigeventsOverview.errorTitle', {
+                        defaultMessage: 'Unable to load significant events',
+                      })}
+                    </h2>
+                  }
+                  body={<p>{error.message}</p>}
+                />
+              ) : eventData ? (
+                <SigeventsOverview
+                  state={eventData.state}
+                  blastRadiusScore={eventData.blastRadiusScore}
+                  mainEventTitle={eventData.mainEventTitle}
+                  mainEventDescription={eventData.description}
+                  severityLabel={eventData.severityLabel}
+                  severityColor={eventData.severityColor}
+                  impactedServices={eventData.impactedServices}
+                  impactedCards={eventData.impactedCards}
+                  lastUpdatedLabel={lastUpdatedLabel}
+                  onViewDetails={openDetailFlyout}
+                  onRemediate={handleRemediate}
+                />
+              ) : (
+                <SigeventsOverview
+                  state="healthy"
+                  healthyMetrics={healthyMetrics}
+                  lowerPriorityVerdicts={overviewData?.verdicts}
+                  onViewDetails={openDetailFlyout}
+                />
+              )}
             </EuiFlexItem>
 
             {EmbeddableConversation && (
@@ -98,6 +275,9 @@ export function SigeventsOverviewPage() {
                   hideWelcomeTitle
                   hideCloseButton
                   initialTitle="Systems overview"
+                  initialMessage={remediationPrompt}
+                  autoSendInitialMessage={false}
+                  autoFocus={false}
                 />
               </EuiFlexItem>
             )}
@@ -105,7 +285,7 @@ export function SigeventsOverviewPage() {
         </div>
       </div>
 
-      {isDetailFlyoutOpen ? (
+      {isDetailFlyoutOpen && detailFields ? (
         <EuiFlyout
           type="push"
           side="right"
@@ -118,14 +298,14 @@ export function SigeventsOverviewPage() {
           <EuiFlyoutHeader hasBorder>
             <div id={flyoutHeadingId}>
               <SignificantEventDetailHeader
-                title={DEFAULT_DETAIL_EVENT.label}
-                severityLabel={DEFAULT_DETAIL_EVENT.severityLabel}
-                severityColor={DEFAULT_DETAIL_EVENT.severityColor}
+                title={detailFields.label}
+                severityLabel={detailFields.severityLabel}
+                severityColor={detailFields.severityColor}
               />
             </div>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <SignificantEventDetailBody event={DEFAULT_DETAIL_EVENT} hideHeader />
+            <SignificantEventDetailBody event={detailFields} hideHeader />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}

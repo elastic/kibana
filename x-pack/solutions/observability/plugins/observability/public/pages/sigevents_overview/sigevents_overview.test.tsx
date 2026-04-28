@@ -17,11 +17,53 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { SigeventsOverviewPage } from './sigevents_overview';
 
+jest.mock('../../hooks/use_fetch_system_overview', () => ({
+  useFetchSystemOverview: () => ({
+    loading: false,
+    data: undefined,
+  }),
+}));
+
+jest.mock('../../hooks/use_fetch_latest_significant_event', () => ({
+  useFetchLatestSignificantEvent: () => ({
+    loading: false,
+    error: null,
+    data: {
+      raw: {},
+      state: 'critical',
+      blastRadiusScore: 90,
+      mainEventTitle: 'Test significant event',
+      description: 'Test description',
+      impactedServices: [],
+      impactedCards: [],
+      severityLabel: 'Critical',
+      severityColor: 'danger',
+      detailFields: {
+        id: 'test-event-id',
+        label: 'Test significant event',
+        subtitle: 'logs · checkout',
+        severityLabel: 'Critical',
+        severityColor: 'danger',
+      },
+    },
+    refetch: jest.fn(),
+  }),
+}));
+
 jest.mock('../../components/sigevents_overview', () => ({
-  SigeventsOverview: ({ onViewDetails }: { onViewDetails?: () => void }) => (
+  SigeventsOverview: ({
+    onViewDetails,
+    onRemediate,
+  }: {
+    onViewDetails?: () => void;
+    onRemediate?: () => void;
+  }) => (
     <div data-test-subj="sigeventsOverview">
       <button data-test-subj="mockSigeventsViewDetailsButton" onClick={onViewDetails}>
         View Details
+      </button>
+      <button data-test-subj="mockSigeventsRemediateButton" onClick={onRemediate}>
+        Remediate
       </button>
     </div>
   ),
@@ -115,6 +157,26 @@ describe('SigeventsOverviewPage', () => {
       expect(
         screen.queryByTestSubject('agentBuilderEmbeddableConversation')
       ).not.toBeInTheDocument();
+    });
+
+    it('passes initialMessage to populate input when Remediate is clicked', () => {
+      const mockAgentBuilder = agentBuilderMocks.createStart();
+      const MockEmbeddableConversation = jest.fn(() => (
+        <div data-test-subj="agentBuilderEmbeddableConversation" />
+      ));
+      mockAgentBuilder.getEmbeddableConversation.mockReturnValue(MockEmbeddableConversation);
+
+      renderWithProviders(mockAgentBuilder);
+
+      fireEvent.click(screen.getByTestSubject('mockSigeventsRemediateButton'));
+
+      expect(MockEmbeddableConversation).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          initialMessage: expect.stringContaining('remediate'),
+          autoSendInitialMessage: false,
+        }),
+        expect.anything()
+      );
     });
   });
 

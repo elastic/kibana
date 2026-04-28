@@ -23,6 +23,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DevModePlaceholder } from './dev_mode_placeholder';
 
 export interface RecommendationStep {
   id: string;
@@ -56,14 +57,18 @@ const DEFAULT_STEPS: RecommendationStep[] = [
 
 const generateAccordionId = htmlIdGenerator('recommendationsPlanStep');
 
-export const RecommendationsPlanPanel = ({
-  steps = DEFAULT_STEPS,
-  escalateBadgeLabel,
-  initialOpenStepIds,
-  initialDetailsOpen = false,
-  onRemediate,
-  onOpenDetails,
-}: RecommendationsPlanPanelProps) => {
+export function RecommendationsPlanPanel(props: RecommendationsPlanPanelProps) {
+  const {
+    steps = DEFAULT_STEPS,
+    escalateBadgeLabel,
+    initialOpenStepIds,
+    initialDetailsOpen = false,
+    onRemediate,
+    onOpenDetails,
+  } = props;
+
+  const hasPlaceholderData = props.steps === undefined;
+
   const { euiTheme } = useEuiTheme();
 
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(initialDetailsOpen);
@@ -155,144 +160,142 @@ export const RecommendationsPlanPanel = ({
   );
 
   return (
-    <EuiPanel
-      hasBorder
-      css={panelCss}
-      data-test-subj="sigeventsOverviewRecommendationsPlanPanel"
-    >
-      <div css={headerStripCss}>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" css={titleCss}>
-                  {i18n.translate(
-                    'xpack.observability.sigeventsOverview.recommendationsPlan.title',
-                    { defaultMessage: 'Recommendations plan' }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color="warning"
-                  iconType="warning"
-                  data-test-subj="sigeventsOverviewRecommendationsPlanEscalateBadge"
-                >
-                  {escalateLabel}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="sigeventsOverviewRecommendationsPlanOpenDetails"
-              size="s"
-              color="text"
-              iconType={isDetailsOpen ? 'arrowUp' : 'arrowDown'}
-              iconSide="right"
-              onClick={toggleDetails}
-              aria-expanded={isDetailsOpen}
-            >
-              {isDetailsOpen ? closeDetailsLabel : openDetailsLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        <EuiText size="s">
-          <p
-            css={css`
-              margin-bottom: 0;
-            `}
+    <DevModePlaceholder hasPlaceholderData={hasPlaceholderData}>
+      <EuiPanel hasBorder css={panelCss} data-test-subj="sigeventsOverviewRecommendationsPlanPanel">
+        <div css={headerStripCss}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="s"
+            responsive={false}
           >
-            <FormattedMessage
-              id="xpack.observability.sigeventsOverview.recommendationsPlan.summary"
-              defaultMessage="We recommend a {stepPlan} to understand what the remediation of this might be."
-              values={{
-                stepPlan: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.observability.sigeventsOverview.recommendationsPlan.summaryStepPlan"
-                      defaultMessage="{stepCount, plural, one {# step plan} other {# step plan}}"
-                      values={{ stepCount: steps.length }}
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-      </div>
-
-      {isDetailsOpen
-        ? steps.map((step) => {
-            const isOpen = openStepIds.has(step.id);
-            const accordionId = generateAccordionId(step.id);
-
-            return (
-              <div
-                key={step.id}
-                css={stepRowCss}
-                data-test-subj={`sigeventsOverviewRecommendationsPlanStep-${step.id}`}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" css={titleCss}>
+                    {i18n.translate(
+                      'xpack.observability.sigeventsOverview.recommendationsPlan.title',
+                      { defaultMessage: 'Recommendations plan' }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color="warning"
+                    iconType="warning"
+                    data-test-subj="sigeventsOverviewRecommendationsPlanEscalateBadge"
+                  >
+                    {escalateLabel}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="sigeventsOverviewRecommendationsPlanOpenDetails"
+                size="s"
+                color="text"
+                iconType={isDetailsOpen ? 'arrowUp' : 'arrowDown'}
+                iconSide="right"
+                onClick={toggleDetails}
+                aria-expanded={isDetailsOpen}
               >
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="spaceBetween"
-                  gutterSize="s"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={true}>
-                    <EuiAccordion
-                      id={accordionId}
-                      forceState={isOpen ? 'open' : 'closed'}
-                      onToggle={() => toggleStep(step.id)}
-                      paddingSize="none"
-                      buttonProps={{
-                        'data-test-subj': `sigeventsOverviewRecommendationsPlanStepToggle-${step.id}`,
-                      }}
-                      buttonContent={
-                        <EuiText size="xs">
-                          <span css={titleCss}>{step.title}</span>
-                        </EuiText>
-                      }
-                    >
-                      {step.description ? (
-                        <div css={stepDescriptionCss}>{step.description}</div>
-                      ) : null}
-                    </EuiAccordion>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="boxesVertical"
-                      display="empty"
-                      size="xs"
-                      color="text"
-                      aria-label={stepMoreActionsAria}
-                      data-test-subj={`sigeventsOverviewRecommendationsPlanStepMore-${step.id}`}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            );
-          })
-        : null}
+                {isDetailsOpen ? closeDetailsLabel : openDetailsLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-      <div css={footerCss}>
-        <AiButton
-          data-test-subj="sigeventsOverviewRecommendationsPlanRemediate"
-          size="s"
-          iconType="productAgent"
-          onClick={onRemediate}
-        >
-          {remediateLabel}
-        </AiButton>
-      </div>
-    </EuiPanel>
+          <EuiSpacer size="s" />
+
+          <EuiText size="s">
+            <p
+              css={css`
+                margin-bottom: 0;
+              `}
+            >
+              <FormattedMessage
+                id="xpack.observability.sigeventsOverview.recommendationsPlan.summary"
+                defaultMessage="We recommend a {stepPlan} to understand what the remediation of this might be."
+                values={{
+                  stepPlan: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.observability.sigeventsOverview.recommendationsPlan.summaryStepPlan"
+                        defaultMessage="{stepCount, plural, one {# step plan} other {# step plan}}"
+                        values={{ stepCount: steps.length }}
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </div>
+
+        {isDetailsOpen
+          ? steps.map((step) => {
+              const isOpen = openStepIds.has(step.id);
+              const accordionId = generateAccordionId(step.id);
+
+              return (
+                <div
+                  key={step.id}
+                  css={stepRowCss}
+                  data-test-subj={`sigeventsOverviewRecommendationsPlanStep-${step.id}`}
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="spaceBetween"
+                    gutterSize="s"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={true}>
+                      <EuiAccordion
+                        id={accordionId}
+                        forceState={isOpen ? 'open' : 'closed'}
+                        onToggle={() => toggleStep(step.id)}
+                        paddingSize="none"
+                        buttonProps={{
+                          'data-test-subj': `sigeventsOverviewRecommendationsPlanStepToggle-${step.id}`,
+                        }}
+                        buttonContent={
+                          <EuiText size="xs">
+                            <span css={titleCss}>{step.title}</span>
+                          </EuiText>
+                        }
+                      >
+                        {step.description ? (
+                          <div css={stepDescriptionCss}>{step.description}</div>
+                        ) : null}
+                      </EuiAccordion>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="boxesVertical"
+                        display="empty"
+                        size="xs"
+                        color="text"
+                        aria-label={stepMoreActionsAria}
+                        data-test-subj={`sigeventsOverviewRecommendationsPlanStepMore-${step.id}`}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              );
+            })
+          : null}
+
+        <div css={footerCss}>
+          <AiButton
+            data-test-subj="sigeventsOverviewRecommendationsPlanRemediate"
+            size="s"
+            iconType="productAgent"
+            onClick={onRemediate}
+          >
+            {remediateLabel}
+          </AiButton>
+        </div>
+      </EuiPanel>
+    </DevModePlaceholder>
   );
-};
+}

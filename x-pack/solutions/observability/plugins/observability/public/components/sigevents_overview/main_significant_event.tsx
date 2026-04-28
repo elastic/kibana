@@ -23,6 +23,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CriticalityDonut } from './criticality_donut';
+import { DevModePlaceholder } from './dev_mode_placeholder';
 
 const CRITICAL_SCORE_THRESHOLD = 80;
 const CARD_BORDER_RADIUS = '8px';
@@ -39,7 +40,7 @@ export interface MainSignificantEventProps {
   blastRadiusScore?: number;
   severityLabel?: string;
   severityColor?: EuiBadgeProps['color'];
-  lastUpdatedLabel?: string;
+  lastUpdatedLabel?: React.ReactNode;
   title?: string;
   impactedServices?: ImpactedService[];
   description?: string;
@@ -83,23 +84,31 @@ const DEFAULT_IMPACTED_SERVICES: ImpactedService[] = [
   { id: 'checkout', label: 'checkout', iconType: 'package' },
 ];
 
-export const MainSignificantEvent = ({
-  blastRadiusScore = DEFAULT_SCORE,
-  severityLabel = DEFAULT_SEVERITY_LABEL,
-  severityColor = 'danger',
-  lastUpdatedLabel = DEFAULT_LAST_UPDATED_LABEL,
-  title = DEFAULT_TITLE,
-  impactedServices = DEFAULT_IMPACTED_SERVICES,
-  description = DEFAULT_DESCRIPTION,
-  remediateLabel,
-  viewDetailsLabel,
-  onRemediate,
-  onViewDetails,
-  onOpenMoreActions,
-}: MainSignificantEventProps) => {
+export function MainSignificantEvent(props: MainSignificantEventProps) {
+  const {
+    blastRadiusScore = DEFAULT_SCORE,
+    severityLabel = DEFAULT_SEVERITY_LABEL,
+    severityColor = 'danger',
+    lastUpdatedLabel = DEFAULT_LAST_UPDATED_LABEL,
+    title = DEFAULT_TITLE,
+    impactedServices = DEFAULT_IMPACTED_SERVICES,
+    description = DEFAULT_DESCRIPTION,
+    remediateLabel,
+    viewDetailsLabel,
+    onRemediate,
+    onViewDetails,
+    onOpenMoreActions,
+  } = props;
+
   const { euiTheme } = useEuiTheme();
 
   const isCritical = blastRadiusScore > CRITICAL_SCORE_THRESHOLD;
+
+  const hasPlaceholderData =
+    props.blastRadiusScore === undefined ||
+    props.title === undefined ||
+    props.description === undefined ||
+    props.impactedServices === undefined;
 
   const remediateText =
     remediateLabel ??
@@ -138,123 +147,125 @@ export const MainSignificantEvent = ({
   `;
 
   return (
-    <div css={cardCss} data-test-subj="sigeventsOverviewMainSignificantEvent">
-      <div css={topSectionCss}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <CriticalityDonut
-              score={blastRadiusScore}
-              isCritical={isCritical}
-              size={DONUT_SIZE}
-              strokeWidth={DONUT_STROKE}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup
-              responsive={false}
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="s"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={severityColor} iconType="dot">
-                  {severityLabel}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {lastUpdatedLabel}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      data-test-subj="sigeventsOverviewMainSignificantEventMoreActions"
-                      iconType="boxesVertical"
-                      color="text"
-                      display="empty"
-                      size="xs"
-                      onClick={onOpenMoreActions}
-                      aria-label={i18n.translate(
-                        'xpack.observability.sigeventsOverview.mainSignificantEvent.moreActionsAria',
-                        { defaultMessage: 'More actions' }
-                      )}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+    <DevModePlaceholder hasPlaceholderData={hasPlaceholderData}>
+      <div css={cardCss} data-test-subj="sigeventsOverviewMainSignificantEvent">
+        <div css={topSectionCss}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <CriticalityDonut
+                score={blastRadiusScore}
+                isCritical={isCritical}
+                size={DONUT_SIZE}
+                strokeWidth={DONUT_STROKE}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiFlexGroup
+                responsive={false}
+                alignItems="center"
+                justifyContent="spaceBetween"
+                gutterSize="s"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={severityColor} iconType="dot">
+                    {severityLabel}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {lastUpdatedLabel}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        data-test-subj="sigeventsOverviewMainSignificantEventMoreActions"
+                        iconType="boxesVertical"
+                        color="text"
+                        display="empty"
+                        size="xs"
+                        onClick={onOpenMoreActions}
+                        aria-label={i18n.translate(
+                          'xpack.observability.sigeventsOverview.mainSignificantEvent.moreActionsAria',
+                          { defaultMessage: 'More actions' }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
-            <EuiSpacer size="s" />
+              <EuiSpacer size="s" />
 
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
 
-            <EuiSpacer size="xs" />
+              <EuiSpacer size="xs" />
 
-            <EuiFlexGroup
-              responsive={false}
-              alignItems="center"
-              gutterSize="xs"
-              wrap
-              data-test-subj="sigeventsOverviewMainSignificantEventImpactedServices"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" css={impactedServicesLabelCss}>
-                  {i18n.translate(
-                    'xpack.observability.sigeventsOverview.mainSignificantEvent.impactedServicesLabel',
-                    { defaultMessage: 'Impacted services:' }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadgeGroup gutterSize="xs">
-                  {impactedServices.map((service) => (
-                    <EuiBadge
-                      key={service.id}
-                      color="hollow"
-                      iconType={service.iconType ?? 'package'}
-                    >
-                      {service.label}
-                    </EuiBadge>
-                  ))}
-                </EuiBadgeGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiFlexGroup
+                responsive={false}
+                alignItems="center"
+                gutterSize="xs"
+                wrap
+                data-test-subj="sigeventsOverviewMainSignificantEventImpactedServices"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" css={impactedServicesLabelCss}>
+                    {i18n.translate(
+                      'xpack.observability.sigeventsOverview.mainSignificantEvent.impactedServicesLabel',
+                      { defaultMessage: 'Impacted services:' }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadgeGroup gutterSize="xs">
+                    {impactedServices.map((service) => (
+                      <EuiBadge
+                        key={service.id}
+                        color="hollow"
+                        iconType={service.iconType ?? 'package'}
+                      >
+                        {service.label}
+                      </EuiBadge>
+                    ))}
+                  </EuiBadgeGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+
+        <div css={bottomSectionCss}>
+          <EuiText size="s">
+            <p>{description}</p>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup responsive={false} wrap gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <AiButton
+                data-test-subj="sigeventsOverviewMainSignificantEventRemediateButton"
+                size="s"
+                iconType="productAgent"
+                onClick={onRemediate}
+              >
+                {remediateText}
+              </AiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="sigeventsOverviewMainSignificantEventViewDetailsButton"
+                size="s"
+                color="text"
+                onClick={onViewDetails}
+              >
+                {viewDetailsText}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </div>
-
-      <div css={bottomSectionCss}>
-        <EuiText size="s">
-          <p>{description}</p>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup responsive={false} wrap gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <AiButton
-              data-test-subj="sigeventsOverviewMainSignificantEventRemediateButton"
-              size="s"
-              iconType="productAgent"
-              onClick={onRemediate}
-            >
-              {remediateText}
-            </AiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="sigeventsOverviewMainSignificantEventViewDetailsButton"
-              size="s"
-              color="text"
-              onClick={onViewDetails}
-            >
-              {viewDetailsText}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </div>
+    </DevModePlaceholder>
   );
-};
+}

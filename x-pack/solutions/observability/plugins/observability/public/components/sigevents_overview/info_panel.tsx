@@ -62,9 +62,7 @@ export const InfoPanel = ({
   const palette = getPaletteForColor(euiTheme, color);
   const bodyId = useGeneratedHtmlId({ prefix: 'infoPanelBody' });
 
-  const [isOpen, setIsOpen] = useState<boolean>(() =>
-    collapsible ? !initialCollapsed : true
-  );
+  const [isOpen, setIsOpen] = useState<boolean>(() => (collapsible ? !initialCollapsed : true));
 
   const toggleOpen = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -141,12 +139,11 @@ export const InfoPanel = ({
               title
             )}
           </EuiFlexItem>
-          {headerRightContent ? (
-            <EuiFlexItem grow={false}>{headerRightContent}</EuiFlexItem>
-          ) : null}
+          {headerRightContent ? <EuiFlexItem grow={false}>{headerRightContent}</EuiFlexItem> : null}
           {collapsible ? (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                data-test-subj="o11yInfoPanelButton"
                 iconType={isOpen ? 'arrowUp' : 'arrowDown'}
                 color="text"
                 size="xs"

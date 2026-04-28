@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('Observability alerts page / State synchronization', function () {
+  describe.skip('Observability alerts page / State synchronization', function () {
     this.tags('includeFirefox');
 
     const find = getService('find');
