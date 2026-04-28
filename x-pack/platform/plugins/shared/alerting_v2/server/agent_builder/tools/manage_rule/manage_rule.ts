@@ -80,7 +80,7 @@ Use operations[] to:
         throw new Error(`Failed to persist rule attachment "${attachmentId}".`);
       }
 
-      logger.info(
+      logger.debug(
         `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`
       );
 
