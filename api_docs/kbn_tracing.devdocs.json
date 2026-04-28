@@ -127,6 +127,7 @@
                 "lineNumber": 28,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -371,6 +372,7 @@
                 "lineNumber": 19,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "OTLPExportConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
