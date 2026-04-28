@@ -70,6 +70,31 @@ describe('i18n config', () => {
       expect(validated.locales).toEqual([]);
       expect(validated.defaultLocale).toEqual('en');
     });
+
+    it('supports a maximum of 10 locales', () => {
+      const validLocales = [
+        'en',
+        'fr-FR',
+        'ja-JP',
+        'zh-CN',
+        'de-DE',
+        'es-ES',
+        'it-IT',
+        'pt-PT',
+        'ru-RU',
+        'ko-KR',
+      ];
+      const validated = config.schema.validate({ locales: validLocales, defaultLocale: 'en' });
+      expect(validated.locales).toEqual(validLocales);
+      expect(validated.defaultLocale).toEqual('en');
+
+      const tooManyLocales = [...validLocales, 'ar-AR'];
+      expect(() =>
+        config.schema.validate({ locales: tooManyLocales, defaultLocale: 'en' })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[locales]: array size is [11], but cannot be greater than [10]"`
+      );
+    });
   });
 
   describe('deprecations', () => {

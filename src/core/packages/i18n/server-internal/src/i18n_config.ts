@@ -17,7 +17,7 @@ const DEFAULT_LOCALES = [...SUPPORTED_LOCALE_IDS];
 
 const configSchema = schema.object(
   {
-    locales: schema.arrayOf(schema.string(), { defaultValue: DEFAULT_LOCALES }),
+    locales: schema.arrayOf(schema.string(), { defaultValue: DEFAULT_LOCALES, maxSize: 10 }),
     defaultLocale: schema.string({ defaultValue: 'en' }),
   },
   {
