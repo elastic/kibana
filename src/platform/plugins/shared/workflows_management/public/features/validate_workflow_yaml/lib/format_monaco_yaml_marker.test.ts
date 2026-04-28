@@ -15,12 +15,16 @@ import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 
 const mockEnrichErrorMessage = jest.fn();
 
-jest.mock('../../../../common/lib/yaml', () => ({
+jest.mock('@kbn/workflows/common/utils/yaml', () => ({
   getPathAtOffset: jest.fn().mockReturnValue([]),
 }));
 
-jest.mock('../../../../common/lib/zod', () => ({
+jest.mock('@kbn/workflows-yaml', () => ({
   enrichErrorMessage: (...args: any[]) => mockEnrichErrorMessage(...args),
+}));
+
+jest.mock('../../../../common/lib/connector_params_schema_resolver', () => ({
+  connectorParamsSchemaResolver: jest.fn().mockReturnValue(null),
 }));
 
 type IMarkerData = monaco.editor.IMarkerData;
@@ -101,10 +105,12 @@ describe('formatMonacoYamlMarker', () => {
     const yamlDoc = parseDocument('key: value');
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
 
-    expect(mockEnrichErrorMessage).toHaveBeenCalledWith([], marker.message, 'unknown', {
-      schema: dummySchema,
-      yamlDocument: yamlDoc,
-    });
+    expect(mockEnrichErrorMessage).toHaveBeenCalledWith(
+      [],
+      marker.message,
+      'unknown',
+      expect.objectContaining({ schema: dummySchema, yamlDocument: yamlDoc })
+    );
     expect(result.message).toBe('enriched message');
   });
 
@@ -116,10 +122,12 @@ describe('formatMonacoYamlMarker', () => {
     const yamlDoc = parseDocument('key: value');
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
 
-    expect(mockEnrichErrorMessage).toHaveBeenCalledWith([], marker.message, 'unknown', {
-      schema: dummySchema,
-      yamlDocument: yamlDoc,
-    });
+    expect(mockEnrichErrorMessage).toHaveBeenCalledWith(
+      [],
+      marker.message,
+      'unknown',
+      expect.objectContaining({ schema: dummySchema, yamlDocument: yamlDoc })
+    );
     expect(result.message).toBe('enriched message');
   });
 
