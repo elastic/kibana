@@ -20,6 +20,7 @@ Review only **Scout test code and the building blocks tests consume**:
 - Files under `**/kbn-scout*/**`: only specs, page objects, API services, fixtures, and test utilities.
 
 Skip everything else, including internal `kbn-scout` framework implementation. If no matching files changed, conclude with no comments. Do not post flaky test runner nudges — a separate agent handles that.
+Do not run this check on backport PRs.
 
 ## Review instructions
 
