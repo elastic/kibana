@@ -90,6 +90,9 @@ describe('verify_permissions_task', () => {
     jest.clearAllMocks();
     mockSoClient.find.mockReset();
     mockSoClient.update.mockReset();
+    mockedAgentPolicyService.list.mockReset();
+    mockedAgentPolicyService.createVerifierPolicy.mockReset();
+    mockedAgentPolicyService.deleteVerifierPolicy.mockReset();
     const mockContext = createAppContextStartContractMock();
     appContextService.start(mockContext);
 
