@@ -41,7 +41,6 @@ export const ServiceNode = memo(
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
 
-    const showContextFrame = contextHighlight;
     const circleEmphasized = selected || contextHighlight;
 
     const borderColor = useMemo(() => {
@@ -181,7 +180,7 @@ export const ServiceNode = memo(
         flex-direction: column;
         align-items: center;
         max-width: 100%;
-        ${showContextFrame
+        ${contextHighlight
           ? `
           padding: ${euiTheme.size.s};
           border: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
@@ -190,12 +189,12 @@ export const ServiceNode = memo(
         `
           : ''}
       `,
-      [euiTheme, showContextFrame]
+      [euiTheme, contextHighlight]
     );
 
     return (
       <div
-        data-test-subj={showContextFrame ? 'serviceMapNodeContextHighlightFrame' : undefined}
+        data-test-subj={contextHighlight ? 'serviceMapNodeContextHighlightFrame' : undefined}
         css={contextFrameStyles}
       >
         <EuiFlexGroup
@@ -277,7 +276,7 @@ export const ServiceNode = memo(
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          <NodeLabel label={data.label} selected={selected || contextHighlight} />
+          <NodeLabel label={data.label} selected={selected} />
         </EuiFlexGroup>
       </div>
     );

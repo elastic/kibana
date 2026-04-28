@@ -181,8 +181,8 @@ interface BaseNodeData extends Record<string, unknown> {
 export interface ServiceNodeData extends BaseNodeData {
   isService: true;
   /**
-   * Embeddable / focused service map: marks the service the author asked users to
-   * focus on
+   * Embeddable / focused service map: accent the filtered/focus service (frame, fill,
+   * primary ring on the node). Edge highlighting still follows React Flow selection only.
    */
   contextHighlight?: boolean;
   agentName?: AgentName;

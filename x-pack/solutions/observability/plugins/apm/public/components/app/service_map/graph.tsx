@@ -89,9 +89,8 @@ interface GraphProps {
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
   /**
-   * When set to a service name that exists on the map, that node is visually emphasized
-   * (dashed frame, interactive-select fill, primary border on the circle). Edges stay
-   * default; blue edges are reserved for user selection. Both can show when filter + click.
+   * When set to a service name that exists on the map, that node gets context highlight
+   * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
    */
   highlightedServiceName?: string;
 }
@@ -198,7 +197,7 @@ function GraphInner({
     [nodesAfterFilters, highlightedServiceName]
   );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesAfterFilters);
+  const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithContextHighlight);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(edgesAfterFilters);
 
   useEffect(() => {
@@ -358,7 +357,10 @@ function GraphInner({
         setSelectedNodeForPopover(null);
         setSelectedEdgeForPopover(edge);
         setEdges((currentEdges) =>
-          applyEdgeHighlighting(currentEdges, { selectedEdgeId: edge.id })
+          applyEdgeHighlighting(currentEdges, {
+            selectedNodeId: null,
+            selectedEdgeId: edge.id,
+          })
         );
       } else {
         handlePopoverClose();
