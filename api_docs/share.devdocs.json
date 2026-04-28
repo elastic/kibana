@@ -70,6 +70,7 @@
             "lineNumber": 24,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "DownloadableContent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -129,6 +130,7 @@
             "lineNumber": 35,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -210,6 +212,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -228,6 +231,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LocatorGetUrlParams",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -245,6 +249,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -342,6 +347,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -359,6 +365,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "G",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -646,6 +653,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -737,6 +745,7 @@
                 "lineNumber": 69,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -779,6 +788,7 @@
                 "lineNumber": 82,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -799,6 +809,7 @@
                 "lineNumber": 82,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -841,6 +852,7 @@
                 "lineNumber": 91,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -861,6 +873,7 @@
                 "lineNumber": 91,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetRedirectUrlOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -903,6 +916,7 @@
                 "lineNumber": 101,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -923,6 +937,7 @@
                 "lineNumber": 101,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -965,6 +980,7 @@
                 "lineNumber": 111,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -985,6 +1001,7 @@
                 "lineNumber": 111,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1025,6 +1042,7 @@
                 "lineNumber": 117,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1043,6 +1061,7 @@
                 "lineNumber": 117,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1060,6 +1079,7 @@
                 "lineNumber": 117,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "DependencyList",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1200,6 +1220,7 @@
                 "lineNumber": 73,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ShareActionConfigArgs",
                 "trackAdoption": false
               }
             ]
@@ -1928,6 +1949,7 @@
               "lineNumber": 41,
               "columnNumber": 12,
               "deprecated": false,
+              "docsReferencedTypeName": "RedirectOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2204,6 +2226,7 @@
             "lineNumber": 22,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Duration",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2324,6 +2347,7 @@
             "lineNumber": 24,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "Duration",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2868,6 +2892,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2886,6 +2911,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LocatorGetUrlParams",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -2903,6 +2929,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3115,6 +3142,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3206,6 +3234,7 @@
                 "lineNumber": 69,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3248,6 +3277,7 @@
                 "lineNumber": 82,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3268,6 +3298,7 @@
                 "lineNumber": 82,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3310,6 +3341,7 @@
                 "lineNumber": 91,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3330,6 +3362,7 @@
                 "lineNumber": 91,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetRedirectUrlOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3372,6 +3405,7 @@
                 "lineNumber": 101,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3392,6 +3426,7 @@
                 "lineNumber": 101,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3434,6 +3469,7 @@
                 "lineNumber": 111,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3454,6 +3490,7 @@
                 "lineNumber": 111,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorNavigationParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3494,6 +3531,7 @@
                 "lineNumber": 117,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3512,6 +3550,7 @@
                 "lineNumber": 117,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorGetUrlParams",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -3529,6 +3568,7 @@
                 "lineNumber": 117,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "DependencyList",
                 "trackAdoption": false,
                 "isRequired": false
               }
