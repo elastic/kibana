@@ -235,6 +235,7 @@ describe('useAllCasesQueryParams', () => {
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },
+        extendedFieldFilters: [],
         from: DEFAULT_FROM_DATE,
         to: DEFAULT_TO_DATE,
       },
