@@ -18,7 +18,7 @@ import {
   METRIC_SOURCE_KIND,
   useMetricSourceKind,
   type MetricSourceKind,
-} from '../../../hooks/use_metric_source_kind';
+} from '../hooks/use_metric_source_kind';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -32,8 +32,8 @@ jest.mock('../../../common/utils', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_metric_source_kind', () => {
-  const actual = jest.requireActual('../../../hooks/use_metric_source_kind');
+jest.mock('../hooks/use_metric_source_kind', () => {
+  const actual = jest.requireActual('../hooks/use_metric_source_kind');
   return {
     ...actual,
     useMetricSourceKind: jest.fn(),

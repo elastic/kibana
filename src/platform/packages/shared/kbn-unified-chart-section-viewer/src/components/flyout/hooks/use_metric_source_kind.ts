@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import { useExternalServices } from '../context/external_services';
+import { useExternalServices } from '../../../context/external_services';
 
 /**
  * Source kinds the metrics flyout knows about. `INDEX` doubles as the tag key

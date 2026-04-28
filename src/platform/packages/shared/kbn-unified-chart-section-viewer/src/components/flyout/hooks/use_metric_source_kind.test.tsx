@@ -9,14 +9,14 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
-import { useExternalServices } from '../context/external_services';
+import { useExternalServices } from '../../../context/external_services';
 import {
   METRIC_SOURCE_KIND,
   resetMetricSourceKindCache,
   useMetricSourceKind,
 } from './use_metric_source_kind';
 
-jest.mock('../context/external_services', () => ({
+jest.mock('../../../context/external_services', () => ({
   useExternalServices: jest.fn(),
 }));
 

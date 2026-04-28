@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { useStreamsFlyoutRenderer } from '../../../hooks/use_streams_flyout_renderer';
+import { useStreamsFlyoutRenderer } from '../hooks/use_streams_flyout_renderer';
 
 interface StreamFieldSectionProps {
   sourceName: string | undefined;

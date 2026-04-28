@@ -27,8 +27,8 @@ import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { StreamFieldSection } from './stream_field_section';
-import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../../../hooks/use_metric_source_kind';
-import { useStreamsFlyoutRenderer } from '../../../hooks/use_streams_flyout_renderer';
+import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
+import { useStreamsFlyoutRenderer } from '../hooks/use_streams_flyout_renderer';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;

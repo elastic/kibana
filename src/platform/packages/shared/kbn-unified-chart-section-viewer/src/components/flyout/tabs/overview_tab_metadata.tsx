@@ -15,7 +15,7 @@ import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
 import type { ParsedMetricItem } from '../../../types';
 import { BadgeGroup, MetricTypeBadge } from '../components';
-import { METRIC_SOURCE_KIND, type MetricSourceKind } from '../../../hooks/use_metric_source_kind';
+import { METRIC_SOURCE_KIND, type MetricSourceKind } from '../hooks/use_metric_source_kind';
 
 const SOURCE_LABEL: Record<MetricSourceKind, string> = {
   [METRIC_SOURCE_KIND.INDEX]: i18n.translate('metricsExperience.overviewTab.strong.indexLabel', {

@@ -14,7 +14,7 @@ import type { ParsedMetricItem } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 import { OverviewTabMetadata } from './overview_tab_metadata';
-import { METRIC_SOURCE_KIND } from '../../../hooks/use_metric_source_kind';
+import { METRIC_SOURCE_KIND } from '../hooks/use_metric_source_kind';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {

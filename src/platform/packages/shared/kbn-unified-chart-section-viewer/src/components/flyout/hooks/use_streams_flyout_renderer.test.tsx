@@ -9,10 +9,10 @@
 
 import { renderHook } from '@testing-library/react';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import { useExternalServices } from '../context/external_services';
+import { useExternalServices } from '../../../context/external_services';
 import { useStreamsFlyoutRenderer } from './use_streams_flyout_renderer';
 
-jest.mock('../context/external_services', () => ({
+jest.mock('../../../context/external_services', () => ({
   useExternalServices: jest.fn(),
 }));
 

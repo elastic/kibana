@@ -8,7 +8,7 @@
  */
 
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
-import { useExternalServices } from '../context/external_services';
+import { useExternalServices } from '../../../context/external_services';
 
 const STREAMS_FEATURE_ID = 'streams' as const;
 

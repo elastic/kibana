@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useStreamsFlyoutRenderer } from '../../../hooks/use_streams_flyout_renderer';
+import { useStreamsFlyoutRenderer } from '../hooks/use_streams_flyout_renderer';
 import { StreamFieldSection } from './stream_field_section';
 
-jest.mock('../../../hooks/use_streams_flyout_renderer', () => ({
+jest.mock('../hooks/use_streams_flyout_renderer', () => ({
   useStreamsFlyoutRenderer: jest.fn(),
 }));
 
