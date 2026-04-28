@@ -114,8 +114,7 @@ export class SemanticLayerPlugin
       checkItemsAccess: smlService.checkItemsAccess,
       getDocuments: smlService.getDocuments,
       getTypeDefinition: smlService.getTypeDefinition,
-      resolveSmlAttachItems: (params) =>
-        resolveSmlAttachItems({ ...params, sml: smlService }),
+      resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: async (params) => {
         const typeDef = smlService.getTypeDefinition(params.attachmentType);
         const soClient = savedObjects.getScopedClient(params.request, {

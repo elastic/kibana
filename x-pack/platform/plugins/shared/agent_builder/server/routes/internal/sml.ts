@@ -65,10 +65,8 @@ export function registerInternalSmlRoutes({
     },
     wrapHandler(
       async (ctx, request, response) => {
-        const {
-          conversations: conversationsService,
-          attachments: attachmentsService,
-        } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const semanticLayer = startDeps.semanticLayer;

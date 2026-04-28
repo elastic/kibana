@@ -51,7 +51,11 @@ describe('createSmlAttachTool', () => {
 
   it('returns error result when resolveSmlAttachItems reports access denied', async () => {
     mockResolveSmlAttachItems.mockResolvedValue([
-      { success: false, chunk_id: 'chunk-1', message: 'Access denied: you do not have the required permissions' },
+      {
+        success: false,
+        chunk_id: 'chunk-1',
+        message: 'Access denied: you do not have the required permissions',
+      },
     ]);
     const tool = createSmlAttachTool({ getSemanticLayer });
     const result = (await tool.handler(
@@ -65,7 +69,11 @@ describe('createSmlAttachTool', () => {
 
   it('returns error result when resolveSmlAttachItems reports document not found', async () => {
     mockResolveSmlAttachItems.mockResolvedValue([
-      { success: false, chunk_id: 'chunk-1', message: "SML document 'chunk-1' not found in the index" },
+      {
+        success: false,
+        chunk_id: 'chunk-1',
+        message: "SML document 'chunk-1' not found in the index",
+      },
     ]);
     const tool = createSmlAttachTool({ getSemanticLayer });
     const result = (await tool.handler(
@@ -82,7 +90,12 @@ describe('createSmlAttachTool', () => {
       {
         success: true,
         chunk_id: 'chunk-1',
-        attachment: { type: 'visualization', data: { layers: [] }, origin: 'ref-1', description: 'visualization/Test' },
+        attachment: {
+          type: 'visualization',
+          data: { layers: [] },
+          origin: 'ref-1',
+          description: 'visualization/Test',
+        },
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-123' });
@@ -94,7 +107,11 @@ describe('createSmlAttachTool', () => {
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
     const successData = (
-      result.results[0] as OtherResult<{ success: boolean; attachment_id: string; attachment_type: string }>
+      result.results[0] as OtherResult<{
+        success: boolean;
+        attachment_id: string;
+        attachment_type: string;
+      }>
     ).data;
     expect(successData.success).toBe(true);
     expect(successData.attachment_id).toBe('att-123');

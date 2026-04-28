@@ -176,8 +176,6 @@ describe('registerSearchRoute', () => {
   it('propagates errors from sml.search', async () => {
     mockSmlService.search.mockRejectedValue(new Error('ES connection failed'));
     await expect(callHandler({ query: 'test' })).rejects.toThrow('ES connection failed');
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('ES connection failed')
-    );
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES connection failed'));
   });
 });

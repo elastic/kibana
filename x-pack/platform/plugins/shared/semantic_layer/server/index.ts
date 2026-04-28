@@ -14,10 +14,7 @@ import type {
 } from './types';
 import { SemanticLayerPlugin } from './plugin';
 
-export type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-} from './types';
+export type { SemanticLayerPluginSetup, SemanticLayerPluginStart } from './types';
 
 export type {
   SmlTypeDefinition,

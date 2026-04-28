@@ -312,9 +312,7 @@ export class AgentBuilderPlugin
    *
    * TODO: Remove in 9.6.0 once all deployments have been upgraded past this version.
    */
-  private async cleanupLegacySmlTasks(
-    taskManager: AgentBuilderStartDependencies['taskManager']
-  ) {
+  private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
     const logger = this.logger.get('sml-migration');
     const legacyTaskIds = [
       'agent_builder:sml_crawler:visualization',

@@ -50,7 +50,9 @@ export const createSmlSearchTool = ({
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      const enabled = await uiSettings.get<boolean>(
+        SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+      );
       return enabled
         ? { status: 'available' }
         : {
