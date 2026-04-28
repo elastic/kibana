@@ -250,4 +250,83 @@ describe('useDefaultModelSettings', () => {
     expect(result.current.isDirty).toBe(false);
     expect(result.current.state.enableAi).toBe(true);
   });
+
+  it('save() calls addDanger and leaves isDirty true when settingsClient.set throws', async () => {
+    const settingsClient = buildSettingsClient({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'pre-1',
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+    });
+    const notifications = buildNotifications();
+    settingsClient.set.mockRejectedValueOnce(new Error('Network error'));
+    mockUseKibana.mockReturnValue({
+      services: { settings: { client: settingsClient }, notifications },
+    });
+
+    const { result } = renderHook(() => useDefaultModelSettings());
+
+    act(() => {
+      result.current.setEnableAi(false);
+    });
+
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(result.current.isDirty).toBe(true);
+  });
+
+  it('save() with FSM on writes NO_DEFAULT_MODEL when the global default is cleared', async () => {
+    const settingsClient = buildSettingsClient({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'pre-1',
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+    });
+    const notifications = buildNotifications();
+    mockUseKibana.mockReturnValue({
+      services: { settings: { client: settingsClient }, notifications },
+    });
+
+    const { result } = renderHook(() => useDefaultModelSettings());
+
+    act(() => {
+      result.current.setDefaultModelId(NO_DEFAULT_MODEL);
+    });
+
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(settingsClient.set).toHaveBeenCalledTimes(1);
+    expect(settingsClient.set).toHaveBeenCalledWith(
+      GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+      NO_DEFAULT_MODEL
+    );
+    expect(result.current.state.enableAi).toBe(true);
+    expect(result.current.state.featureSpecificModels).toBe(true);
+    expect(result.current.isDirty).toBe(false);
+    expect(notifications.toasts.addSuccess).toHaveBeenCalled();
+  });
+
+  it('subscription re-derives savedState when an external settings change fires', async () => {
+    const settingsClient = buildSettingsClient({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'pre-1',
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+    });
+    mockUseKibana.mockReturnValue({
+      services: { settings: { client: settingsClient }, notifications: buildNotifications() },
+    });
+
+    const { result } = renderHook(() => useDefaultModelSettings());
+
+    expect(result.current.isDirty).toBe(false);
+
+    await act(async () => {
+      await settingsClient.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, 'externally-updated');
+    });
+
+    // Local state is unchanged — user has not touched the form.
+    expect(result.current.state.defaultModelId).toBe('pre-1');
+    // savedState was re-derived from the store, so the form now shows as dirty.
+    expect(result.current.isDirty).toBe(true);
+  });
 });

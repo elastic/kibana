@@ -11,16 +11,38 @@ jest.mock('@kbn/i18n', () => ({
   },
 }));
 
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import {
   getGlobalModelComboOptions,
   getGlobalModelSelectedOptions,
 } from './default_model_section_combo';
 
+const baseMockConnector: Pick<
+  InferenceConnector,
+  'type' | 'config' | 'capabilities' | 'isInferenceEndpoint'
+> = {
+  type: InferenceConnectorType.Inference,
+  config: {},
+  capabilities: {},
+  isInferenceEndpoint: true,
+};
+
 describe('default_model_section_combo', () => {
-  const connectors = [
-    { connectorId: 'pre-1', name: 'Elastic Model', isPreconfigured: true },
-    { connectorId: 'custom-1', name: 'My Connector', isPreconfigured: false },
+  const connectors: InferenceConnector[] = [
+    {
+      ...baseMockConnector,
+      connectorId: 'pre-1',
+      name: 'Elastic Model',
+      isPreconfigured: true,
+    },
+    {
+      ...baseMockConnector,
+      connectorId: 'custom-1',
+      name: 'My Connector',
+      isPreconfigured: false,
+    },
   ];
 
   describe('getGlobalModelComboOptions', () => {
@@ -67,6 +89,11 @@ describe('default_model_section_combo', () => {
       expect(getGlobalModelSelectedOptions('pre-1', optsWithNoDefault, true)).toEqual([
         expect.objectContaining({ label: 'Elastic Model', value: 'pre-1' }),
       ]);
+    });
+
+    it('returns empty array when the value does not match any option', () => {
+      const opts = getGlobalModelComboOptions(connectors, true);
+      expect(getGlobalModelSelectedOptions('nonexistent-id', opts, true)).toEqual([]);
     });
   });
 });

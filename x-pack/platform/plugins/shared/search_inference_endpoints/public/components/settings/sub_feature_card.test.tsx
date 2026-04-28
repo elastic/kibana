@@ -289,6 +289,26 @@ describe('SubFeatureCard', () => {
 
       expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1']);
     });
+
+    it('shows a focusable warning indicator for an invalid endpoint in the read-only recommended-defaults list', () => {
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={['ep-1']}
+            effectiveRecommendedEndpoints={['ep-1']}
+            onEndpointsChange={onEndpointsChange}
+            invalidEndpointIds={new Set(['ep-1'])}
+          />
+        </Wrapper>
+      );
+
+      const row = screen.getByTestId('endpoint-row-ep-1');
+      expect(row).toBeInTheDocument();
+      // EuiIconTip renders its inner icon with tabIndex={0}; the normal aria-hidden icon has none.
+      expect(row.querySelector('[tabindex="0"]')).not.toBeNull();
+    });
   });
 
   describe('overflow menu (Copy to)', () => {
@@ -419,6 +439,22 @@ describe('SubFeatureCard', () => {
       fireEvent.click(screen.getByTestId('add-model-button'));
 
       expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1', 'ep-2']);
+    });
+
+    it('clicking remove calls onEndpointsChange without the removed endpoint', () => {
+      renderCard(['ep-1', 'ep-2']);
+
+      fireEvent.click(screen.getByTestId('remove-endpoint-ep-1'));
+
+      expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-2']);
+    });
+
+    it('shows an accessible warning indicator for an invalid endpoint in editable mode', () => {
+      renderCard(['ep-1'], undefined, new Set(['ep-1']));
+
+      expect(
+        screen.getByLabelText('Inference endpoint Claude is no longer available')
+      ).toBeInTheDocument();
     });
   });
 });
