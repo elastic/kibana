@@ -200,7 +200,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       form.getFields().index.reset({
         resetValue: false,
       });
-      form.getFields().dataViewId.reset({
+      form.getFields().dataViewId?.reset({
         resetValue: false,
       });
     },

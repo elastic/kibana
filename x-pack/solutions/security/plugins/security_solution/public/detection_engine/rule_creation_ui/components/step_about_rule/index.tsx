@@ -22,7 +22,7 @@ import type { AboutStepRule, RuleStepProps } from '../../../common/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
-import type { FieldHook, FormHook } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
 import { isUrlInvalid } from '../../../../common/utils/validators';
@@ -142,7 +142,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     (severity: Severity) => {
       const newRiskScoreValue = defaultRiskScoreBySeverity[severity];
       if (newRiskScoreValue != null) {
-        const riskScoreField = getFields().riskScore as FieldHook<AboutStepRule['riskScore']>;
+        const riskScoreField = getFields().riskScore;
         riskScoreField.setValue({ ...riskScoreField.value, value: newRiskScoreValue });
       }
     },
