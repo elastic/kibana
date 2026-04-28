@@ -184,6 +184,7 @@ export function DateRangePickerControl() {
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
+        icon="calendar"
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
@@ -219,7 +220,7 @@ export function DateRangePickerControl() {
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
             compressed={compressed}
-            placeholder={`${hintTextPrefix} ${hintText}`}
+            placeholder={`${hintTextPrefix} "${hintText}"`}
           />
         ) : (
           <EuiToolTip
