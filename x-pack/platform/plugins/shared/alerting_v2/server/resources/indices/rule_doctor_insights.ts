@@ -51,19 +51,40 @@ const insightConfidenceSchema = z.enum(['low', 'medium', 'high']);
 export const ruleDoctorInsightDocSchema = z.object({
   '@timestamp': z.string().describe('ISO 8601 timestamp when the insight was created'),
   insight_id: z.string().min(1).describe('Unique identifier for this insight'),
-  execution_id: z.string().describe('Identifier of the Rule Doctor analysis run that produced this insight'),
+  execution_id: z
+    .string()
+    .describe('Identifier of the Rule Doctor analysis run that produced this insight'),
   status: insightStatusSchema.describe('Current lifecycle status of the insight'),
-  type: z.string().describe('Category of the insight, e.g. duplicate, stale, threshold, coverage_gap'),
-  action: z.string().describe('Recommended remediation action, e.g. merge, disable, adjust_threshold'),
+  type: z
+    .string()
+    .describe('Category of the insight, e.g. duplicate, stale, threshold, coverage_gap'),
+  action: z
+    .string()
+    .describe('Recommended remediation action, e.g. merge, disable, adjust_threshold'),
   impact: insightImpactSchema.describe('Estimated severity if the insight is left unaddressed'),
   confidence: insightConfidenceSchema.describe('How confident the analysis is in this insight'),
   title: z.string().describe('Short human-readable title summarizing the insight'),
   summary: z.string().describe('Detailed explanation of the insight'),
-  justification: z.string().describe('Reasoning for why this insight was raised and the proposed action'),
-  rule_ids: z.array(z.string()).optional().default([]).describe('IDs of the alerting rules involved'),
-  data: z.record(z.string(), z.any()).optional().describe('Arbitrary structured data supporting the insight'),
-  current: z.record(z.string(), z.unknown()).nullable().describe('Current rule configuration snapshot'),
-  proposed: z.record(z.string(), z.unknown()).nullable().describe('Proposed rule configuration after applying the action'),
+  justification: z
+    .string()
+    .describe('Reasoning for why this insight was raised and the proposed action'),
+  rule_ids: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('IDs of the alerting rules involved'),
+  data: z
+    .record(z.string(), z.any())
+    .optional()
+    .describe('Arbitrary structured data supporting the insight'),
+  current: z
+    .record(z.string(), z.unknown())
+    .nullable()
+    .describe('Current rule configuration snapshot'),
+  proposed: z
+    .record(z.string(), z.unknown())
+    .nullable()
+    .describe('Proposed rule configuration after applying the action'),
   diffs: z
     .array(
       z.object({

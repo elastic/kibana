@@ -41,7 +41,9 @@ export class InsightsCleanupTaskRunner {
       const deleted = response.deleted ?? 0;
 
       if (deleted > 0) {
-        this.logger.debug(`Cleaned up ${deleted} stale insights from ${RULE_DOCTOR_INSIGHTS_INDEX}`);
+        this.logger.debug(
+          `Cleaned up ${deleted} stale insights from ${RULE_DOCTOR_INSIGHTS_INDEX}`
+        );
       } else {
         this.logger.debug('No stale insights to clean up');
       }
