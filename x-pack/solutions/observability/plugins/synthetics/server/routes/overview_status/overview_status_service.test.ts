@@ -736,15 +736,15 @@ describe('current status route', () => {
       expect(result.upConfigs.mon1).toBeUndefined();
       expect(result.downConfigs.mon1.overallStatus).toBe('down');
       expect(result.downConfigs.mon1.locations).toHaveLength(3);
-      expect(
-        result.downConfigs.mon1.locations.find((l: any) => l.id === usLoc.id)?.status
-      ).toBe('up');
-      expect(
-        result.downConfigs.mon1.locations.find((l: any) => l.id === euLoc.id)?.status
-      ).toBe('down');
-      expect(
-        result.downConfigs.mon1.locations.find((l: any) => l.id === apLoc.id)?.status
-      ).toBe('pending');
+      expect(result.downConfigs.mon1.locations.find((l: any) => l.id === usLoc.id)?.status).toBe(
+        'up'
+      );
+      expect(result.downConfigs.mon1.locations.find((l: any) => l.id === euLoc.id)?.status).toBe(
+        'down'
+      );
+      expect(result.downConfigs.mon1.locations.find((l: any) => l.id === apLoc.id)?.status).toBe(
+        'pending'
+      );
     });
   });
 
