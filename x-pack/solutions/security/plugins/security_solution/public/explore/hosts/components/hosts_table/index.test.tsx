@@ -45,9 +45,9 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openRightPanel: mockOpenRightPanel })),
+  useExpandableFlyoutApi: jest.fn(() => ({ openFlyout: mockOpenFlyout })),
 }));
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
@@ -65,7 +65,7 @@ describe('Hosts Table', () => {
   const store = createMockStore();
 
   beforeEach(() => {
-    mockOpenRightPanel.mockClear();
+    mockOpenFlyout.mockClear();
   });
 
   describe('rendering', () => {
@@ -220,14 +220,16 @@ describe('Hosts Table', () => {
 
       fireEvent.click(screen.getByTestId('host-details-button'));
 
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          entityId,
-          contextID: 'allHosts',
-          scopeId: 'allHosts',
-          isPreviewMode: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            entityId,
+            contextID: 'allHosts',
+            scopeId: 'allHosts',
+            isPreviewMode: false,
+          },
         },
       });
     });
@@ -252,7 +254,7 @@ describe('Hosts Table', () => {
 
       fireEvent.click(screen.getByTestId('host-details-button'));
 
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
 
     describe('Sorting on Table', () => {
