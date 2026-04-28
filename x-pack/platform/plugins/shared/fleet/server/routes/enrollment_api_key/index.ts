@@ -177,7 +177,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet enrollment API keys'],
         availability: {
-          stability: ’stable',
+          stability: 'stable',
           since: '9.5.0',
         },
       },
