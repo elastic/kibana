@@ -27,10 +27,7 @@ const splitPath = (path: string) => {
 describe('getPathForServiceDetail', () => {
   it('throws when the payload does not match any union branch', () => {
     expect(() =>
-      getPathForServiceDetail(
-        { serviceName: 123 } as unknown as APMLocatorPayload,
-        defaultOptions
-      )
+      getPathForServiceDetail({ serviceName: 123 } as unknown as APMLocatorPayload, defaultOptions)
     ).toThrow();
   });
 

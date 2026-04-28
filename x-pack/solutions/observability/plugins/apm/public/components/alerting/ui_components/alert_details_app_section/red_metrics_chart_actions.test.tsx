@@ -232,7 +232,6 @@ describe('RedMetricsChartActions', () => {
         })
       );
     });
-
   });
 
   describe('Traces in Discover action', () => {
