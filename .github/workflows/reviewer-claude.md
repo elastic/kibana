@@ -36,9 +36,13 @@ if: >-
       contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
       !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
       (
-        github.event_name == 'pull_request' ||
+        (
+          github.event_name == 'pull_request' &&
+          contains(fromJSON('["OWNER","MEMBER"]'), github.event.pull_request.author_association)
+        ) ||
         (
           contains(github.event.comment.body, '@claude') &&
+          contains(fromJSON('["OWNER","MEMBER"]'), github.event.comment.author_association) &&
           (
             github.event_name == 'pull_request_review_comment' ||
             (
