@@ -34,7 +34,15 @@
             "tags": [],
             "label": "projectRouting",
             "description": [
-              "\nControls how `project_routing` is automatically injected into Elasticsearch requests made\nthrough the scoped client.\n\n- `'space'`: Routes requests to the Named Project Routing Expression (NPRE) configured for\n  the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`\n  so that the space can be extracted from the URL pathname. Use this when the scope of the\n  query should match the data boundaries of the active space (e.g. alerting rules)."
+              "\nControls how `project_routing` is automatically injected into Elasticsearch requests made\nthrough the scoped client.\n\n- `'space'`: Routes requests to the Named Project Routing Expression (NPRE) configured for\n  the current Kibana space. Requires a ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ScopeableUrlRequest",
+                "text": "ScopeableUrlRequest"
+              },
+              " to be passed to `asScoped`\n  so that the space can be extracted from the URL pathname. Use this when the scope of the\n  query should match the data boundaries of the active space (e.g. alerting rules)."
             ],
             "signature": [
               "\"space\""
@@ -142,7 +150,15 @@
         "tags": [],
         "label": "ElasticsearchClientConfig",
         "description": [
-          "\nConfiguration options to be used to create a {@link IClusterClient | cluster client}\n"
+          "\nConfiguration options to be used to create a ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.IClusterClient",
+            "text": "cluster client"
+          },
+          "\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
         "lineNumber": 30,
@@ -652,7 +668,15 @@
             "tags": [],
             "label": "client",
             "description": [
-              "\nA pre-scoped {@link IScopedClusterClient} for the current request using origin-only routing."
+              "\nA pre-scoped ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
+              " for the current request using origin-only routing."
             ],
             "signature": [
               "IScopedClusterClient"
@@ -737,7 +761,15 @@
             "tags": [],
             "label": "createClient",
             "description": [
-              "\nCreate application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.\n"
+              "\nCreate application specific Elasticsearch cluster API client with customized config. See ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IClusterClient",
+                "text": "IClusterClient"
+              },
+              ".\n"
             ],
             "signature": [
               "(type: string, clientConfig?: Partial<",
@@ -788,6 +820,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -817,7 +850,15 @@
             "tags": [],
             "label": "setUnauthorizedErrorHandler",
             "description": [
-              "\nRegister a handler that will be called when unauthorized (401) errors are returned from any API\ncall to elasticsearch performed on behalf of a user via a {@link IScopedClusterClient | scoped cluster client}.\n"
+              "\nRegister a handler that will be called when unauthorized (401) errors are returned from any API\ncall to elasticsearch performed on behalf of a user via a ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "scoped cluster client"
+              },
+              ".\n"
             ],
             "signature": [
               "(handler: ",
@@ -844,6 +885,7 @@
                 "lineNumber": 81,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnauthorizedErrorHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -943,7 +985,15 @@
             "tags": [],
             "label": "client",
             "description": [
-              "\nA pre-configured {@link IClusterClient | Elasticsearch client}\n"
+              "\nA pre-configured ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IClusterClient",
+                "text": "Elasticsearch client"
+              },
+              "\n"
             ],
             "signature": [
               "IClusterClient"
@@ -961,7 +1011,15 @@
             "tags": [],
             "label": "createClient",
             "description": [
-              "\nCreate application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.\n"
+              "\nCreate application specific Elasticsearch cluster API client with customized config. See ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IClusterClient",
+                "text": "IClusterClient"
+              },
+              ".\n"
             ],
             "signature": [
               "(type: string, clientConfig?: Partial<",
@@ -1012,6 +1070,7 @@
                 "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1227,7 +1286,15 @@
             "tags": [],
             "label": "asInternalUser",
             "description": [
-              "\nA {@link ElasticsearchClient | client} used to query the Elasticsearch cluster on behalf of\nthe Kibana internal user. Intended primarily for administrative and infrastructure-level\noperations (e.g., index management, bootstrapping, health checks) rather than user-facing\ndata queries.\n\nIn CPS-enabled Serverless environments, requests made through this client are always bound\nto `'origin-only'` routing - they will never fan out to other CPS-connected projects."
+              "\nA ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "client"
+              },
+              " used to query the Elasticsearch cluster on behalf of\nthe Kibana internal user. Intended primarily for administrative and infrastructure-level\noperations (e.g., index management, bootstrapping, health checks) rather than user-facing\ndata queries.\n\nIn CPS-enabled Serverless environments, requests made through this client are always bound\nto `'origin-only'` routing - they will never fan out to other CPS-connected projects."
             ],
             "signature": [
               "{ child: (opts: ",
@@ -2233,7 +2300,23 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch, with CPS space routing.\n\nRequires a {@link ScopeableUrlRequest} so the space id can be extracted from the URL pathname.\n"
+              "\nCreates a ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "scoped cluster client"
+              },
+              " bound to the given request,\nforwarding the request's authentication headers to Elasticsearch, with CPS space routing.\n\nRequires a ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ScopeableUrlRequest",
+                "text": "ScopeableUrlRequest"
+              },
+              " so the space id can be extracted from the URL pathname.\n"
             ],
             "signature": [
               "{ (request: ",
@@ -2270,6 +2353,7 @@
                 "lineNumber": 70,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopeableUrlRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2289,6 +2373,7 @@
                 "lineNumber": 70,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "AsScopedOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2302,7 +2387,15 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch with origin-only routing.\n"
+              "\nCreates a ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "scoped cluster client"
+              },
+              " bound to the given request,\nforwarding the request's authentication headers to Elasticsearch with origin-only routing.\n"
             ],
             "signature": [
               "{ (request: ",
@@ -2339,6 +2432,7 @@
                 "lineNumber": 77,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopeableRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2355,7 +2449,15 @@
         "tags": [],
         "label": "ICustomClusterClient",
         "description": [
-          "\nSee {@link IClusterClient}\n"
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.IClusterClient",
+            "text": "IClusterClient"
+          },
+          "\n"
         ],
         "signature": [
           "ICustomClusterClient",
@@ -2823,7 +2925,15 @@
         "tags": [],
         "label": "IScopedClusterClient",
         "description": [
-          "\nServes the same purpose as the normal {@link IClusterClient | cluster client} but exposes\nan additional `asCurrentUser` method that doesn't use credentials of the Kibana internal\nuser (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers\nextracted from the current user request to the API instead.\n"
+          "\nServes the same purpose as the normal ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.IClusterClient",
+            "text": "cluster client"
+          },
+          " but exposes\nan additional `asCurrentUser` method that doesn't use credentials of the Kibana internal\nuser (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers\nextracted from the current user request to the API instead.\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts",
         "lineNumber": 12,
@@ -2838,7 +2948,15 @@
             "tags": [],
             "label": "asInternalUser",
             "description": [
-              "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
+              "\nA ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "client"
+              },
+              " to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
               "{ child: (opts: ",
@@ -3844,7 +3962,15 @@
             "tags": [],
             "label": "asSecondaryAuthUser",
             "description": [
-              "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\nwith the internal Kibana user as primary auth and the current user as secondary auth\n(using the `es-secondary-authorization` header).\n\nNote that only a subset of Elasticsearch APIs support secondary authentication, and that only those endpoints\nshould be called with this client."
+              "\nA ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "client"
+              },
+              " to be used to query the elasticsearch cluster\nwith the internal Kibana user as primary auth and the current user as secondary auth\n(using the `es-secondary-authorization` header).\n\nNote that only a subset of Elasticsearch APIs support secondary authentication, and that only those endpoints\nshould be called with this client."
             ],
             "signature": [
               "{ child: (opts: ",
@@ -4850,7 +4976,15 @@
             "tags": [],
             "label": "asCurrentUser",
             "description": [
-              "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
+              "\nA ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "client"
+              },
+              " to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
               "{ child: (opts: ",
@@ -6010,7 +6144,15 @@
         "tags": [],
         "label": "UnauthorizedErrorHandlerToolkit",
         "description": [
-          "\nToolkit passed to a {@link UnauthorizedErrorHandler} used to generate responses from the handler"
+          "\nToolkit passed to a ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.UnauthorizedErrorHandler",
+            "text": "UnauthorizedErrorHandler"
+          },
+          " used to generate responses from the handler"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
         "lineNumber": 51,
@@ -6074,6 +6216,7 @@
                 "lineNumber": 63,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnauthorizedErrorHandlerResultRetryParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6090,7 +6233,31 @@
         "tags": [],
         "label": "UrlRequest",
         "description": [
-          "\nA minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in\nnon-HTTP contexts - for example, background tasks or scheduled jobs - where no real\n{@link KibanaRequest} is available. The space is derived from the URL pathname\n(e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.\n\nIn route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies\n{@link ScopeableUrlRequest} without needing this type."
+          "\nA minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in\nnon-HTTP contexts - for example, background tasks or scheduled jobs - where no real\n",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          " is available. The space is derived from the URL pathname\n(e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.\n\nIn route handlers, pass the incoming ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          " directly - it already satisfies\n",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ScopeableUrlRequest",
+            "text": "ScopeableUrlRequest"
+          },
+          " without needing this type."
         ],
         "signature": [
           "UrlRequest",
@@ -7162,7 +7329,39 @@
         "tags": [],
         "label": "ScopeableUrlRequest",
         "description": [
-          "\nA request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.\n\nCovers both {@link KibanaRequest} (the typical caller from route handlers) and\n{@link UrlRequest} (a lightweight synthetic alternative). Space resolution uses\n`getSpaceNPRE` from `@kbn/cps-server-utils`: for {@link KibanaRequest}, when\n`rewrittenUrl` is set (original URL before the first pre-routing `rewriteUrl`), that URL is\npreferred over `url` so the space segment remains visible after Spaces strips `/s/:spaceId`\nfrom `request.url`. Synthetic {@link UrlRequest} values only supply `url`.\n"
+          "\nA request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.\n\nCovers both ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          " (the typical caller from route handlers) and\n",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.UrlRequest",
+            "text": "UrlRequest"
+          },
+          " (a lightweight synthetic alternative). Space resolution uses\n`getSpaceNPRE` from `@kbn/cps-server-utils`: for ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          ", when\n`rewrittenUrl` is set (original URL before the first pre-routing `rewriteUrl`), that URL is\npreferred over `url` so the space segment remains visible after Spaces strips `/s/:spaceId`\nfrom `request.url`. Synthetic ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.UrlRequest",
+            "text": "UrlRequest"
+          },
+          " values only supply `url`.\n"
         ],
         "signature": [
           "KibanaRequest",
@@ -7223,6 +7422,7 @@
             "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnauthorizedErrorHandlerOptions",
             "trackAdoption": false
           },
           {
@@ -7239,6 +7439,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnauthorizedErrorHandlerToolkit",
             "trackAdoption": false
           }
         ],

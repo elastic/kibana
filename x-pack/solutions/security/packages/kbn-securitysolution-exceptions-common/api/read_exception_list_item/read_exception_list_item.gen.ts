@@ -33,6 +33,11 @@ export const ReadExceptionListItemRequestQuery = lazySchema(() =>
      * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified.
      */
     item_id: ExceptionListItemHumanId.optional(),
+    /**
+      * `single` fetches the item in the current space; `agnostic` fetches a global (space-agnostic) item. Must
+match how the list was created.
+
+      */
     namespace_type: ExceptionNamespaceType.optional().default('single'),
   })
 );
