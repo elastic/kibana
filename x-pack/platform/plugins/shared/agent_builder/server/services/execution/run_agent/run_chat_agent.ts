@@ -14,6 +14,7 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   agentBuilderDefaultAgentId,
@@ -192,7 +193,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
-      tools: browserApiTools ?? [],
+      tools: (browserApiTools ?? []).map((tool) => ({ ...tool, origin: ToolOrigin.internal })),
     }),
   ]);
 
@@ -211,8 +212,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     await toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: [
-        builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
-        builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+        {
+          ...builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
+        {
+          ...builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
       ],
       logger,
     });

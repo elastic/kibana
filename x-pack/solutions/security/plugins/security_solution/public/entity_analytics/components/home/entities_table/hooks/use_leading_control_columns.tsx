@@ -59,7 +59,7 @@ export const useLeadingControlColumns = ({
               iconType="timeline"
               label={i18n.translate(
                 'xpack.securitySolution.entityAnalytics.entitiesTable.investigateInTimeline',
-                { defaultMessage: 'Investigate in timeline' }
+                { defaultMessage: 'Investigate in Timeline' }
               )}
               color="text"
               onClick={() => {

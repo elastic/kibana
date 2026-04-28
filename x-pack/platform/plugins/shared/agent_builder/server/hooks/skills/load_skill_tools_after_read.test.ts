@@ -16,7 +16,7 @@ import type {
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ToolType } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
 import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
@@ -197,7 +197,7 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         {
           type: ToolManagerToolType.executable,
-          tools: [convertedTool],
+          tools: [{ ...convertedTool, origin: ToolOrigin.inline }],
           logger: toolHandlerContext.logger,
         },
         { dynamic: true }
@@ -223,7 +223,7 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         expect.objectContaining({
           type: ToolManagerToolType.executable,
-          tools: expect.arrayContaining([registryTool]),
+          tools: expect.arrayContaining([{ ...registryTool, origin: ToolOrigin.registry }]),
         }),
         { dynamic: true }
       );
@@ -251,7 +251,10 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         {
           type: ToolManagerToolType.executable,
-          tools: [convertedInline, registryTool],
+          tools: [
+            { ...convertedInline, origin: ToolOrigin.inline },
+            { ...registryTool, origin: ToolOrigin.registry },
+          ],
           logger: toolHandlerContext.logger,
         },
         { dynamic: true }

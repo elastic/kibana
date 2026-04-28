@@ -145,6 +145,7 @@
             "lineNumber": 26,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DynamicRuleFormProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -198,6 +199,7 @@
             "lineNumber": 44,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "DynamicRuleFormFlyoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -244,6 +246,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -288,6 +291,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -332,6 +336,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -383,6 +388,7 @@
             "lineNumber": 211,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "FormValues",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -443,6 +449,7 @@
             "lineNumber": 190,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "FormValues",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -496,6 +503,7 @@
             "lineNumber": 221,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "FormValues",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -543,6 +551,7 @@
             "lineNumber": 244,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleResponse",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -614,6 +623,7 @@
             "lineNumber": 45,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "PropsWithChildren",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -684,6 +694,7 @@
             "lineNumber": 32,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "StandaloneRuleFormProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -737,6 +748,7 @@
             "lineNumber": 51,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "StandaloneRuleFormFlyoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1016,6 +1028,7 @@
                 "lineNumber": 27,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormValues",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1965,6 +1978,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormValues",
                 "trackAdoption": false,
                 "isRequired": true
               }

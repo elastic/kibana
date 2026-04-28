@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
-import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
 import type {
   ToolProvider,
   ExecutableTool,
@@ -17,6 +17,7 @@ import type {
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
+import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -28,6 +29,11 @@ import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { getStoreTools } from '../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
+
+export interface SelectToolsResult {
+  staticTools: ExecutableToolWithOrigin[];
+  dynamicTools: ExecutableToolWithOrigin[];
+}
 
 export const selectTools = async ({
   conversation,
@@ -57,7 +63,7 @@ export const selectTools = async ({
   runner: ScopedRunner;
   experimentalFeatures: ExperimentalFeatures;
   todoStateManager: TodoStateManager;
-}) => {
+}): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
   // create tool selection for attachments types
@@ -103,14 +109,14 @@ export const selectTools = async ({
   });
 
   const staticTools = [
-    ...versionedAttachmentBoundTools,
-    ...versionedAttachmentTools,
-    ...staticRegistryTools,
-    ...filestoreTools,
-    ...todoTools,
+    ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
+    ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
+    ...withOrigin(staticRegistryTools, ToolOrigin.registry),
+    ...withOrigin(filestoreTools, ToolOrigin.internal),
+    ...withOrigin(todoTools, ToolOrigin.internal),
   ];
 
-  const dedupedStaticTools = new Map<string, ExecutableTool>();
+  const dedupedStaticTools = new Map<string, ExecutableToolWithOrigin>();
   for (const tool of staticTools) {
     dedupedStaticTools.set(tool.id, tool);
   }
@@ -136,9 +142,15 @@ export const selectTools = async ({
 
   return {
     staticTools: [...dedupedStaticTools.values()],
-    dynamicTools: [...dynamicRegistryTools, ...dynamicInlineTools],
+    dynamicTools: [
+      ...withOrigin(dynamicRegistryTools, ToolOrigin.registry),
+      ...withOrigin(dynamicInlineTools, ToolOrigin.inline),
+    ],
   };
 };
+
+const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableToolWithOrigin[] =>
+  tools.map((tool) => ({ ...tool, origin }));
 
 /**
  * Creates executable tools for managing versioned conversation attachments.
