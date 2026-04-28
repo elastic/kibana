@@ -11,13 +11,10 @@ import type { DashboardState, Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
-
-type DashboardStateValidator = Readonly<{
-  validate: (dashboardState: unknown) => DashboardState;
-}>;
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function sanitize(
-  dashboardStateSchema: DashboardStateValidator,
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
