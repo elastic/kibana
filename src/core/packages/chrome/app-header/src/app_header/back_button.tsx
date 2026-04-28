@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useBackButton } from './hooks';
+import type { BackNavigation } from './hooks';
 
 const backLabel = i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabel', {
   defaultMessage: 'Back',
@@ -42,9 +42,12 @@ const useBackButtonStyles = () => {
   }, [euiTheme]);
 };
 
-export const BackButton = React.memo(() => {
+export interface BackButtonProps {
+  targets: BackNavigation[];
+}
+
+export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
   const styles = useBackButtonStyles();
-  const targets = useBackButton();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -67,14 +70,17 @@ export const BackButton = React.memo(() => {
       size="xs"
       css={styles.button}
       aria-label={tooltip}
-      data-test-subj="chromeNextAppHeaderBack"
-      {...(targets.length > 1 ? { onClick: togglePopover } : { href: primary.backHref })}
+      data-test-subj="appHeaderBack"
+      {...(targets.length > 1
+        ? { onClick: togglePopover }
+        : { href: primary.backHref, onClick: primary.backOnClick })}
     />
   );
 
   if (targets.length > 1) {
     return (
       <EuiPopover
+        aria-label={tooltip}
         button={
           <EuiToolTip content={tooltip} delay="long">
             {buttonIcon}
@@ -87,7 +93,12 @@ export const BackButton = React.memo(() => {
       >
         <EuiContextMenuPanel
           items={targets.map((target, idx) => (
-            <EuiContextMenuItem key={idx} href={target.backHref} size="s">
+            <EuiContextMenuItem
+              key={idx}
+              href={target.backHref}
+              onClick={target.backOnClick}
+              size="s"
+            >
               {target.backDestinationLabel ?? target.backHref}
             </EuiContextMenuItem>
           ))}

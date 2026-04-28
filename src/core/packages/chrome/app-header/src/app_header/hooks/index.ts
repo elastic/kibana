@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { useBasePath, useLegacyActionMenu, useHasLegacyActionMenu } from './chrome';
+export { useBackNavTargets } from './use_back_navigation';
+export type { BackNavigation } from './use_back_navigation';
+export { useResolvedBadges } from './use_app_badges';
 export { useAppHeaderMenu, useShareAction } from './use_app_header_menu';
-export { useBackButton } from './use_back_button';
-export { useReportTopBarHeight } from './use_report_top_bar_height';
-export { useTitle } from './use_title';
+export type { ShareAction } from './use_app_header_menu';

@@ -10,30 +10,15 @@
 import type { ReactNode } from 'react';
 import type { ChromeNextAiButton } from './ai_button';
 import type { ChromeNextGlobalSearchConfig } from './global_search';
-import type { ChromeNextHeaderConfig } from './header';
 import type { ChromeNextSpaceSelectorConfig } from './space_selector';
 
 /**
- * Chrome-Next APIs: header configuration, AI button slot, global search, user menu, and space selector.
+ * Chrome-Next APIs: AI button slot, global search, user menu, and space selector.
  * @public
  */
 export interface ChromeNext {
-  header: {
-    /**
-     * Shallow-merge fields into the current Chrome-Next header configuration.
-     * Only provided keys are updated; `undefined` values in the partial are ignored.
-     * Use {@link reset} to clear fields.
-     */
-    set(config: Partial<ChromeNextHeaderConfig>): void;
-
-    /**
-     * Clear Chrome-Next header configuration.
-     * Called with no arguments: clears everything.
-     * Called with key names: clears only those fields.
-     * Automatically called with no arguments on app change.
-     */
-    reset(...keys: Array<keyof ChromeNextHeaderConfig>): void;
-  };
+  /** Whether the Chrome-Next feature flag is enabled. */
+  readonly isEnabled: boolean;
   aiButton: {
     /**
      * Register an AI button for the Chrome-Next header.

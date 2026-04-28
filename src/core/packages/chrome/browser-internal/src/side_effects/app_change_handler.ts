@@ -11,16 +11,12 @@ import type { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs';
 import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 import type { ChromeState } from '../state/chrome_state';
-import type { NextHeaderService } from '../services/next_header';
-
-type NextHeaderStart = ReturnType<NextHeaderService['start']>;
 
 export interface AppChangeHandlerDeps {
   currentAppId$: Observable<string | undefined>;
   stop$: Observable<void>;
   state: ChromeState;
   docTitle: ChromeDocTitle;
-  nextHeader: NextHeaderStart;
 }
 
 /**
@@ -32,7 +28,6 @@ export function setupAppChangeHandler({
   stop$,
   state,
   docTitle,
-  nextHeader,
 }: AppChangeHandlerDeps): void {
   currentAppId$.pipe(takeUntil(stop$)).subscribe(() => {
     // Reset UI elements
@@ -48,8 +43,5 @@ export function setupAppChangeHandler({
 
     // Reset document title
     docTitle.reset();
-
-    // Reset Chrome-Next header config (AI button is global and not cleared here)
-    nextHeader.reset();
   });
 }

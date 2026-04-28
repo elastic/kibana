@@ -32,6 +32,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -39,6 +41,7 @@ import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
   dashboardManagedBadge,
+  dashboardReadonlyBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
   topNavStrings,
@@ -123,6 +126,26 @@ export function InternalDashboardTopNav({
     () => (lastSavedId ? <DashboardFavoriteButton dashboardId={lastSavedId} /> : undefined),
     [lastSavedId]
   );
+
+  const appHeaderBadges = useMemo(() => {
+    const result: AppHeaderBadge[] = [];
+    const { showWriteControls } = getDashboardCapabilities();
+    if (!showWriteControls) {
+      result.push({
+        label: dashboardReadonlyBadge.getText(),
+        color: 'warning',
+        tooltip: dashboardReadonlyBadge.getTooltip(),
+      });
+    }
+    if (showWriteControls && dashboardApi.isManaged) {
+      result.push({
+        label: getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()).badgeText,
+        color: 'primary',
+        tooltip: dashboardManagedBadge.getBadgeAriaLabel(),
+      });
+    }
+    return result.length > 0 ? result : undefined;
+  }, [dashboardApi.isManaged]);
 
   const hasUnpublishedFilters = useMemo(() => {
     return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
@@ -312,18 +335,6 @@ export function InternalDashboardTopNav({
     showResetChange,
   });
 
-  useEffect(() => {
-    coreServices.chrome.next.header.set({
-      title: title ?? '',
-      ...(chromeNextHeaderFavoriteGlobalAction
-        ? { globalActions: { favorite: chromeNextHeaderFavoriteGlobalAction } }
-        : {}),
-    });
-    return () => {
-      coreServices.chrome.next.header.reset();
-    };
-  }, [title, chromeNextHeaderFavoriteGlobalAction]);
-
   UseUnmount(() => {
     dashboardApi.clearOverlays();
   });
@@ -393,61 +404,80 @@ export function InternalDashboardTopNav({
     });
   }, [lastSavedId]);
 
+  const appMenuConfig = visibilityProps.showTopNavMenu
+    ? viewMode === 'edit'
+      ? editModeTopNavConfig
+      : viewModeTopNavConfig
+    : undefined;
+
   return (
-    <div css={styles.container}>
-      <EuiScreenReaderOnly>
-        <h1
-          id="dashboardTitle"
-          ref={dashboardTitleRef}
-        >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
-      </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
-        }
-      />
-      {viewMode !== 'print' && visibilityProps.showSearchBar && (
-        <unifiedSearchService.ui.SearchBar
-          {...visibilityProps}
-          query={query as Query | undefined}
-          screenTitle={title}
-          useDefaultBehaviors={true}
-          savedQueryId={savedQueryId}
-          indexPatterns={allDataViews ?? []}
-          allowSavingQueries
-          enableDateRangePicker
-          appName={DASHBOARD_APP_ID}
-          onQuerySubmit={(_payload, isUpdate) => {
-            if (isUpdate === false) {
-              dashboardApi.forceRefresh();
-            }
-            if (hasUnpublishedFilters) dashboardApi.publishFilters();
-            if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
-            if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
-          }}
-          onSavedQueryIdChange={setSavedQueryId}
-          hasDirtyState={
-            hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
-          }
-          useBackgroundSearchButton={
-            dataService.search.isBackgroundSearchEnabled &&
-            getDashboardCapabilities().storeSearchSession
-          }
+    <>
+      {visibilityProps.showTopNavMenu && viewMode !== 'print' && (
+        <AppHeader
+          title={dashboardTitle}
+          back="/app/dashboards#/list"
+          menu={appMenuConfig}
+          badges={appHeaderBadges}
+          favorite={chromeNextHeaderFavoriteGlobalAction}
+          fallback={null}
+          sticky
         />
       )}
-      {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-      ) : null}
+      <div css={styles.container}>
+        <EuiScreenReaderOnly>
+          <h1
+            id="dashboardTitle"
+            ref={dashboardTitleRef}
+          >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+        </EuiScreenReaderOnly>
+        <AppMenu
+          setAppMenu={coreServices.chrome.setAppMenu}
+          config={
+            visibilityProps.showTopNavMenu
+              ? viewMode === 'edit'
+                ? editModeTopNavConfig
+                : viewModeTopNavConfig
+              : undefined
+          }
+        />
+        {viewMode !== 'print' && visibilityProps.showSearchBar && (
+          <unifiedSearchService.ui.SearchBar
+            {...visibilityProps}
+            query={query as Query | undefined}
+            screenTitle={title}
+            useDefaultBehaviors={true}
+            savedQueryId={savedQueryId}
+            indexPatterns={allDataViews ?? []}
+            allowSavingQueries
+            enableDateRangePicker
+            appName={DASHBOARD_APP_ID}
+            onQuerySubmit={(_payload, isUpdate) => {
+              if (isUpdate === false) {
+                dashboardApi.forceRefresh();
+              }
+              if (hasUnpublishedFilters) dashboardApi.publishFilters();
+              if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
+              if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
+            }}
+            onSavedQueryIdChange={setSavedQueryId}
+            hasDirtyState={
+              hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
+            }
+            useBackgroundSearchButton={
+              dataService.search.isBackgroundSearchEnabled &&
+              getDashboardCapabilities().storeSearchSession
+            }
+          />
+        )}
+        {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
+          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        ) : null}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+        {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
-      {showBorderBottom && <EuiHorizontalRule margin="none" />}
-    </div>
+        {showBorderBottom && <EuiHorizontalRule margin="none" />}
+      </div>
+    </>
   );
 }
 
@@ -458,7 +488,7 @@ const topNavStyles = {
         width: '100%',
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
-        top: `var(--kbn-application--sticky-headers-offset, 0px)`,
+        top: `calc(var(--kbn-application--sticky-headers-offset, 0px) + var(--kbn-appHeader--height, 0px))`,
         background: euiTheme.colors.backgroundBasePlain,
 
         [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {

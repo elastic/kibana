@@ -165,13 +165,12 @@ export class ManagementPlugin
           cloud: deps.cloud,
           isAirGapped,
           setBreadcrumbs: (newBreadcrumbs) => {
+            const [, ...trailingBreadcrumbs] = newBreadcrumbs;
             if (deps.serverless) {
-              // drop the root management breadcrumb in serverless because it comes from the navigation tree
-              const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
               coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
-                project: { value: newBreadcrumbs, absolute: true },
+                project: { value: trailingBreadcrumbs, absolute: true },
               });
             }
           },

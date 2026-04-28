@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useNextHeader } from '../../../shared/chrome_hooks';
-
-export function useTitle(): string | undefined {
-  const config = useNextHeader();
-  return config?.title;
-}
+export {
+  AppHeaderWithFallback as AppHeader,
+  APP_HEADER_HEIGHT_CSS_VAR_NAME,
+  APPLICATION_TOP_BAR_MIN_HEIGHT_PX,
+} from './src';
+export { AppHeaderView } from './src';
+export type { AppHeaderViewProps } from './src';
+export type {
+  AppHeaderWithFallbackProps as AppHeaderProps,
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderTab,
+  AppHeaderMenu,
+} from './src';

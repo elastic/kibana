@@ -9,9 +9,9 @@
 
 import React, { useMemo } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import type { ChromeNextHeaderBadge } from '@kbn/core-chrome-browser/src';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderBadge } from '../types';
 
 const useBadgeStyle = () => {
   return useMemo(() => {
@@ -23,7 +23,7 @@ const useBadgeStyle = () => {
   }, []);
 };
 
-export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
+export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   const { badge: badgeStyle } = useBadgeStyle();
 
   // @ts-expect-error supported for backward compatibility. TODO: Remove it

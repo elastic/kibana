@@ -57,12 +57,5 @@ export type {
   ChromeNext,
   ChromeNextAiButton,
   ChromeNextGlobalSearchConfig,
-  ChromeNextHeaderBack,
-  ChromeNextHeaderBadge,
-  ChromeNextHeaderCallout,
-  ChromeNextHeaderConfig,
-  ChromeNextHeaderGlobalActions,
-  ChromeNextHeaderMetadataSlotItem,
-  ChromeNextHeaderTab,
   ChromeNextSpaceSelectorConfig,
 } from './src';

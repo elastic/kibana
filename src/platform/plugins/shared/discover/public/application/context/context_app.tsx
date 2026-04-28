@@ -41,6 +41,7 @@ import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useScopedServices } from '../../components/scoped_services_provider';
+import { DiscoverAppHeader } from '../../components/discover_app_header';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -261,6 +262,12 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               values: { anchorId },
             })}
           </h1>
+          <DiscoverAppHeader
+            title={i18n.translate('discover.context.headerTitle', {
+              defaultMessage: 'Surrounding documents',
+            })}
+            back={referrer ? { href: referrer } : undefined}
+          />
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage css={styles.docsPage}>
             <EuiPageBody

@@ -20,6 +20,7 @@ import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import { useScopedServices } from '../../../components/scoped_services_provider';
+import { DiscoverAppHeader } from '../../../components/discover_app_header';
 
 export interface DocProps extends EsDocSearchProps {
   /**
@@ -65,8 +66,13 @@ export function Doc(props: DocProps) {
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (
-    <EuiPage>
-      <h1
+    <>
+      <DiscoverAppHeader
+        title={`${props.index}#${props.id}`}
+        back={props.referrer ? { href: props.referrer } : undefined}
+      />
+      <EuiPage>
+        <h1
         id="singleDocTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSingleDocTitle"
@@ -152,6 +158,7 @@ export function Doc(props: DocProps) {
           </div>
         )}
       </EuiPageBody>
-    </EuiPage>
+      </EuiPage>
+    </>
   );
 }

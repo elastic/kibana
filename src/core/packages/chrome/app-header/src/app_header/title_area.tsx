@@ -10,14 +10,19 @@
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { useBackButton, useTitle } from './hooks';
+import type { AppHeaderBack } from '../types';
+import { useBackNavTargets } from './hooks';
 import { BackButton } from './back_button';
 
-export const TitleArea = React.memo(() => {
+export interface TitleAreaProps {
+  title?: string;
+  back?: AppHeaderBack | AppHeaderBack[];
+}
+
+export const TitleArea = React.memo<TitleAreaProps>(({ title, back }) => {
   const { euiTheme } = useEuiTheme();
-  const backTargets = useBackButton();
+  const backTargets = useBackNavTargets(back);
   const hasBack = backTargets.length > 0;
-  const title = useTitle();
 
   const styles = useMemo(() => {
     const wrapper = css`
@@ -42,7 +47,7 @@ export const TitleArea = React.memo(() => {
 
   return (
     <div css={styles.wrapper}>
-      {hasBack && <BackButton />}
+      {hasBack && <BackButton targets={backTargets} />}
       {title && (
         <EuiTitle size="xs" css={!hasBack ? styles.titleOffset : undefined}>
           <h1 className="eui-textTruncate">{title}</h1>

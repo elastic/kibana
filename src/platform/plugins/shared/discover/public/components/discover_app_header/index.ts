@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { NextHeaderService } from './next_header_service';
+export { DiscoverAppHeader } from './discover_app_header';
+export type { DiscoverAppHeaderProps } from './discover_app_header';

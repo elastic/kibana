@@ -111,6 +111,7 @@
     "@kbn/test",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
+    "@kbn/app-header",
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",

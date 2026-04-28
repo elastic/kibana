@@ -15,14 +15,16 @@ import {
   ChromeComponentsProvider,
   ClassicHeader,
   ProjectHeader,
-  AppHeader,
   GlobalHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
   AppMenuBar,
+  ChromeAppHeader,
   Sidebar,
   useHasAppMenu,
+  useHasInlineAppHeader,
+  useHasChromeAppHeaderContent,
 } from '@kbn/core-chrome-browser-components';
 import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
@@ -32,6 +34,7 @@ import {
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
+import { APPLICATION_TOP_BAR_MIN_HEIGHT_PX } from '@kbn/app-header';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
@@ -94,6 +97,7 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
   const chromeVisible = useIsChromeVisible();
   const chromeStyle = useChromeStyle();
   const hasAppMenu = useHasAppMenu();
+  const hasInlineAppHeader = useHasInlineAppHeader();
   const hasHeaderBanner = useHasHeaderBanner();
   const footer = useGlobalFooter();
   const sidebarWidth = useSidebarWidth();
@@ -102,8 +106,12 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
   const layoutConfigKey =
     chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
 
+  const hasFallbackContent = useHasChromeAppHeaderContent();
+  const needsFallbackBar = nextChrome && !hasInlineAppHeader && hasFallbackContent;
+
   const layoutConfig: ChromeLayoutConfig = {
     ...layoutConfigs[layoutConfigKey],
+    ...(needsFallbackBar && { applicationTopBarHeight: APPLICATION_TOP_BAR_MIN_HEIGHT_PX }),
     sidebarWidth,
     navigationWidth,
   };
@@ -125,7 +133,7 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
       ...base,
       header: <GlobalHeader />,
       navigation: <GridLayoutProjectSideNav />,
-      applicationTopBar: <AppHeader />,
+      applicationTopBar: needsFallbackBar ? <ChromeAppHeader /> : undefined,
     };
   }
 

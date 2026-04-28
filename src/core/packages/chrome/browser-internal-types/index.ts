@@ -9,6 +9,8 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -18,7 +20,6 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeNext,
   ChromeNextAiButton,
-  ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
   ChromeNextSpaceSelectorConfig,
   ChromeProjectNavigationNode,
@@ -36,6 +37,11 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  componentDeps: {
+    readonly basePath: IBasePath;
+    readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+  };
+
   sideNav: ChromeStart['sideNav'] & {
     /**
      * Set the width of the side nav.
@@ -122,9 +128,6 @@ export interface InternalChromeStart extends ChromeStart {
 
 /** @internal */
 export interface InternalChromeNext extends ChromeNext {
-  header: ChromeNext['header'] & {
-    get$(): Observable<ChromeNextHeaderConfig | undefined>;
-  };
   aiButton: ChromeNext['aiButton'] & {
     get$(): Observable<ChromeNextAiButton[]>;
   };
@@ -136,5 +139,9 @@ export interface InternalChromeNext extends ChromeNext {
   };
   spaceSelector: ChromeNext['spaceSelector'] & {
     get$(): Observable<ChromeNextSpaceSelectorConfig | undefined>;
+  };
+  inlineAppHeader: {
+    get$(): Observable<boolean>;
+    set(mounted: boolean): void;
   };
 }

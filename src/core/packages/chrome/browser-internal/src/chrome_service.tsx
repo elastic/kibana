@@ -30,7 +30,6 @@ import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
-import { NextHeaderService } from './services/next_header';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
@@ -76,7 +75,6 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
-  private readonly nextHeader: NextHeaderService;
   private readonly sidebar: SidebarService;
   private readonly logger: Logger;
   private readonly isServerless: boolean;
@@ -85,7 +83,6 @@ export class ChromeService {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.projectNavigation = new ProjectNavigationService(this.isServerless);
-    this.nextHeader = new NextHeaderService();
     this.sidebar = new SidebarService({ basePath: params.basePath });
   }
 
@@ -109,6 +106,7 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
+    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -167,8 +165,6 @@ export class ChromeService {
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
     });
 
-    const nextHeaderStart = this.nextHeader.start();
-
     const sidebar = this.sidebar.start();
 
     // 5. Setup app change handler (resets chrome state on app navigation)
@@ -177,7 +173,6 @@ export class ChromeService {
       stop$: this.stop$,
       state,
       docTitle,
-      nextHeader: nextHeaderStart,
     });
 
     // 6. Return chrome API
@@ -189,9 +184,13 @@ export class ChromeService {
         recentlyAccessed,
         docTitle,
         projectNavigation,
-        nextHeader: nextHeaderStart,
       },
       sidebar,
+      featureFlags,
+      componentDeps: {
+        basePath: http.basePath,
+        legacyActionMenu$: application.currentActionMenu$,
+      },
     });
 
     return chrome;
@@ -201,7 +200,6 @@ export class ChromeService {
     this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
-    this.nextHeader.stop();
     this.sidebar.stop();
     this.stop$.next();
   }

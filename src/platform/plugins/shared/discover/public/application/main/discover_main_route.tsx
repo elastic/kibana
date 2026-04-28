@@ -16,6 +16,9 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
+import { DiscoverAppHeader } from '../../components/discover_app_header';
+import { useTopNavMenuItems } from './components/top_nav/use_top_nav_menu_items';
+import { useTopNavBadgeItems } from './components/top_nav/use_top_nav_badge_items';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
@@ -101,6 +104,12 @@ export const DiscoverMainRoute = ({
       </RuntimeStateManagerProvider>
     </DiscoverCustomizationContextProvider>
   );
+};
+
+const DiscoverMainAppHeader: React.FC<{ title: string }> = ({ title }) => {
+  const appMenu = useTopNavMenuItems();
+  const badges = useTopNavBadgeItems();
+  return <DiscoverAppHeader title={title} appMenu={appMenu} badges={badges} />;
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
@@ -220,16 +229,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         titleBreadcrumbText: persistedDiscoverSession?.title,
         services,
       });
-      chrome.next.header.set({
-        title: persistedDiscoverSession?.title || 'Discover',
-      });
     }
-    return () => {
-      chrome.next.header.reset('title');
-    };
   }, [
     chrome.docTitle,
-    chrome.next.header,
     persistedDiscoverSession?.title,
     customizationContext.displayMode,
     services,
@@ -271,6 +273,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
       <DiscoverTopNavMenuProvider customizationContext={customizationContext}>
         <>
+          {customizationContext.displayMode === 'standalone' && (
+            <DiscoverMainAppHeader title={persistedDiscoverSession?.title || 'Discover'} />
+          )}
           <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
             {persistedDiscoverSession?.title
               ? i18n.translate('discover.pageTitleWithSavedSearch', {

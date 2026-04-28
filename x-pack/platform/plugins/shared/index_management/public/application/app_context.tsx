@@ -16,6 +16,7 @@ import type {
   ScopedHistory,
   DocLinksStart,
   ExecutionContextStart,
+  FeatureFlagsStart,
   HttpSetup,
   IUiSettingsClient,
   OverlayStart,
@@ -45,6 +46,7 @@ export interface AppDependencies {
     getUrlForApp: ApplicationStart['getUrlForApp'];
     executionContext: ExecutionContextStart;
     application: ApplicationStart;
+    featureFlags: FeatureFlagsStart;
     http: HttpSetup;
     i18n: I18nStart;
     theme: ThemeServiceStart;

@@ -16,7 +16,6 @@ import type {
   ChromeNavControl,
   ChromeNavLink,
   ChromeNextGlobalSearchConfig,
-  ChromeNextHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -241,17 +240,6 @@ export function useHasAppMenu(): boolean {
   return hasLegacyActionMenu || hasAppMenuConfig;
 }
 
-/**
- * Returns the current Chrome-Next header configuration set via
- * `chrome.next.header.set()`, or `undefined` if not set.
- * Used by Chrome-Next top bar components.
- */
-export function useNextHeader(): ChromeNextHeaderConfig | undefined {
-  const chrome = useChromeService();
-  const config$ = useMemo(() => chrome.next.header.get$(), [chrome]);
-  return useObservable(config$, undefined);
-}
-
 export function useGlobalSearch(): ChromeNextGlobalSearchConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);
@@ -268,4 +256,41 @@ export function useUserMenu(): ReactNode {
 export function useIsNextChrome(): boolean {
   const { featureFlags } = useChromeComponentsDeps();
   return isNextChrome(featureFlags);
+}
+
+/** Whether an inline `AppHeader` is currently mounted by the active app. */
+export function useHasInlineAppHeader(): boolean {
+  const chrome = useChromeService();
+  const inlineAppHeader$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
+  return useObservable(inlineAppHeader$, false);
+}
+
+// ---------------------------------------------------------------------------
+// Internal hooks: read from useChromeService().componentDeps instead of
+// useChromeComponentsDeps(). These work in any React tree that has
+// ChromeServiceProvider (including management section apps).
+// ---------------------------------------------------------------------------
+
+export function useInternalBasePath(): IBasePath {
+  return useChromeService().componentDeps.basePath;
+}
+
+export function useInternalLegacyActionMenu(): MountPoint | undefined {
+  const { legacyActionMenu$ } = useChromeService().componentDeps;
+  return useObservable(legacyActionMenu$, undefined);
+}
+
+export function useInternalHasLegacyActionMenu(): boolean {
+  return !!useInternalLegacyActionMenu();
+}
+
+/**
+ * Like {@link useHasAppMenu} but legacy menu reads {@link useChromeService}.componentDeps
+ * instead of {@link useChromeComponentsDeps}. Safe where only ChromeServiceProvider exists
+ * (e.g. management apps rendering AppHeader inline).
+ */
+export function useInternalHasAppMenu(): boolean {
+  const hasLegacy = useInternalHasLegacyActionMenu();
+  const hasConfig = useHasAppMenuConfig();
+  return hasLegacy || hasConfig;
 }
