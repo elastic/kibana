@@ -47,6 +47,7 @@
             "lineNumber": 27,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "FileUploadProps",
             "trackAdoption": false,
             "isRequired": true
           }

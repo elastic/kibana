@@ -23,6 +23,8 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import { resolveExtendedFieldFilters } from '../../services/cases/extended_field_search_utils';
+import { enrichCasesWithFieldLabels } from './utils';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -35,10 +37,11 @@ export const search = async (
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, templatesService },
     authorization,
     logger,
     spaceId,
+    config,
   } = clientArgs;
 
   try {
@@ -46,7 +49,7 @@ export const search = async (
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
-      .map((config) => config.customFields)
+      .map((configuration) => configuration.customFields)
       .flat();
 
     /**
@@ -120,6 +123,35 @@ export const search = async (
 
     const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
 
+    const ownerArray = asArray(paramArgs.owner).filter(Boolean);
+
+    /**
+     * Fetch ALL template versions upfront. This single fetch serves two purposes:
+     * 1. Extended field filter resolution — we need all versions (not just isLatest) to
+     *    correctly match cases created with older template versions where fields may differ.
+     * 2. Label enrichment — enrichCasesWithFieldLabels uses the same SOs to populate
+     *    extended_fields_labels on returned cases, avoiding redundant fetches.
+     *
+     */
+    const templateSOs = config.templates.enabled
+      ? await templatesService.getTemplateVersionsForExtendedFieldSearch({
+          owner: ownerArray.length > 0 ? ownerArray : undefined,
+        })
+      : [];
+
+    const rawFilters = paramArgs.extendedFieldFilters;
+    const resolvedExtendedFieldFilters =
+      rawFilters && rawFilters.length > 0
+        ? resolveExtendedFieldFilters(
+            rawFilters,
+            templateSOs.map((so) => ({
+              templateId: so.attributes.templateId,
+              templateVersion: so.attributes.templateVersion,
+              fieldNames: so.attributes.fieldNames,
+            }))
+          )
+        : undefined;
+
     const [cases, statusStats] = await Promise.all([
       caseService.searchCasesGroupedByID({
         caseOptions: {
@@ -128,6 +160,7 @@ export const search = async (
           searchFields: asArray(paramArgs.searchFields),
         },
         namespaces,
+        extendedFieldFilters: resolvedExtendedFieldFilters,
       }),
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,
@@ -145,6 +178,8 @@ export const search = async (
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
     });
+
+    res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs);
 
     return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {
