@@ -33,8 +33,10 @@ export const EBT_ELEMENT_DOC_VIEWER_ERRORS = 'docViewerErrors';
 export const EBT_ELEMENT_DOC_VIEWER_SIMILAR_ERRORS = 'docViewerSimilarErrors';
 export const EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS = 'docViewerSpanLinks';
 export const EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY = 'docViewerTraceSummary';
-export const EBT_ELEMENT_TRACE_SUMMARY_EXPAND_BUTTON = 'traceSummaryExpandButton';
-export const EBT_ELEMENT_TRACE_SUMMARY_WATERFALL_AREA = 'traceSummaryWaterfallArea';
+export const EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_EXPAND_BUTTON =
+  'docViewerTraceSummaryExpandButton';
+export const EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_WATERFALL_AREA =
+  'docViewerTraceSummaryWaterfallArea';
 export const EBT_ELEMENT_DOC_VIEWER_ABOUT = 'docViewerAbout';
 export const EBT_ELEMENT_DOC_VIEWER_LOGS = 'docViewerLogs';
 export const EBT_ELEMENT_DOC_VIEWER_SIMILAR_SPANS = 'docViewerSimilarSpans';
