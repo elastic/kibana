@@ -39,6 +39,16 @@ const selectableAriaLabel = i18n.translate(
     defaultMessage: 'Select a model',
   }
 );
+
+const getConnectorButtonAriaLabel = (connectorName: string) =>
+  i18n.translate(
+    'xpack.agentBuilder.conversationInput.connectorSelector.connectorButtonAriaLabel',
+    {
+      defaultMessage: 'Select connector, {connectorName}',
+      values: { connectorName },
+    }
+  );
+
 const defaultConnectorLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.defaultConnectorLabel',
   {
@@ -65,27 +75,28 @@ const connectorSelectId = 'agentBuilderConnectorSelect';
 const connectorListId = `${connectorSelectId}_listbox`;
 const CONNECTOR_OPTION_ROW_HEIGHT = 32;
 
+const defaultConnectorButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel',
+  { defaultMessage: 'LLM' }
+);
+
 const ConnectorPopoverButton: React.FC<{
   isPopoverOpen: boolean;
   onClick: () => void;
   disabled: boolean;
   selectedConnectorName?: string;
 }> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
+  const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
       iconType={() => <ConnectorIcon connectorName={selectedConnectorName} />}
       onClick={onClick}
-      aria-labelledby={connectorSelectId}
+      aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
     >
-      {selectedConnectorName ?? (
-        <FormattedMessage
-          id="xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel"
-          defaultMessage="LLM"
-        />
-      )}
+      {connectorDisplayName}
     </InputPopoverButton>
   );
 };
