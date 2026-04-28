@@ -14,6 +14,7 @@ import {
   internalTools,
   SubagentExecutionMode,
 } from '@kbn/agent-builder-common';
+import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -30,7 +31,10 @@ const schema = z.object({
     .describe(
       'Set to true to run this agent in the background. You will be notified when it completes.'
     ),
-  effort: z.enum(['low', 'medium', 'high']).optional().describe('The effort level of the task.'),
+  effort: z
+    .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
+    .optional()
+    .describe('The effort level of the task.'),
 });
 
 const toolDescription = `Start a sub-agent to perform a specific task.
@@ -99,11 +103,10 @@ export const createSubagentTool = ({
       try {
         const fullPrompt = `${description}\n\n${prompt}`;
 
-        let selectedConnectorId = connectorId;
-        if (effort === 'low') {
-          const fastModel = await modelProvider.getFastModel();
-          selectedConnectorId = fastModel.connector.connectorId;
-        }
+        const subAgentModel = await modelProvider.selectModel({
+          effortLevel: effort as EffortLevel,
+        });
+        const selectedConnectorId = subAgentModel.connector.connectorId;
 
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,

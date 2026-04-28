@@ -9,11 +9,13 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import type {
   ModelProvider,
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
+  ModelSelectionPreferences,
 } from '@kbn/agent-builder-server/runner';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -117,6 +119,15 @@ export const createModelProvider = ({
     return connectorId;
   });
 
+  const selectModelId = async (opts: ModelSelectionPreferences): Promise<string> => {
+    const { effortLevel = EffortLevels.medium } = opts;
+    if (effortLevel === EffortLevels.low) {
+      return await getFastModelConnectorId();
+    } else {
+      return await getDefaultConnectorId();
+    }
+  };
+
   const completedCalls: ModelCallInfo[] = [];
 
   const getUsageStats = (): ModelProviderStats => {
@@ -125,7 +136,7 @@ export const createModelProvider = ({
     };
   };
 
-  const getModel = async (connectorId: string): Promise<ScopedModel> => {
+  const getModelById = async (connectorId: string): Promise<ScopedModel> => {
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
@@ -181,9 +192,9 @@ export const createModelProvider = ({
   };
 
   return {
-    getDefaultModel: async () => getModel(await getDefaultConnectorId()),
-    getFastModel: async () => getModel(await getFastModelConnectorId()),
-    getModel: ({ connectorId }) => getModel(connectorId),
+    selectModel: async (opts) => getModelById(await selectModelId(opts)),
+    getDefaultModel: async () => getModelById(await getDefaultConnectorId()),
+    getModelById: ({ connectorId }) => getModelById(connectorId),
     getUsageStats,
   };
 };

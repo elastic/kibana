@@ -11,6 +11,7 @@ import type {
   InferenceConnector,
   ChatCompletionTokenCount,
 } from '@kbn/inference-common';
+import type { EffortLevel } from '@kbn/agent-builder-common';
 
 /**
  * Represents a model that can be used within the agentBuilder framework (e.g. tools).
@@ -32,25 +33,33 @@ export interface ScopedModel {
   inferenceClient: BoundInferenceClient;
 }
 
+export interface ModelSelectionPreferences {
+  effortLevel?: EffortLevel;
+}
+
 /**
  * Provider, allowing to select various models depending on the needs.
  */
 export interface ModelProvider {
   /**
-   * Returns the standard model used for LLM tasks in the current context.
+   * Returns the default model used for LLM tasks in the current context.
    */
   getDefaultModel: () => Promise<ScopedModel>;
+
   /**
-   * Returns the fast model used for LLM tasks in the current context.
-   * If no fast model is available, returns the default model.
+   * Returns the best available model based on the given selection options.
+   *
+   * Available options are:
+   * - effortLevel: the effort level of the task the model will be used for.
    */
-  getFastModel: () => Promise<ScopedModel>;
+  selectModel: (opts: ModelSelectionPreferences) => Promise<ScopedModel>;
+
   /**
    * Returns a model using the given connectorId.
    *
    * Will throw if connector doesn't exist, user has no access, or connector is not a GenAI connector.
    */
-  getModel: (options: { connectorId: string }) => Promise<ScopedModel>;
+  getModelById: (options: { connectorId: string }) => Promise<ScopedModel>;
   /**
    * Returns the current usage stats for the model provider.
    */

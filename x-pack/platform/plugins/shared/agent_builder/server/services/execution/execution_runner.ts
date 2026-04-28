@@ -168,7 +168,7 @@ const handleConversationExecution = async ({
   const title$ =
     conversation.operation === 'CREATE'
       ? generateTitle({
-          chatModel: (await modelProvider.getFastModel()).chatModel,
+          chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
         })
