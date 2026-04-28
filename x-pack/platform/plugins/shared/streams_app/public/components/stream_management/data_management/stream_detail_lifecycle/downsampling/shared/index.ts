@@ -6,6 +6,7 @@
  */
 
 export type { PreservedTimeUnit, TimeUnit } from './time_unit_types';
+export { PRESERVED_TIME_UNITS } from './time_unit_types';
 export { TIME_UNIT_OPTIONS } from './time_unit_options';
 
 export {
@@ -19,3 +20,4 @@ export { getBoundsHelpTextValues } from './bounds_help_text';
 export { getUnitSelectOptions, isPreservedNonDefaultUnit } from './unit_select_options';
 export type { TimeUnitSelectOption } from './unit_select_options';
 export { downsamplingHelpText } from './i18n';
+export { zodResolver } from './zod_resolver';

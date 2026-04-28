@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useEffect, useRef } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
@@ -44,13 +43,13 @@ export interface StreamDocCountsFetch {
 
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
-  canReadFailureStore: boolean;
+  getCanReadFailureStore: (streamName: string) => boolean;
   numDataPoints: number;
 }
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
-  canReadFailureStore,
+  getCanReadFailureStore,
   numDataPoints,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
@@ -75,12 +74,8 @@ export function useStreamDocCountsFetch({
     abortControllerRef.current = new AbortController();
   }
 
-  useUpdateEffect(() => {
-    docCountsPromiseCache.current = null;
-    histogramPromiseCache.current = {};
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-  }, [canReadFailureStore]);
+  // No longer need to clear cache based on global canReadFailureStore
+  // since we now check per-stream privileges
 
   useEffect(() => {
     return () => {
@@ -130,6 +125,9 @@ export function useStreamDocCountsFetch({
             }
           : {}),
       });
+
+      // Check per-stream privilege
+      const canReadFailureStore = streamName ? getCanReadFailureStore(streamName) : false;
 
       const failedCountPromise = canReadFailureStore
         ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
@@ -183,6 +181,8 @@ export function useStreamDocCountsFetch({
       }
 
       const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+      // Check per-stream privilege
+      const canReadFailureStore = getCanReadFailureStore(streamName);
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
       const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 

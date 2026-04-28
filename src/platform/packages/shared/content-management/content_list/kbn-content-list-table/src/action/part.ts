@@ -11,12 +11,14 @@ import { table } from '../assembly';
 import type {
   EditActionProps,
   DeleteActionProps,
+  InspectActionProps,
   ActionOutput,
   ActionBuilderContext,
   ActionProps,
 } from './types';
 import { buildEditAction } from './edit/edit_action';
 import { buildDeleteAction } from './delete/delete_action';
+import { buildInspectAction } from './inspect/inspect_action';
 
 /**
  * Preset-to-props mapping for table actions.
@@ -24,6 +26,7 @@ import { buildDeleteAction } from './delete/delete_action';
 export interface ActionPresets {
   edit: EditActionProps;
   delete: DeleteActionProps;
+  inspect: InspectActionProps;
 }
 
 /** Part factory for table actions. */
@@ -115,6 +118,29 @@ export const EditAction = action.createPreset({ name: 'edit', resolve: buildEdit
  * ```
  */
 export const DeleteAction = action.createPreset({ name: 'delete', resolve: buildDeleteAction });
+
+/**
+ * Inspect action preset component for `ContentListTable`.
+ *
+ * This is a declarative component that doesn't render anything.
+ * It specifies the inspect (view details) action within a `Column.Actions` context.
+ * Opens the content editor flyout for the selected item.
+ *
+ * @example
+ * ```tsx
+ * const { Column, Action } = ContentListTable;
+ *
+ * <ContentListTable>
+ *   <Column.Name />
+ *   <Column.Actions>
+ *     <Action.Edit />
+ *     <Action.Inspect />
+ *     <Action.Delete />
+ *   </Column.Actions>
+ * </ContentListTable>
+ * ```
+ */
+export const InspectAction = action.createPreset({ name: 'inspect', resolve: buildInspectAction });
 
 /**
  * Custom action component for `ContentListTable`.

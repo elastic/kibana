@@ -415,22 +415,32 @@ const runTests = (
   });
 
   describe('Monitor space validation', () => {
+    let validationSpaceId: string;
+    let validationPrivateLocation: any;
+
+    before(async () => {
+      validationSpaceId = `validation-space-${uuidv4()}`;
+      await kibanaServer.spaces.create({
+        id: validationSpaceId,
+        name: `Validation Space`,
+      });
+      spacesToDeleteIds.push(validationSpaceId);
+      validationPrivateLocation = usePrivateLocations
+        ? await privateLocationService.addTestPrivateLocation(validationSpaceId)
+        : undefined;
+    });
+
     it('should throw error if spaces list does not include the calling space on create', async () => {
-      const INVALID_SPACE = `invalid-space-${uuidv4()}`;
-      await kibanaServer.spaces.create({ id: INVALID_SPACE, name: `Invalid Space` });
-      spacesToDeleteIds.push(INVALID_SPACE);
       const monitorData = applyLocation(
         {
           ...getFixtureJson('http_monitor'),
           name: `invalid-create-${uuidv4()}`,
           spaces: ['default'],
         },
-        usePrivateLocations
-          ? await privateLocationService.addTestPrivateLocation(INVALID_SPACE)
-          : undefined
+        validationPrivateLocation
       );
       const resp = await supertestEditorWithApiKey
-        .post(`/s/${INVALID_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`)
+        .post(`/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`)
         .send(monitorData);
 
       expect(resp.status).to.be(400);
@@ -440,30 +450,23 @@ const runTests = (
     });
 
     it('should throw error if spaces list does not include the calling space on edit', async () => {
-      const EDIT_SPACE = `edit-space-${uuidv4()}`;
-      await kibanaServer.spaces.create({ id: EDIT_SPACE, name: `Edit Space` });
-      spacesToDeleteIds.push(EDIT_SPACE);
       const monitorData = applyLocation(
         {
           ...getFixtureJson('http_monitor'),
           name: `edit-invalid-${uuidv4()}`,
-          spaces: [EDIT_SPACE],
+          spaces: [validationSpaceId],
         },
-        usePrivateLocations
-          ? await privateLocationService.addTestPrivateLocation(EDIT_SPACE)
-          : undefined
+        validationPrivateLocation
       );
-      // Create monitor in EDIT_SPACE
       const res = await supertestEditorWithApiKey
         .post(
-          `/s/${EDIT_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true&savedObjectType=${syntheticsMonitorSavedObjectType}`
+          `/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true&savedObjectType=${syntheticsMonitorSavedObjectType}`
         )
         .send(monitorData);
       expect(res.status).eql(200, JSON.stringify(res.body));
-      // Try to edit monitor with spaces not including EDIT_SPACE
       const resp = await supertestEditorWithApiKey
         .put(
-          `/s/${EDIT_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${res.body.id}?internal=true`
+          `/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${res.body.id}?internal=true`
         )
         .send({ name: `edit-invalid-${uuidv4()}`, spaces: ['default'] });
 

@@ -9,31 +9,18 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams, DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { attachmentDataToDashboardState } from '@kbn/dashboard-agent-common';
 import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
 import { useDashboardPreviewUnifiedSearch } from './use_dashboard_preview_unified_search';
 import { useRegisterCanvasActionButtons } from './use_register_canvas_action_buttons';
 
 const dashboardCanvasContentStyles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    minHeight: 400,
-    '& .dashboardViewport': {
-      minHeight: 0,
-    },
-    '& .embPanel__hoverActions': {
-      display: 'none !important',
-    },
-  }),
   actions: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
@@ -43,7 +30,14 @@ const dashboardCanvasContentStyles = {
       flex: 1,
       minHeight: 0,
       display: 'flex',
+      '& .dashboardViewport': {
+        minHeight: 0,
+      },
+      '& .embPanel__hoverActions': {
+        display: 'none !important',
+      },
       '.controlGroup': {
+        flexGrow: `0 !important` as unknown as number,
         padding: `${euiTheme.size.s} !important`,
         borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       },
@@ -53,45 +47,41 @@ const dashboardCanvasContentStyles = {
       flexShrink: 0,
       padding: `0 ${euiTheme.size.s}`,
     }),
-  callout: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginTop: euiTheme.size.s,
-      marginBottom: euiTheme.size.s,
-    }),
 };
 
 export const DashboardCanvasContent = ({
   attachment,
+  dashboardState,
   registerActionButtons,
   updateOrigin,
   closeCanvas,
   openSidebarConversation,
   dashboardLocator,
   searchBarComponent: SearchBar,
-  filterManager,
+  data,
   checkSavedDashboardExist,
   canWriteDashboards,
 }: AttachmentRenderProps<DashboardAttachment> & {
+  dashboardState: DashboardState;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
   closeCanvas: () => void;
   dashboardLocator?: DashboardRendererProps['locator'];
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  filterManager: DataPublicPluginStart['query']['filterManager'];
+  data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
-  const attachmentOrigin = attachment.origin;
   const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
     status: 'idle',
   });
 
   useEffect(
     function checkSavedObjectExists() {
-      if (!attachmentOrigin) {
+      if (!attachment.origin) {
         setSavedObjectStatus({ status: 'resolved', exists: false });
         return;
       }
@@ -99,7 +89,7 @@ export const DashboardCanvasContent = ({
       let canceled = false;
       setSavedObjectStatus({ status: 'loading' });
 
-      checkSavedDashboardExist(attachmentOrigin)
+      checkSavedDashboardExist(attachment.origin)
         .then((exists) => {
           if (!canceled) {
             setSavedObjectStatus({ status: 'resolved', exists });
@@ -115,17 +105,13 @@ export const DashboardCanvasContent = ({
         canceled = true;
       };
     },
-    [attachmentOrigin, checkSavedDashboardExist]
+    [attachment.origin, checkSavedDashboardExist]
   );
 
-  const dashboardState = useMemo(
-    () => attachmentDataToDashboardState(attachment.data),
-    [attachment.data]
-  );
   const { filters, query, searchBarProps, timeRange } = useDashboardPreviewUnifiedSearch({
     dashboardApi,
     dashboardState,
-    filterManager,
+    data,
   });
 
   const getCreationOptions = useCallback(
@@ -148,9 +134,9 @@ export const DashboardCanvasContent = ({
   const getExistingDashboardId = useCallback(
     () =>
       savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
-        ? attachmentOrigin
+        ? attachment.origin
         : undefined,
-    [attachmentOrigin, savedObjectStatus]
+    [attachment.origin, savedObjectStatus]
   );
 
   useRegisterCanvasActionButtons({
@@ -165,7 +151,7 @@ export const DashboardCanvasContent = ({
   });
 
   return (
-    <div css={styles.root}>
+    <>
       <div css={styles.searchBar}>
         <SearchBar {...searchBarProps} />
       </div>
@@ -183,6 +169,6 @@ export const DashboardCanvasContent = ({
           />
         )}
       </div>
-    </div>
+    </>
   );
 };

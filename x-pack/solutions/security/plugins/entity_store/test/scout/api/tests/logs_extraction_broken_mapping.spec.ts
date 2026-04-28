@@ -366,6 +366,94 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
   );
 
   apiTest(
+    'should collect new field values on subsequent extractions when entity already exists and field has multi-field sub-fields',
+    async ({ apiClient, esClient }) => {
+      const t0 = new Date('2026-04-14T10:10:00.000Z');
+      const sec = (n: number) => new Date(t0.getTime() + n * 1000).toISOString();
+
+      // First doc: entity doesn't exist yet — first extraction creates it with no LOOKUP JOIN.
+      await esClient.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { create: { _index: BROKEN_MAPPING_DATA_STREAM } },
+          {
+            '@timestamp': sec(1),
+            event: { kind: 'asset', module: 'okta' },
+            user: {
+              id: 'multifield-test-user',
+              name: 'multifield-test-user',
+              full_name: 'First Full Name',
+            },
+          },
+        ],
+      });
+
+      const firstExtraction = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: { fromDateISO: t0.toISOString(), toDateISO: sec(15) }, // covers doc1 only (sec(30) is outside)
+        }
+      );
+      expect(firstExtraction.statusCode).toBe(200);
+      expect(firstExtraction.body).toMatchObject({ success: true, count: 1 });
+
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
+      expect(
+        (
+          await esClient.search({
+            index: LATEST_ALIAS,
+            query: { term: { 'entity.id': 'user:multifield-test-user@okta' } },
+          })
+        ).hits.hits
+      ).toHaveLength(1);
+
+      // Second doc: same user, different full_name. Entity now exists in LATEST, so the second
+      // extraction does a LOOKUP JOIN — which surfaces user.full_name.text as an extra column.
+      // Writing it back causes a mapping conflict (object vs keyword) and silently drops the update.
+      await esClient.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { create: { _index: BROKEN_MAPPING_DATA_STREAM } },
+          {
+            '@timestamp': sec(30),
+            event: { kind: 'asset', module: 'okta' },
+            user: {
+              id: 'multifield-test-user',
+              name: 'multifield-test-user',
+              full_name: 'Second Full Name',
+            },
+          },
+        ],
+      });
+
+      const secondExtraction = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: { fromDateISO: t0.toISOString(), toDateISO: sec(59) }, // covers both docs
+        }
+      );
+      expect(secondExtraction.statusCode).toBe(200);
+      expect(secondExtraction.body).toMatchObject({ success: true, count: 1 });
+
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
+      const afterSecond = await esClient.search({
+        index: LATEST_ALIAS,
+        query: { term: { 'entity.id': 'user:multifield-test-user@okta' } },
+      });
+      expect(afterSecond.hits.hits).toHaveLength(1);
+
+      // user.full_name uses `collect` (VALUES) — both values must be present if the update landed.
+      const source = afterSecond.hits.hits[0]._source as { user: { full_name: unknown } };
+      expect(source.user.full_name).toContain('First Full Name');
+      expect(source.user.full_name).toContain('Second Full Name');
+    }
+  );
+
+  apiTest(
     'should extract users successfully when source index has conflicting field mappings (IDP + local id / filters)',
     async ({ apiClient, esClient }) => {
       await ingestBrokenUserDocs(esClient);

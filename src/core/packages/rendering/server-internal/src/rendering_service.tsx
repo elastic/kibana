@@ -201,8 +201,8 @@ export class RenderingService {
       // Only non-anonymous pages
       ...(!isAnonymousPage
         ? ([
-            uiSettings.client?.getUserProvided(),
-            uiSettings.globalClient?.getUserProvided(),
+            uiSettings.client?.getUserProvided(true),
+            uiSettings.globalClient?.getUserProvided(true),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
           ] as [
