@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBoxWrapper, type ScoutPage, type Locator } from '@kbn/scout';
+import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class FeatureSettingsPage {
   // Header
@@ -21,7 +21,7 @@ export class FeatureSettingsPage {
   readonly aiCapabilitiesRow: Locator;
   readonly enableAiSwitch: Locator;
   readonly globalModelRow: Locator;
-  readonly globalModelComboBox: EuiComboBoxWrapper;
+  readonly globalModelComboBox: Locator;
   readonly featureSpecificModelsRow: Locator;
   readonly featureSpecificModelsSwitch: Locator;
 
@@ -64,7 +64,7 @@ export class FeatureSettingsPage {
     this.aiCapabilitiesRow = this.page.testSubj.locator('aiCapabilitiesRow');
     this.enableAiSwitch = this.page.testSubj.locator('enableAiSwitch');
     this.globalModelRow = this.page.testSubj.locator('globalModelRow');
-    this.globalModelComboBox = new EuiComboBoxWrapper(this.page, 'globalModelComboBox');
+    this.globalModelComboBox = this.page.testSubj.locator('globalModelComboBox');
     this.featureSpecificModelsRow = this.page.testSubj.locator('featureSpecificModelsRow');
     this.featureSpecificModelsSwitch = this.page.testSubj.locator('featureSpecificModelsSwitch');
 
@@ -163,8 +163,15 @@ export class FeatureSettingsPage {
     await this.addModelButton(featureId).waitFor({ state: 'visible' });
   }
 
-  /** Picks a connector by visible name in the Global model combobox. */
+  /**
+   * Picks a connector by visible name in the Global model combobox.
+   * Avoids {@link EuiComboBoxWrapper.selectSingleOption}'s initial `clear()`, which asserts an empty
+   * search input — that fails when the current selection is "No default model" (plain-text mode).
+   */
   public async selectGlobalModel(name: string): Promise<void> {
-    await this.globalModelComboBox.selectSingleOption(name);
+    const combo = this.globalModelComboBox;
+    await combo.locator('[data-test-subj="comboBoxInput"]').click();
+    await combo.locator('[data-test-subj="comboBoxSearchInput"]').fill(name);
+    await this.page.getByRole('option', { name, exact: false }).click();
   }
 }
