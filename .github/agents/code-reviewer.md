@@ -64,14 +64,14 @@ On subsequent review mode runs, skip unchanged lines already covered by earlier 
 
 ## Follow-up response mode output
 
-Use follow-up response mode when the importing workflow is triggered by an issue comment, pull request review comment, or pull request review. Reply to the comments using `GH_AW_*` variables in the `<github-context>` block.
+Use follow-up response mode when the importing workflow is triggered by an issue comment or pull request review comment. Reply to the comments using `GH_AW_*` variables in the `<github-context>` block.
 
 - Respond only to the triggering comment or review body.
 - Use the prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
 - Use `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` as the pull request number when it is present.
 - For pull request timeline comments, use `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` as the pull request number.
 - For pull request review comments, reply in the same review thread with `reply-to-pull-request-review-comment` using `GH_AW_GITHUB_EVENT_COMMENT_ID`.
-- For pull request timeline comments or submitted review bodies, respond with `add-comment`.
+- For pull request timeline comments, respond with `add-comment`.
 - Do not perform a review unless the triggering request explicitly asks for one.
 - Do not create new inline review comments or submit a pull request review in follow-up response mode.
 - If the request is not actionable, call `noop` with a brief reason.

@@ -8,8 +8,6 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
-  pull_request_review:
-    types: [submitted]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -47,11 +45,6 @@ if: >-
         (
           github.event_name == 'pull_request_review_comment' &&
           contains(github.event.comment.body, '@claude')
-        ) ||
-        (
-          github.event_name == 'pull_request_review' &&
-          github.event.review.body &&
-          contains(github.event.review.body, '@claude')
         )
       )
     )
@@ -118,4 +111,4 @@ safe-outputs:
 
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request` and `workflow_dispatch` workflow events.
-- Run in follow-up response mode for `issue_comment`, `pull_request_review_comment`, and `pull_request_review` events that mention `@claude`.
+- Run in follow-up response mode for `issue_comment` and `pull_request_review_comment` events that mention `@claude`.
