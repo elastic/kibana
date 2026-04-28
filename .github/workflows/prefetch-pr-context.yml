@@ -29,6 +29,28 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ inputs.repo }}
+          EVENT_ACTION: ${{ github.event.action }}
+          EVENT_COMMENT_AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+          EVENT_COMMENT_ID: ${{ github.event.comment.id }}
+          EVENT_HAS_REVIEWER_LABEL: ${{ contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') }}
+          EVENT_HEAD_REPO_ID: ${{ github.event.pull_request.head.repo.id }}
+          EVENT_IS_ALLOWED_COMMENT_AUTHOR: ${{ github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' }}
+          EVENT_IS_ALLOWED_PR_AUTHOR: ${{ github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' }}
+          EVENT_IS_LABEL_ACTION_MATCH: ${{ github.event_name != 'pull_request' || github.event.action != 'labeled' || github.event.label.name == 'reviewer:claude' }}
+          EVENT_IS_SAME_REPO_PR: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.repository_id }}
+          EVENT_ISSUE_AUTHOR_ASSOCIATION: ${{ github.event.issue.author_association }}
+          EVENT_ISSUE_LABELS_JSON: ${{ toJSON(github.event.issue.labels.*.name) }}
+          EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          EVENT_LABEL_NAME: ${{ github.event.label.name }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PULL_REQUEST_AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          EVENT_PULL_REQUEST_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_REPOSITORY_FORK: ${{ github.event.repository.fork }}
+          EVENT_REPOSITORY_ID: ${{ github.repository_id }}
+          EVENT_SENDER_LOGIN: ${{ github.event.sender.login }}
+          EVENT_SENDER_TYPE: ${{ github.event.sender.type }}
+          EVENT_SKIP_AI_LABEL: ${{ contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') }}
         run: |
           fetch_paginated_array() {
             local endpoint="$1"
@@ -37,6 +59,147 @@ jobs:
           }
 
           mkdir -p /tmp/pr-context
+          event_path_debug="$(jq '
+            {
+              action,
+              sender: { id: .sender.id, login: .sender.login, type: .sender.type },
+              repository: {
+                fork: .repository.fork,
+                full_name: .repository.full_name,
+                id: .repository.id
+              },
+              pull_request: (
+                if .pull_request then {
+                  author_association: .pull_request.author_association,
+                  head: {
+                    ref: .pull_request.head.ref,
+                    repo: {
+                      full_name: .pull_request.head.repo.full_name,
+                      id: .pull_request.head.repo.id
+                    },
+                    sha: .pull_request.head.sha
+                  },
+                  labels: [.pull_request.labels[]?.name],
+                  number: .pull_request.number,
+                  user: {
+                    login: .pull_request.user.login,
+                    type: .pull_request.user.type
+                  }
+                } else null end
+              ),
+              issue: (
+                if .issue then {
+                  author_association: .issue.author_association,
+                  labels: [.issue.labels[]?.name],
+                  number: .issue.number,
+                  pull_request: (.issue.pull_request != null),
+                  user: {
+                    login: .issue.user.login,
+                    type: .issue.user.type
+                  }
+                } else null end
+              ),
+              comment: (
+                if .comment then {
+                  author_association: .comment.author_association,
+                  id: .comment.id,
+                  user: {
+                    login: .comment.user.login,
+                    type: .comment.user.type
+                  }
+                } else null end
+              )
+            }
+          ' "$GITHUB_EVENT_PATH")"
+          pull_rest_debug="$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '
+            {
+              author_association,
+              draft,
+              head: {
+                ref: .head.ref,
+                repo: {
+                  full_name: .head.repo.full_name,
+                  id: .head.repo.id
+                },
+                sha: .head.sha
+              },
+              labels: [.labels[].name],
+              number,
+              user: {
+                login: .user.login,
+                type: .user.type
+              }
+            }
+          ')"
+          issue_rest_debug="$(gh api "repos/$REPO/issues/$PR_NUMBER" --jq '
+            {
+              author_association,
+              labels: [.labels[].name],
+              number,
+              pull_request: (.pull_request != null),
+              user: {
+                login: .user.login,
+                type: .user.type
+              }
+            }
+          ')"
+          jq -n \
+            --arg action "$EVENT_ACTION" \
+            --arg comment_author_association "$EVENT_COMMENT_AUTHOR_ASSOCIATION" \
+            --arg comment_id "$EVENT_COMMENT_ID" \
+            --arg event_name "$EVENT_NAME" \
+            --arg has_reviewer_label "$EVENT_HAS_REVIEWER_LABEL" \
+            --arg head_repo_id "$EVENT_HEAD_REPO_ID" \
+            --arg is_allowed_comment_author "$EVENT_IS_ALLOWED_COMMENT_AUTHOR" \
+            --arg is_allowed_pr_author "$EVENT_IS_ALLOWED_PR_AUTHOR" \
+            --arg is_label_action_match "$EVENT_IS_LABEL_ACTION_MATCH" \
+            --arg is_same_repo_pr "$EVENT_IS_SAME_REPO_PR" \
+            --arg issue_author_association "$EVENT_ISSUE_AUTHOR_ASSOCIATION" \
+            --arg issue_labels_json "$EVENT_ISSUE_LABELS_JSON" \
+            --arg issue_number "$EVENT_ISSUE_NUMBER" \
+            --arg label_name "$EVENT_LABEL_NAME" \
+            --arg pr_author_association "$EVENT_PULL_REQUEST_AUTHOR_ASSOCIATION" \
+            --arg pr_labels_json "$EVENT_PULL_REQUEST_LABELS_JSON" \
+            --arg pr_number "$EVENT_PULL_REQUEST_NUMBER" \
+            --arg repository_fork "$EVENT_REPOSITORY_FORK" \
+            --arg repository_id "$EVENT_REPOSITORY_ID" \
+            --arg sender_login "$EVENT_SENDER_LOGIN" \
+            --arg sender_type "$EVENT_SENDER_TYPE" \
+            --arg skip_ai_label "$EVENT_SKIP_AI_LABEL" \
+            --argjson event_path "$event_path_debug" \
+            --argjson issue_rest "$issue_rest_debug" \
+            --argjson pull_rest "$pull_rest_debug" \
+            '{
+              expression_values: {
+                action: $action,
+                comment_author_association: $comment_author_association,
+                comment_id: $comment_id,
+                event_name: $event_name,
+                has_reviewer_label: $has_reviewer_label,
+                head_repo_id: $head_repo_id,
+                is_allowed_comment_author: $is_allowed_comment_author,
+                is_allowed_pr_author: $is_allowed_pr_author,
+                is_label_action_match: $is_label_action_match,
+                is_same_repo_pr: $is_same_repo_pr,
+                issue_author_association: $issue_author_association,
+                issue_labels_json: $issue_labels_json,
+                issue_number: $issue_number,
+                label_name: $label_name,
+                pr_author_association: $pr_author_association,
+                pr_labels_json: $pr_labels_json,
+                pr_number: $pr_number,
+                repository_fork: $repository_fork,
+                repository_id: $repository_id,
+                sender_login: $sender_login,
+                sender_type: $sender_type,
+                skip_ai_label: $skip_ai_label
+              },
+              github_event_path: $event_path,
+              rest_api: {
+                issue: $issue_rest,
+                pull_request: $pull_rest
+              }
+            }' > /tmp/pr-context/debug-gate-context.json
           gh pr view "$PR_NUMBER" --repo "$REPO" \
             --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels \
             > /tmp/pr-context/pr-metadata.json
