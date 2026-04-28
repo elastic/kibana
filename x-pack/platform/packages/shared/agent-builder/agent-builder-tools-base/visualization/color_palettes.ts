@@ -6,13 +6,37 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { LENS_DYNAMIC_COLOR_PALETTES, LENS_CATEGORICAL_COLOR_PALETTES } from '@kbn/palettes';
+import { getPalettes, KbnPalette } from '@kbn/palettes';
 import { chartTypeRegistry } from './chart_type_registry';
 
 /**
  * Number of color stops sampled from each categorical palette in the prompt
  */
 const CATEGORICAL_PALETTE_PREVIEW_STEPS = 5;
+
+const lightKbnPalettes = getPalettes(false);
+
+/**
+ * Mirrors the Lens dynamic color picker: non-standalone gradient palettes.
+ */
+const lensDynamicColorPalettes = lightKbnPalettes
+  .getAll()
+  .filter((palette) => palette.type === 'gradient');
+
+const LEGACY_CATEGORICAL_PALETTE_IDS = new Set<string>([
+  KbnPalette.Kibana7,
+  KbnPalette.Kibana4,
+  KbnPalette.ElasticClassic,
+]);
+
+/**
+ * Mirrors the Lens categorical color picker, excluding legacy palettes.
+ */
+const lensCategoricalColorPalettes = lightKbnPalettes
+  .getAll()
+  .filter(
+    (palette) => palette.type === 'categorical' && !LEGACY_CATEGORICAL_PALETTE_IDS.has(palette.id)
+  );
 
 const formatPalettePreview = ({
   name,
@@ -23,12 +47,12 @@ const formatPalettePreview = ({
 }): string => `- ${name}: ${colors.join(', ')}`;
 
 const getDynamicPalettePreviews = (steps: number): string[] =>
-  LENS_DYNAMIC_COLOR_PALETTES.map((palette) =>
+  lensDynamicColorPalettes.map((palette) =>
     formatPalettePreview({ name: palette.name, colors: palette.colors(steps) })
   );
 
 const getCategoricalPalettePreviews = (): string[] =>
-  LENS_CATEGORICAL_COLOR_PALETTES.map((palette) =>
+  lensCategoricalColorPalettes.map((palette) =>
     formatPalettePreview({
       name: `${palette.id} (${palette.name})`,
       colors: palette.colors(CATEGORICAL_PALETTE_PREVIEW_STEPS),
