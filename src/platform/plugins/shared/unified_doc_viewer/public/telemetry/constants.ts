@@ -21,12 +21,9 @@
  */
 
 // --- Actions ---
-
 export const EBT_CLICK_ACTION_VIEW_SERVICE = 'viewService';
 export const EBT_CLICK_ACTION_VIEW_TRANSACTION = 'viewTransaction';
 export const EBT_CLICK_ACTION_VIEW_DEPENDENCY = 'viewDependency';
-export const EBT_CLICK_ACTION_VIEW_ERROR = 'viewError';
-export const EBT_CLICK_ACTION_VIEW_SPAN = 'viewSpan';
 export const EBT_CLICK_ACTION_VIEW_TRACE = 'viewTrace';
 export const EBT_CLICK_ACTION_EXPAND_TRACE = 'expandTrace';
 export const EBT_CLICK_ACTION_FILTER_SPAN_LINKS = 'filterSpanLinks';
@@ -42,6 +39,8 @@ export const EBT_ELEMENT_TRACE_SUMMARY_WATERFALL_AREA = 'traceSummaryWaterfallAr
 export const EBT_ELEMENT_DOC_VIEWER_ABOUT = 'docViewerAbout';
 export const EBT_ELEMENT_DOC_VIEWER_LOGS = 'docViewerLogs';
 export const EBT_ELEMENT_DOC_VIEWER_SIMILAR_SPANS = 'docViewerSimilarSpans';
+export const EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW = 'docViewerWaterfallRow';
+export const EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE = 'docViewerWaterfallErrorBadge';
 
 // --- Details ---
 

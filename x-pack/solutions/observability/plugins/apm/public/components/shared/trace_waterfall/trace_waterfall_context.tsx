@@ -63,6 +63,11 @@ export interface TraceWaterfallContextProps {
   agentMarks: AgentMark[];
   scrollElement?: Element;
   scrollStrategy: TraceWaterfallScrollStrategy;
+  // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693.
+  ebt?: {
+    row: { element: string };
+    errorBadge: { element: string };
+  };
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -92,6 +97,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   scrollElement: undefined,
   scrollStrategy: 'window',
   getServiceBadgeHref: undefined,
+  ebt: undefined,
 });
 
 export interface OnNodeClickOptions {
@@ -129,6 +135,11 @@ interface Props {
   entryTransactionId?: string;
   scrollToContextOnMount?: boolean;
   scrollElement?: Element;
+  // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693
+  ebt?: {
+    row: { element: string };
+    errorBadge: { element: string };
+  };
 }
 
 const MAX_DEPTH_OPEN_LIMIT = 2;
@@ -156,6 +167,7 @@ export function TraceWaterfallContextProvider({
   onShowCriticalPathChange,
   entryTransactionId,
   scrollToContextOnMount,
+  ebt,
 }: Props) {
   const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
     useTraceWaterfall({
@@ -293,6 +305,7 @@ export function TraceWaterfallContextProvider({
         agentMarks: getAgentMarks(agentMarks),
         scrollElement,
         scrollStrategy,
+        ebt,
       }}
     >
       {children}

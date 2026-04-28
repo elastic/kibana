@@ -22,10 +22,10 @@ import {
   ERROR_ID,
   EXCEPTION_MESSAGE,
 } from '@kbn/apm-types';
+import { EBT_CLICK_ACTION_VIEW_ERROR } from '@kbn/ebt-click-actions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 import {
-  EBT_CLICK_ACTION_VIEW_ERROR,
   EBT_ELEMENT_DOC_VIEWER_ERRORS,
   EBT_DETAIL_SPAN_DOC,
 } from '../../../../../telemetry/constants';

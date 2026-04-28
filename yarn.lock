@@ -6627,6 +6627,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ebt-click-actions@link:src/platform/packages/shared/kbn-ebt-click-actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""

@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTION_VIEW_SPAN } from '@kbn/ebt-click-actions';
 import type { CriticalPathSegment } from './critical_path';
 import { Bar, type BarSegment } from './bar';
 import { BarDetails } from './bar_details';
@@ -39,6 +40,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     selectedSpanId,
     criticalPathSegmentsById,
     showCriticalPath,
+    ebt,
   } = useTraceWaterfallContext();
   const isContext = contextSpanIds?.includes(item.id) ?? false;
   const isSelected = selectedSpanId === item.id;
@@ -119,6 +121,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           <EuiFlexItem>
             <div
               data-test-subj="traceItemRowContent"
+              data-ebt-action={onClick && ebt?.row ? EBT_CLICK_ACTION_VIEW_SPAN : undefined}
+              data-ebt-element={onClick ? ebt?.row.element : undefined}
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}

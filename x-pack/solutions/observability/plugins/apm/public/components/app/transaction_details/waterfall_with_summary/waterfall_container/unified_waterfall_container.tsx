@@ -12,6 +12,10 @@ import { useHistory } from 'react-router-dom';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { TraceWaterfall } from '../../../../shared/trace_waterfall';
+import {
+  EBT_ELEMENT_WATERFALL_ROW,
+  EBT_ELEMENT_WATERFALL_ERROR_BADGE,
+} from '../../../../shared/trace_waterfall/ebt_constants';
 import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
 import { useGetServiceBadgeHrefFromRouter } from '../../../../shared/trace_waterfall/use_get_service_badge_href_from_router';
 import { UnifiedWaterfallFlyout } from './waterfall/unified_waterfall_flyout';
@@ -92,6 +96,10 @@ export function UnifiedWaterfallContainer({
         traceDocsTotal={traceDocsTotal}
         maxTraceItems={maxTraceItems}
         discoverHref={discoverHref}
+        ebt={{
+          row: { element: EBT_ELEMENT_WATERFALL_ROW },
+          errorBadge: { element: EBT_ELEMENT_WATERFALL_ERROR_BADGE },
+        }}
       >
         <UnifiedWaterfallFlyout
           waterfallItemId={waterfallItemId}

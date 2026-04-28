@@ -17,14 +17,15 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AgentIcon } from '@kbn/custom-icons';
+import { EBT_CLICK_ACTION_VIEW_ERROR } from '@kbn/ebt-click-actions';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -39,7 +40,7 @@ const ORPHAN_CONTENT = i18n.translate(
 
 export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref, onErrorClick, onClick, getServiceBadgeHref } =
+  const { getRelatedErrorsHref, onErrorClick, onClick, getServiceBadgeHref, ebt } =
     useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
   const errorCount = item.errors.length;
@@ -161,6 +162,8 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 color={theme.euiTheme.colors.danger}
                 iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
+                data-ebt-action={ebt?.errorBadge ? EBT_CLICK_ACTION_VIEW_ERROR : undefined}
+                data-ebt-element={ebt?.errorBadge.element}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();

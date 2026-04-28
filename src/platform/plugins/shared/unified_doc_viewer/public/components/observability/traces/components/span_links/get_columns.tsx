@@ -14,12 +14,12 @@ import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
+import { EBT_CLICK_ACTION_VIEW_SPAN } from '@kbn/ebt-click-actions';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 import {
   EBT_CLICK_ACTION_VIEW_SERVICE,
-  EBT_CLICK_ACTION_VIEW_SPAN,
   EBT_CLICK_ACTION_VIEW_TRACE,
   EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
   EBT_DETAIL_SPAN_DOC,
