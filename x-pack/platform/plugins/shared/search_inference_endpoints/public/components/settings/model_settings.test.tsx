@@ -61,8 +61,6 @@ const defaultFormState = {
   isDirty: false,
   assignments: { child_1: ['ep-1'] },
   effectiveRecommendedEndpoints: { child_1: ['ep-1'] },
-  hasSavedObject: { child_1: false },
-  dirtyFeatureIds: new Set<string>(),
   sections: [
     {
       featureId: 'search',
@@ -80,7 +78,6 @@ const defaultFormState = {
 
 const defaultModelSettingsState = {
   state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
-  savedState: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
   isDirty: false,
   setEnableAi: jest.fn(),
   setDefaultModelId: jest.fn(),
@@ -92,7 +89,6 @@ const defaultModelSettingsState = {
 const validValidation = {
   errors: [],
   isValid: true,
-  missingDefaultModel: false,
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -228,7 +224,6 @@ describe('ModelSettings', () => {
     mockUseDefaultModelValidation.mockReturnValue({
       errors: ['Select a default model to save changes.'],
       isValid: false,
-      missingDefaultModel: true,
     });
 
     render(
@@ -257,7 +252,6 @@ describe('ModelSettings', () => {
     mockUseDefaultModelValidation.mockReturnValue({
       errors: ['Select a default model to save changes.'],
       isValid: false,
-      missingDefaultModel: true,
     });
 
     render(

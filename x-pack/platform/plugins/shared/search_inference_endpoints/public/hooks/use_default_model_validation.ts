@@ -14,7 +14,6 @@ import type { DefaultModelSettingsState } from './use_default_model_settings';
 export interface DefaultModelValidationResult {
   errors: readonly string[];
   isValid: boolean;
-  missingDefaultModel: boolean;
 }
 
 /**
@@ -37,13 +36,12 @@ export const useDefaultModelValidation = (
 
   return useMemo(() => {
     if (!state.enableAi) {
-      return { errors: [], isValid: true, missingDefaultModel: false };
+      return { errors: [], isValid: true };
     }
 
     const errors: string[] = [];
-    const missingDefaultModel = state.defaultModelId === NO_DEFAULT_MODEL;
 
-    if (missingDefaultModel) {
+    if (state.defaultModelId === NO_DEFAULT_MODEL) {
       errors.push(
         i18n.translate(
           'xpack.searchInferenceEndpoints.settings.defaultModel.error.selectDefaultModel',
@@ -67,7 +65,6 @@ export const useDefaultModelValidation = (
     return {
       errors,
       isValid: errors.length === 0,
-      missingDefaultModel,
     };
   }, [state.enableAi, state.defaultModelId, connectorExists, connectorExistsLoading]);
 };

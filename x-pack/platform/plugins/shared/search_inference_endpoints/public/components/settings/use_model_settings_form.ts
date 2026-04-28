@@ -23,8 +23,6 @@ export interface ModelSettingsForm {
   isDirty: boolean;
   assignments: Assignments;
   effectiveRecommendedEndpoints: Record<string, string[]>;
-  hasSavedObject: Record<string, boolean>;
-  dirtyFeatureIds: ReadonlySet<string>;
   sections: FeatureSection[];
   invalidEndpointIds: Set<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
@@ -138,16 +136,6 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [settingsData]
   );
 
-  const hasSavedObject = useMemo<Record<string, boolean>>(
-    () =>
-      Object.fromEntries(
-        sections.flatMap(({ children }) =>
-          children.map((f): [string, boolean] => [f.featureId, savedMap.has(f.featureId)])
-        )
-      ),
-    [sections, savedMap]
-  );
-
   const defaultAssignments = useMemo((): Assignments => {
     return Object.fromEntries(
       sections.flatMap(({ children }) =>
@@ -202,8 +190,6 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     isDirty,
     assignments,
     effectiveRecommendedEndpoints,
-    hasSavedObject,
-    dirtyFeatureIds,
     sections,
     invalidEndpointIds,
     updateEndpoints,

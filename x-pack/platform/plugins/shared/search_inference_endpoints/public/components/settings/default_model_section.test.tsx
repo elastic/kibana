@@ -28,14 +28,12 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 const validResult: DefaultModelValidationResult = {
   errors: [],
   isValid: true,
-  missingDefaultModel: false,
 };
 
 const createMockSettings = (
   overrides: Partial<UseDefaultModelSettingsReturn> = {}
 ): UseDefaultModelSettingsReturn => ({
   state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
-  savedState: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
   isDirty: false,
   setEnableAi: jest.fn(),
   setDefaultModelId: jest.fn(),
@@ -126,7 +124,6 @@ describe('DefaultModelSection', () => {
     const invalid: DefaultModelValidationResult = {
       errors: ['Select a default model to save changes.'],
       isValid: false,
-      missingDefaultModel: true,
     };
 
     render(

@@ -22,7 +22,6 @@ export interface DefaultModelSettingsState {
 
 export interface UseDefaultModelSettingsReturn {
   state: DefaultModelSettingsState;
-  savedState: DefaultModelSettingsState;
   isDirty: boolean;
   setEnableAi: (enabled: boolean) => void;
   setDefaultModelId: (id: string) => void;
@@ -180,7 +179,6 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
 
   return {
     state,
-    savedState,
     isDirty,
     setEnableAi,
     setDefaultModelId,

@@ -32,7 +32,6 @@ describe('useDefaultModelValidation', () => {
     expect(result.current).toEqual({
       errors: [],
       isValid: true,
-      missingDefaultModel: false,
     });
   });
 
@@ -59,7 +58,6 @@ describe('useDefaultModelValidation', () => {
     );
 
     expect(withFsmOn.current.isValid).toBe(false);
-    expect(withFsmOn.current.missingDefaultModel).toBe(true);
     expect(withFsmOn.current.errors[0]).toMatch(/Select a default model/);
 
     const { result: withFsmOff } = renderHook(() =>
@@ -71,7 +69,6 @@ describe('useDefaultModelValidation', () => {
     );
 
     expect(withFsmOff.current.isValid).toBe(false);
-    expect(withFsmOff.current.missingDefaultModel).toBe(true);
     expect(withFsmOff.current.errors[0]).toMatch(/Select a default model/);
   });
 
