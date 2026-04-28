@@ -90,17 +90,25 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
-    const { forceDelete } = request.query;
-    const { successCount } = await APIKeyService.deleteEnrollmentApiKeys(
+    const { forceDelete, includeHidden } = request.query;
+    const { successCount, errorCount } = await APIKeyService.deleteEnrollmentApiKeys(
       esClient,
       [request.params.keyId],
       forceDelete,
-      useSpaceAwareness ? currentNamespace : undefined
+      useSpaceAwareness ? currentNamespace : undefined,
+      includeHidden
     );
 
-    if (successCount === 0) {
+    if (successCount === 0 && errorCount === 0) {
       return response.notFound({
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
+      });
+    }
+
+    if (successCount === 0 && errorCount > 0) {
+      return response.customError({
+        statusCode: 500,
+        body: { message: `Failed to process EnrollmentAPIKey ${request.params.keyId}` },
       });
     }
 
@@ -127,7 +135,7 @@ export const bulkDeleteEnrollmentApiKeysHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
 
-  const { tokenIds, kuery, forceDelete } = request.body;
+  const { tokenIds, kuery, forceDelete, includeHidden } = request.body;
   const { count, successCount, errorCount } = await APIKeyService.bulkDeleteEnrollmentApiKeys(
     esClient,
     {
@@ -135,6 +143,7 @@ export const bulkDeleteEnrollmentApiKeysHandler: RequestHandler<
       kuery,
       forceDelete,
       spaceId: useSpaceAwareness ? currentNamespace : undefined,
+      includeHidden,
     }
   );
 

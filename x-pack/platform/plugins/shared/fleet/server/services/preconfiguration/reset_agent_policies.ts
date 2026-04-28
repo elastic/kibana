@@ -183,6 +183,8 @@ async function _deleteExistingData(
     await deleteEnrollmentApiKeys(
       esClient,
       enrollmentApiKeys.map((k) => k.id),
+      true,
+      undefined,
       true
     );
   }

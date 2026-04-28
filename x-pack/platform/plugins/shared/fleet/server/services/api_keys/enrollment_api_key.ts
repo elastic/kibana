@@ -150,7 +150,8 @@ export async function deleteEnrollmentApiKeys(
   esClient: ElasticsearchClient,
   ids: string[],
   forceDelete = false,
-  spaceId?: string
+  spaceId?: string,
+  includeHidden = false
 ): Promise<{ successCount: number; errorCount: number }> {
   if (ids.length === 0) return { successCount: 0, errorCount: 0 };
 
@@ -176,8 +177,9 @@ export async function deleteEnrollmentApiKeys(
       doc as { _id: string; _source: FleetServerEnrollmentAPIKey }
     );
 
+    if (key.hidden && !includeHidden) continue;
+
     if (spaceId) {
-      if (key.hidden) continue;
       const namespaces = doc._source.namespaces;
       if (namespaces?.includes(ALL_SPACES_ID)) {
         // all spaces have access
@@ -292,6 +294,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
   await bulkDeleteEnrollmentApiKeys(esClient, {
     kuery: `policy_id:"${agentPolicyId}"`,
     forceDelete: true,
+    includeHidden: true,
   });
 }
 
@@ -302,14 +305,21 @@ export async function bulkDeleteEnrollmentApiKeys(
     kuery?: string;
     forceDelete?: boolean;
     spaceId?: string;
+    includeHidden?: boolean;
   }
 ): Promise<{ count: number; successCount: number; errorCount: number }> {
-  const { tokenIds, kuery, forceDelete = false, spaceId } = options;
+  const { tokenIds, kuery, forceDelete = false, spaceId, includeHidden = false } = options;
   let successCount = 0;
   let errorCount = 0;
 
   if (tokenIds && tokenIds.length > 0) {
-    const result = await deleteEnrollmentApiKeys(esClient, tokenIds, forceDelete, spaceId);
+    const result = await deleteEnrollmentApiKeys(
+      esClient,
+      tokenIds,
+      forceDelete,
+      spaceId,
+      includeHidden
+    );
     successCount = result.successCount;
     errorCount = result.errorCount;
   } else if (kuery) {
@@ -336,7 +346,8 @@ export async function bulkDeleteEnrollmentApiKeys(
         esClient,
         allIds.slice(i, i + BATCH_SIZE),
         forceDelete,
-        spaceId
+        spaceId,
+        includeHidden
       );
       successCount += result.successCount;
       errorCount += result.errorCount;

@@ -62,6 +62,13 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
           'When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.',
       },
     }),
+    includeHidden: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'When true, allow deletion of hidden enrollment tokens (managed/agentless policies). Defaults to false.',
+      },
+    }),
   }),
 };
 
@@ -107,6 +114,13 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
         meta: {
           description:
             'When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.',
+        },
+      }),
+      includeHidden: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'When true, allow deletion of hidden enrollment tokens (managed/agentless policies). Defaults to false.',
         },
       }),
     },

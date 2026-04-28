@@ -171,6 +171,58 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
       });
+
+      describe('hidden keys (managed policy)', () => {
+        let hiddenKeyIds: string[];
+
+        before(async () => {
+          await apiClient.createAgentPolicy(undefined, {
+            id: 'bulk-hidden-policy',
+            is_managed: true,
+          });
+
+          const created = await Promise.all(
+            Array.from({ length: 2 }, () =>
+              supertest
+                .post(`/api/fleet/enrollment_api_keys`)
+                .set('kbn-xsrf', 'xxx')
+                .send({ policy_id: 'bulk-hidden-policy' })
+                .expect(200)
+            )
+          );
+
+          hiddenKeyIds = created.map((r) => r.body.item.id);
+        });
+
+        it('should skip hidden keys by default when bulk deleting by tokenIds', async () => {
+          const { body } = await supertest
+            .post(`/api/fleet/enrollment_api_keys/_bulk_delete`)
+            .set('kbn-xsrf', 'xxx')
+            .send({ tokenIds: hiddenKeyIds, forceDelete: true })
+            .expect(200);
+
+          expect(body.successCount).to.be(0);
+
+          // Keys should still exist
+          for (const keyId of hiddenKeyIds) {
+            await supertest.get(`/api/fleet/enrollment_api_keys/${keyId}`).expect(200);
+          }
+        });
+
+        it('should delete hidden keys when includeHidden is true', async () => {
+          const { body } = await supertest
+            .post(`/api/fleet/enrollment_api_keys/_bulk_delete`)
+            .set('kbn-xsrf', 'xxx')
+            .send({ tokenIds: hiddenKeyIds, forceDelete: true, includeHidden: true })
+            .expect(200);
+
+          expect(body.successCount).to.be(2);
+
+          for (const keyId of hiddenKeyIds) {
+            await supertest.get(`/api/fleet/enrollment_api_keys/${keyId}`).expect(404);
+          }
+        });
+      });
     });
   });
 }

@@ -167,7 +167,8 @@ const NOT_HIDDEN_KUERY = 'not hidden:true';
 function buildKuery(
   search: string,
   selectedPolicyIds: string[],
-  activeFilter: ActiveFilter
+  activeFilter: ActiveFilter,
+  excludedPolicyIds: string[]
 ): string {
   const parts: string[] = [];
 
@@ -184,6 +185,11 @@ function buildKuery(
     parts.push('(active:true)');
   } else if (activeFilter === 'inactive') {
     parts.push('(active:false)');
+  }
+
+  if (excludedPolicyIds.length > 0) {
+    const exclusion = excludedPolicyIds.map((id) => `policy_id:"${id}"`).join(' or ');
+    parts.push(`(not (${exclusion}))`);
   }
 
   parts.push(`(${NOT_HIDDEN_KUERY})`);
@@ -217,13 +223,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     clearSelection();
   };
 
-  const kuery = buildKuery(search, selectedPolicyIds, activeFilter);
-
-  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
-    page: pagination.currentPage,
-    perPage: pagination.pageSize,
-    kuery,
-  });
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
@@ -239,14 +238,20 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   );
 
   const visibleAgentPolicies = agentPolicies.filter((p) => !p.is_managed && !p.supports_agentless);
+  const excludedPolicyIds = agentPolicies
+    .filter((p) => p.is_managed || p.supports_agentless)
+    .map((p) => p.id);
+
+  const kuery = buildKuery(search, selectedPolicyIds, activeFilter, excludedPolicyIds);
+
+  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+    kuery,
+  });
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
-  const rowItems =
-    enrollmentAPIKeysRequest?.data?.items.filter((enrollmentKey) => {
-      if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
-      const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
-      return !agentPolicy?.is_managed && !agentPolicy?.supports_agentless;
-    }) || [];
+  const rowItems = enrollmentAPIKeysRequest?.data?.items ?? [];
 
   const selectedCount = selectionMode === 'query' ? total : selectedTokens.length;
   const showSelectionInfo =

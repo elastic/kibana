@@ -154,26 +154,9 @@ describe('enrollment api keys', () => {
   });
 
   describe('deleteEnrollmentApiKeys', () => {
-    it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
+    const setupMocks = (esClient: any, docs: any[]) => {
       esClient.bulk.mockResolvedValue({} as any);
-
-      esClient.mget.mockResolvedValue({
-        docs: [
-          {
-            _id: 'test-id',
-            _index: ENROLLMENT_API_KEYS_INDEX,
-            _source: {
-              active: true,
-              created_at: new Date().toISOString(),
-              api_key_id: 'test-enrollment-api-key-id',
-            },
-            found: true,
-          },
-        ],
-      });
-
+      esClient.mget.mockResolvedValue({ docs });
       mockedAppContextService.getSecurity.mockReturnValue({
         authc: {
           apiKeys: {
@@ -181,12 +164,90 @@ describe('enrollment api keys', () => {
           },
         },
       } as any);
+    };
+
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      setupMocks(esClient, [
+        {
+          _id: 'test-id',
+          _index: ENROLLMENT_API_KEYS_INDEX,
+          _source: {
+            active: true,
+            created_at: new Date().toISOString(),
+            api_key_id: 'test-enrollment-api-key-id',
+          },
+          found: true,
+        },
+      ]);
 
       await deleteEnrollmentApiKeys(esClient, ['test-enrollment-api-key-id']);
 
       expect(auditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message:
           'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id] [forceDelete=false]',
+      });
+    });
+
+    it('should skip hidden keys by default', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      setupMocks(esClient, [
+        {
+          _id: 'hidden-key',
+          _index: ENROLLMENT_API_KEYS_INDEX,
+          _source: {
+            active: true,
+            created_at: new Date().toISOString(),
+            api_key_id: 'hidden-api-key-id',
+            hidden: true,
+          },
+          found: true,
+        },
+      ]);
+
+      const result = await deleteEnrollmentApiKeys(esClient, ['hidden-key']);
+
+      expect(result).toEqual({ successCount: 0, errorCount: 0 });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should delete hidden keys when includeHidden is true', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      setupMocks(esClient, [
+        {
+          _id: 'hidden-key',
+          _index: ENROLLMENT_API_KEYS_INDEX,
+          _source: {
+            active: true,
+            created_at: new Date().toISOString(),
+            api_key_id: 'hidden-api-key-id',
+            hidden: true,
+          },
+          found: true,
+        },
+      ]);
+
+      mockedAppContextService.getSecurity.mockReturnValue({
+        authc: {
+          apiKeys: {
+            invalidateAsInternalUser: jest.fn().mockResolvedValue({
+              invalidated_api_keys: ['hidden-api-key-id'],
+              previously_invalidated_api_keys: [],
+              error_count: 0,
+            }),
+          },
+        },
+      } as any);
+
+      await deleteEnrollmentApiKeys(esClient, ['hidden-key'], false, undefined, true);
+
+      expect(esClient.bulk).toHaveBeenCalled();
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message:
+          'User deleting enrollment API key [id=hidden-key] [api_key_id=hidden-api-key-id] [forceDelete=false]',
       });
     });
   });
