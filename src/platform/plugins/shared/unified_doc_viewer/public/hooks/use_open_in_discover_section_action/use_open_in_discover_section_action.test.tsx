@@ -13,12 +13,17 @@ import {
   OPEN_IN_DISCOVER_LABEL,
   OPEN_IN_DISCOVER_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
+import {
+  EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
+  EBT_DETAIL_SPAN_DOC,
+} from '../../telemetry/constants';
 import { DocViewerExtensionActionsProvider } from '../use_doc_viewer_extension_actions';
 import { useOpenInDiscoverSectionAction } from '.';
 
 describe('useOpenInDiscoverSectionAction', () => {
   const tabLabel = 'Some section';
   const dataTestSubj = 'openInDiscover';
+  const ebt = { element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY, detail: EBT_DETAIL_SPAN_DOC };
 
   it('returns undefined when href is missing and openInNewTab cannot be used', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -34,6 +39,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql: undefined,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
@@ -56,6 +62,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql: undefined,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
@@ -68,6 +75,11 @@ describe('useOpenInDiscoverSectionAction', () => {
         icon: 'discoverApp',
         dataTestSubj,
         onClick: undefined,
+        ebt: expect.objectContaining({
+          action: 'openInDiscover',
+          element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
+          detail: EBT_DETAIL_SPAN_DOC,
+        }),
       })
     );
   });
@@ -88,6 +100,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
@@ -127,6 +140,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );

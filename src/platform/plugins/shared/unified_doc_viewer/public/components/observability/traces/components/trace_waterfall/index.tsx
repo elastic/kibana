@@ -23,6 +23,11 @@ import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import type { TraceDocFlyoutType } from '../../common/types';
+import {
+  EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
+  EBT_DETAIL_SPAN_DOC,
+  EBT_CLICK_ACTION_EXPAND_TRACE,
+} from '../../../../../telemetry/constants';
 
 interface Props {
   traceId: string;
@@ -124,6 +129,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+    ebt: { element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY, detail: EBT_DETAIL_SPAN_DOC },
   });
 
   const actionId = 'traceWaterfallFullScreenAction';
@@ -227,6 +233,11 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         ariaLabel: fullScreenButtonLabel,
         id: actionId,
         dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+        ebt: {
+          action: EBT_CLICK_ACTION_EXPAND_TRACE,
+          element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
+          detail: EBT_DETAIL_SPAN_DOC,
+        },
       },
       ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
     ],
@@ -267,6 +278,9 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
       >
         <div
           data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
+          data-ebt-action={EBT_CLICK_ACTION_EXPAND_TRACE}
+          data-ebt-element={EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY}
+          data-ebt-detail={EBT_DETAIL_SPAN_DOC}
           aria-label={fullScreenButtonLabel}
           tabIndex={0}
           onClick={() => setShowFullScreenWaterfall(true)}

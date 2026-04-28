@@ -23,6 +23,10 @@ import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_char
 import { buildSectionDescription, type FieldInfo } from './build_section_description';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../hooks/use_open_in_discover_section_action';
+import {
+  EBT_ELEMENT_DOC_VIEWER_SIMILAR_ERRORS,
+  EBT_DETAIL_LOG_DOC,
+} from '../../../../telemetry/constants';
 
 const createFieldInfo = (value: unknown, field: string | undefined): FieldInfo | undefined => {
   return value && field ? { value, field } : undefined;
@@ -116,6 +120,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'docViewerSimilarErrorsOpenInDiscoverButton',
+    ebt: { element: EBT_ELEMENT_DOC_VIEWER_SIMILAR_ERRORS, detail: EBT_DETAIL_LOG_DOC },
   });
 
   const actions = useMemo(

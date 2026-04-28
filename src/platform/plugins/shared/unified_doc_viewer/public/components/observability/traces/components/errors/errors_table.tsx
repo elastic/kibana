@@ -31,6 +31,10 @@ import {
 } from '../../../../doc_viewer_logs_overview/scrollable_section_wrapper';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import {
+  EBT_ELEMENT_DOC_VIEWER_ERRORS,
+  EBT_DETAIL_SPAN_DOC,
+} from '../../../../../telemetry/constants';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
@@ -71,6 +75,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       esql: esqlQueryString,
       tabLabel: sectionTitle,
       dataTestSubj: 'docViewerErrorsOpenInDiscoverButton',
+      ebt: { element: EBT_ELEMENT_DOC_VIEWER_ERRORS, detail: EBT_DETAIL_SPAN_DOC },
     });
     const actions = useMemo(
       () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),

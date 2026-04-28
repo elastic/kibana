@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { EBT_CLICK_ACTION_OPEN_IN_DISCOVER } from '@kbn/ebt-click-actions';
 import type { Action } from '../../components/content_framework/section/section_actions';
 import {
   OPEN_IN_DISCOVER_LABEL,
@@ -20,12 +21,16 @@ interface UseOpenInDiscoverSectionActionParams {
   dataTestSubj: string;
   href?: string;
   esql?: string;
+  ebt: {
+    element: string;
+    detail: string;
+  };
 }
 
 export function useOpenInDiscoverSectionAction(
   params: UseOpenInDiscoverSectionActionParams
 ): Action | undefined {
-  const { href, esql, tabLabel, dataTestSubj } = params;
+  const { href, esql, tabLabel, dataTestSubj, ebt } = params;
   const actions = useDocViewerExtensionActionsContext();
   const openInNewTab = actions?.openInNewTab;
   const canOpenInNewTab = openInNewTab && esql;
@@ -49,6 +54,11 @@ export function useOpenInDiscoverSectionAction(
       label: OPEN_IN_DISCOVER_LABEL,
       icon: 'discoverApp',
       ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
+      ebt: {
+        action: EBT_CLICK_ACTION_OPEN_IN_DISCOVER,
+        element: ebt?.element,
+        detail: ebt?.detail,
+      },
     };
 
     if (href) {
@@ -67,5 +77,5 @@ export function useOpenInDiscoverSectionAction(
       ...actionBase,
       onClick,
     };
-  }, [canOpenInNewTab, dataTestSubj, href, onClick]);
+  }, [canOpenInNewTab, dataTestSubj, href, onClick, ebt.element, ebt.detail]);
 }

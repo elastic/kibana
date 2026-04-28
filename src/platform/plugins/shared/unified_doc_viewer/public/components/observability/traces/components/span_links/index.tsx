@@ -37,6 +37,11 @@ import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import {
+  EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
+  EBT_DETAIL_SPAN_DOC,
+  EBT_CLICK_ACTION_FILTER_SPAN_LINKS,
+} from '../../../../../telemetry/constants';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
@@ -124,6 +129,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'docViewerSpanLinksOpenInDiscoverButton',
+    ebt: { element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS, detail: EBT_DETAIL_SPAN_DOC },
   });
   const actions = useMemo(
     () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
@@ -173,6 +179,9 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
                     }
                   )}
                   data-test-subj="unifiedDocViewerSpanLinkTypeSelect"
+                  data-ebt-action={EBT_CLICK_ACTION_FILTER_SPAN_LINKS}
+                  data-ebt-element={EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS}
+                  data-ebt-detail={EBT_DETAIL_SPAN_DOC}
                   options={selectOptions}
                   value={type}
                   onChange={(e) => {
