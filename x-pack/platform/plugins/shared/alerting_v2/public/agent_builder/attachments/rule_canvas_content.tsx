@@ -71,16 +71,8 @@ export const RuleCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           handler: async () => {
             const created = await rulesApi.createRule({
-              kind: data.kind,
-              metadata: data.metadata,
-              time_field: data.time_field ?? '@timestamp',
-              schedule: data.schedule,
-              evaluation: data.evaluation,
-              state_transition: data.state_transition ?? null,
-              ...(data.recovery_policy ? { recovery_policy: data.recovery_policy } : {}),
-              ...(data.grouping ? { grouping: data.grouping } : {}),
-              ...(data.no_data ? { no_data: data.no_data } : {}),
-              ...(data.artifacts ? { artifacts: data.artifacts } : {}),
+              kind: data.kind,              
+              ...buildRuleCommonPayload(data),
             });
             await updateOrigin(created.id);
             notifications.toasts.addSuccess(
@@ -106,16 +98,7 @@ export const RuleCanvasContent = ({
         type: ActionButtonType.PRIMARY,
         handler: async () => {
           await rulesApi.updateRule(ruleId, {
-            metadata: data.metadata,
-            schedule: data.schedule,
-            evaluation: { query: data.evaluation?.query },
-            state_transition: data.state_transition ?? null,
-            ...(data.recovery_policy !== undefined
-              ? { recovery_policy: data.recovery_policy }
-              : {}),
-            ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
-            ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
-            ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
+            ...buildRuleCommonPayload(data),
           });
           notifications.toasts.addSuccess(
             i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
@@ -165,3 +148,15 @@ export const RuleCanvasContent = ({
 const hasOrigin = (origin: string | undefined): origin is string => {
   return typeof origin === 'string';
 };
+
+const buildRuleCommonPayload = (data: RuleAttachment['data']) => ({
+  metadata: data.metadata,
+  schedule: data.schedule,
+  evaluation: data.evaluation,
+  state_transition: data.state_transition ?? null,
+  time_field: data.time_field ?? '@timestamp',
+  ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
+  ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
+  ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
+  ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
+});
