@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { useAttackDetailsContext } from '../context';
 import { getField } from '../../document_details/shared/utils';
 
@@ -59,6 +59,11 @@ export const useHeaderData = () => {
     return normalizeToStringArray(value);
   }, [getFieldsData]);
 
+  const alertRuleUuid = useMemo(
+    () => getField(getFieldsData(ALERT_RULE_UUID)) as string | undefined,
+    [getFieldsData]
+  );
+
   return useMemo(
     () => ({
       title,
@@ -67,7 +72,8 @@ export const useHeaderData = () => {
       alertsCount: alertIds.length,
       replacements,
       assignees,
+      alertRuleUuid,
     }),
-    [title, timestamp, nonDuplicatedAlertIds, alertIds.length, replacements, assignees]
+    [title, timestamp, nonDuplicatedAlertIds, alertIds.length, replacements, assignees, alertRuleUuid]
   );
 };

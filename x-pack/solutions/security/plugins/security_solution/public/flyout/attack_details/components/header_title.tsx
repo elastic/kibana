@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
@@ -16,6 +17,7 @@ import { Status } from './status';
 import { Assignees } from './assignees';
 import { Notes } from '../../../flyout_v2/shared/components/notes';
 import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
+import { DetailsFlyout as ScheduleDetailsFlyout } from '../../../attack_discovery/pages/settings_flyout/schedule/details_flyout';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
@@ -37,9 +39,21 @@ const ATTACK_HEADER_BADGE = i18n.translate(
  * Header data for the Attack details flyout
  */
 export const HeaderTitle = memo(() => {
-  const { title, timestamp, alertsCount } = useHeaderData();
+  const { title, timestamp, alertsCount, alertRuleUuid } = useHeaderData();
   const { attackId } = useAttackDetailsContext();
   const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
+
+  const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
+
+  const isScheduled = alertRuleUuid != null && alertRuleUuid !== ATTACK_DISCOVERY_AD_HOC_RULE_ID;
+
+  const openScheduleDetails = useCallback(() => {
+    if (alertRuleUuid) {
+      setScheduleDetailsId(alertRuleUuid);
+    }
+  }, [alertRuleUuid]);
+
+  const closeScheduleDetails = useCallback(() => setScheduleDetailsId(undefined), []);
 
   return (
     <>
@@ -49,7 +63,13 @@ export const HeaderTitle = memo(() => {
           <EuiSpacer size="xs" />
         </>
       )}
-      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
+      {isScheduled ? (
+        <EuiLink onClick={openScheduleDetails}>
+          <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} isLink />
+        </EuiLink>
+      ) : (
+        <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
+      )}
       <EuiSpacer size="s" />
       <EuiBadge
         aria-label={ATTACK_HEADER_BADGE}
@@ -104,6 +124,10 @@ export const HeaderTitle = memo(() => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {scheduleDetailsId && (
+        <ScheduleDetailsFlyout scheduleId={scheduleDetailsId} onClose={closeScheduleDetails} />
+      )}
     </>
   );
 });

@@ -42,6 +42,8 @@ describe('useHeaderData', () => {
           return { key: 'value' };
         case ALERT_WORKFLOW_ASSIGNEE_IDS:
           return ['user-1'];
+        case 'kibana.alert.rule.uuid':
+          return 'schedule-uuid-1';
         default:
           return null;
       }
@@ -57,6 +59,7 @@ describe('useHeaderData', () => {
     expect(result.current.alertsCount).toBe(1);
     expect(result.current.replacements).toEqual({ key: 'value' });
     expect(result.current.assignees).toEqual(['user-1']);
+    expect(result.current.alertRuleUuid).toBe('schedule-uuid-1');
   });
 
   it('should normalize alertIds array correctly', () => {
