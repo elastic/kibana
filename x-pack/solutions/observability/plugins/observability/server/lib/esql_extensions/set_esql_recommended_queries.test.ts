@@ -89,12 +89,12 @@ describe('setEsqlRecommendedQueries', () => {
     const newMetricQueries = queries.slice(4, 8);
 
     // First two use SUM(RATE(...))
-    expect(newMetricQueries[0].query).toContain('SUM(RATE(system.network.io))');
-    expect(newMetricQueries[1].query).toContain('SUM(RATE(system.network.io))');
+    expect(newMetricQueries[0].query).toContain('SUM(RATE(system.network.out.bytes))');
+    expect(newMetricQueries[1].query).toContain('SUM(RATE(system.network.out.bytes))');
 
     // Last two use AVG(...)
-    expect(newMetricQueries[2].query).toContain('AVG(system.cpu.utilization)');
-    expect(newMetricQueries[3].query).toContain('AVG(system.cpu.utilization)');
+    expect(newMetricQueries[2].query).toContain('AVG(system.cpu.total.norm.pct)');
+    expect(newMetricQueries[3].query).toContain('AVG(system.cpu.total.norm.pct)');
   });
 
   it('includes host.name breakdown in the dimension queries', () => {

@@ -71,12 +71,12 @@ const METRICS_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.esqlQueries.metricCounterRateOverTime.name', {
       defaultMessage: 'Metric counter rate over time',
     }),
-    query: `TS ${METRICS_INDEX_PATTERN} | STATS SUM(RATE(system.network.io)) BY TBUCKET(100)`,
+    query: `TS ${METRICS_INDEX_PATTERN} | STATS SUM(RATE(system.network.out.bytes)) BY TBUCKET(100)`,
     description: i18n.translate(
       'xpack.observability.esqlQueries.metricCounterRateOverTime.description',
       {
         defaultMessage:
-          'Calculates the rate of a monotonic counter (like network bytes transferred) over time, handling resets automatically',
+          'Calculates the rate of a monotonic counter (like bytes sent) over time, handling resets automatically',
       }
     ),
   },
@@ -87,7 +87,7 @@ const METRICS_ESQL_RECOMMENDED_QUERIES = [
         defaultMessage: 'Metric counter rate breakdown by dimension over time',
       }
     ),
-    query: `TS ${METRICS_INDEX_PATTERN} | STATS SUM(RATE(system.network.io)) BY TBUCKET(100), host.name`,
+    query: `TS ${METRICS_INDEX_PATTERN} | STATS SUM(RATE(system.network.out.bytes)) BY TBUCKET(100), host.name`,
     description: i18n.translate(
       'xpack.observability.esqlQueries.metricCounterRateBreakdownByDimension.description',
       {
@@ -100,7 +100,7 @@ const METRICS_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.esqlQueries.metricOverTime.name', {
       defaultMessage: 'Metric over time',
     }),
-    query: `TS ${METRICS_INDEX_PATTERN} | STATS AVG(system.cpu.utilization) BY TBUCKET(100)`,
+    query: `TS ${METRICS_INDEX_PATTERN} | STATS AVG(system.cpu.total.norm.pct) BY TBUCKET(100)`,
     description: i18n.translate('xpack.observability.esqlQueries.metricOverTime.description', {
       defaultMessage: 'Calculates the average value of a metric (like CPU or Memory) over time',
     }),
@@ -109,7 +109,7 @@ const METRICS_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.esqlQueries.metricBreakdownByDimension.name', {
       defaultMessage: 'Metric breakdown by dimension over time',
     }),
-    query: `TS ${METRICS_INDEX_PATTERN} | STATS AVG(system.cpu.utilization) BY TBUCKET(100), host.name`,
+    query: `TS ${METRICS_INDEX_PATTERN} | STATS AVG(system.cpu.total.norm.pct) BY TBUCKET(100), host.name`,
     description: i18n.translate(
       'xpack.observability.esqlQueries.metricBreakdownByDimension.description',
       {
