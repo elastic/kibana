@@ -76,8 +76,9 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
   const handleDevToolsLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (hasActiveModifierKey(e)) return;
-      e.preventDefault();
+
       if (consoleHref && navigateToUrl) {
+        e.preventDefault();
         navigateToUrl(consoleHref);
       }
     },
@@ -96,8 +97,8 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
   const handleSearchProfilerLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (hasActiveModifierKey(e)) return;
-      e.preventDefault();
       if (searchProfilerHref && navigateToUrl) {
+        e.preventDefault();
         navigateToUrl(searchProfilerHref);
       }
     },
