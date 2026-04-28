@@ -96,7 +96,7 @@ api-docs-overlay: api-docs-fix-required ## Apply all overlays (including bump-sl
 # injects Bump-specific HTML and would render incorrectly in other tools.
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: api-docs-overlay-external
-api-docs-overlay-external: api-docs-fix-required merge-api-docs-stateful ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
+api-docs-overlay-external: merge-api-docs-stateful api-docs-fix-required ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
 	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/required_field_fixes.overlays.yaml" > "output/kibana.tmp0.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp0.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
