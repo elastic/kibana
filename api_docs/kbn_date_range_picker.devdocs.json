@@ -49,6 +49,7 @@
             "lineNumber": 185,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DateRangePickerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -306,6 +307,7 @@
                 "lineNumber": 62,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeRangeBounds",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -807,6 +809,7 @@
                 "lineNumber": 77,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DateRangePickerOnChangeProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1096,6 +1099,7 @@
                 "lineNumber": 133,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeRangeBoundsOption",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1136,6 +1140,7 @@
                 "lineNumber": 135,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeRangeBoundsOption",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1231,6 +1236,7 @@
                 "lineNumber": 141,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "DateRangePickerSettings",
                 "trackAdoption": false,
                 "isRequired": true
               }

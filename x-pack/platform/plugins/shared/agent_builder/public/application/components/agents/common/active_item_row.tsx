@@ -21,6 +21,8 @@ export interface ActiveItemRowProps {
   canEditAgent: boolean;
 }
 
+const SHOW_ON_HOVER_CLASS = 'agentBuilder__agentActiveItemRow--showOnHover';
+
 export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
   name,
   isSelected,
@@ -32,6 +34,34 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
   canEditAgent,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isReadOnly = Boolean(readOnlyContent);
+  const showRemoveButton = canEditAgent && !isReadOnly;
+
+  const rowStyles = css`
+    block-size: 40px;
+    padding: ${euiTheme.size.s} ${euiTheme.size.m};
+    cursor: pointer;
+    border-radius: ${euiTheme.border.radius.medium};
+    background-color: ${isSelected
+      ? euiTheme.colors.backgroundBaseInteractiveHover
+      : 'transparent'};
+    &:hover {
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    }
+
+    /* Show remove button on row hover / focus */
+    &:hover .${SHOW_ON_HOVER_CLASS}, &:focus-within .${SHOW_ON_HOVER_CLASS} {
+      display: inline;
+      opacity: 1;
+    }
+
+    & .${SHOW_ON_HOVER_CLASS} {
+      /* Always show when row is selected */
+      display: ${isSelected ? 'inline' : 'none'};
+      opacity: ${isSelected ? 1 : 0};
+      transition: opacity ${euiTheme.animation.fast};
+    }
+  `;
 
   return (
     <EuiFlexGroup
@@ -39,17 +69,7 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
       gutterSize="none"
       responsive={false}
       onClick={onSelect}
-      css={css`
-        padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        cursor: pointer;
-        border-radius: ${euiTheme.border.radius.medium};
-        background-color: ${isSelected
-          ? euiTheme.colors.backgroundBaseInteractiveHover
-          : 'transparent'};
-        &:hover {
-          background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        }
-      `}
+      css={rowStyles}
     >
       <EuiFlexItem
         css={css`
@@ -70,20 +90,23 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
           {name}
         </EuiText>
       </EuiFlexItem>
-      {isSelected && (
+      {isReadOnly && (
+        <EuiFlexItem grow={false} className={SHOW_ON_HOVER_CLASS}>
+          {readOnlyContent}
+        </EuiFlexItem>
+      )}
+      {showRemoveButton && (
         <EuiFlexItem grow={false}>
-          {readOnlyContent ??
-            (canEditAgent ? (
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label={removeAriaLabel}
-                disabled={isRemoving}
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  onRemove();
-                }}
-              />
-            ) : null)}
+          <EuiButtonIcon
+            className={SHOW_ON_HOVER_CLASS}
+            iconType="cross"
+            aria-label={removeAriaLabel}
+            disabled={isRemoving}
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
+              onRemove();
+            }}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -22,7 +22,10 @@ import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from './services/private_location_test_service';
 import { keyToOmitList, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
@@ -50,8 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     let roleName: string;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await testPrivateLocations.installSyntheticsPackage();
+      await cleanSyntheticsTestData(kibanaServer);
       const res = await monitorTestService.addsNewSpace();
       username = res.username;
       password = res.password;

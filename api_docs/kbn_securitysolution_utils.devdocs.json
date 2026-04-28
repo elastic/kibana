@@ -104,6 +104,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AxiosError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -181,6 +182,7 @@
             "lineNumber": 20,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "NotArray",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -220,6 +222,7 @@
             "lineNumber": 65,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -616,6 +619,7 @@
             "lineNumber": 11,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLAstQueryExpression",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -808,6 +812,7 @@
             "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TrustedDeviceConditionEntryField",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -910,6 +915,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NotArray",
             "trackAdoption": false,
             "isRequired": true
           }

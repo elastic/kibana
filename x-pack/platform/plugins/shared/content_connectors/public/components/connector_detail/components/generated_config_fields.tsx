@@ -153,6 +153,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorNameLink"
               external
               target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -171,6 +172,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorIdLink"
                   external
                   target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {

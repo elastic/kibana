@@ -198,6 +198,7 @@
                 "lineNumber": 109,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceChatModelParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -524,6 +525,7 @@
                 "lineNumber": 177,
                 "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1122,6 +1124,7 @@
                 "lineNumber": 225,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CallbackManagerForLLMRun",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1208,6 +1211,7 @@
                 "lineNumber": 275,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CallbackManagerForLLMRun",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1290,6 +1294,7 @@
                 "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StructuredOutputMethodOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1544,6 +1549,7 @@
                 "lineNumber": 79,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOptions",
                 "trackAdoption": false
               }
             ]

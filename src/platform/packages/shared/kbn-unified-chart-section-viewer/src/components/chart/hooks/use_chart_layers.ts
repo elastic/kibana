@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
