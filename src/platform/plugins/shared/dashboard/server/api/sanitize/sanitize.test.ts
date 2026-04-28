@@ -53,44 +53,6 @@ describe('sanitize', () => {
     jest.clearAllMocks();
   });
 
-  it('sets a placeholder title when title is empty or whitespace', async () => {
-    mockedTransformDashboardIn.mockImplementation((state) => ({
-      attributes: {
-        ...storedAttributesBase,
-        title: state.title ?? '',
-      },
-      references: [],
-    }));
-
-    mockedTransformDashboardOut.mockImplementation((attrs) => ({
-      dashboardState: { title: attrs.title ?? '' },
-      warnings: [],
-    }));
-
-    mockedStripUnmappedKeys.mockImplementation((state) => ({
-      data: { ...baseDashboardState, title: state.title ?? '' },
-      warnings: [],
-    }));
-
-    const dashboardStateSchema = {
-      validate: jest.fn(() => baseDashboardState),
-    };
-
-    await sanitize(dashboardStateSchema, { ...baseDashboardState, title: '' });
-    expect(mockedTransformDashboardIn).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'New dashboard' })
-    );
-
-    await sanitize(dashboardStateSchema, { ...baseDashboardState, title: '   ' });
-    expect(mockedTransformDashboardIn).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'New dashboard' })
-    );
-
-    expect(dashboardStateSchema.validate).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'New dashboard' })
-    );
-  });
-
   it('does not override a non-empty title', async () => {
     mockedTransformDashboardIn.mockImplementation((state) => ({
       attributes: {
