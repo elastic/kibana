@@ -32,7 +32,15 @@
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
-          "A URL that is meant to be relative to your application id, or a state object that your application uses to render\nthe rule. This information is intended to be used with cores NavigateToApp function, along with the application id that was\noriginally registered to {@link PluginSetupContract.registerNavigation }."
+          "A URL that is meant to be relative to your application id, or a state object that your application uses to render\nthe rule. This information is intended to be used with cores NavigateToApp function, along with the application id that was\noriginally registered to ",
+          {
+            "pluginId": "alerting",
+            "scope": "public",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-public.PluginSetupContract.registerNavigation",
+            "text": "PluginSetupContract.registerNavigation"
+          },
+          "."
         ],
         "children": [
           {
@@ -67,6 +75,7 @@
             "lineNumber": 19,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "SanitizedRule",
             "trackAdoption": false
           }
         ],
@@ -206,6 +215,7 @@
               "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "AlertNavigationHandler",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -282,6 +292,7 @@
               "lineNumber": 59,
               "columnNumber": 54,
               "deprecated": false,
+              "docsReferencedTypeName": "AlertNavigationHandler",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -409,6 +420,7 @@
                 "lineNumber": 107,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -457,6 +469,7 @@
                 "lineNumber": 126,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -513,6 +526,7 @@
                 "lineNumber": 228,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAllAuthorizedRuleTypes",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -551,6 +565,7 @@
                 "lineNumber": 239,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "EnsureAuthorizedOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -589,6 +604,7 @@
                 "lineNumber": 254,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkEnsureAuthorizedOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -641,6 +657,7 @@
                 "lineNumber": 314,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetFindAuthorizationFilterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -679,6 +696,7 @@
                 "lineNumber": 326,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAllAuthorizedRuleTypesFindOperationParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -731,6 +749,7 @@
                 "lineNumber": 337,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAuthorizationFilterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -918,6 +937,7 @@
                 "lineNumber": 430,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAuthorizationFilterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -956,6 +976,7 @@
                 "lineNumber": 466,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAuthorizedRuleTypesParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1089,6 +1110,7 @@
             "lineNumber": 193,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateConcreteWriteIndexOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1126,6 +1148,7 @@
             "lineNumber": 103,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateComponentTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1165,6 +1188,7 @@
             "lineNumber": 23,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateIlmPolicyOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1204,6 +1228,7 @@
             "lineNumber": 110,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateIndexTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1242,6 +1267,7 @@
             "lineNumber": 79,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "GetComponentTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1288,6 +1314,7 @@
             "lineNumber": 47,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "GetDataStreamAdapterOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1327,6 +1354,7 @@
             "lineNumber": 36,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchError",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1365,6 +1393,7 @@
             "lineNumber": 29,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GetIndexTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1402,6 +1431,7 @@
             "lineNumber": 29,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "InstallWithTimeoutOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1439,6 +1469,7 @@
             "lineNumber": 37,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleSnoozeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1604,6 +1635,7 @@
             "lineNumber": 15,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "ShouldCreateAlertsInAllSpacesOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1979,6 +2011,7 @@
                 "lineNumber": 144,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorAdapter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2086,6 +2119,7 @@
                 "lineNumber": 156,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuleType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2417,6 +2451,7 @@
                 "lineNumber": 179,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2460,6 +2495,7 @@
                 "lineNumber": 185,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2532,6 +2568,7 @@
                 "lineNumber": 189,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2719,6 +2756,7 @@
                 "lineNumber": 43,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "BuildActionParamsArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2905,6 +2943,7 @@
                 "lineNumber": 30,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateConcreteWriteIndexOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4621,6 +4660,7 @@
                 "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AsyncSearchStrategies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4914,6 +4954,7 @@
                 "lineNumber": 193,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuleExecutorOptions",
                 "trackAdoption": false
               }
             ]
@@ -5556,6 +5597,7 @@
             "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleExecutorOptions",
             "trackAdoption": false
           }
         ],
@@ -6509,6 +6551,7 @@
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleTagsAggregationResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -6577,6 +6620,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionGroup",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -6617,6 +6661,7 @@
             "lineNumber": 22,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "GetComponentTemplateFromFieldMapOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -6876,6 +6921,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GetRuleTagsAggregationParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -6982,6 +7028,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldMap",
             "trackAdoption": false,
             "isRequired": true
           },

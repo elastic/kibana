@@ -43,36 +43,40 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
   deleteQuery,
 }) => {
   const dispatch = useDispatch();
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const openUserFlyout = useCallback(
     (userName: string) => {
-      openRightPanel({
-        id: UserPanelKey,
-        params: {
-          userName,
-          contextID: 'authentications',
-          scopeId: 'authentications',
-          isPreviewMode: false,
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [openRightPanel]
+    [openFlyout]
   );
 
   const openHostFlyout = useCallback(
     (hostName: string) => {
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          contextID: 'authentications',
-          scopeId: 'authentications',
-          isPreviewMode: false,
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [openRightPanel]
+    [openFlyout]
   );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
