@@ -26,6 +26,7 @@ export const MonitorDetailsLink = ({ monitor }: { monitor: EncryptedSyntheticsSa
   const monitorDetailLinkUrl = useMonitorDetailLocator({
     configId: monitor[ConfigKey.CONFIG_ID],
     locationId,
+    spaces: monitor.spaces,
   });
 
   return (
