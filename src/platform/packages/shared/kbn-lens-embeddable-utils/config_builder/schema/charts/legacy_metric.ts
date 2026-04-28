@@ -97,7 +97,10 @@ export const legacyMetricConfigSchemaNoESQL = schema.object(
     /**
      * Metric configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricConfigMetricOptionsSchema),
+    metric: mergeAllMetricsWithChartDimensionSchema(
+      legacyMetricConfigMetricOptionsSchema,
+      'legacyMetric'
+    ),
   },
   { meta: { id: 'legacyMetricNoESQL', title: 'Legacy Metric Chart (DSL)' } }
 );

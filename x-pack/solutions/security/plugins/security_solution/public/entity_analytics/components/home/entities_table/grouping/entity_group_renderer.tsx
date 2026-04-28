@@ -54,7 +54,7 @@ const ResolutionGroupPanel = ({
   bucket: RawBucket<EntitiesGroupingAggregation>;
   targetMetadata: TargetMetadataMap;
 }) => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -74,17 +74,19 @@ const ResolutionGroupPanel = ({
       const panelParam = EntityPanelParamByType[entityType];
       if (!panelKey || !panelParam) return;
 
-      openRightPanel({
-        id: panelKey,
-        params: {
-          [panelParam]: targetEntityName,
-          entityId,
-          contextID: ENTITY_ANALYTICS_TABLE_ID,
-          scopeId: ENTITY_ANALYTICS_TABLE_ID,
+      openFlyout({
+        right: {
+          id: panelKey,
+          params: {
+            [panelParam]: targetEntityName,
+            entityId,
+            contextID: ENTITY_ANALYTICS_TABLE_ID,
+            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+          },
         },
       });
     },
-    [openRightPanel, targetEntityName, entityType, entityId]
+    [openFlyout, targetEntityName, entityType, entityId]
   );
 
   return (
