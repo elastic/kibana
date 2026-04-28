@@ -61,6 +61,7 @@
                 "lineNumber": 86,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -99,6 +100,7 @@
                 "lineNumber": 91,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "StatusServicePrebootDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -161,6 +163,7 @@
                 "lineNumber": 97,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "StatusServiceSetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -238,6 +241,7 @@
             "lineNumber": 58,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Deps",
             "trackAdoption": false,
             "isRequired": true
           }

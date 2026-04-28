@@ -27,6 +27,22 @@ export const genericOperationOptionsSchema = schema.object({
   ...labelSharedProp,
 });
 
+export const METRIC_OP_TITLES = {
+  static: 'Static Operation Definition',
+  formula: 'Formula Operation',
+  count: 'Count Metric Operation',
+  uniqueCount: 'Unique Count Metric Operation',
+  stats: 'Stats Metric Operation',
+  sum: 'Sum Metric Operation',
+  lastValue: 'Last Value Operation',
+  percentile: 'Percentile Operation',
+  percentileRanks: 'Percentile Ranks Operation',
+  differences: 'Differences Operation',
+  movingAverage: 'Moving Average Operation',
+  cumulativeSum: 'Cumulative Sum Operation',
+  counterRate: 'Counter Rate Operation',
+} as const;
+
 export const staticOperationDefinitionSchema = genericOperationOptionsSchema.extends(
   {
     operation: schema.literal('static_value'),
@@ -40,7 +56,7 @@ export const staticOperationDefinitionSchema = genericOperationOptionsSchema.ext
       defaultValue: LENS_STATIC_VALUE_DEFAULT,
     }),
   },
-  { meta: { id: 'staticOperationDefinition', title: 'Static Operation Definition' } }
+  { meta: { id: 'staticOperationDefinition', title: METRIC_OP_TITLES.static } }
 );
 
 const advancedOperationSettings = {
@@ -111,7 +127,7 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.ex
       )
     ),
   },
-  { meta: { id: 'formulaOperation', title: 'Formula Operation' } }
+  { meta: { id: 'formulaOperation', title: METRIC_OP_TITLES.formula } }
 );
 
 const esqlColumn = {
@@ -145,7 +161,7 @@ const emptyAsNullSchemaRawObject = {
    */
   empty_as_null: schema.boolean({
     meta: {
-      description: 'Whether to consider null values as null',
+      description: 'When `true`, treats empty buckets as null instead of zero.',
     },
     defaultValue: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
   }),
@@ -163,7 +179,7 @@ export const countMetricOperationSchema = fieldBasedOperationSharedSchema
         schema.string({ meta: { description: 'Field to be used for the metric' } })
       ),
     },
-    { meta: { id: 'countMetricOperation', title: 'Count Metric Operation' } }
+    { meta: { id: 'countMetricOperation', title: METRIC_OP_TITLES.count } }
   );
 
 export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
@@ -172,7 +188,7 @@ export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
     {
       operation: schema.literal('unique_count'),
     },
-    { meta: { id: 'uniqueCountMetricOperation', title: 'Unique Count Metric Operation' } }
+    { meta: { id: 'uniqueCountMetricOperation', title: METRIC_OP_TITLES.uniqueCount } }
   );
 
 export const metricOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -185,7 +201,7 @@ export const metricOperationSchema = fieldBasedOperationSharedSchema.extends(
       schema.literal('standard_deviation'),
     ]),
   },
-  { meta: { id: 'minMaxAvgMedianStdDevMetricOperation', title: 'Stats Metric Operation' } }
+  { meta: { id: 'minMaxAvgMedianStdDevMetricOperation', title: METRIC_OP_TITLES.stats } }
 );
 
 export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
@@ -194,7 +210,7 @@ export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
     {
       operation: schema.literal('sum'),
     },
-    { meta: { id: 'sumMetricOperation', title: 'Sum Metric Operation' } }
+    { meta: { id: 'sumMetricOperation', title: METRIC_OP_TITLES.sum } }
   );
 
 export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -215,7 +231,7 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
       defaultValue: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
     }),
   },
-  { meta: { id: 'lastValueOperation', title: 'Last Value Operation' } }
+  { meta: { id: 'lastValueOperation', title: METRIC_OP_TITLES.lastValue } }
 );
 
 export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -226,7 +242,7 @@ export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends
       defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
     }),
   },
-  { meta: { id: 'percentileOperation', title: 'Percentile Operation' } }
+  { meta: { id: 'percentileOperation', title: METRIC_OP_TITLES.percentile } }
 );
 
 export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -237,7 +253,7 @@ export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.ex
       defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
     }),
   },
-  { meta: { id: 'percentileRanksOperation', title: 'Percentile Ranks Operation' } }
+  { meta: { id: 'percentileRanksOperation', title: METRIC_OP_TITLES.percentileRanks } }
 );
 
 export const fieldMetricOperationsSchema = schema.oneOf(
@@ -258,7 +274,7 @@ export const differencesOperationSchema = metricOperationSharedSchema.extends(
     operation: schema.literal('differences'),
     of: fieldMetricOperationsSchema,
   },
-  { meta: { id: 'differencesOperation', title: 'Differences Operation' } }
+  { meta: { id: 'differencesOperation', title: METRIC_OP_TITLES.differences } }
 );
 
 export const movingAverageOperationSchema = metricOperationSharedSchema.extends(
@@ -270,43 +286,57 @@ export const movingAverageOperationSchema = metricOperationSharedSchema.extends(
       defaultValue: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
     }),
   },
-  { meta: { id: 'movingAverageOperation', title: 'Moving Average Operation' } }
+  { meta: { id: 'movingAverageOperation', title: METRIC_OP_TITLES.movingAverage } }
 );
 
 export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends(
   {
     operation: schema.literal('cumulative_sum'),
   },
-  { meta: { id: 'cumulativeSumOperation', title: 'Cumulative Sum Operation' } }
+  { meta: { id: 'cumulativeSumOperation', title: METRIC_OP_TITLES.cumulativeSum } }
 );
 
 export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extends(
   {
     operation: schema.literal('counter_rate'),
   },
-  { meta: { id: 'counterRateOperation', title: 'Counter Rate Operation' } }
+  { meta: { id: 'counterRateOperation', title: METRIC_OP_TITLES.counterRate } }
 );
 
-export const metricOperationDefinitionSchema = schema.oneOf([
-  formulaOperationDefinitionSchema,
-  staticOperationDefinitionSchema,
-  fieldMetricOperationsSchema,
-  differencesOperationSchema,
-  movingAverageOperationSchema,
-  cumulativeSumOperationSchema,
-  counterRateOperationSchema,
-  countMetricOperationSchema,
-  uniqueCountMetricOperationSchema,
-  lastValueOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-]);
+export const metricOperationDefinitionSchema = schema.oneOf(
+  [
+    formulaOperationDefinitionSchema,
+    staticOperationDefinitionSchema,
+    fieldMetricOperationsSchema,
+    differencesOperationSchema,
+    movingAverageOperationSchema,
+    cumulativeSumOperationSchema,
+    counterRateOperationSchema,
+    countMetricOperationSchema,
+    uniqueCountMetricOperationSchema,
+    lastValueOperationSchema,
+    percentileOperationSchema,
+    percentileRanksOperationSchema,
+  ],
+  {
+    meta: {
+      title: 'Metric Operation',
+      description:
+        'Metric dimension configuration, supporting field-based aggregations (count, sum, average, median, standard deviation, unique count, last value), percentile operations, time-series operations (differences, moving average, cumulative sum, counter rate), and mathematical formulas.',
+    },
+  }
+);
 
 export type LensApiAllMetricOperations = TypeOf<typeof metricOperationDefinitionSchema>;
-export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf([
-  fieldMetricOperationsSchema,
-  formulaOperationDefinitionSchema,
-]);
+export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf(
+  [fieldMetricOperationsSchema, formulaOperationDefinitionSchema],
+  {
+    meta: {
+      title: 'Field Metric or Formula Operation',
+      description: 'Metric dimension using a field-based aggregation or a mathematical formula.',
+    },
+  }
+);
 
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation

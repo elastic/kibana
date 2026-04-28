@@ -616,7 +616,15 @@
         "tags": [],
         "label": "SavedObjectAttributeSingle",
         "description": [
-          "\nTODO: This type are originally from \"src/core/types/saved_objects.ts\", once that is package friendly remove\nthis copied type.\n\nDon't use this type, it's simply a helper type for {@link SavedObjectAttribute}\n"
+          "\nTODO: This type are originally from \"src/core/types/saved_objects.ts\", once that is package friendly remove\nthis copied type.\n\nDon't use this type, it's simply a helper type for ",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsAlertingTypesPluginApi",
+            "section": "def-common.SavedObjectAttribute",
+            "text": "SavedObjectAttribute"
+          },
+          "\n"
         ],
         "signature": [
           "string | number | boolean | ",
@@ -644,7 +652,7 @@
         "label": "Severity",
         "description": [],
         "signature": [
-          "\"medium\" | \"critical\" | \"high\" | \"low\""
+          "\"critical\" | \"high\" | \"medium\" | \"low\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "lineNumber": 10,
@@ -661,7 +669,7 @@
         "label": "SeverityMapping",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"critical\" | \"high\" | \"medium\" | \"low\"; }[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "lineNumber": 23,
@@ -678,7 +686,7 @@
         "label": "SeverityMappingItem",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"critical\" | \"high\" | \"medium\" | \"low\"; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "lineNumber": 13,
@@ -1013,7 +1021,7 @@
         ],
         "signature": [
           "Type",
-          "<{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[] | undefined, unknown>"
+          "<{ field: string; operator: \"equals\"; value: string; severity: \"critical\" | \"high\" | \"medium\" | \"low\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"critical\" | \"high\" | \"medium\" | \"low\"; }[] | undefined, unknown>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_severity_mapping_array/index.ts",
         "lineNumber": 16,

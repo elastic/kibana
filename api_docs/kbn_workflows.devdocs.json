@@ -61,6 +61,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "WorkflowRepositoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -176,6 +177,45 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowRepository.areWorkflowsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areWorkflowsEnabled",
+            "description": [
+              "\nBulk-check whether the given (workflowId, spaceId) pairs refer to enabled,\nnon-soft-deleted workflows. Runs a single `_search` fetching only the\n`enabled` field across all requested ids.\n\nThe returned map is keyed by `${spaceId}:${workflowId}`. Missing docs and\nsoft-deleted docs (`deleted_at` present) resolve to `false`."
+            ],
+            "signature": [
+              "(refs: { workflowId: string; spaceId: string; }[]) => Promise<Map<string, boolean>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/server/repositories/workflow_repository.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows",
+                "id": "def-common.WorkflowRepository.areWorkflowsEnabled.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "refs",
+                "description": [],
+                "signature": [
+                  "{ workflowId: string; spaceId: string; }[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows/server/repositories/workflow_repository.ts",
+                "lineNumber": 96,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "Array",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -261,6 +301,7 @@
             "lineNumber": 65,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -318,6 +359,7 @@
             "lineNumber": 30,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorContractUnion",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -381,6 +423,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -499,6 +542,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -750,6 +794,7 @@
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "JSONSchema7",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -773,6 +818,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RootSchemaType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -787,7 +833,15 @@
         "tags": [],
         "label": "createWorkflowLiquidEngine",
         "description": [
-          "\nCreates a LiquidJS engine configured for workflow templates.\nUses an in-memory filesystem, restricts tags to the supported set,\nand enables ownPropertyOnly.\n\nCallers can pass additional {@link LiquidOptions} (e.g. `strictFilters`)\nwhich are merged with the enforced defaults."
+          "\nCreates a LiquidJS engine configured for workflow templates.\nUses an in-memory filesystem, restricts tags to the supported set,\nand enables ownPropertyOnly.\n\nCallers can pass additional ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.LiquidOptions",
+            "text": "LiquidOptions"
+          },
+          " (e.g. `strictFilters`)\nwhich are merged with the enforced defaults."
         ],
         "signature": [
           "(options?: ",
@@ -816,6 +870,7 @@
             "lineNumber": 78,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "LiquidOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -975,6 +1030,7 @@
             "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExtractSchemaPropertyPathsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1057,6 +1113,7 @@
             "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowGraph",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1368,6 +1425,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StepDeprecationInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2538,6 +2596,7 @@
             "lineNumber": 79,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2589,6 +2648,7 @@
             "lineNumber": 64,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2684,6 +2744,7 @@
             "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorContractUnion",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2721,6 +2782,7 @@
             "lineNumber": 90,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2930,6 +2992,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2991,6 +3054,7 @@
             "lineNumber": 93,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3072,6 +3136,7 @@
             "lineNumber": 95,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3123,6 +3188,7 @@
             "lineNumber": 55,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3181,6 +3247,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorContractUnion",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3218,6 +3285,7 @@
             "lineNumber": 92,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3255,6 +3323,7 @@
             "lineNumber": 97,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3292,6 +3361,7 @@
             "lineNumber": 96,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3366,6 +3436,7 @@
             "lineNumber": 98,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3417,6 +3488,7 @@
             "lineNumber": 68,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3491,6 +3563,7 @@
             "lineNumber": 89,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3574,6 +3647,7 @@
             "lineNumber": 94,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3698,6 +3772,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowYaml",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3805,6 +3880,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidateKqlAgainstSchemaOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5750,7 +5826,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"transform\" | \"literal\" | \"date\" | \"map\" | \"readonly\" | \"success\" | \"default\" | \"set\" | \"optional\" | \"int\" | \"null\" | \"void\" | \"never\" | \"any\" | \"record\" | \"file\" | \"array\" | \"tuple\" | \"union\" | \"intersection\" | \"enum\" | \"nullable\" | \"nonoptional\" | \"prefault\" | \"catch\" | \"nan\" | \"pipe\" | \"template_literal\" | \"promise\" | \"lazy\" | \"custom\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"transform\" | \"literal\" | \"date\" | \"map\" | \"readonly\" | \"success\" | \"any\" | \"default\" | \"set\" | \"optional\" | \"int\" | \"null\" | \"void\" | \"never\" | \"record\" | \"file\" | \"array\" | \"tuple\" | \"union\" | \"intersection\" | \"enum\" | \"nullable\" | \"nonoptional\" | \"prefault\" | \"catch\" | \"nan\" | \"pipe\" | \"template_literal\" | \"promise\" | \"lazy\" | \"custom\""
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_schema_property_paths/extract_schema_property_paths.ts",
             "lineNumber": 16,
@@ -6087,6 +6163,7 @@
                 "lineNumber": 562,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6141,6 +6218,7 @@
                 "lineNumber": 571,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6165,6 +6243,7 @@
                 "lineNumber": 572,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6251,6 +6330,7 @@
                 "lineNumber": 582,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectionContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6340,6 +6420,7 @@
                 "lineNumber": 135,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -8769,6 +8850,7 @@
                 "lineNumber": 403,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "WorkflowListItemDto",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10510,6 +10592,25 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.BulkScheduleWorkflowResult",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkScheduleWorkflowResult",
+        "description": [
+          "\nPer-item result of a bulk workflow schedule call. The array is order- and\nlength-preserving with respect to the input items: `results[i]` corresponds\nto `items[i]`."
+        ],
+        "signature": [
+          "({ status: \"scheduled\"; workflowExecutionId: string; } | { status: \"error\"; error: { message: string; }; })[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "lineNumber": 711,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.CollisionStrategy",
         "type": "Type",
         "tags": [],
@@ -11899,7 +12000,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; traceId?: string | undefined; entryTransactionId?: string | undefined; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; isTestRun: boolean; executedBy?: string | undefined; triggeredBy?: string | undefined; finishedAt: string; workflowName?: string | undefined; }"
+          "; traceId?: string | undefined; entryTransactionId?: string | undefined; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; isTestRun: boolean; finishedAt: string; executedBy?: string | undefined; triggeredBy?: string | undefined; workflowName?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "lineNumber": 217,
@@ -12200,7 +12301,7 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
-          " | undefined; startedAt: string; stepId: string; workflowId: string; isTestRun?: boolean | undefined; stepType?: string | undefined; scopeStack: ",
+          " | undefined; startedAt: string; stepId: string; stepType?: string | undefined; scopeStack: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -12208,7 +12309,7 @@
             "section": "def-common.StackFrame",
             "text": "StackFrame"
           },
-          "[]; workflowRunId: string; finishedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
+          "[]; workflowRunId: string; workflowId: string; isTestRun?: boolean | undefined; finishedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "lineNumber": 175,
