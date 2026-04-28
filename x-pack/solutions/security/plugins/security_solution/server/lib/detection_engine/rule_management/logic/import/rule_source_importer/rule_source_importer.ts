@@ -32,13 +32,9 @@ interface RuleSpecifier {
 }
 
 /**
- * Retrieves the rule IDs (`rule_id`s) of available prebuilt rule assets matching those
- * of the specified rules. This information can be used to determine whether
- * the rule being imported is a custom rule or a prebuilt rule.
- *
- * Both the latest active asset versions and deprecated assets are considered: a
- * deprecated prebuilt rule that is exported and re-imported should still be
- * recognized as prebuilt so that it retains `rule_source.type: "external"`.
+ * Retrieves the rule IDs (`rule_id`s) of available prebuilt rule assets (including
+ * deprecated rules) matching those of the specified rules. This information can
+ * be used to determine whether the rule being imported is a custom rule or a prebuilt rule.
  *
  * @param rules - A list of {@link RuleSpecifier}s representing the rules being imported.
  * @param ruleAssetsClient - the {@link IPrebuiltRuleAssetsClient} to use for fetching the available rule assets.
