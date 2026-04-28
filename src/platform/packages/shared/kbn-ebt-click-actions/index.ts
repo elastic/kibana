@@ -27,3 +27,9 @@
 
 /** Navigates to the Discover app. */
 export const EBT_CLICK_ACTION_OPEN_IN_DISCOVER = 'openInDiscover';
+
+/** User intends to view a span or transaction's details. */
+export const EBT_CLICK_ACTION_VIEW_SPAN = 'viewSpan';
+
+/** User intends to view an error's details. */
+export const EBT_CLICK_ACTION_VIEW_ERROR = 'viewError';
