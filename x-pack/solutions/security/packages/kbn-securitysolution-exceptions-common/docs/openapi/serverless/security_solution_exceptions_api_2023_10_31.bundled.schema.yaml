@@ -2689,15 +2689,6 @@ paths:
         content:
           application/json:
             schema:
-              example:
-                description: This is a sample detection type exception list.
-                list_id: simple_list
-                name: Sample Detection Exception List
-                namespace_type: single
-                os_types:
-                  - linux
-                tags:
-                  - malware
               type: object
               properties:
                 description:
@@ -2707,6 +2698,17 @@ paths:
               required:
                 - name
                 - description
+            examples:
+              createSharedExceptionList:
+                value:
+                  description: This is a sample detection type exception list.
+                  list_id: simple_list
+                  name: Sample Detection Exception List
+                  namespace_type: single
+                  os_types:
+                    - linux
+                  tags:
+                    - malware
         required: true
       responses:
         '200':

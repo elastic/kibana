@@ -3457,9 +3457,15 @@ paths:
         required: true
       responses:
         '200':
+          description: |
+            Indicates a successful call. The body matches an Elasticsearch update-by-query response
+            (for example `took`, `updated`, `failures`).
           content:
             application/json:
-              description: Elasticsearch update by query or update by IDs response
+              schema:
+                type: object
+                additionalProperties: true
+                description: Elasticsearch update by query response
               examples:
                 add:
                   value:
@@ -3478,7 +3484,6 @@ paths:
                     total: 1
                     updated: 1
                     version_conflicts: 0
-          description: Indicates a successful call.
         '400':
           content:
             application/json:
