@@ -47,9 +47,6 @@ describe('ESQLLang', () => {
       const createModel = (query: string) =>
         ({
           getValue: jest.fn().mockReturnValue(query),
-          isDisposed: jest.fn(() => false),
-          getValueLength: jest.fn(() => query.length),
-          getLineCount: jest.fn(() => Math.max(1, query.split('\n').length)),
         } as unknown as monaco.editor.ITextModel);
 
       const makeFieldSuggestion = (label: string) => ({
@@ -365,37 +362,6 @@ describe('ESQLLang', () => {
         });
       });
 
-      it('returns empty completion list when the text model is disposed after suggest', async () => {
-        let disposed = false;
-        mockSuggest.mockImplementation(async () => {
-          disposed = true;
-          return [makeFieldSuggestion('body.text')];
-        });
-
-        const suggestionProvider = ESQLLang.getSuggestionProvider();
-        const model = {
-          getValue: jest.fn().mockReturnValue('FROM logs | WHERE '),
-          isDisposed: jest.fn(() => disposed),
-          getValueLength: jest.fn(),
-          getLineCount: jest.fn(),
-        } as unknown as monaco.editor.ITextModel;
-        const mockToken = {
-          isCancellationRequested: false,
-          onCancellationRequested: () => ({ dispose: () => {} }),
-        } as monaco.CancellationToken;
-
-        const result = await suggestionProvider.provideCompletionItems(
-          model,
-          new monaco.Position(1, 20),
-          {
-            triggerKind: monaco.languages.CompletionTriggerKind.Invoke,
-          } as monaco.languages.CompletionContext,
-          mockToken
-        );
-
-        expect(result?.suggestions).toEqual([]);
-      });
-
       it('should call onSuggestionsWithCustomCommandShown when suggestions contain custom commands', async () => {
         const mockOnSuggestionsWithCustomCommandShown = jest.fn();
 
@@ -449,17 +415,11 @@ describe('ESQLLang', () => {
 
         const mockModel = {
           getValue: jest.fn().mockReturnValue('FROM index | EVAL'),
-          isDisposed: jest.fn(() => false),
-          getValueLength: jest.fn(() => 'FROM index | EVAL'.length),
-          getLineCount: jest.fn(() => 1),
         } as unknown as monaco.editor.ITextModel;
 
         const mockPosition = new monaco.Position(1, 18);
         const mockContext = {} as monaco.languages.CompletionContext;
-        const mockToken = {
-          isCancellationRequested: false,
-          onCancellationRequested: () => ({ dispose: () => {} }),
-        } as monaco.CancellationToken;
+        const mockToken = {} as monaco.CancellationToken;
 
         await suggestionProvider.provideCompletionItems(
           mockModel,

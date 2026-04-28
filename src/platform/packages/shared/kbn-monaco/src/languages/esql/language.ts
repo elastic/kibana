@@ -136,7 +136,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
             callbacks: resolvedDeps,
           });
 
-          if (quickFix && !model.isDisposed()) {
+          if (quickFix) {
             actions.push(wrapAsMonacoCodeAction(model, marker, quickFix));
           }
         })
@@ -180,12 +180,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     callbacks?: ESQLCallbacks
   ): monaco.languages.InlineCompletionsProvider => {
     const provider = {
-      async provideInlineCompletions(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        _context: monaco.languages.InlineCompletionContext,
-        token?: monaco.CancellationToken
-      ) {
+      async provideInlineCompletions(model: monaco.editor.ITextModel, position: monaco.Position) {
         const fullText = model.getValue();
         // Get the text before the cursor
         const textBeforeCursor = model.getValueInRange({
@@ -202,11 +197,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           position.column
         );
 
-        const result = await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
-        if (model.isDisposed() || token?.isCancellationRequested) {
-          return { items: [] };
-        }
-        return result;
+        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
       },
       freeInlineCompletions: () => {},
     };
@@ -226,9 +217,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        _context: monaco.languages.CompletionContext,
-        token: monaco.CancellationToken
+        position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
         // Avoid returning suggestions for unfocused editors sharing the same model.
         const editors = monaco.editor.getEditors().filter((editor) => editor.getModel() === model);
@@ -249,10 +238,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         const computeStart = performance.now();
         const suggestions = await suggest(fullText, offset, resolvedDeps);
 
-        if (model.isDisposed() || token.isCancellationRequested) {
-          return { suggestions: [] };
-        }
-
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
           resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
@@ -263,14 +248,12 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         const result = wrapAsMonacoSuggestions(suggestions, fullText);
         const computeEnd = performance.now();
 
-        if (!model.isDisposed()) {
-          resolvedDeps?.telemetry?.onSuggestionsReady?.(
-            computeStart,
-            computeEnd,
-            model.getValueLength(),
-            model.getLineCount()
-          );
-        }
+        resolvedDeps?.telemetry?.onSuggestionsReady?.(
+          computeStart,
+          computeEnd,
+          model.getValueLength(),
+          model.getLineCount()
+        );
 
         const streamNames = getIndexSourcesFromQuery(fullText).filter(
           (name) => !name.includes('*')
@@ -289,13 +272,11 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         if (!context?.getFieldsMetadata) return item;
 
         const fieldsMetadataClient = await context.getFieldsMetadata;
-        if (!fieldsMetadataClient || token.isCancellationRequested) return item;
+        if (!fieldsMetadataClient) return item;
 
         // Fetch the full ECS field list upfront as a single lightweight check.
         // The client caches this result, so subsequent calls are free.
         const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
-
-        if (token.isCancellationRequested) return item;
 
         if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
         if (typeof item.label !== 'string') return item;
@@ -310,7 +291,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
             fieldNames: [strippedFieldName],
             attributes: ['description'],
           });
-          if (token.isCancellationRequested) return item;
           const ecsDescription = ecsMetadata.fields[strippedFieldName]?.description;
           if (ecsDescription) {
             documentationParts.push(ecsDescription);
@@ -325,7 +305,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
             streamNames,
             source: ['streams'],
           });
-          if (token.isCancellationRequested) return item;
           const streamParts = streamNames.flatMap((streamName) => {
             const streamDescription =
               streamMetadata.streamFields[streamName]?.[strippedFieldName]?.description;
@@ -366,7 +345,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         const offset = monacoPositionToOffset(fullText, position);
         const signatureHelp = await getSignatureHelp(fullText, offset, deps);
 
-        if (!signatureHelp || model.isDisposed() || token.isCancellationRequested) {
+        if (!signatureHelp) {
           return null;
         }
 
