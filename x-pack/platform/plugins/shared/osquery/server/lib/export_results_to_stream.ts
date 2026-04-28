@@ -19,6 +19,10 @@ import type { ResultFormatter, ExportMetadata } from './format_results';
 const EXPORT_PAGE_SIZE = 1_000;
 const MAX_EXPORT_RESULTS = 500_000;
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /**
  * Deduplicates osquery multi-field sub-fields (.text, .number) from a flattened record.
  * ES returns both `osquery.pid` (text) and `osquery.pid.number` (long) for the same value.
@@ -116,7 +120,7 @@ export async function exportResultsToStream({
       } catch (e) {
         // Leaked PITs consume cluster memory until keep_alive expires (5m).
         // Surface at warn so cluster-memory pressure is visible in ops dashboards.
-        logger.warn(`Failed to close PIT ${pitId}: ${e.message}`);
+        logger.warn(`Failed to close PIT ${pitId}: ${getErrorMessage(e)}`);
       }
 
       pitId = undefined;
@@ -245,7 +249,8 @@ export async function exportResultsToStream({
           // cannot be changed. Log structured meta so support can correlate the
           // truncated download with server state. `labels` is the ECS-standard
           // field for plugin-specific custom key/value pairs in log meta.
-          logger.error(`Export stream error: ${e.message}`, {
+          const errorMessage = getErrorMessage(e);
+          logger.error(`Export stream error: ${errorMessage}`, {
             labels: {
               action_id: enrichedMetadata.action_id,
               format: enrichedMetadata.format,
@@ -255,7 +260,7 @@ export async function exportResultsToStream({
                 : {}),
             },
           });
-          stream.destroy(e);
+          stream.destroy(e instanceof Error ? e : new Error(errorMessage));
         }
       } finally {
         await cleanup();

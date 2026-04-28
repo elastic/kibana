@@ -7,6 +7,25 @@
 
 export type ExportFormat = 'ndjson' | 'json' | 'csv';
 
+/** Supported values for `format` query param; use with `parseExportFormat`. */
+export const SUPPORTED_EXPORT_FORMATS: readonly ExportFormat[] = ['ndjson', 'json', 'csv'] as const;
+
+/**
+ * Parses a request `format` string into a typed export format.
+ * Returns `undefined` when missing or not supported (caller should return 400).
+ */
+export function parseExportFormat(value: string | undefined): ExportFormat | undefined {
+  if (value === undefined || value === '') {
+    return undefined;
+  }
+
+  if ((SUPPORTED_EXPORT_FORMATS as readonly string[]).includes(value)) {
+    return value as ExportFormat;
+  }
+
+  return undefined;
+}
+
 export interface ExportMetadata {
   action_id: string;
   query?: string;
@@ -141,5 +160,9 @@ export function createFormatter(format: ExportFormat): ResultFormatter {
       return createJsonFormatter();
     case 'csv':
       return createCsvFormatter();
+    default: {
+      const exhaustive: never = format;
+      throw new Error(`Unsupported export format: ${String(exhaustive)}`);
+    }
   }
 }

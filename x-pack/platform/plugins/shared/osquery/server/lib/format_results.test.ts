@@ -10,6 +10,8 @@ import {
   createJsonFormatter,
   createCsvFormatter,
   createFormatter,
+  parseExportFormat,
+  SUPPORTED_EXPORT_FORMATS,
 } from './format_results';
 import type { ExportMetadata } from './format_results';
 
@@ -26,6 +28,25 @@ const record1 = { 'osquery.pid': 1234, 'osquery.name': 'kibana', 'agent.name': '
 const record2 = { 'osquery.pid': 5678, 'osquery.name': 'elastic-agent', 'agent.name': 'host-2' };
 
 describe('format_results', () => {
+  describe('parseExportFormat', () => {
+    it('accepts supported formats', () => {
+      expect(parseExportFormat('ndjson')).toBe('ndjson');
+      expect(parseExportFormat('json')).toBe('json');
+      expect(parseExportFormat('csv')).toBe('csv');
+    });
+
+    it('returns undefined for invalid, empty, or missing values', () => {
+      expect(parseExportFormat('xml')).toBeUndefined();
+      expect(parseExportFormat('NDJSON')).toBeUndefined();
+      expect(parseExportFormat('')).toBeUndefined();
+      expect(parseExportFormat(undefined)).toBeUndefined();
+    });
+
+    it('lists every supported format in SUPPORTED_EXPORT_FORMATS', () => {
+      expect(SUPPORTED_EXPORT_FORMATS).toEqual(['ndjson', 'json', 'csv']);
+    });
+  });
+
   describe('createNdjsonFormatter', () => {
     it('writes metadata as first line', () => {
       const formatter = createNdjsonFormatter();

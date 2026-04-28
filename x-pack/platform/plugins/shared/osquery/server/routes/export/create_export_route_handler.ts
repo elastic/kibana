@@ -20,8 +20,12 @@ import { getQueryFilter } from '../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
-import { createFormatter } from '../../lib/format_results';
-import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
+import {
+  createFormatter,
+  parseExportFormat,
+  SUPPORTED_EXPORT_FORMATS,
+} from '../../lib/format_results';
+import type { ExportMetadata } from '../../lib/format_results';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
@@ -53,12 +57,20 @@ export const createExportRouteHandler =
     params: ExportRouteParams
   ) => {
     const { baseFilter, metadata: routeMetadata, fileNamePrefix, ecsMapping } = params;
-    const format = request.query.format as ExportFormat;
+    const format = parseExportFormat(request.query.format);
     const kuery = request.body?.kuery;
     const agentIds = request.body?.agentIds;
     const esFilters = request.body?.esFilters;
 
     const logger = osqueryContext.logFactory.get('export_results');
+
+    if (!format) {
+      return response.badRequest({
+        body: {
+          message: `Invalid format: must be one of ${SUPPORTED_EXPORT_FORMATS.join(', ')}`,
+        },
+      });
+    }
 
     // Build filter query. Every clause is wrapped in parens defensively so
     // that KQL precedence cannot allow a user-supplied `kuery` to escape the
@@ -84,11 +96,12 @@ export const createExportRouteHandler =
         const built = buildQueryFromFilters(esFilters as unknown as Filter[], undefined);
         esFilterClauses = built.filter as estypes.QueryDslQueryContainer[];
       } catch (e) {
-        logger.warn(`Invalid esFilters in export request: ${e.message}`);
+        const message = e instanceof Error ? e.message : String(e);
+        logger.warn(`Invalid esFilters in export request: ${message}`);
 
         return response.badRequest({
           body: {
-            message: `Invalid esFilters: ${e.message}`,
+            message: `Invalid esFilters: ${message}`,
           },
         });
       }
