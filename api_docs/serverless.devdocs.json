@@ -94,6 +94,7 @@
               "lineNumber": 24,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "Partial",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -136,6 +137,7 @@
               "lineNumber": 26,
               "columnNumber": 18,
               "deprecated": false,
+              "docsReferencedTypeName": "SolutionId",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -158,6 +160,7 @@
               "lineNumber": 26,
               "columnNumber": 34,
               "deprecated": false,
+              "docsReferencedTypeName": "Observable",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -237,6 +240,7 @@
               "lineNumber": 29,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false,
               "isRequired": false
             }

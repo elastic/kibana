@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type { KqlPluginStart, SuggestionsAbstraction } from '@kbn/kql/public';
@@ -26,6 +27,12 @@ const matcherSuggestionsAbstraction: SuggestionsAbstraction = {
   type: 'action_policies',
   fields: {},
 };
+
+const autoHeightContainer = css`
+  & > div {
+    height: auto;
+  }
+`;
 
 export const MatcherInput = ({
   value,
@@ -71,21 +78,23 @@ export const MatcherInput = ({
   );
 
   return (
-    <QueryStringInput
-      appName="alertingV2"
-      indexPatterns={syntheticDataView}
-      query={query}
-      onChange={handleChange}
-      disableAutoFocus
-      disableLanguageSwitcher={true}
-      bubbleSubmitEvent={false}
-      isClearable
-      placeholder={placeholder}
-      dataTestSubj={dataTestSubj}
-      size="s"
-      className={fullWidth ? 'euiFieldText--fullWidth' : undefined}
-      suggestionsAbstraction={matcherSuggestionsAbstraction}
-      suggestionsDebounceMs={300}
-    />
+    <div css={autoHeightContainer}>
+      <QueryStringInput
+        appName="alertingV2"
+        indexPatterns={syntheticDataView}
+        query={query}
+        onChange={handleChange}
+        disableAutoFocus
+        disableLanguageSwitcher={true}
+        bubbleSubmitEvent={false}
+        isClearable
+        placeholder={placeholder}
+        dataTestSubj={dataTestSubj}
+        size="s"
+        className={fullWidth ? 'euiFieldText--fullWidth' : undefined}
+        suggestionsAbstraction={matcherSuggestionsAbstraction}
+        suggestionsDebounceMs={300}
+      />
+    </div>
   );
 };
