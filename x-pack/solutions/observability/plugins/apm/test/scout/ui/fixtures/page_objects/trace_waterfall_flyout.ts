@@ -72,6 +72,7 @@ export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyou
       await page
         .getByTestId('apmTraceWaterfallFlyoutActionsButton')
         .click({ timeout: EXTENDED_TIMEOUT });
+      await page.getByTestId('apmTraceWaterfallOpenInDiscover').waitFor({ state: 'visible' });
     },
   };
 }
