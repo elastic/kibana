@@ -90,7 +90,7 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
     ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
-    : 35;
+    : 30;
   if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
     throw new Error(
       `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
@@ -311,11 +311,11 @@ export async function pickTestGroupRunOrder() {
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 60,
+        defaultMin: 15,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
         tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
-        warmupMin: 2,
+        warmupMin: 5,
         concurrency: 1,
         names: jestIntegrationConfigs,
       },

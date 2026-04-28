@@ -68,6 +68,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BinaryToTextEncoding",
             "trackAdoption": false,
             "isRequired": true
           }
