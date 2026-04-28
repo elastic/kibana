@@ -14,11 +14,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_assign'));
-
-    describe('public tags API', function () {
-      loadTestFile(require.resolve('./tags_create'));
-      loadTestFile(require.resolve('./tags_upsert'));
-      loadTestFile(require.resolve('./tags_read_list_delete'));
-    });
   });
 }

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/usage-collection-plugin",
@@ -22,7 +22,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/as-code-shared-schemas",
     "@kbn/core-http-server",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",
