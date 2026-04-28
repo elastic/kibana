@@ -240,6 +240,12 @@ export async function rollbackAvailableCheck(
               fields: ['dependencies'],
             });
             if (dependantSORes.saved_objects.length === 0) continue;
+            if (dependantSORes.saved_objects.length > 1) {
+              return {
+                isAvailable: false,
+                reason: `Expected exactly one saved object for dependant ${dependantName}`,
+              };
+            }
             const dependantConstraint =
               dependantSORes.saved_objects[0].attributes.dependencies?.find(
                 (d) => d.name === depName
