@@ -38,13 +38,14 @@ if: >-
       (
         github.event_name == 'pull_request' ||
         (
-          github.event_name == 'issue_comment' &&
-          github.event.issue.pull_request &&
-          contains(github.event.comment.body, '@claude')
-        ) ||
-        (
-          github.event_name == 'pull_request_review_comment' &&
-          contains(github.event.comment.body, '@claude')
+          contains(github.event.comment.body, '@claude') &&
+          (
+            github.event_name == 'pull_request_review_comment' ||
+            (
+              github.event_name == 'issue_comment' &&
+              github.event.issue.pull_request
+            )
+          )
         )
       )
     )
