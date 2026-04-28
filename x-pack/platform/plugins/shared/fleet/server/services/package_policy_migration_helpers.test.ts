@@ -188,7 +188,9 @@ describe('migrateStreamVars', () => {
   it('carries renamed var from old input-level vars when not present in old stream vars', () => {
     const newStream = makeStream({ url: { type: 'text', value: 'https://default.example.com' } });
     const oldStream = makeStream({});
-    const oldInputVars = { request_url: { type: 'text', value: 'https://input-level.example.com' } };
+    const oldInputVars = {
+      request_url: { type: 'text', value: 'https://input-level.example.com' },
+    };
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
     const result = migrateStreamVars(newStream, oldStream, oldInputVars, varDefs);
