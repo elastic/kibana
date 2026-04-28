@@ -19,7 +19,7 @@ export const panelContainerStyles = ({ euiTheme }: UseEuiTheme) => {
     flex-direction: column;
     /* min height fits ~1.5 presets, nav items and footer */
     min-block-size: calc(${euiTheme.size.base} * 14);
-    max-block-size: min(${CONTAINER_HEIGHT}px, 70vh);
+    max-block-size: min(${CONTAINER_HEIGHT}px, 50vh);
     inline-size: ${euiTheme.components.forms.maxWidth}px;
     max-inline-size: 100%;
   `;
