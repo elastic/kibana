@@ -780,34 +780,32 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     if (isModelNotDownloaded) return defaultParams;
 
     const uiParams = isNLPModelItem(model)
-      ? model?.stats?.deployment_stats.map((v) =>
+      ? model.stats?.deployment_stats.map((v) =>
           deploymentParamsMapper.mapApiToUiDeploymentParams(v)
         )
       : [];
 
-    return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
+    return uiParams.some((v) => v.optimized === 'optimizedForIngest')
       ? searchParams
       : defaultParams;
   }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo, isRerank]);
 
   const modalTitleId = useGeneratedHtmlId();
 
-  const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
+  const [config, setConfig] = useState<DeploymentParamsUI>(
+    () => initialParams ?? getDefaultParams()
+  );
 
-  useEffect(() => {
-    if (initialParams !== undefined || model === undefined || isRerank !== true) {
-      return;
-    }
-
-    // force search optimization for rerank models.
-    setConfig((prev) => {
-      const next = { ...prev, optimized: 'optimizedForSearch' as const };
-      if (prev.deploymentId === `${modelId}_ingest`) {
-        next.deploymentId = `${modelId}_search`;
+  useEffect(
+    function syncResolvedModelDefaults() {
+      if (initialParams !== undefined || model === undefined || isRerank !== true) {
+        return;
       }
-      return next;
-    });
-  }, [initialParams, model, modelId, isRerank]);
+
+      setConfig(getDefaultParams());
+    },
+    [initialParams, model, isRerank, getDefaultParams]
+  );
 
   const deploymentIdValidator = useMemo(() => {
     if (isUpdate || !isNLPModelItem(model)) {
