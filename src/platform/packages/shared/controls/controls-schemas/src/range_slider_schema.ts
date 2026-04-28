@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
-import { dataControlSchema } from './control_schema';
+import { extendDataControlSchema } from './control_schema';
 
 export const rangeValueSchema = schema.arrayOf(schema.string(), {
   minSize: 2,
@@ -20,8 +20,7 @@ export const rangeValueSchema = schema.arrayOf(schema.string(), {
   },
 });
 
-export const rangeSliderControlSchema = schema.object({
-  ...dataControlSchema.getPropSchemas(),
+export const rangeSliderControlSchema = extendDataControlSchema({
   value: schema.maybe(rangeValueSchema),
   step: schema.number({
     defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,

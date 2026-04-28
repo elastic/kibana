@@ -13,7 +13,11 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from '@kbn/controls-constants';
-import { controlTitleSchema, dataControlSchema } from './control_schema';
+import {
+  controlTitleSchema,
+  dataControlEsqlVariantProps,
+  dataControlFieldVariantProps,
+} from './control_schema';
 
 const SELECTIONS_MAX = 10000;
 
@@ -100,9 +104,8 @@ const optionsListControlBaseParameters = schema.object({
   display_settings: schema.maybe(optionsListDisplaySettingsSchema),
 });
 
-export const optionsListDSLControlSchema = schema.object({
+const optionsListDSLExtras = {
   ...optionsListControlBaseParameters.getPropSchemas(),
-  ...dataControlSchema.getPropSchemas(),
   exclude: schema.boolean({
     defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude,
     meta: {
@@ -140,7 +143,12 @@ export const optionsListDSLControlSchema = schema.object({
     },
   }),
   sort: optionsListSortSchema,
-});
+};
+
+export const optionsListDSLControlSchema = schema.discriminatedUnion('values_source', [
+  schema.object({ ...dataControlFieldVariantProps, ...optionsListDSLExtras }),
+  schema.object({ ...dataControlEsqlVariantProps, ...optionsListDSLExtras }),
+]);
 
 const baseEsqlControl = {
   ...controlTitleSchema.getPropSchemas(),

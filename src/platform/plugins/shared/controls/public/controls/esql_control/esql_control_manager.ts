@@ -47,7 +47,7 @@ import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
 import { castESQLValue } from './utils/esql_type_utils';
-import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import { getESQLSingleColumnValues } from '../utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -216,8 +216,11 @@ export function initializeESQLControlManager(
         .subscribe((result) => {
           setDataLoading(false);
           if (getESQLSingleColumnValues.isSuccess(result)) {
-            valuesColumnType = result.columnType;
-            const newAvailableOptions = result.values.map((value) => value);
+            valuesColumnType = result.column.type;
+            const newAvailableOptions = result.values.map(
+              // Coerce numeric columns into strings
+              (value) => String(value)
+            );
             availableOptions$.next(newAvailableOptions);
 
             // Check if current selections are still compatible

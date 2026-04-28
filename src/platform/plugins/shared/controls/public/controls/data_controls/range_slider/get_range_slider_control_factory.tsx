@@ -141,6 +141,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
+        esqlQuery$: dataControlManager.api.esqlQuery$,
+        valuesSource$: dataControlManager.api.valuesSource$,
         useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start
@@ -253,7 +255,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
           return (
             <RangeSliderControl
-              fieldName={fieldName}
+              fieldName={fieldName ?? ''}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

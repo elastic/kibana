@@ -83,6 +83,7 @@ async function getCreationOptions(
               data_view_id: dataView.id ?? '',
               title: 'Node name',
               field_name: 'service.node.name',
+              esql_query: undefined as never,
             },
             width: 'medium',
             grow: true,

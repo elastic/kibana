@@ -11,8 +11,10 @@ import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   optionsListDSLControlSchema,
+  type LegacyStoredDataControlState,
   type LegacyStoredOptionsListExplicitInput,
   type OptionsListDSLControlState,
+  type StrictDataControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -32,7 +34,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(
-          state,
+          state as StrictDataControlState,
           OPTIONS_LIST_REF_NAME
         );
         return {
@@ -52,7 +54,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
       ): Partial<OptionsListDSLControlState> => {
         const dataControlState = transformDataControlOut(
           id,
-          state,
+          state as Partial<LegacyStoredDataControlState & StrictDataControlState>,
           OPTIONS_LIST_LEGACY_REF_NAMES,
           panelReferences,
           containerReferences
