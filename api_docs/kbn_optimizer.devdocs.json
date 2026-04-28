@@ -54,6 +54,7 @@
                 "lineNumber": 172,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "Options",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -97,6 +98,7 @@
                 "lineNumber": 242,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "Options",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -306,6 +308,7 @@
                 "lineNumber": 299,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ThemeTags",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -427,6 +430,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -502,6 +506,7 @@
             "lineNumber": 21,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -525,6 +530,7 @@
             "lineNumber": 21,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "OptimizerConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -638,6 +644,7 @@
             "lineNumber": 18,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -661,6 +668,7 @@
             "lineNumber": 18,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "OptimizerConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -808,6 +816,7 @@
             "lineNumber": 34,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "OptimizerConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -845,6 +854,7 @@
             "lineNumber": 107,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdateBundleLimitsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -904,6 +914,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -927,6 +938,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OptimizerConfig",
             "trackAdoption": false,
             "isRequired": true
           },

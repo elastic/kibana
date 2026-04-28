@@ -53,6 +53,7 @@
                 "lineNumber": 38,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataStreamsStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -206,6 +207,7 @@
                 "lineNumber": 55,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "SearchLogsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -264,6 +266,7 @@
                 "lineNumber": 47,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "WorkflowEventLoggerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -557,6 +560,7 @@
                 "lineNumber": 63,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutionLogsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -603,6 +607,7 @@
                 "lineNumber": 64,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "StepLogsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -649,6 +654,7 @@
                 "lineNumber": 65,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsByLevelParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -707,6 +713,7 @@
                 "lineNumber": 66,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "SearchLogsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1252,6 +1259,7 @@
               "lineNumber": 69,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "WorkflowExecutionEngineModel",
               "trackAdoption": false
             },
             {
@@ -1268,6 +1276,7 @@
               "lineNumber": 70,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false
             },
             {
@@ -1285,6 +1294,7 @@
               "lineNumber": 71,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false
             }
           ]
@@ -1338,6 +1348,7 @@
               "lineNumber": 75,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "WorkflowExecutionEngineModel",
               "trackAdoption": false
             },
             {
@@ -1383,6 +1394,7 @@
               "lineNumber": 78,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false
             },
             {
@@ -1400,6 +1412,7 @@
               "lineNumber": 79,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false
             }
           ]
@@ -1543,6 +1556,7 @@
               "lineNumber": 95,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false
             },
             {
@@ -1560,6 +1574,7 @@
               "lineNumber": 96,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false
             }
           ]
@@ -1635,6 +1650,7 @@
               "lineNumber": 100,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "WorkflowExecutionEngineModel",
               "trackAdoption": false
             },
             {
@@ -1651,6 +1667,7 @@
               "lineNumber": 101,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false
             },
             {
@@ -1668,6 +1685,7 @@
               "lineNumber": 102,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false
             }
           ]
@@ -1729,6 +1747,7 @@
               "lineNumber": 106,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "Array",
               "trackAdoption": false
             },
             {
@@ -1746,6 +1765,7 @@
               "lineNumber": 107,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false
             }
           ]
@@ -1860,6 +1880,7 @@
             "lineNumber": 24,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateIndexesOptions",
             "trackAdoption": false,
             "isRequired": true
           }

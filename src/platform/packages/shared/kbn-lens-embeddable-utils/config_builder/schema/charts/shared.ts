@@ -37,13 +37,13 @@ import {
 
 export const baseLegendVisibilitySchema = schema.maybe(
   schema.oneOf([schema.literal('visible'), schema.literal('hidden')], {
-    meta: { description: 'Legend visibility' },
+    meta: { description: 'Legend visibility.' },
   })
 );
 
 export const legendVisibilitySchemaWithAuto = schema.maybe(
   schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
-    meta: { description: 'Legend visibility' },
+    meta: { description: 'Legend visibility.' },
   })
 );
 
@@ -60,7 +60,7 @@ export const legendSizeSchema = schema.maybe(
       meta: {
         id: 'legendSize',
         title: 'Legend Size',
-        description: 'Legend size',
+        description: 'Legend size.',
       },
     }
   )
@@ -232,7 +232,7 @@ export const xScaleSchema = schema.oneOf(
     meta: {
       // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
       description:
-        "X-axis scale type. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
+        "X-axis scale type. Use 'temporal' for timestamp/date fields (for example, @timestamp or DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
     },
   }
 );

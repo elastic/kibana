@@ -265,6 +265,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -282,6 +283,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "U",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -343,6 +345,7 @@
             "lineNumber": 36,
             "columnNumber": 25,
             "deprecated": false,
+            "docsReferencedTypeName": "BindableAPI",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -366,6 +369,7 @@
             "lineNumber": 36,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "BoundOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -426,6 +430,7 @@
             "lineNumber": 18,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "RawConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -524,6 +529,7 @@
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -853,6 +859,7 @@
             "lineNumber": 19,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -911,6 +918,7 @@
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceConnector",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -983,6 +991,7 @@
             "lineNumber": 18,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1043,6 +1052,7 @@
             "lineNumber": 60,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1103,6 +1113,7 @@
             "lineNumber": 44,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1156,6 +1167,7 @@
             "lineNumber": 16,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1211,7 +1223,22 @@
         "tags": [],
         "label": "isChatCompletionChunkEvent",
         "description": [
-          "\nCheck if the provided {@link ChatCompletionEvent} is a {@link ChatCompletionChunkEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
+          }
         ],
         "signature": [
           "(event: ",
@@ -1287,6 +1314,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatCompletionEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1301,7 +1329,22 @@
         "tags": [],
         "label": "isChatCompletionEvent",
         "description": [
-          "\nCheck if the provided {@link InferenceTaskEvent} is a {@link ChatCompletionEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskEvent",
+            "text": "InferenceTaskEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          }
         ],
         "signature": [
           "(event: Record<string, unknown> & { type: string; }) => boolean"
@@ -1326,6 +1369,7 @@
             "lineNumber": 50,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceTaskEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1340,7 +1384,22 @@
         "tags": [],
         "label": "isChatCompletionMessageEvent",
         "description": [
-          "\nCheck if the provided {@link ChatCompletionEvent} is a {@link ChatCompletionMessageEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionMessageEvent",
+            "text": "ChatCompletionMessageEvent"
+          }
         ],
         "signature": [
           "(event: ",
@@ -1380,6 +1439,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatCompletionEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1394,7 +1454,22 @@
         "tags": [],
         "label": "isChatCompletionTokenCountEvent",
         "description": [
-          "\nCheck if the provided {@link ChatCompletionEvent} is a {@link ChatCompletionMessageEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionMessageEvent",
+            "text": "ChatCompletionMessageEvent"
+          }
         ],
         "signature": [
           "(event: ",
@@ -1470,6 +1545,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatCompletionEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1484,7 +1560,14 @@
         "tags": [],
         "label": "isInferenceError",
         "description": [
-          "\nCheck if the given error is an {@link InferenceTaskError}"
+          "\nCheck if the given error is an ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskError",
+            "text": "InferenceTaskError"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -1523,7 +1606,14 @@
         "tags": [],
         "label": "isInferenceInternalError",
         "description": [
-          "\nCheck if the given error is an {@link InferenceTaskInternalError}"
+          "\nCheck if the given error is an ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskInternalError",
+            "text": "InferenceTaskInternalError"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -1562,7 +1652,14 @@
         "tags": [],
         "label": "isInferenceProviderError",
         "description": [
-          "\nCheck if the given error is an {@link InferenceTaskProviderError}"
+          "\nCheck if the given error is an ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskProviderError",
+            "text": "InferenceTaskProviderError"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -1601,7 +1698,14 @@
         "tags": [],
         "label": "isInferenceRequestAbortedError",
         "description": [
-          "\nCheck if the given error is an {@link InferenceTaskAbortedError}"
+          "\nCheck if the given error is an ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskAbortedError",
+            "text": "InferenceTaskAbortedError"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -1640,7 +1744,14 @@
         "tags": [],
         "label": "isInferenceRequestError",
         "description": [
-          "\nCheck if the given error is an {@link InferenceTaskRequestError}"
+          "\nCheck if the given error is an ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskRequestError",
+            "text": "InferenceTaskRequestError"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -1679,7 +1790,22 @@
         "tags": [],
         "label": "isOutputCompleteEvent",
         "description": [
-          "\nCheck if the provided {@link ChatCompletionEvent} is a {@link ChatCompletionChunkEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
+          }
         ],
         "signature": [
           "(event: TOutputEvent) => boolean"
@@ -1704,6 +1830,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TOutputEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1718,7 +1845,22 @@
         "tags": [],
         "label": "isOutputEvent",
         "description": [
-          "\nCheck if the provided {@link InferenceTaskEvent} is a {@link OutputEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskEvent",
+            "text": "InferenceTaskEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputEvent",
+            "text": "OutputEvent"
+          }
         ],
         "signature": [
           "(event: Record<string, unknown> & { type: string; }) => boolean"
@@ -1743,6 +1885,7 @@
             "lineNumber": 26,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceTaskEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1757,7 +1900,14 @@
         "tags": [],
         "label": "isOutputTokenLimitReachedError",
         "description": [
-          "\nCheck if an error is a {@link ChatCompletionTokenLimitReachedError}"
+          "\nCheck if an error is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionTokenLimitReachedError",
+            "text": "ChatCompletionTokenLimitReachedError"
+          }
         ],
         "signature": [
           "(error: Error) => boolean"
@@ -1782,6 +1932,7 @@
             "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1796,7 +1947,22 @@
         "tags": [],
         "label": "isOutputUpdateEvent",
         "description": [
-          "\nCheck if the provided {@link OutputEvent} is a {@link OutputUpdateEvent}"
+          "\nCheck if the provided ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputEvent",
+            "text": "OutputEvent"
+          },
+          " is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputUpdateEvent",
+            "text": "OutputUpdateEvent"
+          }
         ],
         "signature": [
           "(event: ",
@@ -1836,6 +2002,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OutputEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1889,6 +2056,7 @@
             "lineNumber": 31,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "RawConnector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1942,7 +2110,14 @@
         "tags": [],
         "label": "isToolNotFoundError",
         "description": [
-          "\nCheck if an error is a {@link ChatCompletionToolNotFoundError}"
+          "\nCheck if an error is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionToolNotFoundError",
+            "text": "ChatCompletionToolNotFoundError"
+          }
         ],
         "signature": [
           "(error: Error) => boolean"
@@ -1967,6 +2142,7 @@
             "lineNumber": 109,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1981,7 +2157,14 @@
         "tags": [],
         "label": "isToolValidationError",
         "description": [
-          "\nCheck if an error is a {@link ChatCompletionToolValidationError}"
+          "\nCheck if an error is a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionToolValidationError",
+            "text": "ChatCompletionToolValidationError"
+          }
         ],
         "signature": [
           "(error: Error | undefined) => boolean"
@@ -2006,6 +2189,7 @@
             "lineNumber": 87,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2485,7 +2669,15 @@
         "tags": [],
         "label": "ApiInferenceConnector",
         "description": [
-          "\nConnector entry returned by {@link INFERENCE_CONNECTORS_INTERNAL_API_PATH}.\n`isRecommended` is set server-side for endpoints that a feature recommends when no\nsaved-object override is configured."
+          "\nConnector entry returned by ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.INFERENCE_CONNECTORS_INTERNAL_API_PATH",
+            "text": "INFERENCE_CONNECTORS_INTERNAL_API_PATH"
+          },
+          ".\n`isRecommended` is set server-side for endpoints that a feature recommends when no\nsaved-object override is configured."
         ],
         "signature": [
           {
@@ -2536,7 +2728,15 @@
         "tags": [],
         "label": "BoundInferenceClient",
         "description": [
-          "\nA version of the {@link InferenceClient} that is pre-bound to a set of parameters."
+          "\nA version of the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceClient",
+            "text": "InferenceClient"
+          },
+          " that is pre-bound to a set of parameters."
         ],
         "signature": [
           {
@@ -2626,6 +2826,7 @@
                 "lineNumber": 20,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TChatCompleteOptions",
                 "trackAdoption": false
               }
             ]
@@ -2715,6 +2916,7 @@
                 "lineNumber": 29,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnboundOutputOptions",
                 "trackAdoption": false
               }
             ]
@@ -2881,7 +3083,15 @@
             "tags": [],
             "label": "bindTo",
             "description": [
-              "\nCreate a {@link BoundInferenceClient}."
+              "\nCreate a ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundInferenceClient",
+                "text": "BoundInferenceClient"
+              },
+              "."
             ],
             "signature": [
               "(options: ",
@@ -2927,6 +3137,7 @@
                 "lineNumber": 87,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "BoundOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3194,7 +3405,15 @@
         "tags": [],
         "label": "ChatCompleteResponse",
         "description": [
-          "\nResponse from the {@link ChatCompleteAPI} when streaming is not enabled."
+          "\nResponse from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          },
+          " when streaming is not enabled."
         ],
         "signature": [
           {
@@ -3631,7 +3850,15 @@
         "tags": [],
         "label": "CustomToolChoice",
         "description": [
-          "\nRepresent a tool choice where the LLM is forced to call a specific tool.\n\nRefer to {@link ToolChoice} for more details."
+          "\nRepresent a tool choice where the LLM is forced to call a specific tool.\n\nRefer to ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          " for more details."
         ],
         "signature": [
           {
@@ -4006,6 +4233,7 @@
                 "lineNumber": 79,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOptions",
                 "trackAdoption": false
               }
             ]
@@ -4070,6 +4298,7 @@
                 "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "OutputOptions",
                 "trackAdoption": false
               }
             ]
@@ -4253,7 +4482,15 @@
             "tags": [],
             "label": "bindTo",
             "description": [
-              "\nCreate a {@link BoundInferenceClient}."
+              "\nCreate a ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundInferenceClient",
+                "text": "BoundInferenceClient"
+              },
+              "."
             ],
             "signature": [
               "(options: ",
@@ -4299,6 +4536,7 @@
                 "lineNumber": 51,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "BoundOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4330,7 +4568,14 @@
             "tags": [],
             "label": "type",
             "description": [
-              "the type of the connector, see {@link InferenceConnectorType}"
+              "the type of the connector, see ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnectorType",
+                "text": "InferenceConnectorType"
+              }
             ],
             "signature": [
               {
@@ -4565,7 +4810,15 @@
         "tags": [],
         "label": "InferenceConnectorsApiResponseBody",
         "description": [
-          "\nResponse body shape for {@link INFERENCE_CONNECTORS_INTERNAL_API_PATH}."
+          "\nResponse body shape for ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.INFERENCE_CONNECTORS_INTERNAL_API_PATH",
+            "text": "INFERENCE_CONNECTORS_INTERNAL_API_PATH"
+          },
+          "."
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_connectors_api.ts",
         "lineNumber": 26,
@@ -4676,6 +4929,7 @@
                 "lineNumber": 34,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceCompleteCallbackHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4733,6 +4987,7 @@
                 "lineNumber": 35,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceErrorCallbackHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5065,7 +5320,14 @@
         "tags": [],
         "label": "OutputOptions",
         "description": [
-          "\nOptions for the {@link OutputAPI}"
+          "\nOptions for the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          }
         ],
         "signature": [
           {
@@ -5367,7 +5629,15 @@
         "tags": [],
         "label": "OutputResponse",
         "description": [
-          "\nResponse from the {@link OutputAPI} when streaming is not enabled."
+          "\nResponse from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          },
+          " when streaming is not enabled."
         ],
         "signature": [
           {
@@ -5612,6 +5882,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TNextPromptVersion",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5654,7 +5925,14 @@
         "tags": [],
         "label": "PromptOptions",
         "description": [
-          "\nOptions for the {@link PromptAPI}"
+          "\nOptions for the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.PromptAPI",
+            "text": "PromptAPI"
+          }
         ],
         "signature": [
           {
@@ -5762,7 +6040,15 @@
             "tags": [],
             "label": "models",
             "description": [
-              "\nA list of {@link ModelMatch} objects. If none are given, it will be\ninterpreted as a fallback match-all version."
+              "\nA list of ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ModelMatch",
+                "text": "ModelMatch"
+              },
+              " objects. If none are given, it will be\ninterpreted as a fallback match-all version."
             ],
             "signature": [
               "ModelMatch",
@@ -6466,7 +6752,14 @@
         "tags": [],
         "label": "ToolOptions",
         "description": [
-          "\nTool-related parameters of {@link ChatCompleteAPI}"
+          "\nTool-related parameters of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          }
         ],
         "signature": [
           {
@@ -6491,7 +6784,14 @@
             "tags": [],
             "label": "toolChoice",
             "description": [
-              "\nThe choice of tool execution.\n\nRefer to {@link ToolChoice}"
+              "\nThe choice of tool execution.\n\nRefer to ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              }
             ],
             "signature": [
               "TToolChoice | undefined"
@@ -6509,7 +6809,15 @@
             "tags": [],
             "label": "tools",
             "description": [
-              "\nThe list of tool definitions that will be exposed to the LLM.\n\nRefer to {@link ToolDefinition}."
+              "\nThe list of tool definitions that will be exposed to the LLM.\n\nRefer to ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolDefinition",
+                "text": "ToolDefinition"
+              },
+              "."
             ],
             "signature": [
               "TToolDefinitions | undefined"
@@ -6530,7 +6838,14 @@
         "tags": [],
         "label": "UnvalidatedToolCall",
         "description": [
-          "\nRepresents a tool call from the LLM before correctly converted to the schema type.\n\nOnly publicly exposed because referenced by {@link ChatCompletionToolValidationError}"
+          "\nRepresents a tool call from the LLM before correctly converted to the schema type.\n\nOnly publicly exposed because referenced by ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionToolValidationError",
+            "text": "ChatCompletionToolValidationError"
+          }
         ],
         "signature": [
           {
@@ -6589,7 +6904,14 @@
         "tags": [],
         "label": "ChatCompletionErrorCode",
         "description": [
-          "\nList of code of error that are specific to the {@link ChatCompleteAPI}"
+          "\nList of code of error that are specific to the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          }
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
         "lineNumber": 11,
@@ -6605,7 +6927,15 @@
         "tags": [],
         "label": "ChatCompletionEventType",
         "description": [
-          "\nList possible values of {@link ChatCompletionEvent} types."
+          "\nList possible values of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          },
+          " types."
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
         "lineNumber": 13,
@@ -6669,7 +6999,15 @@
         "tags": [],
         "label": "MessageRole",
         "description": [
-          "\nEnum for all possible {@link Message} roles."
+          "\nEnum for all possible ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          " roles."
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "lineNumber": 12,
@@ -6727,7 +7065,15 @@
         "tags": [],
         "label": "OutputEventType",
         "description": [
-          "\nList possible values of {@link OutputEvent} types."
+          "\nList possible values of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputEvent",
+            "text": "OutputEvent"
+          },
+          " types."
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/events.ts",
         "lineNumber": 10,
@@ -6743,7 +7089,15 @@
         "tags": [],
         "label": "ToolChoiceType",
         "description": [
-          "\nTool invocation choice type.\n\nRefer to {@link ToolChoice} for more details."
+          "\nTool invocation choice type.\n\nRefer to ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          " for more details."
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
         "lineNumber": 10,
@@ -6869,7 +7223,15 @@
         "tags": [],
         "label": "AssistantMessageOf",
         "description": [
-          "\nUtility type to get the Assistant message type of a {@link ToolOptions} type."
+          "\nUtility type to get the Assistant message type of a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          " type."
         ],
         "signature": [
           "MessageBase<",
@@ -6934,7 +7296,15 @@
         "tags": [],
         "label": "BoundChatCompleteAPI",
         "description": [
-          "\nVersion of {@link ChatCompleteAPI} that got pre-bound to a set of static parameters"
+          "\nVersion of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          },
+          " that got pre-bound to a set of static parameters"
         ],
         "signature": [
           "<TChatCompleteOptions extends Omit<",
@@ -6992,6 +7362,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TChatCompleteOptions",
             "trackAdoption": false
           }
         ],
@@ -7004,7 +7375,15 @@
         "tags": [],
         "label": "BoundOutputAPI",
         "description": [
-          "\nVersion of {@link OutputAPI} that got pre-bound to a set of static parameters"
+          "\nVersion of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          },
+          " that got pre-bound to a set of static parameters"
         ],
         "signature": [
           "<TId extends string = string, TOutputSchema extends ",
@@ -7082,6 +7461,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnboundOutputOptions",
             "trackAdoption": false
           }
         ],
@@ -7094,7 +7474,15 @@
         "tags": [],
         "label": "BoundPromptAPI",
         "description": [
-          "\nVersion of {@link PromptAPI} that got pre-bound to a set of static parameters"
+          "\nVersion of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.PromptAPI",
+            "text": "PromptAPI"
+          },
+          " that got pre-bound to a set of static parameters"
         ],
         "signature": [
           "<TPrompt extends ",
@@ -7216,6 +7604,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TOptions",
             "trackAdoption": false
           }
         ],
@@ -7309,7 +7698,15 @@
         "tags": [],
         "label": "ChatCompleteCompositeResponse",
         "description": [
-          "\nComposite response type from the {@link ChatCompleteAPI},\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
+          "\nComposite response type from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          },
+          ",\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
         ],
         "signature": [
           "(true extends TOptions[\"stream\"] ? ",
@@ -7344,7 +7741,15 @@
         "tags": [],
         "label": "ChatCompleteOptions",
         "description": [
-          "\nOptions used to call the {@link ChatCompleteAPI}.\n\n`connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)\nand Elasticsearch inference endpoint IDs. The system automatically resolves which\npipeline to use based on the provided identifier."
+          "\nOptions used to call the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          },
+          ".\n\n`connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)\nand Elasticsearch inference endpoint IDs. The system automatically resolves which\npipeline to use based on the provided identifier."
         ],
         "signature": [
           "{ connectorId: string; system?: string | undefined; messages: ",
@@ -7413,7 +7818,22 @@
         "tags": [],
         "label": "ChatCompleteStreamResponse",
         "description": [
-          "\nResponse from the {@link ChatCompleteAPI} when streaming is enabled.\n\nObservable of {@link ChatCompletionEvent}"
+          "\nResponse from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          },
+          " when streaming is enabled.\n\nObservable of ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEvent",
+            "text": "ChatCompletionEvent"
+          }
         ],
         "signature": [
           "Observable",
@@ -7500,7 +7920,47 @@
         "tags": [],
         "label": "ChatCompletionEvent",
         "description": [
-          "\nEvents emitted from the {@link ChatCompleteResponse} observable\nreturned from the {@link ChatCompleteAPI}.\n\nThe chatComplete API returns 3 type of events:\n- {@link ChatCompletionChunkEvent}: message chunk events\n- {@link ChatCompletionTokenCountEvent}: token count event\n- {@link ChatCompletionMessageEvent}: message event\n\nNote that chunk events can be emitted any amount of times, but token count will be emitted\nat most once (could not be emitted depending on the underlying connector), and message\nevent will be emitted ex\n"
+          "\nEvents emitted from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteResponse",
+            "text": "ChatCompleteResponse"
+          },
+          " observable\nreturned from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteAPI",
+            "text": "ChatCompleteAPI"
+          },
+          ".\n\nThe chatComplete API returns 3 type of events:\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
+          },
+          ": message chunk events\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionTokenCountEvent",
+            "text": "ChatCompletionTokenCountEvent"
+          },
+          ": token count event\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionMessageEvent",
+            "text": "ChatCompletionMessageEvent"
+          },
+          ": message event\n\nNote that chunk events can be emitted any amount of times, but token count will be emitted\nat most once (could not be emitted depending on the underlying connector), and message\nevent will be emitted ex\n"
         ],
         "signature": [
           "({ content: string; refusal?: string | undefined; tool_calls: ",
@@ -8145,7 +8605,30 @@
         "tags": [],
         "label": "Message",
         "description": [
-          "\nMixin composed of all the possible types of messages in a chatComplete discussion.\n\nMessage can be of three types:\n- {@link UserMessage}\n- {@link AssistantMessage}\n- {@link ToolMessage}"
+          "\nMixin composed of all the possible types of messages in a chatComplete discussion.\n\nMessage can be of three types:\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.UserMessage",
+            "text": "UserMessage"
+          },
+          "\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.AssistantMessage",
+            "text": "AssistantMessage"
+          },
+          "\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          }
         ],
         "signature": [
           {
@@ -8240,7 +8723,15 @@
         "tags": [],
         "label": "MessageOf",
         "description": [
-          "\nUtility type to get the mixin Message type of a {@link ToolOptions} type."
+          "\nUtility type to get the mixin Message type of a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          " type."
         ],
         "signature": [
           {
@@ -8292,7 +8783,14 @@
         "tags": [],
         "label": "Output",
         "description": [
-          "\nTask output of a {@link OutputCompleteEvent}"
+          "\nTask output of a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputCompleteEvent",
+            "text": "OutputCompleteEvent"
+          }
         ],
         "signature": [
           "unknown"
@@ -8364,6 +8862,7 @@
             "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OutputOptions",
             "trackAdoption": false
           }
         ],
@@ -8376,7 +8875,14 @@
         "tags": [],
         "label": "OutputCompleteEvent",
         "description": [
-          "\nCompletion (complete message) event for the {@link OutputAPI}"
+          "\nCompletion (complete message) event for the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          }
         ],
         "signature": [
           "{ id: TId; output: TOutput; content: string; } & { type: ",
@@ -8403,7 +8909,15 @@
         "tags": [],
         "label": "OutputCompositeResponse",
         "description": [
-          "\nComposite response type from the {@link OutputAPI},\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
+          "\nComposite response type from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          },
+          ",\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
         ],
         "signature": [
           "TStream extends true ? ",
@@ -8448,7 +8962,15 @@
         "tags": [],
         "label": "OutputEvent",
         "description": [
-          "\nEvents emitted from the {@link OutputEvent}."
+          "\nEvents emitted from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputEvent",
+            "text": "OutputEvent"
+          },
+          "."
         ],
         "signature": [
           "({ id: TId; content: string; } & { type: ",
@@ -8483,7 +9005,15 @@
         "tags": [],
         "label": "OutputStreamResponse",
         "description": [
-          "\nResponse from the {@link OutputAPI} in streaming mode.\n"
+          "\nResponse from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          },
+          " in streaming mode.\n"
         ],
         "signature": [
           "Observable",
@@ -8521,7 +9051,14 @@
         "tags": [],
         "label": "OutputUpdateEvent",
         "description": [
-          "\nUpdate (chunk) event for the {@link OutputAPI}"
+          "\nUpdate (chunk) event for the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputAPI",
+            "text": "OutputAPI"
+          }
         ],
         "signature": [
           "{ id: TId; content: string; } & { type: ",
@@ -8647,7 +9184,15 @@
         "tags": [],
         "label": "PromptCompositeResponse",
         "description": [
-          "\nComposite response type from the {@link PromptAPI},\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
+          "\nComposite response type from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.PromptAPI",
+            "text": "PromptAPI"
+          },
+          ",\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
         ],
         "signature": [
           "(true extends ",
@@ -8690,7 +9235,15 @@
         "tags": [],
         "label": "PromptResponse",
         "description": [
-          "\nResponse from the {@link PromptAPI} when streaming is not enabled."
+          "\nResponse from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.PromptAPI",
+            "text": "PromptAPI"
+          },
+          " when streaming is not enabled."
         ],
         "signature": [
           {
@@ -8718,7 +9271,15 @@
         "tags": [],
         "label": "PromptStreamResponse",
         "description": [
-          "\nResponse from the {@link PromptAPI} in streaming mode."
+          "\nResponse from the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.PromptAPI",
+            "text": "PromptAPI"
+          },
+          " in streaming mode."
         ],
         "signature": [
           "Observable",
@@ -8801,6 +9362,7 @@
             "lineNumber": 116,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "TToolCall",
             "trackAdoption": false
           }
         ],
@@ -9060,7 +9622,63 @@
         "tags": [],
         "label": "ToolChoice",
         "description": [
-          "\nDefines the tool invocation for {@link ToolOptions}, either a {@link ToolChoiceType} or {@link CustomToolChoice}.\n- {@link ToolChoiceType.none}: the LLM will never call a tool\n- {@link ToolChoiceType.auto}: the LLM will decide if it should call a tool or provide a text response\n- {@link ToolChoiceType.required}: the LLM will always call a tool, but will decide with one to call\n- {@link CustomToolChoice}: the LLM will always call the specified tool"
+          "\nDefines the tool invocation for ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          ", either a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoiceType",
+            "text": "ToolChoiceType"
+          },
+          " or ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.CustomToolChoice",
+            "text": "CustomToolChoice"
+          },
+          ".\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoiceType.none",
+            "text": "ToolChoiceType.none"
+          },
+          ": the LLM will never call a tool\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoiceType.auto",
+            "text": "ToolChoiceType.auto"
+          },
+          ": the LLM will decide if it should call a tool or provide a text response\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoiceType.required",
+            "text": "ToolChoiceType.required"
+          },
+          ": the LLM will always call a tool, but will decide with one to call\n- ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.CustomToolChoice",
+            "text": "CustomToolChoice"
+          },
+          ": the LLM will always call the specified tool"
         ],
         "signature": [
           {
@@ -9123,7 +9741,15 @@
         "tags": [],
         "label": "ToolMessageOf",
         "description": [
-          "\nUtility type to get the Tool message type of a {@link ToolOptions} type."
+          "\nUtility type to get the Tool message type of a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          " type."
         ],
         "signature": [
           "{ [key in ",
@@ -9294,7 +9920,14 @@
         "tags": [],
         "label": "ToolSchema",
         "description": [
-          "\nDefines the schema for a {@link ToolDefinition}"
+          "\nDefines the schema for a ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          }
         ],
         "signature": [
           "ToolSchemaTypeObject"
@@ -9352,7 +9985,14 @@
         "tags": [],
         "label": "UnboundChatCompleteOptions",
         "description": [
-          "\nOptions used to call the {@link BoundChatCompleteAPI}"
+          "\nOptions used to call the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.BoundChatCompleteAPI",
+            "text": "BoundChatCompleteAPI"
+          }
         ],
         "signature": [
           "{ system?: string | undefined; timeout?: number | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
@@ -9430,7 +10070,14 @@
         "tags": [],
         "label": "UnboundOutputOptions",
         "description": [
-          "\nOptions used to call the {@link BoundOutputAPI}"
+          "\nOptions used to call the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.BoundOutputAPI",
+            "text": "BoundOutputAPI"
+          }
         ],
         "signature": [
           "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; metadata?: ",
@@ -9473,7 +10120,14 @@
         "tags": [],
         "label": "UnboundPromptOptions",
         "description": [
-          "\nOptions used to call the {@link BoundPromptAPI}"
+          "\nOptions used to call the ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.BoundPromptAPI",
+            "text": "BoundPromptAPI"
+          }
         ],
         "signature": [
           "{ timeout?: number | undefined; abortSignal?: AbortSignal | undefined; input: ",
