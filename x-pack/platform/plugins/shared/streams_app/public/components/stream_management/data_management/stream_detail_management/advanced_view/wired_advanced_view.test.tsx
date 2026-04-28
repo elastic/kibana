@@ -23,31 +23,6 @@ jest.mock('../../../../../hooks/use_ai_features', () => ({
 // Mock the useStreamsPrivileges hook
 jest.mock('../../../../../hooks/use_streams_privileges');
 
-// Mock hooks used by StreamDescription
-jest.mock(
-  '../../../../sig_events/stream_detail_systems/stream_description/use_stream_description_api',
-  () => ({
-    useStreamDescriptionApi: () => ({
-      description: '',
-      setDescription: jest.fn(),
-      isUpdating: false,
-      isEditing: false,
-      onCancelEdit: jest.fn(),
-      onStartEditing: jest.fn(),
-      onSaveDescription: jest.fn(),
-      isTaskLoading: false,
-      task: undefined,
-      taskError: null,
-      refreshTask: jest.fn(),
-      getDescriptionGenerationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
-      scheduleDescriptionGenerationTask: jest.fn(),
-      cancelDescriptionGenerationTask: jest.fn(),
-      acknowledgeDescriptionGenerationTask: jest.fn(),
-      areButtonsDisabled: false,
-    }),
-  })
-);
-
 // Mock hooks used by StreamDiscoveryConfiguration
 jest.mock('../../../../../hooks/sig_events/use_stream_features', () => ({
   useStreamFeatures: () => ({
