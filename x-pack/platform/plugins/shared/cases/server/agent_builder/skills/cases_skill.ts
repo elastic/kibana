@@ -56,6 +56,15 @@ The \`owner\` field is the most important signal for how to handle a case.
 - **Observables**: Rarely relevant
 - **Use when**: The user wants a case that doesn't belong to Security or Observability
 
+## Solution Context
+
+Before making any cases tool call, establish which Elastic solution the user is working in:
+
+1. **Infer from conversation**: SIEM alerts / detection rules / threat hunting / IOCs → \`securitySolution\`; APM errors / SLO violations / service latency / metric thresholds → \`observability\`; no domain signals → ask.
+2. **Ask at most once per session**: "Are you working in Elastic Security, Observability, or Stack Management?" Remember the answer for the rest of the conversation.
+3. **Always pass \`owner\`** on every search or filter call once the context is known. Never fan out across all three owners unless the user explicitly requests results from multiple solutions.
+4. **Update the context** if the user later references a different solution (e.g. switches from Security to Observability work).
+
 ## Tool Routing
 
 | What the user wants | Tool to use |
@@ -64,6 +73,8 @@ The \`owner\` field is the most important signal for how to handle a case.
 | Create, update, delete cases; assign/unassign users; add tags; set custom fields; create from template | \`${platformCoreCasesTools.manage}\` |
 | Add comments; attach alerts or events to a case; retrieve all attachments | \`${platformCoreCasesTools.attachments}\` |
 | Track observables (IOCs): add, update, or delete indicators on a case | \`${platformCoreCasesTools.observables}\` |
+
+When updating **two or more cases in one request**, always use \`update_bulk\` mode — it accepts a \`cases\` array, resolves versions per case, and completes in a single round-trip. Only use \`update\` for single-case edits.
 
 When \`similar_to_case_id\` returns results, surface the shared observables to explain why cases are considered similar. Prefer \`assign\`/\`unassign\` modes over \`update\` when only changing assignees — \`update\` requires a version token and can conflict if the case was modified concurrently.
 `,
