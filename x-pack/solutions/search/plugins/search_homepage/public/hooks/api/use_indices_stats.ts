@@ -20,10 +20,10 @@ export interface IndicesStats {
 
 const API_BASE_PATH = '/api/index_management';
 
-export const useIndicesStats = (): UseQueryResult<IndicesStats | undefined> => {
+export const useIndicesStats = (): UseQueryResult<IndicesStats | null> => {
   const { http } = useKibana().services;
 
-  const queryResult = useQuery<Index[] | undefined, Error, IndicesStats | undefined>({
+  const queryResult = useQuery<Index[] | null, Error, IndicesStats | null>({
     queryKey: ['fetchIndicesStats'],
     retry: false,
     queryFn: async () => {
@@ -32,14 +32,14 @@ export const useIndicesStats = (): UseQueryResult<IndicesStats | undefined> => {
         return response;
       } catch (error) {
         if (getErrorCode(error) === 403) {
-          return undefined;
+          return null;
         }
         throw error;
       }
     },
     select: (indices) => {
       if (!indices) {
-        return undefined;
+        return null;
       }
 
       const hiddenIndices = indices.filter((index) => index.hidden).length;

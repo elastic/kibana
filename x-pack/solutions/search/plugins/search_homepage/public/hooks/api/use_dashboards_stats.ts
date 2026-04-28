@@ -15,10 +15,10 @@ export interface DashboardsStats {
   totalDashboards: number;
 }
 
-export const useDashboardsStats = (): UseQueryResult<DashboardsStats | undefined> => {
+export const useDashboardsStats = (): UseQueryResult<DashboardsStats | null> => {
   const { http } = useKibana().services;
 
-  const queryResult = useQuery<DashboardsStats | undefined>({
+  const queryResult = useQuery<DashboardsStats | null>({
     queryKey: ['fetchDashboardsStats'],
     retry: false,
     queryFn: async () => {
@@ -39,7 +39,7 @@ export const useDashboardsStats = (): UseQueryResult<DashboardsStats | undefined
         };
       } catch (error) {
         if (getErrorCode(error) === 403) {
-          return undefined;
+          return null;
         }
         throw error;
       }

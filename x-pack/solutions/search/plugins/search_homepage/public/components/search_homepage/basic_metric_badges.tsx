@@ -55,7 +55,11 @@ const BasicMetricPanel = ({
         <EuiTextColor color="subdued">{title}</EuiTextColor>
         &nbsp;&nbsp;
         {isLoading && <EuiLoadingSpinner size="s" />}
-        {!isLoading && (isError || metric === undefined) && '—'}
+        {!isLoading &&
+          (isError ||
+            metric === undefined ||
+            (Array.isArray(metric) && metric.every((m) => m === undefined))) &&
+          '—'}
         {!isLoading &&
           !isError &&
           (Array.isArray(metric)

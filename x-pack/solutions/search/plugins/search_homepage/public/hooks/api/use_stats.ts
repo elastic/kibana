@@ -17,10 +17,10 @@ export interface SizeStats {
   size: StatsResponse['sizeStats']['size'];
 }
 
-export const useStats = (): UseQueryResult<SizeStats | undefined> => {
+export const useStats = (): UseQueryResult<SizeStats | null> => {
   const { http } = useKibana().services;
 
-  const queryResult = useQuery<SizeStats | undefined, Error>({
+  const queryResult = useQuery<SizeStats | null, Error>({
     queryKey: ['fetchSizeStats'],
     retry: false,
     queryFn: async () => {
@@ -32,7 +32,7 @@ export const useStats = (): UseQueryResult<SizeStats | undefined> => {
         };
       } catch (error) {
         if (getErrorCode(error) === 403) {
-          return undefined;
+          return null;
         }
         throw error;
       }

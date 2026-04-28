@@ -96,14 +96,14 @@ describe('useStats', () => {
     });
   });
 
-  it('should set isError when API returns 403', async () => {
+  it('should return null data when API returns 403', async () => {
     const error = { body: { message: 'Forbidden', statusCode: 403 } };
     mockHttpGet.mockRejectedValue(error);
 
     const { result } = renderHook(() => useStats(), { wrapper });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.data).toBeUndefined();
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toBeNull();
   });
 
   it('should set isError for non-403 errors', async () => {

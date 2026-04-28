@@ -18,6 +18,8 @@ export const useAgentCount = () => {
 
   const { hasEnterpriseLicense } = useGetLicenseInfo();
 
+  const isAvailable = hasEnterpriseLicense && !!agentBuilder;
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['fetchAgentCount'],
     retry: false,
@@ -33,18 +35,18 @@ export const useAgentCount = () => {
         };
       } catch (error) {
         if (getErrorCode(error) === 403) {
-          return undefined;
+          return null;
         }
         throw error;
       }
     },
-    enabled: hasEnterpriseLicense && !!agentBuilder,
+    enabled: isAvailable,
   });
 
   return {
-    tools: data?.tools ?? 0,
-    agents: data?.agents ?? 0,
-    isLoading: hasEnterpriseLicense ? isLoading : false,
-    isError: isError || !hasEnterpriseLicense || data === undefined,
+    tools: data?.tools,
+    agents: data?.agents,
+    isLoading: isAvailable ? isLoading : false,
+    isError: isError || !isAvailable,
   };
 };
