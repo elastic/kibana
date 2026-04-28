@@ -251,7 +251,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
                         ', '
@@ -276,7 +276,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${lmdJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -298,7 +298,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${padJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -321,7 +321,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${dedJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -344,7 +344,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${padJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -367,7 +367,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
                         ', '
@@ -391,7 +391,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${dedJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -414,7 +414,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${dedJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -435,7 +435,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${dedJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
@@ -457,7 +457,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
                         ', '
@@ -477,7 +477,7 @@ evaluate.describe(
                 criteria: ['Return at least 1 result with unusual access patterns after hours'],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
                         ', '
@@ -501,7 +501,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
                         ', '
@@ -525,7 +525,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
                       `returns at least 1 active job id from the list: ${padJobIds.join(', ')}`,
                       `returns at least 1 index to query`,

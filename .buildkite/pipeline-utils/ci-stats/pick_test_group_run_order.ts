@@ -90,7 +90,7 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
     ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
-    : 35;
+    : 30;
   if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
     throw new Error(
       `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
@@ -311,11 +311,11 @@ export async function pickTestGroupRunOrder() {
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 60,
+        defaultMin: 15,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
         tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
-        warmupMin: 2,
+        warmupMin: 5,
         concurrency: 1,
         names: jestIntegrationConfigs,
       },
@@ -486,17 +486,13 @@ export async function pickTestGroupRunOrder() {
 
   // Register cancelable child keys before uploading so a concurrent gate failure
   // can discover and short-circuit these jobs immediately.
-  if (unit.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest', 'true');
-  }
-  if (integration.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest-integration', 'true');
-  }
-  // Register child step keys (not the group key) because `buildkite-agent step cancel`
+  // Child step keys (not group keys) are registered because `buildkite-agent step cancel`
   // does not work on group keys.
-  for (const fg of functionalGroups) {
-    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
-  }
+  const cancelKeys: string[] = [];
+  if (unit.count > 0) cancelKeys.push('jest');
+  if (integration.count > 0) cancelKeys.push('jest-integration');
+  for (const fg of functionalGroups) cancelKeys.push(fg.key);
+  bk.setMetadata('cancel_on_gate_failure_batch:test_groups', JSON.stringify(cancelKeys));
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);
