@@ -2769,7 +2769,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 /x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting
@@ -2792,7 +2791,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting
