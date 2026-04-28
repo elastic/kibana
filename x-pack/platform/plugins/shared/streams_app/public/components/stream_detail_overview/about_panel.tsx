@@ -204,7 +204,7 @@ export function AboutPanel() {
                 border: none;
                 border-bottom-left-radius: 0;
                 border-bottom-right-radius: 0;
-                height: ${description.length > 200 ? '280px' : '100px'};
+                height: ${descriptionValue.length > 200 ? '280px' : '100px'};
               `}
               fullWidth
               placeholder={i18n.translate(

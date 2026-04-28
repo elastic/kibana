@@ -31,8 +31,7 @@ export const STREAMS_HISTOGRAM_NUM_DATA_POINTS = 25;
 function isUnknownIndexError(error: unknown): boolean {
   if (error instanceof Error) {
     return (
-      error.message.includes('Unknown index') ||
-      error.message.includes('index_not_found_exception')
+      error.message.includes('Unknown index') || error.message.includes('index_not_found_exception')
     );
   }
   return false;
