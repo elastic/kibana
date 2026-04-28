@@ -49,6 +49,7 @@
             "lineNumber": 11,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }

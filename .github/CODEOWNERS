@@ -699,6 +699,7 @@ src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizati
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
+src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
@@ -1045,10 +1046,12 @@ x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
+x-pack/platform/packages/shared/ml/common-types @elastic/ml-ui
 x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
+x-pack/platform/packages/shared/ml/server-schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
@@ -1777,6 +1780,8 @@ x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/feature
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
+# common
+x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -2733,6 +2738,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
 
 ## Security Solution sub teams - Cloud Security Posture
 
@@ -2762,7 +2772,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 /x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting
@@ -2785,7 +2794,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting
@@ -3077,11 +3085,6 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
