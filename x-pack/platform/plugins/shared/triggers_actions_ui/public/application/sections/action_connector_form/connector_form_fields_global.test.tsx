@@ -249,6 +249,32 @@ describe('ConnectorFormFieldsGlobal', () => {
     });
   });
 
+  it('auto-populates connector ID from name again after clearing both fields', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    const idInput = screen.getByTestId('connectorIdInput');
+
+    await userEvent.type(nameInput, 'First Name');
+    await waitFor(() => {
+      expect(idInput).toHaveValue('first-name');
+    });
+
+    // Clearing the ID marks the form as using a custom identifier; clearing both restores auto-slug.
+    await userEvent.clear(idInput);
+    await userEvent.clear(nameInput);
+
+    await userEvent.type(nameInput, 'Second Name');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('second-name');
+    });
+  });
+
   it('truncates auto-populated connector ID to 36 characters', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit}>

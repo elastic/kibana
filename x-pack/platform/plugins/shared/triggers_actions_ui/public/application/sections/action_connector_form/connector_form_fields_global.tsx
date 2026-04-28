@@ -196,8 +196,16 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
 }) => {
   const { http } = useKibana().services;
   const { setFieldValue } = useFormContext();
-  const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
+  const [{ name, id }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
+
+  // If the user cleared the ID while the name was still set, `usingCustomIdentifier` becomes true.
+  // After they clear both fields, we should resume auto-slug from the name (same as a fresh form).
+  useEffect(() => {
+    if (!isEdit && name === '' && id === '') {
+      setUsingCustomIdentifier(false);
+    }
+  }, [name, id, isEdit]);
 
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
