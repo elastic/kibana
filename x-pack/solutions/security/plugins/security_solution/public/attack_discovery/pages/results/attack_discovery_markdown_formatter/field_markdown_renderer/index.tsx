@@ -66,6 +66,7 @@ export const getFieldMarkdownRenderer = (disableActions: boolean, scopeId?: stri
             isAggregatable={false}
             field={name}
             value={value}
+            hideFilter={true}
           >
             {entityButton}
           </DraggableBadge>

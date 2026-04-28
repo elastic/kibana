@@ -35,6 +35,7 @@ export const ProviderContentWrapper = styled.span`
 
 export interface CellActionsRendererProps {
   hideTopN?: boolean;
+  hideFilter?: boolean;
   field: string;
   value?: string | number | null;
   queryValue?: string | null;
@@ -87,6 +88,7 @@ Content.displayName = 'Content';
 export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
   ({
     hideTopN = false,
+    hideFilter = false,
     field,
     value,
     children,
@@ -112,8 +114,13 @@ export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
     }, [value, field, queryValue]);
 
     const disabledActionTypes = useMemo(
-      () => (hideTopN ? [SecurityCellActionType.SHOW_TOP_N] : []),
-      [hideTopN]
+      () => {
+        const types: SecurityCellActionType[] = [];
+        if (hideTopN) types.push(SecurityCellActionType.SHOW_TOP_N);
+        if (hideFilter) types.push(SecurityCellActionType.FILTER);
+        return types;
+      },
+      [hideTopN, hideFilter]
     );
 
     const content = useMemo(
