@@ -20,8 +20,8 @@ import { apmSources, generateSourceLink, infraSources } from './get_alert_source
  * page vs. the alert flyout.
  */
 export const ALERT_SOURCES_ELEMENT = {
-  ALERT_DETAILS: 'alertDetails',
-  ALERT_FLYOUT: 'alertFlyout',
+  ALERT_DETAILS: 'alertDetailsSources',
+  ALERT_FLYOUT: 'alertFlyoutSources',
 } as const;
 
 export type AlertSourcesElement =

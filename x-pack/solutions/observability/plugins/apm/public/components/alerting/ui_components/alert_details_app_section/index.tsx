@@ -136,8 +136,9 @@ export function AlertDetailsAppSection({
         value: (
           <EuiLink
             data-test-subj="apmAlertDetailsErrorGroupKeyLink"
-            data-source={`alertDetails-${alertRuleTypeId}`}
-            data-action={`navigateTo-${ERROR_GROUP_ID}`}
+            data-ebt-action="openInApm"
+            data-ebt-element="alertDetailsSources"
+            data-ebt-detail={alertRuleTypeId}
             href={errorDetailsHref}
           >
             {errorGroupingKey}
