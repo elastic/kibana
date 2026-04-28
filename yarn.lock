@@ -4607,6 +4607,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -8888,10 +8892,6 @@
   uid ""
 
 "@kbn/securitysolution-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/semantic-layer-plugin@link:x-pack/platform/plugins/shared/semantic_layer":
   version "0.0.0"
   uid ""
 
