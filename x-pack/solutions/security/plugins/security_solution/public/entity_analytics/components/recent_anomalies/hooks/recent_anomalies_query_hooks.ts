@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
@@ -143,21 +144,21 @@ export const useRecentAnomaliesQuery = (params: {
   } = useQuery<{
     anomalyRecords: Array<Record<string, unknown>>;
     rowLabels: string[];
+    rawResponse?: ESQLSearchResponse;
   }>(
     [filterQuery, anomalyDataEsqlSource, rowLabels],
     async ({ signal }) => {
       if (!anomalyDataEsqlSource || !rowLabels || rowLabels.length === 0) {
         return { anomalyRecords: [], rowLabels: [] };
       }
+      const esqlResult = await getESQLResults({
+        esqlQuery: anomalyDataEsqlSource,
+        search,
+        signal,
+        filter: filterQuery,
+      });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
-        (
-          await getESQLResults({
-            esqlQuery: anomalyDataEsqlSource,
-            search,
-            signal,
-            filter: filterQuery,
-          })
-        ).response
+        esqlResult.response
       ).map((eachRawRecord) => ({
         ...eachRawRecord,
         '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
@@ -165,6 +166,7 @@ export const useRecentAnomaliesQuery = (params: {
       return {
         anomalyRecords: anomalyRecords ?? [],
         rowLabels: rowLabels ?? [],
+        rawResponse: esqlResult.response,
       };
     },
     {
@@ -185,9 +187,9 @@ export const useRecentAnomaliesQuery = (params: {
           2
         ),
       ],
-      response: data ? [JSON.stringify(data, null, 2)] : [],
+      response: data?.rawResponse ? [JSON.stringify(data.rawResponse, null, 2)] : [],
     };
-  }, [data, anomalyDataEsqlSource]);
+  }, [data?.rawResponse, anomalyDataEsqlSource]);
 
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.recentAnomalies.queryError', {
