@@ -295,6 +295,45 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
 
+    test('persists config.authType from secrets when config is empty (spec source)', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'shared',
+        config: { authType: 'bearer' },
+        secrets: {},
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soResult);
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await update({
+        context: mockContext,
+        id: '1',
+        action: {
+          name: 'Test Connector',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
+        expect.anything()
+      );
+    });
+
     test('does not inject config.authType for stack source on update', async () => {
       const soResult = makeSavedObjectResult({
         authMode: 'shared',

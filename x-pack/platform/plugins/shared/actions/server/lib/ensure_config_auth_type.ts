@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Copies authType from secrets into config when absent. Config is stored in plaintext
+// while secrets are encrypted, so authType must be in config to remain readable after save.
 export const ensureConfigAuthType = (
   config: Record<string, unknown>,
   secrets: Record<string, unknown>
