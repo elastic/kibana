@@ -140,9 +140,7 @@ describe('useMetricSourceKind', () => {
     const second = renderHook(() =>
       useMetricSourceKind('eventually-found', METRIC_SOURCE_KIND.INDEX)
     );
-    await waitFor(() =>
-      expect(second.result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM)
-    );
+    await waitFor(() => expect(second.result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM));
     expect(getIndices).toHaveBeenCalledTimes(2);
   });
 
