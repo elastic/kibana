@@ -7,7 +7,7 @@
 
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { isAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import { createInferenceProviderError } from '@kbn/inference-common';
+import { createInferenceProviderError, createInferenceRequestError } from '@kbn/inference-common';
 import { convertError, isRecoverableError } from './errors';
 
 describe('errors', () => {
@@ -42,6 +42,20 @@ describe('errors', () => {
         expect(
           'statusCode' in converted.meta ? converted.meta.statusCode : undefined
         ).toBeUndefined();
+      });
+    });
+
+    describe('InferenceTaskRequestError', () => {
+      it('propagates 404 when the inference endpoint cannot be resolved', () => {
+        const message =
+          "No connector or inference endpoint found for ID '.anthropic-claude-3.7-sonnet-chat_completion'";
+        const err = createInferenceRequestError(message, 404);
+        const converted = convertError(err);
+
+        expect(isAgentExecutionError(converted)).toBe(true);
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.connectorError);
+        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBe(404);
+        expect(converted.message).toBe(message);
       });
     });
 

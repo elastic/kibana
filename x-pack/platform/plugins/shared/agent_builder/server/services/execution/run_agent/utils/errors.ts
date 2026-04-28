@@ -10,7 +10,7 @@ import {
   isToolValidationError,
   isContextLengthExceededError,
 } from '@kbn/inference-common/src/chat_complete/errors';
-import { isInferenceProviderError } from '@kbn/inference-common';
+import { isInferenceProviderError, isInferenceRequestError } from '@kbn/inference-common';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import {
@@ -44,7 +44,7 @@ export const convertError = (error: Error): AgentBuilderAgentExecutionError => {
   } else if (isContextLengthExceededError(error)) {
     return createAgentExecutionError(error.message, ErrCodes.contextLengthExceeded, {});
   }
-  if (isInferenceProviderError(error)) {
+  if (isInferenceProviderError(error) || isInferenceRequestError(error)) {
     const status = error.meta?.status;
     if (typeof status === 'number' && status >= 400 && status < 600) {
       return createAgentExecutionError(error.message, ErrCodes.connectorError, {
