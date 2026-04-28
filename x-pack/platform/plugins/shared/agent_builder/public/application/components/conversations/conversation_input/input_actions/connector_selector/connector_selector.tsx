@@ -40,6 +40,11 @@ const selectableAriaLabel = i18n.translate(
   }
 );
 
+/**
+ * Generates an accessible label for the connector selector button that includes
+ * both the action ("Select connector") and the current value, satisfying WCAG 4.1.2
+ * Name, Role, Value requirement so screen readers announce the selected connector.
+ */
 const getConnectorButtonAriaLabel = (connectorName: string) =>
   i18n.translate(
     'xpack.agentBuilder.conversationInput.connectorSelector.connectorButtonAriaLabel',
