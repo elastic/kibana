@@ -41,5 +41,9 @@ export const useStyles = () => {
     fullHeightPanel: css`
       height: 100%;
     `,
+
+    resizeableContainer: css`
+      height: calc(100% - 40px);
+    `,
   };
 };

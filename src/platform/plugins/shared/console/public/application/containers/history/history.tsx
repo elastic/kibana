@@ -46,7 +46,8 @@ const CHILD_ELEMENT_PREFIX = 'historyReq';
 
 const staticStyles = {
   fullHeight: css`
-    height: 100%;
+    height: 500px;
+    width: 1000px;
   `,
   // Sticky positioned element
   stickyTopElement: css`

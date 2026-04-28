@@ -40,7 +40,6 @@ export type Action =
   | { type: 'setInputEditor'; payload: MonacoEditorActionsProvider }
   | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings }
-  | { type: 'setCurrentView'; payload: string }
   | { type: 'setRequestToRestore'; payload: RequestToRestore }
   | { type: 'clearRequestToRestore' }
   | { type: 'setFileToImport'; payload: string | null };
@@ -69,11 +68,6 @@ export const reducer: Reducer<Store, Action> = (state, action) => {
     // Store the request and change the current view to the shell
     draft.restoreRequestFromHistory = action.payload;
     draft.currentView = SHELL_TAB_ID;
-    return draft;
-  }
-
-  if (action.type === 'setCurrentView') {
-    draft.currentView = action.payload;
     return draft;
   }
 

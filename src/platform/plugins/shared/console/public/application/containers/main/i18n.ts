@@ -17,7 +17,7 @@ export const MAIN_PANEL_LABELS = {
   },
   get importButton() {
     return i18n.translate('console.importButtonLabel', {
-      defaultMessage: 'Import requests',
+      defaultMessage: 'Import',
     });
   },
   get importButtonTooltip() {
@@ -27,7 +27,7 @@ export const MAIN_PANEL_LABELS = {
   },
   get exportButton() {
     return i18n.translate('console.exportButton', {
-      defaultMessage: 'Export requests',
+      defaultMessage: 'Export',
     });
   },
   get exportButtonTooltip() {

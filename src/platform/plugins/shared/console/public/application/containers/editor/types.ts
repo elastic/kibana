@@ -7,7 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParsedRequest } from '@kbn/monaco';
+import type { monaco, ParsedRequest } from '@kbn/monaco';
+
+export type EditorViewState = ReturnType<monaco.editor.IStandaloneCodeEditor['saveViewState']>;
+
+export interface InputEditorValue {
+  text: string;
+  viewState?: EditorViewState;
+}
+
+export interface PersistedEditorTab {
+  id: string;
+  label: string;
+  inputValue: InputEditorValue;
+}
+
+export interface PersistedEditorTabsState {
+  selectedTabId: string;
+  tabs: PersistedEditorTab[];
+}
 
 export interface EditorRequest {
   method: string;

@@ -22,4 +22,7 @@ export const editorI18n = {
   adjustPanelSizeHorizontal: i18n.translate('console.editor.adjustPanelSizeAriaLabelHorizontal', {
     defaultMessage: "Press left/right to adjust panels' sizes",
   }),
+  newTabLabel: i18n.translate('console.editor.newTabLabel', {
+    defaultMessage: 'New tab',
+  }),
 };

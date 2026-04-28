@@ -92,15 +92,6 @@ describe('editor store', () => {
     expect(stateWithDifferentView.restoreRequestFromHistory).toBe(null);
   });
 
-  it('should handle setCurrentView action', () => {
-    const action: Action = { type: 'setCurrentView', payload: 'history' };
-    const newState = reducer(initialValue, action);
-
-    expect(newState).not.toBe(initialValue);
-    expect(newState.currentView).toBe('history');
-    expect(initialValue.currentView).toBe(SHELL_TAB_ID);
-  });
-
   it('should handle clearRequestToRestore action', () => {
     const stateWithRestore: Store = {
       ...initialValue,

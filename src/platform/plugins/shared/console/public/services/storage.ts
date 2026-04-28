@@ -17,6 +17,7 @@ export enum StorageKeys {
   FOLDS = 'folds',
   VARIABLES = 'variables',
   DEFAULT_LANGUAGE = 'defaultLanguage',
+  EDITOR_TABS_STATE = 'editorTabsState',
 }
 
 export class Storage {

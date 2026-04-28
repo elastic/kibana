@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 import { useEditorActionContext } from '../../../contexts';
+import type { InputEditorValue } from '../types';
 
 const httpsProtocol = 'https:';
 const elasticHostname = 'www.elastic.co';
@@ -26,8 +27,14 @@ interface QueryParams {
 interface SetInitialValueParams {
   /** The text value that is initially in the console editor. */
   localStorageValue?: string;
+  /** The current controlled value of the Console editor. */
+  currentValueText: string;
+  /** When true, don't write an initial value into the editor. */
+  skipInitialValue?: boolean;
+  /** When true, allow injecting the default content when the editor starts empty. */
+  allowDefaultValueWhenEmpty?: boolean;
   /** The function that sets the state of the value in the console editor. */
-  setValue: (value: string) => void;
+  setValue: (value: InputEditorValue) => void;
   /** The toasts service. */
   toasts: IToasts;
 }
@@ -49,7 +56,14 @@ export const readLoadFromParam = () => {
  * @param params The {@link SetInitialValueParams} to use.
  */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
-  const { localStorageValue, setValue, toasts } = params;
+  const {
+    localStorageValue,
+    currentValueText,
+    skipInitialValue = false,
+    allowDefaultValueWhenEmpty = false,
+    setValue,
+    toasts,
+  } = params;
   const isInitialValueSet = useRef<boolean>(false);
   const editorDispatch = useEditorActionContext();
 
@@ -122,8 +136,19 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
 
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
-      // Only set to default input value if the localstorage value is undefined
-      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      const isEditorEmpty = currentValueText === '';
+      const hasSavedLocalStorageValue = localStorageValue != null && localStorageValue !== '';
+
+      if (!skipInitialValue && isEditorEmpty) {
+        setValue({ text: localStorageValue ?? DEFAULT_INPUT_VALUE });
+      } else if (
+        skipInitialValue &&
+        isEditorEmpty &&
+        !hasSavedLocalStorageValue &&
+        allowDefaultValueWhenEmpty
+      ) {
+        setValue({ text: DEFAULT_INPUT_VALUE });
+      }
       loadFromUrl();
       isInitialValueSet.current = true;
     }
@@ -131,5 +156,13 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     return () => {
       window.removeEventListener('hashchange', loadFromUrl);
     };
-  }, [localStorageValue, setValue, toasts, editorDispatch]);
+  }, [
+    localStorageValue,
+    currentValueText,
+    skipInitialValue,
+    allowDefaultValueWhenEmpty,
+    setValue,
+    toasts,
+    editorDispatch,
+  ]);
 };

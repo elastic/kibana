@@ -7,129 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
   EuiPageTemplate,
   EuiSplitPanel,
-  EuiToolTip,
   useEuiTour,
-  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
-  useEuiTheme,
-  useEuiOverflowScroll,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
-import { Config } from '../config';
-import {
-  useEditorReadContext,
-  useEditorActionContext,
-  useRequestActionContext,
-} from '../../contexts';
+import { VariablesFlyout } from '../config/variables_flyout';
+import { SettingsFlyout } from '../config/settings_flyout';
+import { useEditorReadContext, useRequestActionContext } from '../../contexts';
 import type { ConsoleTourStepProps } from '../../components';
 import {
-  TopNavMenu,
   SomethingWentWrongCallout,
   HelpPopover,
   ShortcutsPopover,
   ConsoleTourStep,
 } from '../../components';
-import { History } from '../history';
+import { HistoryFlyout } from '../history/history_flyout';
 import { useDataInit } from '../../hooks';
-import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
-import { ImportConfirmModal } from './import_confirm_modal';
-import {
-  SHELL_TAB_ID,
-  HISTORY_TAB_ID,
-  CONFIG_TAB_ID,
-  EDITOR_TOUR_STEP,
-  INITIAL_TOUR_CONFIG,
-  FILES_TOUR_STEP,
-  EXPORT_FILE_NAME,
-} from './constants';
+// todo remove SHELL_TAB_ID from constants and use currentView instead
+import { SHELL_TAB_ID, EDITOR_TOUR_STEP, INITIAL_TOUR_CONFIG, FILES_TOUR_STEP } from './constants';
+import { useMainStyles } from './main_styles';
 
 interface MainProps {
   currentTabProp?: string;
   isEmbeddable?: boolean;
 }
 
-const staticStyles = {
-  importConsoleFile: css`
-    opacity: 0;
-    position: absolute;
-    z-index: -1;
-  `,
-};
-
-const useStyles = (isEmbeddable: boolean) => {
-  const { euiTheme } = useEuiTheme();
-
-  return {
-    ...staticStyles,
-    consoleContainer: css`
-      display: flex;
-      flex: 1 1 auto;
-      // Make sure the editor actions don't create scrollbars on this container
-      // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
-      overflow: hidden;
-      padding: ${euiTheme.size.m};
-      gap: 0;
-      ${isEmbeddable &&
-      css`
-        padding: 0;
-        gap: 0;
-      `}
-
-      /*
-      * The z-index for the autocomplete suggestions popup
-      */
-      .kibanaCodeEditor .monaco-editor .suggest-widget {
-        // the value needs to be above the z-index of the resizer bar
-        z-index: ${euiTheme.levels.header} + 2;
-      }
-    `,
-
-    consoleTabs: css`
-      padding: 0 ${euiTheme.size.s};
-    `,
-
-    // Scrollable panel with body background
-    scrollablePanelWithBackground: css`
-      ${useEuiOverflowScroll('y', false)}
-      background-color: ${euiTheme.colors.body};
-    `,
-  };
-};
-
-// 2MB limit (2 * 1024 * 1024 bytes)
-const MAX_FILE_UPLOAD_SIZE = 2 * 1024 * 1024;
-
 export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
-  const dispatch = useEditorActionContext();
   const requestDispatch = useRequestActionContext();
   const { currentView } = useEditorReadContext();
   const currentTab = currentTabProp ?? currentView;
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
-  const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
-  const styles = useStyles(isEmbeddable);
+  const [isVariablesFlyoutOpen, setIsVariablesFlyoutOpen] = useState(false);
+  const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = useState(false);
+  const [isHistoryFlyoutOpen, setIsHistoryFlyoutOpen] = useState(false);
+  const styles = useMainStyles(isEmbeddable);
 
-  const {
-    docLinks,
-    services: { notifications, routeHistory },
-  } = useServicesContext();
+  const { docLinks } = useServicesContext();
 
   const [tourStepProps, actions, tourState] = useEuiTour(
     getTourSteps(docLinks),
@@ -152,14 +82,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const { currentTextObject } = useEditorReadContext();
   const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
 
-  const updateTab = (tab: string) => {
-    if (routeHistory) {
-      routeHistory?.push(`/console/${tab}`);
-    } else {
-      dispatch({ type: 'setCurrentView', payload: tab });
-    }
-  };
-
   const toggleFullscreen = () => {
     const isEnabled = !isFullscreenOpen;
 
@@ -169,50 +91,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
       document.querySelector('#consoleRoot')?.requestFullscreen();
     } else {
       document.exitFullscreen();
-    }
-  };
-
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    const file = files && files[0];
-    // Clear the input value so that a file can be imported again
-    event.target.value = '';
-
-    if (file) {
-      if (file.size > MAX_FILE_UPLOAD_SIZE) {
-        notifications.toasts.addWarning(
-          i18n.translate('console.notification.error.fileTooBigMessage', {
-            defaultMessage: `File size exceeds the 2MB limit.`,
-          })
-        );
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onerror = () => {
-        notifications.toasts.addWarning(
-          i18n.translate('console.notification.error.failedToReadFile', {
-            defaultMessage: `Failed to read the file you selected.`,
-          })
-        );
-      };
-
-      reader.onload = (e) => {
-        const fileContent = e?.target?.result;
-
-        if (fileContent) {
-          setIsConfirmImportOpen(fileContent as string);
-        } else {
-          notifications.toasts.addWarning(
-            i18n.translate('console.notification.error.fileImportNoContent', {
-              defaultMessage: `The file you selected doesn't appear to have any content. Please select a different file.`,
-            })
-          );
-        }
-      };
-
-      reader.readAsText(file);
     }
   };
 
@@ -252,105 +130,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
       <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-        <EuiSplitPanel.Inner grow={false} css={styles.consoleTabs}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <TopNavMenu
-                disabled={!done}
-                items={getTopNavConfig({
-                  selectedTab: currentTab,
-                  setSelectedTab: (tab) => updateTab(tab),
-                })}
-                tourStepProps={consoleTourStepProps}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                <>
-                  <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
-                    <EuiButtonEmpty
-                      iconType="upload"
-                      disabled={inputEditorValue === ''}
-                      onClick={() =>
-                        downloadFileAs(EXPORT_FILE_NAME, {
-                          content: inputEditorValue,
-                          type: 'text/plain',
-                        })
-                      }
-                      size="xs"
-                      data-test-subj="consoleExportButton"
-                      aria-label={MAIN_PANEL_LABELS.exportButtonTooltip}
-                    >
-                      {MAIN_PANEL_LABELS.exportButton}
-                    </EuiButtonEmpty>
-                  </EuiToolTip>
-                  <>
-                    <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
-                      <EuiButtonEmpty
-                        iconType="download"
-                        onClick={() => document.getElementById('importConsoleFile')?.click()}
-                        size="xs"
-                        data-test-subj="consoleImportButton"
-                        aria-label={MAIN_PANEL_LABELS.importButtonTooltip}
-                      >
-                        {MAIN_PANEL_LABELS.importButton}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
-                    {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
-                    <input
-                      type="file"
-                      accept="text/*"
-                      multiple={false}
-                      name="consoleSnippets"
-                      id="importConsoleFile"
-                      css={styles.importConsoleFile}
-                      onChange={onFileChange}
-                    />
-                  </>
-                </>
-              </ConsoleTourStep>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ShortcutsPopover
-                button={shortcutsButton}
-                isOpen={isShortcutsOpen}
-                closePopover={() => setIsShortcutsOpen(false)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <HelpPopover
-                button={helpButton}
-                isOpen={isHelpOpen}
-                closePopover={() => setIsHelpOpen(false)}
-                resetTour={() => {
-                  setIsHelpOpen(false);
-                  updateTab(SHELL_TAB_ID);
-                  actions.resetTour();
-                }}
-              />
-            </EuiFlexItem>
-            {isEmbeddable && (
-              <EuiFlexItem grow={false}>
-                <NavIconButton
-                  iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
-                  onClick={toggleFullscreen}
-                  ariaLabel={
-                    isFullscreenOpen
-                      ? MAIN_PANEL_LABELS.closeFullscrenButton
-                      : MAIN_PANEL_LABELS.openFullscrenButton
-                  }
-                  dataTestSubj="consoleToggleFullscreenButton"
-                  toolTipContent={
-                    isFullscreenOpen
-                      ? MAIN_PANEL_LABELS.closeFullscrenButton
-                      : MAIN_PANEL_LABELS.openFullscrenButton
-                  }
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="none"
           css={styles.scrollablePanelWithBackground}
@@ -360,11 +139,14 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
             <Editor
               loading={!done}
               inputEditorValue={inputEditorValue}
-              setInputEditorValue={setInputEditorValue}
+              setInputEditorValue={(val) => {
+                setInputEditorValue(val);
+              }}
+              isFullscreenOpen={isFullscreenOpen}
+              toggleFullscreen={toggleFullscreen}
+              filesTourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}
             />
           )}
-          {currentTab === HISTORY_TAB_ID && <History />}
-          {currentTab === CONFIG_TAB_ID && <Config />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
@@ -373,29 +155,115 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           data-test-subj="console-variables-bottom-bar"
           color="plain"
         >
-          <EuiButtonEmpty
-            onClick={() => updateTab(CONFIG_TAB_ID)}
-            iconType="code"
-            size="xs"
-            color="text"
-            aria-label={MAIN_PANEL_LABELS.variablesButton}
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+            justifyContent="spaceBetween"
           >
-            {MAIN_PANEL_LABELS.variablesButton}
-          </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => setIsHistoryFlyoutOpen(true)}
+                    size="xs"
+                    color="text"
+                    data-test-subj="consoleHistoryButton"
+                    aria-label={i18n.translate('console.topNav.historyTabLabel', {
+                      defaultMessage: 'History',
+                    })}
+                  >
+                    {i18n.translate('console.topNav.historyTabLabel', {
+                      defaultMessage: 'History',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => setIsSettingsFlyoutOpen(true)}
+                    size="xs"
+                    color="text"
+                    data-test-subj="consoleConfigButton"
+                    aria-label={i18n.translate('console.topNav.configTabLabel', {
+                      defaultMessage: 'Config',
+                    })}
+                  >
+                    {i18n.translate('console.topNav.configTabLabel', {
+                      defaultMessage: 'Config',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => setIsVariablesFlyoutOpen(true)}
+                    iconType="code"
+                    size="xs"
+                    color="text"
+                    aria-label={MAIN_PANEL_LABELS.variablesButton}
+                  >
+                    {MAIN_PANEL_LABELS.variablesButton}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <ShortcutsPopover
+                    button={shortcutsButton}
+                    isOpen={isShortcutsOpen}
+                    closePopover={() => setIsShortcutsOpen(false)}
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <HelpPopover
+                    button={helpButton}
+                    isOpen={isHelpOpen}
+                    closePopover={() => setIsHelpOpen(false)}
+                    resetTour={() => {
+                      setIsHelpOpen(false);
+                      actions.resetTour();
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
+
+      {isVariablesFlyoutOpen && (
+        <VariablesFlyout
+          onClose={() => {
+            setIsVariablesFlyoutOpen(false);
+          }}
+        />
+      )}
+
+      {isSettingsFlyoutOpen && (
+        <SettingsFlyout
+          onClose={() => {
+            setIsSettingsFlyoutOpen(false);
+          }}
+        />
+      )}
+
+      {isHistoryFlyoutOpen && (
+        <HistoryFlyout
+          onClose={() => {
+            setIsHistoryFlyoutOpen(false);
+          }}
+        />
+      )}
 
       {/* Empty container for Editor Tour Step */}
       <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
         <div />
       </ConsoleTourStep>
-
-      {isConfirmImportOpen && (
-        <ImportConfirmModal
-          onClose={() => setIsConfirmImportOpen(null)}
-          fileContent={isConfirmImportOpen}
-        />
-      )}
     </div>
   );
 }
