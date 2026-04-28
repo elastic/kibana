@@ -25,6 +25,8 @@ import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in
 import type { TraceDocFlyoutType } from '../../common/types';
 import {
   EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
+  EBT_ELEMENT_TRACE_SUMMARY_EXPAND_BUTTON,
+  EBT_ELEMENT_TRACE_SUMMARY_WATERFALL_AREA,
   EBT_DETAIL_SPAN_DOC,
   EBT_CLICK_ACTION_EXPAND_TRACE,
 } from '../../../../../telemetry/constants';
@@ -235,7 +237,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
         ebt: {
           action: EBT_CLICK_ACTION_EXPAND_TRACE,
-          element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
+          element: EBT_ELEMENT_TRACE_SUMMARY_EXPAND_BUTTON,
           detail: EBT_DETAIL_SPAN_DOC,
         },
       },
@@ -279,7 +281,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         <div
           data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
           data-ebt-action={EBT_CLICK_ACTION_EXPAND_TRACE}
-          data-ebt-element={EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY}
+          data-ebt-element={EBT_ELEMENT_TRACE_SUMMARY_WATERFALL_AREA}
           data-ebt-detail={EBT_DETAIL_SPAN_DOC}
           aria-label={fullScreenButtonLabel}
           tabIndex={0}
