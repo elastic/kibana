@@ -30,8 +30,8 @@ import {
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
 import {
-  MAX_SAVED_SEARCH_COLUMNS,
-  MAX_SAVED_SEARCH_COLUMNS_SERVERLESS,
+  MAX_DISCOVER_SESSION_COLUMNS,
+  MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
 } from '@kbn/saved-search-plugin/common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
@@ -53,8 +53,8 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: enableValidations
-      ? schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS_SERVERLESS })
-      : schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS }),
+      ? schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS })
+      : schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {

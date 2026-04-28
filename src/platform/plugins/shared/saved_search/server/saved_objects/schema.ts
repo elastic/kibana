@@ -13,8 +13,8 @@ import { DataGridDensity } from '@kbn/discover-utils';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
-  MAX_SAVED_SEARCH_COLUMNS,
-  MAX_SAVED_SEARCH_TABS,
+  MAX_DISCOVER_SESSION_COLUMNS,
+  MAX_DISCOVER_SESSION_TABS,
   VIEW_MODE,
 } from '../../common';
 
@@ -26,12 +26,12 @@ const SCHEMA_SEARCH_BASE = schema.object({
   // Data grid
   columns: schema.arrayOf(schema.string(), {
     defaultValue: [],
-    maxSize: MAX_SAVED_SEARCH_COLUMNS,
+    maxSize: MAX_DISCOVER_SESSION_COLUMNS,
   }),
   sort: schema.oneOf(
     [
       schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 }), {
-        maxSize: MAX_SAVED_SEARCH_COLUMNS,
+        maxSize: MAX_DISCOVER_SESSION_COLUMNS,
       }),
       schema.arrayOf(schema.string(), { maxSize: 2 }),
     ],
@@ -166,7 +166,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.exten
   tabs: schema.maybe(
     schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, {
       minSize: 1,
-      maxSize: MAX_SAVED_SEARCH_TABS,
+      maxSize: MAX_DISCOVER_SESSION_TABS,
     })
   ),
 });
@@ -185,7 +185,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.exten
   sort: schema.maybe(sort),
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, {
     minSize: 1,
-    maxSize: MAX_SAVED_SEARCH_TABS,
+    maxSize: MAX_DISCOVER_SESSION_TABS,
   }),
 });
 
@@ -204,7 +204,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.exten
   ...CONTROL_GROUP_JSON_SCHEMA,
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, {
     minSize: 1,
-    maxSize: MAX_SAVED_SEARCH_TABS,
+    maxSize: MAX_DISCOVER_SESSION_TABS,
   }),
 });
 
@@ -237,7 +237,7 @@ const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSI
 export const SCHEMA_SEARCH_MODEL_VERSION_10 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, {
     minSize: 1,
-    maxSize: MAX_SAVED_SEARCH_TABS,
+    maxSize: MAX_DISCOVER_SESSION_TABS,
   }),
 });
 

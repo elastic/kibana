@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
-import { MAX_SAVED_SEARCH_TABS } from '@kbn/saved-search-plugin/common';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -88,7 +88,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             selectedItemId={currentTabId}
             recentlyClosedItems={recentlyClosedItems}
             unsavedItemIds={unsavedTabIds}
-            maxItemsCount={MAX_SAVED_SEARCH_TABS}
+            maxItemsCount={MAX_DISCOVER_SESSION_TABS}
             hideTabsBar={hideTabsBar}
             createItem={createItem}
             getPreviewData={getPreviewData}
