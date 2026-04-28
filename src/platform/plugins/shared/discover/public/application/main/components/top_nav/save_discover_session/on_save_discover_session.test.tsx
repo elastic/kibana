@@ -180,7 +180,7 @@ describe('onSaveDiscoverSession', () => {
         dataView: dataViewMock,
         services,
       });
-      jest.spyOn(services.embeddableEditor, 'getByValueInput').mockReturnValue(byValueTab);
+      jest.spyOn(services.embeddableEditor, 'getByValueTab').mockReturnValue(byValueTab);
       jest.spyOn(services.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
 
       const onSaveCb = jest.fn();
