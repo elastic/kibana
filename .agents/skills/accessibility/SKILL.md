@@ -1,53 +1,50 @@
 ---
 name: accessibility
-description: Kibana accessibility — WCAG-compliant EUI usage, aria wiring, keyboard/screen reader patterns, ESLint rules, and shared a11y principles.
+description: >
+  Use this skill whenever you write, edit, or review code that uses any of these EUI components:
+  EuiModal, EuiFlyout, EuiFlyoutResizable, EuiConfirmModal, EuiPopover,
+  EuiBasicTable, EuiInMemoryTable, EuiCallOut, EuiIcon, EuiIconTip, EuiToolTip,
+  EuiButtonIcon, EuiButton, EuiLink, EuiFormRow, EuiFieldText, EuiFieldNumber,
+  EuiFilePicker, EuiComboBox, EuiTextArea, EuiSelect, EuiSuperSelect,
+  EuiRadio, EuiRadioGroup, EuiBetaBadge, EuiPagination, EuiTreeView, EuiBreadcrumbs.
+  Also use when fixing any @elastic/eui ESLint accessibility rule or answering general a11y questions in Kibana.
 ---
 
 # Accessibility (Kibana)
 
-Guide accessible UI development in Kibana: correct EUI component usage, aria wiring, keyboard and screen reader support, accessible naming, and WCAG 2.2 AA compliance.
+This skill is the **canonical reference for using EUI accessibly**. Open it whenever you author or refactor EUI components — *before* writing the JSX, not only after lint complains.
 
-## 1. Find the right guide
+## When to use this skill
 
-| Starting point | Go to |
-|---------------|-------|
-| `@elastic/eui/*` ESLint rule id | `references/eslint/index.md` → open the **component guide** |
-| EUI component (modal, table, callout …) | `references/components/index.md` → open the matching guide |
-| General a11y question or non-EUI code | `references/shared_principles.md` (read end-to-end) |
+- **Primary — writing or refactoring an EUI component.** Open the matching guide in `references/components/index.md` and follow the canonical pattern (props, naming, focus, ids).
+- **Refactoring legacy markup.** Use the same component guides to bring existing JSX in line with the canonical pattern.
+- **Secondary — fixing an `@elastic/eui/*` ESLint error.** Use `references/eslint/index.md` to jump to the relevant component guide.
+- **General a11y or non-EUI question.** Read `references/shared_principles.md`.
 
-## 2. Read shared principles
+## Find the right guide
 
-Always read `references/shared_principles.md` before editing. It applies to all accessibility work — EUI and non-EUI.
+| You are… | Open |
+|----------|------|
+| Adding or refactoring an **EUI component** | `references/components/index.md` → matching guide |
+| Resolving a non-EUI a11y concern | `references/shared_principles.md` |
+| Working from an `@elastic/eui/*` rule id | `references/eslint/index.md` (links into the component guide) |
 
-## 3. Implement
+## Read shared principles first
 
-- Follow the **component guide** when one exists — keep changes minimal and typed.
-- For non-EUI elements, apply WCAG and WAI-ARIA APG patterns from shared principles.
-- New/changed user-visible or assistive-technology strings must use `i18n.translate`.
-- New `id` / `aria-labelledby` wiring follows `references/project/html_ids.md`.
-- If tests fail from DOM changes, update assertions only — never skip or delete tests.
-- No unrelated refactors; license headers untouched.
+Always read `references/shared_principles.md` before authoring or refactoring. It defines the standards (WCAG / APG), the canonical decision order (semantics → structure → behavior → lifecycle), accessible naming, keyboard and focus expectations, project i18n / HTML-id contracts, and escalation criteria. The component guides are component-specific extensions of these principles.
 
-## 4. Verify the fix
+## Layout
 
-Run **before** considering the task done:
-
-```bash
-node scripts/check
 ```
-
-This runs linting, type checking, and i18n validation on your local changes. If any check fails, fix the root cause — do not suppress errors.
-
-## File layout
-
-| Path | What it contains |
-|------|-----------------|
-| `references/shared_principles.md` | Global a11y rules — WCAG, aria, keyboard, naming, escalation |
-| `references/project/` | **Project-specific** — swap this folder when porting |
-| `references/project/i18n.md` | Localization contract |
-| `references/project/html_ids.md` | HTML ID generation utilities |
-| `references/components/index.md` | Component guide lookup |
-| `references/components/*.md` | Canonical EUI patterns, examples, common mistakes |
-| `references/eslint/index.md` | ESLint rule id → component guide + eslint bridge |
-| `references/eslint/fix-*.md` | Thin lint bridges (link into `components/`) |
-| `scripts/get_skill_path.mjs` | Programmatic rule → bridge path lookup (for hooks/CI; agents use `eslint/index.md`) |
+references/
+  shared_principles.md          ← read first
+  components/
+    index.md                    ← topic → guide
+    eui_*.md                    ← canonical usage per component
+  project/
+    i18n.md                     ← localization contract
+    html_ids.md                 ← id / aria-labelledby utilities
+  eslint/
+    index.md                    ← rule id → component guide (secondary)
+    fix-*.md                    ← thin bridges into the component guide
+```

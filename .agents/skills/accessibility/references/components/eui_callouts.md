@@ -2,62 +2,34 @@
 
 **Applies to:** `EuiCallOut`
 
-When a callout **appears conditionally** (validation, async result, toggle, etc.), assistive technology may **not read its content** unless you opt into EUI's **live-region** behavior via **`announceOnMount`**.
+A callout that **appears conditionally** (validation, async result, toggle, post-submit feedback) is invisible to assistive technology unless you opt into EUI's **live-region** behavior.
 
-## When `announceOnMount` applies
+## Canonical usage
 
-**`@elastic/eui/callout-announce-on-mount`** targets **`EuiCallOut`** that is **conditionally rendered** (`condition && <EuiCallOut …>`, ternary, `if` / `else`, or a variable assigned in branches).
+- **Conditional render** (`condition && <…>`, ternary, branches, early return) → set **`announceOnMount`** so the callout is announced when it mounts.
+- **Always-mounted, static callout** → omit **`announceOnMount`**; it does not need a live region.
+- **Conditional but must not announce** (rare) → **`announceOnMount={false}`** and document why in the callsite if non-obvious.
+- New user-visible strings (`title`, body) → **`i18n.translate`** (see **`../project/i18n.md`**).
 
-- **Default fix:** add **`announceOnMount`** (or **`announceOnMount={true}`**) — typical for validation errors, success messages, warnings after submit.
-- **Explicit opt-out:** set **`announceOnMount={false}`** when the callout is under a condition but must **not** trigger an announcement (rare).
+If **`EuiCallOut`** uses **`{...calloutProps}`** and **`announceOnMount`** is not on the opening tag, merge it at the callsite or in the spread source.
 
-## When you do **not** need the prop
+## Examples
 
-- The callout is **always mounted** — static callouts do not need **`announceOnMount`**.
-
-## Correct usage patterns
-
-**Conditional render — announce when shown**
+**Conditional**
 
 ```tsx
 {hasError && (
-  <EuiCallOut announceOnMount title={i18n.translate('form.errorTitle', { defaultMessage: 'Error' })} color="danger">
+  <EuiCallOut
+    announceOnMount
+    title={i18n.translate('form.errorTitle', { defaultMessage: 'Error' })}
+    color="danger"
+  >
     {errorMessage}
   </EuiCallOut>
 )}
 ```
 
-**Ternary**
-
-```tsx
-{saved ? (
-  <EuiCallOut
-    announceOnMount
-    title={i18n.translate('save.successTitle', { defaultMessage: 'Saved' })}
-    color="success"
-  >
-    {i18n.translate('save.successBody', { defaultMessage: 'Changes applied.' })}
-  </EuiCallOut>
-) : null}
-```
-
-**Early return**
-
-```tsx
-if (showWarning) {
-  return (
-    <EuiCallOut
-      announceOnMount
-      title={i18n.translate('flow.warningTitle', { defaultMessage: 'Warning' })}
-      color="warning"
-    >
-      {warningText}
-    </EuiCallOut>
-  );
-}
-```
-
-**Explicit opt-out (document why in code review if non-obvious)**
+**Explicit opt-out**
 
 ```tsx
 {decorativeCondition && (
@@ -67,43 +39,15 @@ if (showWarning) {
 )}
 ```
 
-## Spread attributes
-
-If **`EuiCallOut`** uses **`{...calloutProps}`** and **`announceOnMount`** is not on the opening tag, the autofix may not apply. Merge **`announceOnMount`** at the callsite or into the spread source.
-
-## Skip / defer
-
-- **Always-visible** callout — no **`announceOnMount`** needed.
-- **Spread-only** props — verify manually.
-
-Also check **`../shared_principles.md` → When to escalate** for general stop conditions.
-
 ## Common mistakes
 
-**Missing `announceOnMount` on conditional callout**
-
 ```tsx
-// WRONG
+// WRONG — conditional callout without announceOnMount
 {hasError && <EuiCallOut title="Error" color="danger" />}
 
 // RIGHT
 {hasError && <EuiCallOut announceOnMount title="Error" color="danger" />}
-```
 
-**Adding `announceOnMount` to an always-visible callout**
-
-```tsx
-// WRONG — callout is static, prop is unnecessary
+// WRONG — unnecessary on a static callout
 <EuiCallOut announceOnMount title="Note" color="primary" />
-
-// RIGHT — no condition means no announceOnMount needed
-<EuiCallOut title="Note" color="primary" />
 ```
-
-## Related ESLint rules
-
-| Rule ID | What it enforces |
-|--------|-------------------|
-| `@elastic/eui/callout-announce-on-mount` | **`announceOnMount`** on **`EuiCallOut`** when the element is **conditionally rendered**. |
-
-ESLint quick ref: `../eslint/fix-callout-announce-on-mount.md`.

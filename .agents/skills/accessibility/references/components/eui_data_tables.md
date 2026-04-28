@@ -2,15 +2,16 @@
 
 **Applies to:** `EuiBasicTable`, `EuiInMemoryTable`
 
-Tables need a **caption** exposed to assistive technology so users understand what the grid represents (not the same as a page `<title>`). EUI encodes this as the **`tableCaption`** prop.
+Tables need a **caption** exposed to assistive technology so users understand what the grid represents (different from the page `<title>`). EUI exposes this as **`tableCaption`**.
 
-## Correct usage
+## Canonical usage
 
-1. Pass **exactly one** meaningful **`tableCaption`** per table instance.
-2. Prefer text that **describes the dataset or task** (e.g. “User accounts in this space”) over generic labels (“Table”).
-3. If visible nearby text already describes the table, you may align caption wording with it (see **Accessibility rules** in `../shared_principles.md`); otherwise use **`i18n.translate`** for new or user-visible caption strings.
+- Pass **exactly one** **`tableCaption`** per table instance.
+- Caption text **describes the dataset or task** — “User accounts in this space”, not “Table”.
+- If visible nearby text already names the table, you may align caption wording with it; otherwise use **`i18n.translate`** for new strings (**`../project/i18n.md`**).
+- If **`tableCaption`** is supplied through **`{...tableProps}`**, fix it at the **source** or merge explicitly at the callsite — never duplicate conflicting captions.
 
-## Examples
+## Example
 
 ```tsx
 <EuiBasicTable
@@ -22,50 +23,12 @@ Tables need a **caption** exposed to assistive technology so users understand wh
 />
 ```
 
-```tsx
-<EuiInMemoryTable
-  tableCaption={i18n.translate('discover.gridCaption', {
-    defaultMessage: 'Documents in this view',
-  })}
-  items={items}
-  columns={columns}
-/>
-```
-
-## Spread props
-
-If **`tableCaption`** is supplied only via **`{...tableProps}`**, fix it at the **source** of `tableProps` or merge explicitly at the callsite. Do not duplicate conflicting `tableCaption` values. If the spread is opaque, flag for manual review.
-
 ## Common mistakes
 
-**Missing `tableCaption`**
-
 ```tsx
-// WRONG
+// WRONG — no caption
 <EuiBasicTable items={items} columns={columns} />
 
-// RIGHT
-<EuiBasicTable
-  tableCaption={i18n.translate('users.tableCaption', { defaultMessage: 'User accounts' })}
-  items={items}
-  columns={columns}
-/>
+// WRONG — generic caption
+<EuiBasicTable tableCaption="Table" items={items} columns={columns} />
 ```
-
-**Generic caption**
-
-```tsx
-// WRONG — "Table" tells assistive technology users nothing
-tableCaption="Table"
-
-// RIGHT — describes the dataset
-tableCaption={i18n.translate('users.tableCaption', { defaultMessage: 'User accounts' })}
-```
-
-## Related ESLint rules
-
-| Rule ID | What it enforces |
-|--------|-------------------|
-| `@elastic/eui/require-table-caption` | `tableCaption` on `EuiBasicTable` / `EuiInMemoryTable`. |
-
-ESLint quick ref: `../eslint/fix-require-table-caption.md`.

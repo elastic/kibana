@@ -1,27 +1,22 @@
-# EUI tooltips and icon controls
+# EUI tooltip on an icon button
 
 **Applies to:** `EuiToolTip`, `EuiButtonIcon`
 
-Avoid duplicate screen reader announcements when **`EuiToolTip`** wraps an icon control via **`disableScreenReaderOutput`**.
+When **`EuiToolTip`** wraps **`EuiButtonIcon`** and the tooltip **`content`** matches the button's **`aria-label`**, assistive technology can announce the same text twice. Use **`disableScreenReaderOutput`** so the tooltip stays available to sighted users while screen readers hear the name once.
 
-**Related:** `eui_focus_and_keyboard.md` (keyboard anchors / `tabIndex`) · `eui_icons_and_tooltips.md` (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`).
+**Related guides:** **`eui_focus_and_keyboard.md`** (tooltip anchors / `tabIndex`) · **`eui_icons_and_tooltips.md`** (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`).
 
-## `disableScreenReaderOutput` — `@elastic/eui/sr-output-disabled-tooltip`
+## Canonical usage
 
-When **`EuiToolTip`** wraps **`EuiButtonIcon`** and tooltip **`content`** equals the button's **`aria-label`**, assistive technology can announce the same text twice. **`disableScreenReaderOutput`** suppresses the redundant tooltip announcement while keeping the hover tooltip for sighted users.
+- **`content`** equals **`aria-label`** (same string or same variable / same `i18n` call) → set **`disableScreenReaderOutput`** on **`EuiToolTip`**.
+- **`content`** differs from **`aria-label`** → no extra prop; both will be announced as intended.
+- Child is not **`EuiButtonIcon`** → this pattern doesn't apply; check the related guides above.
 
-### When this rule applies
+Prefer a single **`i18n.translate`** call (same id + `defaultMessage`) for both **`content`** and **`aria-label`** so the strings can't drift apart.
 
-**`@elastic/eui/sr-output-disabled-tooltip`** fires when **all** of these are true:
+For `{...tooltipProps}` spreads, merge **`disableScreenReaderOutput`** at the callsite or in the spread source.
 
-1. Opening element is **`EuiToolTip`**.
-2. Direct child is **`EuiButtonIcon`** (only this button type in current matcher).
-3. **`disableScreenReaderOutput`** is **not** already set.
-4. Tooltip **`content`** and button **`aria-label`** are **equal** (same literal or same variable).
-
-### Correct usage
-
-Add **`disableScreenReaderOutput`** on **`EuiToolTip`** when **`content`** and **`aria-label`** intentionally use the **same** string (or same `i18n` expression) so SR users hear the name once.
+## Example
 
 ```tsx
 <EuiToolTip
@@ -36,29 +31,10 @@ Add **`disableScreenReaderOutput`** on **`EuiToolTip`** when **`content`** and *
 </EuiToolTip>
 ```
 
-### When you do **not** need the prop
-
-- **`content`** and **`aria-label`** **differ** — no duplicate; rule does not fire.
-- Child is **not `EuiButtonIcon`** — rule does not apply.
-- **`EuiIconTip`** patterns — see `eui_icons_and_tooltips.md`.
-
-### i18n
-
-Prefer **one** `i18n.translate` (same id + `defaultMessage`) for both **`content`** and **`aria-label`** when they must match; keeps copy in sync and satisfies static equality checks.
-
-### Skip / defer
-
-- **`{...tooltipProps}`** without visible **`disableScreenReaderOutput`** — merge at callsite or in spread source.
-- Dynamic equality the rule cannot detect — resolve per **Change boundaries** in `../shared_principles.md`.
-
-Also check **`../shared_principles.md` → When to escalate** for general stop conditions.
-
 ## Common mistakes
 
-**Missing `disableScreenReaderOutput` when content matches aria-label**
-
 ```tsx
-// WRONG — SR announces "Add filter" twice
+// WRONG — screen reader announces "Add filter" twice
 <EuiToolTip content={label}>
   <EuiButtonIcon iconType="plusInCircle" aria-label={label} onClick={onAdd} />
 </EuiToolTip>
@@ -67,12 +43,8 @@ Also check **`../shared_principles.md` → When to escalate** for general stop c
 <EuiToolTip content={label} disableScreenReaderOutput>
   <EuiButtonIcon iconType="plusInCircle" aria-label={label} onClick={onAdd} />
 </EuiToolTip>
-```
 
-**Different `i18n` ids for matching content and aria-label**
-
-```tsx
-// WRONG — strings may drift apart; rule may not detect equality
+// WRONG — different ids, strings may drift apart
 content={i18n.translate('a.tooltip', { defaultMessage: 'Add' })}
 aria-label={i18n.translate('a.button', { defaultMessage: 'Add' })}
 
@@ -80,11 +52,3 @@ aria-label={i18n.translate('a.button', { defaultMessage: 'Add' })}
 content={i18n.translate('a.add', { defaultMessage: 'Add' })}
 aria-label={i18n.translate('a.add', { defaultMessage: 'Add' })}
 ```
-
-## Related ESLint rules
-
-| Rule ID | What it enforces |
-|--------|-------------------|
-| `@elastic/eui/sr-output-disabled-tooltip` | **`disableScreenReaderOutput`** on **`EuiToolTip`** when **`content`** matches **`EuiButtonIcon`** **`aria-label`**. |
-
-ESLint quick ref: `../eslint/fix-sr-output-disabled-tooltip.md`.

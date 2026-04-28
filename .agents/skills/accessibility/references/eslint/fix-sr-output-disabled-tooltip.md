@@ -3,13 +3,9 @@ name: fix-sr-output-disabled-tooltip
 description: Fixes @elastic/eui/sr-output-disabled-tooltip — add disableScreenReaderOutput on EuiToolTip when content matches EuiButtonIcon aria-label.
 ---
 
-# ESLint: `@elastic/eui/sr-output-disabled-tooltip`
+# `@elastic/eui/sr-output-disabled-tooltip`
 
-**Prerequisite:** `../shared_principles.md`
+1. **`../shared_principles.md`**
+2. **[`../components/eui_tooltip_icon.md`](../components/eui_tooltip_icon.md)**
 
-**Canonical usage:** [`../components/eui_tooltip_icon.md`](../components/eui_tooltip_icon.md) — **`EuiToolTip`** + **`EuiButtonIcon`**, duplicate SR announcements, **`disableScreenReaderOutput`**.
-
-## Rule-only deferrals
-
-- **`EuiToolTip`** props from **`{...spread}`** → ensure **`disableScreenReaderOutput`** is set when **`content`** and **`aria-label`** match; merge into spread source when appropriate.
-- Child is not **`EuiButtonIcon`** → rule matcher may not apply; do not force the prop without understanding the pattern.
+**Manual review:** `EuiToolTip` props from spread; child not `EuiButtonIcon`.

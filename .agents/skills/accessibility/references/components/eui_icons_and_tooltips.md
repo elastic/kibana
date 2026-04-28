@@ -4,24 +4,21 @@
 
 ## `EuiIcon`: decorative vs meaningful
 
-- **Decorative** — the icon repeats or ornaments visible text; hide it from assistive technology with **`aria-hidden={true}`**. Do not use **`aria-hidden`** if the icon is **focusable** (`tabIndex`).
-- **Meaningful** — the icon alone carries information; give it **`aria-label`** (with `i18n.translate`) or **`aria-labelledby`** to visible text (**Accessibility rules** in `../shared_principles.md`).
-- **`title`** — only when you want a **native browser tooltip** on built-in icon types; for **SVG React components** passed as **`type`**, **`title` is not supported** — use **`aria-label`** / **`aria-labelledby`** instead.
+Every **`EuiIcon`** is **either decorative or meaningful** — pick one, then mark it accordingly.
 
-### `tabIndex` + `aria-hidden` conflict
+- **Decorative.** The icon repeats or ornaments visible text → **`aria-hidden={true}`**. Do not combine **`aria-hidden`** with **`tabIndex`** — focusable nodes must be perceivable.
+- **Meaningful.** The icon alone carries information → give it an **accessible name** (`aria-label` with `i18n.translate`, or `aria-labelledby` to visible text). See **`../project/i18n.md`** and **`../project/html_ids.md`**.
+- **`title`** — only for a **native browser tooltip** on built-in icon types. For **SVG React components** passed as `type`, **`title` is not supported** — use `aria-label` / `aria-labelledby` instead.
 
-Remove **`aria-hidden`** and add an accessible name — focusable nodes must be perceivable.
+## Prefer `EuiIconTip` for "icon + tooltip"
 
-## Prefer `EuiIconTip` for “icon + tooltip”
+When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, use **`EuiIconTip`** instead — one component, clearer semantics, better defaults.
 
-When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, prefer **`EuiIconTip`**: one component, clearer semantics, better accessibility defaults.
+- Move supported props (`content`, `position`, `delay`, `title`, `id`, `aria-label`, `data-test-subj`, icon `type` / `color` / `size`).
+- **Do not** carry **`tabIndex`** from the old **`EuiIcon`** into **`EuiIconTip`**.
+- New tooltip **`content`** / accessible names → **`i18n.translate`**.
 
-1. Replace the wrapper pattern with **`<EuiIconTip ... />`**.
-2. Move supported props (`content`, `position`, `delay`, `title`, `id`, `aria-label`, `data-test-subj`, icon `type` / `color` / `size`, etc.).
-3. **Do not** pass **`tabIndex`** from the old **`EuiIcon`** into **`EuiIconTip`**.
-4. New user-visible strings → **`i18n.translate`** (see `../project/i18n.md`).
-
-**Skip `EuiIconTip`** when: multiple tooltip children, child is not **`EuiIcon`**, **`EuiIcon`** has **`onClick`** / other handlers **`EuiIconTip`** does not support, or tooltip uses props **`EuiIconTip`** cannot take — escalate manually.
+**Stay with `EuiToolTip` + `EuiIcon`** when there are multiple tooltip children, the child has `onClick` / handlers `EuiIconTip` doesn't support, or the tooltip uses props `EuiIconTip` cannot accept — escalate manually.
 
 ## Examples
 
@@ -46,7 +43,7 @@ When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, prefer **`EuiIconTi
 />
 ```
 
-**`EuiIconTip` migration**
+**`EuiIconTip` (preferred over `EuiToolTip` + single `EuiIcon`)**
 
 ```tsx
 <EuiIconTip
@@ -57,56 +54,27 @@ When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, prefer **`EuiIconTi
 />
 ```
 
-**SVG as React component**
-
-```tsx
-import { ReactComponent as ReactLogo } from './logo.svg';
-
-<EuiIcon
-  type={ReactLogo}
-  aria-label={i18n.translate('myFeature.appLogo', {
-    defaultMessage: 'App logo',
-  })}
-/>
-```
-
 ## Common mistakes
 
-**Meaningful icon without accessible name**
-
 ```tsx
-// WRONG — icon carries meaning but assistive technology ignores it
+// WRONG — meaningful icon without an accessible name
 <EuiIcon type="warning" color="danger" />
 
-// RIGHT
-<EuiIcon type="warning" color="danger" aria-label={i18n.translate('x.warning', { defaultMessage: 'Warning' })} />
-```
-
-**`aria-hidden` on focusable icon**
-
-```tsx
 // WRONG — focusable but hidden from assistive technology
 <EuiIcon type="help" tabIndex={0} aria-hidden={true} />
 
-// RIGHT — remove aria-hidden, add accessible name
-<EuiIcon type="help" tabIndex={0} aria-label={i18n.translate('x.help', { defaultMessage: 'Help' })} />
-```
+// RIGHT — remove aria-hidden, add an accessible name
+<EuiIcon
+  type="help"
+  tabIndex={0}
+  aria-label={i18n.translate('x.help', { defaultMessage: 'Help' })}
+/>
 
-**Keeping `EuiToolTip` + `EuiIcon` when `EuiIconTip` works**
-
-```tsx
-// WRONG — verbose wrapper
-<EuiToolTip content="Help"><EuiIcon type="questionInCircle" /></EuiToolTip>
+// WRONG — verbose wrapper for a single icon
+<EuiToolTip content="Help">
+  <EuiIcon type="questionInCircle" />
+</EuiToolTip>
 
 // RIGHT
 <EuiIconTip content="Help" type="questionInCircle" />
 ```
-
-## Related ESLint rules
-
-| Rule ID | What it enforces |
-|--------|-------------------|
-| `@elastic/eui/icon-accessibility-rules` | Name or hide `EuiIcon`; no focusable + `aria-hidden`. |
-| `@elastic/eui/prefer-eui-icon-tip` | Prefer `EuiIconTip` over `EuiToolTip` + single `EuiIcon`. |
-
-ESLint quick refs: `../eslint/fix-icon-accessibility-rules.md`, `../eslint/fix-prefer-eui-icon-tip.md`.

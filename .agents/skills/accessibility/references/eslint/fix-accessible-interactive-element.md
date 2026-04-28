@@ -3,12 +3,9 @@ name: fix-accessible-interactive-element
 description: Fixes @elastic/eui/accessible-interactive-element — remove tabIndex={-1} from interactive EUI components so they stay in keyboard tab order (WCAG 2.1.1).
 ---
 
-# ESLint: `@elastic/eui/accessible-interactive-element`
+# `@elastic/eui/accessible-interactive-element`
 
-**Prerequisite:** `../shared_principles.md`
+1. **`../shared_principles.md`**
+2. **[`../components/eui_focus_and_keyboard.md`](../components/eui_focus_and_keyboard.md)**
 
-**Canonical usage:** [`../components/eui_focus_and_keyboard.md`](../components/eui_focus_and_keyboard.md) — tab order for interactive EUI controls; **`tabIndex={-1}`** removal and conditional patterns.
-
-## Rule-only deferrals
-
-- **`tabIndex`** only from **`{...props}`** or HOC → manual review; this rule does not redesign roving tabindex.
+**Manual review:** `tabIndex` only from `{...props}` or HOC; do not redesign roving tabindex here.
