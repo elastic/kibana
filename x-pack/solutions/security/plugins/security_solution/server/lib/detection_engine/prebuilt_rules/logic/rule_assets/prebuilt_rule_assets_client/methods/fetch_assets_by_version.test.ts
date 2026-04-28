@@ -7,7 +7,10 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-import { fetchAssetsByVersion } from './fetch_assets_by_version';
+import {
+  PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP,
+  fetchAssetsByVersion,
+} from './fetch_assets_by_version';
 
 jest.mock('../../prebuilt_rule_assets_validation', () => ({
   validatePrebuiltRuleAssets: (assets: unknown[]) => assets,
@@ -154,6 +157,38 @@ describe('fetchAssetsByVersion', () => {
     const { assets } = await fetchAssetsByVersion(savedObjectsClient, versions);
 
     expect(assets.map((a) => a.rule_id)).toEqual(['rule-a', 'rule-b', 'rule-c']);
+  });
+
+  describe('size parameter', () => {
+    const buildVersions = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({ rule_id: `rule-${i}`, version: 1 }));
+
+    it('defaults size to versions.length when versions.length < cap and no perPage is provided', async () => {
+      const versions = buildVersions(7);
+
+      await fetchAssetsByVersion(savedObjectsClient, versions);
+
+      const call = searchMock.mock.calls[0][0];
+      expect(call.size).toBe(7);
+    });
+
+    it('caps the default size at PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP when versions.length >= cap', async () => {
+      const versions = buildVersions(PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP + 25);
+
+      await fetchAssetsByVersion(savedObjectsClient, versions);
+
+      const call = searchMock.mock.calls[0][0];
+      expect(call.size).toBe(PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP);
+    });
+
+    it('supports perPage when it is provided', async () => {
+      const versions = buildVersions(500);
+
+      await fetchAssetsByVersion(savedObjectsClient, versions, { perPage: 500 });
+
+      const call = searchMock.mock.calls[0][0];
+      expect(call.size).toBe(500);
+    });
   });
 
   it('sets _source.includes to prefixed requested fields plus the zod baseline plus SO root fields', async () => {

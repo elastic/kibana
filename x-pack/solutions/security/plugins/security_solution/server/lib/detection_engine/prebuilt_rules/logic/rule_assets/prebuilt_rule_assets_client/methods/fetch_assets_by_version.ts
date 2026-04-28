@@ -24,6 +24,12 @@ import {
 } from '../utils';
 import { buildPrebuiltRuleAssetSourceIncludes } from '../build_source_includes';
 
+/**
+ * Default upper bound applied to `size` when callers don't provide an explicit
+ * `perPage`
+ */
+export const PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP = 100;
+
 export interface FetchAssetsByVersionSearchParams {
   filter?: string;
   aggs?: Record<string, AggregationsAggregationContainer>;
@@ -91,7 +97,7 @@ export async function fetchAssetsByVersion(
     ...(postFilterSoIds ? { post_filter: { terms: { _id: postFilterSoIds } } } : {}),
     ...(sourceIncludes ? { _source: { includes: sourceIncludes } } : {}),
     runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
-    size: params?.perPage,
+    size: params?.perPage ?? Math.min(versions.length, PREBUILT_RULE_ASSETS_FETCH_BATCH_CAP),
     from:
       params?.page != null && params?.perPage != null
         ? (params.page - 1) * params.perPage
