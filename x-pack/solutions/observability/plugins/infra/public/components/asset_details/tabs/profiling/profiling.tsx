@@ -29,7 +29,7 @@ import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 
-export function Profiling() {
+export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean }) {
   const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, setDateRange } = useDatePickerContext();
   const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
@@ -179,14 +179,18 @@ export function Profiling() {
         <ProfilingEmptyState />
       ) : (
         <>
-          <EmbeddableProfilingSearchBar
-            kuery={customKuery}
-            rangeFrom={dateRange.from}
-            rangeTo={dateRange.to}
-            onQuerySubmit={onSearchSubmit}
-            onRefresh={onSearchRefresh}
-          />
-          <EuiSpacer />
+          {showSearchBar && (
+            <>
+              <EmbeddableProfilingSearchBar
+                kuery={customKuery}
+                rangeFrom={dateRange.from}
+                rangeTo={dateRange.to}
+                onQuerySubmit={onSearchSubmit}
+                onRefresh={onSearchRefresh}
+              />
+              <EuiSpacer />
+            </>
+          )}
           <DescriptionCallout />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </>
