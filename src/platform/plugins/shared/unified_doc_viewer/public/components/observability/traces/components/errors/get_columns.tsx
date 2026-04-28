@@ -24,7 +24,18 @@ import {
 } from '@kbn/apm-types';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
+import {
+  EBT_CLICK_ACTION_VIEW_ERROR,
+  EBT_ELEMENT_DOC_VIEWER_ERRORS,
+  EBT_DETAIL_SPAN_DOC,
+} from '../../../../../telemetry/constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
+
+const errorEbt = {
+  action: EBT_CLICK_ACTION_VIEW_ERROR,
+  element: EBT_ELEMENT_DOC_VIEWER_ERRORS,
+  detail: EBT_DETAIL_SPAN_DOC,
+};
 
 function createWhereClause({
   traceId,
@@ -89,6 +100,7 @@ const ErrorMessageLinkCell = ({
       whereClause={createWhereClause({ traceId, docId, source, item })}
       tabLabel={errorLabel}
       dataTestSubj="error-group-link"
+      ebt={errorEbt}
     >
       {content}
     </DiscoverEsqlLink>

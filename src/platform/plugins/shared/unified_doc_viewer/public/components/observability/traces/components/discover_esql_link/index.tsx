@@ -20,12 +20,14 @@ export const DiscoverEsqlLink = ({
   whereClause,
   tabLabel,
   dataTestSubj,
+  ebt,
   children,
 }: {
   indexPattern?: string;
   whereClause?: QueryOperator;
   tabLabel: string;
   dataTestSubj: string;
+  ebt: { action: string; element: string; detail: string };
   children: React.ReactNode;
 }) => {
   const actions = useDocViewerExtensionActionsContext();
@@ -53,7 +55,13 @@ export const DiscoverEsqlLink = ({
   });
 
   return discoverUrl || canOpenInNewTab ? (
-    <EuiLink data-test-subj={dataTestSubj} {...linkProps}>
+    <EuiLink
+      data-test-subj={dataTestSubj}
+      data-ebt-action={ebt.action}
+      data-ebt-element={ebt.element}
+      data-ebt-detail={ebt.detail}
+      {...linkProps}
+    >
       {children}
     </EuiLink>
   ) : (

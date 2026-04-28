@@ -17,6 +17,13 @@ import type { SpanLinkDetails } from '@kbn/apm-types';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
+import {
+  EBT_CLICK_ACTION_VIEW_SERVICE,
+  EBT_CLICK_ACTION_VIEW_SPAN,
+  EBT_CLICK_ACTION_VIEW_TRACE,
+  EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
+  EBT_DETAIL_SPAN_DOC,
+} from '../../../../../telemetry/constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import {
@@ -24,6 +31,14 @@ import {
   createSpanNameWhereClause,
   createTraceIdWhereClause,
 } from './create_span_links_where_clauses';
+
+const spanLinksEbtBase = {
+  element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
+  detail: EBT_DETAIL_SPAN_DOC,
+};
+const spanNameEbt = { action: EBT_CLICK_ACTION_VIEW_SPAN, ...spanLinksEbtBase };
+const serviceNameEbt = { action: EBT_CLICK_ACTION_VIEW_SERVICE, ...spanLinksEbtBase };
+const traceIdEbt = { action: EBT_CLICK_ACTION_VIEW_TRACE, ...spanLinksEbtBase };
 
 const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
@@ -41,6 +56,7 @@ const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDe
       dataTestSubj={`${type}-spanNameLink-${item.spanId}`}
       tabLabel={item.details?.spanName || NOT_AVAILABLE_LABEL}
       whereClause={createSpanNameWhereClause(item)}
+      ebt={spanNameEbt}
     >
       {content}
     </DiscoverEsqlLink>
@@ -64,6 +80,7 @@ const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLin
           dataTestSubj={`${type}-serviceNameLink-${serviceName}`}
           tabLabel={serviceName}
           whereClause={createServiceNameWhereClause(item)}
+          ebt={serviceNameEbt}
         >
           {content}
         </DiscoverEsqlLink>
@@ -85,6 +102,7 @@ const TraceIdLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDet
       dataTestSubj={`${type}-traceIdLink-${item.traceId}`}
       tabLabel={item.traceId}
       whereClause={createTraceIdWhereClause(item)}
+      ebt={traceIdEbt}
     >
       {content}
     </DiscoverEsqlLink>
