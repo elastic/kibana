@@ -9,17 +9,17 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import {
+  getDetailedTypeDescription,
+  getZodTypeName,
+  inferZodType,
+  VARIABLE_REGEX,
+} from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { VARIABLE_REGEX } from '../../../../common/lib/regex';
-import {
-  getDetailedTypeDescription,
-  getSchemaAtPath,
-  getZodTypeName,
-  inferZodType,
-} from '../../../../common/lib/zod';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
