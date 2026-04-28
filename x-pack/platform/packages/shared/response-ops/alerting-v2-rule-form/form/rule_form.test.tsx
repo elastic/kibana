@@ -228,6 +228,80 @@ describe('RuleForm', () => {
       expect(editor.value).toContain('Initial Rule');
     });
 
+    it('regenerates YAML when metadata.name changes (not just query)', async () => {
+      const user = userEvent.setup();
+
+      const NameWriter = () => {
+        const { setValue } = useFormContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="testSetName"
+            onClick={() => setValue('metadata.name', 'renamed-rule', { shouldDirty: true })}
+          >
+            set name
+          </button>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <NameWriter />
+        </>,
+        { wrapper: createFormWrapper({ metadata: { name: 'original-name', enabled: true } }) }
+      );
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(initialEditor.value).toContain('original-name');
+      expect(initialEditor.value).not.toContain('renamed-rule');
+
+      await user.click(screen.getByTestId('testSetName'));
+
+      await waitFor(() => {
+        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+        expect(editor.value).toContain('renamed-rule');
+      });
+    });
+
+    it('regenerates YAML when metadata.tags changes', async () => {
+      const user = userEvent.setup();
+
+      const TagsWriter = () => {
+        const { setValue } = useFormContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="testSetTags"
+            onClick={() => setValue('metadata.tags', ['critical', 'edge'], { shouldDirty: true })}
+          >
+            set tags
+          </button>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <TagsWriter />
+        </>,
+        { wrapper: createFormWrapper() }
+      );
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(initialEditor.value).not.toContain('critical');
+
+      await user.click(screen.getByTestId('testSetTags'));
+
+      await waitFor(() => {
+        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+        expect(editor.value).toContain('critical');
+        expect(editor.value).toContain('edge');
+      });
+    });
+
     it('regenerates YAML when the ES|QL query field changes', async () => {
       const user = userEvent.setup();
 
