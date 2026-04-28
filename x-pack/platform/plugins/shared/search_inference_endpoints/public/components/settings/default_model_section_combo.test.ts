@@ -46,24 +46,19 @@ describe('default_model_section_combo', () => {
   ];
 
   describe('getGlobalModelComboOptions', () => {
-    it('prepends Optional > No default model when feature-specific models include no-default choice', () => {
+    it('prepends a standalone No default model option when feature-specific models include it', () => {
       const opts = getGlobalModelComboOptions(connectors, true);
 
       expect(opts[0]).toEqual(
         expect.objectContaining({
-          label: 'Optional',
-          value: 'optionalGlobalDefault',
-          options: [
-            expect.objectContaining({
-              label: 'No default model',
-              value: NO_DEFAULT_MODEL,
-            }),
-          ],
+          label: 'No default model',
+          value: NO_DEFAULT_MODEL,
         })
       );
+      expect(opts[1]?.label).toBe('Pre-configured');
     });
 
-    it('does not include the Optional group when no-default is not allowed', () => {
+    it('does not include No default model when no-default is not allowed', () => {
       const opts = getGlobalModelComboOptions(connectors, false);
 
       expect(opts.map((g) => g.label)).toEqual(['Pre-configured', 'Custom connectors']);

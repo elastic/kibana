@@ -58,19 +58,7 @@ export const getGlobalModelComboOptions = (
     return connectorGroups;
   }
 
-  return [
-    {
-      label: i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.globalModel.noDefaultGroupLabel',
-        {
-          defaultMessage: 'Optional',
-        }
-      ),
-      value: 'optionalGlobalDefault',
-      options: [noDefaultModelOption()],
-    },
-    ...connectorGroups,
-  ];
+  return [noDefaultModelOption(), ...connectorGroups];
 };
 
 export const getGlobalModelSelectedOptions = (
