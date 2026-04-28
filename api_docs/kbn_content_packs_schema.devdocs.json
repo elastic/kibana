@@ -63,6 +63,7 @@
             "lineNumber": 35,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentPackSavedObject",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -229,6 +230,7 @@
             "lineNumber": 28,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentPackIncludedObjects",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -514,6 +516,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentPackSavedObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -531,6 +534,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
