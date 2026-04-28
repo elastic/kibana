@@ -225,6 +225,7 @@
                 "lineNumber": 33,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArrayBuffer",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -277,6 +278,7 @@
                 "lineNumber": 61,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnalyticsServiceStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -384,6 +386,7 @@
                 "lineNumber": 80,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "FileAnalysisEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -420,6 +423,7 @@
                 "lineNumber": 87,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "FileUploadEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -456,6 +460,7 @@
                 "lineNumber": 94,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "UploadSessionEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -531,6 +536,7 @@
                 "lineNumber": 16,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImportFactoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -776,6 +782,7 @@
                 "lineNumber": 12,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArrayBuffer",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -941,6 +948,7 @@
             "lineNumber": 22,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "AnalyticsServiceSetup",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3689,7 +3697,9 @@
             "type": "string",
             "tags": [],
             "label": "FILE_ANALYSIS",
-            "description": [],
+            "description": [
+              "\nEvent types."
+            ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
             "lineNumber": 14,
             "columnNumber": 3,
@@ -3702,7 +3712,9 @@
             "type": "string",
             "tags": [],
             "label": "FILE_UPLOAD",
-            "description": [],
+            "description": [
+              "\nEvent types."
+            ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
             "lineNumber": 15,
             "columnNumber": 3,
@@ -3715,7 +3727,9 @@
             "type": "string",
             "tags": [],
             "label": "UPLOAD_SESSION",
-            "description": [],
+            "description": [
+              "\nEvent types."
+            ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
             "lineNumber": 16,
             "columnNumber": 3,

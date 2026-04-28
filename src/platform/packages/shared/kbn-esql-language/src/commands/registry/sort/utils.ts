@@ -26,7 +26,7 @@ export const getSortPos = (
   command: ESQLAstAllCommands
 ): { position: SortPosition | undefined; expressionRoot: ESQLSingleAstItem | undefined } => {
   const lastArg = command.args[command.args.length - 1];
-  const afterComma = /,\s+$/.test(query);
+  const afterComma = endsWithComma(query) && endsWithWhitespace(query);
   const hasExpressionArg = lastArg && !Array.isArray(lastArg) && lastArg.type !== 'order';
 
   // Expression context: no arg, after comma, or within an expression (not order node)
@@ -115,7 +115,7 @@ export const getSuggestionsAfterCompleteExpression = (
   });
 
   // does the query end with whitespace?
-  if (/\s$/.test(innerText)) {
+ if (endsWithWhitespace(innerText)) {
     commaSuggestion.replacementRangeStrategy = {
       kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };

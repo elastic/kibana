@@ -58,18 +58,18 @@ export const getPosition = (command: ESQLAstAllCommands, innerText: string): Car
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
+    if (isAssignment(lastOptionArg) && !endsWithComma(innerText)) {
       return 'grouping_expression_after_assignment';
     }
 
     return 'grouping_expression_without_assignment';
   }
 
-  if (isAssignment(lastCommandArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
+  if (isAssignment(lastCommandArg) && !endsWithComma(innerText)) {
     return 'expression_after_assignment';
   }
 
-  if (isWhereExpression(lastCommandArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
+  if (isWhereExpression(lastCommandArg) && !endsWithComma(innerText)) {
     return 'after_where';
   }
 
@@ -190,7 +190,7 @@ export const getCommaAndPipe = (
   });
 
   // does the query end with whitespace?
-  if (/\s$/.test(innerText)) {
+ if (endsWithWhitespace(innerText)) {
     commaSuggestion.replacementRangeStrategy = {
       kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };

@@ -99,7 +99,7 @@ export function computePrefixRange(query: string): PrefixResult {
   }
 
   // Structural delimiters like ( ) , . = are not valid prefixes — cursor is in an empty position
-  if (!STARTS_WITH_WORD_CHAR.test(lastToken.text[0])) {
+  if (!startsWithWordChar(lastToken.text[0])) {
     return getPrefixResultAfterDelimiter(query, tokens);
   }
 
@@ -182,7 +182,7 @@ export function attachReplacementRanges(
     // part of the typed sequence, such as "IS NOT NULL" after "IS NO|". Using
     // trimEnd() keeps trailing formatting whitespace from routing otherwise-normal
     // suggestions through the overlap path.
-    const overlapRange = CONTAINS_WHITESPACE_REGEX.test(suggestion.text.trimEnd())
+    const overlapRange = containsWhitespace(suggestion.text.trimEnd())
       ? getOverlapRange(innerText, suggestion.text)
       : undefined;
     const effectiveRange = overlapRange ?? { start: range.start, end: range.end };
@@ -321,7 +321,7 @@ function getTrailingNonWhitespaceRange(
   startOffset: number
 ): { start: number; end: number } {
   const trailingText = query.substring(startOffset);
-  const nonWhitespaceOffset = trailingText.search(NON_WHITESPACE_REGEX);
+  const nonWhitespaceOffset = findFirstNonWhitespaceIndex(trailingText);
   const rangeStart = nonWhitespaceOffset >= 0 ? startOffset + nonWhitespaceOffset : query.length;
 
   return {
@@ -349,7 +349,7 @@ function getPrefixResultFromUnparsedTrailingText(
 ): PrefixResult {
   const textAfterLastToken = query.substring(lastTokenEnd);
 
-  if (ONLY_WHITESPACE_REGEX.test(textAfterLastToken)) {
+  if (isOnlyWhitespace(textAfterLastToken)) {
     return createEmptyPrefixResult(query, 'token-based');
   }
 
@@ -416,7 +416,7 @@ function getTrailingDotFieldPrefix(query: string, tokens: LexerToken[]) {
 
   if (
     previousToken.stop + 1 !== dotToken.start ||
-    (!STARTS_WITH_WORD_CHAR.test(previousToken.text[0]) && !previousToken.text.startsWith('`'))
+    (!startsWithWordChar(previousToken.text[0]) && !previousToken.text.startsWith('`'))
   ) {
     return;
   }
