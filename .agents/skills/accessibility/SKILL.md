@@ -1,13 +1,14 @@
 ---
 name: accessibility
 description: >
-  Use this skill whenever you write, edit, or review code that uses any of these EUI components:
-  EuiModal, EuiFlyout, EuiFlyoutResizable, EuiConfirmModal, EuiPopover,
-  EuiBasicTable, EuiInMemoryTable, EuiCallOut, EuiIcon, EuiIconTip, EuiToolTip,
-  EuiButtonIcon, EuiButton, EuiLink, EuiFormRow, EuiFieldText, EuiFieldNumber,
-  EuiFilePicker, EuiComboBox, EuiTextArea, EuiSelect, EuiSuperSelect,
+  Use when writing, refactoring, or reviewing Kibana JSX that uses EUI components to apply
+  the canonical accessible pattern (component choice, props, accessible names, ARIA wiring,
+  keyboard/focus, html ids). Components: EuiModal, EuiFlyout, EuiFlyoutResizable,
+  EuiConfirmModal, EuiPopover, EuiBasicTable, EuiInMemoryTable, EuiCallOut, EuiIcon,
+  EuiIconTip, EuiToolTip, EuiButton, EuiButtonIcon, EuiLink, EuiFormRow, EuiFieldText,
+  EuiFieldNumber, EuiFilePicker, EuiComboBox, EuiTextArea, EuiSelect, EuiSuperSelect,
   EuiRadio, EuiRadioGroup, EuiBetaBadge, EuiPagination, EuiTreeView, EuiBreadcrumbs.
-  Also use when fixing any @elastic/eui ESLint accessibility rule or answering general a11y questions in Kibana.
+  Also use when fixing @elastic/eui ESLint accessibility rules.
 ---
 
 # Accessibility (Kibana)
