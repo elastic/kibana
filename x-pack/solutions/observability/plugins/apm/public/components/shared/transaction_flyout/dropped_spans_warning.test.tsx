@@ -54,23 +54,17 @@ describe('DroppedSpansWarning', () => {
   });
 
   it('does not render when dropped is 0', () => {
-    const { container } = render(
-      <DroppedSpansWarning transactionDoc={buildTransaction(0)} />
-    );
+    const { container } = render(<DroppedSpansWarning transactionDoc={buildTransaction(0)} />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('does not render when span_count is missing', () => {
-    const { container } = render(
-      <DroppedSpansWarning transactionDoc={buildTransaction()} />
-    );
+    const { container } = render(<DroppedSpansWarning transactionDoc={buildTransaction()} />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('does not render when transaction is missing', () => {
-    const { container } = render(
-      <DroppedSpansWarning transactionDoc={{} as Transaction} />
-    );
+    const { container } = render(<DroppedSpansWarning transactionDoc={{} as Transaction} />);
     expect(container).toBeEmptyDOMElement();
   });
 });
