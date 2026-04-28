@@ -39,13 +39,18 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
 };
 
 /**
- * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility)
+ * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
+ *
+ * Note: `metadata.enabled` is intentionally NOT serialized. The API's `metadataSchema`
+ * is strict and only accepts { name, description?, owner?, tags? }; `enabled` lives at
+ * the top level of the update/response schemas, never under metadata, and is not part
+ * of the create payload at all. The form keeps its own `metadata.enabled` for the
+ * Enabled toggle UI; that's stripped by the request mappers before the API call.
  */
 export const formValuesToYamlObject = (values: FormValues): Record<string, unknown> => ({
   kind: values.kind,
   metadata: {
     name: values.metadata.name,
-    enabled: values.metadata.enabled,
     ...(values.metadata.description && { description: values.metadata.description }),
     ...(values.metadata.owner && { owner: values.metadata.owner }),
     ...(values.metadata.tags?.length && { tags: values.metadata.tags }),

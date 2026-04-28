@@ -60,7 +60,6 @@ describe('yaml_form_utils', () => {
         kind: 'alert',
         metadata: {
           name: 'Test Rule',
-          enabled: true,
           description: 'A test rule',
           owner: 'test-owner',
           tags: ['label1', 'label2'],
@@ -109,7 +108,6 @@ describe('yaml_form_utils', () => {
         kind: 'signal',
         metadata: {
           name: 'Minimal Rule',
-          enabled: false,
         },
         time_field: '@timestamp',
         schedule: {
