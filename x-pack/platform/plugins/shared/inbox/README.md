@@ -2,9 +2,9 @@
 
 The **Inbox plugin** provides the human-in-the-loop (HITL) control center for agents and
 tasks that have paused execution and are waiting for a human to approve, reject, or otherwise
-weigh in. It exposes a list of pending "inbox actions" that other plugins (Security Solution,
-Evals, Attack Discovery, etc.) can feed into, and a dedicated page where analysts can review
-and action them.
+weigh in. It exposes a list of pending "inbox actions" that other plugins (for example,
+Security Solution, Evals, and Attack Discovery) can feed into, and a dedicated page where
+analysts can review and action them.
 
 Inbox is registered as a standalone Kibana app (`/app/inbox`). Solutions that want to surface
 it in their own navigation can reference the `inbox` deep link id - see the Security Solution
@@ -82,9 +82,9 @@ node scripts/eslint --fix x-pack/platform/packages/shared/kbn-inbox-common/impl/
 ## RBAC
 
 The plugin registers a single Kibana feature with id `inbox`. Both `all` and `read` grant the
-`inbox` API privilege and the `show` UI capability. When more granular actions land (approve,
-reject, snooze, etc.), add sub-privileges to this feature rather than introducing a new one
-so existing grants continue to work.
+`inbox` API privilege and the `show` UI capability. When more granular actions land (for
+example, approve, reject, or snooze), add sub-privileges to this feature rather than
+introducing a new one so existing grants continue to work.
 
 ## Running tests
 
