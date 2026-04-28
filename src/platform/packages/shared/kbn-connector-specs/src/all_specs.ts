@@ -21,6 +21,7 @@ export * from './specs/google_drive/google_drive';
 export * from './specs/greynoise/greynoise';
 export * from './specs/notion/notion';
 export * from './specs/shodan/shodan';
+export * from './specs/snyk/snyk';
 export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';
 export * from './specs/jina/jina_reader';

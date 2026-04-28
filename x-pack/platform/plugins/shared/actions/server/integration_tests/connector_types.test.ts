@@ -49,7 +49,9 @@ describe('Connector type config checks', () => {
   let actionTypeRegistry: ActionTypeRegistry;
 
   beforeAll(async () => {
-    const setupResult = await setupTestServers();
+    const setupResult = await setupTestServers({
+      xpack: { stack_connectors: { enableExperimental: ['snykConnectorOn'] } },
+    });
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
 
