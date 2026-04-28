@@ -63,6 +63,7 @@
             "lineNumber": 20,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "NotebookRendererProps",
             "trackAdoption": false,
             "isRequired": true
           }

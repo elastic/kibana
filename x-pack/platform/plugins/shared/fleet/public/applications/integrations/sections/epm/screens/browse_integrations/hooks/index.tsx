@@ -44,11 +44,11 @@ export function useBrowseIntegrationHook({
 
     if (sortKey === 'a-z') {
       return [...originalFilteredCards].sort((a, b) => {
-        return a.name.localeCompare(b.name);
+        return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
       return [...originalFilteredCards].sort((a, b) => {
-        return b.name.localeCompare(a.name);
+        return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
