@@ -52,6 +52,7 @@ import type {
   UserProfileService,
 } from '@kbn/core/public';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
@@ -358,7 +359,15 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(
+        buildPath('/internal/search/{strategy}/{id}', {
+          strategy: `${strategy}`,
+          id: id as string,
+        }),
+        {
+          version: '1',
+        }
+      )
     );
 
     const cancel = async () => {
@@ -481,7 +490,10 @@ export class SearchInterceptor {
 
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+        buildPath('/internal/search/{strategy}/{id?}', {
+          strategy: `${strategy}`,
+          id: request.id,
+        }),
         {
           version: '1',
           signal: abortSignal,

@@ -122,6 +122,93 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `esArchiver`
 - `samlAuth`
 
+Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-synthtrace) is **not** part of `@kbn/scout`. Use the optional add-on [`@kbn/scout-synthtrace`](../kbn-scout-synthtrace/README.md) and merge its Playwright fixtures where you need `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`. `@kbn/scout-oblt`, `@kbn/scout-search`, and `@kbn/scout-security` do not bundle or re-export it.
+
+#### Optional: wiring Synthtrace
+
+1. **Register the dependency** in your plugin or package `tsconfig.json` (`kbn_references`), then run Moon regeneration if your project uses it:
+
+```jsonc
+"kbn_references": [
+  "@kbn/scout",
+  "@kbn/scout-synthtrace"
+]
+```
+
+For Observability plugins that normally use `@kbn/scout-oblt`, include both `@kbn/scout-oblt` and `@kbn/scout-synthtrace`.
+
+2. **UI tests (platform)** — merge `synthtraceFixture` into the Scout `test` object, then extend with your plugin fixtures. Use `mergeTests` from `@kbn/scout` (not `playwright/test`) so Scout ESLint rules stay satisfied:
+
+```ts
+// e.g. test/scout/ui/fixtures/index.ts
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { mergeTests, test as scoutTest } from '@kbn/scout';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const base = mergeTests(scoutTest, synthtraceFixture);
+
+export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
+  // …plugin-specific fixtures
+});
+```
+
+Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), and `tags` / `expect` from `@kbn/scout` or `@kbn/scout/ui` as usual.
+
+3. **Parallel / `spaceTest`** — same pattern with `spaceTest` from `@kbn/scout`:
+
+```ts
+import { mergeTests, spaceTest as scoutSpaceTest } from '@kbn/scout';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+export const spaceTest = mergeTests(scoutSpaceTest, synthtraceFixture).extend(/* … */);
+```
+
+4. **Observability (`@kbn/scout-oblt`)** — merge `synthtraceFixture` with the Oblt `test` (or `spaceTest`) you already extend:
+
+```ts
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
+import { mergeTests, test as obltTest } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const base = mergeTests(obltTest, synthtraceFixture);
+
+export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
+  // …
+});
+```
+
+Import `test` from `../fixtures` (or your fixtures barrel) in specs that need synthtrace clients; keep importing `tags` from `@kbn/scout-oblt` if you use Oblt tags.
+
+5. **Parallel `global.setup.ts`** — `@kbn/scout`’s `globalSetupHook` does not include synthtrace. Either use the pre-merged helper from `@kbn/scout-synthtrace`, or merge manually:
+
+```ts
+// Option A — equivalent worker stack (core + esArchiver + synthtrace + apiServices)
+import { globalSetupHookWithSynthtrace } from '@kbn/scout-synthtrace';
+
+globalSetupHookWithSynthtrace('Load data', async ({ logsSynthtraceEsClient, esArchiver, log }) => {
+  await logsSynthtraceEsClient.clean();
+  // …
+});
+```
+
+```ts
+// Option B — you already use a wrapper hook (e.g. @kbn/scout-oblt globalSetupHook)
+import { mergeTests, globalSetupHook as obltGlobalSetupHook } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+
+globalSetupHook('Load data', async ({ apmSynthtraceEsClient, log }) => {
+  // …
+});
+```
+
+6. **Setup only (no synthtrace in `test` fixtures)** — if you only need clients inside global setup, import `getSynthtraceClient` from `@kbn/scout-synthtrace` and call it with `esClient`, `log`, `config`, and optional `kbnUrl` (see that package’s README). You do not need to merge `synthtraceFixture` into `test` unless specs use the `*SynthtraceEsClient` fixtures directly.
+
+More detail and edge cases: [kbn-scout-synthtrace README](../kbn-scout-synthtrace/README.md).
+
 ```ts
 test.beforeAll(async ({ kbnClient }) => {
   await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE);
@@ -219,6 +306,8 @@ import { spaceTest as test, expect } from '@kbn/scout';
 
 - **`spaceTest`**: Use for parallel tests that can be isolated by Kibana spaces, allowing faster execution
 - **`test`**: Use for sequential tests that cannot run in parallel
+
+If you need **synthtrace** worker fixtures (`apmSynthtraceEsClient`, `logsSynthtraceEsClient`, etc.), add `@kbn/scout-synthtrace` and follow [Optional: wiring Synthtrace](#optional-wiring-synthtrace) under **Fixtures** above—your specs should import `test` from a local `fixtures` module that merges `synthtraceFixture`, not directly from `@kbn/scout` alone.
 
 **Example UI Test:**
 
@@ -331,11 +420,11 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 To start the servers locally without running tests, use the following command:
 
 ```bash
-node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
+node scripts/scout start-server --arch <arch> --domain <domain>
 ```
 
-- **`--stateful`**: Starts servers in a stateful mode.
-- **`--serverless`**: Starts servers in a serverless mode. You can specify additional options like `es` (Elasticsearch), `oblt` (Observability), or `security`.
+- **`--arch`**: `stateful` or `serverless`.
+- **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
 
 This command is useful for manual testing or running tests via an IDE.
 
@@ -344,22 +433,22 @@ This command is useful for manual testing or running tests via an IDE.
 To start the servers locally and run tests in one step, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --config <plugin-path>/test/scout/ui/playwright.config.ts
+node scripts/scout run-tests --location local --arch stateful --domain classic --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 To start the servers locally and run a single test file, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --testFiles <plugin-path>/test/scout/ui/tests/your_test_spec.ts
+node scripts/scout run-tests --location local --arch stateful --domain classic --testFiles <plugin-path>/test/scout/ui/tests/your_test_spec.ts
 ```
 
 To start the servers locally and run a tests sub-directory, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --testFiles <plugin-path>/test/scout/ui/tests/test_sub_directory
+node scripts/scout run-tests --location local --arch stateful --domain classic --testFiles <plugin-path>/test/scout/ui/tests/test_sub_directory
 ```
 
-- **`--stateful`** or **`--serverless`**: Specifies the deployment type.
+- **`--arch`** and **`--domain`**: Specify the test target (e.g. stateful classic, serverless search).
 - **`--config`**: Path to the Playwright configuration file for the plugin.
 
 This command starts the required servers and automatically executes the tests using Playwright.
@@ -384,39 +473,41 @@ To run tests against a Cloud deployment, you can use either the Scout CLI or the
 **Using Scout CLI:**
 
 ```bash
-node scripts/scout.js run-tests \
-  --stateful \
-  --testTarget=cloud \
+node scripts/scout run-tests \
+  --location cloud \
+  --arch stateful \
+  --domain classic \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
-node scripts/scout.js run-tests \
-  --serverless=oblt \
-  --testTarget=cloud \
+node scripts/scout run-tests \
+  --location cloud \
+  --arch serverless \
+  --domain observability_complete \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
-- **`--testTarget=cloud`**: Specifies that tests should run against a Cloud deployment.
+- **`--location cloud`**: Run tests against a Cloud deployment (ECH or MKI).
 
 **Using Playwright CLI:**
 
 ```bash
 npx playwright test \
   --project=ech \
-  --grep=@ess \
+  --grep=stateful-classic \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
 npx playwright test \
   --project=mki \
-  --grep=@svlOblt \
+  --grep=serverless-observability_complete \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 - **`--project`**: Specifies the test target (`ech` for Stateful or `mki` for Serverless).
-- **`--grep`**: Filters tests by tags (e.g., `@svlSearch` for Elasticsearch or `@svlOblt` for Observability).
+- **`--grep`**: Filters tests by tags (e.g., `serverless-search` for Elasticsearch or `serverless-observability_complete` for Observability).
 
 By following these steps, you can efficiently run tests in various environments using Scout.
 

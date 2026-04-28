@@ -42,6 +42,7 @@ export interface UsageStats {
   'observability:enableServiceGroups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
+  'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logSources': string[];
@@ -70,6 +71,7 @@ export interface UsageStats {
   'securitySolution:enableNewsFeed': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;

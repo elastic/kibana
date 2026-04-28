@@ -512,12 +512,6 @@ async function installPackageFromRegistry({
   try {
     // get the currently installed package
 
-    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-    installType = getInstallType({ pkgVersion, installedPkg });
-
-    telemetryEvent.installType = installType;
-    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
-
     const queryLatest = () =>
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
@@ -530,6 +524,12 @@ async function installPackageFromRegistry({
       latestPkg = await queryLatest();
       pkgVersion = latestPkg.version;
     }
+
+    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installType = getInstallType({ pkgVersion, installedPkg });
+
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     // get latest package version and requested version in parallel for performance
     const [latestPackage, { paths, packageInfo, archiveIterator, verificationResult }] =

@@ -19,10 +19,16 @@ xml-formatter
 @storybook/addon-docs
 dompurify
 magic-bytes.js
-@axe-core/playwright
 @opentelemetry/exporter-trace-otlp-grpc
 @ai-sdk/langchain
 ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
 yaml-language-server
+@swc/core
+lightningcss
+tar-fs
+browserslist
+@atlaskit/pragmatic-drag-and-drop
+@atlaskit/pragmatic-drag-and-drop-hitbox
+@langchain/classic

@@ -26,7 +26,6 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'bulkEditAlertSuppressionEnabled',
-            'doesNotMatchForIndicatorMatchRuleEnabled',
             'entityThreatHuntingEnabled',
           ])}`,
         ],

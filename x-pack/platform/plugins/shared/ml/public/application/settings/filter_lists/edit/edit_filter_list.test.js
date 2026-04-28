@@ -118,8 +118,8 @@ describe('EditFilterList', () => {
 
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
 
-    waitFor(() => {
-      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue(
+    await waitFor(() => {
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent(
         'List of known safe domains'
       );
     });
@@ -133,7 +133,7 @@ describe('EditFilterList', () => {
 
     const mlFilterListDescriptionInput = getByTestId('mlFilterListDescriptionInput');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mlFilterListDescriptionInput).toBeInTheDocument();
       expect(mlFilterListDescriptionInput).toHaveValue('List of known safe domains');
     });
@@ -142,8 +142,10 @@ describe('EditFilterList', () => {
     await userEvent.type(mlFilterListDescriptionInput, 'Known safe web domains');
     await userEvent.click(mlFilterListEditDescriptionButton);
 
-    waitFor(() => {
-      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue('Known safe web domains');
+    await waitFor(() => {
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent(
+        'Known safe web domains'
+      );
     });
   });
 
@@ -211,6 +213,7 @@ describe('EditFilterList', () => {
   });
 
   test('adds new items to filter list', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     const { getByTestId, getByText, findByText, findByTestId, queryByTestId, queryByText } = render(
       <IntlProvider locale="en">
         <EditFilterList {...props} filterId="safe_domains" />
@@ -231,7 +234,7 @@ describe('EditFilterList', () => {
       'mlFilterListOpenNewItemsPopoverButton'
     );
     expect(mlFilterListOpenNewItemsPopoverButton).toBeInTheDocument();
-    await userEvent.click(mlFilterListOpenNewItemsPopoverButton);
+    await user.click(mlFilterListOpenNewItemsPopoverButton);
 
     // Assert that the popover was opened.
     expect(await findByTestId('mlFilterListAddItemPopoverContent')).toBeInTheDocument();
@@ -247,8 +250,8 @@ describe('EditFilterList', () => {
     expect(mlFilterListAddItemsButton).toBeDisabled();
 
     // Enter items in the textarea and click the add items button
-    await userEvent.type(mlFilterListAddItemTextArea, 'amazon.com\nspotify.com');
-    await userEvent.click(mlFilterListAddItemsButton);
+    await user.type(mlFilterListAddItemTextArea, 'amazon.com\nspotify.com');
+    await user.click(mlFilterListAddItemsButton);
 
     // Assert that the popover is closed again
     expect(await queryByTestId('mlFilterListAddItemPopover')).not.toBeInTheDocument();

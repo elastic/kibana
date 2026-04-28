@@ -75,6 +75,12 @@ export function HighlightedExitSpansTable({ items, title }: HighlightedExitSpans
         columns={columns}
         tableLayout="auto"
         data-test-subj="apmServiceMapHighlightedExitSpansTable"
+        tableCaption={i18n.translate(
+          'xpack.apm.serviceMap.diagnosticResults.highlightedExitSpansCaption',
+          {
+            defaultMessage: 'Highlighted exit spans',
+          }
+        )}
       />
     </EuiPanel>
   );

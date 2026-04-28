@@ -270,6 +270,18 @@ responses:
       application/json:
         examples:
           # Apply a similar pattern to writing examples here
+x-codeSamples:
+- lang: cURL
+  # label: A label which will be used as a title. Defaults to the lang value.
+  source: |
+    curl \
+      -X POST /api/foo
+      -H "kbn-xsrf: true"
+      -d '{...}'
+- lang: Console
+  source: |
+    POST kbn:/api/agent_builder/tools
+    {...}
 ```
 
 </details>

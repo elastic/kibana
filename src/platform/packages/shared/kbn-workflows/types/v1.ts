@@ -111,6 +111,8 @@ export interface EsWorkflowExecution {
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
+  /** IDs of all step executions, enables O(1) mget lookup instead of search */
+  stepExecutionIds?: string[];
 }
 
 export interface ProviderInput {
@@ -464,4 +466,14 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+}
+
+export interface RequestOptions {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, string>;
+  headers?: Record<string, string>;
+  /** Bulk body for elasticsearch.bulk step */
+  bulkBody?: Array<Record<string, unknown>>;
 }

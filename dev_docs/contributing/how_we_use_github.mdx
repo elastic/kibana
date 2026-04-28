@@ -3,7 +3,7 @@ id: kibGitHub
 slug: /kibana-dev-docs/contributing/github
 title: How we use Github
 description: Forking, branching, committing and using labels in the Kibana GitHub repo
-date: 2021-09-16
+date: 2026-02-06
 tags: ['contributor', 'dev', 'github', 'getting started', 'onboarding', 'kibana']
 ---
 
@@ -19,6 +19,11 @@ At Elastic, all products in the stack, including Kibana, are released at the sam
 - `<major>.<minor>` is the previously released minor version, including patch releases.
 
 As an example, let’s assume that the main branch is currently a not-yet-released 8.1.0. Once 8.1.0 has reached feature freeze, it will be branched to 8.1 and main will be updated to reflect 8.2.0. The release of 8.1.0 and subsequent patch releases will be cut from the 8.1 branch. At any time, you can verify the current version of a branch by inspecting the version attribute in the package.json file within the Kibana source.
+
+The active branches and their roles are defined in `versions.json` at the repository root, categorized by `branchType`:
+
+- `"development"` -- Branches like `main` for new features and breaking changes
+- `"release"` -- Maintained release branches for backporting fixes, docs, tests, security, and dependency updates
 
 Pull requests are made into the main branch and only backported when it is safe and appropriate.
 
@@ -212,3 +217,13 @@ The following labels are related to backporting PRs:
 - `backport:all-open`: Automatically backport to all generally available versions. This functionally is equivalent to backport:prev-major at the time of writing.
 - `backport:skip`: This PR does not require backporting.
 - `backport`: This PR was backported (added by CI).
+
+If automated backporting fails (e.g. due to merge conflicts), you can backport manually:
+
+```bash
+# Interactive backport (select commits and branches)
+node scripts/backport
+
+# Backport a specific commit to specific branches
+node scripts/backport --sha <commit-sha> --branch 9.2 --branch 9.1
+```

@@ -22,6 +22,7 @@ export const ConfigSchema = z.union([
     .object({
       apiProvider: z.enum([OpenAiProviderType.AzureAi]),
       apiUrl: z.string(),
+      defaultModel: z.string().optional(),
       headers: z.record(z.string(), z.string()).optional(),
       contextWindowLength: z.coerce.number().optional(),
       temperature: z.coerce.number().optional(),

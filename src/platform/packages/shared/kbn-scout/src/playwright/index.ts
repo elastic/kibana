@@ -13,7 +13,9 @@ import './peggy_setup';
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
-export { expect } from './expect';
+
+// Matchers
+export { expect } from './matchers/ui';
 
 // Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
@@ -34,14 +36,16 @@ export type {
   ScoutParallelWorkerFixtures,
 } from './test/ui';
 
+// Worker primitives (for optional packages such as @kbn/scout-synthtrace)
+export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
+export type { EsArchiverFixture } from './fixtures/scope/worker';
+
 // API services (can be extended with solution specific API services)
 export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 
-export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
-
 // Other worker types
-export type { SamlAuth, SynthtraceFixture, RequestAuthFixture } from './fixtures/scope/worker';
+export type { SamlAuth, RequestAuthFixture } from './fixtures/scope/worker';
 
 // Tagging utility
 export { tags } from './tags';

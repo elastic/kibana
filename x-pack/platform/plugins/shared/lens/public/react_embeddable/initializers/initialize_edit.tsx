@@ -30,7 +30,10 @@ import type {
 } from '@kbn/lens-common';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
-import { extractInheritedViewModeObservable } from '../helper';
+import {
+  extractInheritedViewModeObservable,
+  saveUpdatedLinkedAnnotationsToLibrary,
+} from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
@@ -234,13 +237,23 @@ export function initializeEditApi(
         internalApi.updateEditingState(false);
         updateState({ ...firstState });
       },
-      // the getState() here contains the wrong filters references but the input attributes
-      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
-        ? noop
-        : (attributes: LensRuntimeState['attributes']) => {
+        ? undefined
+        : async (attributes) => {
+            let appliedAttributes = attributes;
+            if (attributes.visualizationType === 'lnsXY') {
+              const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+                attributes.state.visualization,
+                startDependencies.eventAnnotationService
+              );
+              appliedAttributes = {
+                ...attributes,
+                state: { ...attributes.state, visualization: updatedVizState },
+              };
+            }
             internalApi.updateEditingState(false);
-            updateState({ ...getState(), attributes });
+            updateState({ ...getState(), attributes: appliedAttributes });
+            return appliedAttributes;
           },
       closeFlyout: () => {
         internalApi.updateEditingState(false);

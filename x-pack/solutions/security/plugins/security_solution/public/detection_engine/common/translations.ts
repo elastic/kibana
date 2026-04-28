@@ -52,7 +52,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Detection rules (SIEM)',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(

@@ -26,24 +26,33 @@ import type { WorkflowExecutionState } from '../workflow_execution_state';
 const dependencies = mockContextDependencies();
 
 jest.mock('../../utils', () => ({
-  buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
+  ...jest.requireActual<typeof import('../../utils')>('../../utils'),
+  buildStepExecutionId: jest.fn().mockImplementation((executionId: string, stepId: string) => {
     return `${stepId}_generated`;
   }),
   getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
   buildWorkflowExecutionUrl: jest
     .fn()
-    .mockImplementation((kibanaUrl, spaceId, workflowId, executionId, stepExecutionId) => {
-      const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-      const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
-      const params = new URLSearchParams({
-        executionId,
-        tab: 'executions',
-      });
-      if (stepExecutionId) {
-        params.set('stepExecutionId', stepExecutionId);
+    .mockImplementation(
+      (
+        kibanaUrl: string,
+        spaceId: string,
+        workflowId: string,
+        executionId: string,
+        stepExecutionId?: string
+      ) => {
+        const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+        const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+        const params = new URLSearchParams({
+          executionId,
+          tab: 'executions',
+        });
+        if (stepExecutionId) {
+          params.set('stepExecutionId', stepExecutionId);
+        }
+        return `${baseUrl}?${params.toString()}`;
       }
-      return `${baseUrl}?${params.toString()}`;
-    }),
+    ),
 }));
 
 describe('WorkflowContextManager', () => {
@@ -70,7 +79,10 @@ describe('WorkflowContextManager', () => {
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
     const templatingEngineMock = {} as unknown as WorkflowTemplatingEngine;
-    templatingEngineMock.render = jest.fn().mockImplementation((template) => template);
+    templatingEngineMock.render = jest.fn().mockImplementation((...args: unknown[]) => args[0]);
+    templatingEngineMock.evaluateExpression = jest
+      .fn()
+      .mockImplementation((...args: unknown[]) => args[0]);
 
     // Provide a dummy esClient as required by ContextManagerInit
     const esClient = {
@@ -502,10 +514,9 @@ describe('WorkflowContextManager', () => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
               stepType: 'foreach',
+              input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
               state: {
-                items: ['item1', 'item2', 'item3'],
                 index: 0,
-                item: 'item1',
                 total: 3,
               },
             };
@@ -514,10 +525,9 @@ describe('WorkflowContextManager', () => {
           if (stepExecutionId === 'innerForeachStep_generated') {
             return {
               stepType: 'foreach',
+              input: { foreach: JSON.stringify(['1', '2', '3', '4']) },
               state: {
-                items: ['1', '2', '3', '4'],
                 index: 1,
-                item: '2',
                 total: 4,
               },
             };
@@ -596,10 +606,9 @@ describe('WorkflowContextManager', () => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
               stepType: 'foreach',
+              input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
               state: {
-                items: ['item1', 'item2', 'item3'],
                 index: 0,
-                item: 'item1',
                 total: 3,
               },
             };
@@ -613,6 +622,392 @@ describe('WorkflowContextManager', () => {
         index: 0,
         item: 'item1',
         total: 3,
+      });
+    });
+
+    it('should populate steps[foreachStepId] with item, items, index, total for a single foreach', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          },
+        ] as StackFrame[],
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId) => {
+          if (stepExecutionId === 'outerForeachStep_generated') {
+            return {
+              stepId: 'outerForeachStep',
+              stepType: 'foreach',
+              input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
+              state: { index: 1, total: 3 },
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+
+      expect(context.steps.outerForeachStep).toEqual(
+        expect.objectContaining({
+          item: 'item2',
+          items: ['item1', 'item2', 'item3'],
+          index: 1,
+          total: 3,
+        })
+      );
+    });
+
+    describe('nested foreach with inner expression {{foreach.item}}', () => {
+      const outerItems = [
+        ['innerA', 'innerB'],
+        ['innerC', 'innerD'],
+      ];
+      const outerCurrentIndex = 0;
+      const outerCurrentItem = outerItems[outerCurrentIndex];
+      const innerCurrentIndex = 1;
+
+      beforeEach(() => {
+        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+          workflowDefinition: workflow,
+          scopeStack: [
+            {
+              stepId: 'outerForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            },
+            {
+              stepId: 'innerForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
+            },
+          ],
+        } as EsWorkflowExecution);
+        testContainer.workflowExecutionState.getStepExecution = jest
+          .fn()
+          .mockImplementation((stepExecutionId) => {
+            if (stepExecutionId === 'outerForeachStep_generated') {
+              return {
+                stepId: 'outerForeachStep',
+                stepType: 'foreach',
+                input: { foreach: JSON.stringify(outerItems) },
+                state: { index: outerCurrentIndex, total: outerItems.length },
+              };
+            }
+            if (stepExecutionId === 'innerForeachStep_generated') {
+              return {
+                stepId: 'innerForeachStep',
+                stepType: 'foreach',
+                input: { foreach: '{{foreach.item}}' },
+                state: { index: innerCurrentIndex, total: outerCurrentItem.length },
+              };
+            }
+            return undefined;
+          });
+      });
+
+      it('should resolve inner foreach items from outer current item when inner expression is {{foreach.item}}', () => {
+        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+          (expr: string, ctx: Record<string, unknown>) => {
+            if (expr.includes('foreach.item')) {
+              return (ctx as { foreach?: { item: unknown } }).foreach?.item;
+            }
+            return expr;
+          }
+        );
+        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+          (...args: unknown[]) => args[0]
+        );
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.foreach).toEqual({
+          items: outerCurrentItem,
+          item: outerCurrentItem[innerCurrentIndex],
+          index: innerCurrentIndex,
+          total: outerCurrentItem.length,
+        });
+      });
+
+      it('should expose innermost foreach as context.foreach (current loop)', () => {
+        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+          (expr: string, ctx: Record<string, unknown>) => {
+            if (expr.includes('foreach.item')) {
+              return (ctx as { foreach?: { item: unknown } }).foreach?.item;
+            }
+            return expr;
+          }
+        );
+        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+          (...args: unknown[]) => args[0]
+        );
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.foreach?.item).toBe('innerB');
+        expect(context.foreach?.index).toBe(innerCurrentIndex);
+        expect(context.foreach?.total).toBe(outerCurrentItem.length);
+        expect(context.foreach?.items).toEqual(['innerA', 'innerB']);
+      });
+
+      it('should populate steps[outerForeachStep] with item, items, index, total', () => {
+        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+          (expr: string, ctx: Record<string, unknown>) => {
+            if (expr.includes('foreach.item')) {
+              return (ctx as { foreach?: { item: unknown } }).foreach?.item;
+            }
+            return expr;
+          }
+        );
+        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+          (...args: unknown[]) => args[0]
+        );
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.steps.outerForeachStep).toEqual(
+          expect.objectContaining({
+            item: outerItems[outerCurrentIndex],
+            items: outerItems,
+            index: outerCurrentIndex,
+            total: outerItems.length,
+          })
+        );
+      });
+
+      it('should populate steps[innerForeachStep] with item, items, index, total', () => {
+        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+          (expr: string, ctx: Record<string, unknown>) => {
+            if (expr.includes('foreach.item')) {
+              return (ctx as { foreach?: { item: unknown } }).foreach?.item;
+            }
+            return expr;
+          }
+        );
+        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+          (...args: unknown[]) => args[0]
+        );
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.steps.innerForeachStep).toEqual(
+          expect.objectContaining({
+            item: outerCurrentItem[innerCurrentIndex],
+            items: outerCurrentItem,
+            index: innerCurrentIndex,
+            total: outerCurrentItem.length,
+          })
+        );
+      });
+
+      it('should not overwrite existing step output/input when merging foreach context', () => {
+        (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockImplementation(
+          (expr: string, ctx: Record<string, unknown>) => {
+            if (expr.includes('foreach.item')) {
+              return (ctx as { foreach?: { item: unknown } }).foreach?.item;
+            }
+            return expr;
+          }
+        );
+        (testContainer.templatingEngineMock.render as jest.Mock).mockImplementation(
+          (...args: unknown[]) => args[0]
+        );
+        jest.spyOn(testContainer.workflowExecutionGraph, 'getAllPredecessors').mockReturnValue([
+          {
+            id: 'outerForeachStep',
+            stepId: 'outerForeachStep',
+            type: 'enter-foreach',
+          } as any,
+        ]);
+        testContainer.workflowExecutionState.getLatestStepExecution = jest
+          .fn()
+          .mockImplementation((stepId: string) => {
+            if (stepId === 'outerForeachStep') {
+              return {
+                input: { foreach: JSON.stringify(outerItems) },
+                output: { result: 'outerOutput' },
+                state: { index: outerCurrentIndex, total: outerItems.length },
+              };
+            }
+            return undefined;
+          });
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.steps.outerForeachStep).toEqual(
+          expect.objectContaining({
+            output: { result: 'outerOutput' },
+            input: { foreach: JSON.stringify(outerItems) },
+            item: outerItems[outerCurrentIndex],
+            items: outerItems,
+            index: outerCurrentIndex,
+            total: outerItems.length,
+          })
+        );
+      });
+    });
+
+    describe('triple-nested foreach', () => {
+      const outerItems = ['A', 'B'];
+      const middleItems = ['x', 'y'];
+      const innerItems = [1, 2];
+      const outerIdx = 1;
+      const middleIdx = 0;
+      const innerIdx = 1;
+
+      beforeEach(() => {
+        testContainer = createTestContainer(workflow);
+        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+          workflowDefinition: workflow,
+          scopeStack: [
+            {
+              stepId: 'outerForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            },
+            {
+              stepId: 'innerForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
+            },
+            {
+              stepId: 'deepForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_deepForeachStep' }],
+            },
+          ],
+        } as EsWorkflowExecution);
+        testContainer.workflowExecutionState.getStepExecution = jest
+          .fn()
+          .mockImplementation((stepExecutionId) => {
+            if (stepExecutionId === 'outerForeachStep_generated') {
+              return {
+                stepId: 'outerForeachStep',
+                stepType: 'foreach',
+                input: { foreach: JSON.stringify(outerItems) },
+                state: { index: outerIdx, total: outerItems.length },
+              };
+            }
+            if (stepExecutionId === 'innerForeachStep_generated') {
+              return {
+                stepId: 'innerForeachStep',
+                stepType: 'foreach',
+                input: { foreach: JSON.stringify(middleItems) },
+                state: { index: middleIdx, total: middleItems.length },
+              };
+            }
+            if (stepExecutionId === 'deepForeachStep_generated') {
+              return {
+                stepId: 'deepForeachStep',
+                stepType: 'foreach',
+                input: { foreach: JSON.stringify(innerItems) },
+                state: { index: innerIdx, total: innerItems.length },
+              };
+            }
+            return undefined;
+          });
+      });
+
+      it('should populate steps for all three foreach levels', () => {
+        const context = testContainer.underTest.getContext();
+
+        expect(context.steps.outerForeachStep).toEqual(
+          expect.objectContaining({
+            item: outerItems[outerIdx],
+            items: outerItems,
+            index: outerIdx,
+            total: outerItems.length,
+          })
+        );
+        expect(context.steps.innerForeachStep).toEqual(
+          expect.objectContaining({
+            item: middleItems[middleIdx],
+            items: middleItems,
+            index: middleIdx,
+            total: middleItems.length,
+          })
+        );
+        expect(context.steps.deepForeachStep).toEqual(
+          expect.objectContaining({
+            item: innerItems[innerIdx],
+            items: innerItems,
+            index: innerIdx,
+            total: innerItems.length,
+          })
+        );
+      });
+
+      it('should set foreach to the innermost loop context', () => {
+        const context = testContainer.underTest.getContext();
+
+        expect(context.foreach).toEqual({
+          item: innerItems[innerIdx],
+          items: innerItems,
+          index: innerIdx,
+          total: innerItems.length,
+        });
+      });
+    });
+
+    describe('foreach with missing or malformed input', () => {
+      beforeEach(() => {
+        testContainer = createTestContainer(workflow);
+      });
+
+      it('should produce empty items when foreach step input is null', () => {
+        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+          workflowDefinition: workflow,
+          scopeStack: [
+            {
+              stepId: 'outerForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            },
+          ],
+        } as EsWorkflowExecution);
+        testContainer.workflowExecutionState.getStepExecution = jest
+          .fn()
+          .mockImplementation((stepExecutionId) => {
+            if (stepExecutionId === 'outerForeachStep_generated') {
+              return {
+                stepType: 'foreach',
+                input: null,
+                state: { index: 0, total: 3 },
+              };
+            }
+            return undefined;
+          });
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.foreach?.items).toEqual([]);
+        expect(context.foreach?.item).toBeUndefined();
+      });
+
+      it('should produce empty items when foreach step input has no foreach key', () => {
+        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+          workflowDefinition: workflow,
+          scopeStack: [
+            {
+              stepId: 'outerForeachStep',
+              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            },
+          ],
+        } as EsWorkflowExecution);
+        testContainer.workflowExecutionState.getStepExecution = jest
+          .fn()
+          .mockImplementation((stepExecutionId) => {
+            if (stepExecutionId === 'outerForeachStep_generated') {
+              return {
+                stepType: 'foreach',
+                input: { other: 'value' },
+                state: { index: 0, total: 2 },
+              };
+            }
+            return undefined;
+          });
+
+        const context = testContainer.underTest.getContext();
+
+        expect(context.foreach?.items).toEqual([]);
+        expect(context.foreach?.item).toBeUndefined();
       });
     });
   });

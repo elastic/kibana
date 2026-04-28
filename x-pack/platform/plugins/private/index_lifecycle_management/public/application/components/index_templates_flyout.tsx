@@ -57,6 +57,12 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiInMemoryTable
+          tableCaption={i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.caption',
+            {
+              defaultMessage: 'Index templates',
+            }
+          )}
           pagination={true}
           // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
           items={indexTemplates ?? []}

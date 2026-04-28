@@ -25,7 +25,7 @@ describe('WorkflowExecutionState', () => {
 
     stepExecutionRepository = {} as unknown as StepExecutionRepository;
     stepExecutionRepository.bulkUpsert = jest.fn();
-    stepExecutionRepository.searchStepExecutionsByExecutionId = jest.fn();
+    stepExecutionRepository.getStepExecutionsByIds = jest.fn();
 
     const fakeWorkflowExecution = {
       id: 'test-workflow-execution-id',
@@ -343,8 +343,8 @@ describe('WorkflowExecutionState', () => {
       await underTest.flush(); // second flush with no changes
       await underTest.flush(); // third flush with no changes
 
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2); // create the first step execution and then update
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -395,8 +395,15 @@ describe('WorkflowExecutionState', () => {
   });
 
   describe('load', () => {
+    it('should throw if stepExecutionIds is not set on the workflow execution', async () => {
+      await expect(underTest.load()).rejects.toThrow(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    });
+
     it('should load existing step executions', async () => {
-      (stepExecutionRepository.searchStepExecutionsByExecutionId as jest.Mock).mockResolvedValue([
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'testStep',
@@ -410,6 +417,7 @@ describe('WorkflowExecutionState', () => {
       ]);
       await underTest.load();
 
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['11', '22']);
       expect(underTest.getLatestStepExecution('testStep')).toEqual({
         id: '11',
         stepId: 'testStep',
@@ -423,7 +431,8 @@ describe('WorkflowExecutionState', () => {
     });
 
     it('should sort step executions by executionIndex when loaded from repository', async () => {
-      (stepExecutionRepository.searchStepExecutionsByExecutionId as jest.Mock).mockResolvedValue([
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '44', '33', '22'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'testStep',

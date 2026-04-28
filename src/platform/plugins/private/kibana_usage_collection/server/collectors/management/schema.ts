@@ -136,7 +136,17 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in analyzer.',
+    },
+  },
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
+    },
   },
   'securitySolution:enableCcsWarning': {
     type: 'boolean',
@@ -625,6 +635,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureAssetCustomDashboards': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableGroupedNav': {

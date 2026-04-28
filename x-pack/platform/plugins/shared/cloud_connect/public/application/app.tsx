@@ -64,6 +64,10 @@ export const CloudConnectedAppMain: React.FC = () => {
     clusterConfig: config!,
     hasConfigurePermission: appContext.application.capabilities.cloudConnect?.configure === true,
     hasActionsSavePrivilege: appContext.application.capabilities.actions?.save === true,
+    justConnected: appContext.justConnected,
+    setJustConnected: appContext.setJustConnected,
+    autoEnablingEis: appContext.autoEnablingEis,
+    setAutoEnablingEis: appContext.setAutoEnablingEis,
   };
 
   return (

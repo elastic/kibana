@@ -32,6 +32,8 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 
+import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
+
 import { catchAndSetErrorStackTrace } from '../errors/utils';
 
 import {
@@ -629,8 +631,8 @@ class AgentPolicyService {
     }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const isMultispace = (policy.space_ids ?? []).length > 1;
-    const _soClient = isMultispace
+    const hasExplicitSpaces = (policy.space_ids ?? []).length > 0;
+    const _soClient = hasExplicitSpaces
       ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
       : soClient;
     const results = await _soClient
@@ -638,7 +640,7 @@ class AgentPolicyService {
         type: savedObjectType,
         searchFields: ['name'],
         search: escapeSearchQueryPhrase(policy.name),
-        ...(isMultispace ? { namespaces: policy.space_ids } : {}),
+        ...(hasExplicitSpaces ? { namespaces: policy.space_ids } : {}),
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
@@ -1115,12 +1117,10 @@ class AgentPolicyService {
         const newPackagePolicies = await pMap(
           basePackagePolicies,
           async (packagePolicy: PackagePolicy) => {
-            const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-
             const updatedPackagePolicy = {
-              ...newPackagePolicy,
+              ...copyPackagePolicy(packagePolicy),
               name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
-            };
+            } as NewPackagePolicy & { id: undefined };
             return updatedPackagePolicy;
           }
         );
@@ -1391,7 +1391,7 @@ class AgentPolicyService {
     outputId: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 

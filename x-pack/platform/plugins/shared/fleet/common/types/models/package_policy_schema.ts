@@ -71,7 +71,7 @@ export const PackagePolicyInputsSchema = {
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
   config: schema.maybe(ConfigRecordSchema),
-  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
+  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
@@ -242,7 +242,7 @@ const CreatePackagePolicyProps = {
     schema.object({
       ...PackagePolicyInputsSchema,
       streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
       ),
     }),
     { maxSize: 1000 }
@@ -286,9 +286,9 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
   schema.nullable(
     schema.oneOf([
-      schema.boolean(),
       schema.string(),
       schema.number(),
+      schema.boolean(),
       schema.arrayOf(schema.string(), { maxSize: 100 }),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets
@@ -473,10 +473,10 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
       schema.object({
         ...PackagePolicyInputsSchema,
         streams: schema.maybe(
-          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
         ),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
   version: schema.maybe(schema.string()),
@@ -536,7 +536,7 @@ export const PackagePolicySchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
 });

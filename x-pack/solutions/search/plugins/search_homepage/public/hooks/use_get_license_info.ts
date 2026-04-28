@@ -16,10 +16,16 @@ export const useGetLicenseInfo = () => {
 
   const license = useObservable(licensing.license$, null);
 
-  const { isTrial, licenseType } = useMemo(
+  const { isTrial, licenseType, hasEnterpriseLicense } = useMemo(
     () => ({
       isTrial: license && license.isAvailable && license.isActive && license.type === 'trial',
       licenseType: license?.type,
+      hasEnterpriseLicense: !!(
+        license &&
+        license.isAvailable &&
+        license.isActive &&
+        license.hasAtLeast('enterprise')
+      ),
     }),
     [license]
   );
@@ -27,5 +33,6 @@ export const useGetLicenseInfo = () => {
   return {
     isTrial,
     licenseType,
+    hasEnterpriseLicense,
   };
 };

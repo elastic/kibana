@@ -25,6 +25,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
+import { SLOS_BASE_PATH } from '../../../../common/locators/paths';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
@@ -145,7 +146,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
           spaceId,
-          `/app/observability/slos/${slo.id}${urlQuery}`
+          `${SLOS_BASE_PATH}/${slo.id}${urlQuery}`
         );
         if (shouldAlert) {
           const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
@@ -237,7 +238,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       const viewInAppUrl = addSpaceIdToPath(
         basePath.publicBaseUrl,
         spaceId,
-        `/app/observability/slos/${slo.id}${urlQuery}`
+        `${SLOS_BASE_PATH}/${slo.id}${urlQuery}`
       );
 
       const context = {

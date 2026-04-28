@@ -21,28 +21,18 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/
     <dd>Execute this to build your plugin ui browser side so Kibana could pick up when started in development</dd>
 </dl>
 
-## API Integration Tests
+## Scout API tests (deployment-agnostic)
 
-The SLO tests are located under `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/slo` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SLO`) on stateful or serverless.
-
-### Stateful
+SLO API tests live under `test/scout/api/tests/`. Run them with Scout (stateful classic or serverless observability), for example:
 
 ```
-# start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
-
-# run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --grep=SLO
+node scripts/scout.js run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/slo/test/scout/api/playwright.config.ts
 ```
 
-### Serverless
+Or target files:
 
 ```
-# start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
-
-# run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts --grep=SLO
+node scripts/scout.js run-tests --arch stateful --domain classic --testFiles x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_create.spec.ts
 ```
 
 ---

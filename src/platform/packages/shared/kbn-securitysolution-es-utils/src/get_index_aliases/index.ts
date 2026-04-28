@@ -36,7 +36,6 @@ export const getIndexAliases = async ({
   const response = await esClient.indices.getAlias(
     {
       name: alias,
-      expand_wildcards: ['open', 'hidden'],
       ...(index ? { index } : {}),
     },
     { meta: true }

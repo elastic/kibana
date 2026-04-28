@@ -394,6 +394,9 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         panelProps={{
           'data-test-subj': 'exportPopoverPanel',
         }}
+        aria-label={i18n.translate('share.export.popoverAriaLabel', {
+          defaultMessage: 'Export options',
+        })}
       >
         <EuiListGroup flush>
           {exportIntegrations.map((menuItem) => (
@@ -444,6 +447,9 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             headerZindexLocation: 'above',
           }}
           ref={flyoutRef}
+          aria-label={i18n.translate('share.export.flyoutAriaLabel', {
+            defaultMessage: 'Export',
+          })}
           {...(selectedMenuItem?.groupId === 'exportDerivatives'
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}

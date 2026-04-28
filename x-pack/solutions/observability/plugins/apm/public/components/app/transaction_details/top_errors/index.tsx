@@ -59,7 +59,7 @@ export function TopErrors() {
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && transactionType) {
+      if (start && end && transactionType && transactionName) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
           {
@@ -163,6 +163,9 @@ export function TopErrors() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBasicTable
+          tableCaption={i18n.translate('xpack.apm.transactionDetails.topErrors.caption', {
+            defaultMessage: 'Top errors summary',
+          })}
           error={
             status === FETCH_STATUS.FAILURE
               ? i18n.translate('xpack.apm.transactionDetails.topErrors.errorMessage', {

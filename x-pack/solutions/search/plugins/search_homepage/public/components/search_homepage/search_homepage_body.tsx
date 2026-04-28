@@ -53,9 +53,6 @@ export const SearchHomepageBody = () => {
         <EuiFlexItem>
           <BodyLinks />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule />
-        </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
   );

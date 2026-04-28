@@ -53,6 +53,28 @@ The cascade component by default supports up to 3 levels of visual nesting, for 
 virtualized for performance, and it's also possible to have a cell's content virtualized, and connect it to the overall virtualization strategy,
 such that the scroll of the entire component also controls the cell and it turns determines the content the cell renders.
 
+#### Nested virtualization at the cell level
+
+For a scenario where one might want to roll a cell that's also has it's content virtualized so all items in the cascade component are presented as a continuous list
+there’s some accommodation to support this, the data cascade component exposes the following props; 
+`getScrollMargin`, `getScrollOffset`, `getScrollElement` in the render prop of the child value it expects to facilitate this;
+
+```tsx
+import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '@kbn/shared-ux-document-data-cascade';
+
+<DataCascade {...dataCascadeProps}>
+  <DataCascadeRow {...dataCascadeRowProps}>
+    <DataCascadeRowCell {...dataCascadeRowCellProps}>
+          {({ data, getScrollMargin, getScrollOffset, getScrollElement  }) => {
+            // getScrollElement - Provides the scroll element for the cascade component
+            // getScrollMargin - Provides the configured scroll margin of the scroll component
+            // getScrollOffset - Provides the scrollOffset at the cell level, this can be passed along to ensure rendering is smooth, and items are placed properly
+          }}
+    </DataCascadeRowCell>
+  </DataCascadeRow>
+</DataCascade>
+```
+
 ## Component Props
 
 {/* Note: Excluding `query` from the controls as it's not a prop of the component, but rather a simulation of user input for generating group by fields. */}

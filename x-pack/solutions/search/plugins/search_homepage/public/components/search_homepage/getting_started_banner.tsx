@@ -41,7 +41,7 @@ export const GettingStartedBanner = () => {
         >
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <EuiTitle size="s">
+              <EuiTitle size="xs">
                 <h4>
                   {i18n.translate(
                     'xpack.searchHomepage.gettingStartedBanner.h4.exploreAPITutorialsAndLabel',

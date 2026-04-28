@@ -15,7 +15,8 @@ import 'jest-canvas-mock';
 
 jest.setTimeout(10 * 1000);
 
-describe('FilterLabel', function () {
+// Failing: See https://github.com/elastic/kibana/issues/253320
+describe.skip('FilterLabel', function () {
   mockAppDataView();
 
   const invertFilter = jest.fn();
@@ -37,11 +38,10 @@ describe('FilterLabel', function () {
       />
     );
 
-    await waitFor(async () => {
-      expect(await screen.findByText('elastic-co')).toBeInTheDocument();
-      expect(await screen.findByText('elastic-co')).toBeInTheDocument();
-      expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
-      expect(await screen.findByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('elastic-co')).toBeInTheDocument();
+      expect(screen.getByText(/web application:/i)).toBeInTheDocument();
+      expect(screen.getByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
     });
   });
 

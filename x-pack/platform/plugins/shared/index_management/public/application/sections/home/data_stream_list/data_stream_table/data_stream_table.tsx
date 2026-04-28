@@ -301,6 +301,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectableMessage: () =>
+      i18n.translate('xpack.idxMgmt.dataStreamList.table.selection.selectRowAriaLabel', {
+        defaultMessage: 'Select this row',
+      }),
   };
 
   const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];
@@ -448,6 +452,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="dataStreamTable"
+        tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
+          defaultMessage: 'Data streams',
+        })}
         noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"

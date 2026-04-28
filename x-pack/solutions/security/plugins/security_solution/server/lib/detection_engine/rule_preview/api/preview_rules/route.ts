@@ -149,9 +149,6 @@ export const previewRulesRoute = (
           });
           throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
-          const listsContext = await context.lists;
-          await listsContext?.getExceptionListClient().createEndpointList();
-
           const spaceId = siemClient.getSpaceId();
           const previewId = uuidv4();
           const username = security?.authc.getCurrentUser(request)?.username;
@@ -191,6 +188,14 @@ export const previewRulesRoute = (
                 isAborted: undefined,
               },
             });
+          }
+
+          // Create the preview index so the Lens histogram can resolve field
+          // mappings even when no preview alerts have been generated yet.
+          try {
+            await previewRuleDataClient.getWriter({ namespace: spaceId });
+          } catch (err) {
+            logger.warn(`Failed to bootstrap preview index for space "${spaceId}": ${err.message}`);
           }
 
           const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({

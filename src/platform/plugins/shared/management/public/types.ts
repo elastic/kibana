@@ -22,9 +22,23 @@ import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
+/** @public */
+export interface AutoOpsStatusResult {
+  isCloudConnectAutoopsEnabled: boolean;
+  isLoading: boolean;
+}
+
+/** @public */
+export type AutoOpsStatusHook = () => AutoOpsStatusResult;
+
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
   locator: LocatorPublic<ManagementAppLocatorParams>;
+  /**
+   * Registers a hook that returns the AutoOps status.
+   * Used by the cloud_connect plugin to provide connection status to the management landing page.
+   */
+  registerAutoOpsStatusHook: (hook: AutoOpsStatusHook) => void;
 }
 
 export interface DefinedSections {
@@ -113,7 +127,8 @@ export interface AppDependencies {
   chromeStyle?: ChromeStyle;
   coreStart: CoreStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
+  getAutoOpsStatusHook: () => AutoOpsStatusHook;
 }
 
 export interface ConfigSchema {

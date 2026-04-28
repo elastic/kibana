@@ -23,7 +23,9 @@ import { ExecutionContextContainer, getParentContextFrom } from './execution_con
  * @internal
  */
 export interface IExecutionContext {
-  getParentContextFrom(headers: Record<string, string>): KibanaExecutionContext | undefined;
+  getParentContextFrom(
+    headers: Record<string, string | string[] | undefined>
+  ): KibanaExecutionContext | undefined;
 
   setRequestId(requestId: string): void;
 

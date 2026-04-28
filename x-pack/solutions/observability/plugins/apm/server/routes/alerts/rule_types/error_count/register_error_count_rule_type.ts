@@ -26,6 +26,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -249,6 +250,7 @@ export function registerErrorCountRuleType({
             [PROCESSOR_EVENT]: ProcessorEvent.error,
             [ALERT_EVALUATION_VALUE]: errorCount,
             [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+            [ALERT_GROUPING]: groupingObject,
             [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
             [ALERT_REASON]: alertReason,
             ...sourceFields,
@@ -312,7 +314,8 @@ export function registerErrorCountRuleType({
           relativeViewInAppUrl
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-        const groupingObject = unflattenObject(groupByFields);
+        const groupingObjectFromRecoveredAlert =
+          alertHits?.[ALERT_GROUPING] ?? unflattenObject(groupByFields);
 
         const recoveredContext = {
           alertDetailsUrl,
@@ -326,7 +329,7 @@ export function registerErrorCountRuleType({
           threshold: ruleParams.threshold,
           triggerValue: alertHits?.[ALERT_EVALUATION_VALUE],
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: groupingObjectFromRecoveredAlert,
           ...groupByActionVariables,
         };
 

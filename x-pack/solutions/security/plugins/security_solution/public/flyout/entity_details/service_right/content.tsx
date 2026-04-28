@@ -68,7 +68,6 @@ export const ServicePanelContent = ({
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}
-        queryId={OBSERVED_SERVICE_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
     </FlyoutBody>

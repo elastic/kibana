@@ -38,7 +38,7 @@ export const analyticsMapRouteFactory = (
       }),
     },
   ],
-  enableDatePicker: true,
+  enableDatePicker: false,
   'data-test-subj': 'mlPageAnalyticsMap',
 });
 

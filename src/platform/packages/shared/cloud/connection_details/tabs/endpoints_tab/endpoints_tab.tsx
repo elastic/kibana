@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiForm } from '@elastic/eui';
+import { EuiCallOut, EuiForm } from '@elastic/eui';
 import * as React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useConnectionDetailsOpts, useConnectionDetailsService } from '../../context';
 import { useBehaviorSubject } from '../../hooks/use_behavior_subject';
 import { CloudIdRow } from './rows/cloud_id_row';
@@ -23,11 +24,27 @@ export const EndpointsTab: React.FC = () => {
 
   return (
     <EuiForm component="div">
-      {!!endpoints?.url && (
+      {!!endpoints?.url ? (
         <EndpointUrlRow
           url={endpoints.url}
           onCopyClick={() => service.emitTelemetryEvent(['copy_endpoint_url_clicked'])}
         />
+      ) : (
+        <EuiCallOut
+          title={i18n.translate('cloud.connectionDetails.tab.endpoints.callout.title', {
+            defaultMessage: 'Endpoints unavailable',
+          })}
+          color="warning"
+          iconType="warning"
+          announceOnMount={false}
+        >
+          <p>
+            {i18n.translate('cloud.connectionDetails.tab.endpoints.callout.message', {
+              defaultMessage:
+                'Endpoint information is not automatically available for this deployment. Please contact an administrator for your cluster’s endpoint details.',
+            })}
+          </p>
+        </EuiCallOut>
       )}
       {!!endpoints?.id && (
         <CloudIdRow

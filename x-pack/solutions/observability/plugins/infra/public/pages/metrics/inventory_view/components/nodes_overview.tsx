@@ -128,6 +128,7 @@ export const NodesOverview = ({
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
         })}
+        data-test-subj="infraNodesOverviewLoadingPanel"
       />
     );
   } else if (noData) {
@@ -174,7 +175,7 @@ export const NodesOverview = ({
 
   if (view === 'table') {
     return (
-      <TableContainer>
+      <TableContainer data-test-subj="infraNodesOverviewTable">
         <TableView
           nodeType={nodeType}
           nodes={nodes}

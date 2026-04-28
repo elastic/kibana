@@ -645,6 +645,27 @@ export const ENTITY_ENGINE_DELETION_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
+  entityType: string;
+  spaceId: string;
+}> = {
+  eventType: 'entity_highlights_usage',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity highlights have been request for  (e.g. "host")',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the highlight request originated (e.g. "default")',
+      },
+    },
+  },
+};
+
 export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
   storeSize: number;
   entityType: string;
@@ -1430,6 +1451,10 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
                 },
               },
             },
+            _meta: {
+              optional: true,
+              description: 'Reason for the failure if the query execution was unsuccessful.',
+            },
           },
         },
         _meta: {
@@ -1451,6 +1476,49 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
         _meta: {
           optional: true,
           description: 'Circuit breaker metrics such as execution time and memory usage.',
+        },
+      },
+      descriptorVersion: {
+        type: 'integer',
+        _meta: {
+          description: 'Version of the query descriptor that produced this event.',
+        },
+      },
+      status: {
+        type: 'keyword',
+        _meta: {
+          description: "Execution status: 'success', 'failed', or 'skipped'.",
+        },
+      },
+      skipReason: {
+        type: 'keyword',
+        _meta: {
+          optional: true,
+          description:
+            "Reason for skipping: 'datastreams_not_matched', 'integration_not_installed' or 'unknown_version'.",
+        },
+      },
+      integration: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Name of the matched integration.' },
+          },
+          version: {
+            type: 'keyword',
+            _meta: { description: 'Version of the matched integration.' },
+          },
+          indices: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Index patterns for this integration after type filtering.' },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Integration resolution metadata. Present only for v2 query descriptors.',
         },
       },
     },
@@ -1715,6 +1783,7 @@ export const events = [
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,

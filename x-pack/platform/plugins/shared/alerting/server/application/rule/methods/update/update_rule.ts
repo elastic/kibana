@@ -29,6 +29,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -316,6 +317,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedBy: username,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
+    ...(originalRule.lastRun
+      ? { lastRun: migrateLegacyLastRunOutcomeMsg(originalRule.lastRun) }
+      : {}),
   });
 
   const mappedParams = getMappedParams(updatedParams);

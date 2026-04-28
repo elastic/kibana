@@ -26,7 +26,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema } from '../../schema';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
 export const CREATE_CASE_CONTRACT: InternalConnectorContract = {
@@ -66,6 +66,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     ...getShapeAt(create_case_default_space_request, 'path'),
     ...getShapeAt(create_case_default_space_request, 'query'),
     fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
   }),
   outputSchema: create_case_default_space_response,
 };

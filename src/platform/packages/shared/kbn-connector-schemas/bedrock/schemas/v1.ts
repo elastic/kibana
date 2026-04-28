@@ -21,6 +21,7 @@ export const TelemetryMetadataSchema = z
 export const ConfigSchema = z
   .object({
     apiUrl: z.string(),
+    region: z.string().optional(),
     defaultModel: z.string().default(DEFAULT_MODEL),
     contextWindowLength: z.coerce.number().optional(),
     temperature: z.coerce.number().optional(),

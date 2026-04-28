@@ -42,7 +42,8 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        * option to true and get the whole alerts experience without the need
        * to explicitly set the sync to true
        */
-      isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
+      isSyncAlertsEnabled:
+        !features.alerts.enabled || !features.alerts.all ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
@@ -55,6 +56,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
     [
       features.alerts.enabled,
       features.alerts.sync,
+      features.alerts.all,
       features.metrics,
       hasLicenseGreaterThanPlatinum,
       assign,

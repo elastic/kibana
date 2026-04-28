@@ -4,6 +4,11 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
-  "kbn_references": ["@kbn/scout-oblt"],
+  "kbn_references": [
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/rison",
+  ],
   "exclude": ["target/**/*"]
 }

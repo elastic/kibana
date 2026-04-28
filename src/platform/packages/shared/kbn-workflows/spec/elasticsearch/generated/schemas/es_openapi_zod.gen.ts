@@ -187,6 +187,17 @@ export const types_sliced_scroll = z.object({
 
 export const types_diversify_retriever_types = z.enum(['mmr']);
 
+export const types_text_embedding = z.object({
+    model_id: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Model ID is required for all dense_vector fields but\nmay be inferred for semantic_text fields'
+    })),
+    model_text: z.string()
+});
+
+export const types_query_vector_builder = z.object({
+    text_embedding: z.optional(types_text_embedding)
+});
+
 export const types_query_vector = z.array(z.number());
 
 export const types_specified_document = z.object({
@@ -399,17 +410,6 @@ export const types_rescore_vector = z.object({
     oversample: z.number().register(z.globalRegistry, {
         description: 'Applies the specified oversample factor to k on the approximate kNN search'
     })
-});
-
-export const types_text_embedding = z.object({
-    model_id: z.optional(z.string().register(z.globalRegistry, {
-        description: 'Model ID is required for all dense_vector fields but\nmay be inferred for semantic_text fields'
-    })),
-    model_text: z.string()
-});
-
-export const types_query_vector_builder = z.object({
-    text_embedding: z.optional(types_text_embedding)
 });
 
 export const types_sort_results = z.array(types_field_value);
@@ -6160,6 +6160,7 @@ export const types_diversify_retriever = z.lazy((): any => types_retriever_base)
         description: 'The number of top documents from the nested retriever to consider for diversification.'
     })),
     query_vector: z.optional(types_query_vector),
+    query_vector_builder: z.optional(types_query_vector_builder),
     lambda: z.optional(z.number().register(z.globalRegistry, {
         description: 'Controls the trade-off between relevance and diversity for MMR. A value of 0.0 focuses solely on diversity, while a value of 1.0 focuses solely on relevance. Required for MMR'
     }))
@@ -7882,6 +7883,9 @@ export const types_mapping_property = z.union([
         type: z.literal('histogram')
     }).and(z.lazy(() => z.lazy((): any => types_mapping_histogram_property))),
     z.object({
+        type: z.literal('exponential_histogram')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_exponential_histogram_property))),
+    z.object({
         type: z.literal('ip')
     }).and(z.lazy(() => z.lazy((): any => types_mapping_ip_property))),
     z.object({
@@ -8132,8 +8136,14 @@ export const types_mapping_ip_property = types_mapping_doc_values_property_base.
     type: z.enum(['ip'])
 }));
 
+export const types_mapping_exponential_histogram_property = types_mapping_property_base.and(z.object({
+    time_series_metric: z.optional(types_mapping_time_series_metric_type),
+    type: z.enum(['exponential_histogram'])
+}));
+
 export const types_mapping_histogram_property = types_mapping_property_base.and(z.object({
     ignore_malformed: z.optional(z.boolean()),
+    time_series_metric: z.optional(types_mapping_time_series_metric_type),
     type: z.enum(['histogram'])
 }));
 

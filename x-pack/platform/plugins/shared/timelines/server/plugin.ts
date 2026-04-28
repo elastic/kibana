@@ -13,7 +13,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } from './types';
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
@@ -25,7 +24,6 @@ export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
 {
   private readonly logger: Logger;
-  private security?: SecurityPluginSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -38,16 +36,11 @@ export class TimelinesPlugin
 
   public setup(core: CoreSetup<StartPlugins, TimelinesPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('timelines: Setup');
-    this.security = plugins.security;
 
     const IndexFields = indexFieldsProvider(core.getStartServices);
     // Register search strategy
     void core.getStartServices().then(([_, depsStart]) => {
-      const TimelineSearchStrategy = timelineSearchStrategyProvider(
-        depsStart.data,
-        this.logger,
-        this.security
-      );
+      const TimelineSearchStrategy = timelineSearchStrategyProvider(depsStart.data, this.logger);
       const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
 
       plugins.data.search.registerSearchStrategy('indexFields', IndexFields);

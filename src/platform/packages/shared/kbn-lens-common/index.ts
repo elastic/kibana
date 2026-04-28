@@ -382,3 +382,4 @@ export {
   getLensLayerTypeTabDisplayName,
   lensLayerTypeTabDisplayNames,
 } from './visualizations/layer_type_tab_display_name';
+export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from } from '@kbn/esql-composer';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { BaseDiscoverButton } from './base_discover_button';
 import { filterByKuery, filterBySpanId } from './filters';
@@ -63,7 +63,7 @@ export function OpenSpanInDiscoverLink({
   dataTestSubj: string;
   spanId: string;
 }) {
-  const { indexSettings } = useApmServiceContext();
+  const { indexSettings = [] } = useApmIndexSettingsContext();
 
   const {
     query: { rangeFrom, rangeTo, kuery },

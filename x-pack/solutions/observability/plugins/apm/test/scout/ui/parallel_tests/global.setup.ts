@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
+import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
+import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
 import { testData } from '../fixtures';
-
-globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ apmSynthtraceEsClient, apiServices, log, config, esClient, kbnClient }) => {
     const startTime = Date.now();
 
@@ -36,6 +39,14 @@ globalSetupHook(
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
+
+    // Generate span links data for span links tests
+    const spanLinksData = generateSpanLinksData();
+    await apmSynthtraceEsClient.index(spanLinksData);
+
+    // Generate span stacktrace data for stacktrace tests
+    const spanStacktraceData = generateSpanStacktraceData();
+    await apmSynthtraceEsClient.index(spanStacktraceData);
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

@@ -10,6 +10,7 @@ import React, { useState, type FC, useEffect, useMemo, useCallback, useRef } fro
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { get, isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -354,6 +355,9 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
           rowProps={getRowProps}
           data-test-subj="mlAnomaliesTable"
           onTableChange={onTableChange}
+          tableCaption={i18n.translate('xpack.ml.anomaliesTable.tableCaption', {
+            defaultMessage: 'Anomalies detected for the selected jobs',
+          })}
         />
       </>
     );

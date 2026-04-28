@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type { CreateAgentPolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   EPM_API_ROUTES,
@@ -56,23 +56,68 @@ export function installIntegrations({
       packages,
       force: true,
     },
-  });
+  })
+    .then(() => {
+      // Wait for each package to reach 'installed' status before proceeding
+      packages.forEach(({ name }) => waitForPackageInstalled(name));
+    })
+    .then(() =>
+      rootRequest<CreateAgentPolicyResponse>({
+        method: 'POST',
+        url: `${AGENT_POLICY_API_ROUTES.CREATE_PATTERN}?sys_monitoring=true`,
+        body: agentPolicy,
+        // Fleet Agent Policies API is known to be slow.
+        // Set 1 minute timeout, default is 30 seconds.
+        timeout: 60000,
+      })
+    )
+    .then((response) => {
+      const packagePolicyWithAgentPolicyId: PackagePolicy = {
+        ...packagePolicy,
+        policy_id: response.body.item.id,
+      };
 
-  // Install agent and package policies
-  rootRequest<CreateAgentPolicyResponse>({
-    method: 'POST',
-    url: `${AGENT_POLICY_API_ROUTES.CREATE_PATTERN}?sys_monitoring=true`,
-    body: agentPolicy,
-  }).then((response) => {
-    const packagePolicyWithAgentPolicyId: PackagePolicy = {
-      ...packagePolicy,
-      policy_id: response.body.item.id,
-    };
-
-    rootRequest({
-      method: 'POST',
-      url: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-      body: packagePolicyWithAgentPolicyId,
+      rootRequest({
+        method: 'POST',
+        url: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+        body: packagePolicyWithAgentPolicyId,
+      });
     });
-  });
 }
+
+/**
+ * Checks if a Fleet package is installed by querying the Fleet EPM API
+ * @param packageName - The name of the package to check (e.g., 'entityanalytics_okta')
+ * @returns Cypress chainable that resolves to true if installed, false otherwise
+ */
+export const checkPackageInstalled = (packageName: string): Cypress.Chainable<boolean> => {
+  return rootRequest<GetInfoResponse>({
+    method: 'GET',
+    url: `/api/fleet/epm/packages/${packageName}`,
+    failOnStatusCode: false,
+  }).then((response) => {
+    const status = response.body?.item?.status;
+    return status === 'installed';
+  });
+};
+
+/**
+ * Polls the Fleet EPM API until a package installation status is 'installed'
+ * @param packageName - The name of the package to wait for (e.g., 'entityanalytics_okta')
+ * @param options - Configuration options
+ * @param options.timeout - Maximum time to wait in milliseconds (default: 60000)
+ * @param options.interval - Polling interval in milliseconds (default: 2000)
+ */
+export const waitForPackageInstalled = (
+  packageName: string,
+  options: { timeout?: number; interval?: number } = {}
+): void => {
+  const { timeout = 60000, interval = 2000 } = options;
+
+  cy.waitUntil(() => checkPackageInstalled(packageName), {
+    interval,
+    timeout,
+  });
+
+  cy.log(`Package ${packageName} is now installed`);
+};

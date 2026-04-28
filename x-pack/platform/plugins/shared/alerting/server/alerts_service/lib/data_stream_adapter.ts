@@ -19,7 +19,7 @@ import type {
 } from './create_concrete_write_index';
 import {
   updateIndexMappingsAndSettings,
-  updateAliasesAndSetConcreteWriteIndex,
+  findOrSetConcreteWriteIndex,
 } from './create_concrete_write_index';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { IIndexPatternString } from '../resource_installer_utils';
@@ -207,7 +207,6 @@ async function getValidConcreteIndices({
         index,
         alias: aliasName,
         isWriteIndex: aliasProperties.is_write_index ?? false,
-        isHidden: aliasProperties.is_hidden ?? false,
       }))
     );
 
@@ -290,7 +289,7 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
 
   // if a concrete write index already exists, update the underlying mapping
   if (validConcreteIndices.length > 0) {
-    const concreteWriteIndex = await updateAliasesAndSetConcreteWriteIndex({
+    const concreteWriteIndex = await findOrSetConcreteWriteIndex({
       logger,
       esClient,
       concreteIndices: validConcreteIndices,
@@ -348,7 +347,6 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
             aliases: {
               [indexPatterns.alias]: {
                 is_write_index: true,
-                is_hidden: true,
               },
             },
           }),

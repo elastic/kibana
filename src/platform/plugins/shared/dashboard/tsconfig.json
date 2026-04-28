@@ -9,6 +9,10 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
+    "test/scout_oas_schema/**/*",
+    "test/scout_oas_schema/**/*.json",
+    "test/scout_anonymous_authc/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -102,7 +106,10 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/scout",
+    "@kbn/test",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

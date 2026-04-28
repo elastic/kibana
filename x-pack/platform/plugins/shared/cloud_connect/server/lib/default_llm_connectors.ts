@@ -46,17 +46,4 @@ export const defaultLLMConnectors: DefaultLLMConnector[] = [
       },
     },
   },
-  {
-    id: 'c5586e3b-3c63-4142-b8bf-122578300a58',
-    name: 'OpenAI GPT-OSS 120B',
-    actionTypeId: '.inference',
-    config: {
-      provider: 'elastic',
-      taskType: 'chat_completion',
-      inferenceId: 'openai-gpt-oss-120b-chat_completion',
-      providerConfig: {
-        model_id: 'openai-gpt-oss-120b',
-      },
-    },
-  },
 ];

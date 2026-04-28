@@ -41,7 +41,9 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
     cy.task('esArchiverUnload', { archiveName: 'endpoint_2' });
     cy.task('esArchiverLoad', { archiveName: 'endpoint_2' });
     login();
-    createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+    createRule(getEndpointRule()).then((rule) =>
+      visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
+    );
 
     waitForAlertsToPopulate();
   });

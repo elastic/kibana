@@ -14,7 +14,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
-import { resolve } from 'path';
+import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
 import {
   preCreateSecurityIndexesViaSamlAuth,
@@ -24,18 +24,36 @@ import {
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
-import { execPromise, getPlaywrightGrepTag } from '../utils';
+import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
-  testTarget: RunTestsOptions['testTarget'],
-  mode: RunTestsOptions['mode']
+  testTarget: RunTestsOptions['testTarget']
 ): ScoutPlaywrightProjects => {
-  if (testTarget === 'cloud') {
-    return mode === 'stateful' ? 'ech' : 'mki';
+  switch (testTarget.location) {
+    case 'local':
+      return 'local';
+    case 'cloud':
+      return testTarget.arch === 'stateful' ? 'ech' : 'mki';
+    default:
+      throw new Error(`Unable to determine Playwright project for test target '${testTarget}'`);
+  }
+};
+
+const getScoutRunCommandForReporting = (argv: string[]): string => {
+  const [nodeBin, scriptPath, ...rest] = argv;
+  const nodeDisplay =
+    typeof nodeBin === 'string' && basename(nodeBin) === 'node' ? 'node' : nodeBin;
+
+  if (typeof scriptPath !== 'string') {
+    return [nodeDisplay, ...rest].filter(Boolean).join(' ');
   }
 
-  return 'local';
+  const relativeScriptPath = isAbsolute(scriptPath) ? relative(REPO_ROOT, scriptPath) : scriptPath;
+  const scriptDisplay =
+    relativeScriptPath && !relativeScriptPath.startsWith('..') ? relativeScriptPath : scriptPath;
+
+  return [nodeDisplay, scriptDisplay, ...rest].filter(Boolean).join(' ');
 };
 
 async function runPlaywrightTest(
@@ -48,10 +66,10 @@ async function runPlaywrightTest(
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
-    env: {
+    env: withKibanaBabelRegister({
       ...process.env,
       ...env,
-    },
+    }),
     wait: true,
   });
 }
@@ -64,10 +82,14 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = ['SCOUT_REPORTER_ENABLED=false', cmd, ...cmdArgs, '--list'].join(' ');
-    log.debug(`scout: running '${validationCmd}'`);
+    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
 
-    const result = await execPromise(validationCmd);
+    const result = await execPromise(validationCmd, {
+      env: withKibanaBabelRegister({
+        ...process.env,
+        SCOUT_REPORTER_ENABLED: 'false',
+      }) as NodeJS.ProcessEnv,
+    });
     const lastLine = result.stdout.trim().split('\n').pop() || '';
 
     log.info(`scout: ${lastLine}`);
@@ -98,8 +120,8 @@ async function runLocalServersAndTests(
   cmdArgs: string[],
   env: Record<string, string> = {}
 ) {
-  const configRootDir = getConfigRootDir(options.configPath, options.mode);
-  const config = await loadServersConfig(options.mode, log, configRootDir);
+  const configRootDir = getConfigRootDir(options.configPath, options.testTarget);
+  const config = await loadServersConfig(options.testTarget, log, configRootDir);
   const abortCtrl = new AbortController();
 
   const onEarlyExit = (msg: string) => {
@@ -148,10 +170,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
-  const pwGrepTag = getPlaywrightGrepTag(options.mode);
+  const scoutRunCommandForReporting = getScoutRunCommandForReporting(process.argv);
+
+  const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
   const pwConfigPath = options.configPath;
   const pwTestFiles = options.testFiles || [];
-  const pwProject = getPlaywrightProject(options.testTarget, options.mode);
+  const pwProject = getPlaywrightProject(options.testTarget);
   const globalFlags = getFlags(process.argv.slice(2), {
     allowUnexpected: true,
   });
@@ -163,6 +187,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.info(`scout: Running Scout tests located in:\n${pwTestFiles.join('\n')}`);
   }
 
+  if (options.repeatEach) {
+    log.info(
+      `scout: Each test will be repeated ${options.repeatEach} time(s) for flakiness validation`
+    );
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
@@ -171,14 +201,17 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
+    ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
   ];
 
   await withProcRunner(log, async (procs) => {
     const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
     const pwEnv = {
       SCOUT_LOG_LEVEL: logsLevel,
-      SCOUT_TARGET_TYPE: options.testTarget,
-      SCOUT_TARGET_MODE: options.mode,
+      SCOUT_TARGET_LOCATION: options.testTarget.location,
+      SCOUT_TARGET_ARCH: options.testTarget.arch,
+      SCOUT_TARGET_DOMAIN: options.testTarget.domain,
+      SCOUT_RUN_COMMAND: scoutRunCommandForReporting,
     };
 
     if (exitCode !== 0) {
@@ -211,8 +244,9 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
   ];
 
   const pwEnv = {
-    SCOUT_TARGET_TYPE: 'local',
-    SCOUT_TARGET_MODE: 'stateful',
+    SCOUT_TARGET_LOCATION: 'local',
+    SCOUT_TARGET_ARCH: 'stateful',
+    SCOUT_TARGET_DOMAIN: 'classic',
   };
 
   await withProcRunner(log, async (procs) => {

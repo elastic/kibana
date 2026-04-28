@@ -8,7 +8,8 @@
  */
 
 import { test as base } from '@playwright/test';
-import type { KbnClient, SamlSessionManager } from '@kbn/test';
+import type { KbnClient } from '@kbn/kbn-client';
+import type { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   KibanaUrl,
@@ -30,7 +31,8 @@ import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
 
 // re-export to import types from '@kbn-scout'
-export type { KbnClient, SamlSessionManager } from '@kbn/test';
+export type { KbnClient } from '@kbn/kbn-client';
+export type { SamlSessionManager } from '@kbn/test-saml-auth';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../../types';
@@ -91,6 +93,19 @@ export interface CoreWorkerFixtures {
   esClient: Client;
   kbnClient: KbnClient;
   samlAuth: SamlAuth;
+  /**
+   * `true` when the target Elasticsearch cluster is a SNAPSHOT build. SNAPSHOT
+   * builds bundle test-only modules (e.g. the `shard_delay` aggregation) that
+   * are unavailable in release builds. Use this to gate tests that rely on
+   * those features:
+   *
+   * @example
+   * test('uses shard_delay agg', async ({ esClient, isSnapshotBuild }) => {
+   *   test.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT only)');
+   *   // ...
+   * });
+   */
+  isSnapshotBuild: boolean;
 }
 
 /**
@@ -165,6 +180,24 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
   esClient: [
     ({ config, log }, use) => {
       use(getEsClient(config, log));
+    },
+    { scope: 'worker' },
+  ],
+
+  /**
+   * Resolves once per worker by calling `esClient.info()` and reporting whether
+   * `version.number` contains the `SNAPSHOT` qualifier. Tests can `skip` based
+   * on this flag when they depend on test-only ES modules that are bundled
+   * only with SNAPSHOT builds.
+   */
+  isSnapshotBuild: [
+    async ({ esClient, log }, use) => {
+      const info = await esClient.info();
+      const isSnapshot = info.version.number.includes('SNAPSHOT');
+      log.debug(
+        `[isSnapshotBuild] Elasticsearch version: ${info.version.number} -> isSnapshot=${isSnapshot}`
+      );
+      await use(isSnapshot);
     },
     { scope: 'worker' },
   ],

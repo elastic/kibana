@@ -51,6 +51,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -252,6 +253,15 @@ export async function getPackagePolicySavedObjectType() {
   return (await isSpaceAwarenessEnabled())
     ? PACKAGE_POLICY_SAVED_OBJECT_TYPE
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
+}
+
+/**
+ * Returns a kuery string that excludes package policies with latest_revision:false,
+ * optionally AND-ing with an additional kuery clause.
+ */
+export function buildCurrentRevisionFilter(savedObjectType: string, kuery?: string): string {
+  const base = `NOT ${savedObjectType}.attributes.latest_revision:false`;
+  return kuery ? `${base} AND (${kuery})` : base;
 }
 
 export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
@@ -492,7 +502,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (!enrichedPackagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${enrichedPackagePolicy.name}" without package are not supported`
+      );
     }
     if (!options?.skipEnsureInstalled) {
       await ensureInstalledPackage({
@@ -765,7 +777,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
         if (!packagePolicy.package) {
-          throw new FleetError('Package policy without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
@@ -900,7 +914,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
 
     if (!packagePolicy.package) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = packageInfos.get(
@@ -1013,9 +1029,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packagePolicySO = await soClient
       .find<PackagePolicySOAttributes>({
         type: savedObjectType,
-        filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
-          agentPolicyId
-        )} AND ${savedObjectType}.attributes.latest_revision:true`,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)}`
+        ),
         perPage: SO_SEARCH_LIMIT,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
@@ -1137,9 +1154,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     const packagePolicies = await soClient
@@ -1159,7 +1174,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
+        name: packagePolicy.attributes?.name,
         savedObjectType,
       });
     }
@@ -1198,9 +1213,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     const packagePolicies = await soClient
@@ -1220,7 +1233,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
+        name: packagePolicy.attributes?.name,
         savedObjectType,
       });
     }
@@ -1338,7 +1351,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let { version, ...restOfPackagePolicy } = packagePolicy;
 
     if (!packagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = await getPackageInfo({
@@ -1753,13 +1768,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         if (!packagePolicy.package?.name) {
-          throw new FleetError('Package policies without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
         const pkgInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
         );
         if (!pkgInfoAndAsset) {
-          throw new FleetError('Package info and assets not found');
+          throw new FleetError(
+            `Package info and assets not found: ${packagePolicy.package.name}-${packagePolicy.package.version}`
+          );
         }
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
@@ -2717,9 +2736,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     return createSoFindIterable<{}>({
@@ -2765,9 +2782,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     return createSoFindIterable<PackagePolicySOAttributes>({
@@ -2827,7 +2842,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult> {
     const savedObjectType = await getPackagePolicySavedObjectType();
 
@@ -2849,7 +2865,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicies.forEach((policy) => {
       const namespace = getSpaceForPackagePolicySO(policy);
 
-      if (!policy.id.endsWith(':prev')) {
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
         const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
         if (previousRevision?.attributes) {
           if (!policiesToCreate[namespace]) {
@@ -2872,7 +2892,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
           });
         }
-      } else {
+      } else if (policy.id.endsWith(':prev')) {
         if (!previousVersionPolicies[namespace]) {
           previousVersionPolicies[namespace] = [];
         }
@@ -3228,6 +3248,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
         })
       );
     }
+  }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
   }
 }
 

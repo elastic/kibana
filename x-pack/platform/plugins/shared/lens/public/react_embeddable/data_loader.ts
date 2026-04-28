@@ -23,6 +23,7 @@ import {
   merge,
   tap,
   map,
+  filter,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
@@ -41,7 +42,12 @@ import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
 import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext } from './helper';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
@@ -323,6 +329,23 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

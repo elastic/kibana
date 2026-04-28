@@ -25,7 +25,7 @@ export const DocCallouts: React.FC<DocCalloutsProps> = ({
 }) => {
   return (
     <>
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h4>{title}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />

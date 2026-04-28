@@ -176,6 +176,12 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
         'data-test-subj': `mlProcessorStatsTableRow row-${item.id}`,
       })}
       onTableChange={() => {}}
+      tableCaption={i18n.translate(
+        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.tableCaption',
+        {
+          defaultMessage: 'Pipeline processor statistics',
+        }
+      )}
       data-test-subj={'mlProcessorStatsTable'}
     />
   );

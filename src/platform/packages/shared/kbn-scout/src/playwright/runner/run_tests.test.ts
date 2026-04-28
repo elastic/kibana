@@ -8,12 +8,43 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { hasTestsInPlaywrightConfig } from './run_tests';
+import { getPlaywrightProject, hasTestsInPlaywrightConfig } from './run_tests';
 import { execPromise } from '../utils';
+import { ScoutTestTarget } from '@kbn/scout-info';
 
 jest.mock('../utils', () => ({
   execPromise: jest.fn(),
+  withKibanaBabelRegister: jest.fn((env = {}) => ({
+    ...env,
+    NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/babel-register/install']
+      .filter(Boolean)
+      .join(' '),
+  })),
 }));
+
+describe('getPlaywrightProject', () => {
+  it('returns "local" for testTarget with location "local"', () => {
+    expect(getPlaywrightProject(new ScoutTestTarget('local', 'stateful', 'classic'))).toBe('local');
+  });
+
+  it('returns "ech" for cloud stateful testTarget', () => {
+    expect(getPlaywrightProject(new ScoutTestTarget('cloud', 'stateful', 'classic'))).toBe('ech');
+  });
+
+  it('returns "mki" for cloud serverless testTarget', () => {
+    expect(getPlaywrightProject(new ScoutTestTarget('cloud', 'serverless', 'search'))).toBe('mki');
+  });
+
+  it('throws for unknown location', () => {
+    expect(() =>
+      getPlaywrightProject({
+        location: 'unknown',
+        arch: 'stateful',
+        domain: 'classic',
+      } as unknown as ScoutTestTarget)
+    ).toThrow(/Unable to determine Playwright project for test target/);
+  });
+});
 
 describe('hasTestsInPlaywrightConfig', () => {
   let mockLog: ToolingLog;
@@ -21,7 +52,6 @@ describe('hasTestsInPlaywrightConfig', () => {
 
   beforeEach(() => {
     mockLog = {
-      debug: jest.fn(),
       info: jest.fn(),
       error: jest.fn(),
     } as unknown as ToolingLog;
@@ -47,8 +77,14 @@ describe('hasTestsInPlaywrightConfig', () => {
       'configPath/playwright.config.ts'
     );
 
-    expect(mockLog.debug).toHaveBeenCalledWith(
-      `scout: running 'SCOUT_REPORTER_ENABLED=false playwright test pwArgs --list'`
+    expect(execPromiseMock).toHaveBeenCalledWith(
+      'playwright test pwArgs --list',
+      expect.objectContaining({
+        env: expect.objectContaining({
+          SCOUT_REPORTER_ENABLED: 'false',
+          NODE_OPTIONS: expect.stringContaining('--require=@kbn/babel-register/install'),
+        }),
+      })
     );
     expect(mockLog.info).toHaveBeenCalledTimes(2);
     expect(mockLog.info).toHaveBeenNthCalledWith(1, 'scout: Validate Playwright config has tests');

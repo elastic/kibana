@@ -194,7 +194,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndex[indexName].aliases).to.eql({
           '.alerts-test.patternfiring.alerts-default': {
             is_write_index: true,
-            is_hidden: true,
           },
         });
         expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);

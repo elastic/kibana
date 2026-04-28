@@ -28,7 +28,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);
     }
 
-    if (foreachState.items[foreachState.index + 1]) {
+    if (foreachState.index + 1 < foreachState.total) {
       this.wfExecutionRuntimeManager.navigateToNode(this.node.startNodeId);
       return;
     }

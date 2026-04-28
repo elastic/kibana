@@ -15,10 +15,6 @@ export class Homepage {
     await this.page.testSubj.waitForSelector('search-homepage');
   }
 
-  async getManageLink() {
-    return this.page.testSubj.locator('searchHomepageSearchHomepagePageManageSubscriptionLink');
-  }
-
   async getHeaderLeftGroup() {
     return this.page.testSubj.locator('searchHomepageHeaderLeftsideGroup');
   }

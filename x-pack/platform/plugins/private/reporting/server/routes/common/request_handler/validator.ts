@@ -41,7 +41,8 @@ const timezoneSchema = z.string().refine((val) => validateTimezone(val) === unde
 
 const dimensionsSchema = z
   .object({
-    height: z.number().positive().max(14400),
+    // 16000px height is the maximum screenshot Chrome can make
+    height: z.number().positive().max(16000),
     width: z.number().positive().max(14400),
   })
   .strict();
@@ -94,7 +95,7 @@ const locatorObjectSchema = z.object({
   params: z.record(z.any()).optional(),
 });
 
-const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);
+const locatorParamsSchema = z.array(locatorObjectSchema).max(100).or(locatorObjectSchema);
 
 const relativeUrlSchema = z.string().max(4096);
 const relativeUrlsSchema = z.array(relativeUrlSchema).max(100);

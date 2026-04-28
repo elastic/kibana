@@ -418,6 +418,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         itemId="id"
         items={packagePolicies}
         columns={columns}
+        tableCaption={i18n.translate(
+          'xpack.fleet.policyDetails.packagePoliciesTable.tableCaption',
+          {
+            defaultMessage: 'Integration policies',
+          }
+        )}
         sorting={{
           sort: {
             field: 'name',

@@ -147,7 +147,7 @@ export function ChangeDataView({
           css={{ maxWidth: '100%' }}
         >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" />}
+          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" aria-hidden={true} />}
           <span className="eui-textTruncate">{trigger.label}</span>
         </EuiFlexGroup>
       </EuiFormControlButton>
@@ -348,6 +348,12 @@ export function ChangeDataView({
               initialFocus={`[id="${searchListInputId}"]`}
               display="block"
               buffer={8}
+              aria-label={i18n.translate(
+                'unifiedSearch.dataViewPicker.changeDataViewPopoverAriaLabel',
+                {
+                  defaultMessage: 'Data view selector',
+                }
+              )}
               css={{ inlineSize: '100%' }}
             >
               <div css={styles.popoverContent}>

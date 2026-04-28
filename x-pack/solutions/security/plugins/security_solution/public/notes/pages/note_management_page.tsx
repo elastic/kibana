@@ -251,6 +251,7 @@ export const NoteManagementPage = () => {
       <EuiSpacer size="m" />
       <NotesUtilityBar />
       <EuiBasicTable
+        tableCaption={i18n.NOTES}
         items={tableNotes}
         pagination={currentPagination}
         columns={columns}

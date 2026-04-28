@@ -3,15 +3,13 @@
   "value": {
     "aliases": {
       ".alerts-security.alerts-default": {
-        "is_write_index": false,
-        "is_hidden": true
+        "is_write_index": false
       },
-      "siem-signals-default": {
-        "is_write_index": true,
-        "is_hidden": true
+      ".siem-signals-default": {
+        "is_write_index": true
       }
     },
-    "index": "siem-signals-default-000001",
+    "index": ".siem-signals-default-000001",
     "mappings": {
       "_meta": {
         "aliases_version": 1,
@@ -4983,8 +4981,8 @@
     "settings": {
       "index": {
         "lifecycle": {
-          "name": "siem-signals-default",
-          "rollover_alias": "siem-signals-default"
+          "name": ".siem-signals-default",
+          "rollover_alias": ".siem-signals-default"
         },
         "mapping": {
           "total_fields": {
@@ -4992,8 +4990,7 @@
           }
         },
         "number_of_replicas": "1",
-        "number_of_shards": "1",
-        "hidden": true
+        "number_of_shards": "1"
       }
     }
   }
