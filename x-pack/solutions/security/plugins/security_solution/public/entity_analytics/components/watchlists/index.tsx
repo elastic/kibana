@@ -8,15 +8,27 @@
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { WatchlistsManagementTable } from './components/watchlists_management_table';
-import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
 
-export const Watchlists = () => {
+interface WatchlistsProps {
+  privileges?: EntityAnalyticsPrivileges;
+  error?: { message: string } | null;
+  isLoading: boolean;
+  canRead: boolean;
+  canWrite: boolean;
+}
+
+export const Watchlists = ({
+  privileges,
+  error,
+  isLoading,
+  canRead,
+  canWrite,
+}: WatchlistsProps) => {
   const spaceId = useSpaceId();
-  const { data: privileges, error, isLoading } = useWatchlistsPrivileges();
-  const hasRequiredPrivileges = privileges?.has_all_required ?? false;
 
   return (
     <EuiFlexGroup direction="column">
@@ -44,7 +56,7 @@ export const Watchlists = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      ) : privileges && !hasRequiredPrivileges ? (
+      ) : privileges && !canRead ? (
         <EuiFlexItem>
           <MissingPrivilegesCallout
             privileges={privileges}
@@ -56,9 +68,11 @@ export const Watchlists = () => {
             }
           />
         </EuiFlexItem>
-      ) : hasRequiredPrivileges ? (
-        <EuiFlexItem>{spaceId && <WatchlistsManagementTable spaceId={spaceId} />}</EuiFlexItem>
-      ) : null}
+      ) : (
+        <EuiFlexItem>
+          {spaceId && <WatchlistsManagementTable spaceId={spaceId} canWrite={canWrite} />}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
