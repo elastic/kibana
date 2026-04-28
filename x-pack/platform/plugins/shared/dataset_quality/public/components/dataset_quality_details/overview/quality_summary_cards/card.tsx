@@ -127,7 +127,14 @@ export function Card({
           <>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
               <EuiFlexItem grow={false}>
-                <EuiText size="s" css={css`font-weight: ${euiTheme.font.weight.semiBold};`}>{title}</EuiText>
+                <EuiText
+                  size="s"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  {title}
+                </EuiText>
               </EuiFlexItem>
               {titleTooltipContent && (
                 <EuiFlexItem grow={false}>
