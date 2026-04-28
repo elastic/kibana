@@ -31,13 +31,14 @@ export function registerVerifierPolicyCleanupTask(taskManager: TaskManagerSetupC
       createTaskRunner: ({ abortController }) => ({
         run: async () => {
           const logger = appContextService.getLogger().get('otel-verifier');
-          logger.info(`${CLEANUP_TASK_LOG} Task run started`);
+          logger.debug(`${CLEANUP_TASK_LOG} Task run started`);
           try {
             await runVerifierPolicyCleanup(abortController);
           } catch (error) {
             logger.error(`${CLEANUP_TASK_LOG} Error running cleanup task.`, { error });
+            throw error;
           }
-          logger.info(`${CLEANUP_TASK_LOG} Task run completed`);
+          logger.debug(`${CLEANUP_TASK_LOG} Task run completed`);
         },
       }),
     },
@@ -56,7 +57,7 @@ export async function scheduleVerifierPolicyCleanupTask(taskManager: TaskManager
       state: {},
       params: {},
     });
-    logger.info(
+    logger.debug(
       `${CLEANUP_TASK_LOG} Scheduled recurring task (id=${TASK_ID}, interval=${TASK_INTERVAL})`
     );
   } catch (error) {

@@ -41,13 +41,13 @@ export async function runVerifierPolicyCleanup(abortController: AbortController)
       spaceId: '*',
     });
 
-    logger.info(
+    logger.debug(
       `${CLEANUP_TASK_LOG} Found ${verifierPolicies.items.length} verifier policies for cleanup check`
     );
 
     for (const policy of verifierPolicies.items) {
       throwIfAborted(abortController);
-      logger.info(
+      logger.debug(
         `${CLEANUP_TASK_LOG} Current policy verifier policy ${policy.id} created at ${policy.created_at} updated at ${policy.updated_at}`
       );
       const createdAt = policy.created_at ?? policy.updated_at;
@@ -60,11 +60,11 @@ export async function runVerifierPolicyCleanup(abortController: AbortController)
       try {
         const ageSec = Math.round(ageMs / 1000);
         const ttlSec = Math.round(VERIFICATION_TTL_MS / 1000);
-        logger.info(
+        logger.debug(
           `${CLEANUP_TASK_LOG} Deleting verifier policy ${policy.id} (age: ${ageSec}s, TTL: ${ttlSec}s)`
         );
         await agentPolicyService.deleteVerifierPolicy(soClient, esClient, policy.id);
-        logger.info(`${CLEANUP_TASK_LOG} Deleted verifier policy ${policy.id}`);
+        logger.debug(`${CLEANUP_TASK_LOG} Deleted verifier policy ${policy.id}`);
       } catch (err) {
         logger.error(
           `${CLEANUP_TASK_LOG} Failed to delete verifier policy ${policy.id}: ${err.message}`
