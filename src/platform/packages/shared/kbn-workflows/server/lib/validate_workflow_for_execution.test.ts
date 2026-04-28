@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto } from '@kbn/workflows';
 import { validateWorkflowForExecution } from './validate_workflow_for_execution';
+import type { WorkflowDetailDto } from '../..';
 
 const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
   id: 'test-workflow-id',
