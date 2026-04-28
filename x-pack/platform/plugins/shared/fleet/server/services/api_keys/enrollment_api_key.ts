@@ -323,23 +323,14 @@ export async function bulkDeleteEnrollmentApiKeys(
     successCount = result.successCount;
     errorCount = result.errorCount;
   } else if (kuery) {
-    const allIds: string[] = [];
-    let page = 1;
-    let hasMore = true;
-    while (hasMore) {
-      const { items } = await listEnrollmentApiKeys(esClient, {
-        page: page++,
-        perPage: 10000,
-        kuery,
-        spaceId,
-      });
-      if (items.length === 0) {
-        hasMore = false;
-      } else {
-        allIds.push(...items.map((k) => k.id));
-      }
-    }
+    const { items } = await listEnrollmentApiKeys(esClient, {
+      page: 1,
+      perPage: 10000,
+      kuery,
+      spaceId,
+    });
 
+    const allIds = items.map((k) => k.id);
     const BATCH_SIZE = 1000;
     for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
       const result = await deleteEnrollmentApiKeys(
