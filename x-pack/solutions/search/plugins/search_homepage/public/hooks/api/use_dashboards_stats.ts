@@ -24,13 +24,11 @@ export const useDashboardsStats = (): UseQueryResult<DashboardsStats | null> => 
     queryFn: async () => {
       try {
         const response = await http.get<{
-          saved_objects: Array<{ id: string; type: string }>;
           total: number;
         }>('/api/saved_objects/_find', {
           query: {
             type: 'dashboard',
-            per_page: 10000,
-            fields: 'title',
+            per_page: 0,
           },
         });
 
