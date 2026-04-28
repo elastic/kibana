@@ -42,6 +42,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -102,6 +103,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CalloutVariant",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -200,6 +202,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeViewModel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -253,6 +256,7 @@
             "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeViewModel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -307,6 +311,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -353,6 +358,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -409,6 +415,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -446,6 +453,7 @@
             "lineNumber": 24,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "GraphPopoverProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -507,6 +515,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeViewModel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -565,6 +574,7 @@
             "lineNumber": 28,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeViewModel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -618,6 +628,7 @@
             "lineNumber": 118,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeViewModel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -660,6 +671,7 @@
             "lineNumber": 83,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFetchGraphDataParams",
             "trackAdoption": false,
             "isRequired": true
           }

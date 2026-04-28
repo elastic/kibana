@@ -19,10 +19,8 @@ import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../
 import { getAssignmentExpressionRoot } from '../expressions';
 import { suggestForExpression } from './expressions';
 import { withAutoSuggest } from './helpers';
-import { TRAILING_COMMA_REGEX } from '../shared';
+import { endsWithComma, endsWithWhitespace } from '../regex';
 import type { ExpressionContextOptions } from './expressions/types';
-
-const ENDS_WITH_WHITESPACE_REGEX = /\s$/;
 
 export async function suggestFieldsList(
   query: string,
@@ -55,10 +53,10 @@ export async function suggestFieldsList(
   const innerText = query.substring(0, cursorPosition);
   const lastField = fieldList[fieldList.length - 1];
 
-  const endsWithComma = TRAILING_COMMA_REGEX.test(innerText);
+  const hasTrailingComma = endsWithComma(innerText);
   const withinFunction =
     lastField && isFunctionExpression(lastField) && within(innerText.length, lastField);
-  const startingNewExpression = endsWithComma && !withinFunction;
+  const startingNewExpression = hasTrailingComma && !withinFunction;
 
   let expressionRoot = startingNewExpression ? undefined : lastField;
   let insideAssignment = false;
@@ -104,7 +102,7 @@ export async function suggestFieldsList(
     if (options?.includePipeAndCommaSuggestions !== false) {
       const commaSuggestion = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
 
-      if (ENDS_WITH_WHITESPACE_REGEX.test(innerText)) {
+      if (endsWithWhitespace(innerText)) {
         commaSuggestion.rangeToReplace = {
           start: innerText.length - 1,
           end: innerText.length,

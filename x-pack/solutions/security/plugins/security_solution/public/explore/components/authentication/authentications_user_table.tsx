@@ -42,36 +42,40 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   userName,
 }) => {
   const dispatch = useDispatch();
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const openUserFlyout = useCallback(
     (name: string) => {
-      openRightPanel({
-        id: UserPanelKey,
-        params: {
-          userName: name,
-          contextID: 'authentications',
-          scopeId: 'authentications',
-          isPreviewMode: false,
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName: name,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [openRightPanel]
+    [openFlyout]
   );
 
   const openHostFlyout = useCallback(
     (hostName: string) => {
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          contextID: 'authentications',
-          scopeId: 'authentications',
-          isPreviewMode: false,
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [openRightPanel]
+    [openFlyout]
   );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
