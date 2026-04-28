@@ -31,7 +31,8 @@ interface ChartTypeRegistryEntry {
   supportsDynamicColoring?: boolean;
   /**
    * Number of colors to request for dynamic `steps[]`. Metrics work best with
-   * 3 bands; charts like gauges, heatmaps, and datatables use 5 stops.
+   * 3 bands; gauges mirror Lens' 4 default status bands; charts like heatmaps
+   * and datatables use 5 stops.
    */
   paletteStepsCount?: number;
   /**
@@ -78,7 +79,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
     ],
     supportsDynamicColoring: true,
-    paletteStepsCount: 5,
+    paletteStepsCount: 4,
   },
   [SupportedChartType.XY]: {
     schema: xyConfigSchemaESQL,
