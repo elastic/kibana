@@ -14,8 +14,8 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationPolicy,
-  NotificationPolicyId,
+  ActionPolicy,
+  ActionPolicyId,
   Rule,
   RuleId,
 } from '../types';
@@ -36,7 +36,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
 export function evaluateMatchers(
   dispatchable: readonly AlertEpisode[],
   rules: ReadonlyMap<RuleId, Rule>,
-  policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
+  policies: ReadonlyMap<ActionPolicyId, ActionPolicy>
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
 
