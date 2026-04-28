@@ -449,11 +449,13 @@ describe('SubFeatureCard', () => {
       expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-2']);
     });
 
-    it('shows an accessible warning indicator for an invalid endpoint in editable mode', () => {
+    it('shows a warning indicator for an invalid endpoint in editable mode', () => {
       renderCard(['ep-1'], undefined, new Set(['ep-1']));
 
+      // In JSDOM, EuiIcon renders the aria-label as text content, so the warning message
+      // is queryable as visible text.
       expect(
-        screen.getByRole('img', { name: /inference endpoint claude is no longer available/i })
+        screen.getByText('Inference endpoint Claude is no longer available')
       ).toBeInTheDocument();
     });
   });
