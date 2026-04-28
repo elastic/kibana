@@ -70,7 +70,7 @@ export const PostEnrollmentAPIKeyRequestSchema = {
 export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
   body: schema.object(
     {
-      tokenIds: schema.maybe(schema.arrayOf(schema.string())),
+      tokenIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
       kuery: schema.maybe(
         schema.string({
           validate: (value: string) => {
