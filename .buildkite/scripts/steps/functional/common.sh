@@ -6,6 +6,10 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# All functional/integration test steps run Kibana from the distributable,
+# so dev-mode webpack bundles built during bootstrap are never used.
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
