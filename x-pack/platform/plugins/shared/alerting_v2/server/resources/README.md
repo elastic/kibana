@@ -19,6 +19,44 @@ If you change stored document shape, retention behavior, or ES|QL views, this fo
 
 `register_resources.ts` registers datastreams and ES|QL views, then asks `ResourceManager` to start initialization during plugin start.
 
+## Temporary reset API (pre-GA only)
+
+While alerting v2 is still pre-GA and breaking resource changes are still expected, Kibana also exposes a temporary internal endpoint that wipes and recreates these resources:
+
+- endpoint: `POST /internal/alerting/v2/_reset_resources`
+- implementation: `server/routes/reset_resources_route.ts`
+- success response: `204 No Content`
+
+What it deletes:
+
+- all documents in `.rule-events`
+- all documents in `.alert-actions`
+- the backing index templates for those two data streams
+- all alerting v2 saved objects of type `alerting_rule`, `alerting_notification_policy`, and `alerting_api_key_pending_invalidation`
+- all per-rule task manager tasks of type `alerting_v2:rule_executor`
+
+What it recreates:
+
+- `.rule-events`
+- `.alert-actions`
+- their ILM policies and index templates
+
+How to call it from Kibana Dev Tools:
+
+```http
+POST kbn:/internal/alerting/v2/_reset_resources
+```
+
+Permissions required:
+
+- The alerting v2 feature privilegs
+- The superuser role to have access to system indices
+
+Notes:
+
+- This endpoint is intentionally destructive and only meant to unblock pre-GA development when resource or saved object schema changes require a clean slate.
+- Remove this section from the README when `server/routes/reset_resources_route.ts` is removed for GA. That cleanup is tracked by `rna-program#426`.
+
 ## Design principles
 
 | Topic | Behavior |

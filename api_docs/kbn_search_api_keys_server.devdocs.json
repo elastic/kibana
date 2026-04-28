@@ -56,6 +56,7 @@
             "lineNumber": 19,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "IRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -79,6 +80,7 @@
             "lineNumber": 19,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           }
