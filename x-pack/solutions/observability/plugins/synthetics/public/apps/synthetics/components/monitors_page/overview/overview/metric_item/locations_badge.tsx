@@ -81,9 +81,6 @@ export const LocationsBadge = ({
         data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"
         iconType="arrowDown"
         iconSide="right"
-        onMouseOver={() => {
-          setPopover(true);
-        }}
         onClick={(e) => {
           e.stopPropagation();
           setPopover(!isPopoverOpen);

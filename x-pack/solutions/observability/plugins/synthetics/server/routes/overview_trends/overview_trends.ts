@@ -61,7 +61,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
     body: schema.arrayOf(
       schema.object({
         configId: schema.string(),
-        locationIds: schema.arrayOf(schema.string()),
+        locationIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
         schedule: schema.string(),
       }),
       { maxSize: 500 }
