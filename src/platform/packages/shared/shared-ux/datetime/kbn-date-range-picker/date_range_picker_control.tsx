@@ -80,6 +80,7 @@ export function DateRangePickerControl() {
   useSelectTextPartsWithArrowKeys({
     inputRef,
     isActive: isEditing && !wasClearedRef.current,
+    initialSelection: 'none',
     // TODO this is simply increasing/decreasing integers,
     // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
     onModifyPart: ({ text: currentText, part, action }) => {
