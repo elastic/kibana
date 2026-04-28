@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetConfigRoute(
-  { router }: RouteDependencies,
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
-) {
+export function registerGetConfigRoute({ router, service }: RouteDependencies) {
   router.versioned
     .get({
       path: '/internal/workflows/config',
@@ -28,11 +24,11 @@ export function registerGetConfigRoute(
         version: INTERNAL_API_VERSION,
         validate: false,
       },
-      withLicenseCheck(async (_context, _request, response) => {
-        const engine = await getWorkflowExecutionEngine();
+      withAvailabilityCheck(async (_context, _request, response) => {
+        const { triggerEvents } = await service.getWorkflowsExecutionEngine();
         return response.ok({
           body: {
-            eventDrivenExecutionEnabled: engine.isEventDrivenExecutionEnabled(),
+            eventDrivenExecutionEnabled: triggerEvents.isEnabled,
           },
         });
       })

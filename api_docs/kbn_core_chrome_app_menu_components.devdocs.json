@@ -33,6 +33,7 @@
             "lineNumber": 32,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuActionButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -72,6 +73,7 @@
             "lineNumber": 35,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuItemsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -109,6 +111,7 @@
             "lineNumber": 25,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuItemProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -146,6 +149,7 @@
             "lineNumber": 27,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuShowMoreButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -183,6 +187,7 @@
             "lineNumber": 30,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuContextMenuProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -220,6 +225,7 @@
             "lineNumber": 21,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuPopoverActionButtonsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -321,6 +327,7 @@
             "lineNumber": 39,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1232,6 +1239,7 @@
             "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuPopoverItem",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1300,6 +1308,7 @@
             "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HTMLElement",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1597,6 +1606,7 @@
             "lineNumber": 38,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuRunActionParams",
             "trackAdoption": false
           }
         ],

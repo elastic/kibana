@@ -8,7 +8,7 @@
 import {
   createAlertEpisode,
   createDispatcherPipelineState,
-  createNotificationPolicy,
+  createActionPolicy,
   createRule,
 } from '../fixtures/test_utils';
 import { EvaluateMatchersStep, evaluateMatchers } from './evaluate_matchers_step';
@@ -19,7 +19,7 @@ describe('EvaluateMatchersStep', () => {
   it('returns matched pairs for episodes with global catch-all policies', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({ id: 'p1' });
+    const policy = createActionPolicy({ id: 'p1' });
 
     const state = createDispatcherPipelineState({
       dispatchable: [episode],
@@ -55,8 +55,8 @@ describe('evaluateMatchers', () => {
   it('matches episode to all global catch-all policies', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const p1 = createNotificationPolicy({ id: 'p1' });
-    const p2 = createNotificationPolicy({ id: 'p2' });
+    const p1 = createActionPolicy({ id: 'p1' });
+    const p2 = createActionPolicy({ id: 'p2' });
 
     const matched = evaluateMatchers(
       [episode],
@@ -81,7 +81,7 @@ describe('evaluateMatchers', () => {
   it('does not match when KQL matcher evaluates to false', () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({ id: 'p1', matcher: 'episode_status: active' });
+    const policy = createActionPolicy({ id: 'p1', matcher: 'episode_status: active' });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -91,7 +91,7 @@ describe('evaluateMatchers', () => {
   it('matches when KQL matcher evaluates to true', () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({ id: 'p1', matcher: 'episode_status: active' });
+    const policy = createActionPolicy({ id: 'p1', matcher: 'episode_status: active' });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -107,7 +107,7 @@ describe('evaluateMatchers', () => {
       group_hash: 'critical-group',
     });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
       matcher: 'episode_status: active and group_hash: critical-group',
     });
@@ -120,7 +120,7 @@ describe('evaluateMatchers', () => {
   it('matches with complex KQL using OR operator', () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'recovering' });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
       matcher: 'episode_status: active or episode_status: recovering',
     });
@@ -137,7 +137,7 @@ describe('evaluateMatchers', () => {
       group_hash: 'normal-group',
     });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
       matcher: 'episode_status: active and group_hash: critical-group',
     });
@@ -150,7 +150,7 @@ describe('evaluateMatchers', () => {
   it('skips disabled policies', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({ id: 'p1', enabled: false });
+    const policy = createActionPolicy({ id: 'p1', enabled: false });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -161,7 +161,7 @@ describe('evaluateMatchers', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const futureDate = new Date(Date.now() + 3_600_000).toISOString();
-    const policy = createNotificationPolicy({ id: 'p1', snoozedUntil: futureDate });
+    const policy = createActionPolicy({ id: 'p1', snoozedUntil: futureDate });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -172,7 +172,7 @@ describe('evaluateMatchers', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const pastDate = new Date(Date.now() - 3_600_000).toISOString();
-    const policy = createNotificationPolicy({ id: 'p1', snoozedUntil: pastDate });
+    const policy = createActionPolicy({ id: 'p1', snoozedUntil: pastDate });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -182,7 +182,7 @@ describe('evaluateMatchers', () => {
   it('matches enabled policies without snooze', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createNotificationPolicy({ id: 'p1', enabled: true });
+    const policy = createActionPolicy({ id: 'p1', enabled: true });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -193,7 +193,7 @@ describe('evaluateMatchers', () => {
     it('matches rule.name via KQL', () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1', name: 'Test rule' });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'rule.name: "Test rule"',
       });
@@ -210,7 +210,7 @@ describe('evaluateMatchers', () => {
     it('matches rule.tags via array membership', () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1', tags: ['production', 'critical'] });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'rule.tags: "production"',
       });
@@ -227,7 +227,7 @@ describe('evaluateMatchers', () => {
     it('matches combined episode and rule conditions', () => {
       const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
       const rule = createRule({ id: 'r1', tags: ['production'] });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'episode_status: active and rule.tags: "production"',
       });
@@ -244,7 +244,7 @@ describe('evaluateMatchers', () => {
     it('does not match rule.tags when rule has no matching tags', () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1', tags: [] });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'rule.tags: "production"',
       });
@@ -261,7 +261,7 @@ describe('evaluateMatchers', () => {
     it('does not match when combined condition is partially met', () => {
       const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
       const rule = createRule({ id: 'r1', tags: ['production'] });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'episode_status: active and rule.tags: "production"',
       });
@@ -283,7 +283,7 @@ describe('evaluateMatchers', () => {
         data: { severity: 'critical' },
       });
       const rule = createRule({ id: 'r1' });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'data.severity: "critical"',
       });
@@ -303,7 +303,7 @@ describe('evaluateMatchers', () => {
         data: { env: 'staging' },
       });
       const rule = createRule({ id: 'r1' });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'data.env: "production"',
       });
@@ -320,7 +320,7 @@ describe('evaluateMatchers', () => {
     it('does not match when episode has no data', () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });
       const rule = createRule({ id: 'r1' });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'data.severity: "critical"',
       });
@@ -340,7 +340,7 @@ describe('evaluateMatchers', () => {
         data: { severity: 'critical' },
       });
       const rule = createRule({ id: 'r1', name: 'CPU Alert' });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'data.severity: "critical" and rule.name: "CPU Alert"',
       });
@@ -360,7 +360,7 @@ describe('evaluateMatchers', () => {
         data: { host: { name: 'my-host.com' } },
       });
       const rule = createRule({ id: 'r1' });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         matcher: 'data.host.name: "my-host.com"',
       });

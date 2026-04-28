@@ -15,8 +15,8 @@ import {
   AlertConsumers,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import type { JobsHealthTests } from '@kbn/ml-common-types/alerts';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
-import type { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
   ANOMALY_DETECTION: ML_ANOMALY_DETECTION_RULE_TYPE_ID,
