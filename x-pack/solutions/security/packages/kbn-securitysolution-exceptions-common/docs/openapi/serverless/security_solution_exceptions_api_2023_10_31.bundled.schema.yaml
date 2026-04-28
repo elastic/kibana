@@ -2688,16 +2688,6 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                description:
-                  $ref: '#/components/schemas/ExceptionListDescription'
-                name:
-                  $ref: '#/components/schemas/ExceptionListName'
-              required:
-                - name
-                - description
             examples:
               createSharedExceptionList:
                 value:
@@ -2709,6 +2699,16 @@ paths:
                     - linux
                   tags:
                     - malware
+            schema:
+              type: object
+              properties:
+                description:
+                  $ref: '#/components/schemas/ExceptionListDescription'
+                name:
+                  $ref: '#/components/schemas/ExceptionListName'
+              required:
+                - name
+                - description
         required: true
       responses:
         '200':
