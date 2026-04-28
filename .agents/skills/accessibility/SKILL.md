@@ -11,38 +11,20 @@ description: >
   Also use when fixing @elastic/eui ESLint accessibility rules.
 ---
 
-# Accessibility (Kibana)
+# Kibana Accessibility
 
-This skill is the **canonical reference for using EUI accessibly**. Open it whenever you author or refactor EUI components — *before* writing the JSX, not only after lint complains.
+> Accessibility is part of writing the component, not a step that happens after lint complains. Open the matching guide in `references/components/index.md` **before** writing the JSX, and read `references/shared_principles.md` first.
 
-## When to use this skill
+## When to Use
 
-- **Primary — writing or refactoring an EUI component.** Open the matching guide in `references/components/index.md` and follow the canonical pattern (props, naming, focus, ids).
-- **Refactoring legacy markup.** Use the same component guides to bring existing JSX in line with the canonical pattern.
-- **Secondary — fixing an `@elastic/eui/*` ESLint error.** Use `references/eslint.md` to jump to the relevant component guide.
+- **Writing or refactoring an EUI component.** Open the matching guide from `references/components/index.md` and follow the canonical pattern (props, accessible names, focus, ids).
+- **Fixing an `@elastic/eui/*` ESLint error.** Use `references/eslint.md` to jump from the rule id to the component guide that explains the canonical fix.
 - **General a11y or non-EUI question.** Read `references/shared_principles.md`.
 
-## Find the right guide
+## References
 
-| You are… | Open |
-|----------|------|
-| Adding or refactoring an **EUI component** | `references/components/index.md` → matching guide |
-| Resolving a non-EUI a11y concern | `references/shared_principles.md` |
-| Working from an `@elastic/eui/*` rule id | `references/eslint.md` (links into the component guide) |
+Open only what you need:
 
-## Read shared principles first
-
-Always read `references/shared_principles.md` before authoring or refactoring. It defines the standards (WCAG / APG), the canonical decision order (semantics → structure → behavior → lifecycle), accessible naming, keyboard and focus expectations, project i18n / HTML-id contracts, and escalation criteria. The component guides are component-specific extensions of these principles.
-
-## Layout
-
-```
-references/
-  shared_principles.md   ← read first
-  i18n.md                ← localization contract
-  html_ids.md            ← id / aria-labelledby utilities
-  eslint.md              ← rule id → component guide (secondary)
-  components/
-    index.md             ← topic → guide
-    *.md                 ← canonical usage per component
-```
+- Standards, decision order, accessible naming, i18n, html ids, keyboard/focus, escalation: `references/shared_principles.md`
+- Component guide topic table: `references/components/index.md`
+- ESLint rule id → component guide (with manual-review notes): `references/eslint.md`

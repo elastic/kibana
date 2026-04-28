@@ -7,7 +7,7 @@
 Every **`EuiIcon`** is **either decorative or meaningful** — pick one, then mark it accordingly.
 
 - **Decorative.** The icon repeats or ornaments visible text → **`aria-hidden={true}`**. Do not combine **`aria-hidden`** with **`tabIndex`** — focusable nodes must be perceivable.
-- **Meaningful.** The icon alone carries information → give it an **accessible name** (`aria-label` with `i18n.translate`, or `aria-labelledby` to visible text). See **`../i18n.md`** and **`../html_ids.md`**.
+- **Meaningful.** The icon alone carries information → give it an **accessible name** (`aria-label` with `i18n.translate`, or `aria-labelledby` to visible text). See *Localization (i18n)* and *HTML ids* in **`../shared_principles.md`**.
 - **`title`** — only for a **native browser tooltip** on built-in icon types. For **SVG React components** passed as `type`, **`title` is not supported** — use `aria-label` / `aria-labelledby` instead.
 
 ## Prefer `EuiIconTip` for "icon + tooltip"

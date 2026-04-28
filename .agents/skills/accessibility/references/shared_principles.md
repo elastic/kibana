@@ -32,6 +32,42 @@ Whether you are writing a new component or fixing existing code, work top-down a
 - Do not remove `title`, `alt`, `aria-label`, or `aria-labelledby` unless replacing with a stronger alternative.
 - Images that convey meaning need `alt`; decorative images use `alt=""` or `aria-hidden="true"`.
 
+## Localization (i18n)
+
+User-visible or assistive-tech strings (`aria-label`, `tableCaption`, tooltip `content`, labels, titles, body copy) use **`i18n.translate`** from `@kbn/i18n` — never raw literals. Programmatic tokens (`name` on radios, internal ids) stay as plain strings.
+
+```tsx
+i18n.translate('messageId', { defaultMessage: 'English fallback' })
+```
+
+- If the file already uses a shared object (e.g. `i18nTexts.modalTitle`), follow that pattern for new strings.
+- Add an `i18n` import only when you add a new `i18n.translate` call; merge with existing imports.
+- Message ids: reuse an existing id for the same message; otherwise `fileOrComponent.attribute` (e.g. `myTable.tableCaption`); one id ↔ one `defaultMessage` per file.
+
+Full guide: `src/platform/packages/shared/kbn-i18n/GUIDELINE.md`.
+
+## HTML ids
+
+Use EUI's id generators for any `id` / `aria-labelledby` / `titleProps.id` wiring. Call once and store in a descriptive variable (e.g. `modalTitleId`, `fieldLabelId`); reuse an existing id variable when it already targets the same element.
+
+Function components — `useGeneratedHtmlId` from `@elastic/eui`, called before the first `return`:
+
+```tsx
+import { useGeneratedHtmlId } from '@elastic/eui';
+
+const labelId = useGeneratedHtmlId();
+```
+
+Class components — `htmlIdGenerator` from `@elastic/eui`, called inside `render()` with a stable suffix:
+
+```tsx
+import { htmlIdGenerator } from '@elastic/eui';
+
+render() {
+  const labelId = htmlIdGenerator()('myLabel');
+}
+```
+
 ## Keyboard and focus
 
 - Every interactive element must be reachable and operable from the keyboard alone.
@@ -52,11 +88,6 @@ Whether you are writing a new component or fixing existing code, work top-down a
 
 - Do not widen types (`string` → `any`) or suppress errors (`@ts-ignore`, `as any`).
 - New props must match the component’s type definition.
-
-## Project references
-
-- **i18n:** `i18n.md`
-- **HTML ids** (`id`, `aria-labelledby`, `titleProps.id`): `html_ids.md`
 
 ## When to escalate
 

@@ -16,7 +16,7 @@ Use this guide when building or refactoring **layered UI** that traps or shifts 
 Prefer **`aria-labelledby`** pointing at the **visible title** so the spoken name matches what sighted users see.
 
 1. Render a real title inside the overlay (`EuiModalTitle`, `EuiFlyoutTitle`, `EuiPopoverTitle`, `EuiTitle`, or a heading).
-2. Give that title element a stable **`id`** — use `useGeneratedHtmlId()` (or `htmlIdGenerator()` in class components), see **`../html_ids.md`**.
+2. Give that title element a stable **`id`** — use `useGeneratedHtmlId()` (or `htmlIdGenerator()` in class components), see *HTML ids* in **`../shared_principles.md`**.
 3. Set **`aria-labelledby`** on the overlay container to that `id`.
 4. Reuse one ID variable for both the title and `aria-labelledby` — never orphan references.
 
