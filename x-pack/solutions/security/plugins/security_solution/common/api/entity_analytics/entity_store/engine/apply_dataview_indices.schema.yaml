@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: ApplyEntityEngineDataviewIndices
       summary: Apply DataView indices to all installed engines
+      description: Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
       responses:
         '200':
           description: Successful response
@@ -20,10 +21,31 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: Whether all engines updated successfully.
                   result:
                     type: array
+                    description: Per-engine update results.
                     items:
                       $ref: '#/components/schemas/EngineDataviewUpdateResult'
+              examples:
+                applyDataviewIndicesExample:
+                  summary: All engines updated
+                  description: All running engines were successfully updated with the current data view index patterns.
+                  value:
+                    success: true
+                    result:
+                      - type: host
+                        changes:
+                          indexPatterns:
+                            - 'logs-*'
+                            - 'filebeat-*'
+                            - 'auditbeat-*'
+                      - type: user
+                        changes:
+                          indexPatterns:
+                            - 'logs-*'
+                            - 'filebeat-*'
+                            - 'auditbeat-*'
 
         '207':
           description: Partial successful response
@@ -34,14 +56,31 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: Always `false` for a partial success.
                   result:
                     type: array
+                    description: Per-engine update results for engines that succeeded.
                     items:
                       $ref: '#/components/schemas/EngineDataviewUpdateResult'
                   errors:
                     type: array
+                    description: Error messages for engines that failed to update.
                     items:
                       type: string
+              examples:
+                partialSuccessExample:
+                  summary: One engine failed
+                  description: The host engine was updated but the user engine failed due to insufficient privileges.
+                  value:
+                    success: false
+                    result:
+                      - type: host
+                        changes:
+                          indexPatterns:
+                            - 'logs-*'
+                            - 'filebeat-*'
+                    errors:
+                      - 'Failed to update user engine: insufficient privileges'
         '500':
           description: Error response
           content:
@@ -51,20 +90,33 @@ paths:
                 properties:
                   body:
                     type: string
+                    description: Error message.
                   statusCode:
                     type: number
+                    description: HTTP status code.
+              examples:
+                serverErrorExample:
+                  summary: Internal server error
+                  description: An unexpected error occurred while applying data view indices.
+                  value:
+                    body: 'An internal error occurred while updating engine indices'
+                    statusCode: 500
 components:
   schemas:
     EngineDataviewUpdateResult:
       type: object
+      description: The result of applying data view index changes to a single engine.
       properties:
         type:
           type: string
+          description: The entity type of the engine that was updated.
         changes:
           type: object
+          description: The changes applied to the engine.
           properties:
             indexPatterns:
               type: array
+              description: The updated list of index patterns now used by the engine.
               items:
                 type: string
       required:

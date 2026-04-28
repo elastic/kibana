@@ -12,14 +12,18 @@ import type { DefaultEmbeddableApi, EmbeddableFactory } from './types';
 
 const registry: { [key: string]: () => Promise<EmbeddableFactory<any, any>> } = {};
 
+export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
+
 /**
- * Registers a new React embeddable factory. This should be called at plugin start time.
+ * Registers an embeddable public defintion. This should be called at plugin setup time.
+ * Be sure to register an embeddable server definition for this type.
  *
- * @param type The key to register the factory under.
+ * @param type The key to register the embeddable public defintion. Part of public "dashboards as code" REST API.
+ * Must be lower case, snake cased, and concise.
  * @param getFactory an async function that gets the factory definition for this key. This should always async import the
  * actual factory definition file to avoid polluting page load.
  */
-export const registerReactEmbeddableFactory = <
+export const registerEmbeddablePublicDefinition = <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
@@ -33,6 +37,14 @@ export const registerReactEmbeddableFactory = <
         values: { key: type },
       })
     );
+
+  if (!TYPE_REGEX.test(type))
+    throw new Error(
+      i18n.translate('embeddableApi.reactEmbeddable.invalidTypeError', {
+        defaultMessage: 'Type must be lower case and snake cased.',
+      })
+    );
+
   registry[type] = getFactory;
 };
 

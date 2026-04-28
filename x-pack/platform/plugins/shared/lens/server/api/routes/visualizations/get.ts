@@ -7,6 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
@@ -23,17 +24,18 @@ import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
     summary: 'Get visualization',
-    description: 'Get a visualization from id.',
+    description: 'Returns a single Lens visualization by its ID.',
     options: {
       tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -74,34 +76,35 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      try {
-        const { result } = await client.get(req.params.id);
-        const responseItem = getLensResponseItem(builder, result.item);
+        try {
+          const { result } = await client.get(req.params.id);
+          const responseItem = getLensResponseItem(builder, result.item);
 
-        return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
-          body: responseItem,
-        });
-      } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
-              },
-            });
+          return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error)) {
+            if (error.output.statusCode === 404) {
+              return res.notFound({
+                body: {
+                  message: `A visualization with id [${req.params.id}] was not found.`,
+                },
+              });
+            }
+            if (error.output.statusCode === 403) {
+              return res.forbidden();
+            }
           }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
+
+          return boomify(error); // forward unknown error
         }
-
-        return boomify(error); // forward unknown error
-      }
-    }
+      })
   );
 };

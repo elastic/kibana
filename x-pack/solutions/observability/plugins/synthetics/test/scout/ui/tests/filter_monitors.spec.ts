@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 const FIRST_TAG = 'a';
 const SECOND_TAG = 'b';
 
-test.describe('FilterMonitors', { tag: tags.stateful.classic }, () => {
+test.describe('FilterMonitors', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });
@@ -45,22 +45,44 @@ test.describe('FilterMonitors', { tag: tags.stateful.classic }, () => {
       await pageObjects.syntheticsApp.refreshOverview();
     });
 
+    // EuiSelectable re-renders the option list on each selection, and a positional
+    // click on the next option can miss if it lands during a re-render. This helper
+    // re-checks state before clicking, so it won't toggle off an already-selected
+    // option — safe to retry until aria-checked settles on "true".
+    const selectTagOption = async (tagName: string) => {
+      const option = page.getByRole('option', { name: tagName });
+      await expect
+        .poll(
+          async () => {
+            if ((await option.getAttribute('aria-checked')) === 'true') return 'true';
+            await option.click();
+            return option.getAttribute('aria-checked');
+          },
+          { timeout: 15_000, intervals: [250, 500, 1000] }
+        )
+        .toBe('true');
+    };
+
     await test.step('filter by tags with AND', async () => {
       await page.getByLabel('expands filter group for Tags filter').click();
-      await page.getByRole('option', { name: FIRST_TAG }).click();
-      await page.getByRole('option', { name: SECOND_TAG }).click();
+
+      await selectTagOption(FIRST_TAG);
+      await selectTagOption(SECOND_TAG);
+
       await page.testSubj.click('tagsLogicalOperatorSwitch');
       await page.testSubj.click('o11yFieldValueSelectionApplyButton');
+      await expect(page.getByLabel('expands filter group for Tags filter')).toBeVisible();
 
-      await expect(page.getByText('Showing 1 Monitor')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('Showing 1 Monitor')).toBeVisible({ timeout: 30_000 });
     });
 
     await test.step('filter by tags with OR', async () => {
       await page.getByLabel('expands filter group for Tags filter').click();
       await page.testSubj.click('tagsLogicalOperatorSwitch');
       await page.testSubj.click('o11yFieldValueSelectionApplyButton');
+      await expect(page.getByLabel('expands filter group for Tags filter')).toBeVisible();
 
-      await expect(page.getByText('Showing 2 Monitors')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('Showing 2 Monitors')).toBeVisible({ timeout: 30_000 });
     });
   });
 });

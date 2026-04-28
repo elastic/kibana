@@ -23,6 +23,7 @@ import { bindClient } from '../../common/inference_client/bind_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
 
 interface CreateClientOptions {
   request: KibanaRequest;
@@ -36,6 +37,8 @@ interface CreateClientOptions {
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -59,6 +62,8 @@ export function createClient(
     endpointIdCache,
     callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
   } = options;
   const client = createInferenceClient({
     request,
@@ -72,6 +77,8 @@ export function createClient(
     endpointIdCache,
     callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
