@@ -1104,6 +1104,72 @@ describe('SAMLAuthenticationProvider', () => {
         });
       });
     });
+
+    describe('Secure cookie flag (isHttps)', () => {
+      const buildLoginAttempt = () => ({
+        type: SAMLLogin.LoginInitiatedByUser as const,
+        redirectURL: '/test-base-path/some-path#some-fragment',
+      });
+
+      const overridePublicBaseUrl = (
+        providerOptions: MockAuthenticationProviderOptions,
+        publicBaseUrl: string | undefined
+      ) => {
+        Object.defineProperty(providerOptions.basePath, 'publicBaseUrl', {
+          value: publicBaseUrl,
+          configurable: true,
+        });
+      };
+
+      const expectStateCookie = async (
+        providerOptions: MockAuthenticationProviderOptions,
+        expected: { sameSite: 'None'; isSecure: true } | undefined
+      ) => {
+        providerOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          id: 'request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=req',
+          realm: 'test-realm',
+        });
+
+        const localProvider = new SAMLAuthenticationProvider(providerOptions);
+        const result = await localProvider.login(
+          httpServerMock.createKibanaRequest(),
+          buildLoginAttempt(),
+          null
+        );
+
+        const redirectOptions = (result as any).options;
+        if (expected) {
+          expect(redirectOptions.stateCookieOptions).toEqual(expected);
+        } else {
+          expect(redirectOptions.stateCookieOptions).toBeUndefined();
+        }
+      };
+
+      it('sets Secure/SameSite=None when `server.publicBaseUrl` is HTTPS', async () => {
+        const opts = mockAuthenticationProviderOptions({ name: 'saml' });
+        opts.getServerBaseURL = () => 'http://internal:5601';
+        overridePublicBaseUrl(opts, 'https://kibana.example.com/kbn');
+
+        await expectStateCookie(opts, { sameSite: 'None', isSecure: true });
+      });
+
+      it('omits cookie override when `server.publicBaseUrl` is HTTP', async () => {
+        const opts = mockAuthenticationProviderOptions({ name: 'saml' });
+        opts.getServerBaseURL = () => 'https://test-hostname:1234';
+        overridePublicBaseUrl(opts, 'http://kibana.example.com/kbn');
+
+        await expectStateCookie(opts, undefined);
+      });
+
+      it('falls back to `getServerBaseURL` when `server.publicBaseUrl` is not set', async () => {
+        const opts = mockAuthenticationProviderOptions({ name: 'saml' });
+        opts.getServerBaseURL = () => 'https://test-hostname:1234';
+        overridePublicBaseUrl(opts, undefined);
+
+        await expectStateCookie(opts, { sameSite: 'None', isSecure: true });
+      });
+    });
   });
 
   describe('`authenticate` method', () => {

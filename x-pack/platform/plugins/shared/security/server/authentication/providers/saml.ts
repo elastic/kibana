@@ -879,7 +879,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * Returns true if the Kibana server is configured to be served over HTTPS.
    */
   private isHttps() {
-    return new URL(this.options.getServerBaseURL()).protocol === 'https:';
+    const { publicBaseUrl } = this.options.basePath;
+    return new URL(publicBaseUrl ?? this.options.getServerBaseURL()).protocol === 'https:';
   }
 
   /**

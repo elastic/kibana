@@ -22,7 +22,10 @@ export function mockAuthenticationProviderOptions(options?: { name: string; uiam
     getServerBaseURL: () => 'https://test-hostname:1234',
     client: elasticsearchServiceMock.createClusterClient(),
     logger: loggingSystemMock.create().get(),
-    basePath: httpServiceMock.createBasePath(),
+    basePath: httpServiceMock.createBasePath(
+      '/mock-server-basepath',
+      'https://test-hostname:1234/mock-server-basepath'
+    ),
     getRequestOriginalURL: jest.fn(),
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
     uiam: options?.uiam ? uiamServiceMock.create() : undefined,
