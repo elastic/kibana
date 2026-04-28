@@ -54,12 +54,6 @@ export interface GenerateEsqlOptions {
    */
   index?: string;
   /**
-   * When `index` is not set, `indexExplorer` runs on `nlQuery` first. If it finds no resource
-   * (e.g. the instruction is a short edit with no data-source hints), this value is used
-   * as the ES|QL target — for example the index pattern parsed from the user's current editor query.
-   */
-  fallbackIndex?: string;
-  /**
    * Additional context to provide to the model (user prompt)
    */
   additionalContext?: string;
@@ -100,7 +94,6 @@ export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
 export const generateEsql = async ({
   nlQuery,
   index,
-  fallbackIndex,
   executeQuery = true,
   additionalInstructions,
   additionalContext,
@@ -132,34 +125,31 @@ export const generateEsql = async ({
     },
     async () => {
       try {
-        // Discover index if not provided: try nlQuery first, then optional fallback (e.g. FROM in editor)
+        // Discover index if not provided (`indexExplorer` takes one string; append `additionalContext`
+        // when set so resource selection can use editor notes or any other hints, not only `nlQuery`.)
+        const nlQueryWithContext = additionalContext?.trim()
+          ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
+          : nlQuery.trim();
+
         let selectedTarget = index;
         if (!selectedTarget) {
           logger?.debug('No index provided, discovering target index using indexExplorer');
-          const { resources } = await indexExplorer({
-            nlQuery,
+          const {
+            resources: [selectedResource],
+          } = await indexExplorer({
+            nlQuery: nlQueryWithContext,
             esClient,
             limit: 1,
             model,
             logger,
           });
-          const discovered = resources[0];
-          if (discovered) {
-            selectedTarget = discovered.name;
-            logger?.debug(`Discovered target index: ${selectedTarget}`);
-          } else {
-            const trimmedFallback = fallbackIndex?.trim();
-            if (trimmedFallback) {
-              selectedTarget = trimmedFallback;
-              logger?.debug(
-                `Index discovery returned no resource; using fallback index: ${selectedTarget}`
-              );
-            } else {
-              throw new Error(
-                'Could not discover a suitable index for the query. Please specify an index explicitly.'
-              );
-            }
+          if (!selectedResource) {
+            throw new Error(
+              'Could not discover a suitable index for the query. Please specify an index explicitly.'
+            );
           }
+          selectedTarget = selectedResource.name;
+          logger?.debug(`Discovered target index: ${selectedTarget}`);
         }
 
         const outState = await graph.invoke(

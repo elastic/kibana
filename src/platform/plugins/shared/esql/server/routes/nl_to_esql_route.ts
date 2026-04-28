@@ -13,7 +13,6 @@ import type {
   IUiSettingsClient,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
@@ -114,11 +113,6 @@ export const registerNLtoESQLRoute = (
 
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
-        const indexPatternFromCurrent = trimmedCurrent
-          ? getIndexPatternFromESQLQuery(trimmedCurrent).trim()
-          : '';
-        const fallbackIndex =
-          indexPatternFromCurrent.length > 0 ? indexPatternFromCurrent : undefined;
         const additionalContext = trimmedCurrent
           ? [
               'The user is in the ES|QL editor. Below is their current query.',
@@ -135,7 +129,6 @@ export const registerNLtoESQLRoute = (
           esClient: client,
           logger,
           nlQuery: nlInstruction,
-          fallbackIndex,
           additionalContext,
           executeQuery: false,
         });
