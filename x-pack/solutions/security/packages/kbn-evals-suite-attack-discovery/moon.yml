@@ -35,4 +35,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks: { }
+tasks: {}

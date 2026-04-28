@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/solutions/security/packages/ai-security-labs-content
-dependsOn: [ ]
+dependsOn: []
 tags:
   - shared-server
   - package
@@ -30,4 +30,4 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
-tasks: { }
+tasks: {}
