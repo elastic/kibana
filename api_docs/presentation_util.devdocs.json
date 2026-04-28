@@ -36,6 +36,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -84,6 +85,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -122,6 +124,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -160,6 +163,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -198,6 +202,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -242,6 +247,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -296,6 +302,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -335,6 +342,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -486,6 +494,7 @@
                 "lineNumber": 23,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProjectID",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -529,6 +538,7 @@
                 "lineNumber": 24,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProjectID",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -609,6 +619,7 @@
                 "lineNumber": 26,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProjectID",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -626,6 +637,7 @@
                 "lineNumber": 26,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "EnvironmentName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1161,6 +1173,7 @@
               "lineNumber": 17,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "PanelSettingsGetter",
               "trackAdoption": false,
               "returnComment": [],
               "children": [
@@ -1178,6 +1191,7 @@
                   "lineNumber": 31,
                   "columnNumber": 3,
                   "deprecated": false,
+                  "docsReferencedTypeName": "SerializedState",
                   "trackAdoption": false
                 }
               ]
@@ -1238,6 +1252,7 @@
               "lineNumber": 35,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "SerializedState",
               "trackAdoption": false
             }
           ]
@@ -1356,6 +1371,7 @@
             "lineNumber": 82,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "EnvironmentStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1716,7 +1732,9 @@
             "type": "Object",
             "tags": [],
             "label": "[DEFER_BELOW_FOLD]",
-            "description": [],
+            "description": [
+              "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
+            ],
             "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "lineNumber": 25,
             "columnNumber": 3,
@@ -1837,7 +1855,9 @@
             "type": "Object",
             "tags": [],
             "label": "[BY_VALUE_EMBEDDABLE]",
-            "description": [],
+            "description": [
+              "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
+            ],
             "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "lineNumber": 39,
             "columnNumber": 3,

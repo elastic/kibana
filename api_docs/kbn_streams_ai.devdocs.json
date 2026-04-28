@@ -89,6 +89,7 @@
             "lineNumber": 288,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IFieldsMetadataClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -123,6 +124,7 @@
             "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -350,6 +352,7 @@
                     "lineNumber": 51,
                     "columnNumber": 5,
                     "deprecated": false,
+                    "docsReferencedTypeName": "IFieldsMetadataClient",
                     "trackAdoption": false,
                     "isRequired": true
                   },
@@ -384,6 +387,7 @@
                     "lineNumber": 53,
                     "columnNumber": 5,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Record",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -511,6 +515,7 @@
             "lineNumber": 11,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "Feature",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -552,6 +557,7 @@
             "lineNumber": 306,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -714,6 +720,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Set",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -763,6 +770,7 @@
             "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComputedFeatureGeneratorOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3513,6 +3521,7 @@
             "lineNumber": 65,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "IdentifyFeaturesOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3620,6 +3629,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5000,6 +5010,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "QueryLink",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5580,6 +5591,7 @@
                     "lineNumber": 68,
                     "columnNumber": 20,
                     "deprecated": false,
+                    "docsReferencedTypeName": "StreamlangDSL",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -6849,6 +6861,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           }
