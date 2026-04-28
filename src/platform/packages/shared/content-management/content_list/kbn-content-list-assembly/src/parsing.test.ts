@@ -62,6 +62,7 @@ describe('parseDeclarativeChildren', () => {
           preset: 'name',
           instanceId: 'name',
           attributes: { label: 'Title' },
+          componentType: NameColumn,
         },
       ]);
     });

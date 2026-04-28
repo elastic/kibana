@@ -54,6 +54,16 @@ export interface ParsedPart {
   instanceId: string;
   /** The component's props as declared in JSX. */
   attributes: Record<string, unknown>;
+  /**
+   * The original component function from the React element's `type` field.
+   *
+   * Carried through from parsing so that the resolver can look up the
+   * per-component-instance resolver registered via `createComponent`. This
+   * is the only way to distinguish two custom parts that share the same
+   * part name but were created by different `createComponent` calls — the
+   * component function reference is unique per call.
+   */
+  componentType?: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -162,9 +172,13 @@ const walkChildren = (children: ReactNode, assembly: string): ParsedItem[] => {
     // (string HTML tags were filtered by `getPartType` above), but
     // TypeScript's React types don't model `displayName` on
     // `JSXElementConstructor`, so a cast through `unknown` is needed.
+    const componentFn =
+      typeof child.type === 'function'
+        ? (child.type as unknown as (...args: unknown[]) => unknown)
+        : undefined;
     const displayName =
-      typeof child.type !== 'string'
-        ? (child.type as unknown as { displayName?: string }).displayName
+      componentFn !== undefined
+        ? (componentFn as unknown as { displayName?: string }).displayName
         : undefined;
     const seenIds = getSeenIds(partName);
 
@@ -192,7 +206,14 @@ const walkChildren = (children: ReactNode, assembly: string): ParsedItem[] => {
     seenIds.add(instanceId);
 
     // Props are the attributes -- no parser transformation.
-    result.push({ type: 'part', part: partName, preset, instanceId, attributes: props });
+    result.push({
+      type: 'part',
+      part: partName,
+      preset,
+      instanceId,
+      attributes: props,
+      componentType: componentFn,
+    });
   };
 
   Children.forEach(children, processChild);
