@@ -74,6 +74,7 @@
                 "lineNumber": 33,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -178,6 +179,7 @@
                 "lineNumber": 49,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaExecutionContext",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -197,7 +199,15 @@
         "tags": [],
         "label": "ExecutionContextStart",
         "description": [
-          "\nSee {@link ExecutionContextSetup}."
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-execution-context-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+            "section": "def-public.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          },
+          "."
         ],
         "signature": [
           "ExecutionContextSetup"

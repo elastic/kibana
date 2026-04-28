@@ -13,6 +13,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { Appenders } from './appenders';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
+import { OtelAppender } from './otel/otel_appender';
 import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 
 beforeEach(() => {
@@ -34,6 +35,15 @@ test('`configSchema` creates correct schema.', () => {
     layout: { type: 'mock' },
   });
 
+  const validConfig3 = {
+    type: 'otel',
+    protocol: 'http',
+    url: 'http://collector:4318/v1/logs',
+    headers: { Authorization: 'Bearer token' },
+    attributes: { 'service.name': 'kibana' },
+  };
+  expect(appendersSchema.validate(validConfig3)).toEqual(validConfig3);
+
   const wrongConfig1 = {
     type: 'console',
     layout: { type: 'mock' },
@@ -50,6 +60,9 @@ test('`configSchema` creates correct schema.', () => {
     fileName: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig3)).toThrow();
+
+  const wrongConfig4 = { type: 'otel', headers: {}, attributes: {} };
+  expect(() => appendersSchema.validate(wrongConfig4)).toThrow();
 });
 
 test('`create()` creates correct appender.', () => {
@@ -76,4 +89,13 @@ test('`create()` creates correct appender.', () => {
     policy: { type: 'size-limit', size: ByteSizeValue.parse('15b') },
   });
   expect(rollingFileAppender).toBeInstanceOf(RollingFileAppender);
+
+  const otelAppender = Appenders.create({
+    type: 'otel',
+    protocol: 'http',
+    url: 'http://collector:4318/v1/logs',
+    headers: {},
+    attributes: {},
+  });
+  expect(otelAppender).toBeInstanceOf(OtelAppender);
 });
