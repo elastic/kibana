@@ -28,6 +28,11 @@ const NON_SPACE_PATH_PREFIXES = [
     '/api/security/role',
     '/api/spaces',
     '/api/security/session/_invalidate',
+    // During technical preview, these paths are replaced by placeholder operations
+    // in kibana.overlays.bump_slim.yaml and should not get the spaces section injected.
+    // Remove these entries once the Dashboards and Visualizations APIs reach GA.
+    '/api/dashboards',
+    '/api/visualizations',
   ]),
 ];
 
