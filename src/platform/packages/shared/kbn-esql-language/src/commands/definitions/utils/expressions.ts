@@ -67,11 +67,10 @@ export function getExpressionType(
     }
 
     const fnDef = getFunctionDefinition(castFunction);
-    if (!fnDef) {
+    if (!fnDef || fnDef.signatures.length === 0) {
       return 'unknown';
     }
 
-    // Safe to get the first one as all cast functions have a single return type
     return fnDef.signatures[0].returnType;
   }
 
