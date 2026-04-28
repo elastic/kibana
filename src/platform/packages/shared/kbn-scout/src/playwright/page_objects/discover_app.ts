@@ -258,6 +258,66 @@ export class DiscoverApp {
     await this.waitForDocViewerFlyoutOpen();
   }
 
+  /**
+   * Close the Discover document-viewer flyout and wait for it to disappear.
+   */
+  async closeDocViewerFlyout() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+  }
+
+  /**
+   * Hover the given data-grid cell and click its "expand" action, opening the
+   * cell-value popover (which embeds a Monaco editor with the row JSON).
+   *
+   * @param rowIndex - 0-based visible row index.
+   * @param columnId - EUI data-grid column id (e.g. `_source`, `@timestamp`).
+   */
+  async expandGridCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
+    const cell = this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
+    );
+    await cell.hover();
+    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+  }
+
+  /**
+   * Inside an open document-viewer flyout, toggle the grid column for `fieldName`
+   * from the field-table tab. Calling this twice on the same field toggles it off.
+   */
+  async toggleColumnInDocViewer(fieldName: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await expect(async () => {
+      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameElement.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameElement.hover();
+      const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
+      await toggle.waitFor({ state: 'visible' });
+      await toggle.scrollIntoViewIfNeeded();
+      await toggle.click();
+    }).toPass({ timeout: 15_000 });
+  }
+
+  /**
+   * Read JSON from the active Monaco source editor (cell expansion popover, or doc
+   * flyout after the JSON tab is selected). Retries until the model is non-empty —
+   * the wrapper can return `''` before the document attaches.
+   */
+  async readMonacoJson(): Promise<{ _id: string } & Record<string, unknown>> {
+    let parsed: { _id: string } & Record<string, unknown> = { _id: '' };
+    await expect(async () => {
+      const raw = await this.codeEditor.getCodeEditorValue();
+      if (!raw) {
+        throw new Error('Monaco editor has not rendered a value yet');
+      }
+      parsed = JSON.parse(raw);
+    }).toPass({ timeout: 30_000 });
+    return parsed;
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -276,6 +336,43 @@ export class DiscoverApp {
   async getChartInterval(): Promise<string> {
     const button = this.page.testSubj.locator('unifiedHistogramTimeIntervalSelectorButton');
     return (await button.getAttribute('data-selected-value')) || '';
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
+      state: 'hidden',
+    });
+  }
+
+  /**
+   * Click the histogram breakdown selector and pick `field` (or `"No breakdown"`).
+   */
+  async chooseBreakdownField(field: string) {
+    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'hidden',
+    });
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
