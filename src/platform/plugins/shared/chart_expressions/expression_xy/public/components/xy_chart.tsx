@@ -969,7 +969,7 @@ export function XYChart({
             )}
             {yAxesConfiguration.map((axis) => {
               const tickDecimals = axis.formatter
-                ? getDecimalsFromFormatParams(axis.formatter?.params())
+                ? getDecimalsFromFormatParams(axis.formatter.params())
                 : undefined;
 
               return (
