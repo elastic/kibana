@@ -31,8 +31,9 @@ const buildTagPath = (id: string) => buildPath(`${TAGS_API_PATH}/{id}`, { id });
 const toTag = ({ id, data, meta }: TagResponseItem): Tag => {
   return {
     id,
-    managed: meta.managed ?? false,
     ...data,
+    description: data.description ?? '',
+    managed: meta.managed ?? false,
   };
 };
 

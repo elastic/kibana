@@ -83,6 +83,28 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest.delete(`/api/tags/${id}`).expect(204);
     });
 
+    it('creates a tag with a generated color when omitted (201)', async () => {
+      const id = 'created-via-put-no-color';
+      await supertest
+        .put(`/api/tags/${id}`)
+        .send({
+          name: 'created name no color',
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.id).to.eql(id);
+          expect(body.data).to.eql({
+            name: 'created name no color',
+            color: body.data.color,
+          });
+          expect(body.data).to.not.have.property('description');
+          expect(body.data.color).to.match(/^#[0-9a-f]{6}$/i);
+          expect(body.meta).to.have.property('managed', false);
+        });
+
+      await supertest.delete(`/api/tags/${id}`).expect(204);
+    });
+
     it('returns 409 when updating to an existing name', async () => {
       const existingName = 'tag-3';
       await supertest

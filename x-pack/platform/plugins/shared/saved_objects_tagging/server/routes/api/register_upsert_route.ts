@@ -11,7 +11,7 @@ import type { TagsPluginRouter } from '../../types';
 import type { TagAttributes } from '../../../common/types';
 import { handleRouteError } from './error_handler';
 import { getRouteConfig } from './get_route_config';
-import { tagResponseItemSchema, tagAttributesSchema, tagIdParamSchema } from './schemas';
+import { tagResponseItemSchema, tagRequestAttributesSchema, tagIdParamSchema } from './schemas';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 
 export const registerUpsertRoute = (router: TagsPluginRouter) => {
@@ -30,7 +30,7 @@ export const registerUpsertRoute = (router: TagsPluginRouter) => {
       validate: {
         request: {
           params: tagIdParamSchema,
-          body: tagAttributesSchema,
+          body: tagRequestAttributesSchema,
         },
         response: {
           200: {
@@ -68,8 +68,14 @@ export const registerUpsertRoute = (router: TagsPluginRouter) => {
           });
         }
 
+        const attributes: TagAttributes = {
+          name: req.body.name,
+          description: req.body.description ?? '',
+          color: req.body.color,
+        };
+
         try {
-          await tagsClient.update(id, req.body);
+          await tagsClient.update(id, attributes);
           const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, id);
           return res.ok({
             body: {
@@ -80,7 +86,7 @@ export const registerUpsertRoute = (router: TagsPluginRouter) => {
           });
         } catch (e) {
           if (SavedObjectsErrorHelpers.isNotFoundError(e as Error)) {
-            await tagsClient.create(req.body, { id });
+            await tagsClient.create(attributes, { id });
             const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, id);
             return res.created({
               body: {
