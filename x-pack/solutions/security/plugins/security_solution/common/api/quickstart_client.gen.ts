@@ -37,6 +37,10 @@ import type {
   ReviewRuleInstallationResponse,
 } from './detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import type {
+  ReviewRuleUpgradeRequestBodyInput,
+  ReviewRuleUpgradeResponse,
+} from './detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
+import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
   PerformRulesBulkActionResponse,
@@ -3052,6 +3056,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Lists currently installed prebuilt detection rules that have newer versions available.
+   */
+  async reviewRuleUpgrade(props: ReviewRuleUpgradeProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleUpgrade`);
+    return this.kbnClient
+      .request<ReviewRuleUpgradeResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/upgrade/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -4115,6 +4135,9 @@ export interface ResolveTimelineProps {
 }
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;
+}
+export interface ReviewRuleUpgradeProps {
+  body: ReviewRuleUpgradeRequestBodyInput;
 }
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;

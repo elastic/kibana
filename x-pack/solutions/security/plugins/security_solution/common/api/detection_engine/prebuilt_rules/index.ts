@@ -11,7 +11,7 @@ export type * from './install_prebuilt_rules_and_timelines/install_prebuilt_rule
 export * from './perform_rule_installation/perform_rule_installation_route';
 export * from './perform_rule_upgrade/perform_rule_upgrade_route';
 export * from './review_rule_installation/review_rule_installation_route.gen';
-export type * from './review_rule_upgrade/review_rule_upgrade_route';
+export * from './review_rule_upgrade/review_rule_upgrade_route';
 export * from './urls';
 export type * from './model/aggregated_prebuilt_rules_error';
 export * from './model/diff/diffable_rule/diffable_field_types';
