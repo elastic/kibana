@@ -91,12 +91,13 @@ const resolveSourceKind = async (
     // resolved-with-undefined hides both real failures and transient states
     // (data stream being created, cross-cluster permissions propagating, etc.)
     // Evict so the next consumer retries instead of pinning the session-long fallback.
-    pending.then((kind) => {
-      if (kind === undefined && cache.get(name) === pending) cache.delete(name);
-    });
-    pending.catch(() => {
-      if (cache.get(name) === pending) cache.delete(name);
-    });
+    pending
+      .then((kind) => {
+        if (kind === undefined && cache.get(name) === pending) cache.delete(name);
+      })
+      .catch(() => {
+        if (cache.get(name) === pending) cache.delete(name);
+      });
   }
   try {
     return { name, kind: await pending };
