@@ -16,6 +16,7 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { SpanIcon } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { EBT_CLICK_ACTION_VIEW_DEPENDENCY } from '../../../../telemetry/constants';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
@@ -23,6 +24,7 @@ interface DependencyNameLinkProps {
   spanSubtype?: string;
   environment?: string;
   formattedDependencyName?: React.ReactNode;
+  ebt: { element: string; detail: string };
 }
 
 export function DependencyNameLink({
@@ -31,6 +33,7 @@ export function DependencyNameLink({
   spanSubtype,
   environment,
   formattedDependencyName,
+  ebt,
 }: DependencyNameLinkProps) {
   const {
     share: { url: urlService },
@@ -77,7 +80,13 @@ export function DependencyNameLink({
   );
 
   return canViewApm && routeLinkProps ? (
-    <EuiLink {...routeLinkProps} data-test-subj="unifiedDocViewSpanOverviewDependencyNameLink">
+    <EuiLink
+      {...routeLinkProps}
+      data-test-subj="unifiedDocViewSpanOverviewDependencyNameLink"
+      data-ebt-action={EBT_CLICK_ACTION_VIEW_DEPENDENCY}
+      data-ebt-element={ebt.element}
+      data-ebt-detail={ebt.detail}
+    >
       {content}
     </EuiLink>
   ) : (
