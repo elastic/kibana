@@ -8,6 +8,7 @@
 import { Subject, ReplaySubject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
+import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '../../../../mocks';
 import type { ModelProviderMock } from '../../../../test_utils';
@@ -36,7 +37,7 @@ const callHandler = async (
     description: string;
     prompt: string;
     run_in_background?: boolean;
-    effort?: 'low' | 'medium' | 'high';
+    effort?: EffortLevels;
   },
   context: ReturnType<typeof createMockContext>['context']
 ) => tool.handler(params, context) as Promise<{ results: any[] }>;
@@ -178,7 +179,7 @@ describe('createSubagentTool', () => {
       {
         description: 'Summarize data',
         prompt: 'Summarize the following data...',
-        effort: 'high',
+        effort: EffortLevels.high,
       },
       context
     );
