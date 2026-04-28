@@ -148,9 +148,7 @@ export async function pickScoutFlakyRunOrder(
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
 
-  const manifest = JSON.parse(
-    Fs.readFileSync(scoutConfigsPath, 'utf-8')
-  ) as ModuleDiscoveryInfo[];
+  const manifest = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as ModuleDiscoveryInfo[];
 
   const configIndex = indexConfigsByPath(manifest);
   const extraEnv: Record<string, string> = collectEnvFromLabels();
