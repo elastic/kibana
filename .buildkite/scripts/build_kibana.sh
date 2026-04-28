@@ -26,6 +26,6 @@ version="$(jq -r '.version' package.json)"
 linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.zst"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
-tar -xf "$linuxBuild" -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
+tar -xf "$linuxBuild" -I zstd -C "$installDir" --strip=1
 mkdir -p "$KIBANA_BUILD_LOCATION"
 cp -pR install/kibana/. "$KIBANA_BUILD_LOCATION/"
