@@ -54,13 +54,11 @@ export async function create(
     }
   );
 
-  const response = getDashboardCRUResponseBody(
+  return getDashboardCRUResponseBody(
     savedObject,
     'create',
     dashboardStateSchema,
     isDashboardAppRequest,
     serverTiming
   );
-
-  return response;
 }
