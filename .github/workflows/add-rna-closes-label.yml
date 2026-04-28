@@ -12,18 +12,41 @@ jobs:
       contents: read
 
     steps:
-      - name: Label if PR closes an issue on the RNA Program Board
+      - name: Label if PR closes an RnA program issue
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
+          # Heuristic stand-in for "issue is on the RNA Program Board (project 2076)":
+          # any issue in elastic/rna-program, OR any elastic/kibana issue carrying
+          # Feature:AlertingV2. Project-board membership itself isn't readable by
+          # the default GITHUB_TOKEN — Projects v2 are org-owned and require
+          # read:project scope, which the workflow can't grant itself.
           script: |
             const label = "closes:rna";
-            const rnaBoardNumber = 2076;
+            const RNA_REPO = "elastic/rna-program";
+            const KIBANA_REPO = "elastic/kibana";
+            const KIBANA_TRIGGER_LABELS = ["Feature:AlertingV2"];
             const prNumber = context.payload.pull_request.number;
 
             const existingLabels = context.payload.pull_request.labels.map(l => l.name);
             if (existingLabels.includes(label)) {
               return;
             }
+
+            const isRnaIssue = (repoNameWithOwner, issueLabels) => {
+              if (repoNameWithOwner === RNA_REPO) return true;
+              if (repoNameWithOwner === KIBANA_REPO &&
+                  issueLabels.some(name => KIBANA_TRIGGER_LABELS.includes(name))) {
+                return true;
+              }
+              return false;
+            };
+
+            const applyLabel = () => github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: [label],
+            });
 
             const { repository } = await github.graphql(`
               query($owner: String!, $repo: String!, $prNumber: Int!) {
@@ -32,11 +55,8 @@ jobs:
                     body
                     closingIssuesReferences(first: 10) {
                       nodes {
-                        projectItems(first: 20) {
-                          nodes {
-                            project { number }
-                          }
-                        }
+                        repository { nameWithOwner }
+                        labels(first: 30) { nodes { name } }
                       }
                     }
                   }
@@ -50,57 +70,59 @@ jobs:
 
             const pr = repository.pullRequest;
 
-            const isOnRnaBoard = (issue) =>
-              issue.projectItems.nodes.some(item => item.project.number === rnaBoardNumber);
-
             // Check closingIssuesReferences first (works for PRs targeting default branch)
-            if (pr.closingIssuesReferences.nodes.some(isOnRnaBoard)) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                labels: [label],
-              });
+            const matched = pr.closingIssuesReferences.nodes.some(issue =>
+              isRnaIssue(
+                issue.repository.nameWithOwner,
+                issue.labels.nodes.map(l => l.name),
+              )
+            );
+            if (matched) {
+              await applyLabel();
               return;
             }
 
             // Fallback: parse issue references from PR body
             const body = pr.body || "";
-            const pattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)[\s:]*(?:https:\/\/github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)|#(\d+))/gi;
+            const pattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)[\s:]*(?:https:\/\/github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)|([^\s\/#]+\/[^\s\/#]+)#(\d+)|#(\d+))/gi;
             const issueRefs = [];
             let match;
             while ((match = pattern.exec(body)) !== null) {
               if (match[1] && match[2]) {
                 const [owner, repo] = match[1].split("/");
                 issueRefs.push({ owner, repo, number: parseInt(match[2]) });
-              } else if (match[3]) {
-                issueRefs.push({ owner: context.repo.owner, repo: context.repo.repo, number: parseInt(match[3]) });
+              } else if (match[3] && match[4]) {
+                const [owner, repo] = match[3].split("/");
+                issueRefs.push({ owner, repo, number: parseInt(match[4]) });
+              } else if (match[5]) {
+                issueRefs.push({ owner: context.repo.owner, repo: context.repo.repo, number: parseInt(match[5]) });
               }
             }
 
             for (const ref of issueRefs) {
+              const repoNameWithOwner = `${ref.owner}/${ref.repo}`;
+
+              // rna-program: matches without needing label data
+              if (repoNameWithOwner === RNA_REPO) {
+                await applyLabel();
+                return;
+              }
+              if (repoNameWithOwner !== KIBANA_REPO) continue;
+
               try {
                 const { repository: issueRepo } = await github.graphql(`
                   query($owner: String!, $repo: String!, $number: Int!) {
                     repository(owner: $owner, name: $repo) {
                       issue(number: $number) {
-                        projectItems(first: 20) {
-                          nodes {
-                            project { number }
-                          }
-                        }
+                        labels(first: 30) { nodes { name } }
                       }
                     }
                   }
                 `, ref);
 
-                if (isOnRnaBoard(issueRepo.issue)) {
-                  await github.rest.issues.addLabels({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: prNumber,
-                    labels: [label],
-                  });
+                const issueLabels = (issueRepo?.issue?.labels?.nodes || []).map(l => l.name);
+                if (isRnaIssue(repoNameWithOwner, issueLabels)) {
+                  await applyLabel();
                   return;
                 }
               } catch (e) {
