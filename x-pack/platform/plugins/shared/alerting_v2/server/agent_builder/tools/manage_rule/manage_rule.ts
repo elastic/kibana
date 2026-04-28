@@ -49,14 +49,14 @@ Use operations[] to:
     { logger, attachments, esClient }
   ) => {
     try {
-      const existingRecord = previousAttachmentId
+      const persistedRecord = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
         : undefined;
 
-      const isNew = !existingRecord;
+      const isNew = !persistedRecord;
       const attachmentId = previousAttachmentId ?? uuidv4();
 
-      const currentData: Partial<RuleAttachmentData> = existingRecord?.versions.at(-1)?.data ?? {};
+      const currentData: Partial<RuleAttachmentData> = persistedRecord?.versions.at(-1)?.data ?? {};
 
       const updatedData = (await executeRuleOperations(currentData, operations, esClient, {
         isNew,

@@ -121,13 +121,13 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('rule name is required');
     });
 
-    it('updates an existing attachment when ruleAttachmentId is provided', async () => {
+    it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
         versions: [
           {
             data: {
-              metadata: { name: 'Existing Rule' },
+              metadata: { name: 'Persisted Rule' },
               kind: 'alert',
             },
           },
@@ -136,7 +136,7 @@ describe('manageRuleTool', () => {
 
       const result = await tool.handler(
         {
-          ruleAttachmentId: 'existing-id',
+          ruleAttachmentId: 'persisting-id',
           operations: [{ operation: 'set_kind', kind: 'signal' }],
         },
         ctx
