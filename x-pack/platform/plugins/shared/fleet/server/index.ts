@@ -7,7 +7,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
+export { buildAgentRuntimeFields } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
   AgentClient,

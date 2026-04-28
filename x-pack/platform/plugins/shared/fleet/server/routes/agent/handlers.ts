@@ -48,7 +48,7 @@ import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 import { getPackageInfo } from '../../services/epm/packages';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
-import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { buildAgentRuntimeFields } from '../../services/agents/build_status_runtime_field';
 import { appContextService } from '../../services';
 import { AGENTS_INDEX } from '../../constants';
 
@@ -410,7 +410,7 @@ export const getAgentStatusRuntimeFieldHandler: RequestHandler = async (
   request,
   response
 ) => {
-  const runtimeFields = await buildAgentStatusRuntimeField();
+  const runtimeFields = await buildAgentRuntimeFields();
 
   return response.ok({ body: (runtimeFields.status.script as Script)!.source! });
 };
