@@ -1,0 +1,21 @@
+## Publishes OAS docs to Bump for a given commit
+
+agents:
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: "Select commit"
+    commands:
+      - ts-node .buildkite/scripts/serverless/publish_oas/select_commit.ts
+    key: select_commit
+
+  - wait: ~
+
+  - label: "Deploy commit to bump.sh"
+    commands:
+      - bash .buildkite/scripts/serverless/publish_oas/publish_oas.sh
+    key: deploy_to_bump
+    depends_on: select_commit
