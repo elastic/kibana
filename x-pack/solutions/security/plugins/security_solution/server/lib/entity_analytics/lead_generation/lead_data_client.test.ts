@@ -163,6 +163,25 @@ describe('LeadDataClient', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to persist leads'));
     });
+
+    it('re-throws when ES returns security_exception so callers can surface the 403', async () => {
+      const securityException = {
+        statusCode: 403,
+        body: { error: { type: 'security_exception', reason: 'access denied' } },
+        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+      };
+      esClient.bulk.mockRejectedValueOnce(securityException);
+
+      await expect(
+        client.createLeads({
+          leads: [makeTestLead()],
+          executionId: 'exec-5',
+          sourceType: 'adhoc',
+        })
+      ).rejects.toBe(securityException);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('findLeads', () => {
@@ -246,6 +265,29 @@ describe('LeadDataClient', () => {
 
       const result = await client.findLeads({});
       expect(result).toEqual({ leads: [], total: 0, page: 1, perPage: 20 });
+    });
+
+    it('returns empty results when error type is index_not_found_exception', async () => {
+      const indexNotFound = {
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+        meta: { body: { error: { type: 'index_not_found_exception', reason: 'no such index' } } },
+      };
+      esClient.search.mockRejectedValueOnce(indexNotFound);
+
+      const result = await client.findLeads({});
+      expect(result).toEqual({ leads: [], total: 0, page: 1, perPage: 20 });
+    });
+
+    it('re-throws when ES returns security_exception so the route can return 403', async () => {
+      const securityException = {
+        statusCode: 403,
+        body: { error: { type: 'security_exception', reason: 'access denied' } },
+        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+      };
+      esClient.search.mockRejectedValueOnce(securityException);
+
+      await expect(client.findLeads({})).rejects.toBe(securityException);
     });
   });
 
@@ -355,6 +397,29 @@ describe('LeadDataClient', () => {
         totalLeads: 0,
         lastRun: null,
       });
+    });
+
+    it('returns defaults for any generic ES error', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('cluster timeout'));
+
+      const status = await client.getStatus();
+      expect(status).toEqual({
+        isEnabled: false,
+        indexExists: false,
+        totalLeads: 0,
+        lastRun: null,
+      });
+    });
+
+    it('re-throws when ES returns security_exception so the route can return 403', async () => {
+      const securityException = {
+        statusCode: 403,
+        body: { error: { type: 'security_exception', reason: 'access denied' } },
+        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+      };
+      esClient.search.mockRejectedValueOnce(securityException);
+
+      await expect(client.getStatus()).rejects.toBe(securityException);
     });
   });
 
