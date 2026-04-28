@@ -172,10 +172,13 @@ export const gaugeConfigSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema({
-      ...gaugeConfigMetricOptionsSchema,
-      ...gaugeConfigMetricInnerNoESQLOpsSchema,
-    }),
+    metric: mergeAllMetricsWithChartDimensionSchema(
+      {
+        ...gaugeConfigMetricOptionsSchema,
+        ...gaugeConfigMetricInnerNoESQLOpsSchema,
+      },
+      'gaugeMetric'
+    ),
   },
   {
     meta: {

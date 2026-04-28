@@ -418,7 +418,10 @@ export const datatableConfigSchemaNoESQL = schema.object(
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableConfigMetricsOptionsSchema),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        datatableConfigMetricsOptionsSchema,
+        'datatableMetric'
+      ),
       {
         minSize: 1,
         maxSize: 1000,
@@ -430,7 +433,10 @@ export const datatableConfigSchemaNoESQL = schema.object(
      */
     rows: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(datatableConfigRowsOptionsNoESQLSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          datatableConfigRowsOptionsNoESQLSchema,
+          'datatableRow'
+        ),
         {
           minSize: 1,
           maxSize: 50,

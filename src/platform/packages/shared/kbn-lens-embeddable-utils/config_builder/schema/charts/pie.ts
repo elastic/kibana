@@ -156,7 +156,8 @@ export const pieConfigSchemaNoESQL = schema.object(
     styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionConfigPrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema,
+        'pieMetric'
       ),
       {
         minSize: 1,
@@ -166,7 +167,10 @@ export const pieConfigSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'pieGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,

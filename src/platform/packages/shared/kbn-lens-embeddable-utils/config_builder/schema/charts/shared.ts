@@ -24,6 +24,7 @@ import {
   counterRateOperationSchema,
   staticOperationDefinitionSchema,
   formulaOperationDefinitionSchema,
+  METRIC_OP_TITLES,
 } from '../metric_ops';
 import {
   bucketDateHistogramOperationSchema,
@@ -31,6 +32,7 @@ import {
   bucketHistogramOperationSchema,
   bucketRangesOperationSchema,
   bucketFiltersOperationSchema,
+  BUCKET_OP_TITLES,
 } from '../bucket_ops';
 
 export const baseLegendVisibilitySchema = schema.maybe(
@@ -64,24 +66,61 @@ export const legendSizeSchema = schema.maybe(
   )
 );
 
-function mergeWithSimpleMetrics<T extends Props>(baseSchema: T) {
+function ctxMeta(context: string, suffix: string, title: string) {
+  return { meta: { id: `${context}${suffix}`, title } };
+}
+
+function mergeWithSimpleMetrics<T extends Props>(baseSchema: T, context: string) {
   return schema.oneOf([
-    countMetricOperationSchema.extends(baseSchema),
-    uniqueCountMetricOperationSchema.extends(baseSchema),
-    metricOperationSchema.extends(baseSchema),
-    sumMetricOperationSchema.extends(baseSchema),
-    lastValueOperationSchema.extends(baseSchema),
-    percentileOperationSchema.extends(baseSchema),
-    percentileRanksOperationSchema.extends(baseSchema),
+    countMetricOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'CountMetric', METRIC_OP_TITLES.count)
+    ),
+    uniqueCountMetricOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'UniqueCountMetric', METRIC_OP_TITLES.uniqueCount)
+    ),
+    metricOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'StatsMetric', METRIC_OP_TITLES.stats)
+    ),
+    sumMetricOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'SumMetric', METRIC_OP_TITLES.sum)
+    ),
+    lastValueOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'LastValue', METRIC_OP_TITLES.lastValue)
+    ),
+    percentileOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Percentile', METRIC_OP_TITLES.percentile)
+    ),
+    percentileRanksOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'PercentileRanks', METRIC_OP_TITLES.percentileRanks)
+    ),
   ]);
 }
 
-function mergeWithRefrenceBasedMetrics<T extends Props>(baseSchema: T) {
+function mergeWithRefrenceBasedMetrics<T extends Props>(baseSchema: T, context: string) {
   return schema.oneOf([
-    differencesOperationSchema.extends(baseSchema),
-    movingAverageOperationSchema.extends(baseSchema),
-    cumulativeSumOperationSchema.extends(baseSchema),
-    counterRateOperationSchema.extends(baseSchema),
+    differencesOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Differences', METRIC_OP_TITLES.differences)
+    ),
+    movingAverageOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'MovingAverage', METRIC_OP_TITLES.movingAverage)
+    ),
+    cumulativeSumOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'CumulativeSum', METRIC_OP_TITLES.cumulativeSum)
+    ),
+    counterRateOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'CounterRate', METRIC_OP_TITLES.counterRate)
+    ),
   ]);
 }
 
@@ -94,59 +133,93 @@ function mergeWithRefrenceBasedMetrics<T extends Props>(baseSchema: T) {
  * - bucket operations
  */
 
-export function mergeAllMetricsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
+export function mergeAllMetricsWithChartDimensionSchema<T extends Props>(
+  baseSchema: T,
+  context: string
+) {
   return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+    mergeWithSimpleMetrics(baseSchema, context),
+    formulaOperationDefinitionSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Formula', METRIC_OP_TITLES.formula)
+    ),
   ]);
 }
 
 export function mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps<T extends Props>(
-  baseSchema: T
+  baseSchema: T,
+  context: string
 ) {
   return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    mergeWithRefrenceBasedMetrics(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+    mergeWithSimpleMetrics(baseSchema, context),
+    mergeWithRefrenceBasedMetrics(baseSchema, context),
+    formulaOperationDefinitionSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Formula', METRIC_OP_TITLES.formula)
+    ),
   ]);
 }
 
 export function mergeAllMetricsWithChartDimensionSchemaWithTimeBasedAndStaticOps<T extends Props>(
-  baseSchema: T
+  baseSchema: T,
+  context: string
 ) {
   return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    mergeWithRefrenceBasedMetrics(baseSchema),
-    staticOperationDefinitionSchema.extends(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+    mergeWithSimpleMetrics(baseSchema, context),
+    mergeWithRefrenceBasedMetrics(baseSchema, context),
+    staticOperationDefinitionSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Static', METRIC_OP_TITLES.static)
+    ),
+    formulaOperationDefinitionSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Formula', METRIC_OP_TITLES.formula)
+    ),
   ]);
 }
 
 export function mergeAllMetricsWithChartDimensionSchemaWithStaticOps<T extends Props>(
-  baseSchema: T
+  baseSchema: T,
+  context: string
 ) {
   return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    staticOperationDefinitionSchema.extends(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+    mergeWithSimpleMetrics(baseSchema, context),
+    staticOperationDefinitionSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Static', METRIC_OP_TITLES.static)
+    ),
+    formulaOperationDefinitionSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Formula', METRIC_OP_TITLES.formula)
+    ),
   ]);
 }
 
-export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
+export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(
+  baseSchema: T,
+  context: string
+) {
   return schema.oneOf([
-    bucketDateHistogramOperationSchema.extends(baseSchema),
-    bucketTermsOperationSchema.extends(baseSchema),
-    bucketHistogramOperationSchema.extends(baseSchema),
-    bucketRangesOperationSchema.extends(baseSchema),
-    bucketFiltersOperationSchema.extends(baseSchema),
+    bucketDateHistogramOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'DateHistogram', BUCKET_OP_TITLES.dateHistogram)
+    ),
+    bucketTermsOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Terms', BUCKET_OP_TITLES.terms)
+    ),
+    bucketHistogramOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Histogram', BUCKET_OP_TITLES.histogram)
+    ),
+    bucketRangesOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Ranges', BUCKET_OP_TITLES.ranges)
+    ),
+    bucketFiltersOperationSchema.extends(
+      baseSchema,
+      ctxMeta(context, 'Filters', BUCKET_OP_TITLES.filters)
+    ),
   ]);
 }
 

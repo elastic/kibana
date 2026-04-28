@@ -172,7 +172,8 @@ export const heatmapConfigSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     styling: schema.maybe(heatmapStylingSchema),
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      heatmapConfigMetricOptionsSchemaProps
+      heatmapConfigMetricOptionsSchemaProps,
+      'heatmapMetric'
     ),
   },
   {
