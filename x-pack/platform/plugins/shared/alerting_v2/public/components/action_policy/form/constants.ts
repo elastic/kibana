@@ -131,6 +131,61 @@ export const DURATION_UNIT_LABELS: Record<string, string> = {
   }),
 };
 
+export interface EpisodeStatusFilterOption {
+  value: 'active' | 'recovering' | 'pending' | 'inactive';
+  title: string;
+  badgeColor: 'danger' | 'success' | 'warning' | 'default';
+  description: string;
+}
+
+export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
+  {
+    value: 'active',
+    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.active.title', {
+      defaultMessage: 'Active',
+    }),
+    badgeColor: 'danger',
+    description: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.quickFilters.status.active.description',
+      { defaultMessage: 'Episode is confirmed and ongoing' }
+    ),
+  },
+  {
+    value: 'recovering',
+    title: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.quickFilters.status.recovering.title',
+      { defaultMessage: 'Recovering' }
+    ),
+    badgeColor: 'success',
+    description: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.quickFilters.status.recovering.description',
+      { defaultMessage: 'Condition stopped breaching, waiting for confirmation' }
+    ),
+  },
+  {
+    value: 'pending',
+    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.title', {
+      defaultMessage: 'Pending',
+    }),
+    badgeColor: 'warning',
+    description: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.description',
+      { defaultMessage: 'First breach detected, not yet confirmed' }
+    ),
+  },
+  {
+    value: 'inactive',
+    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.title', {
+      defaultMessage: 'Inactive',
+    }),
+    badgeColor: 'default',
+    description: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.description',
+      { defaultMessage: 'Episode is fully resolved' }
+    ),
+  },
+];
+
 export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   name: '',
   description: '',
