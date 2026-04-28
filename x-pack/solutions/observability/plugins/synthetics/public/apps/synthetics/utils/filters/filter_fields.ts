@@ -13,7 +13,12 @@ import type { MonitorFilterState } from '../../state';
 
 export type SyntheticsMonitorFilterField = keyof Omit<
   MonitorFilterState,
-  'query' | 'monitorQueryIds' | 'showFromAllSpaces'
+  | 'query'
+  | 'monitorQueryIds'
+  | 'showFromAllSpaces'
+  | 'filterByDateRange'
+  | 'dateRangeStart'
+  | 'dateRangeEnd'
 >;
 
 export interface LabelWithCountValue {

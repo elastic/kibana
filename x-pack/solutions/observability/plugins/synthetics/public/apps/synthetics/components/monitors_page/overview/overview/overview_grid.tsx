@@ -5,9 +5,13 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
+import { DisplayOptionsPopover } from '../../common/display_options_popover';
+import { selectOverviewPageState } from '../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
@@ -64,7 +68,14 @@ export const OverviewGrid = memo(
           wrap={true}
         >
           <EuiFlexItem grow={true}>
-            <OverviewPaginationInfo total={status ? monitorsSortedByStatus.length : undefined} />
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OverviewPaginationInfo
+                  total={status ? monitorsSortedByStatus.length : undefined}
+                />
+              </EuiFlexItem>
+              <ActiveFiltersBadges />
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ShowAllSpaces />
@@ -85,6 +96,9 @@ export const OverviewGrid = memo(
               <ViewButtons />
             </EuiFlexItem>
           ) : null}
+          <EuiFlexItem grow={false}>
+            <DisplayOptionsPopover />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {/*
           Card view has no built-in refresh indicator, so we surface a thin
@@ -118,4 +132,47 @@ export const OverviewGrid = memo(
       </>
     );
   }
+);
+
+/**
+ * Renders a small info icon next to the "Showing X monitors" pagination info
+ * when a URL-driven filter is narrowing the list. The tooltip explains *why*
+ * the count may be lower than expected (e.g. range filter active) and shows
+ * the actual range. Users clear the filter from Display options — keeping
+ * the indicator informational keeps the toolbar uncluttered.
+ *
+ * Cosmetic localStorage prefs intentionally don't surface here — they don't
+ * change what's on screen, only how it's drawn.
+ */
+const ActiveFiltersBadges: React.FC = () => {
+  const { filterByDateRange, dateRangeStart, dateRangeEnd } = useSelector(selectOverviewPageState);
+
+  if (!filterByDateRange) return null;
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip
+        type="info"
+        color="subdued"
+        position="top"
+        aria-label={INFO_ARIA_LABEL}
+        data-test-subj="syntheticsActiveFilterByDateRangeInfo"
+        content={
+          <FormattedMessage
+            id="xpack.synthetics.overview.activeFilters.filterByDateRangeTooltip"
+            defaultMessage="Showing only monitors with a run between {start} and {end}. Adjust this in Display options."
+            values={{
+              start: <strong>{dateRangeStart || 'now-15m'}</strong>,
+              end: <strong>{dateRangeEnd || 'now'}</strong>,
+            }}
+          />
+        }
+      />
+    </EuiFlexItem>
+  );
+};
+
+const INFO_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.overview.activeFilters.filterByDateRangeAriaLabel',
+  { defaultMessage: 'Filtered by date range' }
 );

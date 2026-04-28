@@ -47,6 +47,7 @@ export interface SyntheticsUrlParams {
   useLogicalAndFor?: UseLogicalAndField[];
   view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
   remoteName?: string;
+  filterByDateRange?: boolean;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -108,6 +109,7 @@ export const getSupportedUrlParams = (params: {
     useLogicalAndFor,
     view,
     remoteName,
+    filterByDateRange,
     browserResourceTypes,
     party,
     issuers,
@@ -149,6 +151,7 @@ export const getSupportedUrlParams = (params: {
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
     remoteName: remoteName || undefined,
+    filterByDateRange: filterByDateRange === 'true' ? true : undefined,
     browserResourceTypes: parseFilters(browserResourceTypes),
     party: parseFilters(party),
     issuers: parseFilters(issuers),

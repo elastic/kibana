@@ -28,6 +28,14 @@ export interface MonitorFilterState {
   configIds?: string[]; // Config IDs (UUIDs)
   showFromAllSpaces?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
+  // When true, the overview list is restricted to monitors that have a final
+  // summary inside `[dateRangeStart, dateRangeEnd]`. When false (default),
+  // the list shows every configured monitor regardless of recent activity —
+  // matching the legacy behavior. The fields are sourced from the page-level
+  // date picker so they stay in sync with the visualizations.
+  filterByDateRange?: boolean;
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
 }
 
 export interface MonitorListPageState extends MonitorFilterState {

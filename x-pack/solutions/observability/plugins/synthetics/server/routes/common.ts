@@ -40,6 +40,10 @@ const CommonQuerySchema = {
   useLogicalAndFor: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
   ),
+  // Optional date-range filter for the overview list (see runtime type docs).
+  filterByDateRange: schema.maybe(schema.boolean()),
+  dateRangeStart: schema.maybe(schema.string()),
+  dateRangeEnd: schema.maybe(schema.string()),
 };
 
 export const QuerySchema = schema.object({
