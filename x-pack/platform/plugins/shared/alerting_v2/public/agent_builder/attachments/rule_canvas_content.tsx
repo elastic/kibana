@@ -44,7 +44,7 @@ export const RuleCanvasContent = ({
   container,
 }: RuleCanvasContentProps) => {
   const { data, origin } = attachment;
-  const isPersisted = Boolean(origin);
+  const isPersisted = hasOrigin(origin);
 
   // Start false so the first effect registers [],
   // matching the canvas_flyout clear effect. The second cycle (mounted=true)
@@ -95,7 +95,7 @@ export const RuleCanvasContent = ({
       return;
     }
 
-    const ruleId = origin!;
+    const ruleId = origin;
 
     registerActionButtons([
       {
@@ -160,4 +160,8 @@ export const RuleCanvasContent = ({
       </RuleProvider>
     </Context.Provider>
   );
+};
+
+const hasOrigin = (origin: string | undefined): origin is string => {
+  return typeof origin === 'string';
 };
