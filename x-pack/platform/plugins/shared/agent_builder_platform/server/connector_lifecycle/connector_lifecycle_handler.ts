@@ -19,7 +19,11 @@ import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plug
 interface ConnectorLifecycleHandlerDeps {
   logger: Logger;
   getStartServices: () => Promise<
-    [CoreStart, { spaces?: SpacesPluginStart; agentContextLayer: AgentContextLayerPluginStart }, unknown]
+    [
+      CoreStart,
+      { spaces?: SpacesPluginStart; agentContextLayer: AgentContextLayerPluginStart },
+      unknown
+    ]
   >;
 }
 

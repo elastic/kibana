@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
+import type {
   AnalyticsServiceStart,
   CoreSetup,
   CoreStart,
@@ -16,10 +20,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
@@ -333,7 +333,10 @@ export class WorkflowsPlugin
       .onStart<{ agentContextLayer: AgentContextLayerPluginStart }>('agentContextLayer')
       .then(({ agentContextLayer }) => {
         if (agentContextLayer.found) {
-          api.setSmlIndexAttachment(agentContextLayer.contract.indexAttachment, this.logger.get('sml'));
+          api.setSmlIndexAttachment(
+            agentContextLayer.contract.indexAttachment,
+            this.logger.get('sml')
+          );
           this.logger.debug(
             'Workflows Management: SML event-driven indexing wired to workflow CRUD'
           );

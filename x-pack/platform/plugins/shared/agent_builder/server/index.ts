@@ -37,7 +37,10 @@ export type {
   SmlIndexAttachmentParams,
 } from '@kbn/agent-context-layer-plugin/server';
 
-export { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-context-layer-plugin/server';
+export {
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+} from '@kbn/agent-context-layer-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
