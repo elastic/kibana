@@ -123,12 +123,12 @@ export const MonitorStatusCol = ({
               <>
                 <EuiText color="text" size="xs">
                   <strong>
-                    {absoluteTimestamps ? timestamp.fromNow() : getShortTimeStamp(timestamp)}
+                    {absoluteTimestamps ? getShortTimeStamp(timestamp) : timestamp.fromNow()}
                   </strong>
                 </EuiText>
                 <EuiHorizontalRule margin="xs" />
                 <EuiText color="ghost" size="xs">
-                  {absoluteTimestamps ? getShortTimeStamp(timestamp) : timestamp.fromNow()}
+                  {absoluteTimestamps ? timestamp.fromNow() : getShortTimeStamp(timestamp)}
                 </EuiText>
               </>
             }

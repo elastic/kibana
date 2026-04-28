@@ -480,19 +480,32 @@ export class OverviewStatusService {
         }
       });
     });
-    // check if any pending config have any up/down location, move it there instead of keeping it in pending and delete it from pending
-    Object.values(pendingConfigs).forEach((pendingMeta) => {
-      if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
-        pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
-        downConfigs[pendingMeta.configId] = pendingMeta;
-        delete pendingConfigs[pendingMeta.configId];
-      } else if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.UP)) {
-        pendingMeta.overallStatus = MONITOR_STATUS_ENUM.UP;
-        pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
-        upConfigs[pendingMeta.configId] = pendingMeta;
-        delete pendingConfigs[pendingMeta.configId];
+    // Reconcile bucket placement: processing order from ES is not
+    // deterministic, so a monitor may land in upConfigs or pendingConfigs
+    // even though a later location flipped overallStatus to DOWN. Walk
+    // every non-down bucket and relocate entries whose overallStatus
+    // disagrees with the bucket they currently sit in.
+    for (const [id, meta] of Object.entries(upConfigs)) {
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
+        meta.locations = movePendingToEnd(meta.locations);
+        downConfigs[id] = meta;
+        delete upConfigs[id];
       }
-    });
+    }
+    for (const [id, meta] of Object.entries(pendingConfigs)) {
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
+        meta.locations = movePendingToEnd(meta.locations);
+        downConfigs[id] = meta;
+        delete pendingConfigs[id];
+      } else if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.UP)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.UP;
+        meta.locations = movePendingToEnd(meta.locations);
+        upConfigs[id] = meta;
+        delete pendingConfigs[id];
+      }
+    }
 
     return {
       up,

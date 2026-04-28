@@ -12,7 +12,13 @@ import { throttle } from 'lodash';
 import { useMonitorHealthColor } from '../../../hooks/use_monitor_health_color';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
-export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+export const LocationsBadge = ({
+  monitor,
+  onLocationClick,
+}: {
+  monitor: OverviewStatusMetaData;
+  onLocationClick?: (locationId: string, locationLabel: string) => void;
+}) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const throttledOpenPopover = useMemo(
@@ -51,6 +57,7 @@ export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData })
           icon: <EuiIcon type="dot" color={getColor(location.status)} />,
           onClick: () => {
             closePopover();
+            onLocationClick?.(location.id, location.label);
           },
           'data-test-subj': `syntheticsLocationsBadgeLocation-${location.label}`,
         };

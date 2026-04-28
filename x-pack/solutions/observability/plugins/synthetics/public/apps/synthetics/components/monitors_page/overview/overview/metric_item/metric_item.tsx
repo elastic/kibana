@@ -242,7 +242,20 @@ export const MetricItem = ({
                 {
                   title: truncateText(monitor.name),
                   subtitle: metricSubtitle,
-                  body: <MetricItemBody monitor={monitor} />,
+                  body: (
+                    <MetricItemBody
+                      monitor={monitor}
+                      onLocationClick={(locId, locLabel) => {
+                        onClick({
+                          locationId: locId,
+                          configId: monitor.configId,
+                          id: monitor.configId,
+                          location: locLabel,
+                          spaces: monitor.spaces,
+                        });
+                      }}
+                    />
+                  ),
                   color: getColor(euiTheme, monitor.isEnabled, status),
                   trendShape: MetricTrendShape.Area,
                   trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],

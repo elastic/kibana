@@ -14,7 +14,13 @@ import { MonitorTypeBadge } from '../../../../common/components/monitor_type_bad
 import * as labels from '../../../management/monitor_list_table/labels';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
-export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+export const MetricItemBody = ({
+  monitor,
+  onLocationClick,
+}: {
+  monitor: OverviewStatusMetaData;
+  onLocationClick?: (locationId: string, locationLabel: string) => void;
+}) => {
   const tags = monitor.tags;
   const history = useHistory();
 
@@ -45,7 +51,7 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
         <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
         {monitor?.locations?.length > 1 && (
           <EuiFlexItem grow={false}>
-            <LocationsBadge monitor={monitor} />
+            <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />
           </EuiFlexItem>
         )}
         {(tags ?? []).length > 0 && (

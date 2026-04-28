@@ -145,7 +145,40 @@ describe('current status route', () => {
           "disabledMonitorQueryIds": Array [],
           "disabledMonitorsCount": 0,
           "down": 1,
-          "downConfigs": Object {},
+          "downConfigs": Object {
+            "id2": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "up",
+                },
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "down",
+                },
+              ],
+              "maintenanceWindows": undefined,
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "overallStatus": "down",
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaces": undefined,
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:19:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+              "urls": undefined,
+            },
+          },
           "enabledMonitorQueryIds": Array [
             "id1",
             "id2",
@@ -170,38 +203,6 @@ describe('current status route', () => {
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "overallStatus": "up",
-              "projectId": "project-id",
-              "schedule": "1",
-              "spaces": undefined,
-              "tags": Array [
-                "tag-1",
-                "tag-2",
-              ],
-              "timestamp": "2022-09-15T16:19:16.724Z",
-              "type": "browser",
-              "updated_at": undefined,
-              "urls": undefined,
-            },
-            "id2": Object {
-              "configId": "id2",
-              "isEnabled": true,
-              "isStatusAlertEnabled": false,
-              "locations": Array [
-                Object {
-                  "id": "asia_japan",
-                  "label": "Asia/Pacific - Japan",
-                  "status": "up",
-                },
-                Object {
-                  "id": "europe_germany",
-                  "label": "Europe - Germany",
-                  "status": "down",
-                },
-              ],
-              "maintenanceWindows": undefined,
-              "monitorQueryId": "id2",
-              "name": "test monitor 2",
-              "overallStatus": "down",
               "projectId": "project-id",
               "schedule": "1",
               "spaces": undefined,
@@ -302,7 +303,40 @@ describe('current status route', () => {
           "disabledMonitorQueryIds": Array [],
           "disabledMonitorsCount": 0,
           "down": 1,
-          "downConfigs": Object {},
+          "downConfigs": Object {
+            "id2": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "up",
+                },
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "down",
+                },
+              ],
+              "maintenanceWindows": undefined,
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "overallStatus": "down",
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaces": undefined,
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:19:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+              "urls": undefined,
+            },
+          },
           "enabledMonitorQueryIds": Array [
             "id1",
             "id2",
@@ -327,38 +361,6 @@ describe('current status route', () => {
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "overallStatus": "up",
-              "projectId": "project-id",
-              "schedule": "1",
-              "spaces": undefined,
-              "tags": Array [
-                "tag-1",
-                "tag-2",
-              ],
-              "timestamp": "2022-09-15T16:19:16.724Z",
-              "type": "browser",
-              "updated_at": undefined,
-              "urls": undefined,
-            },
-            "id2": Object {
-              "configId": "id2",
-              "isEnabled": true,
-              "isStatusAlertEnabled": false,
-              "locations": Array [
-                Object {
-                  "id": "asia_japan",
-                  "label": "Asia/Pacific - Japan",
-                  "status": "up",
-                },
-                Object {
-                  "id": "europe_germany",
-                  "label": "Europe - Germany",
-                  "status": "down",
-                },
-              ],
-              "maintenanceWindows": undefined,
-              "monitorQueryId": "id2",
-              "name": "test monitor 2",
-              "overallStatus": "down",
               "projectId": "project-id",
               "schedule": "1",
               "spaces": undefined,
@@ -564,12 +566,16 @@ describe('current status route', () => {
 
       const result = await service.getOverviewStatus();
 
-      const mon = result.upConfigs.mon1 || result.downConfigs.mon1;
-      expect(mon).toBeDefined();
-      expect(mon.overallStatus).toBe('down');
-      expect(mon.locations).toHaveLength(2);
-      expect(mon.locations.find((l: any) => l.id === usLoc.id)?.status).toBe('up');
-      expect(mon.locations.find((l: any) => l.id === euLoc.id)?.status).toBe('down');
+      expect(result.downConfigs.mon1).toBeDefined();
+      expect(result.upConfigs.mon1).toBeUndefined();
+      expect(result.downConfigs.mon1.overallStatus).toBe('down');
+      expect(result.downConfigs.mon1.locations).toHaveLength(2);
+      expect(result.downConfigs.mon1.locations.find((l: any) => l.id === usLoc.id)?.status).toBe(
+        'up'
+      );
+      expect(result.downConfigs.mon1.locations.find((l: any) => l.id === euLoc.id)?.status).toBe(
+        'down'
+      );
     });
 
     it('moves pending config with a down location to downConfigs', async () => {
@@ -726,14 +732,19 @@ describe('current status route', () => {
 
       const result = await service.getOverviewStatus();
 
-      // down takes precedence since it was promoted from pending -> down
-      const mon = result.downConfigs.mon1 || result.upConfigs.mon1;
-      expect(mon).toBeDefined();
-      expect(mon.overallStatus).toBe('down');
-      expect(mon.locations).toHaveLength(3);
-      expect(mon.locations.find((l: any) => l.id === usLoc.id)?.status).toBe('up');
-      expect(mon.locations.find((l: any) => l.id === euLoc.id)?.status).toBe('down');
-      expect(mon.locations.find((l: any) => l.id === apLoc.id)?.status).toBe('pending');
+      expect(result.downConfigs.mon1).toBeDefined();
+      expect(result.upConfigs.mon1).toBeUndefined();
+      expect(result.downConfigs.mon1.overallStatus).toBe('down');
+      expect(result.downConfigs.mon1.locations).toHaveLength(3);
+      expect(
+        result.downConfigs.mon1.locations.find((l: any) => l.id === usLoc.id)?.status
+      ).toBe('up');
+      expect(
+        result.downConfigs.mon1.locations.find((l: any) => l.id === euLoc.id)?.status
+      ).toBe('down');
+      expect(
+        result.downConfigs.mon1.locations.find((l: any) => l.id === apLoc.id)?.status
+      ).toBe('pending');
     });
   });
 
@@ -1060,11 +1071,10 @@ describe('current status route', () => {
         { id: japanLoc.id, label: japanLoc.label, status: 'up' },
       ]);
 
-      // id2 has up (japan) + down (germany). It stays in upConfigs because of
-      // the existing grouping logic (monitor lands wherever its first
-      // location was), but overallStatus flips to down. The down location
-      // alone should carry the new fields.
-      const mixedMonitor = result.upConfigs.id2;
+      // id2 has up (japan) + down (germany). Post-processing moves it to
+      // downConfigs because at least one location is down.
+      const mixedMonitor = result.downConfigs.id2;
+      expect(mixedMonitor).toBeDefined();
       expect(mixedMonitor.overallStatus).toBe('down');
       expect(mixedMonitor.locations).toEqual([
         { id: japanLoc.id, label: japanLoc.label, status: 'up' },

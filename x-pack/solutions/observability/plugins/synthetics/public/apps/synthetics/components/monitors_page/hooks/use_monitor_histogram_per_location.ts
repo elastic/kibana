@@ -50,24 +50,27 @@ export const useMonitorHistogramPerLocation = ({
   );
 
   const byIdsBuckets = data?.aggregations?.byIds.buckets ?? [];
-  const histogramsById: { [key: string]: Histogram } = {};
 
-  byIdsBuckets.forEach((idBucket) => {
-    idBucket.perLocation.buckets.forEach((locationBucket) => {
-      const uniqId = `${idBucket.key}-${locationBucket.key}`;
-      const points: HistogramPoint[] = [];
-      locationBucket.histogram.buckets.forEach((histogramBucket) => {
-        const timestamp = histogramBucket.key;
-        const down = histogramBucket.totalDown.value ?? 0;
-        points.push({
-          timestamp,
-          up: undefined,
-          down,
+  const histogramsById = useMemo(() => {
+    const result: { [key: string]: Histogram } = {};
+    byIdsBuckets.forEach((idBucket) => {
+      idBucket.perLocation.buckets.forEach((locationBucket) => {
+        const uniqId = `${idBucket.key}-${locationBucket.key}`;
+        const points: HistogramPoint[] = [];
+        locationBucket.histogram.buckets.forEach((histogramBucket) => {
+          const timestamp = histogramBucket.key;
+          const down = histogramBucket.totalDown.value ?? 0;
+          points.push({
+            timestamp,
+            up: undefined,
+            down,
+          });
         });
+        result[uniqId] = { points };
       });
-      histogramsById[uniqId] = { points };
     });
-  });
+    return result;
+  }, [byIdsBuckets]);
 
   return { histogramsById, loading, minInterval };
 };

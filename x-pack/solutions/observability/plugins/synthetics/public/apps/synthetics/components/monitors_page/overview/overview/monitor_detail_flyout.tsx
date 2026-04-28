@@ -269,6 +269,8 @@ export function MonitorDetailFlyout(props: Props) {
     const allConfigs = Object.values({
       ...(overviewStatus.upConfigs ?? {}),
       ...(overviewStatus.downConfigs ?? {}),
+      ...(overviewStatus.pendingConfigs ?? {}),
+      ...(overviewStatus.disabledConfigs ?? {}),
     });
     return allConfigs.find((ov) => ov.configId === configId);
   }, [overviewStatus, configId]);

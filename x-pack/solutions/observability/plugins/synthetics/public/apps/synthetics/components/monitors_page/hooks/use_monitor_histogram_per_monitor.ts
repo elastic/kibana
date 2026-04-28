@@ -49,21 +49,24 @@ export const useMonitorHistogramPerMonitor = ({
   );
 
   const byIdsBuckets = data?.aggregations?.byIds.buckets ?? [];
-  const histogramsById: { [key: string]: Histogram } = {};
 
-  byIdsBuckets.forEach((idBucket) => {
-    const points: HistogramPoint[] = [];
-    idBucket.histogram.buckets.forEach((histogramBucket) => {
-      const timestamp = histogramBucket.key;
-      const down = histogramBucket.totalDown.value ?? 0;
-      points.push({
-        timestamp,
-        up: undefined,
-        down,
+  const histogramsById = useMemo(() => {
+    const result: { [key: string]: Histogram } = {};
+    byIdsBuckets.forEach((idBucket) => {
+      const points: HistogramPoint[] = [];
+      idBucket.histogram.buckets.forEach((histogramBucket) => {
+        const timestamp = histogramBucket.key;
+        const down = histogramBucket.totalDown.value ?? 0;
+        points.push({
+          timestamp,
+          up: undefined,
+          down,
+        });
       });
+      result[idBucket.key] = { points };
     });
-    histogramsById[idBucket.key] = { points };
-  });
+    return result;
+  }, [byIdsBuckets]);
 
   return { histogramsById, loading, minInterval };
 };
