@@ -8,7 +8,6 @@
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { LensByValueSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 import { flattenApiConfig, isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
 
 describe('flattenApiConfig / unflattenAPIConfig', () => {
@@ -26,7 +25,7 @@ describe('flattenApiConfig / unflattenAPIConfig', () => {
     expect(flat.type).toBe('xy');
     expect(flat.title).toBe('Panel');
 
-    const back = unflattenAPIConfig(flat as unknown as FlattenedLensByValuePanelSchema);
+    const back = unflattenAPIConfig(flat);
     expect(back.title).toBe('Panel');
     expect(back.attributes).toEqual(chartFields);
   });
