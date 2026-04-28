@@ -168,7 +168,9 @@ describe('verifier_policy_cleanup', () => {
         state: {},
         params: {},
       });
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Scheduled recurring task'));
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Scheduled recurring task')
+      );
     });
 
     it('logs when scheduling fails', async () => {

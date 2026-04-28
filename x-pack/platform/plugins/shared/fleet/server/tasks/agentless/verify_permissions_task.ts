@@ -24,7 +24,7 @@ import { getPackageInfo } from '../../services/epm/packages';
 import { ensureInstalledPackage } from '../../services/epm/packages/install';
 import { throwIfAborted } from '../utils';
 
-import { runVerifierPolicyCleanup, VERIFICATION_TTL_MS } from './verifier_policy_cleanup';
+import { VERIFICATION_TTL_MS } from './verifier_policy_cleanup';
 
 const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
@@ -34,7 +34,7 @@ const TASK_INTERVAL = '12h';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
 /** Buffer added to VERIFICATION_TTL_MS when computing `runAt` for the next run, so
- *  Phase 1 cleanup reliably sees the just-created verifier as expired on the
+ *  the verifier-policy cleanup task reliably sees the just-created verifier as expired on the
  *  next fire (protects against clock skew and task-manager polling jitter). */
 const RESCHEDULE_BUFFER_MS = 30 * 1000;
 
@@ -95,9 +95,7 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  * Task flow (fires on a 12 h cron, and self-reschedules at VERIFICATION_TTL_MS
  * cadence whenever additional work remains):
  *
- * Phase 1 - Cleanup: Delegates to runVerifierPolicyCleanup (also invoked by
- *           fleet:verifier_policy_cleanup on a 5 m interval). Deletes verifier
- *           policies past {@link VERIFICATION_TTL_MS}.
+ * Phase 1 - Gate: If a non-expired verifier agent policy exists, skip this run.
  *
  * Phase 2 - Pre-filter: Fetch package policies with cloud_connector_id to build
  *           a map of connector ID -> package policy IDs. Then fetch only the
@@ -116,8 +114,8 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  *
  * Returns `shouldReschedule: true` if there is still work to do: a gating
  * verifier that will expire soon, additional eligible connectors waiting their
- * turn, or a verifier policy was just created (so phase-1 cleanup can run after
- * TTL without waiting for the 12 h cron). The caller uses this to return
+ * turn, or a verifier policy was just created (so fleet:verifier_policy_cleanup
+ * can remove it after TTL without waiting for the 12 h cron). The caller uses this to return
  * `runAt = now + TTL` so task manager fires the task again without waiting for
  * the 12 h cron.
  */
@@ -136,13 +134,10 @@ async function runPermissionVerifierTask(
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
 
-  // Phase 1: Cleanup expired verifier policies before creating new ones
-  await runVerifierPolicyCleanup(abortController);
-
   try {
     throwIfAborted(abortController);
 
-    // Gate check: only one verifier deployment at a time.
+    // Phase 1 — Gate: only one verifier deployment at a time.
     // If a non-expired verifier policy still exists, skip this run.
     const saveObjectType = await getAgentPolicySavedObjectType();
     const activeVerifiers = await agentPolicyService.list(soClient, {
@@ -267,8 +262,8 @@ async function runPermissionVerifierTask(
     );
 
     // Reschedule when more connectors need verification, or when we created a
-    // verifier deployment so phase-1 cleanup runs after TTL (otherwise a
-    // single-connector run would fall back to the 12 h interval and leave the
+    // verifier deployment so fleet:verifier_policy_cleanup can remove it after TTL
+    // (otherwise a single-connector run would fall back to the 12 h interval and leave the
     // verifier policy orphaned until then).
     return { shouldReschedule: hasMoreEligible || verifierPolicyCreated };
   } catch (error) {
