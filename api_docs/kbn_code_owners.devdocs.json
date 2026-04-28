@@ -32,7 +32,7 @@
           "(owner: string) => \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -50,7 +50,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -413,7 +413,9 @@
             "type": "Array",
             "tags": [],
             "label": "search",
-            "description": [],
+            "description": [
+              "\nArea mappings for code owners"
+            ],
             "signature": [
               "string[]"
             ],
@@ -429,7 +431,9 @@
             "type": "Array",
             "tags": [],
             "label": "observability",
-            "description": [],
+            "description": [
+              "\nArea mappings for code owners"
+            ],
             "signature": [
               "string[]"
             ],
@@ -445,7 +449,9 @@
             "type": "Array",
             "tags": [],
             "label": "security",
-            "description": [],
+            "description": [
+              "\nArea mappings for code owners"
+            ],
             "signature": [
               "string[]"
             ],
@@ -461,12 +467,14 @@
             "type": "Array",
             "tags": [],
             "label": "workplaceai",
-            "description": [],
+            "description": [
+              "\nArea mappings for code owners"
+            ],
             "signature": [
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

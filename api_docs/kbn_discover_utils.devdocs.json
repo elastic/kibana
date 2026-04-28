@@ -94,6 +94,7 @@
                 "lineNumber": 30,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuItemType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -167,6 +168,7 @@
                 "lineNumber": 39,
                 "columnNumber": 54,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuPopoverItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -221,6 +223,7 @@
                 "lineNumber": 53,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuItemType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -330,6 +333,7 @@
                 "lineNumber": 69,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuPrimaryActionItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -403,6 +407,7 @@
                 "lineNumber": 78,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuPopoverItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -504,6 +509,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsHitRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -530,6 +536,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -740,6 +747,7 @@
                     "lineNumber": 54,
                     "columnNumber": 20,
                     "deprecated": false,
+                    "docsReferencedTypeName": "DataTableRecord",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1280,6 +1288,7 @@
             "lineNumber": 31,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "DegradedDocsControlProps",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1327,6 +1336,7 @@
             "lineNumber": 36,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "LogsContextServiceDeps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1391,6 +1401,7 @@
             "lineNumber": 25,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1442,6 +1453,7 @@
             "lineNumber": 93,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DiscoverFlyouts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1526,6 +1538,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DiscoverFlyouts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1723,6 +1736,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsHitRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1748,6 +1762,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormatsStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1774,6 +1789,7 @@
             "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1800,6 +1816,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1826,6 +1843,7 @@
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormatsContentType",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1903,6 +1921,7 @@
             "lineNumber": 100,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatFieldValueReactParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1946,6 +1965,7 @@
             "lineNumber": 122,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatFieldValueTextParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2040,6 +2060,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2063,6 +2084,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2086,6 +2108,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ShouldShowFieldInTableHandler",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2126,6 +2149,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormatsStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2187,6 +2211,7 @@
             "lineNumber": 38,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2238,6 +2263,7 @@
             "lineNumber": 22,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "TraceFields",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2498,6 +2524,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AggregateQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2742,6 +2769,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2817,6 +2845,7 @@
             "lineNumber": 76,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3030,6 +3059,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3150,6 +3180,7 @@
             "lineNumber": 21,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "LogDocumentOverview",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3298,6 +3329,7 @@
             "lineNumber": 117,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevelCoalescedValue",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3351,6 +3383,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevelCoalescedValue",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3369,6 +3402,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3420,6 +3454,7 @@
             "lineNumber": 19,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "LogDocumentOverview",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3580,6 +3615,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3704,6 +3740,7 @@
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3792,6 +3829,7 @@
             "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SortInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3815,6 +3853,7 @@
             "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4023,6 +4062,7 @@
             "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4042,6 +4082,7 @@
             "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4110,6 +4151,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4197,6 +4239,7 @@
             "lineNumber": 50,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4305,6 +4348,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4328,6 +4372,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewsServicePublic",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5749,6 +5794,7 @@
                 "lineNumber": 36,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "RowControlComponent",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5772,6 +5818,7 @@
                 "lineNumber": 36,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "RowControlRowProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7269,6 +7316,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DiscoverAppMenuRunActionParams",
             "trackAdoption": false
           }
         ],
@@ -8199,6 +8247,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {

@@ -21,6 +21,11 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM });
     });
 
+    test.beforeEach(async ({ pageObjects }) => {
+      // Navigate to a stable tab first to avoid race conditions
+      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
+    });
+
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       await apiServices.streams.deleteStream(CLASSIC_STREAM);
       await logsSynthtraceEsClient.clean();
@@ -28,11 +33,10 @@ test.describe(
 
     test('should NOT show Advanced tab for viewer role on classic stream', async ({
       browserAuth,
-      pageObjects,
       page,
     }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
+      await page.reload();
 
       // Verify the Advanced tab is not visible for viewer
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
@@ -40,11 +44,10 @@ test.describe(
 
     test('should NOT show Advanced tab for editor role on classic stream', async ({
       browserAuth,
-      pageObjects,
       page,
     }) => {
       await browserAuth.loginAs('editor');
-      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
+      await page.reload();
 
       // Verify the Advanced tab is not visible for editor
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
@@ -56,7 +59,7 @@ test.describe(
       page,
     }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoAdvancedTab(CLASSIC_STREAM);
+      await page.reload();
 
       // Verify the Advanced tab is visible for admin
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();

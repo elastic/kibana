@@ -14,8 +14,7 @@ import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/type
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { SupportedDataType } from '../types';
 
-/** Matches a trailing comma (with optional whitespace) at end of text — used to detect "starting a new argument/expression" */
-export const TRAILING_COMMA_REGEX = /,\s*$/;
+export { getTrailingIdentifier } from './regex';
 
 export const techPreviewLabel = i18n.translate(
   'kbn-esql-language.esql.autocomplete.techPreviewLabel',
@@ -163,13 +162,6 @@ export function unescapeColumnName(columnName: string) {
     return columnName.slice(1, -1).replace(/``/g, '`');
   }
   return columnName;
-}
-
-/** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
-export function getTrailingIdentifier(text: string): string | undefined {
-  const match = text.match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
-
-  return match ? match[1] : undefined;
 }
 
 /**
