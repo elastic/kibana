@@ -78,10 +78,18 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
   const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
+
+  // If recoveryId is set we use an inclusive lower bound because we are recovering
+  //  from a previous extraction and we don't want to miss any logs from the previous window
+  //
+  // If logsPageCursorStart is not set we use a inclusive lower bound because we are starting a new extraction
+  // and we want to include all logs from the new window
+  const inclusiveLowerBound = recoveryId || !logsPageCursorStart ? true : false;
+
   const baseWhere = `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE 
-      ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+      ${TIMESTAMP_FIELD} ${inclusiveLowerBound ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
       AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
 

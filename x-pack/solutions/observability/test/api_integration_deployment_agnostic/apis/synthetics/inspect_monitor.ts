@@ -28,6 +28,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const config = getService('config');
+    const kibanaServerUrl = `${config.get('servers.kibana.protocol')}://${config.get(
+      'servers.kibana.hostname'
+    )}:${config.get('servers.kibana.port')}`;
 
     let _monitors: MonitorFields[];
     let editorUser: RoleCredentials;
@@ -117,6 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ipv4: true,
                       ipv6: true,
                       fields: {
+                        kibanaUrl: kibanaServerUrl,
                         meta: { space_id: ['default'] },
                         'monitor.interval': 300,
                       },
@@ -187,6 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       throttling: { download: 5, upload: 3, latency: 20 },
                       original_space: 'default',
                       fields: {
+                        kibanaUrl: kibanaServerUrl,
                         meta: { space_id: ['default'] },
                         'monitor.interval': 600,
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
@@ -242,6 +248,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       delete compiledStream.id;
       delete compiledStream.processors[0].add_fields.fields.config_id;
+      delete compiledStream.processors[0].add_fields.fields.kibanaUrl;
 
       expect(enabledStream?.vars?.password.value).eql(
         '"-----BEGIN CERTIFICATE-----\n\nMIICMzBgNV\n\n\npAqEAJlQND\n\n-----END CERTIFICATE-----"'

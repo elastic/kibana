@@ -186,9 +186,11 @@ export const AgentTools: React.FC = () => {
   const handleRemoveToolWithDeselect = useCallback(
     (tool: ToolDefinition) => {
       handleRemoveTool(tool);
-      setSelectedToolId(null);
+      if (tool.id === selectedToolId) {
+        setSelectedToolId(null);
+      }
     },
-    [handleRemoveTool, setSelectedToolId]
+    [handleRemoveTool, selectedToolId, setSelectedToolId]
   );
 
   /** Guarded removal: only prevents removing auto-included tools from the agent. */

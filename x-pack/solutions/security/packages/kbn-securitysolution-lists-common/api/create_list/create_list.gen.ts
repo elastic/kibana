@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ListId,
@@ -25,16 +25,18 @@ import {
 } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
+export const CreateListRequestBody = lazySchema(() =>
+  z.object({
+    id: ListId.optional(),
+    name: ListName,
+    description: ListDescription,
+    type: ListType,
+    meta: ListMetadata.optional(),
+    version: z.number().int().min(1).optional().default(1),
+  })
+);
 export type CreateListRequestBody = z.infer<typeof CreateListRequestBody>;
-export const CreateListRequestBody = z.object({
-  id: ListId.optional(),
-  name: ListName,
-  description: ListDescription,
-  type: ListType,
-  meta: ListMetadata.optional(),
-  version: z.number().int().min(1).optional().default(1),
-});
 export type CreateListRequestBodyInput = z.input<typeof CreateListRequestBody>;
 
+export const CreateListResponse = lazySchema(() => List);
 export type CreateListResponse = z.infer<typeof CreateListResponse>;
-export const CreateListResponse = List;
