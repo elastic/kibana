@@ -9,6 +9,10 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type {
+  SmlIndexAction,
+  SmlIndexAttachmentParams,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
@@ -45,8 +49,6 @@ import type {
 import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
-
-import type { SmlIndexAttachmentParams, SmlIndexAction } from '@kbn/agent-context-layer-plugin/server';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 

@@ -12,7 +12,8 @@ import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
 const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
+    if (key === AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      return experimentalFeaturesEnabled;
     return undefined;
   }),
 });
@@ -63,7 +64,10 @@ describe('createConnectorLifecycleHandler', () => {
       const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
       });
 
       await handler.onPostCreate(createBaseParams({ wasSuccessful: false }) as any);
@@ -88,7 +92,10 @@ describe('createConnectorLifecycleHandler', () => {
       const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
       });
 
       await handler.onPostCreate(createBaseParams() as any);
@@ -107,7 +114,10 @@ describe('createConnectorLifecycleHandler', () => {
       agentContextLayer.indexAttachment.mockRejectedValue(new Error('SML error'));
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
       });
 
       await expect(handler.onPostCreate(createBaseParams() as any)).resolves.toBeUndefined();
@@ -123,7 +133,10 @@ describe('createConnectorLifecycleHandler', () => {
       const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
       });
 
       await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
@@ -142,7 +155,10 @@ describe('createConnectorLifecycleHandler', () => {
       agentContextLayer.indexAttachment.mockRejectedValue(new Error('SML delete error'));
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
       });
 
       await expect(
