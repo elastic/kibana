@@ -52,7 +52,9 @@ describe('Enrollment token page', () => {
 
   it('Delete Token - inactivates the token', () => {
     cy.visit('app/fleet/enrollment-tokens');
-    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).find('.euiTableRow').should('have.length.at.least', 1);
+    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE)
+      .find('.euiTableRow')
+      .should('have.length.at.least', 1);
 
     // Open the per-row actions menu and click revoke
     cy.getBySel(ENROLLMENT_TOKENS.TABLE_ACTIONS_MENU).first().click();
@@ -63,6 +65,8 @@ describe('Enrollment token page', () => {
     // Default filter is "Active", so the revoked token should disappear from the list.
     // Switch to "Inactive" to verify it was revoked.
     cy.getBySel(ENROLLMENT_TOKENS.FILTER_INACTIVE).click();
-    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).find('.euiTableRow').should('have.length.at.least', 1);
+    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE)
+      .find('.euiTableRow')
+      .should('have.length.at.least', 1);
   });
 });
