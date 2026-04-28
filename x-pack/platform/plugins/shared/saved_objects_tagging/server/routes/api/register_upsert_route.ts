@@ -11,7 +11,7 @@ import type { TagsPluginRouter } from '../../types';
 import type { TagAttributes } from '../../../common/types';
 import { handleRouteError } from './error_handler';
 import { getRouteConfig } from './get_route_config';
-import { tagResponseItemSchema, tagRequestAttributesSchema, tagIdParamSchema } from './schemas';
+import { tagResponseItemSchema, tagAttributesSchema, tagIdParamSchema } from './schemas';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 
 export const registerUpsertRoute = (router: TagsPluginRouter) => {
@@ -30,7 +30,7 @@ export const registerUpsertRoute = (router: TagsPluginRouter) => {
       validate: {
         request: {
           params: tagIdParamSchema,
-          body: tagRequestAttributesSchema,
+          body: tagAttributesSchema,
         },
         response: {
           200: {
@@ -77,10 +77,14 @@ export const registerUpsertRoute = (router: TagsPluginRouter) => {
         try {
           await tagsClient.update(id, attributes);
           const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, id);
+          const { description, ...restAttributes } = savedObject.attributes;
           return res.ok({
             body: {
               id: savedObject.id,
-              data: savedObject.attributes,
+              data: {
+                ...restAttributes,
+                ...(description ? { description } : {}),
+              },
               meta: getMeta(savedObject),
             },
           });
@@ -88,10 +92,14 @@ export const registerUpsertRoute = (router: TagsPluginRouter) => {
           if (SavedObjectsErrorHelpers.isNotFoundError(e as Error)) {
             await tagsClient.create(attributes, { id });
             const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, id);
+            const { description, ...restAttributes } = savedObject.attributes;
             return res.created({
               body: {
                 id: savedObject.id,
-                data: savedObject.attributes,
+                data: {
+                  ...restAttributes,
+                  ...(description ? { description } : {}),
+                },
                 meta: getMeta(savedObject),
               },
             });

@@ -49,10 +49,14 @@ export const registerReadRoute = (router: TagsPluginRouter) => {
       try {
         const { client } = (await ctx.core).savedObjects;
         const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, id);
+        const { description, ...restAttributes } = savedObject.attributes;
         return res.ok({
           body: {
             id: savedObject.id,
-            data: savedObject.attributes,
+            data: {
+              ...restAttributes,
+              ...(description ? { description } : {}),
+            },
             meta: getMeta(savedObject),
           },
         });

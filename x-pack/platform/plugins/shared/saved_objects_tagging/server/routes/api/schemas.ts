@@ -28,7 +28,7 @@ export const tagIdParamSchema = schema.object(
   }
 );
 
-export const tagRequestAttributesSchema = schema.object(
+export const tagAttributesSchema = schema.object(
   {
     name: schema.string({
       meta: {
@@ -53,26 +53,15 @@ export const tagRequestAttributesSchema = schema.object(
   {
     unknowns: 'forbid',
     meta: {
-      id: 'kbn-tags-request-attributes',
-      title: 'Tag request attributes',
-      description: 'The request body used to create or upsert a tag.',
+      id: 'kbn-tags-attributes',
     },
   }
-);
-
-export const tagDataSchema = schema.object(
-  {
-    name: schema.string(),
-    description: schema.string(),
-    color: schema.string(),
-  },
-  { unknowns: 'forbid' }
 );
 
 export const tagResponseItemSchema = schema.object(
   {
     id: schema.string(),
-    data: tagDataSchema,
+    data: tagAttributesSchema,
     meta: asCodeMetaSchema,
   },
   { unknowns: 'forbid' }

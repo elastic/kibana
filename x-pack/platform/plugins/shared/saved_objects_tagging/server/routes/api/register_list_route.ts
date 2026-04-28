@@ -54,11 +54,18 @@ export const registerListRoute = (router: TagsPluginRouter) => {
         }
         await pitFinder.close();
 
-        const tags = results.map((savedObject) => ({
-          id: savedObject.id,
-          data: savedObject.attributes,
-          meta: getMeta(savedObject),
-        }));
+        const tags = results.map((savedObject) => {
+          const { description, ...restAttributes } = savedObject.attributes;
+
+          return {
+            id: savedObject.id,
+            data: {
+              ...restAttributes,
+              ...(description ? { description } : {}),
+            },
+            meta: getMeta(savedObject),
+          };
+        });
 
         return res.ok({
           body: {

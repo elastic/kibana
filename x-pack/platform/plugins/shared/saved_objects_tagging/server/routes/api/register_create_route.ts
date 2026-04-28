@@ -10,7 +10,7 @@ import type { TagsPluginRouter } from '../../types';
 import type { TagAttributes } from '../../../common/types';
 import { handleRouteError } from './error_handler';
 import { getRouteConfig } from './get_route_config';
-import { tagResponseItemSchema, tagRequestAttributesSchema } from './schemas';
+import { tagResponseItemSchema, tagAttributesSchema } from './schemas';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 
 export const registerCreateRoute = (router: TagsPluginRouter) => {
@@ -28,7 +28,7 @@ export const registerCreateRoute = (router: TagsPluginRouter) => {
       version: routeVersion,
       validate: {
         request: {
-          body: tagRequestAttributesSchema,
+          body: tagAttributesSchema,
         },
         response: {
           201: {
@@ -67,10 +67,14 @@ export const registerCreateRoute = (router: TagsPluginRouter) => {
           color: req.body.color,
         });
         const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, tag.id);
+        const { description, ...restAttributes } = savedObject.attributes;
         return res.created({
           body: {
             id: savedObject.id,
-            data: savedObject.attributes,
+            data: {
+              ...restAttributes,
+              ...(description ? { description } : {}),
+            },
             meta: getMeta(savedObject),
           },
         });
