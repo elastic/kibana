@@ -9,7 +9,10 @@ import type { RelationshipIntegrationConfig } from '../engine/types';
 import { getIndexPattern as elasticDefendIndexPattern } from './integrations/elastic_defend/constants';
 import { getIndexPattern as awsCloudtrailAccessesIndexPattern } from './integrations/aws_cloudtrail/constants';
 import { getIndexPattern as systemAuthIndexPattern } from './integrations/system_auth/constants';
-import { getIndexPattern as systemSecurityIndexPattern, EXCLUDED_USERNAMES } from './integrations/system_security/constants';
+import {
+  getIndexPattern as systemSecurityIndexPattern,
+  EXCLUDED_USERNAMES,
+} from './integrations/system_security/constants';
 
 export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {

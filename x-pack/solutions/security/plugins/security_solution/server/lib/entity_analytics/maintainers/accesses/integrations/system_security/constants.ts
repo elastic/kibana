@@ -9,9 +9,4 @@ export function getIndexPattern(namespace: string): string {
   return `logs-system.security-${namespace}`;
 }
 
-export const EXCLUDED_USERNAMES = [
-  'SYSTEM',
-  'LOCAL SERVICE',
-  'NETWORK SERVICE',
-  'ANONYMOUS LOGON',
-];
+export const EXCLUDED_USERNAMES = ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'ANONYMOUS LOGON'];
