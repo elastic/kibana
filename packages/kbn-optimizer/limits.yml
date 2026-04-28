@@ -2,13 +2,13 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilder: 48000
-  agentBuilderPlatform: 8737
+  agentBuilderPlatform: 8886
   agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
   alertingVTwo: 47881
-  apm: 26000
+  apm: 27979
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -155,7 +155,7 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 9695
+  searchInferenceEndpoints: 13404
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -177,7 +177,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 15434
+  streams: 15433
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
