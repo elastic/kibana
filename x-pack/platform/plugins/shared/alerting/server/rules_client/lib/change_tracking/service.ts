@@ -33,18 +33,20 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   constructor(logger: Logger, kibanaVersion: string) {
     this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
-    this.logger = logger;
+    this.logger = logger.get('change_tracking');
     this.kibanaVersion = kibanaVersion;
     this.modules = [];
   }
 
   register(module: RuleTypeSolution) {
-    if (!this.modules.includes(module)) {
-      this.modules.push(module);
-      const { dataset, logger, kibanaVersion } = this;
-      const client = new ChangeHistoryClient({ module, dataset, logger, kibanaVersion });
-      this.clients[module] = client;
+    if (this.modules.includes(module)) {
+      return;
     }
+    this.modules.push(module);
+    const { dataset, logger, kibanaVersion } = this;
+    const client = new ChangeHistoryClient({ module, dataset, logger, kibanaVersion });
+    this.clients[module] = client;
+    this.logger.debug(`Change tracking registered for [${module}, ${this.dataset}]`);
   }
 
   isInitialized(module: RuleTypeSolution) {
@@ -52,8 +54,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
   }
 
   initialize(elasticsearchClient: ElasticsearchClient) {
-    this.logger.debug(`ChangeTrackingService.initialize(esClient)`);
-    void this.initializeAll(elasticsearchClient).catch((err) => this.logger.error(err));
+    this.logger.debug(`Initializing change tracking..`);
+    void this.initializeAll(elasticsearchClient).catch((cause) => {
+      const error = new Error(
+        `Unexpected failure initializing change tracking for [${this.dataset}]`,
+        { cause }
+      );
+      this.logger.error(error);
+    });
   }
 
   async initializeAll(elasticsearchClient: ElasticsearchClient) {
@@ -61,6 +69,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
     for (const [module, client] of Object.entries(this.clients)) {
       try {
         await client.initialize(elasticsearchClient);
+        this.logger.info(`Change tracking initialized for [${module}, ${this.dataset}]`);
       } catch (cause) {
         const error = new Error(
           `Unable to initialize change tracking for [${module}, ${this.dataset}]`,
@@ -93,11 +102,12 @@ export class ChangeTrackingService implements IChangeTrackingService {
     for (const module of groups.keys()) {
       const client = this.clients[module];
       const groupedChanges = groups.get(module);
+      const count = groupedChanges?.length ?? 0;
       if (!client) {
         const error = new Error(
-          `Unable to log changes. Change history client not initialized for [${module}, ${this.dataset}]`
+          `Unable to log changes. Change history client not initialized for [${module}, ${this.dataset}] correlationId=${correlationId}; dropped ${count} change(s)`
         );
-        this.logger.error(error);
+        this.logger.warn(error);
         continue;
       }
       if (groupedChanges) {
@@ -108,10 +118,13 @@ export class ChangeTrackingService implements IChangeTrackingService {
             fieldsToIgnore: ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
             fieldsToHash: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
           });
+          this.logger.trace(
+            `Logged ${groupedChanges.length} change/s to history stream for [${module}, ${this.dataset}] correlationId=${correlationId}`
+          );
         } catch (err) {
           // Just catch the error.
           const error = new Error(
-            `Error saving change history for [${module}, ${this.dataset}]: ${err}`,
+            `Error saving change history for [${module}, ${this.dataset}], missing ${count} change(s) with correlationId=${correlationId}: ${err}`,
             { cause: err }
           );
           this.logger.error(error);
@@ -131,7 +144,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
       const error = new Error(
         `Unable to get history. Change history client not initialized for [${module}, ${this.dataset}]`
       );
-      this.logger.error(error);
+      this.logger.warn(error.message);
       throw error;
     }
     return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, opts);

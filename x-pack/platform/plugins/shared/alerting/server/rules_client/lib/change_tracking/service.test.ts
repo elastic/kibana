@@ -65,12 +65,14 @@ describe('ChangeTrackingService', () => {
       service.register('stack');
       service.register('stack');
       expect(ChangeHistoryClientMock).toHaveBeenCalledTimes(1);
-      expect(ChangeHistoryClientMock).toHaveBeenCalledWith({
-        module: 'stack',
-        dataset: 'alerting-rules',
-        logger,
-        kibanaVersion,
-      });
+      expect(ChangeHistoryClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          module: 'stack',
+          dataset: 'alerting-rules',
+          logger: expect.objectContaining({ context: ['change_tracking'] }),
+          kibanaVersion,
+        })
+      );
     });
 
     it('creates distinct clients for different modules', () => {
@@ -204,7 +206,9 @@ describe('ChangeTrackingService', () => {
       await expect(service.logBulk([change], baseOpts)).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Error saving change history for [stack, alerting-rules]: Error: es down',
+          message: expect.stringMatching(
+            /^Error saving change history for \[stack, alerting-rules\], missing 1 change\(s\) with correlationId=[a-f0-9]{32}: Error: es down$/
+          ),
         })
       );
     });
@@ -223,6 +227,14 @@ describe('ChangeTrackingService', () => {
       await service.logBulk([change], baseOpts);
 
       expect(stackClient.logBulk).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringMatching(
+            /^Unable to log changes\. Change history client not initialized for \[security, alerting-rules\] correlationId=[a-f0-9]{32}; dropped 1 change\(s\)$/
+          ),
+        })
+      );
     });
   });
 
@@ -242,15 +254,13 @@ describe('ChangeTrackingService', () => {
       );
     });
 
-    it('throws and logs when the module has no client', async () => {
+    it('throws when the module has no client (logs at debug, not error, to avoid duplicate logging in callers)', async () => {
       await expect(service.getHistory('stack', 'default', 'rule-1', {})).rejects.toThrow(
         'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
       );
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message:
-            'Unable to get history. Change history client not initialized for [stack, alerting-rules]',
-        })
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
       );
     });
   });

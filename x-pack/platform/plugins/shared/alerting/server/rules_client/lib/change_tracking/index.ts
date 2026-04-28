@@ -6,5 +6,5 @@
  */
 
 export * from './service';
-export * from './types';
 export * from './constants';
+export type * from './types';

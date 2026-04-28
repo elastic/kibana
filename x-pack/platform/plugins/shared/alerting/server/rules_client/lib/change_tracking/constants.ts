@@ -15,8 +15,8 @@ export const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
     nextRun: true,
     scheduledTaskId: true,
   },
-};
+} as const;
 
 export const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
   attributes: { apiKey: true, uiamApiKey: true },
-};
+} as const;
