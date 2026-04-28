@@ -254,12 +254,12 @@ describe('ChangeTrackingService', () => {
       );
     });
 
-    it('throws when the module has no client (logs at debug, not error, to avoid duplicate logging in callers)', async () => {
+    it('throws when the module has no client and adds a warning to the logs', async () => {
       await expect(service.getHistory('stack', 'default', 'rule-1', {})).rejects.toThrow(
         'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
       );
       expect(logger.error).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
       );
     });
