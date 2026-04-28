@@ -8,25 +8,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { getRandomColor } from '../../../common';
 
-export const tagIdParamSchema = schema.object(
-  {
-    id: schema.string({
-      meta: {
-        description: 'The tag identifier, as returned by the create or list endpoints.',
-      },
-    }),
-  },
-  {
-    unknowns: 'forbid',
+export const tagIdParamSchema = schema.object({
+  id: schema.string({
     meta: {
-      id: 'kbn-tags-id-params',
-      title: 'Tag ID parameters',
-      description: 'Path parameters for tag routes that operate on a single tag.',
+      description: 'The tag identifier, as returned by the create or list endpoints.',
     },
-  }
-);
+  }),
+});
 
 export const tagAttributesSchema = schema.object(
   {
@@ -43,7 +32,6 @@ export const tagAttributesSchema = schema.object(
       })
     ),
     color: schema.string({
-      defaultValue: getRandomColor,
       meta: {
         description:
           'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
@@ -54,6 +42,21 @@ export const tagAttributesSchema = schema.object(
     unknowns: 'forbid',
     meta: {
       id: 'kbn-tags-attributes',
+    },
+  }
+);
+
+const tagAttributesProps = tagAttributesSchema.getPropSchemas();
+
+export const tagRequestAttributesSchema = schema.object(
+  {
+    ...tagAttributesProps,
+    color: schema.maybe(tagAttributesProps.color),
+  },
+  {
+    unknowns: 'forbid',
+    meta: {
+      id: 'kbn-tags-request-attributes',
     },
   }
 );

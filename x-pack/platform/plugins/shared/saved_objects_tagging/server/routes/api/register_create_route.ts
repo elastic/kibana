@@ -8,9 +8,10 @@
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { TagsPluginRouter } from '../../types';
 import type { TagAttributes } from '../../../common/types';
+import { getRandomColor } from '../../../common';
 import { handleRouteError } from './error_handler';
 import { getRouteConfig } from './get_route_config';
-import { tagResponseItemSchema, tagAttributesSchema } from './schemas';
+import { tagResponseItemSchema, tagRequestAttributesSchema } from './schemas';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 
 export const registerCreateRoute = (router: TagsPluginRouter) => {
@@ -28,7 +29,7 @@ export const registerCreateRoute = (router: TagsPluginRouter) => {
       version: routeVersion,
       validate: {
         request: {
-          body: tagAttributesSchema,
+          body: tagRequestAttributesSchema,
         },
         response: {
           201: {
@@ -64,7 +65,7 @@ export const registerCreateRoute = (router: TagsPluginRouter) => {
         const tag = await tagsClient.create({
           name: req.body.name,
           description: req.body.description ?? '',
-          color: req.body.color,
+          color: req.body.color ?? getRandomColor(),
         });
         const savedObject = await client.get<TagAttributes>(tagSavedObjectTypeName, tag.id);
         const { description, ...restAttributes } = savedObject.attributes;
