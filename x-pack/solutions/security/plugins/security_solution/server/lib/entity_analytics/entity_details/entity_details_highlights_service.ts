@@ -33,7 +33,6 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { CriteriaField } from '@kbn/ml-anomaly-utils';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
-import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
@@ -143,7 +142,6 @@ const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
 });
 
 interface EntityDetailsHighlightsServiceFactoryOptions {
-  riskEngineClient: RiskEngineDataClient;
   entityStoreClient: EntityStoreCRUDClient;
   esClient: ElasticsearchClient;
   experimentalFeatures: EntityAnalyticsRoutesDeps['config']['experimentalFeatures'];
@@ -166,7 +164,6 @@ interface GetDataFnOpts {
 
 export const entityDetailsHighlightsServiceFactory = ({
   logger,
-  riskEngineClient,
   entityStoreClient,
   experimentalFeatures,
   request,
@@ -191,16 +188,8 @@ export const entityDetailsHighlightsServiceFactory = ({
 
   const getRiskScoreData = async (
     entityType: string,
-    entityIdentifier: string,
-    checkEngineStatus: boolean = true
+    entityIdentifier: string
   ) => {
-    if (checkEngineStatus) {
-      const engineStatus = await riskEngineClient.getStatus({ namespace: spaceId });
-      if (engineStatus.riskEngineStatus !== 'ENABLED') {
-        return null;
-      }
-    }
-
     const getRiskScore = createGetRiskScores({
       logger,
       esClient,
@@ -556,18 +545,7 @@ export const entityDetailsHighlightsServiceFactory = ({
     anomalyFromDate,
     anomalyToDate,
   }: GetDataFnOpts) => {
-    const typedEntityType = entityType as EntityType;
-    const enrichedEntityService = new EnrichEntityService({
-      entityStoreClient,
-      esClient,
-      experimentalFeatures,
-      logger,
-      ml,
-      request,
-      soClient,
-      spaceId,
-      uiSettingsClient,
-    });
+    const anonymizedRiskScore = await getRiskScoreData(entityType, entityIdentifier);
 
     const { entities: enrichedEntities } = await enrichedEntityService.getEnrichedEntities({
       anomalyFromDate,
