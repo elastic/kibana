@@ -75,6 +75,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // `uiamApiKeyCreatedByUser`) with matching per-credential checks in
     // `getApiKeyIdsForInvalidation`.
     const apiKeyCreatedByUser = requestHasApiKey(security, request);
+    const user = security.authc.getCurrentUser(request);
 
     const result = new Map<string, ApiKeySOFields>();
     taskInstances.forEach((task) => {
@@ -89,6 +90,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
             ...(uiamKey ? { uiamApiKeyId: uiamKey.apiKeyId } : {}),
             spaceId: request.spaceId,
             apiKeyCreatedByUser,
+            userProfileId: user?.profile_uid,
           },
         });
       }
