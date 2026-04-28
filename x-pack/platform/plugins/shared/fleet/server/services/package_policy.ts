@@ -4046,7 +4046,10 @@ export function updatePackageInputs(
     const registryInputVarDefs = updateType
       ? packageInfo.policy_templates
           ?.flatMap((pt) => getNormalizedInputs(pt))
-          .find((ri) => (ri.name ?? ri.type) === updateType)?.vars
+          .find(
+            (ri) =>
+              getInputEffectiveName(ri) === getInputEffectiveName(update as NewPackagePolicyInput)
+          )?.vars
       : undefined;
 
     if (update.policy_template) {
@@ -4240,14 +4243,17 @@ export function updatePackageInputs(
           // Start with httpjson vars as the base — the migrate_from declaration signals that
           // httpjson is the authoritative source for these vars.
           const seededVars: typeof storedCelVars = { ...oldSourceVars };
-          // Merge in cel's own stored vars only for keys NOT present in the old source input
-          // (i.e. cel-only vars). For shared keys (url, api_token, etc.), the old source
-          // (httpjson) always wins — that is the purpose of the migrate_from migration.
+          // Merge in the new input's own stored vars:
+          // - For keys NOT in the old source: always keep the stored value (new-input-only var).
+          // - For shared keys: keep the stored value when it was explicitly set by the user
+          //   (non-null, non-empty). This handles the case where both the old and new inputs
+          //   existed in the policy and the user had independently configured the new input
+          //   (e.g. m365_defender CEL vulnerability credentials differ from httpjson alert creds).
+          //   When the stored value is null/empty, the old source wins so its vars seed the new
+          //   input for the common case where the new input was unconfigured before migration.
           for (const [key, celEntry] of Object.entries(storedCelVars)) {
-            if (!(key in oldSourceVars)) {
-              if (celEntry?.value != null && celEntry.value !== '') {
-                seededVars[key] = celEntry;
-              }
+            if (!(key in oldSourceVars) || (celEntry?.value != null && celEntry.value !== '')) {
+              seededVars[key] = celEntry;
             }
           }
           const merged = deepMergeVars(
