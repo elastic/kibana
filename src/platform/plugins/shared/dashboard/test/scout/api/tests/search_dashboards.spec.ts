@@ -31,7 +31,7 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
   return query ? `${SEARCH_ENDPOINT}?${query}` : SEARCH_ENDPOINT;
 };
 
-apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe.only('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
