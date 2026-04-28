@@ -27,7 +27,7 @@ beforeAll(() => {
 describe('connectorTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
-    expect(connectorTypeModel.actionTypeTitle).toEqual('Send to PagerDuty');
+    expect(connectorTypeModel.actionTypeTitle).toEqual('PagerDuty');
   });
 });
 

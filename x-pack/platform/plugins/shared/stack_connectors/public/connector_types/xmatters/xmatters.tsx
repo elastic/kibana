@@ -29,7 +29,7 @@ export function getConnectorType(): ConnectorTypeModel<
     actionTypeTitle: i18n.translate(
       'xpack.stackConnectors.components.xmatters.connectorTypeTitle',
       {
-        defaultMessage: 'xMatters data',
+        defaultMessage: 'xMatters',
       }
     ),
     validateParams: async (

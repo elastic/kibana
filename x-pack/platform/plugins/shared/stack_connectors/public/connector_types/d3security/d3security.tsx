@@ -24,7 +24,7 @@ export function getConnectorType(): D3SecurityConnector {
     actionTypeTitle: i18n.translate(
       'xpack.stackConnectors.components.d3security.connectorTypeTitle',
       {
-        defaultMessage: 'D3 data',
+        defaultMessage: 'D3 Security',
       }
     ),
     validateParams: async (

@@ -22,7 +22,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, Te
       defaultMessage: 'Send a message to a Microsoft Teams channel.',
     }),
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.teams.connectorTypeTitle', {
-      defaultMessage: 'Send a message to a Microsoft Teams channel.',
+      defaultMessage: 'Microsoft',
     }),
     validateParams: async (
       actionParams: TeamsActionParams

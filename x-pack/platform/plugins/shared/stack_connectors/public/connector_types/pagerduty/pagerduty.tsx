@@ -33,7 +33,7 @@ export function getConnectorType(): ConnectorTypeModel<
     actionTypeTitle: i18n.translate(
       'xpack.stackConnectors.components.pagerDuty.connectorTypeTitle',
       {
-        defaultMessage: 'Send to PagerDuty',
+        defaultMessage: 'PagerDuty',
       }
     ),
     validateParams: async (

@@ -28,7 +28,7 @@ export function getConnectorType(): ConnectorTypeModel<
       defaultMessage: 'Send a request to a web service.',
     }),
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.webhook.connectorTypeTitle', {
-      defaultMessage: 'Webhook data',
+      defaultMessage: 'Webhook',
     }),
     validateParams: async (
       actionParams: WebhookActionParams,

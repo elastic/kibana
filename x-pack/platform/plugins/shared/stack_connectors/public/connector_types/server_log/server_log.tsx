@@ -24,7 +24,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerL
     actionTypeTitle: i18n.translate(
       'xpack.stackConnectors.components.serverLog.connectorTypeTitle',
       {
-        defaultMessage: 'Send to Server log',
+        defaultMessage: 'Server log',
       }
     ),
     validateParams: (

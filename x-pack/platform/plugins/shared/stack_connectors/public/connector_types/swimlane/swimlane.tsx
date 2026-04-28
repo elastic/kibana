@@ -24,7 +24,7 @@ export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
 export const SW_ACTION_TYPE_TITLE = i18n.translate(
   'xpack.stackConnectors.components.swimlane.connectorTypeTitle',
   {
-    defaultMessage: 'Create Swimlane Record',
+    defaultMessage: 'Swimlane',
   }
 );
 
