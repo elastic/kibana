@@ -93,6 +93,7 @@
                 "lineNumber": 52,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Journey",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -224,6 +225,7 @@
                 "lineNumber": 95,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "JourneyConfigOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -323,6 +325,7 @@
                 "lineNumber": 133,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "FtrProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -446,6 +449,7 @@
                 "lineNumber": 158,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "JourneyConfigOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -692,6 +696,7 @@
                 "lineNumber": 208,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseStepCtx",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1011,6 +1016,7 @@
                 "lineNumber": 92,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyStep",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1028,6 +1034,7 @@
                 "lineNumber": 92,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "Buffer",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1045,6 +1052,7 @@
                 "lineNumber": 92,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "Buffer",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1083,6 +1091,7 @@
                 "lineNumber": 113,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnyStep",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1100,6 +1109,7 @@
                 "lineNumber": 113,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Buffer",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1117,6 +1127,7 @@
                 "lineNumber": 113,
                 "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "Buffer",
                 "trackAdoption": false,
                 "isRequired": true
               }

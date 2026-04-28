@@ -117,6 +117,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   owner: [],
   category: [],
   customFields: {},
+  extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,
   to: DEFAULT_TO_DATE,
 };

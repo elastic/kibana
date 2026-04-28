@@ -27,7 +27,7 @@
             "id": "def-public.ChartSwitchTrigger.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  label,\n  icon,\n  onClick,\n  dataTestSubj,\n}",
             "description": [],
             "signature": [
               "{ label: string; icon?: ",
@@ -87,6 +87,7 @@
             "lineNumber": 38,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ColorPickerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -126,6 +127,7 @@
             "lineNumber": 53,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -168,6 +170,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -573,6 +576,7 @@
             "lineNumber": 24,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Assign",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -727,6 +731,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldPickerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -766,6 +771,7 @@
             "lineNumber": 23,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "BucketContainerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -805,6 +811,7 @@
             "lineNumber": 58,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterQueryInputProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -934,6 +941,7 @@
                     "lineNumber": 56,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Icon",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1063,6 +1071,7 @@
                     "lineNumber": 99,
                     "columnNumber": 13,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Icon",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1217,6 +1226,7 @@
             "lineNumber": 16,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1276,6 +1286,7 @@
             "lineNumber": 33,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Query",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1299,6 +1310,7 @@
             "lineNumber": 33,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1381,6 +1393,7 @@
                     "lineNumber": 32,
                     "columnNumber": 15,
                     "deprecated": false,
+                    "docsReferencedTypeName": "LineStyleConfig",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1536,6 +1549,7 @@
             "lineNumber": 20,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "NewBucketButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1656,6 +1670,7 @@
                     "lineNumber": 49,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Query",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1886,6 +1901,7 @@
                     "lineNumber": 41,
                     "columnNumber": 15,
                     "deprecated": false,
+                    "docsReferencedTypeName": "TextDecorationConfig",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -2028,6 +2044,7 @@
             "lineNumber": 13,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2684,6 +2701,7 @@
             "lineNumber": 12,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedFieldFormat",
             "trackAdoption": false
           }
         ],
