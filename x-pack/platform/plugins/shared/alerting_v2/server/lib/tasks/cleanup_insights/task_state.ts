@@ -10,21 +10,12 @@ import { schema } from '@kbn/config-schema';
 
 export const stateSchemaByVersion = {
   1: {
-    up: (state: Record<string, unknown>) => ({
-      runs: state.runs || 0,
-      total_deleted: state.total_deleted || 0,
-    }),
-    schema: schema.object({
-      runs: schema.number(),
-      total_deleted: schema.number(),
-    }),
+    up: (_state: Record<string, unknown>) => ({}),
+    schema: schema.object({}),
   },
 };
 
 const latestTaskStateSchema = stateSchemaByVersion[1].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
-export const emptyState: LatestTaskStateSchema = {
-  runs: 0,
-  total_deleted: 0,
-};
+export const emptyState: LatestTaskStateSchema = {};

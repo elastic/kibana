@@ -9,12 +9,12 @@ import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { emptyState } from './task_state';
 import {
-  CLEANUP_FINDINGS_TASK_ID,
-  CLEANUP_FINDINGS_TASK_TYPE,
-  CLEANUP_FINDINGS_TASK_INTERVAL,
+  CLEANUP_INSIGHTS_TASK_ID,
+  CLEANUP_INSIGHTS_TASK_TYPE,
+  CLEANUP_INSIGHTS_TASK_INTERVAL,
 } from './task_definition';
 
-export async function scheduleCleanupFindingsTask({
+export async function scheduleCleanupInsightsTask({
   logger,
   taskManager,
 }: {
@@ -23,15 +23,15 @@ export async function scheduleCleanupFindingsTask({
 }): Promise<void> {
   try {
     await taskManager.ensureScheduled({
-      id: CLEANUP_FINDINGS_TASK_ID,
-      taskType: CLEANUP_FINDINGS_TASK_TYPE,
-      schedule: { interval: CLEANUP_FINDINGS_TASK_INTERVAL },
+      id: CLEANUP_INSIGHTS_TASK_ID,
+      taskType: CLEANUP_INSIGHTS_TASK_TYPE,
+      schedule: { interval: CLEANUP_INSIGHTS_TASK_INTERVAL },
       state: emptyState,
       params: {},
     });
   } catch (e) {
     logger.error(
-      `Error scheduling ${CLEANUP_FINDINGS_TASK_ID} task, received ${(e as Error).message}`
+      `Error scheduling ${CLEANUP_INSIGHTS_TASK_ID} task, received ${(e as Error).message}`
     );
   }
 }

@@ -7,15 +7,15 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { scheduleCleanupFindingsTask } from './schedule_task';
+import { scheduleCleanupInsightsTask } from './schedule_task';
 import {
-  CLEANUP_FINDINGS_TASK_ID,
-  CLEANUP_FINDINGS_TASK_TYPE,
-  CLEANUP_FINDINGS_TASK_INTERVAL,
+  CLEANUP_INSIGHTS_TASK_ID,
+  CLEANUP_INSIGHTS_TASK_TYPE,
+  CLEANUP_INSIGHTS_TASK_INTERVAL,
 } from './task_definition';
 import { emptyState } from './task_state';
 
-describe('scheduleCleanupFindingsTask', () => {
+describe('scheduleCleanupInsightsTask', () => {
   const logger = loggingSystemMock.createLogger();
   const taskManager = {
     ensureScheduled: jest.fn().mockResolvedValue(undefined),
@@ -26,15 +26,15 @@ describe('scheduleCleanupFindingsTask', () => {
   });
 
   it('schedules the task with correct parameters', async () => {
-    await scheduleCleanupFindingsTask({
+    await scheduleCleanupInsightsTask({
       logger,
       taskManager: taskManager as unknown as TaskManagerStartContract,
     });
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
-      id: CLEANUP_FINDINGS_TASK_ID,
-      taskType: CLEANUP_FINDINGS_TASK_TYPE,
-      schedule: { interval: CLEANUP_FINDINGS_TASK_INTERVAL },
+      id: CLEANUP_INSIGHTS_TASK_ID,
+      taskType: CLEANUP_INSIGHTS_TASK_TYPE,
+      schedule: { interval: CLEANUP_INSIGHTS_TASK_INTERVAL },
       state: emptyState,
       params: {},
     });
@@ -43,13 +43,13 @@ describe('scheduleCleanupFindingsTask', () => {
   it('logs an error if scheduling fails', async () => {
     taskManager.ensureScheduled.mockRejectedValue(new Error('scheduling failed'));
 
-    await scheduleCleanupFindingsTask({
+    await scheduleCleanupInsightsTask({
       logger,
       taskManager: taskManager as unknown as TaskManagerStartContract,
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Error scheduling ${CLEANUP_FINDINGS_TASK_ID} task, received scheduling failed`
+      `Error scheduling ${CLEANUP_INSIGHTS_TASK_ID} task, received scheduling failed`
     );
   });
 });

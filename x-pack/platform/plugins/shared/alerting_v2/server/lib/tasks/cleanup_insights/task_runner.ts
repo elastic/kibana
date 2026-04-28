@@ -10,56 +10,50 @@ import { Logger as PluginLogger } from '@kbn/core-di';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 import { EsServiceInternalToken } from '../../services/es_service/tokens';
-import { RULE_DOCTOR_FINDINGS_INDEX } from '../../../resources/indices/rule_doctor_findings';
-import type { LatestTaskStateSchema } from './task_state';
-import { CLEANUP_FINDINGS_TASK_INTERVAL, CLEANUP_FINDINGS_RETENTION_DAYS } from './task_definition';
+import { RULE_DOCTOR_INSIGHTS_INDEX } from '../../../resources/indices/rule_doctor_insights';
+import { CLEANUP_INSIGHTS_TASK_INTERVAL, CLEANUP_INSIGHTS_RETENTION_DAYS } from './task_definition';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
-export class FindingsCleanupTaskRunner {
+export class InsightsCleanupTaskRunner {
   constructor(
     @inject(PluginLogger) private readonly logger: Logger,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient
   ) {}
 
-  public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
-    const state = taskInstance.state as LatestTaskStateSchema;
-    let deleted = 0;
-
+  public async run(_params: TaskRunParams): Promise<RunResult> {
     try {
       const response = await this.esClient.deleteByQuery({
-        index: RULE_DOCTOR_FINDINGS_INDEX,
+        index: RULE_DOCTOR_INSIGHTS_INDEX,
         query: {
           bool: {
             filter: [
               { terms: { status: ['dismissed', 'applied'] } },
-              { range: { '@timestamp': { lt: `now-${CLEANUP_FINDINGS_RETENTION_DAYS}d` } } },
+              { range: { '@timestamp': { lt: `now-${CLEANUP_INSIGHTS_RETENTION_DAYS}d` } } },
             ],
           },
         },
-        refresh: true,
+        conflicts: 'proceed',
+        slices: 'auto',
       });
 
-      deleted = response.deleted ?? 0;
+      const deleted = response.deleted ?? 0;
 
       if (deleted > 0) {
-        this.logger.info(`Cleaned up ${deleted} stale findings from ${RULE_DOCTOR_FINDINGS_INDEX}`);
+        this.logger.debug(`Cleaned up ${deleted} stale insights from ${RULE_DOCTOR_INSIGHTS_INDEX}`);
       } else {
-        this.logger.debug('No stale findings to clean up');
+        this.logger.debug('No stale insights to clean up');
       }
     } catch (e) {
-      this.logger.error(`Error executing findings cleanup task: ${(e as Error).message}`, {
+      this.logger.error(`Error executing insights cleanup task: ${(e as Error).message}`, {
         error: { stack_trace: (e as Error).stack },
       });
     }
 
     return {
-      state: {
-        runs: (state.runs || 0) + 1,
-        total_deleted: (state.total_deleted || 0) + deleted,
-      },
-      schedule: { interval: CLEANUP_FINDINGS_TASK_INTERVAL },
+      state: {},
+      schedule: { interval: CLEANUP_INSIGHTS_TASK_INTERVAL },
     };
   }
 }
