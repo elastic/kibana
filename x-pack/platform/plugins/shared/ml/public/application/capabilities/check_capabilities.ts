@@ -18,19 +18,19 @@ import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo, useRef } from 'react';
+import {
+  getDefaultMlCapabilities,
+  type MlCapabilities,
+  type MlCapabilitiesKey,
+} from '@kbn/ml-common-types/capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
-import {
-  getDefaultCapabilities,
-  type MlCapabilities,
-  type MlCapabilitiesKey,
-} from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
 import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
 
-let _capabilities: MlCapabilities = getDefaultCapabilities();
+let _capabilities: MlCapabilities = getDefaultMlCapabilities();
 
 const CAPABILITIES_REFRESH_INTERVAL = 5 * 60 * 1000; // 5min;
 
