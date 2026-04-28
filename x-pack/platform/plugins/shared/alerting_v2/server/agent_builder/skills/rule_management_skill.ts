@@ -49,7 +49,7 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
-- The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter to breach conditions.
+- The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
