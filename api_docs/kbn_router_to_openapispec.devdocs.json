@@ -102,6 +102,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GenerateOpenApiDocumentOptions",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -116,6 +116,10 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   'PUT:/api/workflows/workflow/{id}': [WORKFLOWS_INDEX],
   'DELETE:/api/workflows/workflow/{id}': [WORKFLOWS_INDEX],
   'DELETE:/api/workflows': [WORKFLOWS_INDEX],
+  // ID collision detection during single create (see WorkflowsService.resolveUniqueWorkflowIds / getWorkflow)
+  'POST:/api/workflows/workflow': [WORKFLOWS_INDEX],
+  // ID deduplication and collision detection during bulk create (see WorkflowsService.resolveAndDeduplicateBulkIds)
+  'POST:/api/workflows': [WORKFLOWS_INDEX],
   // Existence check before cancelAllActiveWorkflowExecutions (see WorkflowsManagementApi.cancelAllActiveWorkflowExecutions)
   'POST:/api/workflows/workflow/{workflowId}/executions/cancel': [WORKFLOWS_INDEX],
 };

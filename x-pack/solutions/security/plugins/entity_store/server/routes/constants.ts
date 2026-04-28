@@ -49,8 +49,8 @@ export const LogExtractionUpdateParams = z.object({
     .string()
     .regex(/[smdh]$/)
     .optional(),
-  docsLimit: z.number().int().positive().optional(),
-  maxLogsPerPage: z.number().int().positive().optional(),
+  docsLimit: z.number().int().min(1).optional(),
+  maxLogsPerPage: z.number().int().min(1).optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

@@ -108,10 +108,11 @@ describe('ESQL routes', () => {
   });
 
   describe('get timefield route', () => {
+    const url = '/internal/esql/get_timefield';
+
     it('should return the time field when specified in the query', async () => {
       const query = 'FROM lookup_index1 | WHERE my_time_field >= ?_tstart';
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('my_time_field');
     });
@@ -131,8 +132,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${indexName}`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
 
@@ -142,8 +142,7 @@ describe('ESQL routes', () => {
 
     it('should return undefined when no time field in query and index has no @timestamp', async () => {
       const query = 'FROM lookup_index1';
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe(undefined);
     });
@@ -175,8 +174,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, (FROM ${index2})`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
 
@@ -211,8 +209,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, (FROM ${index2})`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe(undefined);
 
@@ -247,8 +244,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, ${index2}`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
 
@@ -283,8 +279,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${index1}, ${index2}`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
 
@@ -317,8 +312,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${viewName}`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe('@timestamp');
 
@@ -354,8 +348,7 @@ describe('ESQL routes', () => {
       });
 
       const query = `FROM ${viewName}`;
-      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
-      const result = await testbed.GET(url).send().expect(200);
+      const result = await testbed.POST(url).send({ query }).expect(200);
 
       expect(result.body.timeField).toBe(undefined);
 

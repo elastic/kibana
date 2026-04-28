@@ -48,6 +48,7 @@
             "lineNumber": 24,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ValueObservable",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -100,6 +101,7 @@
             "lineNumber": 25,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Observable",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -117,6 +119,7 @@
             "lineNumber": 25,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -169,6 +172,7 @@
             "lineNumber": 26,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Observable",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -221,6 +225,7 @@
             "lineNumber": 27,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Observable",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -238,6 +243,7 @@
             "lineNumber": 27,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
