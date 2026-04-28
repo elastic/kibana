@@ -29,12 +29,6 @@ const skipList: Record<string, string[]> = {
     'Node x pipeline hotspots - by time spent',
     'Events between Ports',
     'Top hosts by memory usage over time',
-
-    // failing from legend truncation logic
-    'Login/Logout Activity [Logs authentik]',
-    'Container Service Kube Node Status Condition',
-    'Sum of bytes between source and destination',
-    'VM placements on ESXi Hosts',
   ],
 };
 
