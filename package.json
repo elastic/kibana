@@ -143,7 +143,7 @@
     "@elastic/elasticsearch": "9.3.4",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "3.0.0",
-    "@elastic/eui": "114.2.0",
+    "@elastic/eui": "114.3.0",
     "@elastic/eui-theme-borealis": "7.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
