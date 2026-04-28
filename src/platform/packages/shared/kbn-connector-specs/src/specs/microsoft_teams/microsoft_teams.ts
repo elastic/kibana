@@ -337,9 +337,9 @@ export const MicrosoftTeams: ConnectorSpec = {
     '- Direct/group chats: listChats → listChatMessages (with chatId)',
     '',
     'AUTH DIFFERENCES (delegated vs app-only):',
-    '- Delegated auth (bearer token or oauth_authorization_code): userId is optional — omit it to operate as the signed-in user.',
+    '- Delegated auth (bearer token or oauth_authorization_code or ears): userId is optional — omit it to operate as the signed-in user.',
     '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
-    '- searchMessages only works with delegated auth (bearer or oauth_authorization_code); app-only (client credentials) is not supported.',
+    '- searchMessages only works with delegated auth (bearer or oauth_authorization_code or ears); app-only (client credentials) is not supported.',
   ].join('\n'),
 
   test: {
