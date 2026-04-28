@@ -23,8 +23,9 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       // Semconv KPI + flyout suites rely on Lens + elastic-charts rendering
       // on top of the OTel data stream; first-load timing in CI exceeds
-      // Scout's 60s default. Extend the budget to 180s.
-      test.setTimeout(180_000);
+      // Scout's 60s default. Now that this spec runs sequentially, a smaller
+      // budget is sufficient while still covering first-render variance.
+      test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_SEMCONV_DATA_FROM,
@@ -55,10 +56,7 @@ test.describe(
 
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI tile has a value`, async () => {
-          await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
-            'title',
-            /.+/
-          );
+          await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute('title', /.+/);
         });
       }
     });
@@ -108,3 +106,4 @@ test.describe(
     });
   }
 );
+

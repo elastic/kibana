@@ -30,7 +30,7 @@ export class HostsPage {
   public readonly kpiGrid: Locator;
   public readonly metricsChartsContainer: Locator;
 
-  public readonly pageSizeSelector: Locator;
+  public readonly tablePageSizeSelector: Locator;
   public readonly selectedHostsFilterButton: Locator;
   public readonly addFilterButton: Locator;
   public readonly noDataPage: Locator;
@@ -55,7 +55,7 @@ export class HostsPage {
     this.kpiGrid = this.page.getByTestId('hostsViewKPIGrid');
     this.metricsChartsContainer = this.page.getByTestId('hostsView-metricChart');
 
-    this.pageSizeSelector = this.page.getByTestId('tablePaginationPopoverButton');
+    this.tablePageSizeSelector = this.page.getByTestId('tablePaginationPopoverButton');
     this.selectedHostsFilterButton = this.page.getByTestId('hostsViewTableSelectHostsFilterButton');
     this.addFilterButton = this.page.getByTestId('hostsViewTableAddFilterButton');
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
@@ -139,34 +139,17 @@ export class HostsPage {
     return row.getByTestId(cellTestId).locator('.euiTableCellContent');
   }
 
-  private async getCellText(row: Locator, cellTestId: string) {
-    return (await this.getCellContentLocator(row, cellTestId).textContent())?.trim() ?? '';
-  }
-
-  public async getRowData(row: Locator) {
+  public getRowDataLocators(row: Locator) {
     return {
-      title: (await row.getByTestId('hostsViewTableEntryTitleLink').textContent())?.trim() ?? '',
-      cpuUsage: await this.getCellText(row, 'hostsView-tableRow-cpuUsage'),
-      normalizedLoad: await this.getCellText(row, 'hostsView-tableRow-normalizedLoad1m'),
-      memoryUsage: await this.getCellText(row, 'hostsView-tableRow-memoryUsage'),
-      memoryFree: await this.getCellText(row, 'hostsView-tableRow-memoryFree'),
-      diskSpaceUsage: await this.getCellText(row, 'hostsView-tableRow-diskSpaceUsage'),
-      rx: await this.getCellText(row, 'hostsView-tableRow-rx'),
-      tx: await this.getCellText(row, 'hostsView-tableRow-tx'),
-    };
-  }
-
-  public async getRowDataWithAlerts(row: Locator) {
-    return {
-      alertsCount: await this.getCellText(row, 'hostsView-tableRow-alertsCount'),
-      title: (await row.getByTestId('hostsViewTableEntryTitleLink').textContent())?.trim() ?? '',
-      cpuUsage: await this.getCellText(row, 'hostsView-tableRow-cpuUsage'),
-      normalizedLoad: await this.getCellText(row, 'hostsView-tableRow-normalizedLoad1m'),
-      memoryUsage: await this.getCellText(row, 'hostsView-tableRow-memoryUsage'),
-      memoryFree: await this.getCellText(row, 'hostsView-tableRow-memoryFree'),
-      diskSpaceUsage: await this.getCellText(row, 'hostsView-tableRow-diskSpaceUsage'),
-      rx: await this.getCellText(row, 'hostsView-tableRow-rx'),
-      tx: await this.getCellText(row, 'hostsView-tableRow-tx'),
+      alertsCount: this.getCellContentLocator(row, 'hostsView-tableRow-alertsCount'),
+      title: row.getByTestId('hostsViewTableEntryTitleLink'),
+      cpuUsage: this.getCellContentLocator(row, 'hostsView-tableRow-cpuUsage'),
+      normalizedLoad: this.getCellContentLocator(row, 'hostsView-tableRow-normalizedLoad1m'),
+      memoryUsage: this.getCellContentLocator(row, 'hostsView-tableRow-memoryUsage'),
+      memoryFree: this.getCellContentLocator(row, 'hostsView-tableRow-memoryFree'),
+      diskSpaceUsage: this.getCellContentLocator(row, 'hostsView-tableRow-diskSpaceUsage'),
+      rx: this.getCellContentLocator(row, 'hostsView-tableRow-rx'),
+      tx: this.getCellContentLocator(row, 'hostsView-tableRow-tx'),
     };
   }
 
@@ -184,12 +167,32 @@ export class HostsPage {
 
   // KPI helpers
 
-  public getKPITileValueLocator(type: string) {
-    return this.kpiGrid.getByTestId(`hostsViewKPI-${type}`).locator('.echMetricText__value');
+  private getHostKPIValueSelector(kpiPanelTestId: string): string {
+    // Relative to `kpiGrid` — do not repeat `hostsViewKPIGrid` here or Playwright
+    // will nest the selector twice (grid + grid + KPI).
+    return `[data-test-subj="${kpiPanelTestId}"] .echMetricText__value`;
   }
 
-  public async getKPITileValue(type: string) {
-    return this.getKPITileValueLocator(type).getAttribute('title');
+  private async waitForHostKPIValueTitleToBeSet(metric: string, timeout?: number) {
+    await this.getHostKPIChartValueLocator(metric).waitFor({ state: 'attached', timeout });
+    const kpiPanelTestId = `infraAssetDetailsKPI${metric}`;
+    const selector = `[data-test-subj="hostsViewKPIGrid"] ${this.getHostKPIValueSelector(
+      kpiPanelTestId
+    )}`;
+
+    await this.page.waitForFunction(
+      ({ sel }) => {
+        const valueEl = document.querySelector(sel);
+        const title = valueEl?.getAttribute('title');
+        return typeof title === 'string' && title.trim().length > 0;
+      },
+      { sel: selector },
+      { timeout }
+    );
+  }
+
+  public getKPITileValueLocator(type: string) {
+    return this.kpiGrid.getByTestId(`hostsViewKPI-${type}`).locator('.echMetricText__value');
   }
 
   /**
@@ -210,11 +213,10 @@ export class HostsPage {
    * when one takes longer to render than the others (a common CI flake source).
    */
   public async waitForHostKPIChartsToLoad(metrics: readonly string[], timeout?: number) {
-    await Promise.all(
-      metrics.map((metric) =>
-        this.getHostKPIChartValueLocator(metric).waitFor({ state: 'visible', timeout })
-      )
-    );
+    await this.waitForKPILoadingToFinish(timeout);
+    for (const metric of metrics) {
+      await this.waitForHostKPIValueTitleToBeSet(metric, timeout);
+    }
   }
 
   /**
@@ -259,32 +261,10 @@ export class HostsPage {
     await this.logsTab.click();
   }
 
-  // Alerts tab
-
-  public async visitAlertsTab() {
-    await this.alertsTab.scrollIntoViewIfNeeded();
-    await this.alertsTab.click();
-  }
-
-  public async getAlertsCount() {
-    return this.alertsTabCountBadge.innerText();
-  }
-
-  public async setAlertStatusFilter(status?: 'active' | 'recovered' | 'untracked' | 'all') {
-    const buttonMap: Record<string, string> = {
-      active: 'hostsView-alert-status-filter-active-button',
-      recovered: 'hostsView-alert-status-filter-recovered-button',
-      untracked: 'hostsView-alert-status-filter-untracked-button',
-      all: 'hostsView-alert-status-filter-show-all-button',
-    };
-    const testId = status ? buttonMap[status] : buttonMap.all;
-    await this.page.getByTestId(testId).click();
-  }
-
   // Pagination
 
   public async changePageSize(pageSize: number) {
-    await this.pageSizeSelector.click();
+    await this.tablePageSizeSelector.click();
     await this.page.getByTestId(`tablePagination-${pageSize}-rows`).click();
   }
 

@@ -56,10 +56,10 @@ test.describe(
       for (const host of HOSTS) {
         const row = hostsPage.getHostRow(host.hostName);
         await expect(row).toBeVisible();
-        const rowData = await hostsPage.getRowData(row);
-        expect(rowData.title).toBe(host.hostName);
-        expect(rowData.cpuUsage).not.toBe('');
-        expect(rowData.cpuUsage).not.toBe('N/A');
+        const rowData = hostsPage.getRowDataLocators(row);
+        await expect(rowData.title).toHaveText(host.hostName);
+        await expect(rowData.cpuUsage).not.toHaveText('');
+        await expect(rowData.cpuUsage).not.toHaveText('N/A');
       }
     });
 

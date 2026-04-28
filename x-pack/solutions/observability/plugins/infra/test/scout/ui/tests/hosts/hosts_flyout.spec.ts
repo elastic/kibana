@@ -27,10 +27,10 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       // Flyout suites open Lens + elastic-charts in the host overview tab.
       // Under CI contention the cumulative cost of navigation, flyout init,
-      // and first-time chart rendering exceeds Scout's default 60s test
-      // timeout; extend it to 180s. Re-run the flaky runner if tightening is
-      // possible later.
-      test.setTimeout(180_000);
+      // and first-time chart rendering can exceed Scout's default 60s test
+      // timeout. Now that this spec runs sequentially, a smaller budget is
+      // sufficient while still covering first-render variance.
+      test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,

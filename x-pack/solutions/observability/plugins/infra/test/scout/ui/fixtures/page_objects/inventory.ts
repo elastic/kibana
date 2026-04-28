@@ -41,6 +41,8 @@ export class InventoryPage {
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
 
+  public readonly addDataHeaderLink: Locator;
+
   public readonly k8sPodWaffleContextMenu: Locator;
 
   public readonly alertsHeaderButton: Locator;
@@ -87,8 +89,12 @@ export class InventoryPage {
 
     this.noDataPrompt = this.page.getByTestId('noMetricsDataPrompt');
 
-    this.noDataPage = this.page.getByTestId('kbnNoDataPage');
-    this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
+    // Inventory uses the infra `NoData` empty prompt (not `kbnNoDataPage`).
+    this.noDataPage = this.noDataPrompt;
+    this.noDataPageActionButton = this.noDataPage.getByTestId('infraNoDataButton');
+
+    // Metrics app header link rendered on `/inventory` (see `infra/public/pages/metrics/index.tsx`)
+    this.addDataHeaderLink = this.page.getByRole('link', { name: 'Add data' });
 
     this.k8sPodWaffleContextMenu = this.page
       .getByRole('dialog')
@@ -256,6 +262,10 @@ export class InventoryPage {
 
   public async clickNoDataPageAddDataButton() {
     await this.noDataPageActionButton.click();
+  }
+
+  public async clickHeaderAddDataLink() {
+    await this.addDataHeaderLink.click();
   }
 
   public async filterByQueryBar(query: string) {

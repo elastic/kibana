@@ -182,10 +182,15 @@ export class OverviewTab extends AssetDetailsTab {
     );
   }
 
+  private getKPIValueSelector(kpiPanelTestId: string): string {
+    // Relative to `kpiGrid` — do not repeat `infraAssetDetailsKPIGrid` here or
+    // Playwright will nest the selector twice (grid + grid + KPI).
+    return `[data-test-subj="${kpiPanelTestId}"] .echMetricText__value`;
+  }
+
   public getKPIValue(metric: string): Locator {
-    return this.kpiGrid
-      .getByTestId(`infraAssetDetailsKPI${metric}`)
-      .locator('.echMetricText__value');
+    const kpiPanelTestId = `infraAssetDetailsKPI${metric}`;
+    return this.kpiGrid.locator(this.getKPIValueSelector(kpiPanelTestId));
   }
 
   private getKPILoadingIndicator(metric: string): Locator {
@@ -194,20 +199,24 @@ export class OverviewTab extends AssetDetailsTab {
       .getByRole('progressbar', { name: 'Loading' });
   }
 
+  public async waitForKPILoadingToFinish(timeout?: number) {
+    await this.getKPILoadingIndicator('cpuUsage').waitFor({ state: 'hidden', timeout });
+  }
+
   private async waitForKPIValueTitleToBeSet(metric: string, timeout?: number) {
-    const valueLocator = this.getKPIValue(metric);
-    await valueLocator.waitFor({ state: 'attached', timeout });
-    const handle = await valueLocator.elementHandle();
-    if (!handle) {
-      return;
-    }
+    await this.getKPIValue(metric).waitFor({ state: 'attached', timeout });
+    const kpiPanelTestId = `infraAssetDetailsKPI${metric}`;
+    const selector = `[data-test-subj="infraAssetDetailsKPIGrid"] ${this.getKPIValueSelector(
+      kpiPanelTestId
+    )}`;
 
     await this.page.waitForFunction(
-      (el) => {
-        const title = el.getAttribute('title');
+      ({ sel }) => {
+        const valueEl = document.querySelector(sel);
+        const title = valueEl?.getAttribute('title');
         return typeof title === 'string' && title.trim().length > 0;
       },
-      handle,
+      { sel: selector },
       { timeout }
     );
   }
@@ -223,14 +232,10 @@ export class OverviewTab extends AssetDetailsTab {
   public async waitForKPIChartsToLoad(timeout?: number) {
     await this.kpiGrid.scrollIntoViewIfNeeded();
 
-    await Promise.all(
-      KPI_METRICS.map((metric) =>
-        this.getKPILoadingIndicator(metric).waitFor({ state: 'hidden', timeout })
-      )
-    );
+    await this.waitForKPILoadingToFinish(timeout);
 
-    await Promise.all(
-      KPI_METRICS.map((metric) => this.waitForKPIValueTitleToBeSet(metric, timeout))
-    );
+    for (const metric of KPI_METRICS) {
+      await this.waitForKPIValueTitleToBeSet(metric, timeout);
+    }
   }
 }
