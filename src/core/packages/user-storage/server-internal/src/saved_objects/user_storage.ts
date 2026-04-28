@@ -45,7 +45,7 @@ const USER_STORAGE_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
 export const userStorageType: SavedObjectsType = {
   name: USER_STORAGE_SO_TYPE,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated', // ability to support access control for user storage in the future, if needed
   mappings: USER_STORAGE_MAPPINGS,
   modelVersions: USER_STORAGE_MODEL_VERSIONS,
 };
