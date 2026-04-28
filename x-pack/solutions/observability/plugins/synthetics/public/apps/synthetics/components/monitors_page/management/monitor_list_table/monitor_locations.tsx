@@ -20,9 +20,10 @@ interface Props {
   locationsWithStatus?: OverviewStatusMetaData['locations'];
   locations?: ServiceLocations;
   configId: string;
+  spaces?: string[];
 }
 
-export const MonitorLocations = ({ locationsWithStatus, locations, configId }: Props) => {
+export const MonitorLocations = ({ locationsWithStatus, locations, configId, spaces }: Props) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
   const getColor = useMonitorHealthColor();
@@ -40,7 +41,12 @@ export const MonitorLocations = ({ locationsWithStatus, locations, configId }: P
     });
 
     return (
-      <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={false} />
+      <LocationStatusBadges
+        configId={configId}
+        locations={locationsToDisplay}
+        loading={false}
+        spaces={spaces}
+      />
     );
   } else {
     const locationsToDisplay =
@@ -57,7 +63,12 @@ export const MonitorLocations = ({ locationsWithStatus, locations, configId }: P
         };
       }) ?? [];
     return (
-      <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={true} />
+      <LocationStatusBadges
+        configId={configId}
+        locations={locationsToDisplay}
+        loading={true}
+        spaces={spaces}
+      />
     );
   }
 };
