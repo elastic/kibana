@@ -13,6 +13,7 @@ export interface AlertEpisodeAction {
   rule_id: string | null;
   group_hash: string | null;
   last_ack_action: string | null;
+  last_assignee_uid: string | null;
 }
 
 export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
@@ -21,9 +22,13 @@ export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
   // prettier-ignore
   return esql.from(ALERT_ACTIONS_DATA_STREAM)
     .where`episode_id IN (${episodeIdLiterals})`
-    .where`action_type IN ("ack", "unack")`
+    .where`action_type IN ("ack", "unack", "assign")`
+    .pipe`EVAL
+      ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
+      assignee_value = CASE(action_type == "assign", assignee_uid, null)`
     .pipe`STATS
-      last_ack_action = LAST(action_type, @timestamp)
+      last_ack_action = LAST(ack_action, @timestamp),
+      last_assignee_uid = LAST(assignee_value, @timestamp)
       BY episode_id, rule_id, group_hash`
-    .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action');
+    .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid');
 };

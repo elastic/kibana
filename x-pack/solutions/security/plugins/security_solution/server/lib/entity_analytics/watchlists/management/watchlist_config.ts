@@ -100,6 +100,7 @@ export class WatchlistConfigClient {
       options: {
         index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
+        settings: { hidden: true },
       },
     });
 
@@ -225,10 +226,6 @@ export class WatchlistConfigClient {
       watchlistConfigTypeName,
       watchlistId
     );
-
-    if (so.attributes.managed === true) {
-      throw createWatchlistValidationError(400, `Cannot modify managed watchlist '${watchlistId}'`);
-    }
 
     if (source.managed === true) {
       throw createWatchlistValidationError(

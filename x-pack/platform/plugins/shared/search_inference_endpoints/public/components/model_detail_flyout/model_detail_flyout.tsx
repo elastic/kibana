@@ -26,12 +26,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
+import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
@@ -83,7 +83,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       taskTypeOptions: taskTypes.map((tt) => ({
         value: tt,
         label: tt,
-        description: TASK_TYPE_TOOLTIPS[tt] ?? '',
+        description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
       })),
     };
   }, [endpoints]);
@@ -115,7 +115,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         defaultMessage: 'Documentation',
       }),
       description: (
-        <EuiLink href={docLinks.elasticInferenceService} target="_blank" external>
+        <EuiLink
+          data-test-subj="searchInferenceEndpointsModelDetailFlyoutViewDocumentationLink"
+          href={docLinks.elasticInferenceService}
+          target="_blank"
+          external
+        >
           {i18n.translate(
             'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
             { defaultMessage: 'View documentation' }
@@ -137,9 +142,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        {uniqueTaskTypes.map((taskType) => (
-          <EuiBadge key={taskType}>{taskType}</EuiBadge>
-        ))}
+        <span data-test-subj="flyoutTaskBadges">
+          {uniqueTaskTypes.map((taskType) => (
+            <EuiBadge key={taskType}>{taskType}</EuiBadge>
+          ))}
+        </span>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -148,6 +155,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           compressed
           columnGutterSize="m"
           listItems={descriptionListItems}
+          data-test-subj="flyoutModelDetails"
         />
 
         <EuiHorizontalRule margin="xxl" />

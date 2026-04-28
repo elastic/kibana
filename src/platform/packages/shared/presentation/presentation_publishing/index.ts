@@ -186,7 +186,6 @@ export {
 } from './interfaces/titles/title_manager';
 export { transformTitlesOut } from './interfaces/titles/bwc/titles_transforms';
 export {
-  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,
@@ -266,8 +265,3 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
-
-export {
-  apiSupportsPassThroughContext,
-  type PassThroughContext,
-} from './interfaces/containers/pass_through_context';

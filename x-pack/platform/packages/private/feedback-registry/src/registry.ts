@@ -5,55 +5,21 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_EXPERIENCE_QUESTION_ID,
-  DEFAULT_GENERAL_QUESTION_ID,
-  DEFAULT_REGISTRY_ID,
-} from './constants';
-import type { FeedbackRegistry, FeedbackRegistryEntry } from './types';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
+import { DEFAULT_REGISTRY_ID } from './constants';
+import type { FeedbackRegistry } from './types';
 
 const feedbackRegistry: FeedbackRegistry = new Map([
-  [
-    DEFAULT_REGISTRY_ID,
-    [
-      {
-        id: DEFAULT_EXPERIENCE_QUESTION_ID,
-        order: 1,
-        placeholder: {
-          i18nId: 'xpack.feedbackRegistry.defaultExperiencePlaceholder',
-          defaultMessage: 'Describe your experience',
-        },
-        ariaLabel: {
-          i18nId: 'xpack.feedbackRegistry.defaultExperienceAriaLabel',
-          defaultMessage: 'Describe your experience',
-        },
-        question: 'Describe your experience',
-      },
-      {
-        id: DEFAULT_GENERAL_QUESTION_ID,
-        order: 2,
-        placeholder: {
-          i18nId: 'xpack.feedbackRegistry.defaultGeneralPlaceholder',
-          defaultMessage: 'Add more thoughts',
-        },
-        label: {
-          i18nId: 'xpack.feedbackRegistry.defaultGeneralLabel',
-          defaultMessage: 'Anything else you would like to share about Elastic overall?',
-        },
-        ariaLabel: {
-          i18nId: 'xpack.feedbackRegistry.defaultGeneralAriaLabel',
-          defaultMessage: 'Additional feedback about Elastic',
-        },
-        question: 'Anything else you would like to share about Elastic overall?',
-      },
-    ],
-  ],
+  [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
 ]);
 
-export const getFeedbackQuestionsForApp = (appId?: string): FeedbackRegistryEntry[] => {
-  if (appId && feedbackRegistry.has(appId)) {
-    return feedbackRegistry.get(appId)?.sort((a, b) => a.order - b.order) || [];
-  }
-
-  return feedbackRegistry.get(DEFAULT_REGISTRY_ID)?.sort((a, b) => a.order - b.order) || [];
+export const getFeedbackQuestionsForApp = async (
+  appId?: string
+): Promise<FeedbackRegistryEntry[]> => {
+  const loader =
+    appId && feedbackRegistry.has(appId)
+      ? feedbackRegistry.get(appId)!
+      : feedbackRegistry.get(DEFAULT_REGISTRY_ID)!;
+  const questions = await loader();
+  return questions.sort((a, b) => a.order - b.order);
 };

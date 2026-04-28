@@ -211,6 +211,37 @@ describe('bulkEnableRules', () => {
     });
   });
 
+  test('does not leak stale uiamApiKey when bulk enabling a rule without apiKey', async () => {
+    const disabledRuleWithStaleUiam: SavedObject<RawRule> = {
+      ...disabledRule1,
+      attributes: {
+        ...disabledRule1.attributes,
+        apiKey: null,
+        apiKeyOwner: null,
+        uiamApiKey: Buffer.from('stale-uiam:stale-key').toString('base64'),
+      },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithStaleUiam],
+    });
+    mockUnsecuredSavedObjectFind(1);
+
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1],
+    });
+
+    await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    const bulkCreatePayload = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const writtenAttributes = bulkCreatePayload[0].attributes;
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
+  });
+
   test('should enable two rules and return right actions', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],

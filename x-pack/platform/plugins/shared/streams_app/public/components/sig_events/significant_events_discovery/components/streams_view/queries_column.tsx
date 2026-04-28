@@ -9,7 +9,10 @@ import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
-import { useFetchSignificantEvents } from '../../../../../hooks/sig_events/use_fetch_significant_events';
+import { useFetchDiscoveryQueries } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
+
+const QUERIES_PER_PAGE = 1000;
+const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 
 interface QueriesColumnProps {
   streamName: string;
@@ -17,12 +20,18 @@ interface QueriesColumnProps {
 }
 
 export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesColumnProps) {
-  const significantEventsFetchState = useFetchSignificantEvents(
+  const queriesFetchState = useFetchDiscoveryQueries(
     {
       name: streamName,
+      query: '',
+      page: 1,
+      perPage: QUERIES_PER_PAGE,
+      status: [...ACTIVE_DRAFT_STATUS],
     },
     [streamOnboardingResult]
   );
+
+  const totalCount = queriesFetchState.data?.queries.length ?? 0;
 
   return (
     <EuiText
@@ -32,11 +41,7 @@ export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesCol
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {significantEventsFetchState.data?.significant_events.length ? (
-        <EuiI18nNumber value={significantEventsFetchState.data.significant_events.length} />
-      ) : (
-        '—'
-      )}
+      {totalCount ? <EuiI18nNumber value={totalCount} /> : '—'}
     </EuiText>
   );
 }

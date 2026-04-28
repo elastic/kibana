@@ -226,14 +226,14 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('should not override mapped namespace when IDP post-agg filter matches', () => {
+  it('should override mapped namespace when IDP host.id present', () => {
     const idpLikeDoc = {
       user: { name: 'alice' },
       host: { id: 'host-1' },
       event: { module: 'okta', kind: 'asset' },
     };
     expect(applyFieldEvaluations(idpLikeDoc, userEvaluations)).toEqual({
-      'entity.namespace': 'okta',
+      'entity.namespace': 'local',
     });
   });
 });

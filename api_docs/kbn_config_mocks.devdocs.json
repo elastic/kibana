@@ -202,6 +202,7 @@
             "lineNumber": 23,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "DeepPartial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -541,7 +542,7 @@
                 "id": "def-common.configServiceMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  atPath = {},\n  getConfig$ = {},\n}",
                 "description": [],
                 "signature": [
                   "{ atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }"
@@ -601,7 +602,7 @@
                 "id": "def-common.rawConfigServiceMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  rawConfig = {},\n  rawConfig$ = undefined,\n}",
                 "description": [],
                 "signature": [
                   "{ rawConfig?: Record<string, any> | undefined; rawConfig$?: ",

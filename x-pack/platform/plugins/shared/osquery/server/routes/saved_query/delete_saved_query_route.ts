@@ -16,6 +16,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { isSavedQueryPrebuilt } from './utils';
 import type { DeleteSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/delete_saved_query_route';
 import { deleteSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/delete_saved_query_route';
+import { deleteSavedQueryResponseSchema } from './response_schemas';
 
 export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -37,6 +38,11 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               typeof deleteSavedQueryRequestParamsSchema,
               DeleteSavedQueryRequestParamsSchema
             >(deleteSavedQueryRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => deleteSavedQueryResponseSchema,
+            },
           },
         },
       },

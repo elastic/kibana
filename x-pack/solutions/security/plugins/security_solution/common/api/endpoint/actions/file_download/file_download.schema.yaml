@@ -17,6 +17,7 @@ paths:
         - name: action_id
           in: path
           required: true
+          description: The ID of the response action that generated the file.
           schema:
             type: string
         - name: file_id
@@ -31,7 +32,7 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/octet-stream:
               schema:

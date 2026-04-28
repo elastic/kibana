@@ -22,6 +22,7 @@ interface PolicyProps {
   params?: Record<string, any>;
   isBrowser?: boolean;
   spaceId?: string;
+  kibanaUrl?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
@@ -138,6 +139,7 @@ export const getHttpInput = ({
   isBrowser,
   spaceId,
   namespace,
+  kibanaUrl,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;
@@ -205,9 +207,12 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
+              ...(projectId
+                ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+                : {}),
+              'monitor.interval': 300,
               meta: { space_id: spaceId ?? 'default' },
-              'monitor.project.name': projectId,
-              'monitor.project.id': projectId,
+              ...(kibanaUrl ? { kibanaUrl } : {}),
             },
             target: '',
           },
@@ -305,14 +310,16 @@ export const getHttpInput = ({
       {
         add_fields: {
           fields: {
+            'monitor.fleet_managed': true,
             config_id: id,
+            ...(projectId
+              ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+              : {}),
+            'monitor.interval': 300,
             meta: {
               space_id: spaceId ?? 'default',
             },
-            'monitor.fleet_managed': true,
-            ...(projectId
-              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
-              : {}),
+            ...(kibanaUrl ? { kibanaUrl } : {}),
           },
           target: '',
         },

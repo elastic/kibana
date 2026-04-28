@@ -5,52 +5,56 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useState } from 'react';
-import { isEqual } from 'lodash';
+import { useCallback } from 'react';
 import type { PhaseName } from '@kbn/streams-schema';
+import { get } from 'lodash';
+import type { DeepPartial, FieldErrors, FieldPath } from 'react-hook-form';
 import type { IlmPhasesFlyoutFormInternal } from './types';
+import { ILM_PHASE_ORDER } from '../constants';
 
-export type OnFieldErrorsChange = (path: string, errors: string[] | null) => void;
+/**
+ * Paths that `EditIlmPhasesFlyout` must watch to ensure tab error indicators refresh when
+ * validations are gated by form values (not just by `errors` updates).
+ *
+ * Keep this list in sync with `useIlmPhasesFlyoutTabErrors` whenever you add new `formData`-based
+ * gating logic (e.g. toggles that determine whether a shared error should surface on a tab).
+ */
+export const ILM_PHASES_FLYOUT_TAB_ERROR_INDICATOR_WATCH_PATHS: Array<
+  FieldPath<IlmPhasesFlyoutFormInternal>
+> = [
+  ...ILM_PHASE_ORDER.map(
+    (p) => `_meta.${p}.enabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>
+  ),
+  // Enable/disable toggles that gate validations (tabs need to update when these change).
+  '_meta.hot.downsampleEnabled',
+  '_meta.warm.downsampleEnabled',
+  '_meta.cold.downsampleEnabled',
+  '_meta.cold.searchableSnapshotEnabled',
+  '_meta.searchableSnapshot.repository',
+];
 
-const OnFieldErrorsChangeContext = createContext<OnFieldErrorsChange | null>(null);
+type DownsampleEnabledPhaseName = 'hot' | 'warm' | 'cold';
+const isDownsampleEnabledPhase = (phaseName: PhaseName): phaseName is DownsampleEnabledPhaseName =>
+  phaseName === 'hot' || phaseName === 'warm' || phaseName === 'cold';
 
-export const OnFieldErrorsChangeProvider = ({
-  value,
-  children,
-}: {
-  value: OnFieldErrorsChange;
-  children: React.ReactNode;
-}) => {
-  return React.createElement(OnFieldErrorsChangeContext.Provider, { value }, children);
-};
-
-export const useOnFieldErrorsChange = (): OnFieldErrorsChange | null => {
-  return useContext(OnFieldErrorsChangeContext);
-};
-
-export const useIlmPhasesFlyoutTabErrors = (formData: IlmPhasesFlyoutFormInternal | undefined) => {
-  const [errorsByPath, setErrorsByPath] = useState<Record<string, string[] | null>>({});
-
-  const onFieldErrorsChange = useCallback<OnFieldErrorsChange>((path, errors) => {
-    setErrorsByPath((prev) => {
-      if (isEqual(prev[path], errors)) return prev;
-      return { ...prev, [path]: errors };
-    });
-  }, []);
-
+export const useIlmPhasesFlyoutTabErrors = (
+  formData: DeepPartial<IlmPhasesFlyoutFormInternal> | undefined,
+  errors: FieldErrors<IlmPhasesFlyoutFormInternal>
+) => {
   const tabHasErrors = useCallback(
     (phaseName: PhaseName) => {
-      const hasErrorAt = (path: string) => Boolean(errorsByPath[path]?.length);
+      const hasErrorAt = (path: FieldPath<IlmPhasesFlyoutFormInternal>) =>
+        Boolean(get(errors, path));
 
       // Min age validations live on the value field for warm/cold/frozen/delete.
       if (phaseName !== 'hot' && hasErrorAt(`_meta.${phaseName}.minAgeValue`)) return true;
 
       // Downsample validations live on the fixedIntervalValue field.
-      // Downsampling is only available for hot/warm/cold phases; using dynamic access requires cast.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const downsampleEnabled = Boolean((formData as any)?._meta?.[phaseName]?.downsampleEnabled);
+      const downsampleEnabled = isDownsampleEnabledPhase(phaseName)
+        ? Boolean(formData?._meta?.[phaseName]?.downsampleEnabled)
+        : false;
       if (
-        (phaseName === 'hot' || phaseName === 'warm' || phaseName === 'cold') &&
+        isDownsampleEnabledPhase(phaseName) &&
         downsampleEnabled &&
         hasErrorAt(`_meta.${phaseName}.downsample.fixedIntervalValue`)
       ) {
@@ -67,8 +71,8 @@ export const useIlmPhasesFlyoutTabErrors = (formData: IlmPhasesFlyoutFormInterna
 
       return false;
     },
-    [errorsByPath, formData]
+    [errors, formData]
   );
 
-  return { onFieldErrorsChange, tabHasErrors };
+  return { tabHasErrors };
 };

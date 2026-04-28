@@ -49,3 +49,20 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
+
+export const CRITICAL_FILES_SCOUT = [
+  'package.json',
+  'yarn.lock',
+  'tsconfig.json',
+  '.node-version',
+  '.nvmrc',
+  'src/setup_node_env/**/*',
+  'packages/kbn-babel-preset/**/*',
+  'src/platform/packages/shared/kbn-repo-info/**/*',
+  'src/platform/packages/shared/kbn-scout/**/*',
+  'src/platform/packages/private/kbn-scout-reporting/**/*',
+  'scripts/scout.js',
+  '.buildkite/scripts/steps/test/scout/**/*',
+  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
+  '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
+];
