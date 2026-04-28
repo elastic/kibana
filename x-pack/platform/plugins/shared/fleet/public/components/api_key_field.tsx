@@ -13,7 +13,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -23,9 +22,8 @@ const TOKEN_MASK = '•'.repeat(24);
 
 export const ApiKeyField: React.FunctionComponent<{
   apiKeyId: string;
-  sendGetAPIKey: (id: string) => Promise<SendRequestResponse>;
-  tokenGetter: (response: SendRequestResponse) => string | undefined;
-}> = ({ apiKeyId, sendGetAPIKey, tokenGetter }) => {
+  getToken: (id: string) => Promise<string>;
+}> = ({ apiKeyId, getToken }) => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
@@ -34,11 +32,7 @@ export const ApiKeyField: React.FunctionComponent<{
   const fetchKey = async () => {
     try {
       setState('LOADING');
-      const res = await sendGetAPIKey(apiKeyId);
-      if (res.error) {
-        throw res.error;
-      }
-      const fetchedKey = tokenGetter(res);
+      const fetchedKey = await getToken(apiKeyId);
       setKey(fetchedKey);
       setState('VISIBLE');
       return fetchedKey;

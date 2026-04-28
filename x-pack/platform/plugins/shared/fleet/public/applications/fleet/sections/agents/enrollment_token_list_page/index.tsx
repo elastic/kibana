@@ -22,11 +22,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
-
 import { ApiKeyField } from '../../../../../components/api_key_field';
 
-import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
 import {
   ENROLLMENT_API_KEYS_INDEX,
   SO_SEARCH_LIMIT,
@@ -38,7 +35,7 @@ import {
   usePagination,
   useGetEnrollmentAPIKeysQuery,
   useGetAgentPolicies,
-  sendGetOneEnrollmentAPIKey,
+  getOneEnrollmentAPIKeyToken,
   useStartServices,
   sendDeleteOneEnrollmentAPIKey,
   sendBulkDeleteEnrollmentAPIKeys,
@@ -350,15 +347,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Secret',
       }),
       render: (apiKeyId: string) => {
-        return (
-          <ApiKeyField
-            apiKeyId={apiKeyId}
-            sendGetAPIKey={sendGetOneEnrollmentAPIKey}
-            tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
-              response.data?.item.api_key
-            }
-          />
-        );
+        return <ApiKeyField apiKeyId={apiKeyId} getToken={getOneEnrollmentAPIKeyToken} />;
       },
     },
     {
@@ -404,9 +393,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
   ];
 
-  const isLoading =
+  const isInitialLoading =
     enrollmentAPIKeysRequest.isInitialLoading ||
     (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest);
+  const isLoading = isInitialLoading || enrollmentAPIKeysRequest.isFetching;
 
   return (
     <DefaultLayout section="enrollment_tokens">
@@ -620,7 +610,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         noItemsMessage={
           <>
             <EuiSpacer size="s" />
-            {isLoading ? (
+            {isInitialLoading ? (
               <FormattedMessage
                 id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
                 defaultMessage="Loading enrollment tokens..."

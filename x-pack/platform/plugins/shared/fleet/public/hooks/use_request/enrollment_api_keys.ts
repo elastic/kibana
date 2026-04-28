@@ -42,6 +42,15 @@ export function sendGetOneEnrollmentAPIKey(keyId: string, options?: RequestOptio
   });
 }
 
+export async function getOneEnrollmentAPIKeyToken(keyId: string): Promise<string> {
+  const data = await sendRequestForRq<GetOneEnrollmentAPIKeyResponse>({
+    method: 'get',
+    path: enrollmentAPIKeyRouteService.getInfoPath(keyId),
+    version: API_VERSIONS.public.v1,
+  });
+  return data.item.api_key;
+}
+
 export function sendDeleteOneEnrollmentAPIKey(
   keyId: string,
   query?: { forceDelete?: boolean },

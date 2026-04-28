@@ -290,10 +290,9 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
   agentPolicyId: string
 ) {
   let hasMore = true;
-  let page = 1;
   while (hasMore) {
     const { items } = await listEnrollmentApiKeys(esClient, {
-      page: page++,
+      page: 1,
       perPage: 100,
       kuery: `policy_id:"${agentPolicyId}"`,
     });
@@ -328,10 +327,9 @@ export async function bulkDeleteEnrollmentApiKeys(
     errorCount = result.errorCount;
   } else if (kuery) {
     let hasMore = true;
-    let page = 1;
     while (hasMore) {
       const { items } = await listEnrollmentApiKeys(esClient, {
-        page: page++,
+        page: 1,
         perPage: 1000,
         kuery,
         spaceId,
