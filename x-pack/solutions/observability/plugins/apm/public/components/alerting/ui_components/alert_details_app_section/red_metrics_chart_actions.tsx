@@ -94,19 +94,36 @@ function RedMetricsChartActionsPopover({
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
-  const { serviceName, ...queryForApm } = queryParams;
+  const { serviceName, errorGroupId, ...queryForApm } = queryParams;
 
   const apmLink = useMemo(() => {
+    let serviceOverviewTab: 'errors' | 'transactions' | undefined;
+
+    if (indexType === 'error') {
+      serviceOverviewTab = 'errors';
+    } else if (queryParams.transactionName) {
+      serviceOverviewTab = 'transactions';
+    }
+
     return apmLocator.getRedirectUrl({
       serviceName,
-      serviceOverviewTab: queryParams.transactionName ? 'transactions' : undefined,
+      serviceOverviewTab,
+      errorGroupId,
       query: {
         ...queryForApm,
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
       },
     });
-  }, [apmLocator, serviceName, queryParams.transactionName, queryForApm, timeRange]);
+  }, [
+    apmLocator,
+    serviceName,
+    errorGroupId,
+    queryParams.transactionName,
+    queryForApm,
+    timeRange,
+    indexType,
+  ]);
 
   const discoverLink = useMemo(() => {
     if (indexSettingsStatus !== FETCH_STATUS.SUCCESS) return undefined;

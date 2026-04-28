@@ -17,10 +17,12 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
   return LatencyAggregationType.avg;
 };
 
-export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): boolean =>
+export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): ruleTypeId is ApmRuleType.Anomaly =>
   ruleTypeId === ApmRuleType.Anomaly;
 
-export const isErrorCountRuleType = (ruleTypeId: string) => ruleTypeId === ApmRuleType.ErrorCount;
+export const isErrorCountRuleType = (
+  ruleTypeId: ApmRuleType
+): ruleTypeId is ApmRuleType.ErrorCount => ruleTypeId === ApmRuleType.ErrorCount;
 
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);

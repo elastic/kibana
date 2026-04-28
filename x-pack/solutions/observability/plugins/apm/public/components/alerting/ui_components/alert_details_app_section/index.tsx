@@ -62,10 +62,7 @@ export function AlertDetailsAppSection({
   const { services } = useKibana();
   createCallApmApi(services as CoreStart);
 
-  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as Exclude<
-    ApmRuleType,
-    ApmRuleType.ErrorCount
-  >;
+  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType;
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
   const alertSeverity = alert.fields[ALERT_SEVERITY] as ML_ANOMALY_SEVERITY | undefined;
@@ -123,35 +120,39 @@ export function AlertDetailsAppSection({
     alertRuleTypeId,
   ]);
 
-  const errorSources = useMemo(() => {
-    if (!isErrorCountRuleType(alertRuleTypeId) || !errorGroupingKey) return undefined;
+  useLayoutEffect(() => {
+    if (!isErrorCountRuleType(alertRuleTypeId) || !errorGroupingKey) {
+      setSources([]);
+      return;
+    }
 
     const errorDetailsHref = services.http?.basePath.prepend(
       getAlertUrlErrorDetails(serviceName, errorGroupingKey, environment)
     );
 
-    return [
+    setSources([
       {
-        label: i18n.translate('xpack.apm.alertDetails.source.errorGroupingKey', {
-          defaultMessage: 'error.grouping_key',
-        }),
+        label: ERROR_GROUP_ID,
         value: (
           <EuiLink
             data-test-subj="apmAlertDetailsErrorGroupKeyLink"
             data-source={`alertDetails-${alertRuleTypeId}`}
-            data-action="navigateTo-error.grouping_key"
+            data-action={`navigateTo-${ERROR_GROUP_ID}`}
             href={errorDetailsHref}
           >
             {errorGroupingKey}
           </EuiLink>
         ),
       },
-    ];
-  }, [alertRuleTypeId, environment, errorGroupingKey, serviceName, services.http?.basePath]);
-
-  useLayoutEffect(() => {
-    if (errorSources) setSources(errorSources);
-  }, [errorSources, setSources]);
+    ]);
+  }, [
+    alertRuleTypeId,
+    environment,
+    errorGroupingKey,
+    serviceName,
+    services.http?.basePath,
+    setSources,
+  ]);
 
   const { from, to } = timeRange;
 
