@@ -54,6 +54,7 @@
             "lineNumber": 47,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -141,6 +142,7 @@
             "lineNumber": 24,
             "columnNumber": 66,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -399,6 +401,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -458,6 +461,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -498,6 +502,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewsContract",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -515,6 +520,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -567,6 +573,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedDataTableRenderCustomToolbarProps",
             "trackAdoption": false
           }
         ],
@@ -616,6 +623,7 @@
             "lineNumber": 40,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "RowHeightSettingsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -995,6 +1003,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -1159,6 +1168,7 @@
             "lineNumber": 33,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "UseColumnsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2596,6 +2606,7 @@
             "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false
           },
           {
@@ -2658,6 +2669,7 @@
             "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableColumnsMeta",
             "trackAdoption": false
           }
         ],
@@ -2808,6 +2820,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedDataTableRenderCustomToolbarProps",
             "trackAdoption": false
           }
         ],

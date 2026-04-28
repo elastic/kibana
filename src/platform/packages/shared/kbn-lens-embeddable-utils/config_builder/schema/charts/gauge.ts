@@ -37,7 +37,7 @@ const gaugeStylingSchema = schema.object(
               meta: {
                 id: 'gaugeShapeBullet',
                 title: 'Shape (Bullet)',
-                description: 'Bullet gauge shape',
+                description: 'Bullet gauge shape.',
               },
             }
           ),
@@ -53,7 +53,7 @@ const gaugeStylingSchema = schema.object(
               meta: {
                 id: 'gaugeShapeCircular',
                 title: 'Shape (Circular)',
-                description: 'Circular gauge shape',
+                description: 'Circular gauge shape.',
               },
             }
           ),
@@ -113,11 +113,11 @@ const gaugeConfigMetricOptionsSchema = {
       {
         visible: schema.maybe(
           schema.boolean({
-            meta: { description: 'Show the title' },
+            meta: { description: 'When `true`, displays the title.' },
             defaultValue: true,
           })
         ),
-        text: schema.maybe(schema.string({ meta: { description: 'Title text' } })),
+        text: schema.maybe(schema.string({ meta: { description: 'Title text.' } })),
       },
       { meta: { description: 'Title configuration' } }
     )
@@ -126,13 +126,14 @@ const gaugeConfigMetricOptionsSchema = {
    * Subtitle
    */
   subtitle: schema.maybe(
-    schema.string({ meta: { description: 'Subtitle below the gauge value' } })
+    schema.string({ meta: { description: 'Subtitle below the gauge value.' } })
   ),
   /**
    * Color configuration
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, noColorSchema, autoColorSchema], {
+      meta: { description: 'Color configuration for the gauge fill.' },
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -144,13 +145,13 @@ const gaugeConfigMetricOptionsSchema = {
       {
         visible: schema.maybe(
           schema.boolean({
-            meta: { description: 'Show tick marks' },
+            meta: { description: 'When `true`, displays tick marks on the gauge.' },
             defaultValue: true,
           })
         ),
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
-            meta: { description: 'Tick placement mode' },
+            meta: { description: 'Tick placement mode.' },
             defaultValue: 'bands',
           })
         ),
@@ -179,7 +180,13 @@ export const gaugeConfigSchemaNoESQL = schema.object(
       'gaugeMetric'
     ),
   },
-  { meta: { id: 'gaugeNoESQL', title: 'Gauge Chart (DSL)' } }
+  {
+    meta: {
+      id: 'gaugeNoESQL',
+      title: 'Gauge Chart (DSL)',
+      description: 'Gauge configuration using a data view.',
+    },
+  }
 );
 
 export const gaugeConfigSchemaESQL = schema.object(
@@ -197,11 +204,22 @@ export const gaugeConfigSchemaESQL = schema.object(
       ...gaugeConfigMetricInnerESQLOpsSchema,
     }),
   },
-  { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
+  {
+    meta: {
+      id: 'gaugeESQL',
+      title: 'Gauge Chart (ES|QL)',
+      description: 'Gauge configuration using an ES|QL query.',
+    },
+  }
 );
 
 export const gaugeConfigSchema = objectUnion([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL], {
-  meta: { id: 'gaugeChart', title: 'Gauge Chart' },
+  meta: {
+    id: 'gaugeChart',
+    title: 'Gauge Chart',
+    description:
+      'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',
+  },
 });
 
 export type GaugeConfig = TypeOf<typeof gaugeConfigSchema>;
