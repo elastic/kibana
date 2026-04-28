@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiFilterGroup,
   EuiFilterButton,
-  EuiHealth,
+  EuiIcon,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -379,20 +379,16 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Active',
       }),
       width: '80px',
-      render: (active: boolean) => (
-        <EuiHealth
-          color={active ? 'success' : 'subdued'}
-          aria-label={
-            active
-              ? i18n.translate('xpack.fleet.enrollmentTokensList.activeValue', {
-                  defaultMessage: 'Active',
-                })
-              : i18n.translate('xpack.fleet.enrollmentTokensList.inactiveValue', {
-                  defaultMessage: 'Inactive',
-                })
-          }
-        />
-      ),
+      render: (active: boolean) =>
+        active ? (
+          <EuiIcon
+            type="dot"
+            color="success"
+            aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.activeValue', {
+              defaultMessage: 'Active',
+            })}
+          />
+        ) : null,
     },
     {
       field: 'actions',
