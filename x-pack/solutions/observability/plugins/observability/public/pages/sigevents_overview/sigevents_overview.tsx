@@ -117,14 +117,23 @@ export function SigeventsOverviewPage() {
       color: ${euiTheme.colors.textAccent};
     `;
 
-    const warningValueCss = css`
-      font-size: ${euiTheme.size.base};
-      font-weight: ${euiTheme.font.weight.semiBold};
-      color: ${euiTheme.colors.severity.warning};
-    `;
-
     const serviceCount = overviewData.services.length;
     const lowPriorityCount = overviewData.lowCount + overviewData.mediumCount;
+
+    const getRiskCardStyling = (count: number) => {
+      const hasValue = count > 0;
+      return {
+        valueCss: hasValue ? accentValueCss : successValueCss,
+        iconBackground: hasValue
+          ? euiTheme.colors.backgroundLightAccent
+          : euiTheme.colors.backgroundLightSuccess,
+        iconColor: hasValue ? euiTheme.colors.textAccent : euiTheme.colors.severity.success,
+      };
+    };
+
+    const criticalStyling = getRiskCardStyling(overviewData.criticalCount);
+    const highStyling = getRiskCardStyling(overviewData.highCount);
+    const lowMedStyling = getRiskCardStyling(lowPriorityCount);
 
     return [
       {
@@ -152,46 +161,30 @@ export function SigeventsOverviewPage() {
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.critical', {
           defaultMessage: 'Critical',
         }),
-        value: <span css={successValueCss}>{overviewData.criticalCount}</span>,
-        iconType: 'minusInCircle',
-        iconBackground: euiTheme.colors.backgroundLightSuccess,
-        iconColor: euiTheme.colors.severity.success,
+        value: <span css={criticalStyling.valueCss}>{overviewData.criticalCount}</span>,
+        iconType: 'radar',
+        iconBackground: criticalStyling.iconBackground,
+        iconColor: criticalStyling.iconColor,
       },
       {
         id: 'highRisk',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.high', {
           defaultMessage: 'High',
         }),
-        value: (
-          <span css={overviewData.highCount > 0 ? warningValueCss : successValueCss}>
-            {overviewData.highCount}
-          </span>
-        ),
-        iconType: overviewData.highCount > 0 ? 'warning' : 'minusInCircle',
-        iconBackground:
-          overviewData.highCount > 0
-            ? euiTheme.colors.backgroundLightWarning
-            : euiTheme.colors.backgroundLightSuccess,
-        iconColor:
-          overviewData.highCount > 0
-            ? euiTheme.colors.severity.warning
-            : euiTheme.colors.severity.success,
+        value: <span css={highStyling.valueCss}>{overviewData.highCount}</span>,
+        iconType: 'warning',
+        iconBackground: highStyling.iconBackground,
+        iconColor: highStyling.iconColor,
       },
       {
         id: 'lowerPriority',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.lowMed', {
           defaultMessage: 'Low / Med',
         }),
-        value: (
-          <span css={lowPriorityCount > 0 ? accentValueCss : bigValueCss}>{lowPriorityCount}</span>
-        ),
-        iconType: lowPriorityCount > 0 ? 'search' : 'minusInCircle',
-        iconBackground:
-          lowPriorityCount > 0
-            ? euiTheme.colors.backgroundLightAccent
-            : euiTheme.colors.backgroundBaseSubdued,
-        iconColor:
-          lowPriorityCount > 0 ? euiTheme.colors.textAccent : euiTheme.colors.textParagraph,
+        value: <span css={lowMedStyling.valueCss}>{lowPriorityCount}</span>,
+        iconType: 'eye',
+        iconBackground: lowMedStyling.iconBackground,
+        iconColor: lowMedStyling.iconColor,
       },
     ];
   }, [overviewData, euiTheme]);

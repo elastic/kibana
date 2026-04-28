@@ -19,6 +19,7 @@ import {
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiBadgeProps, EuiIconProps } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,8 @@ export interface RecommendationStep {
 export interface RecommendationsPlanPanelProps {
   steps?: RecommendationStep[];
   escalateBadgeLabel?: string;
+  escalateBadgeColor?: EuiBadgeProps['color'];
+  escalateBadgeIconType?: EuiIconProps['type'];
   initialOpenStepIds?: string[];
   initialDetailsOpen?: boolean;
   onRemediate?: () => void;
@@ -61,6 +64,8 @@ export function RecommendationsPlanPanel(props: RecommendationsPlanPanelProps) {
   const {
     steps = DEFAULT_STEPS,
     escalateBadgeLabel,
+    escalateBadgeColor = 'warning',
+    escalateBadgeIconType = 'warning',
     initialOpenStepIds,
     initialDetailsOpen = false,
     onRemediate,
@@ -181,8 +186,8 @@ export function RecommendationsPlanPanel(props: RecommendationsPlanPanelProps) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge
-                    color="warning"
-                    iconType="warning"
+                    color={escalateBadgeColor}
+                    iconType={escalateBadgeIconType}
                     data-test-subj="sigeventsOverviewRecommendationsPlanEscalateBadge"
                   >
                     {escalateLabel}
