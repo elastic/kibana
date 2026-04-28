@@ -26,7 +26,7 @@ import { RulePreviewPanel } from './fields/rule_preview_panel';
 import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
-import { serializeFormToYaml } from './utils/yaml_form_utils';
+import { parseYamlToFormValues, serializeFormToYaml } from './utils/yaml_form_utils';
 
 export type { RuleFormServices } from './contexts';
 
@@ -132,9 +132,21 @@ const RuleFormContent = ({
   const handleModeChange = useCallback(
     (newMode: EditMode) => {
       if (newMode === editMode) return;
+      // When leaving YAML mode, eagerly flush YAML→Form so the form view
+      // shows the user's YAML edits. Don't rely on the Monaco editor's blur
+      // event — it can race with the unmount triggered by setEditMode and
+      // get dropped along with the disposed listener. If the YAML is invalid
+      // we keep the lifted yamlText buffer and skip the form update; the user
+      // can fix the YAML and try again.
+      if (editMode === 'yaml' && newMode === 'form') {
+        const result = parseYamlToFormValues(yamlText);
+        if (result.values) {
+          reset(result.values, { keepDirty: true, keepDefaultValues: true });
+        }
+      }
       setEditMode(newMode);
     },
-    [editMode]
+    [editMode, yamlText, reset]
   );
 
   // Wrapper that syncs YAML changes back to form state before submitting

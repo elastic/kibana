@@ -347,6 +347,66 @@ describe('RuleForm', () => {
       });
     });
 
+    it('flushes YAML→Form on toggle to Form (does not depend on editor blur)', async () => {
+      const user = userEvent.setup();
+
+      // Probe that reflects current form state for assertions.
+      const FormStateProbe = () => {
+        const { getValues } = useFormContext();
+        return (
+          <div data-test-subj="formStateProbe">
+            name={String(getValues('metadata.name') ?? '')};tags=
+            {JSON.stringify(getValues('metadata.tags') ?? [])}
+          </div>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <FormStateProbe />
+        </>,
+        { wrapper: createFormWrapper({ metadata: { name: 'before-edit', enabled: true } }) }
+      );
+
+      // Switch to YAML
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+
+      // Replace the entire YAML with a valid edited rule (changes name and adds tags)
+      const editedYaml = [
+        'kind: alert',
+        'metadata:',
+        '  name: after-edit',
+        '  tags:',
+        '    - critical',
+        '    - team-rna',
+        'time_field: "@timestamp"',
+        'schedule:',
+        '  every: 5m',
+        '  lookback: 1m',
+        'evaluation:',
+        '  query:',
+        '    base: FROM logs-*',
+        '',
+      ].join('\n');
+      await user.clear(editor);
+      // userEvent.type respects \n; use fireEvent.change for a clean replace
+      const { fireEvent } = await import('@testing-library/react');
+      fireEvent.change(editor, { target: { value: editedYaml } });
+
+      // Click Form toggle — this should flush YAML→Form regardless of blur timing.
+      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
+
+      // GuiRuleForm is now mounted; form state should reflect the YAML edits.
+      await waitFor(() => {
+        expect(screen.getByTestId('formStateProbe')).toHaveTextContent('name=after-edit');
+      });
+      expect(screen.getByTestId('formStateProbe')).toHaveTextContent(
+        'tags=["critical","team-rna"]'
+      );
+    });
+
     it('preserves YAML edits across Form↔YAML toggle', async () => {
       const user = userEvent.setup();
 
