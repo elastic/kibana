@@ -19,7 +19,7 @@ This skill is the **canonical reference for using EUI accessibly**. Open it when
 
 - **Primary — writing or refactoring an EUI component.** Open the matching guide in `references/components/index.md` and follow the canonical pattern (props, naming, focus, ids).
 - **Refactoring legacy markup.** Use the same component guides to bring existing JSX in line with the canonical pattern.
-- **Secondary — fixing an `@elastic/eui/*` ESLint error.** Use `references/eslint/index.md` to jump to the relevant component guide.
+- **Secondary — fixing an `@elastic/eui/*` ESLint error.** Use `references/eslint.md` to jump to the relevant component guide.
 - **General a11y or non-EUI question.** Read `references/shared_principles.md`.
 
 ## Find the right guide
@@ -28,7 +28,7 @@ This skill is the **canonical reference for using EUI accessibly**. Open it when
 |----------|------|
 | Adding or refactoring an **EUI component** | `references/components/index.md` → matching guide |
 | Resolving a non-EUI a11y concern | `references/shared_principles.md` |
-| Working from an `@elastic/eui/*` rule id | `references/eslint/index.md` (links into the component guide) |
+| Working from an `@elastic/eui/*` rule id | `references/eslint.md` (links into the component guide) |
 
 ## Read shared principles first
 
@@ -38,14 +38,11 @@ Always read `references/shared_principles.md` before authoring or refactoring. I
 
 ```
 references/
-  shared_principles.md          ← read first
+  shared_principles.md   ← read first
+  i18n.md                ← localization contract
+  html_ids.md            ← id / aria-labelledby utilities
+  eslint.md              ← rule id → component guide (secondary)
   components/
-    index.md                    ← topic → guide
-    eui_*.md                    ← canonical usage per component
-  project/
-    i18n.md                     ← localization contract
-    html_ids.md                 ← id / aria-labelledby utilities
-  eslint/
-    index.md                    ← rule id → component guide (secondary)
-    fix-*.md                    ← thin bridges into the component guide
+    index.md             ← topic → guide
+    *.md                 ← canonical usage per component
 ```

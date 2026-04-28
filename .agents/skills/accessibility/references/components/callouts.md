@@ -9,7 +9,7 @@ A callout that **appears conditionally** (validation, async result, toggle, post
 - **Conditional render** (`condition && <…>`, ternary, branches, early return) → set **`announceOnMount`** so the callout is announced when it mounts.
 - **Always-mounted, static callout** → omit **`announceOnMount`**; it does not need a live region.
 - **Conditional but must not announce** (rare) → **`announceOnMount={false}`** and document why in the callsite if non-obvious.
-- New user-visible strings (`title`, body) → **`i18n.translate`** (see **`../project/i18n.md`**).
+- New user-visible strings (`title`, body) → **`i18n.translate`** (see **`../i18n.md`**).
 
 If **`EuiCallOut`** uses **`{...calloutProps}`** and **`announceOnMount`** is not on the opening tag, merge it at the callsite or in the spread source.
 

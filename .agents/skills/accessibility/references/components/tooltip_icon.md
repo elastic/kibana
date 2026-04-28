@@ -4,7 +4,7 @@
 
 When **`EuiToolTip`** wraps **`EuiButtonIcon`** and the tooltip **`content`** matches the button's **`aria-label`**, assistive technology can announce the same text twice. Use **`disableScreenReaderOutput`** so the tooltip stays available to sighted users while screen readers hear the name once.
 
-**Related guides:** **`eui_focus_and_keyboard.md`** (tooltip anchors / `tabIndex`) · **`eui_icons_and_tooltips.md`** (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`).
+**Related guides:** **`focus_and_keyboard.md`** (tooltip anchors / `tabIndex`) · **`icons_and_tooltips.md`** (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`).
 
 ## Canonical usage
 

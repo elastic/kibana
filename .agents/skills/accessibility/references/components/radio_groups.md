@@ -8,7 +8,7 @@ Radio buttons are **grouped in the accessibility tree** by shared **`name`** val
 
 - Every **`EuiRadio`** and **`EuiRadioGroup`** has a **`name`**.
 - Options that belong together share the **same** `name`; distinct groups in one view use **different** names.
-- `name` is a **programmatic** token — do **not** wrap it in `i18n` (see **`../project/i18n.md`**). Visible **`label`** text **does** use `i18n.translate` when added or changed.
+- `name` is a **programmatic** token — do **not** wrap it in `i18n` (see **`../i18n.md`**). Visible **`label`** text **does** use `i18n.translate` when added or changed.
 - Naming: **`camelCase`** from field, section, or state (`paymentMethod`, `alertSeverity`). Avoid `radio1`, `group1`, `options`. If the context is genuinely unknown, `optionGroup` is an acceptable last resort — still better than omitting `name`.
 - For `{...groupProps}`, verify `name` in the spread source before adding another.
 

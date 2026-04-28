@@ -8,7 +8,7 @@ Tables need a **caption** exposed to assistive technology so users understand wh
 
 - Pass **exactly one** **`tableCaption`** per table instance.
 - Caption text **describes the dataset or task** — “User accounts in this space”, not “Table”.
-- If visible nearby text already names the table, you may align caption wording with it; otherwise use **`i18n.translate`** for new strings (**`../project/i18n.md`**).
+- If visible nearby text already names the table, you may align caption wording with it; otherwise use **`i18n.translate`** for new strings (**`../i18n.md`**).
 - If **`tableCaption`** is supplied through **`{...tableProps}`**, fix it at the **source** or merge explicitly at the callsite — never duplicate conflicting captions.
 
 ## Example

@@ -6,7 +6,7 @@ These principles apply to every Kibana accessibility decision — when **writing
 
 1. Task-specific user or system instruction
 2. This document
-3. Component guide (`components/*.md`) or ESLint bridge (`eslint/fix-*.md`)
+3. Component guide (`components/*.md`) or ESLint table (`eslint.md`)
 
 ## Standards
 
@@ -55,8 +55,8 @@ Whether you are writing a new component or fixing existing code, work top-down a
 
 ## Project references
 
-- **i18n:** `project/i18n.md`
-- **HTML ids** (`id`, `aria-labelledby`, `titleProps.id`): `project/html_ids.md`
+- **i18n:** `i18n.md`
+- **HTML ids** (`id`, `aria-labelledby`, `titleProps.id`): `html_ids.md`
 
 ## When to escalate
 
