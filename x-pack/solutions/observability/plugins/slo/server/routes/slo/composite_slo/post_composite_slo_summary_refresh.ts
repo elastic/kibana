@@ -6,7 +6,7 @@
  */
 
 import { postCompositeSloSummaryRefreshParamsSchema } from '@kbn/slo-schema';
-import { requestCompositeSloSummaryRefreshOnCompositeListVisit } from '../../../services/tasks/composite_slo_summary_task/request_refresh_on_composite_list_visit';
+import { refreshCompositeSloSummaries } from '../../../services/tasks/composite_slo_summary_task/refresh_composite_slo_summaries';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -23,7 +23,7 @@ export const postCompositeSloSummaryRefreshRoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
 
-    return requestCompositeSloSummaryRefreshOnCompositeListVisit({
+    return refreshCompositeSloSummaries({
       taskManager,
       logger,
       config,

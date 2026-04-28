@@ -14,7 +14,7 @@ import type { SLORoutesDependencies } from '../../../routes/types';
 import type { CompositeSloSummaryTaskState } from './types';
 import { getCompositeSloSummaryTaskId } from './composite_slo_summary_task';
 
-export const COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS = 10 * 60 * 1000;
+export const COOLDOWN_MS = 10 * 60 * 1000;
 
 interface Dependencies {
   taskManager: TaskManagerStartContract;
@@ -22,7 +22,7 @@ interface Dependencies {
   config: Pick<SLORoutesDependencies['config'], 'compositeSloSummaryTaskEnabled'>;
 }
 
-export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
+export async function refreshCompositeSloSummaries({
   taskManager,
   logger,
   config,
@@ -81,5 +81,5 @@ export async function requestCompositeSloSummaryRefreshOnCompositeListVisit({
 function isInCooldown(taskState: CompositeSloSummaryTaskState): boolean {
   const lastAt = taskState.lastCompositeListVisitRunSoonAt;
   return typeof lastAt === 'number' &&
-    Date.now() - lastAt < COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS
+    Date.now() - lastAt < COOLDOWN_MS
 }

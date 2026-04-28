@@ -9,11 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import {
-  COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS,
-  requestCompositeSloSummaryRefreshOnCompositeListVisit,
-} from './request_refresh_on_composite_list_visit';
+  COOLDOWN_MS,
+  refreshCompositeSloSummaries,
+} from './refresh_composite_slo_summaries';
 
-describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
+describe('refreshCompositeSloSummaries', () => {
   const logger = {
     debug: jest.fn(),
   } as unknown as Logger;
@@ -27,7 +27,7 @@ describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
   });
 
   it('returns task_disabled when summary task is disabled in config', async () => {
-    const result = await requestCompositeSloSummaryRefreshOnCompositeListVisit({
+    const result = await refreshCompositeSloSummaries({
       taskManager: {} as any,
       logger,
       config: { ...baseConfig, compositeSloSummaryTaskEnabled: false },
@@ -45,7 +45,7 @@ describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
       get: jest.fn().mockRejectedValue(notFoundError),
     };
 
-    const result = await requestCompositeSloSummaryRefreshOnCompositeListVisit({
+    const result = await refreshCompositeSloSummaries({
       taskManager: taskManager as any,
       logger,
       config: baseConfig,
@@ -59,12 +59,12 @@ describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
       get: jest.fn().mockResolvedValue({
         state: {
           lastCompositeListVisitRunSoonAt:
-            Date.now() - COMPOSITE_SLO_SUMMARY_LIST_VISIT_RUN_SOON_COOLDOWN_MS + 60_000,
+            Date.now() - COOLDOWN_MS + 60_000,
         },
       }),
     };
 
-    const result = await requestCompositeSloSummaryRefreshOnCompositeListVisit({
+    const result = await refreshCompositeSloSummaries({
       taskManager: taskManager as any,
       logger,
       config: baseConfig,
@@ -83,7 +83,7 @@ describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
       bulkUpdateState: jest.fn(),
     };
 
-    const result = await requestCompositeSloSummaryRefreshOnCompositeListVisit({
+    const result = await refreshCompositeSloSummaries({
       taskManager: taskManager as any,
       logger,
       config: baseConfig,
@@ -102,7 +102,7 @@ describe('requestCompositeSloSummaryRefreshOnCompositeListVisit', () => {
       bulkUpdateState: jest.fn().mockResolvedValue(undefined),
     };
 
-    const result = await requestCompositeSloSummaryRefreshOnCompositeListVisit({
+    const result = await refreshCompositeSloSummaries({
       taskManager: taskManager as any,
       logger,
       config: baseConfig,

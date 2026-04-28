@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useMutation } from '@kbn/react-query';
 import { usePluginContext } from './use_plugin_context';
 
-export function useRequestCompositeSloSummaryOnListVisit(): void {
+export function useRefreshCompositeSloSummaries(): void {
   const { sloClient } = usePluginContext();
 
   const { mutate } = useMutation(['requestCompositeSloSummaryRefresh'], () =>
