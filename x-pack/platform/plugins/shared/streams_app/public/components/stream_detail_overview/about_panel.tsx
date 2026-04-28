@@ -125,16 +125,13 @@ export function AboutPanel() {
   useEffect(() => {
     const handleKeyup = (e: KeyboardEvent) => {
       if (!isEditing) return;
-      if (e.key === 'Enter' && !e.shiftKey) {
-        saveDescription(descriptionValue.trim());
-      }
       if (e.key === 'Escape') {
         setIsEditing(false);
       }
     };
     window.addEventListener('keyup', handleKeyup);
     return () => window.removeEventListener('keyup', handleKeyup);
-  }, [isEditing, saveDescription, descriptionValue]);
+  }, [isEditing]);
 
   return (
     <EuiFocusTrap onClickOutside={() => setIsEditing(false)}>
@@ -221,8 +218,9 @@ export function AboutPanel() {
               disabled={isGenerating}
               value={descriptionValue}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
+                  saveDescription(descriptionValue.trim());
                 }
               }}
               onChange={(e) => setDescriptionValue(e.target.value)}
@@ -235,41 +233,39 @@ export function AboutPanel() {
                 gutterSize="s"
                 responsive={false}
               >
-                {isAIAvailable && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={
-                        !hasConnector
-                          ? i18n.translate(
-                              'xpack.streams.aboutPanel.generateDescription.noConnectorTooltip',
-                              {
-                                defaultMessage:
-                                  'Configure an AI connector to generate a description automatically.',
-                              }
-                            )
-                          : undefined
-                      }
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      !hasConnector
+                        ? i18n.translate(
+                            'xpack.streams.aboutPanel.generateDescription.noConnectorTooltip',
+                            {
+                              defaultMessage:
+                                'Configure an AI connector to generate a description automatically.',
+                            }
+                          )
+                        : undefined
+                    }
+                  >
+                    <AiButtonEmpty
+                      size="xs"
+                      iconSide="left"
+                      iconType="sparkles"
+                      isDisabled={!isAIAvailable || !hasConnector || isGenerating}
+                      isLoading={isGenerating}
+                      onClick={async () => {
+                        const generated = await generateDescription();
+                        if (generated) {
+                          setDescriptionValue(generated);
+                        }
+                      }}
                     >
-                      <AiButtonEmpty
-                        size="xs"
-                        iconSide="left"
-                        iconType="sparkles"
-                        isDisabled={!hasConnector || isGenerating}
-                        isLoading={isGenerating}
-                        onClick={async () => {
-                          const generated = await generateDescription();
-                          if (generated) {
-                            setDescriptionValue(generated);
-                          }
-                        }}
-                      >
-                        {i18n.translate('xpack.streams.aboutPanel.p.helpMeGenerateALabel', {
-                          defaultMessage: 'Help me generate a description',
-                        })}
-                      </AiButtonEmpty>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
+                      {i18n.translate('xpack.streams.aboutPanel.p.helpMeGenerateALabel', {
+                        defaultMessage: 'Help me generate a description',
+                      })}
+                    </AiButtonEmpty>
+                  </EuiToolTip>
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <img
                     css={css`

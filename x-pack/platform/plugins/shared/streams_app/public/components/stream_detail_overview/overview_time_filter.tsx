@@ -61,6 +61,7 @@ export function OverviewTimeFilter() {
           showUpdateButton="iconOnly"
           updateButtonProps={{
             size: 's',
+            fill: false,
           }}
           onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
         />

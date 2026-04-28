@@ -26,6 +26,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -41,13 +42,12 @@ import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
 } from '../../hooks/use_streams_doc_counts_fetch';
+import { getMeaningfulBucketMs } from '../../util/stream_overview_esql';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { OverviewTimeFilter } from './overview_time_filter';
 import { IngestChartStatistics } from './ingest_chart_statistics';
-
-const CHART_HEIGHT = 300;
 
 function getChartTimeZone(uiSettings: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
@@ -72,7 +72,9 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     core: { uiSettings },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
+
   const chartBaseTheme = useElasticChartsTheme();
+
   const barSeriesTimeZone = useMemo(() => getChartTimeZone(uiSettings), [uiSettings]);
 
   const canReadFailureStore = Streams.ingest.all.GetResponse.is(definition)
@@ -85,8 +87,9 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
   const esqlSource = isQueryStream ? definition.stream.query.view : streamName;
 
   const { timeState } = useTimefilter();
-  const minInterval = Math.floor(
-    (timeState.end - timeState.start) / STREAMS_HISTOGRAM_NUM_DATA_POINTS
+  const minInterval = getMeaningfulBucketMs(
+    timeState.end - timeState.start,
+    STREAMS_HISTOGRAM_NUM_DATA_POINTS
   );
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
@@ -109,6 +112,11 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
   );
 
   const { updateTimeRange } = useTimeRangeUpdate();
+
+  const isStackedOverviewLayout = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
+
+  const CHART_HEIGHT = isStackedOverviewLayout ? 100 : 200;
+
   const onBrushEnd = useCallback<BrushEndListener>(
     (brushEvent) => {
       const { x } = brushEvent as XYBrushEvent;
@@ -127,30 +135,6 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     { defaultMessage: 'Documents' }
   );
 
-  const chartHeader = (
-    <div data-test-subj="streamsAppStreamOverviewChartHeader">
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{documentsSeriesName}</h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <p>
-              {i18n.translate(
-                'xpack.streams.streamOverview.ingestRateChartContent.forSelectedTimeRangeFlexItemLabel',
-                { defaultMessage: 'For selected time range' }
-              )}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <OverviewTimeFilter />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-    </div>
-  );
-
   const chartColumnCss = useMemo(
     () =>
       css({
@@ -163,7 +147,27 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
 
   return (
     <EuiPanel hasBorder paddingSize="m">
-      {chartHeader}
+      <div data-test-subj="streamsAppStreamOverviewChartHeader">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>{documentsSeriesName}</h3>
+            </EuiTitle>
+            <EuiText size="xs" color="subdued">
+              <p>
+                {i18n.translate(
+                  'xpack.streams.streamOverview.ingestRateChartContent.forSelectedTimeRangeFlexItemLabel',
+                  { defaultMessage: 'For selected time range' }
+                )}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OverviewTimeFilter />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </div>
       <EuiSpacer size="m" />
 
       <EuiFlexGroup

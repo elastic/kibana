@@ -122,7 +122,7 @@ describe('AboutPanel', () => {
     expect(screen.getByText(/to help identify this stream/)).toBeInTheDocument();
   });
 
-  it('enters edit mode and shows the textarea when the panel is clicked', async () => {
+  it('enters edit mode and shows the textarea when the pencil button is clicked', async () => {
     mockUseStreamDetail.mockReturnValue({
       definition: wiredDefinitionWithDescription('Test description'),
     });
@@ -131,7 +131,7 @@ describe('AboutPanel', () => {
 
     expect(screen.queryByLabelText('Edit stream description')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByText('Test description'));
+    await userEvent.click(screen.getByLabelText('Edit description'));
 
     expect(screen.getByLabelText('Edit stream description')).toBeInTheDocument();
   });

@@ -95,14 +95,14 @@ export function TopFailureReasons({ streamName, canReadFailureStore }: TopFailur
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <strong>
+        <EuiText size="s" color="subdued">
+          <h4>
             {i18n.translate('xpack.streams.dataQualityCard.topFailureReasons.title', {
               defaultMessage: 'Top failure reasons',
             })}
-          </strong>
+          </h4>
         </EuiText>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
       </EuiFlexItem>
 
       {failureReasonsFetch.loading ? (
@@ -119,15 +119,19 @@ export function TopFailureReasons({ streamName, canReadFailureStore }: TopFailur
         </EuiFlexItem>
       ) : (
         reasons.map((reason, idx) => (
-          <EuiFlexItem key={reason.errorType}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow>{reason.errorType}</EuiFlexItem>
+          <EuiFlexItem key={reason.errorType} grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow>
+                <EuiText size="s">
+                  <p>{reason.errorType}</p>
+                </EuiText>
+              </EuiFlexItem>
               <EuiFlexItem
                 css={css`
                   max-width: 33%;
                 `}
               >
-                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow>
                     <EuiProgress
                       value={reason.count}

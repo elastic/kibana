@@ -11,7 +11,10 @@ import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
-import { buildStreamIngestHistogramEsql } from '../util/stream_overview_esql';
+import {
+  buildStreamIngestHistogramEsql,
+  getMeaningfulBucketMs,
+} from '../util/stream_overview_esql';
 import { executeEsqlQuery } from './use_execute_esql_query';
 
 /**
@@ -180,7 +183,7 @@ export function useStreamDocCountsFetch({
         throw new Error('Abort controller not set');
       }
 
-      const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+      const minInterval = getMeaningfulBucketMs(timeState.end - timeState.start, numDataPoints);
       // Check per-stream privilege
       const canReadFailureStore = getCanReadFailureStore(streamName);
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;

@@ -10,13 +10,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
-import { calculatePercentage, DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { calculatePercentage } from '@kbn/dataset-quality-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
@@ -26,13 +27,12 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { executeEsqlQuery } from '../../hooks/use_execute_esql_query';
-import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
   buildDataQualityDegradedDocCountEsql,
   buildDataQualityIgnoredFieldsCountEsql,
   buildDataQualityTotalDocCountEsql,
 } from '../../util/stream_overview_esql';
-import { OverviewStat } from './overview_stat';
+import { StatCell, TrendSubtitle } from './stat_cell';
 import { TopFailureReasons } from './top_failure_reasons';
 
 export function DataQualityCard() {
@@ -147,11 +147,6 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const degradedDocs = degradedDocsResult.value ?? 0;
   const failedDocs = failedDocsResult.value ?? 0;
 
-  const quality = useMemo(
-    () => calculateDataQuality({ totalDocs, degradedDocs, failedDocs }),
-    [totalDocs, degradedDocs, failedDocs]
-  );
-
   const degradedPercentage = useMemo(
     () => calculatePercentage({ totalDocs, count: degradedDocs }),
     [totalDocs, degradedDocs]
@@ -164,6 +159,9 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
 
   const isQualityLoading =
     totalDocsResult.loading || degradedDocsResult.loading || failedDocsResult.loading;
+
+  const degradedColor =
+    degradedPercentage === 0 ? 'success' : degradedPercentage <= 3 ? 'warning' : 'danger';
 
   const dataQualityTabHref = router.link('/{key}/management/{tab}', {
     path: { key: streamName, tab: 'dataQuality' as const },
@@ -183,14 +181,6 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
               })}
             </h2>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DatasetQualityIndicator
-            quality={quality}
-            isLoading={isQualityLoading}
-            showTooltip={true}
-            dataTestSubj={`streamsOverviewDataQualityIndicator-${streamName}`}
-          />
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
@@ -218,53 +208,53 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
 
       <EuiFlexGroup wrap>
         <EuiFlexItem>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="flexStart"
-            responsive
-            gutterSize="none"
-          >
-            <EuiFlexItem grow>
-              <OverviewStat
-                title={formatPct(degradedPercentage)}
-                description={i18n.translate(
-                  'xpack.streams.streamOverview.dataQualityCard.degradedDocs',
-                  { defaultMessage: 'Degraded docs' }
-                )}
-                isLoading={isQualityLoading}
-                titleColor="warning"
-                dataTestSubj="streamsOverviewDegradedDocs"
-              />
-            </EuiFlexItem>
+          <EuiFlexGroup>
+            <StatCell
+              data-test-subj="streamsOverviewDegradedDocs"
+              title={i18n.translate('xpack.streams.streamOverview.dataQualityCard.degradedDocs', {
+                defaultMessage: 'Degraded docs',
+              })}
+              value={
+                isQualityLoading ? <EuiLoadingSpinner size="m" /> : formatPct(degradedPercentage)
+              }
+              valueColor={isQualityLoading ? undefined : degradedColor}
+              subtitle={<TrendSubtitle trend={null} loading={isQualityLoading} />}
+            />
 
-            <EuiFlexItem grow>
-              <OverviewStat
-                title={
-                  canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />
+            <StatCell
+              data-test-subj="streamsOverviewFailedDocs"
+              title={i18n.translate('xpack.streams.streamOverview.dataQualityCard.failedDocs', {
+                defaultMessage: 'Failed docs',
+              })}
+              value={canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />}
+              subtitle={
+                <TrendSubtitle
+                  trend={null}
+                  loading={canReadFailureStore && failedDocsResult.loading}
+                />
+              }
+            />
+
+            <StatCell
+              data-test-subj="streamsOverviewIgnoredFields"
+              title={i18n.translate('xpack.streams.streamOverview.dataQualityCard.ignoredFields', {
+                defaultMessage: 'Ignored fields',
+              })}
+              value={
+                ignoredFieldsResult.loading ? (
+                  <EuiLoadingSpinner size="m" />
+                ) : (
+                  formatNumber(ignoredFieldsResult.value ?? 0, '0,0')
+                )
+              }
+              unit={i18n.translate(
+                'xpack.streams.streamOverview.dataQualityCard.ignoredFields.unit',
+                {
+                  defaultMessage: 'fields',
                 }
-                description={i18n.translate(
-                  'xpack.streams.streamOverview.dataQualityCard.failedDocs',
-                  {
-                    defaultMessage: 'Failed docs',
-                  }
-                )}
-                isLoading={canReadFailureStore ? failedDocsResult.loading : false}
-                titleColor={canReadFailureStore ? 'danger' : undefined}
-                dataTestSubj="streamsOverviewFailedDocs"
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow>
-              <OverviewStat
-                title={formatNumber(ignoredFieldsResult.value ?? 0, '0,0')}
-                description={i18n.translate(
-                  'xpack.streams.streamOverview.dataQualityCard.ignoredFields',
-                  { defaultMessage: 'Ignored fields' }
-                )}
-                isLoading={ignoredFieldsResult.loading}
-                dataTestSubj="streamsOverviewIgnoredFields"
-              />
-            </EuiFlexItem>
+              )}
+              subtitle={<TrendSubtitle trend={null} loading={ignoredFieldsResult.loading} />}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>

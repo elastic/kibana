@@ -12,12 +12,10 @@ import type { Streams } from '@kbn/streams-schema';
 import { isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
-import { StreamDescription } from '../../../../sig_events/stream_detail_systems/stream_description';
 import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
-import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 
 export function WiredAdvancedView({
   definition,
@@ -29,7 +27,6 @@ export function WiredAdvancedView({
   const {
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
-  const aiFeatures = useAIFeatures();
 
   const { onPageReady } = usePerformanceContext();
 
@@ -50,16 +47,6 @@ export function WiredAdvancedView({
       {contentPacks.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
-          <EuiSpacer />
-        </>
-      )}
-      {significantEvents?.enabled && significantEvents?.available && (
-        <>
-          <StreamDescription
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-            aiFeatures={aiFeatures}
-          />
           <EuiSpacer />
         </>
       )}
