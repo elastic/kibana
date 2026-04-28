@@ -9,7 +9,11 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, isEventDrivenWorkflowTriggerSource } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
@@ -64,40 +68,42 @@ export async function runWorkflow({
 
   setupSpan?.end();
 
-  if (!workflowsExecutionEngine.triggerEvents.isEnabled) {
-    // Check if the workflow execution is event-driven and skip if it is
-    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-      workflowRunId,
-      spaceId
+  const execution = workflowExecutionState.getWorkflowExecution();
+  if (isTerminalStatus(execution.status)) {
+    logger.debug(
+      `Skipping workflow run ${workflowRunId}: execution already terminal [${execution.status}]`
     );
-    if (execution) {
-      const triggeredBy = execution.triggeredBy;
-      const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
-      if (isEventDriven) {
-        const cancelledAt = new Date().toISOString();
-        await workflowExecutionRepository.updateWorkflowExecution({
-          id: workflowRunId,
-          status: ExecutionStatus.SKIPPED,
-          cancellationReason: 'Event-driven execution disabled by operator',
-          cancelledAt,
-          cancelledBy: 'system',
-        });
-        logger.debug(
-          `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
-        );
-        telemetryClient.reportEventDrivenExecutionSuppressed({
-          workflowExecution: {
-            ...execution,
-            status: ExecutionStatus.SKIPPED,
-            cancellationReason: 'Event-driven execution disabled by operator',
-            cancelledAt,
-            cancelledBy: 'system',
-          },
-          logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
-        });
-        return;
-      }
+    if (meteringService) {
+      void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
     }
+    return;
+  }
+
+  const triggeredBy = execution.triggeredBy;
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+  if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
+    const cancelledAt = new Date().toISOString();
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason: 'Event-driven execution disabled by operator',
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    logger.debug(
+      `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+    );
+    telemetryClient.reportEventDrivenExecutionSuppressed({
+      workflowExecution: {
+        ...execution,
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: 'Event-driven execution disabled by operator',
+        cancelledAt,
+        cancelledBy: 'system',
+      },
+      logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
+    });
+    return;
   }
 
   // Span for runtime initialization (graph building, topsort, etc.)

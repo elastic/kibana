@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JobSelector } from './job_selector';
-import type { MlSummaryJob } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 jest.mock('../../contexts/kibana', () => ({
   useMlKibana: () => ({}),

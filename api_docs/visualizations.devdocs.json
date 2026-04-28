@@ -614,6 +614,7 @@
                 "lineNumber": 98,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false
               },
               {
@@ -636,6 +637,7 @@
                 "lineNumber": 99,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisToExpressionAstParams",
                 "trackAdoption": false
               }
             ]
@@ -749,6 +751,7 @@
                 "lineNumber": 58,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisTypeDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -830,6 +833,7 @@
                 "lineNumber": 41,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStatePath",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -866,6 +870,7 @@
                 "lineNumber": 58,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStateKey",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1043,6 +1048,7 @@
                 "lineNumber": 89,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStatePath",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1336,6 +1342,7 @@
                 "lineNumber": 72,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedVis",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1372,6 +1379,7 @@
                 "lineNumber": 97,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "PartialVisState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1549,6 +1557,7 @@
                 "lineNumber": 147,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimefilterContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1566,6 +1575,7 @@
                 "lineNumber": 148,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeEmbeddableConfiguration",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1589,6 +1599,7 @@
                 "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1607,6 +1618,7 @@
                 "lineNumber": 150,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AttributeService",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1915,6 +1927,7 @@
                 "lineNumber": 402,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1953,6 +1966,7 @@
                 "lineNumber": 437,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2096,6 +2110,7 @@
                 "lineNumber": 679,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2281,6 +2296,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewsPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2387,6 +2403,7 @@
             "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Vis",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2410,6 +2427,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VisToExpressionAstParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2454,6 +2472,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2868,6 +2887,7 @@
                 "lineNumber": 152,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "EditorRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4008,6 +4028,7 @@
                 "lineNumber": 109,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4874,6 +4895,7 @@
                 "lineNumber": 103,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4945,6 +4967,7 @@
                 "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -4969,6 +4992,7 @@
                 "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimefilterContract",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5030,6 +5054,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -5054,6 +5079,7 @@
                 "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimefilterContract",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5122,6 +5148,7 @@
                 "lineNumber": 128,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5174,6 +5201,7 @@
                 "lineNumber": 135,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5482,6 +5510,7 @@
                 "lineNumber": 190,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5580,6 +5609,7 @@
                 "lineNumber": 98,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false
               },
               {
@@ -5602,6 +5632,7 @@
                 "lineNumber": 99,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisToExpressionAstParams",
                 "trackAdoption": false
               }
             ]
@@ -5652,6 +5683,7 @@
                 "lineNumber": 208,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5711,6 +5743,7 @@
                 "lineNumber": 210,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5959,6 +5992,7 @@
                 "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6035,6 +6069,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6137,6 +6172,7 @@
                 "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SearchQuery",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6883,6 +6919,7 @@
             "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Vis",
             "trackAdoption": false
           },
           {
@@ -6905,6 +6942,7 @@
             "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VisToExpressionAstParams",
             "trackAdoption": false
           }
         ],
@@ -7465,7 +7503,7 @@
               "id": "def-public.VisualizationsStart.showNewVisModal.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n  editorParams = [],\n  onClose,\n  originatingApp,\n  originatingPath,\n  breadcrumbs,\n  outsideVisualizeApp,\n  showAggsSelection,\n  selectedVisType,\n}",
               "description": [],
               "signature": [
                 "ShowNewVisModalParams"
@@ -7474,6 +7512,7 @@
               "lineNumber": 48,
               "columnNumber": 33,
               "deprecated": false,
+              "docsReferencedTypeName": "ShowNewVisModalParams",
               "trackAdoption": false
             }
           ]
@@ -7798,6 +7837,7 @@
             "lineNumber": 18,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "IAggConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7888,6 +7928,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ColorSchemas",
             "trackAdoption": false,
             "isRequired": true
           },
