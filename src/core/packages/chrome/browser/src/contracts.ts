@@ -237,14 +237,12 @@ export interface ChromeStart {
 
   /**
    * Register an app-specific documentation link to be shown in the app menu.
-   * Falls back to the documentation link from the help extension if not set.
    */
   registerAppDocumentationLink(link: string): void;
 
   /**
-   * Get an observable of the current app documentation link.
-   * Returns the link registered via {@link ChromeStart.registerAppDocumentationLink} if set,
-   * otherwise falls back to the documentation link from the help extension.
+   * Get an observable of the app documentation link registered via
+   * {@link ChromeStart.registerAppDocumentationLink}, or `undefined` if none is set.
    */
   getAppDocumentationLink$(): Observable<string | undefined>;
 

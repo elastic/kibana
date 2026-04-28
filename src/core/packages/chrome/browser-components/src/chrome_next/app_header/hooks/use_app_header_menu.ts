@@ -45,17 +45,25 @@ const useStaticItems = () => {
   const chrome = useChromeService();
   const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
   const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
+  const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {
     const staticItems: AppMenuItemType[] = [];
+
     if (feedbackHandler) {
       staticItems.push(createFeedbackMenuItem(feedbackHandler));
     }
-    if (documentationLink) {
-      staticItems.push(createDocumentationMenuItem(documentationLink));
+
+    const docLink =
+      documentationLink ??
+      helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
+
+    if (docLink) {
+      staticItems.push(createDocumentationMenuItem(docLink));
     }
+
     return staticItems;
-  }, [feedbackHandler, documentationLink]);
+  }, [feedbackHandler, documentationLink, helpExtension]);
 };
 
 const useResolvedAppMenu = (): ResolvedAppMenu => {
