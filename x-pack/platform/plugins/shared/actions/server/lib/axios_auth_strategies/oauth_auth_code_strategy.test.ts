@@ -212,24 +212,30 @@ describe('OAuthAuthCodeStrategy', () => {
       }
     );
 
-    it('sets Authorization header with title-case Bearer scheme at refresh time', async () => {
-      const { instance, mockRequest } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, baseDeps);
-      const onRejected = getOnRejected(instance);
+    it.each([
+      ['bearer refreshed-token', 'Bearer refreshed-token'],
+      ['Bearer refreshed-token', 'Bearer refreshed-token'],
+    ])(
+      'sets Authorization header with title-case Bearer scheme at refresh time (%s -> %s)',
+      async (input, expected) => {
+        const { instance, mockRequest } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, baseDeps);
+        const onRejected = getOnRejected(instance);
 
-      mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('bearer refreshed-token');
-      mockRequest.mockResolvedValue({ status: 200 });
+        mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue(input);
+        mockRequest.mockResolvedValue({ status: 200 });
 
-      const error = {
-        config: { _retry: false, headers: {} as Record<string, string> },
-        response: { status: 401 },
-        message: 'Unauthorized',
-      };
-      await onRejected(error);
+        const error = {
+          config: { _retry: false, headers: {} as Record<string, string> },
+          response: { status: 401 },
+          message: 'Unauthorized',
+        };
+        await onRejected(error);
 
-      expect(error.config.headers.Authorization).toBe('Bearer refreshed-token');
-      expect(instance.defaults.headers.common.Authorization).toBe('Bearer refreshed-token');
-    });
+        expect(error.config.headers.Authorization).toBe(expected);
+        expect(instance.defaults.headers.common.Authorization).toBe(expected);
+      }
+    );
   });
 
   describe('getToken', () => {
