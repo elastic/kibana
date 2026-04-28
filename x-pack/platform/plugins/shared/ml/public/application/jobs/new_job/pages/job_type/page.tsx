@@ -120,13 +120,16 @@ export const Page: FC = () => {
   };
 
   const getUrlParams = () => {
-    let urlParams = !selectedSavedSearch
-      ? `?index=${selectedDataView.id}`
-      : `?savedSearchId=${selectedSavedSearch.id}`;
-    if (projectRouting) {
-      urlParams += `&project_routing=${projectRouting}`;
+    const params = new URLSearchParams();
+    if (!selectedSavedSearch && selectedDataView.id) {
+      params.set('index', selectedDataView.id);
+    } else if (selectedSavedSearch?.id) {
+      params.set('savedSearchId', selectedSavedSearch.id);
     }
-    return urlParams;
+    if (projectRouting) {
+      params.set('project_routing', projectRouting);
+    }
+    return `?${params.toString()}`;
   };
 
   const addSelectionToRecentlyAccessed = async () => {
