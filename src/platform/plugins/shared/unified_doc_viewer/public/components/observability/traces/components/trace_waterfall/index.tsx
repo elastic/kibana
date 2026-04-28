@@ -36,6 +36,7 @@ interface Props {
   docId?: string;
   serviceName?: string;
   dataView: DocViewRenderProps['dataView'];
+  ebtDetail?: 'spanDoc' | 'logDoc';
 }
 
 export interface TraceWaterfallRestorableState {
@@ -64,7 +65,13 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
   defaultMessage: 'Trace summary',
 });
 
-function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
+function InternalTraceWaterfall({
+  traceId,
+  docId,
+  serviceName,
+  dataView,
+  ebtDetail = EBT_DETAIL_SPAN_DOC,
+}: Props) {
   const { data, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
 
@@ -131,7 +138,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
-    ebt: { element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY, detail: EBT_DETAIL_SPAN_DOC },
+    ebt: { element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY, detail: ebtDetail },
   });
 
   const actionId = 'traceWaterfallFullScreenAction';
@@ -238,12 +245,12 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         ebt: {
           action: EBT_CLICK_ACTION_EXPAND_TRACE,
           element: EBT_ELEMENT_TRACE_SUMMARY_EXPAND_BUTTON,
-          detail: EBT_DETAIL_SPAN_DOC,
+          detail: ebtDetail,
         },
       },
       ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
     ],
-    [openInDiscoverSectionAction, setShowFullScreenWaterfall]
+    [ebtDetail, openInDiscoverSectionAction, setShowFullScreenWaterfall]
   );
 
   if (!FocusedTraceWaterfall) return null;
@@ -282,7 +289,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
           data-ebt-action={EBT_CLICK_ACTION_EXPAND_TRACE}
           data-ebt-element={EBT_ELEMENT_TRACE_SUMMARY_WATERFALL_AREA}
-          data-ebt-detail={EBT_DETAIL_SPAN_DOC}
+          data-ebt-detail={ebtDetail}
           aria-label={fullScreenButtonLabel}
           tabIndex={0}
           onClick={() => setShowFullScreenWaterfall(true)}

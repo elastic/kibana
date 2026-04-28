@@ -41,6 +41,7 @@ import {
   TraceWaterfall,
   type TraceWaterfallRestorableState,
 } from '../observability/traces/components/trace_waterfall';
+import { EBT_DETAIL_LOG_DOC } from '../../telemetry/constants';
 import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
@@ -167,6 +168,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
                   docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
                   serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                   dataView={dataView}
+                  ebtDetail={EBT_DETAIL_LOG_DOC}
                   initialState={initialState}
                   onInitialStateChange={onInitialStateChange}
                 />
