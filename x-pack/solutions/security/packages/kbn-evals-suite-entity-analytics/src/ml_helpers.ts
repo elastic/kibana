@@ -17,7 +17,7 @@ import {
 import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { isJobStarted } from '@kbn/security-solution-plugin/common/machine_learning/helpers';
 
 // Security Authentication ML module

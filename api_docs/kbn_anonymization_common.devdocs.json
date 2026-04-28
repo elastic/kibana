@@ -245,6 +245,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1727,7 +1728,9 @@
             "type": "string",
             "tags": [],
             "label": "'destination.ip'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"IP\""
             ],
@@ -1743,7 +1746,9 @@
             "type": "string",
             "tags": [],
             "label": "'host.ip'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"IP\""
             ],
@@ -1759,7 +1764,9 @@
             "type": "string",
             "tags": [],
             "label": "'client.ip'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"IP\""
             ],
@@ -1775,7 +1782,9 @@
             "type": "string",
             "tags": [],
             "label": "'server.ip'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"IP\""
             ],
@@ -1791,7 +1800,9 @@
             "type": "string",
             "tags": [],
             "label": "'network.forwarded_ip'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"IP\""
             ],
@@ -1807,7 +1818,9 @@
             "type": "string",
             "tags": [],
             "label": "'related.ip'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"IP\""
             ],
@@ -1841,7 +1854,9 @@
             "type": "string",
             "tags": [],
             "label": "'host.hostname'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"HOST_NAME\""
             ],
@@ -1875,7 +1890,9 @@
             "type": "string",
             "tags": [],
             "label": "'user.full_name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"USER_NAME\""
             ],
@@ -1891,7 +1908,9 @@
             "type": "string",
             "tags": [],
             "label": "'user.target.name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"USER_NAME\""
             ],
@@ -1907,7 +1926,9 @@
             "type": "string",
             "tags": [],
             "label": "'user.effective.name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"USER_NAME\""
             ],
@@ -1923,7 +1944,9 @@
             "type": "string",
             "tags": [],
             "label": "'user.display_name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"USER_NAME\""
             ],
@@ -1957,7 +1980,9 @@
             "type": "string",
             "tags": [],
             "label": "'url.original'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"URL\""
             ],
@@ -2009,7 +2034,9 @@
             "type": "string",
             "tags": [],
             "label": "'cloud.account.name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"CLOUD_ACCOUNT\""
             ],
@@ -2061,7 +2088,9 @@
             "type": "string",
             "tags": [],
             "label": "'resource.id'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"RESOURCE_ID\""
             ],
@@ -2095,7 +2124,9 @@
             "type": "string",
             "tags": [],
             "label": "'cloud.provider'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"ORG\""
             ],
@@ -2129,7 +2160,9 @@
             "type": "string",
             "tags": [],
             "label": "'related.user'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"PER\""
             ],
@@ -2163,7 +2196,9 @@
             "type": "string",
             "tags": [],
             "label": "'geo.country_name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"LOC\""
             ],
@@ -2179,7 +2214,9 @@
             "type": "string",
             "tags": [],
             "label": "'geo.region_name'",
-            "description": [],
+            "description": [
+              "\nMaps known ECS (and Kibana-specific) field paths to their canonical\nanonymization entity class. Used to auto-suggest entity classes in the UI\nwhen a user is building a new anonymization profile, and to populate\ndefault field rules when profiles are automatically initialized.\n\nFields not present in this map should be left to the user to classify."
+            ],
             "signature": [
               "\"LOC\""
             ],
