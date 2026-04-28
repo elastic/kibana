@@ -70,8 +70,6 @@ The ${alertingTools.manageRule} tool only manages the **in-memory attachment** �
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create rule** — create a new V2 rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
-- **Delete Rule** — delete the origin rule (only for attached saved rules).
-- **Enable / Disable** — toggle the rule's enabled state (only for attached saved rules).
 - **View in Rules** — navigate to the rule detail page (only for attached saved rules).
 
 Never attempt to create, update, delete, enable, or disable rules directly via API calls.`,
