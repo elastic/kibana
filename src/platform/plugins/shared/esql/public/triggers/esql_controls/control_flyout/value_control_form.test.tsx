@@ -26,6 +26,7 @@ import {
 } from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
   return {
     getESQLResults: jest.fn().mockResolvedValue({
       response: {
@@ -45,6 +46,7 @@ jest.mock('@kbn/esql-utils', () => {
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+    getVariableNamePrefix: actual.getVariableNamePrefix,
   };
 });
 
