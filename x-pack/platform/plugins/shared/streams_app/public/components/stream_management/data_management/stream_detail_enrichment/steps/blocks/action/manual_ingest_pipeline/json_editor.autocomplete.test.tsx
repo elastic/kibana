@@ -73,6 +73,7 @@ interface FakeModel {
     startColumn: number;
     endColumn: number;
   };
+  isDisposed: () => boolean;
 }
 
 const createFakeModel = (lines: string[]): FakeModel => {
