@@ -291,23 +291,40 @@ export class WorkflowCrudService {
     }
 
     const createdIds = new Set(created.map((w) => w.id));
-    const workflowsToSchedule = resolvedWorkflows.filter(
-      (vw) => createdIds.has(vw.id) && vw.definition?.triggers?.some((t) => t.type === 'scheduled')
-    );
-
+    const successfullyWritten = resolvedWorkflows.filter((vw) => createdIds.has(vw.id));
     const taskScheduler = this.deps.getTaskScheduler();
-    await Promise.allSettled(
-      workflowsToSchedule.map((vw) =>
-        scheduleWorkflowTriggers({
-          workflowId: vw.id,
-          definition: vw.definition,
-          spaceId,
-          request,
-          taskScheduler,
-          logger: this.deps.logger,
-        })
-      )
-    );
+
+    if (overwrite && taskScheduler) {
+      // Overwrite may have removed the scheduled trigger or disabled the workflow — sync to drop orphaned tasks.
+      await Promise.allSettled(
+        successfullyWritten.map((vw) =>
+          syncSchedulerAfterSave({
+            workflowId: vw.id,
+            spaceId,
+            request,
+            getWorkflow: (wfId, sp) => this.getEsWorkflowForScheduler(wfId, sp),
+            taskScheduler,
+            logger: this.deps.logger,
+          })
+        )
+      );
+    } else {
+      const workflowsToSchedule = successfullyWritten.filter((vw) =>
+        vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+      );
+      await Promise.allSettled(
+        workflowsToSchedule.map((vw) =>
+          scheduleWorkflowTriggers({
+            workflowId: vw.id,
+            definition: vw.definition,
+            spaceId,
+            request,
+            taskScheduler,
+            logger: this.deps.logger,
+          })
+        )
+      );
+    }
 
     return { created, failed };
   }
