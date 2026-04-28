@@ -83,8 +83,9 @@ const getChartSpecificRules = (chartType: SupportedChartType): string[] => {
     case SupportedChartType.Datatable:
       return [
         '- Datatable placement: prefer `apply_color_to: "badge"`; avoid cell background or text coloring unless the user asks.',
-        '- Numeric datatable columns: use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data.',
-        '- Categorical datatable columns: use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values.',
+        '- Add datatable coloring only when it improves readability, highlights status/severity, or the user asks for colored values.',
+        '- Numeric datatable columns: when coloring is useful, use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data.',
+        '- Categorical datatable columns: when coloring is useful, use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values.',
       ];
     default:
       return [];
@@ -127,8 +128,9 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
   if (supportsDynamic && supportsCategorical) {
     lines.push(
       `${nextSection()}) CHOOSE the coloring mode based on the column type`,
-      '- Numeric columns → use `color: { type: "auto" }` by default; use `color: { type: "dynamic", range, steps: [...] }` only when explicit steps are allowed.',
-      '- Keyword / text columns → use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }`.',
+      '- Only add color when it adds meaning, improves readability, highlights status/severity, or the user asks for colored values.',
+      '- Numeric columns → when coloring is useful, use `color: { type: "auto" }` by default; use `color: { type: "dynamic", range, steps: [...] }` only when explicit steps are allowed.',
+      '- Keyword / text columns → when coloring is useful, use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }`.',
       '- NEVER apply categorical mapping to a numeric column or dynamic palette steps to a keyword column.',
       '- NEVER use the deprecated `type: "legacy_dynamic"`.',
       ''
