@@ -68,10 +68,6 @@ function getFilterConfig(
 }
 
 const pageSizeOptions = [5, 10, 15];
-const changePointsTableWrapperCss = {
-  maxWidth: '100%',
-  overflowX: 'auto' as const,
-};
 
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
@@ -126,9 +122,19 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     [onRenderComplete, pagination.pageSize]
   );
 
+  const isDashboardEmbedding = embeddingOrigin === 'dashboard';
   const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
+
+  // Prevents timestamp and p-value cells from wrapping excessively in narrow tables,
+  // which would make the values unreadable. Capped at 3 lines as a safe maximum.
+  const lineClampStyle: React.CSSProperties = {
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  };
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
@@ -138,10 +144,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       name: i18n.translate('xpack.aiops.changePointDetection.timeColumn', {
         defaultMessage: 'Time',
       }),
+      dataType: 'date',
       sortable: true,
       truncateText: false,
-      width: '230px',
-      render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
+      render: (timestamp: ChangePointAnnotation['timestamp']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {dateFormatter.convert(timestamp)}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '180px' : '20%',
     },
     {
       id: 'preview',
@@ -176,9 +187,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      truncateText: false,
+      truncateText: true,
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
-      width: '150px',
+      width: isDashboardEmbedding ? '130px' : '15%',
     },
     {
       id: 'pValue',
@@ -195,9 +206,12 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       },
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePointAnnotation['p_value']) =>
-        pValue !== undefined ? pValue.toPrecision(3) : '-',
-      width: '130px',
+      render: (pValue: ChangePointAnnotation['p_value']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {pValue !== undefined ? pValue.toPrecision(3) : '-'}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '120px' : '15%',
     },
     ...(fieldConfig.splitField
       ? [
@@ -205,9 +219,14 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
-            name: fieldConfig.splitField,
+            // name: fieldConfig.splitField,
+            name: 'very.long.field.name.with.many.dots.and.dots.and.dots', // remove after testing
             truncateText: false,
             sortable: true,
+            width: isDashboardEmbedding ? '120px' : '15%',
+            render: (value: string) => (
+              <span style={isDashboardEmbedding ? lineClampStyle : undefined}>{value}</span>
+            ),
           },
           ...(hasActions
             ? [
@@ -298,46 +317,44 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   }, [fieldConfig, onSelectionChange]);
 
   return (
-    <div css={changePointsTableWrapperCss}>
-      <EuiInMemoryTable<ChangePointAnnotation>
-        tableLayout="auto"
-        tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
-          defaultMessage: 'Change point detection results',
-        })}
-        itemId="id"
-        selection={selectionValue}
-        loading={isLoading}
-        data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
-        items={annotations}
-        columns={columns}
-        pagination={
-          pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
-        }
-        sorting={sorting}
-        onTableChange={onTableChange}
-        rowProps={(item) => ({
-          'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
-        })}
-        noItemsMessage={
-          isLoading ? (
-            <EuiEmptyPrompt
-              iconType="magnify"
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
-                    defaultMessage="Fetching change points..."
-                  />
-                </h3>
-              }
-              titleSize="xs"
-            />
-          ) : (
-            <NoDataFoundWarning />
-          )
-        }
-      />
-    </div>
+    <EuiInMemoryTable<ChangePointAnnotation>
+      tableLayout={isDashboardEmbedding ? 'auto' : 'fixed'}
+      tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
+        defaultMessage: 'Change point detection results',
+      })}
+      itemId="id"
+      selection={selectionValue}
+      loading={isLoading}
+      data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
+      items={annotations}
+      columns={columns}
+      pagination={
+        pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
+      }
+      sorting={sorting}
+      onTableChange={onTableChange}
+      rowProps={(item) => ({
+        'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
+      })}
+      noItemsMessage={
+        isLoading ? (
+          <EuiEmptyPrompt
+            iconType="magnify"
+            title={
+              <h3>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
+                  defaultMessage="Fetching change points..."
+                />
+              </h3>
+            }
+            titleSize="xs"
+          />
+        ) : (
+          <NoDataFoundWarning />
+        )
+      }
+    />
   );
 };
 
