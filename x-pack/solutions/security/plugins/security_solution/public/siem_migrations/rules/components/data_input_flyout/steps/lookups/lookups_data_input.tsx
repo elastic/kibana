@@ -38,7 +38,13 @@ interface LookupsDataInputSubStepsProps {
 }
 
 export const LookupsDataInput = React.memo<MigrationStepProps>(
-  ({ dataInputStep, migrationSource, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
+  ({
+    dataInputStep,
+    migrationSource,
+    migrationStats,
+    missingResourcesIndexed,
+    setDataInputStep,
+  }) => {
     const missingLookups = useMemo(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
