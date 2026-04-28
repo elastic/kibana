@@ -76,6 +76,14 @@ interface ClassifiedSource {
 // to re-resolve every source.
 const cache = new Map<string, Promise<MetricSourceKind | undefined>>();
 
+/**
+ * Clears the cache above. Call when previous classifications are known to
+ * be stale (e.g. between tests).
+ */
+export const resetMetricSourceKindCache = () => {
+  cache.clear();
+};
+
 const resolveSourceKind = async (
   dataViews: DataViewsPublicPluginStart,
   name: string

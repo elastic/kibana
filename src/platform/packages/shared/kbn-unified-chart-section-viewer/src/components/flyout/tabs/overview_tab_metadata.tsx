@@ -15,14 +15,37 @@ import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
 import type { ParsedMetricItem } from '../../../types';
 import { BadgeGroup, MetricTypeBadge } from '../components';
+import { METRIC_SOURCE_KIND, type MetricSourceKind } from '../../../hooks/use_metric_source_kind';
+
+const SOURCE_LABEL: Record<MetricSourceKind, string> = {
+  [METRIC_SOURCE_KIND.INDEX]: i18n.translate('metricsExperience.overviewTab.strong.indexLabel', {
+    defaultMessage: 'Index',
+  }),
+  [METRIC_SOURCE_KIND.DATA_STREAM]: i18n.translate(
+    'metricsExperience.overviewTab.strong.dataStreamLabel',
+    { defaultMessage: 'Data stream' }
+  ),
+};
+
+const SOURCE_TEST_SUBJ: Record<MetricSourceKind, string> = {
+  [METRIC_SOURCE_KIND.INDEX]: 'metricsExperienceFlyoutOverviewTabIndexLabel',
+  [METRIC_SOURCE_KIND.DATA_STREAM]: 'metricsExperienceFlyoutOverviewTabDataStreamLabel',
+};
 
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
-  /** When set, prepends an `Index: <name>` row. */
-  indexName?: string;
+  /**
+   * When set, prepends a `<Label>: <metricItem.dataStream>` row above the
+   * standard metadata. The label is derived from the kind (Index or Data
+   * stream). The row is only rendered if `metricItem.dataStream` is also set.
+   */
+  metadataSourceKind?: MetricSourceKind;
 }
 
-export const OverviewTabMetadata = ({ metricItem, indexName }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({
+  metricItem,
+  metadataSourceKind,
+}: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
@@ -34,33 +57,30 @@ export const OverviewTabMetadata = ({ metricItem, indexName }: OverviewTabMetada
       </EuiText>
     );
 
-    const indexRow = indexName
-      ? [
-          {
-            title: title(
-              i18n.translate('metricsExperience.overviewTab.strong.indexLabel', {
-                defaultMessage: 'Index',
-              })
-            ),
-            description: (
-              <EuiText
-                color="primary"
-                size="s"
-                css={css`
-                  word-break: break-word;
-                  overflow-wrap: anywhere;
-                `}
-                data-test-subj="metricsExperienceFlyoutOverviewTabIndexLabel"
-              >
-                {indexName}
-              </EuiText>
-            ),
-          },
-        ]
-      : [];
+    const sourceRow =
+      metadataSourceKind && metricItem.dataStream
+        ? [
+            {
+              title: title(SOURCE_LABEL[metadataSourceKind]),
+              description: (
+                <EuiText
+                  color="primary"
+                  size="s"
+                  css={css`
+                    word-break: break-word;
+                    overflow-wrap: anywhere;
+                  `}
+                  data-test-subj={SOURCE_TEST_SUBJ[metadataSourceKind]}
+                >
+                  {metricItem.dataStream}
+                </EuiText>
+              ),
+            },
+          ]
+        : [];
 
     const rowsInner = [
-      ...indexRow,
+      ...sourceRow,
       {
         title: title(
           i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
@@ -114,7 +134,14 @@ export const OverviewTabMetadata = ({ metricItem, indexName }: OverviewTabMetada
     ];
 
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
-  }, [euiTheme.base, indexName, metricItem.fieldTypes, metricItem.metricTypes, metricItem.units]);
+  }, [
+    euiTheme.base,
+    metadataSourceKind,
+    metricItem.dataStream,
+    metricItem.fieldTypes,
+    metricItem.metricTypes,
+    metricItem.units,
+  ]);
 
   return (
     <EuiPanel

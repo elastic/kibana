@@ -10,7 +10,11 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
 import { useExternalServices } from '../context/external_services';
-import { METRIC_SOURCE_KIND, useMetricSourceKind } from './use_metric_source_kind';
+import {
+  METRIC_SOURCE_KIND,
+  resetMetricSourceKindCache,
+  useMetricSourceKind,
+} from './use_metric_source_kind';
 
 jest.mock('../context/external_services', () => ({
   useExternalServices: jest.fn(),
@@ -31,6 +35,10 @@ const buildDataViews = (impl: jest.Mock) =>
 describe('useMetricSourceKind', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    // The hook caches in-flight promises in a module-level Map that persists
+    // across tests within the same Jest worker. Clear it so each test starts
+    // from a clean slate and tests can safely reuse source names.
+    resetMetricSourceKindCache();
   });
 
   it('returns the provided fallback when external services are absent', () => {

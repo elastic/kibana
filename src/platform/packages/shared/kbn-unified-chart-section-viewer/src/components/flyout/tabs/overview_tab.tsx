@@ -28,6 +28,7 @@ import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { StreamFieldSection } from './stream_field_section';
 import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../../../hooks/use_metric_source_kind';
+import { useExternalServices } from '../../../context/external_services';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -45,7 +46,17 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     metricItem.dataStream,
     METRIC_SOURCE_KIND.DATA_STREAM
   );
-  const isIndex = sourceKind === METRIC_SOURCE_KIND.INDEX;
+  const externalServices = useExternalServices();
+  const hasStreamsFlyout = Boolean(
+    externalServices?.discoverShared?.features.registry.getById('streams')
+      ?.renderFlyoutStreamFieldByStreamName
+  );
+
+  const streamFieldSourceName =
+    metricItem.dataStream && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && hasStreamsFlyout
+      ? metricItem.dataStream
+      : undefined;
+  const metadataSourceKind = !streamFieldSourceName ? sourceKind : undefined;
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -89,12 +100,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      {!isIndex && <StreamFieldSection sourceName={metricItem.dataStream} />}
+      {streamFieldSourceName && <StreamFieldSection sourceName={streamFieldSourceName} />}
 
-      <OverviewTabMetadata
-        metricItem={metricItem}
-        indexName={isIndex ? metricItem.dataStream : undefined}
-      />
+      <OverviewTabMetadata metricItem={metricItem} metadataSourceKind={metadataSourceKind} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>
