@@ -47,6 +47,7 @@
             "lineNumber": 13,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "EditLookupIndexFlyoutDeps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -105,6 +106,7 @@
             "lineNumber": 27,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "AnalyticsServiceSetup",
             "trackAdoption": false
           }
         ],

@@ -8,11 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlRoute } from '../router';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { NavigateToPageButton } from '../components/navigate_to_page_button';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { ML_PAGES } from '../../../locator';
 import { createPath } from '../router';
 import { MODE, PageWrapper } from './new_job/index_or_search_page_wrapper';
 
