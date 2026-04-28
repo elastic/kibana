@@ -9,7 +9,8 @@ jest.mock('../ears/get_ears_access_token');
 jest.mock('../ears/url');
 
 import type { AxiosInstance } from 'axios';
-import type { EarsGetTokenOpts, GetTokenOpts } from '@kbn/connector-specs';
+import { authTypeSpecs } from '@kbn/connector-specs';
+import type { AuthContext, EarsGetTokenOpts, GetTokenOpts } from '@kbn/connector-specs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
@@ -193,6 +194,25 @@ describe('EarsStrategy', () => {
         expect.objectContaining({ provider: 'my-provider', forceRefresh: true })
       );
     });
+  });
+
+  describe('configure (bearer normalization)', () => {
+    it.each([
+      ['bearer initial-token', 'Bearer initial-token'],
+      ['Bearer initial-token', 'Bearer initial-token'],
+    ])(
+      'sets Authorization header with title-case Bearer scheme (%s → %s) at setup time',
+      async (input, expected) => {
+        const ctx = {
+          getToken: jest.fn().mockResolvedValue(input),
+        } as unknown as AuthContext;
+        const { instance } = createMockAxiosInstance();
+
+        await authTypeSpecs.Ears.configure(ctx, instance, { provider: 'google' });
+
+        expect(instance.defaults.headers.common.Authorization).toBe(expected);
+      }
+    );
   });
 
   describe('getToken', () => {

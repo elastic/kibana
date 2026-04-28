@@ -8,7 +8,8 @@
 jest.mock('../get_oauth_authorization_code_access_token');
 
 import type { AxiosInstance } from 'axios';
-import type { GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
+import { authTypeSpecs } from '@kbn/connector-specs';
+import type { AuthContext, GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
@@ -205,6 +206,30 @@ describe('OAuthAuthCodeStrategy', () => {
         })
       );
     });
+  });
+
+  describe('configure (bearer normalization)', () => {
+    it.each([
+      ['bearer initial-token', 'Bearer initial-token'],
+      ['Bearer initial-token', 'Bearer initial-token'],
+    ])(
+      'sets Authorization header with title-case Bearer scheme (%s → %s) at setup time',
+      async (input, expected) => {
+        const ctx = {
+          getToken: jest.fn().mockResolvedValue(input),
+        } as unknown as AuthContext;
+        const { instance } = createMockAxiosInstance();
+
+        await authTypeSpecs.OAuthAuthorizationCode.configure(ctx, instance, {
+          authorizationUrl: 'https://provider.example.com/authorize',
+          tokenUrl: 'https://provider.example.com/token',
+          clientId: 'my-client-id',
+          clientSecret: 'my-client-secret',
+        });
+
+        expect(instance.defaults.headers.common.Authorization).toBe(expected);
+      }
+    );
   });
 
   describe('getToken', () => {
