@@ -99,6 +99,7 @@
                 "lineNumber": 19,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "SortingContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -245,6 +246,7 @@
             "lineNumber": 28,
             "columnNumber": 70,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -284,6 +286,7 @@
             "lineNumber": 113,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLAstPromqlCommand",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -302,7 +305,7 @@
           "(query: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/sources.ts",
-        "lineNumber": 352,
+        "lineNumber": 389,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -318,7 +321,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/sources.ts",
-            "lineNumber": 352,
+            "lineNumber": 389,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -635,6 +638,111 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.getQuickFixForMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getQuickFixForMessage",
+        "description": [
+          "\nComputes the quick-fix code actions associated with an ESQLMessage."
+        ],
+        "signature": [
+          "({\n  queryString,\n  message,\n  callbacks,\n}: { queryString: string; message: { code: string; }; callbacks?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLCallbacks",
+            "text": "ESQLCallbacks"
+          },
+          " | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/esql-language",
+            "scope": "common",
+            "docId": "kibKbnEsqlLanguagePluginApi",
+            "section": "def-common.EsqlCodeAction",
+            "text": "EsqlCodeAction"
+          },
+          " | undefined>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getQuickFixForMessage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  queryString,\n  message,\n  callbacks,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.getQuickFixForMessage.$1.queryString",
+                "type": "string",
+                "tags": [],
+                "label": "queryString",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.getQuickFixForMessage.$1.message",
+                "type": "Object",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "{ code: string; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.getQuickFixForMessage.$1.callbacks",
+                "type": "Object",
+                "tags": [],
+                "label": "callbacks",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLCallbacks",
+                    "text": "ESQLCallbacks"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.getSignatureHelp",
         "type": "Function",
         "tags": [],
@@ -712,6 +820,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -817,6 +926,7 @@
             "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1127,6 +1237,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1249,6 +1360,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1273,6 +1385,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidationOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1315,6 +1428,7 @@
             "lineNumber": 330,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ISuggestionItem",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1501,6 +1615,48 @@
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
             "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.EsqlCodeAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsqlCodeAction",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.EsqlCodeAction.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.EsqlCodeAction.fixedText",
+            "type": "string",
+            "tags": [],
+            "label": "fixedText",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/language/code_actions/index.ts",
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

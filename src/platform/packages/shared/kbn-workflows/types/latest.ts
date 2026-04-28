@@ -67,6 +67,7 @@ export type {
   StepSelectionValues,
   RequestOptions,
   GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values

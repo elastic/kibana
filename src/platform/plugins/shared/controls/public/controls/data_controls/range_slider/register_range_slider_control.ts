@@ -12,7 +12,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { untilPluginStartServicesReady } from '../../../services/kibana_services';
 
 export function registerRangeSliderControl(embeddable: EmbeddableSetup) {
-  embeddable.registerReactEmbeddableFactory(RANGE_SLIDER_CONTROL, async () => {
+  embeddable.registerEmbeddablePublicDefinition(RANGE_SLIDER_CONTROL, async () => {
     const [{ getRangesliderControlFactory }] = await Promise.all([
       import('../../../controls_module'),
       untilPluginStartServicesReady(),

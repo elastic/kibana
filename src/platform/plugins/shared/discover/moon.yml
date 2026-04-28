@@ -146,6 +146,7 @@ dependsOn:
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/as-code-filters-constants'
+  - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
 tags:
   - plugin

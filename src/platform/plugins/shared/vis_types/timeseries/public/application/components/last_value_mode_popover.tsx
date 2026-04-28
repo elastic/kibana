@@ -8,7 +8,13 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSwitch,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface LastValueModePopoverProps {
@@ -21,11 +27,13 @@ export const LastValueModePopover = ({
   toggleIndicatorDisplay,
 }: LastValueModePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       className="tvbLastValueModePopover"
       css={css`
         height: auto;
@@ -48,7 +56,7 @@ export const LastValueModePopover = ({
           width: 360px;
         `}
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>
           {i18n.translate('visTypeTimeseries.lastValueModePopover.title', {
             defaultMessage: 'Last value options',
           })}
