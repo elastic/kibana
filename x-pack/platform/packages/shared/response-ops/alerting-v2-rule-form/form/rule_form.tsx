@@ -141,7 +141,12 @@ const RuleFormContent = ({
       if (editMode === 'yaml' && newMode === 'form') {
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          reset(result.values, { keepDirty: true, keepDefaultValues: true });
+          // Plain reset(values) — same pattern as handleYamlSubmit. Earlier
+          // attempts with { keepDirty, keepDefaultValues } caused RHF to skip
+          // the value update for clean fields, which manifested as the YAML
+          // editor briefly showing old values before the toggle completed
+          // (the watch subscription would re-serialize stale getValues()).
+          reset(result.values);
         }
       }
       setEditMode(newMode);

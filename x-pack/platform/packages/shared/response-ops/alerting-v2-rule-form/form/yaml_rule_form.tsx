@@ -86,13 +86,14 @@ export const YamlRuleForm = ({
     search: services.data.search.search,
   });
 
-  // Wraps react-hook-form's `reset(values, options)` — its name implies
-  // "throw away changes" but with values it's RHF's bulk-update API.
-  // keepDirty: true so the form remains dirty after sync (Save isn't disabled).
-  // keepDefaultValues: true so the original initial values stay tracked.
+  // Wraps react-hook-form's `reset(values)` — its name implies "throw away
+  // changes" but with a values argument it's RHF's bulk-update API. Same
+  // pattern as handleYamlSubmit. We tried { keepDirty, keepDefaultValues }
+  // here; in practice RHF would skip the value update for clean fields and
+  // the YAML editor would briefly flash to old values during the sync.
   const applyYamlValuesToForm = useCallback(
     (values: FormValues) => {
-      reset(values, { keepDirty: true, keepDefaultValues: true });
+      reset(values);
     },
     [reset]
   );
