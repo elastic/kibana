@@ -28,7 +28,7 @@ export function registerVerifierPolicyCleanupTask(taskManager: TaskManagerSetupC
     [TASK_TYPE]: {
       title: TASK_TITLE,
       timeout: TASK_TIMEOUT,
-      createTaskRunner: ({ abortController }: { abortController: AbortController }) => ({
+      createTaskRunner: ({ abortController }) => ({
         run: async () => {
           const logger = appContextService.getLogger().get('otel-verifier');
           logger.info(`${CLEANUP_TASK_LOG} Task run started`);
