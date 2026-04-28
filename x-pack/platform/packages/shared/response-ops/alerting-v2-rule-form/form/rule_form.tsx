@@ -26,6 +26,7 @@ import { RulePreviewPanel } from './fields/rule_preview_panel';
 import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
+import { serializeFormToYaml } from './utils/yaml_form_utils';
 
 export type { RuleFormServices } from './contexts';
 
@@ -77,11 +78,14 @@ const RuleFormContent = ({
   cancelLabel,
   ruleId,
 }: RuleFormProps) => {
-  const { reset } = useFormContext<FormValues>();
+  const { reset, getValues } = useFormContext<FormValues>();
   const services = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { http, notifications } = services;
   const [editMode, setEditMode] = useState<EditMode>('form');
+  // YAML buffer is lifted here (rather than inside YamlRuleForm) so it survives
+  // the unmount that happens when the user toggles back to Form mode.
+  const [yamlText, setYamlText] = useState<string>(() => serializeFormToYaml(getValues()));
 
   // Internal submission hooks — always initialised so hooks are stable,
   // but only the appropriate one is used when no external onSubmit is provided.
@@ -168,6 +172,8 @@ const RuleFormContent = ({
           onSubmit={handleYamlSubmit}
           isDisabled={isDisabled}
           isSubmitting={isSubmitting}
+          yamlText={yamlText}
+          setYamlText={setYamlText}
         />
       ) : (
         <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />

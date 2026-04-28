@@ -63,9 +63,20 @@ jest.mock('./gui_rule_form', () => ({
   ),
 }));
 
-// Mock YamlRuleForm to avoid monaco editor setup
+// Mock YamlRuleForm to avoid monaco editor setup. The mock binds the textarea
+// to the lifted yamlText/setYamlText props so toggle-persistence is observable.
 jest.mock('./yaml_rule_form', () => ({
-  YamlRuleForm: ({ onSubmit, isDisabled }: { onSubmit: () => void; isDisabled?: boolean }) => (
+  YamlRuleForm: ({
+    onSubmit,
+    isDisabled,
+    yamlText,
+    setYamlText,
+  }: {
+    onSubmit: () => void;
+    isDisabled?: boolean;
+    yamlText: string;
+    setYamlText: (yaml: string) => void;
+  }) => (
     <form
       id="ruleV2Form"
       data-test-subj="mockYamlRuleForm"
@@ -75,7 +86,12 @@ jest.mock('./yaml_rule_form', () => ({
       }}
     >
       <div>YAML Form</div>
-      <textarea data-test-subj="ruleV2FormYamlEditor" disabled={isDisabled} />
+      <textarea
+        data-test-subj="ruleV2FormYamlEditor"
+        disabled={isDisabled}
+        value={yamlText}
+        onChange={(e) => setYamlText(e.target.value)}
+      />
     </form>
   ),
 }));
@@ -194,6 +210,43 @@ describe('RuleForm', () => {
 
       expect(screen.getByTestId('ruleV2FormEditModeFormButton')).toBeDisabled();
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeDisabled();
+    });
+
+    it('initializes the YAML buffer from current form values', async () => {
+      const user = userEvent.setup();
+
+      render(<RuleForm {...defaultProps} includeYaml />, {
+        wrapper: createFormWrapper({
+          metadata: { name: 'Initial Rule', enabled: true },
+        }),
+      });
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+
+      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(editor.value).toContain('Initial Rule');
+    });
+
+    it('preserves YAML edits across Form↔YAML toggle', async () => {
+      const user = userEvent.setup();
+
+      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
+
+      // Switch to YAML and type something distinctive
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+
+      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      await user.clear(editor);
+      await user.type(editor, 'metadata:\n  name: persisted-edit');
+
+      // Switch back to Form mode (unmounts the YAML form)
+      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
+      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
+
+      // Switch to YAML again — the lifted state should restore the buffer
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const editorAfter = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(editorAfter.value).toContain('persisted-edit');
     });
   });
 

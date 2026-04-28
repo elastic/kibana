@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { dump } from 'js-yaml';
-import { YamlRuleForm } from './yaml_rule_form';
+import { YamlRuleForm, type YamlRuleFormProps } from './yaml_rule_form';
 import { createFormWrapper, createMockServices } from '../test_utils';
+
+// Hosts the lifted yamlText state so existing tests can keep firing onChange and
+// observing the resulting submit. After Commit 1, YamlRuleForm receives yamlText
+// from its parent (RuleFormContent in production). For unit tests of YamlRuleForm
+// in isolation, this small wrapper plays the parent's role.
+const StatefulYamlRuleForm = ({
+  initialYaml = '',
+  ...props
+}: Omit<YamlRuleFormProps, 'yamlText' | 'setYamlText'> & { initialYaml?: string }) => {
+  const [yamlText, setYamlText] = useState(initialYaml);
+  return <YamlRuleForm {...props} yamlText={yamlText} setYamlText={setYamlText} />;
+};
 
 // Mock the yaml-rule-editor to avoid monaco editor setup
 jest.mock('@kbn/yaml-rule-editor', () => ({
@@ -108,17 +120,19 @@ describe('YamlRuleForm component', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the YAML editor with initial form values', () => {
-    const Wrapper = createFormWrapper({
+  it('renders the YAML editor with the provided yamlText prop', () => {
+    // After Commit 1, YamlRuleForm no longer derives YAML from form context;
+    // its parent (RuleFormContent) does. The "derive from form" behavior is
+    // covered in rule_form.test.tsx.
+    const initialYaml = dump({
+      kind: 'alert',
       metadata: { name: 'Initial Rule', enabled: true },
       evaluation: { query: { base: 'FROM logs-*' } },
     });
 
-    render(
-      <Wrapper>
-        <YamlRuleForm {...defaultProps} />
-      </Wrapper>
-    );
+    render(<StatefulYamlRuleForm {...defaultProps} initialYaml={initialYaml} />, {
+      wrapper: createFormWrapper(),
+    });
 
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' }) as HTMLTextAreaElement;
     expect(editor).toBeInTheDocument();
@@ -126,7 +140,7 @@ describe('YamlRuleForm component', () => {
   });
 
   it('renders the form label and help text', () => {
-    render(<YamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+    render(<StatefulYamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
     expect(screen.getByText('Rule definition (YAML)')).toBeInTheDocument();
     expect(
@@ -135,14 +149,14 @@ describe('YamlRuleForm component', () => {
   });
 
   it('disables editor when isDisabled is true', () => {
-    render(<YamlRuleForm {...defaultProps} isDisabled />, { wrapper: createFormWrapper() });
+    render(<StatefulYamlRuleForm {...defaultProps} isDisabled />, { wrapper: createFormWrapper() });
 
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
     expect(editor).toBeDisabled();
   });
 
   it('disables editor when isSubmitting is true', () => {
-    render(<YamlRuleForm {...defaultProps} isSubmitting />, { wrapper: createFormWrapper() });
+    render(<StatefulYamlRuleForm {...defaultProps} isSubmitting />, { wrapper: createFormWrapper() });
 
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
     expect(editor).toBeDisabled();
@@ -151,7 +165,7 @@ describe('YamlRuleForm component', () => {
   it('calls onSubmit with parsed values on valid submission', async () => {
     const onSubmit = jest.fn();
 
-    render(<YamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
+    render(<StatefulYamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
       wrapper: createFormWrapper(),
     });
 
@@ -187,7 +201,7 @@ describe('YamlRuleForm component', () => {
   it('displays error callout for invalid YAML', async () => {
     const onSubmit = jest.fn();
 
-    render(<YamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
+    render(<StatefulYamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
       wrapper: createFormWrapper(),
     });
 
@@ -209,7 +223,7 @@ describe('YamlRuleForm component', () => {
   it('displays error for missing required fields', async () => {
     const onSubmit = jest.fn();
 
-    render(<YamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
+    render(<StatefulYamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
       wrapper: createFormWrapper(),
     });
 
@@ -236,7 +250,7 @@ describe('YamlRuleForm component', () => {
   });
 
   it('clears error when user starts editing', async () => {
-    render(<YamlRuleForm {...defaultProps} />, {
+    render(<StatefulYamlRuleForm {...defaultProps} />, {
       wrapper: createFormWrapper(),
     });
 
@@ -261,7 +275,7 @@ describe('YamlRuleForm component', () => {
   });
 
   it('has correct data-test-subj attribute', () => {
-    render(<YamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+    render(<StatefulYamlRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
     expect(screen.getByTestId('ruleV2FormYamlEditor')).toBeInTheDocument();
   });

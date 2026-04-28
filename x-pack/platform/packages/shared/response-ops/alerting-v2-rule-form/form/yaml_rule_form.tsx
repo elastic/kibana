@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +28,10 @@ export interface YamlRuleFormProps {
   onSubmit: (values: FormValues) => void;
   isDisabled?: boolean;
   isSubmitting?: boolean;
+  /** YAML buffer, lifted to the parent so it survives Form↔YAML toggle. */
+  yamlText: string;
+  /** Setter for the lifted YAML buffer. */
+  setYamlText: (yaml: string) => void;
 }
 
 /**
@@ -42,12 +45,9 @@ export const YamlRuleForm = ({
   onSubmit,
   isDisabled = false,
   isSubmitting = false,
+  yamlText,
+  setYamlText,
 }: YamlRuleFormProps) => {
-  const { getValues } = useFormContext<FormValues>();
-  const [yaml, setYaml] = useState<string>(() => {
-    const values = getValues();
-    return serializeFormToYaml(values);
-  });
   const [error, setError] = useState<string | null>(null);
 
   const esqlCallbacks = useEsqlCallbacks({
@@ -60,7 +60,7 @@ export const YamlRuleForm = ({
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      const result = parseYamlToFormValues(yaml);
+      const result = parseYamlToFormValues(yamlText);
       if (result.error) {
         setError(result.error);
         return;
@@ -71,14 +71,17 @@ export const YamlRuleForm = ({
         onSubmit(result.values);
       }
     },
-    [yaml, onSubmit]
+    [yamlText, onSubmit]
   );
 
-  const handleYamlChange = useCallback((newYaml: string) => {
-    setYaml(newYaml);
-    // Clear error when user starts editing
-    setError(null);
-  }, []);
+  const handleYamlChange = useCallback(
+    (newYaml: string) => {
+      setYamlText(newYaml);
+      // Clear error when user starts editing
+      setError(null);
+    },
+    [setYamlText]
+  );
 
   const isReadOnly = isDisabled || isSubmitting;
 
@@ -118,7 +121,7 @@ export const YamlRuleForm = ({
           }
         >
           <YamlRuleEditor
-            value={yaml}
+            value={yamlText}
             onChange={handleYamlChange}
             esqlCallbacks={esqlCallbacks}
             isReadOnly={isReadOnly}
