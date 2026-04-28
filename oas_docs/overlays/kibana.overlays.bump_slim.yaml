@@ -3,7 +3,7 @@ info:
   title: Bump slim overlay — replace Dashboards & Visualizations with tech-preview placeholders
   version: 0.0.1
   # ⚠️  TODO before tech preview GA: update the two external URLs below.
-  # Current hosting: https://thomthomson.github.io/dashboard-tech-preview-docs/
+  # Current hosting: https://elastic.github.io/as-code-docs/
   # These URLs must be updated once the permanent hosting location is confirmed.
 
 actions:
@@ -34,7 +34,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
       post:
         tags:
           - Dashboards
@@ -43,7 +43,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
 
   - target: "$.paths['/api/dashboards/{id}'].get"
     description: "Strip GET /api/dashboards/{id} down to redirect notice"
@@ -65,7 +65,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
       put:
         tags:
           - Dashboards
@@ -74,7 +74,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
       delete:
         tags:
           - Dashboards
@@ -83,7 +83,7 @@ actions:
         description: |
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+          > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
 
   # ──────────────────────────────────────────────
   # VISUALIZATIONS — same strategy.
@@ -107,7 +107,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
       post:
         tags:
           - Visualizations
@@ -116,7 +116,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
 
   - target: "$.paths['/api/visualizations/{id}'].get"
     description: "Strip GET /api/visualizations/{id} down to redirect notice"
@@ -138,7 +138,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
       put:
         tags:
           - Visualizations
@@ -147,7 +147,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
       delete:
         tags:
           - Visualizations
@@ -156,7 +156,7 @@ actions:
         description: |
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
-          > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+          > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
 
   # ──────────────────────────────────────────────
   # Tag-level descriptions (section intro above the operations list).
@@ -168,7 +168,7 @@ actions:
       description: |
         > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
         >
-        > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
+        > **[View the full Dashboards API reference →](https://elastic.github.io/as-code-docs/#tag/Dashboards)**
 
   - target: '$.tags[?(@.name=="Visualizations")]'
     description: "Replace Visualizations tag description with tech-preview notice"
@@ -176,4 +176,4 @@ actions:
       description: |
         > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
         >
-        > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
+        > **[View the full Visualizations API reference →](https://elastic.github.io/as-code-docs/#tag/Visualizations)**
