@@ -65,6 +65,7 @@
             "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServiceDefinitionVersioned",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -131,6 +132,7 @@
             "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServiceDefinitionVersioned",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -148,6 +150,7 @@
             "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Version",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -243,6 +246,7 @@
             "lineNumber": 100,
             "columnNumber": 74,
             "deprecated": false,
+            "docsReferencedTypeName": "Version",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -355,6 +359,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "I",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -449,6 +454,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "I",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -560,6 +566,7 @@
                 "lineNumber": 63,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Version",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1262,6 +1269,7 @@
             "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServiceDefinitionVersioned",
             "trackAdoption": false
           },
           {
@@ -1275,6 +1283,7 @@
             "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Version",
             "trackAdoption": false
           },
           {
@@ -1335,6 +1344,7 @@
             "lineNumber": 14,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "I",
             "trackAdoption": false
           }
         ],
