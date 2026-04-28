@@ -11,6 +11,8 @@ import {
   AI_IS_CURRENTLY_ANALYZING,
   AI_IS_CURRENTLY_ANALYZING_FROM,
   AI_IS_CURRENTLY_ANALYZING_RANGE,
+  START_OF_THE_WEEK,
+  NOW,
 } from './translations';
 
 describe('getAttackDiscoveryLoadingMessage', () => {
@@ -50,6 +52,22 @@ describe('getAttackDiscoveryLoadingMessage', () => {
       AI_IS_CURRENTLY_ANALYZING_FROM({
         alertsCount: 15,
         from: '2025-01-01T00:00:00Z',
+      })
+    );
+  });
+
+  it('returns AI_IS_CURRENTLY_ANALYZING_RANGE when start and end are date math expressions', () => {
+    const result = getAttackDiscoveryLoadingMessage({
+      alertsCount: 10,
+      start: 'now/w',
+      end: 'now',
+    });
+
+    expect(result).toBe(
+      AI_IS_CURRENTLY_ANALYZING_RANGE({
+        alertsCount: 10,
+        start: START_OF_THE_WEEK(),
+        end: NOW(),
       })
     );
   });
