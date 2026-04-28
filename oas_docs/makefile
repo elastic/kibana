@@ -78,9 +78,11 @@ api-docs-overlay: api-docs-fix-required ## Apply all overlays (including bump-sl
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Producing kibana.external.yaml for external Dashboards/Visualizations hosting
+# ⚠️  TEMPORARY — retire this target when Dashboards & Visualizations APIs reach GA.
+# See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
 # ──────────────────────────────────────────────────────────────────────────────
 # This target is NOT run by CI. Run it manually whenever you need to update the
-# external hosting repo (e.g. thomthomson.github.io/dashboard-tech-preview-docs).
+# external hosting repo (https://elastic.github.io/as-code-docs/).
 #
 # Full sequence:
 #   cd oas_docs

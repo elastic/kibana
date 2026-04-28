@@ -2,9 +2,9 @@ overlay: 1.0.0
 info:
   title: Bump slim overlay — replace Dashboards & Visualizations with tech-preview placeholders
   version: 0.0.1
-  # ⚠️  TODO before tech preview GA: update the two external URLs below.
-  # Current hosting: https://elastic.github.io/as-code-docs/
-  # These URLs must be updated once the permanent hosting location is confirmed.
+  # ⚠️  TEMPORARY — retire this file when Dashboards & Visualizations APIs reach GA.
+  # See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
+  # Current external hosting: https://elastic.github.io/as-code-docs/
 
 actions:
   # ──────────────────────────────────────────────
