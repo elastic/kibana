@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
   AGENT_BUILDER_INFERENCE_FEATURE_ID,
@@ -42,6 +43,7 @@ import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './ser
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { installDashboards } from './dashboard';
 
 export class AgentBuilderPlugin
   implements
@@ -300,6 +302,13 @@ export class AgentBuilderPlugin
     if (this.home) {
       registerSampleData(this.home, this.logger);
     }
+
+    const internalRepository = savedObjects.createInternalRepository();
+    const internalSoClient = new SavedObjectsClient(internalRepository);
+    const savedObjectsImporter = savedObjects.createImporter(internalSoClient);
+    installDashboards(savedObjectsImporter, this.logger.get('dashboards')).catch((e) => {
+      this.logger.error(`Failed to install Agent Builder dashboards: ${e.message}`);
+    });
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
