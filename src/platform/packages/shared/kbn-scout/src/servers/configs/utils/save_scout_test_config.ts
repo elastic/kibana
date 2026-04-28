@@ -22,10 +22,6 @@ export const saveScoutTestConfigOnDisk = (testServersConfig: ScoutTestConfig, lo
   const configFilePath = path.join(SCOUT_SERVERS_ROOT, `local.json`);
 
   try {
-    // Persist the full config — including `uiam` — since `local.json` reflects
-    // exactly what the local server was started with (e.g. UIAM-on or
-    // UIAM-off serverless variants from the chosen TS config set). The schema
-    // accepts any `uiam` value for local (`isCloud: false`).
     const jsonData = JSON.stringify(testServersConfig, null, 2);
 
     if (!Fs.existsSync(SCOUT_SERVERS_ROOT)) {

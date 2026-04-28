@@ -439,24 +439,12 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 
 #### Cloud config validation
 
-`cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them, and any issues are reported in a single message with the full file path and `'<field>'` paths. The required and conditional rules are:
+`cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
 
-| Field                | Required when                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| `serverless`         | always                                                                              |
-| `isCloud`            | always                                                                              |
-| `hosts.{kibana, elasticsearch}` | always (must be valid URLs)                                            |
-| `auth.{username, password}`     | always (must be non-empty)                                             |
-| `cloudUsersFilePath` | always                                                                              |
-| `cloudHostName`      | when `isCloud: true`                                                                 |
-| `projectType`        | when `serverless: true` (one of `es` \| `oblt` \| `security` \| `workplaceai`)       |
-| `productTier`        | when `projectType` is `security` or `oblt` (one of `complete` \| `essentials` \| `logs_essentials` \| `search_ai_lake`) |
-
-`http2` and `license` are optional and default to `false` and `"trial"` respectively. `http2: true` enables TLS verification bypass for local development and is rejected when `isCloud: true`.
-
-`uiam` defaults to mirror `serverless` (UIAM-only on serverless, never on stateful). For **local** runs the value can be set freely in the JSON — that is how local TS server configs under `servers/configs/config_sets/**` (e.g. `uiam_local`, `uiam_oauth_local`) propagate their `esServerlessOptions.uiam` choice into `local.json`. For **cloud** runs (`isCloud: true`) `uiam` cannot deviate from `serverless`: a serverless cloud config must have `uiam: true` (or omit it), and a stateful cloud config must have `uiam: false` (or omit it). `uiam: true` is rejected on stateful regardless of cloud, since UIAM is serverless-only.
-
-Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
+- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
+- `license` is optional and defaults to `"trial"`.
+- You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
 
 #### Starting Servers Only
 
