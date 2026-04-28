@@ -99,6 +99,7 @@
                 "lineNumber": 19,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "SortingContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -245,6 +246,7 @@
             "lineNumber": 28,
             "columnNumber": 70,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -284,6 +286,7 @@
             "lineNumber": 113,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLAstPromqlCommand",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -817,6 +820,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -922,6 +926,7 @@
             "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1232,6 +1237,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1354,6 +1360,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLCallbacks",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1378,6 +1385,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidationOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1420,6 +1428,7 @@
             "lineNumber": 330,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ISuggestionItem",
             "trackAdoption": false,
             "isRequired": true
           }
