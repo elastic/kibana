@@ -353,6 +353,7 @@
                 "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Package",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -379,6 +380,7 @@
                 "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProject",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -567,6 +569,7 @@
                         "lineNumber": 27,
                         "columnNumber": 3,
                         "deprecated": false,
+                        "docsReferencedTypeName": "T",
                         "trackAdoption": false
                       }
                     ]
@@ -645,6 +648,7 @@
                 "lineNumber": 90,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProject",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -833,6 +837,7 @@
                         "lineNumber": 27,
                         "columnNumber": 3,
                         "deprecated": false,
+                        "docsReferencedTypeName": "T",
                         "trackAdoption": false
                       }
                     ]
@@ -893,6 +898,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -945,6 +951,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LintOptions",
             "trackAdoption": false,
             "isRequired": true
           }
