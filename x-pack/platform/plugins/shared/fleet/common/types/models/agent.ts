@@ -426,7 +426,6 @@ export interface FleetServerAgent {
   health?: ComponentHealth;
   effective_config?: any;
   effective_config_hash?: string;
-  effective_config_label?: string;
 }
 
 export interface ComponentHealth {
