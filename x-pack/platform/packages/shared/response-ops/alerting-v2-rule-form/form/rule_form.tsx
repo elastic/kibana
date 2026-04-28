@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
@@ -86,6 +86,16 @@ const RuleFormContent = ({
   // YAML buffer is lifted here (rather than inside YamlRuleForm) so it survives
   // the unmount that happens when the user toggles back to Form mode.
   const [yamlText, setYamlText] = useState<string>(() => serializeFormToYaml(getValues()));
+
+  // Regenerate the YAML buffer whenever the ES|QL query field changes (typically
+  // from edits in the ES|QL editor). Per design, this always overwrites — any
+  // user-typed YAML that differs from the new query is intentionally clobbered.
+  // The effect runs once on mount as a no-op (state matches the lazy-init); React
+  // bails on identical values via Object.is.
+  const baseQuery = useWatch<FormValues>({ name: 'evaluation.query.base' });
+  useEffect(() => {
+    setYamlText(serializeFormToYaml(getValues()));
+  }, [baseQuery, getValues]);
 
   // Internal submission hooks — always initialised so hooks are stable,
   // but only the appropriate one is used when no external onSubmit is provided.

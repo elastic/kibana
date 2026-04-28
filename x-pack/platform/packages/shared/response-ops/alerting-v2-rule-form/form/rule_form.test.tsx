@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useFormContext } from 'react-hook-form';
 import { RuleForm } from './rule_form';
 import { RULE_FORM_ID } from './constants';
 import { createFormWrapper, createMockServices } from '../test_utils';
@@ -225,6 +226,51 @@ describe('RuleForm', () => {
 
       const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
       expect(editor.value).toContain('Initial Rule');
+    });
+
+    it('regenerates YAML when the ES|QL query field changes', async () => {
+      const user = userEvent.setup();
+
+      // Stand-in for the ES|QL editor: a button that pushes a new query into
+      // form state via setValue, which is what esql_editor_field.tsx does in
+      // production via field.onChange.
+      const QueryWriter = () => {
+        const { setValue } = useFormContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="testSetQuery"
+            onClick={() =>
+              setValue('evaluation.query.base', 'FROM other-index | LIMIT 1', {
+                shouldDirty: true,
+              })
+            }
+          >
+            set query
+          </button>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <QueryWriter />
+        </>,
+        { wrapper: createFormWrapper() }
+      );
+
+      // Open YAML to see initial buffer
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(initialEditor.value).not.toContain('other-index');
+
+      // Simulate an ES|QL editor change pushing into form state
+      await user.click(screen.getByTestId('testSetQuery'));
+
+      await waitFor(() => {
+        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+        expect(editor.value).toContain('other-index');
+      });
     });
 
     it('preserves YAML edits across Form↔YAML toggle', async () => {
