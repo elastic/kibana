@@ -13,6 +13,7 @@ import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } 
 import { createPrebuiltRuleObjectsClient as createPrebuiltRuleObjectsClientMock } from '../../../../prebuilt_rules/logic/rule_objects/__mocks__/prebuilt_rule_objects_client';
 import { requestContextMock } from '../../../../routes/__mocks__';
 import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { createRuleSourceImporter } from './rule_source_importer';
 
 describe('ruleSourceImporter', () => {
@@ -163,22 +164,32 @@ describe('ruleSourceImporter', () => {
     });
 
     it('returns external rule_source for re-imports of deprecated prebuilt rules', async () => {
+      const deprecatedRuleToImport = {
+        ...getRulesSchemaMock(),
+        rule_id: 'validated-rule',
+        version: 1,
+      };
+
       ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
       ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue([]);
       ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
         {
-          rule_id: rule.rule_id,
-          version: rule.version ?? 1,
+          rule_id: deprecatedRuleToImport.rule_id,
+          version: deprecatedRuleToImport.version,
           deprecated: true,
           name: 'Deprecated rule',
         },
       ]);
-      await subject.setup([rule]);
+      await subject.setup([deprecatedRuleToImport]);
 
-      const result = subject.calculateRuleSource(rule);
+      const result = subject.calculateRuleSource(deprecatedRuleToImport);
 
       expect(result.immutable).toBe(true);
-      expect(result.ruleSource.type).toBe('external');
+      expect(result.ruleSource).toMatchObject({
+        type: 'external',
+        is_customized: false,
+        has_base_version: false,
+      });
     });
   });
 });
