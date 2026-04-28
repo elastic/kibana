@@ -32,6 +32,10 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-lifecycle-browser'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -43,6 +47,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
