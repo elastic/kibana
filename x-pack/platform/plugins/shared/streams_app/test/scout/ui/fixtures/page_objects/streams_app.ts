@@ -909,9 +909,9 @@ export class StreamsApp {
   }
 
   /**
-   * Asserts a preview grid cell eventually contains `value`. Polls the cell's inner text because
-   * the simulation preview can briefly show stale values (e.g. literal "null" from a Set processor)
-   * before refreshed documents render (https://github.com/elastic/kibana/issues/260710).
+   * Asserts a preview grid cell eventually contains `value`.
+   * Uses a high default timeout so the simulation preview has time to refresh
+   * after transient stale values (e.g. literal "null" from a Set processor).
    */
   async expectCellValueContains({
     columnName,
@@ -931,10 +931,7 @@ export class StreamsApp {
     if (invertCondition) {
       await expect(cellLocator).not.toContainText(value, { timeout });
     } else {
-      await expect(async () => {
-        const text = (await cellLocator.innerText()).replace(/\s+/g, ' ').trim();
-        expect(text).toContain(value);
-      }).toPass({ timeout, intervals: [100, 200, 400, 800, 1600] });
+      await expect(cellLocator).toContainText(value, { timeout });
     }
   }
 
