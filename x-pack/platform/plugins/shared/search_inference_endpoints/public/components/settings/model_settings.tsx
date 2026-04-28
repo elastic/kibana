@@ -45,15 +45,21 @@ export const ModelSettings: React.FC = () => {
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
-  const { enableAi, featureSpecificModels } = defaultModelSettings.state;
-  const defaultModelValidation = useDefaultModelValidation(defaultModelSettings.state);
+  const {
+    state: defaultModelState,
+    isDirty: isDefaultModelDirty,
+    save: saveDefaultModel,
+    reset: resetDefaultModel,
+  } = defaultModelSettings;
+  const { enableAi, featureSpecificModels } = defaultModelState;
+  const defaultModelValidation = useDefaultModelValidation(defaultModelState);
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
     services: { application, http },
   } = useKibana();
   const usageTracker = useUsageTracker();
 
-  const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
+  const isDirty = isFeatureDirty || isDefaultModelDirty;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
 
   const history = useHistory();
@@ -82,23 +88,31 @@ export const ModelSettings: React.FC = () => {
     if (!defaultModelValidation.isValid) {
       return;
     }
-    if (isFeatureDirty) {
-      saveFeatures();
+    if (!isFeatureDirty && !isDefaultModelDirty) {
+      return;
     }
-    if (defaultModelSettings.isDirty) {
-      await defaultModelSettings.save();
+
+    // Run both saves; collect outcomes so the telemetry event only fires when at least one
+    // round-trip actually succeeded. `saveDefaultModel` swallows its own errors and surfaces them
+    // via toasts, so its rejection branch is unreachable in practice -- we still guard for safety.
+    const results = await Promise.allSettled([
+      isFeatureDirty ? saveFeatures() : Promise.resolve(),
+      isDefaultModelDirty ? saveDefaultModel() : Promise.resolve(),
+    ]);
+    if (results.some((r) => r.status === 'fulfilled')) {
+      usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
     }
-    usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
   }, [
     isFeatureDirty,
     saveFeatures,
-    defaultModelSettings,
+    isDefaultModelDirty,
+    saveDefaultModel,
     defaultModelValidation.isValid,
     usageTracker,
   ]);
 
   const handleDiscardAndLeave = useCallback(() => {
-    defaultModelSettings.reset();
+    resetDefaultModel();
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
@@ -109,7 +123,7 @@ export const ModelSettings: React.FC = () => {
       application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [application, http.basePath, pendingLocation, defaultModelSettings]);
+  }, [application, http.basePath, pendingLocation, resetDefaultModel]);
 
   const showFeatureSections = enableAi && featureSpecificModels;
 

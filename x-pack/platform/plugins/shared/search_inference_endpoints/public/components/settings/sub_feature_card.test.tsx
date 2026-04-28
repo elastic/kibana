@@ -193,7 +193,9 @@ describe('SubFeatureCard', () => {
 
       const toggle = screen.getByTestId('useRecommendedDefaultsToggle-test_feature');
       expect(toggle).toBeChecked();
-      // Locked mode: no add-model button, no remove buttons, no overflow.
+      // Locked mode renders the recommended endpoint as a read-only row...
+      expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
+      // ...with no edit controls.
       expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('remove-endpoint-ep-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('subFeatureOverflowMenu-test_feature')).not.toBeInTheDocument();

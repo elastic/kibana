@@ -18,6 +18,7 @@ import { useDefaultModelSettings } from '../../hooks/use_default_model_settings'
 import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('./use_model_settings_form');
@@ -73,7 +74,7 @@ const defaultFormState = {
   ],
   invalidEndpointIds: new Set<string>(),
   updateEndpoints: jest.fn(),
-  save: jest.fn(),
+  save: jest.fn().mockResolvedValue(undefined),
 };
 
 const defaultModelSettingsState = {
@@ -169,7 +170,7 @@ describe('ModelSettings', () => {
   it('hides feature sections when AI is off', () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
-      state: { enableAi: false, defaultModelId: 'NO_DEFAULT_MODEL', featureSpecificModels: false },
+      state: { enableAi: false, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: false },
     });
 
     render(
@@ -236,7 +237,7 @@ describe('ModelSettings', () => {
   });
 
   it('clicking save is a no-op when validation fails', () => {
-    const saveFeatures = jest.fn();
+    const saveFeatures = jest.fn().mockResolvedValue(undefined);
     const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
 
     mockUseModelSettingsForm.mockReturnValue({
@@ -267,7 +268,7 @@ describe('ModelSettings', () => {
   });
 
   it('calls both saveFeatures and defaultModelSettings.save when both are dirty', async () => {
-    const saveFeatures = jest.fn();
+    const saveFeatures = jest.fn().mockResolvedValue(undefined);
     const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
 
     mockUseModelSettingsForm.mockReturnValue({

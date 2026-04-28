@@ -26,7 +26,7 @@ export interface ModelSettingsForm {
   sections: FeatureSection[];
   invalidEndpointIds: Set<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
-  save: () => void;
+  save: () => Promise<void>;
 }
 
 const getEffectiveEndpoints = (
@@ -75,7 +75,7 @@ const getChangedAssignments = (
 export const useModelSettingsForm = (): ModelSettingsForm => {
   const { features: registeredFeatures, isLoading: isFeaturesLoading } = useRegisteredFeatures();
   const { data: settingsData, isLoading: isSettingsLoading } = useInferenceSettings();
-  const { mutate: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
+  const { mutateAsync: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
 
   const isLoading = isFeaturesLoading || isSettingsLoading;
 
@@ -172,13 +172,13 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
   }, []);
 
-  const save = useCallback(() => {
+  const save = useCallback(async () => {
     const changed = getChangedAssignments(
       assignments,
       registeredFeatures,
       recommendedEndpointsById
     );
-    saveSettings({ features: toApiFormat(changed) });
+    await saveSettings({ features: toApiFormat(changed) });
   }, [saveSettings, assignments, registeredFeatures, recommendedEndpointsById]);
 
   return {

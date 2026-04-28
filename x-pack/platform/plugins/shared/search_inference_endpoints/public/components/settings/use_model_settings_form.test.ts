@@ -18,7 +18,7 @@ jest.mock('../../hooks/use_inference_settings');
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
 const mockUseInferenceSettings = useInferenceSettings as jest.Mock;
 const mockUseSaveInferenceSettings = useSaveInferenceSettings as jest.Mock;
-const mockSaveSettings = jest.fn();
+const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
 
 const parentFeature: InferenceFeatureConfig = {
   featureId: 'search',
@@ -53,7 +53,10 @@ describe('useModelSettingsForm', () => {
     jest.clearAllMocks();
     mockUseRegisteredFeatures.mockReturnValue({ features: allFeatures, isLoading: false });
     mockUseInferenceSettings.mockReturnValue({ data: undefined, isLoading: false });
-    mockUseSaveInferenceSettings.mockReturnValue({ mutate: mockSaveSettings, isLoading: false });
+    mockUseSaveInferenceSettings.mockReturnValue({
+      mutateAsync: mockSaveSettings,
+      isLoading: false,
+    });
   });
 
   it('groups features into sections by parentFeatureId', () => {
