@@ -1042,6 +1042,8 @@
       "@kbn/dot-text/*": ["src/platform/packages/private/kbn-dot-text/*"],
       "@kbn/dot-text-loader": ["src/platform/packages/private/kbn-dot-text-loader"],
       "@kbn/dot-text-loader/*": ["src/platform/packages/private/kbn-dot-text-loader/*"],
+      "@kbn/ebt-click-actions": ["src/platform/packages/shared/kbn-ebt-click-actions"],
+      "@kbn/ebt-click-actions/*": ["src/platform/packages/shared/kbn-ebt-click-actions/*"],
       "@kbn/ebt-tools": ["src/platform/packages/shared/kbn-ebt-tools"],
       "@kbn/ebt-tools/*": ["src/platform/packages/shared/kbn-ebt-tools/*"],
       "@kbn/ecs-data-quality-dashboard": ["x-pack/solutions/security/packages/ecs-data-quality-dashboard"],
