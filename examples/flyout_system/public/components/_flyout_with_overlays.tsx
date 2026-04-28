@@ -330,8 +330,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           resizable: true,
           onActive: mainFlyoutOnActive,
           onClose: () => {
-            flyoutRef.current = null;
             setIsFlyoutOpen(false);
+            // flyoutRef is cleared by the effect cleanup
           },
           ['aria-labelledby']: `flyoutHeading-${title}`,
           historyKey,

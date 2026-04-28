@@ -87,8 +87,8 @@ const OverlaysFlyout: React.FC<NonSessionFlyoutsProps> = React.memo(({ overlays,
             // overlays.openFlyout does not auto-close when options.onClose is provided —
             // the consumer must call .close() to dismiss the overlay (see flyout_service.tsx).
             flyout.close();
-            flyoutRef.current = null;
             setIsFlyoutOpen(false);
+            // flyoutRef is cleared by the effect cleanup
           },
         }
       );
