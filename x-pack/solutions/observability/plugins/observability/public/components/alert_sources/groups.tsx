@@ -30,7 +30,7 @@ export type AlertSourcesElement =
 const getClickActionLabel = (field: string): string => {
   if (apmSources.includes(field)) return 'openInApm';
   if (infraSources.includes(field)) return 'openInInfra';
-  return 'navigate';
+  return `navigateTo-${field}`;
 };
 
 export function Groups({
