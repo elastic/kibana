@@ -1,9 +1,8 @@
 ---
 name: Claude Reviewer
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, labeled]
-    names: [reviewer:claude]
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -36,7 +35,13 @@ if: >-
       contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
       !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
       (
-        github.event_name == 'pull_request' ||
+        (
+          github.event_name == 'pull_request_target' &&
+          (
+            github.event.action != 'labeled' ||
+            github.event.label.name == 'reviewer:claude'
+          )
+        ) ||
         (
           contains(github.event.comment.body, '@claude') &&
           (
@@ -112,5 +117,5 @@ safe-outputs:
 # Claude PR Reviewer
 
 Using the imported reviewer instructions:
-- Run in review mode for `pull_request` and `workflow_dispatch` workflow events.
+- Run in review mode for `pull_request_target` and `workflow_dispatch` workflow events.
 - Run in follow-up response mode for `issue_comment` and `pull_request_review_comment` events that mention `@claude`.
