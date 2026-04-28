@@ -10,58 +10,58 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import type { RuleDoctorFindingsClient } from '../../lib/rule_doctor_findings_client/rule_doctor_findings_client';
-import { FindingsClientScopedToken } from '../../lib/rule_doctor_findings_client/tokens';
+import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
+import { InsightsClientScopedToken } from '../../lib/rule_doctor_insights_client/tokens';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_RULE_DOCTOR_FINDINGS_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { SpaceContext } from './space_context';
 
-const getFindingParamsSchema = z.object({
-  finding_id: z.string().describe('The identifier for the finding.'),
+const getInsightParamsSchema = z.object({
+  insight_id: z.string().describe('The identifier for the insight.'),
 });
 
 @injectable()
-export class GetFindingRoute extends BaseAlertingRoute {
+export class GetInsightRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_RULE_DOCTOR_FINDINGS_API_PATH}/{finding_id}`;
+  static path = `${ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH}/{insight_id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.ruleDoctor.read],
     },
   };
   static routeOptions = {
-    summary: 'Get a Rule Doctor finding',
+    summary: 'Get a Rule Doctor insight',
   } as const;
   static validate = {
     request: {
-      params: buildRouteValidationWithZod(getFindingParamsSchema),
+      params: buildRouteValidationWithZod(getInsightParamsSchema),
     },
   };
 
-  protected readonly routeName = 'get finding';
+  protected readonly routeName = 'get insight';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
-      z.infer<typeof getFindingParamsSchema>,
+      z.infer<typeof getInsightParamsSchema>,
       unknown,
       unknown
     >,
-    @inject(FindingsClientScopedToken)
-    private readonly findingsClient: RuleDoctorFindingsClient,
+    @inject(InsightsClientScopedToken)
+    private readonly insightsClient: RuleDoctorInsightsClient,
     @inject(SpaceContext) private readonly spaceContext: SpaceContext
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const finding = await this.findingsClient.getFinding(
-      this.request.params.finding_id,
+    const insight = await this.insightsClient.getInsight(
+      this.request.params.insight_id,
       this.spaceContext.spaceId
     );
-    return this.ctx.response.ok({ body: finding });
+    return this.ctx.response.ok({ body: insight });
   }
 }

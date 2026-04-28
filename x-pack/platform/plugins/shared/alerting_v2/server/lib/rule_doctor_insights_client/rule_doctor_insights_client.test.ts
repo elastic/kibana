@@ -9,10 +9,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { RULE_DOCTOR_FINDINGS_INDEX } from '../../resources/indices/rule_doctor_findings';
-import type { LoggerServiceContract } from '../services/logger_service/logger_service';
-import { RuleDoctorFindingsClient } from './rule_doctor_findings_client';
-import type { RuleDoctorFindingDoc } from '../../resources/indices/rule_doctor_findings';
+import {
+  RULE_DOCTOR_INSIGHTS_INDEX,
+  type RuleDoctorInsightDoc,
+} from '../../resources/indices/rule_doctor_insights';
 
 const mockLoggerService: jest.Mocked<LoggerServiceContract> = {
   debug: jest.fn(),
@@ -21,9 +21,9 @@ const mockLoggerService: jest.Mocked<LoggerServiceContract> = {
   error: jest.fn(),
 };
 
-const makeFinding = (overrides: Partial<RuleDoctorFindingDoc> = {}): RuleDoctorFindingDoc => ({
+const makeInsight = (overrides: Partial<RuleDoctorInsightDoc> = {}): RuleDoctorInsightDoc => ({
   '@timestamp': '2026-04-23T00:00:00.000Z',
-  finding_id: 'finding-1',
+  insight_id: 'insight-1',
   execution_id: 'exec-1',
   status: 'open',
   type: 'deduplication',
@@ -32,6 +32,7 @@ const makeFinding = (overrides: Partial<RuleDoctorFindingDoc> = {}): RuleDoctorF
   confidence: 'high',
   title: 'Duplicate rules detected',
   summary: 'Rules A and B are duplicates',
+  justification: '',
   rule_ids: ['rule-1', 'rule-2'],
   data: {},
   current: null,
@@ -40,26 +41,26 @@ const makeFinding = (overrides: Partial<RuleDoctorFindingDoc> = {}): RuleDoctorF
   ...overrides,
 });
 
-describe('RuleDoctorFindingsClient', () => {
+describe('RuleDoctorInsightsClient', () => {
   let esClient: DeeplyMockedApi<ElasticsearchClient>;
-  let client: RuleDoctorFindingsClient;
+  let client: RuleDoctorInsightsClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    client = new RuleDoctorFindingsClient(esClient, mockLoggerService);
+    client = new RuleDoctorInsightsClient(esClient, mockLoggerService);
   });
 
-  describe('listFindings', () => {
+  describe('listInsights', () => {
     it('builds query with space_id filter and default pagination', async () => {
       esClient.search.mockResolvedValue({
         hits: { total: { value: 0, relation: 'eq' }, hits: [] },
       } as never);
 
-      await client.listFindings({ spaceId: 'default' });
+      await client.listInsights({ spaceId: 'default' });
 
       expect(esClient.search).toHaveBeenCalledWith({
-        index: RULE_DOCTOR_FINDINGS_INDEX,
+        index: RULE_DOCTOR_INSIGHTS_INDEX,
         ignore_unavailable: true,
         query: { bool: { filter: [{ term: { space_id: 'default' } }] } },
         sort: [{ '@timestamp': { order: 'desc' } }],
@@ -74,7 +75,7 @@ describe('RuleDoctorFindingsClient', () => {
         hits: { total: { value: 0, relation: 'eq' }, hits: [] },
       } as never);
 
-      await client.listFindings({
+      await client.listInsights({
         spaceId: 'my-space',
         status: 'open',
         type: 'deduplication',
@@ -104,17 +105,17 @@ describe('RuleDoctorFindingsClient', () => {
     });
 
     it('returns items and total from response', async () => {
-      const finding = makeFinding();
+      const insight = makeInsight();
       esClient.search.mockResolvedValue({
         hits: {
           total: { value: 1, relation: 'eq' },
-          hits: [{ _id: 'doc-1', _index: RULE_DOCTOR_FINDINGS_INDEX, _source: finding }],
+          hits: [{ _id: 'doc-1', _index: RULE_DOCTOR_INSIGHTS_INDEX, _source: insight }],
         },
       } as never);
 
-      const result = await client.listFindings({ spaceId: 'default' });
+      const result = await client.listInsights({ spaceId: 'default' });
 
-      expect(result).toEqual({ items: [finding], total: 1 });
+      expect(result).toEqual({ items: [insight], total: 1 });
     });
 
     it('returns empty results when index does not exist', async () => {
@@ -122,30 +123,30 @@ describe('RuleDoctorFindingsClient', () => {
         hits: { total: { value: 0, relation: 'eq' }, hits: [] },
       } as never);
 
-      const result = await client.listFindings({ spaceId: 'default' });
+      const result = await client.listInsights({ spaceId: 'default' });
 
       expect(result).toEqual({ items: [], total: 0 });
     });
   });
 
-  describe('getFinding', () => {
-    it('returns finding when found in the correct space', async () => {
-      const finding = makeFinding();
+  describe('getInsight', () => {
+    it('returns insight when found in the correct space', async () => {
+      const insight = makeInsight();
       esClient.search.mockResolvedValue({
         hits: {
-          hits: [{ _id: 'doc-1', _index: RULE_DOCTOR_FINDINGS_INDEX, _source: finding }],
+          hits: [{ _id: 'doc-1', _index: RULE_DOCTOR_INSIGHTS_INDEX, _source: insight }],
         },
       } as never);
 
-      const result = await client.getFinding('finding-1', 'default');
+      const result = await client.getInsight('insight-1', 'default');
 
-      expect(result).toEqual(finding);
+      expect(result).toEqual(insight);
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
             bool: {
               filter: [
-                { term: { finding_id: 'finding-1' } },
+                { term: { insight_id: 'insight-1' } },
                 { term: { space_id: 'default' } },
               ],
             },
@@ -155,32 +156,32 @@ describe('RuleDoctorFindingsClient', () => {
       );
     });
 
-    it('throws 404 when finding does not exist', async () => {
+    it('throws 404 when insight does not exist', async () => {
       esClient.search.mockResolvedValue({
         hits: { hits: [] },
       } as never);
 
-      await expect(client.getFinding('missing', 'default')).rejects.toThrow(
-        /Finding missing not found/
+      await expect(client.getInsight('missing', 'default')).rejects.toThrow(
+        /Insight missing not found/
       );
     });
   });
 
-  describe('updateFindingStatus', () => {
-    it('looks up by finding_id + space_id and updates the ES document', async () => {
+  describe('updateInsightStatus', () => {
+    it('looks up by insight_id + space_id and updates the ES document', async () => {
       esClient.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'doc-1', _index: RULE_DOCTOR_FINDINGS_INDEX }] },
+        hits: { hits: [{ _id: 'doc-1', _index: RULE_DOCTOR_INSIGHTS_INDEX }] },
       } as never);
       esClient.update.mockResolvedValue({ result: 'updated' } as never);
 
-      await client.updateFindingStatus('finding-1', 'dismissed', 'default');
+      await client.updateInsightStatus('insight-1', 'dismissed', 'default');
 
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
             bool: {
               filter: [
-                { term: { finding_id: 'finding-1' } },
+                { term: { insight_id: 'insight-1' } },
                 { term: { space_id: 'default' } },
               ],
             },
@@ -190,47 +191,47 @@ describe('RuleDoctorFindingsClient', () => {
         })
       );
       expect(esClient.update).toHaveBeenCalledWith({
-        index: RULE_DOCTOR_FINDINGS_INDEX,
+        index: RULE_DOCTOR_INSIGHTS_INDEX,
         id: 'doc-1',
         doc: { status: 'dismissed' },
         refresh: 'wait_for',
       });
     });
 
-    it('throws 404 when finding does not exist in the space', async () => {
+    it('throws 404 when insight does not exist in the space', async () => {
       esClient.search.mockResolvedValue({
         hits: { hits: [] },
       } as never);
 
       await expect(
-        client.updateFindingStatus('missing', 'dismissed', 'default')
-      ).rejects.toThrow(/Finding missing not found/);
+        client.updateInsightStatus('missing', 'dismissed', 'default')
+      ).rejects.toThrow(/Insight missing not found/);
 
       expect(esClient.update).not.toHaveBeenCalled();
     });
   });
 
-  describe('bulkIndexFindings', () => {
+  describe('bulkIndexInsights', () => {
     it('returns early for empty array', async () => {
-      const result = await client.bulkIndexFindings([]);
+      const result = await client.bulkIndexInsights([]);
 
       expect(result).toEqual({ indexed: 0, failed: 0 });
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('builds bulk operations with finding_id as _id', async () => {
-      const finding = makeFinding();
+    it('builds bulk operations with insight_id as _id', async () => {
+      const insight = makeInsight();
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'finding-1', status: 201 } }],
+        items: [{ index: { _id: 'insight-1', status: 201 } }],
       } as never);
 
-      const result = await client.bulkIndexFindings([finding]);
+      const result = await client.bulkIndexInsights([insight]);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: RULE_DOCTOR_FINDINGS_INDEX, _id: 'finding-1' } },
-          finding,
+          { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: 'insight-1' } },
+          insight,
         ],
         refresh: false,
       });
@@ -238,14 +239,14 @@ describe('RuleDoctorFindingsClient', () => {
     });
 
     it('reports failed count and logs error when bulk has errors', async () => {
-      const findings = [makeFinding(), makeFinding({ finding_id: 'finding-2' })];
+      const insights = [makeInsight(), makeInsight({ insight_id: 'insight-2' })];
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { index: { _id: 'finding-1', status: 201 } },
+          { index: { _id: 'insight-1', status: 201 } },
           {
             index: {
-              _id: 'finding-2',
+              _id: 'insight-2',
               status: 400,
               error: { type: 'mapper_parsing_exception', reason: 'bad field' },
             },
@@ -253,29 +254,29 @@ describe('RuleDoctorFindingsClient', () => {
         ],
       } as never);
 
-      const result = await client.bulkIndexFindings(findings);
+      const result = await client.bulkIndexInsights(insights);
 
       expect(result).toEqual({ indexed: 1, failed: 1 });
       expect(mockLoggerService.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'BULK_INDEX_FINDINGS_ERROR',
+          code: 'BULK_INDEX_INSIGHTS_ERROR',
         })
       );
     });
   });
 
-  describe('countFindings', () => {
+  describe('countInsights', () => {
     it('builds query with space_id and optional filters', async () => {
       esClient.count.mockResolvedValue({ count: 42 } as never);
 
-      const result = await client.countFindings({
+      const result = await client.countInsights({
         spaceId: 'default',
         status: 'open',
         type: 'stale_rule',
       });
 
       expect(esClient.count).toHaveBeenCalledWith({
-        index: RULE_DOCTOR_FINDINGS_INDEX,
+        index: RULE_DOCTOR_INSIGHTS_INDEX,
         ignore_unavailable: true,
         query: {
           bool: {
@@ -293,7 +294,7 @@ describe('RuleDoctorFindingsClient', () => {
     it('returns 0 when index does not exist', async () => {
       esClient.count.mockResolvedValue({ count: 0 } as never);
 
-      const result = await client.countFindings({ spaceId: 'default' });
+      const result = await client.countInsights({ spaceId: 'default' });
 
       expect(result).toBe(0);
     });

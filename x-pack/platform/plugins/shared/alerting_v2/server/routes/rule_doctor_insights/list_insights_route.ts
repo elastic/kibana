@@ -10,15 +10,15 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import type { RuleDoctorFindingsClient } from '../../lib/rule_doctor_findings_client/rule_doctor_findings_client';
-import { FindingsClientScopedToken } from '../../lib/rule_doctor_findings_client/tokens';
+import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
+import { InsightsClientScopedToken } from '../../lib/rule_doctor_insights_client/tokens';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_RULE_DOCTOR_FINDINGS_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { SpaceContext } from './space_context';
 
-const listFindingsQuerySchema = z.object({
+const listInsightsQuerySchema = z.object({
   page: z.coerce.number().min(1).optional().default(1).describe('The page number to return.'),
   perPage: z.coerce
     .number()
@@ -26,13 +26,13 @@ const listFindingsQuerySchema = z.object({
     .max(1000)
     .optional()
     .default(20)
-    .describe('The number of findings to return per page.'),
+    .describe('The number of insights to return per page.'),
   status: z
     .enum(['open', 'dismissed', 'applied'])
     .optional()
-    .describe('Filter findings by status.'),
-  type: z.string().optional().describe('Filter findings by type.'),
-  execution_id: z.string().optional().describe('Filter findings by execution ID.'),
+    .describe('Filter insights by status.'),
+  type: z.string().optional().describe('Filter insights by type.'),
+  execution_id: z.string().optional().describe('Filter insights by execution ID.'),
   rule_ids: z
     .string()
     .optional()
@@ -40,35 +40,35 @@ const listFindingsQuerySchema = z.object({
 });
 
 @injectable()
-export class ListFindingsRoute extends BaseAlertingRoute {
+export class ListInsightsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = ALERTING_V2_RULE_DOCTOR_FINDINGS_API_PATH;
+  static path = ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.ruleDoctor.read],
     },
   };
   static routeOptions = {
-    summary: 'List Rule Doctor findings',
+    summary: 'List Rule Doctor insights',
   } as const;
   static validate = {
     request: {
-      query: buildRouteValidationWithZod(listFindingsQuerySchema),
+      query: buildRouteValidationWithZod(listInsightsQuerySchema),
     },
   };
 
-  protected readonly routeName = 'list findings';
+  protected readonly routeName = 'list insights';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof listFindingsQuerySchema>,
+      z.infer<typeof listInsightsQuerySchema>,
       unknown
     >,
-    @inject(FindingsClientScopedToken)
-    private readonly findingsClient: RuleDoctorFindingsClient,
+    @inject(InsightsClientScopedToken)
+    private readonly insightsClient: RuleDoctorInsightsClient,
     @inject(SpaceContext) private readonly spaceContext: SpaceContext
   ) {
     super(ctx);
@@ -79,7 +79,7 @@ export class ListFindingsRoute extends BaseAlertingRoute {
     const from = (page - 1) * perPage;
     const ruleIds = rule_ids ? rule_ids.split(',').map((id) => id.trim()) : undefined;
 
-    const result = await this.findingsClient.listFindings({
+    const result = await this.insightsClient.listInsights({
       spaceId: this.spaceContext.spaceId,
       from,
       size: perPage,

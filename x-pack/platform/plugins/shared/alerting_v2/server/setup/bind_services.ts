@@ -67,12 +67,12 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
-import { RuleDoctorFindingsClient } from '../lib/rule_doctor_findings_client/rule_doctor_findings_client';
-import { SpaceContext } from '../routes/rule_doctor_findings/space_context';
+import { RuleDoctorInsightsClient } from '../lib/rule_doctor_insights_client/rule_doctor_insights_client';
+import { SpaceContext } from '../routes/rule_doctor_insights/space_context';
 import {
-  FindingsClientScopedToken,
-  FindingsClientInternalToken,
-} from '../lib/rule_doctor_findings_client/tokens';
+  InsightsClientScopedToken,
+  InsightsClientInternalToken,
+} from '../lib/rule_doctor_insights_client/tokens';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -248,19 +248,19 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(SpaceContext).toSelf().inRequestScope();
 
-  bind(FindingsClientScopedToken)
+  bind(InsightsClientScopedToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      return new RuleDoctorFindingsClient(esClient, loggerService);
+      return new RuleDoctorInsightsClient(esClient, loggerService);
     })
     .inRequestScope();
 
-  bind(FindingsClientInternalToken)
+  bind(InsightsClientInternalToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new RuleDoctorFindingsClient(esClient, loggerService);
+      return new RuleDoctorInsightsClient(esClient, loggerService);
     })
     .inSingletonScope();
 

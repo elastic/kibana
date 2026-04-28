@@ -7,15 +7,15 @@
 
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { RuleDoctorFindingsClient } from '../../lib/rule_doctor_findings_client/rule_doctor_findings_client';
+import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { createRouteDependencies } from '../test_utils';
-import { UpdateFindingStatusRoute } from './update_finding_status_route';
+import { UpdateInsightStatusRoute } from './update_insight_status_route';
 import type { SpaceContext } from './space_context';
 
-describe('UpdateFindingStatusRoute', () => {
-  const findingsClient = {
-    updateFindingStatus: jest.fn(),
-  } as unknown as jest.Mocked<Pick<RuleDoctorFindingsClient, 'updateFindingStatus'>>;
+describe('UpdateInsightStatusRoute', () => {
+  const insightsClient = {
+    updateInsightStatus: jest.fn(),
+  } as unknown as jest.Mocked<Pick<RuleDoctorInsightsClient, 'updateInsightStatus'>>;
 
   const spaceContext: SpaceContext = { spaceId: 'my-space' };
 
@@ -23,46 +23,46 @@ describe('UpdateFindingStatusRoute', () => {
     jest.clearAllMocks();
   });
 
-  it('delegates to updateFindingStatus and returns noContent', async () => {
+  it('delegates to updateInsightStatus and returns noContent', async () => {
     const { ctx, response } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
-      params: { finding_id: 'finding-1' },
+      params: { insight_id: 'insight-1' },
       body: { status: 'dismissed' },
     });
 
-    findingsClient.updateFindingStatus.mockResolvedValueOnce(undefined);
+    insightsClient.updateInsightStatus.mockResolvedValueOnce(undefined);
 
-    const route = new UpdateFindingStatusRoute(
+    const route = new UpdateInsightStatusRoute(
       ctx,
       request,
-      findingsClient as unknown as RuleDoctorFindingsClient,
+      insightsClient as unknown as RuleDoctorInsightsClient,
       spaceContext
     );
     await route.handle();
 
-    expect(findingsClient.updateFindingStatus).toHaveBeenCalledWith(
-      'finding-1',
+    expect(insightsClient.updateInsightStatus).toHaveBeenCalledWith(
+      'insight-1',
       'dismissed',
       'my-space'
     );
     expect(response.noContent).toHaveBeenCalled();
   });
 
-  it('returns 404 when finding is not found', async () => {
+  it('returns 404 when insight is not found', async () => {
     const { ctx, response } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
-      params: { finding_id: 'nonexistent' },
+      params: { insight_id: 'nonexistent' },
       body: { status: 'applied' },
     });
 
-    findingsClient.updateFindingStatus.mockRejectedValueOnce(
-      Boom.notFound('Finding nonexistent not found')
+    insightsClient.updateInsightStatus.mockRejectedValueOnce(
+      Boom.notFound('Insight nonexistent not found')
     );
 
-    const route = new UpdateFindingStatusRoute(
+    const route = new UpdateInsightStatusRoute(
       ctx,
       request,
-      findingsClient as unknown as RuleDoctorFindingsClient,
+      insightsClient as unknown as RuleDoctorInsightsClient,
       spaceContext
     );
     await route.handle();

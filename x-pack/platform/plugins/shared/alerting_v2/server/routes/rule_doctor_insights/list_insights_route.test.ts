@@ -7,15 +7,15 @@
 
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { RuleDoctorFindingsClient } from '../../lib/rule_doctor_findings_client/rule_doctor_findings_client';
+import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { createRouteDependencies } from '../test_utils';
-import { ListFindingsRoute } from './list_findings_route';
+import { ListInsightsRoute } from './list_insights_route';
 import type { SpaceContext } from './space_context';
 
-describe('ListFindingsRoute', () => {
-  const findingsClient = {
-    listFindings: jest.fn(),
-  } as unknown as jest.Mocked<Pick<RuleDoctorFindingsClient, 'listFindings'>>;
+describe('ListInsightsRoute', () => {
+  const insightsClient = {
+    listInsights: jest.fn(),
+  } as unknown as jest.Mocked<Pick<RuleDoctorInsightsClient, 'listInsights'>>;
 
   const spaceContext: SpaceContext = { spaceId: 'default' };
 
@@ -23,23 +23,23 @@ describe('ListFindingsRoute', () => {
     jest.clearAllMocks();
   });
 
-  it('forwards query params to the findings client with page/perPage conversion', async () => {
+  it('forwards query params to the insights client with page/perPage conversion', async () => {
     const { ctx, response } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
       query: { page: 2, perPage: 10, status: 'open' },
     });
 
-    findingsClient.listFindings.mockResolvedValueOnce({ items: [], total: 0 });
+    insightsClient.listInsights.mockResolvedValueOnce({ items: [], total: 0 });
 
-    const route = new ListFindingsRoute(
+    const route = new ListInsightsRoute(
       ctx,
       request,
-      findingsClient as unknown as RuleDoctorFindingsClient,
+      insightsClient as unknown as RuleDoctorInsightsClient,
       spaceContext
     );
     await route.handle();
 
-    expect(findingsClient.listFindings).toHaveBeenCalledWith({
+    expect(insightsClient.listInsights).toHaveBeenCalledWith({
       spaceId: 'default',
       from: 10,
       size: 10,
@@ -59,17 +59,17 @@ describe('ListFindingsRoute', () => {
       query: { page: 1, perPage: 20, rule_ids: 'abc,def,ghi' },
     });
 
-    findingsClient.listFindings.mockResolvedValueOnce({ items: [], total: 0 });
+    insightsClient.listInsights.mockResolvedValueOnce({ items: [], total: 0 });
 
-    const route = new ListFindingsRoute(
+    const route = new ListInsightsRoute(
       ctx,
       request,
-      findingsClient as unknown as RuleDoctorFindingsClient,
+      insightsClient as unknown as RuleDoctorInsightsClient,
       spaceContext
     );
     await route.handle();
 
-    expect(findingsClient.listFindings).toHaveBeenCalledWith(
+    expect(insightsClient.listInsights).toHaveBeenCalledWith(
       expect.objectContaining({
         ruleIds: ['abc', 'def', 'ghi'],
       })
@@ -82,12 +82,12 @@ describe('ListFindingsRoute', () => {
       query: { page: 1, perPage: 20 },
     });
 
-    findingsClient.listFindings.mockRejectedValueOnce(Boom.internal('es failure'));
+    insightsClient.listInsights.mockRejectedValueOnce(Boom.internal('es failure'));
 
-    const route = new ListFindingsRoute(
+    const route = new ListInsightsRoute(
       ctx,
       request,
-      findingsClient as unknown as RuleDoctorFindingsClient,
+      insightsClient as unknown as RuleDoctorInsightsClient,
       spaceContext
     );
     await route.handle();

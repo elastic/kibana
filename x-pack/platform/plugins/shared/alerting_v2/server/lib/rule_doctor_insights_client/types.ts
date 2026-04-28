@@ -6,13 +6,13 @@
  */
 
 import type {
-  RuleDoctorFindingDoc,
-  RuleDoctorFindingStatus,
-} from '../../resources/indices/rule_doctor_findings';
+  RuleDoctorInsightDoc,
+  RuleDoctorInsightStatus,
+} from '../../resources/indices/rule_doctor_insights';
 
-export interface ListFindingsParams {
+export interface ListInsightsParams {
   spaceId: string;
-  status?: RuleDoctorFindingStatus;
+  status?: RuleDoctorInsightStatus;
   type?: string;
   executionId?: string;
   ruleIds?: string[];
@@ -20,18 +20,18 @@ export interface ListFindingsParams {
   size?: number;
 }
 
-export interface ListFindingsResult {
-  items: RuleDoctorFindingDoc[];
+export interface ListInsightsResult {
+  items: RuleDoctorInsightDoc[];
   total: number;
 }
 
-export interface CountFindingsParams {
+export interface CountInsightsParams {
   spaceId: string;
-  status?: RuleDoctorFindingStatus;
+  status?: RuleDoctorInsightStatus;
   type?: string;
 }
 
-export interface BulkIndexFindingsResult {
+export interface BulkIndexInsightsResult {
   indexed: number;
   failed: number;
 }
