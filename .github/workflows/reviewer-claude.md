@@ -34,7 +34,7 @@ if: >-
   (
     github.event_name == 'workflow_dispatch' ||
     (
-      (github.event.pull_request.user.type || github.event.comment.user.type || github.event.review.user.type) != 'Bot' &&
+      github.event.sender.type != 'Bot' &&
       contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
       !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
       (
