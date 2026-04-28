@@ -23,7 +23,7 @@ interface CreateRuleAttachmentTypeOptions {
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
 }
 
-const formatRuleAttachment = (attachmentId: string, data: RuleAttachmentData): string => {
+const formatRuleAttachmentDescription = (attachmentId: string, data: RuleAttachmentData): string => {
   const status = data.id ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
   const schedule = data.schedule?.every ? `every ${data.schedule.every}` : 'unknown';
 
@@ -91,7 +91,7 @@ export const createRuleAttachmentType = ({
   format: (attachment) => ({
     getRepresentation: () => ({
       type: 'text',
-      value: formatRuleAttachment(attachment.id, attachment.data),
+      value: formatRuleAttachmentDescription(attachment.id, attachment.data),
     }),
   }),
 
