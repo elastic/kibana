@@ -23,7 +23,6 @@ import {
 
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSearchUsage } from '../../hooks/use_search_usage';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
 
 export const SearchGettingStartedHeader: React.FC = () => {
@@ -33,7 +32,6 @@ export const SearchGettingStartedHeader: React.FC = () => {
   } = useKibana();
 
   const isTrialBadgeEnabled = uiSettings.get<boolean>(TRIAL_USAGE_BADGE_ENABLED_ID, false);
-  const { data: searchUsageData, isLoading: isSearchUsageLoading } = useSearchUsage();
 
   const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
@@ -71,15 +69,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
                   alignItems: 'flex-start',
                 })}
               >
-                <TrialUsageBadge
-                  billingUrl={billingUrl}
-                  searchUsage={
-                    searchUsageData
-                      ? { value: searchUsageData.totalVcu, unit: 'VCU', max: 100 }
-                      : undefined
-                  }
-                  isLoading={isSearchUsageLoading}
-                />
+                <TrialUsageBadge billingUrl={billingUrl} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>

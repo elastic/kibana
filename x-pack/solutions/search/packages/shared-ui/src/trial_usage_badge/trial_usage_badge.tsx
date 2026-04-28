@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
@@ -24,41 +23,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface UsageMetric {
-  value: number;
-  displayValue?: string;
-  unit: string;
-  max: number;
-}
-
 interface TrialUsageBadgeProps {
   billingUrl?: string;
-  searchUsage?: UsageMetric;
-  modelUsage?: UsageMetric;
-  isLoading?: boolean;
 }
 
-const DEFAULT_SEARCH_USAGE: UsageMetric = {
-  value: 0,
-  unit: 'VCU',
-  max: 100,
+// TODO: Replace with real API data when available
+const MOCKED_USAGE = {
+  searchUsage: {
+    value: 84.69,
+    unit: 'ECU',
+    max: 100,
+  },
+  modelUsage: {
+    value: 9000,
+    displayValue: '9k',
+    unit: 'Tokens',
+    max: 50000,
+  },
 };
 
-const DEFAULT_MODEL_USAGE: UsageMetric = {
-  value: 0,
-  displayValue: '0',
-  unit: 'Tokens',
-  max: 50000,
-};
-
-export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
-  billingUrl,
-  searchUsage,
-  modelUsage,
-  isLoading,
-}) => {
-  const search = searchUsage ?? DEFAULT_SEARCH_USAGE;
-  const model = modelUsage ?? DEFAULT_MODEL_USAGE;
+export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ billingUrl }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
@@ -152,28 +136,19 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiText size="xs">
-                  <strong>{search.displayValue ?? search.value}</strong>{' '}
-                  <EuiText
-                    size="xs"
-                    component="span"
-                    color="subdued"
-                    css={css({ display: 'inline' })}
-                  >
-                    {search.unit}
-                  </EuiText>
-                </EuiText>
-              )}
+              <EuiText size="xs">
+                <strong>{MOCKED_USAGE.searchUsage.value}</strong>{' '}
+                <span css={css({ color: euiTheme.colors.textSubdued })}>
+                  {MOCKED_USAGE.searchUsage.unit}
+                </span>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiProgress
-            value={search.value}
-            max={search.max}
+            value={MOCKED_USAGE.searchUsage.value}
+            max={MOCKED_USAGE.searchUsage.max}
             size="s"
-            color="primary"
+            color="success"
             css={css({ marginTop: euiTheme.size.xs })}
           />
         </EuiFlexItem>
@@ -201,26 +176,17 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiText size="xs">
-                  <strong>{model.displayValue ?? model.value}</strong>{' '}
-                  <EuiText
-                    size="xs"
-                    component="span"
-                    color="subdued"
-                    css={css({ display: 'inline' })}
-                  >
-                    {model.unit}
-                  </EuiText>
-                </EuiText>
-              )}
+              <EuiText size="xs">
+                <strong>{MOCKED_USAGE.modelUsage.displayValue}</strong>{' '}
+                <span css={css({ color: euiTheme.colors.textSubdued })}>
+                  {MOCKED_USAGE.modelUsage.unit}
+                </span>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiProgress
-            value={model.value}
-            max={model.max}
+            value={MOCKED_USAGE.modelUsage.value}
+            max={MOCKED_USAGE.modelUsage.max}
             size="s"
             color="success"
             css={css({ marginTop: euiTheme.size.xs })}

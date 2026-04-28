@@ -23,7 +23,6 @@ import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
 import { docLinks } from '../../../common/doc_links';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
-import { useSearchUsage } from '../../hooks/api/use_search_usage';
 
 export const SearchHomepagePage = () => {
   const {
@@ -40,7 +39,6 @@ export const SearchHomepagePage = () => {
   const { user } = useAuthenticatedUser();
   const { isTrial } = useGetLicenseInfo();
   const isTrialBadgeEnabled = uiSettings.get<boolean>(TRIAL_USAGE_BADGE_ENABLED_ID, false);
-  const { data: searchUsageData, isLoading: isSearchUsageLoading } = useSearchUsage();
 
   const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
@@ -102,15 +100,7 @@ export const SearchHomepagePage = () => {
               </EuiFlexItem>
               {isTrial && isTrialBadgeEnabled ? (
                 <EuiFlexItem grow={false}>
-                  <TrialUsageBadge
-                    billingUrl={billingUrl}
-                    searchUsage={
-                      searchUsageData
-                        ? { value: searchUsageData.totalVcu, unit: 'VCU', max: 100 }
-                        : undefined
-                    }
-                    isLoading={isSearchUsageLoading}
-                  />
+                  <TrialUsageBadge billingUrl={billingUrl} />
                 </EuiFlexItem>
               ) : (
                 !cloud?.isCloudEnabled && (

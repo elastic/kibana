@@ -6,4 +6,3 @@
  */
 
 export { TrialUsageBadge } from './trial_usage_badge';
-export type { UsageMetric } from './trial_usage_badge';
