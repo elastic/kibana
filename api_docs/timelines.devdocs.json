@@ -319,7 +319,7 @@
                     "id": "def-public.getTableSkipFocus.$1.getFocusedCell.$1",
                     "type": "Object",
                     "tags": [],
-                    "label": "__0",
+                    "label": "{\n  containerElement,\n  tableClassName,\n}",
                     "description": [],
                     "signature": [
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
@@ -968,7 +968,7 @@
             "id": "def-public.OnColumnFocused.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  newFocusedColumn,\n  newFocusedColumnAriaColindex,\n}",
             "description": [],
             "signature": [
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
@@ -1103,6 +1103,7 @@
               "lineNumber": 26,
               "columnNumber": 20,
               "deprecated": false,
+              "docsReferencedTypeName": "LastUpdatedAtProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1187,6 +1188,7 @@
               "lineNumber": 29,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "Store",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1282,6 +1284,7 @@
             "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Fields",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1370,6 +1373,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchHit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1801,6 +1805,7 @@
                 "lineNumber": 18,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Ecs",
                 "trackAdoption": false,
                 "isRequired": true
               }
