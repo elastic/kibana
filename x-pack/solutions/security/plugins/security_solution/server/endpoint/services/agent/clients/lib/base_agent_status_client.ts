@@ -56,7 +56,7 @@ export abstract class AgentStatusClient implements AgentStatusClientInterface {
         lastSeen: '',
         status: HostStatus.OFFLINE,
         pendingActions: {},
-        error: err.message,
+        error: error.message,
       };
 
       return acc;
