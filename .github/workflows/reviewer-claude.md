@@ -26,24 +26,34 @@ engine:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
     ENABLE_PROMPT_CACHING_1H: "1"
+# Activation rules:
+# - Manual runs always activate.
+# - PR events activate when the reviewer label was just added, or is already present.
+# - Comment events activate only for `@claude` comments on labeled PRs.
 if: >-
   !github.event.repository.fork &&
   (
     github.event_name == 'workflow_dispatch' ||
     (
       github.event.sender.type != 'Bot' &&
-      contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
       !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
       (
         (
           github.event_name == 'pull_request_target' &&
           (
-            github.event.action != 'labeled' ||
-            github.event.label.name == 'reviewer:claude'
+            (
+              github.event.action == 'labeled' &&
+              github.event.label.name == 'reviewer:claude'
+            ) ||
+            (
+              github.event.action != 'labeled' &&
+              contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+            )
           )
         ) ||
         (
           contains(github.event.comment.body, '@claude') &&
+          contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
           (
             github.event_name == 'pull_request_review_comment' ||
             (
@@ -56,7 +66,18 @@ if: >-
     )
   )
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}-${{ github.event.comment.id || github.event.review.id || 'review' }}
+  # Keep one review lane per PR/comment. Unrelated label events get their own group suffix so they can skip without canceling an in-flight review.
+  group: >-
+    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}-${{
+      github.event.comment.id ||
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'reviewer:claude' &&
+        github.event.label.name != 'reviewer:skip-ai' &&
+        github.event.label.name
+      ) ||
+      'pr-review'
+    }}
   cancel-in-progress: true
   job-discriminator: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}
 permissions:
