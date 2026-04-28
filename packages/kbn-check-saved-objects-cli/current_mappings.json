@@ -1733,9 +1733,6 @@
       "name": {
         "type": "keyword"
       },
-      "namespace_customization_enabled_for": {
-        "type": "keyword"
-      },
       "package_assets": {
         "dynamic": false,
         "properties": {}
