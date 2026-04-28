@@ -50,7 +50,7 @@ export const ConfirmRevokeModal = ({ count, onCancel, onConfirm }: BulkActionMod
       <EuiCallOut
         title={i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.description', {
           defaultMessage:
-            'Are you sure you want to revoke {count, plural, one {this token} other {these tokens}}? New agents will no longer be able to enroll using {count, plural, one {this token} other {these tokens}}.',
+            'Are you sure you want to revoke {count, plural, one {this token} other {these tokens}}? You will no longer be able to use {count, plural, one {it} other {them}} to enroll new agents.',
           values: { count },
         })}
         color="danger"
@@ -94,7 +94,7 @@ export const ConfirmDeleteModal = ({ count, onCancel, onConfirm }: BulkActionMod
       <EuiCallOut
         title={i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.description', {
           defaultMessage:
-            'Are you sure you want to delete {count, plural, one {this token} other {these tokens}}? Any active {count, plural, one {token} other {tokens}} will be revoked, and new agents will no longer be able to enroll using {count, plural, one {it} other {them}}.',
+            'Are you sure you want to delete {count, plural, one {this token} other {these tokens}}? Any active {count, plural, one {token} other {tokens}} will be revoked, and you will no longer be able to use {count, plural, one {it} other {them}} to enroll new agents.',
           values: { count },
         })}
         color="danger"
