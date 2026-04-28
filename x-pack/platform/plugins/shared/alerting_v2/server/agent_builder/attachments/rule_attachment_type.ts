@@ -23,7 +23,10 @@ interface CreateRuleAttachmentTypeOptions {
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
 }
 
-const formatRuleAttachmentDescription = (attachmentId: string, data: RuleAttachmentData): string => {
+const formatRuleAttachmentDescription = (
+  attachmentId: string,
+  data: RuleAttachmentData
+): string => {
   const status = data.id ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
   const schedule = data.schedule?.every ? `every ${data.schedule.every}` : 'unknown';
 
