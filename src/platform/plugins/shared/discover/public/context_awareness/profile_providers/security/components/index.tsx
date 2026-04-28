@@ -41,3 +41,19 @@ export const EnhancedAlertFlyoutFooterLazy = withSuspense(
     }))
   )
 );
+
+export const EnhancedIOCOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_overview').then((module) => ({
+      default: module.EnhancedIOCOverview,
+    }))
+  )
+);
+
+export const EnhancedIOCFlyoutFooterLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_flyout_footer').then((module) => ({
+      default: module.EnhancedIOCFlyoutFooter,
+    }))
+  )
+);

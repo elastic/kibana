@@ -6,19 +6,24 @@
  */
 
 import React, { memo } from 'react';
-import { useIOCDetailsContext } from '../context';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { JsonTab as SharedJsonTab } from '../../../flyout/shared/components/json_tab';
 import { IndicatorEmptyPrompt } from '../components/empty_prompt';
 
 export const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
 
+export interface JsonTabProps {
+  /**
+   * The indicator document
+   */
+  indicator: Indicator;
+}
+
 /**
  * Displays all the properties and values of an {@link Indicator} in json view,
  * using the {@link EuiCodeBlock} from the @elastic/eui library.
  */
-export const JsonTab = memo(() => {
-  const { indicator } = useIOCDetailsContext();
-
+export const JsonTab = memo(({ indicator }: JsonTabProps) => {
   return Object.keys(indicator).length === 0 ? (
     <IndicatorEmptyPrompt />
   ) : (

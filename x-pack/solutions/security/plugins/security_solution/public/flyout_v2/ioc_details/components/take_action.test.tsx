@@ -8,21 +8,14 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TAKE_ACTION_BUTTON_TEST_ID, TakeAction } from './take_action';
-import { useIOCDetailsContext } from '../context';
 import { generateMockIndicator } from '../../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../context');
-
 describe('TakeAction', () => {
   it('should render an EuiContextMenuPanel', () => {
-    (useIOCDetailsContext as jest.Mock).mockReturnValue({
-      indicator: generateMockIndicator(),
-    });
-
     const { getByTestId, getAllByText } = render(
       <TestProviders>
-        <TakeAction />
+        <TakeAction indicator={generateMockIndicator()} />
       </TestProviders>
     );
 

@@ -9,14 +9,18 @@ import { EuiSpacer, EuiTab, EuiTabs, EuiText, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIOCDetailsContext } from './context';
 import { unwrapValue } from '../../threat_intelligence/modules/indicators/utils/unwrap_value';
+import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../common/threat_intelligence/types/indicator';
 import { DateFormatter } from '../../threat_intelligence/components/date_formatter';
 import type { RightPanelTabType, RightPanelPaths } from './tabs';
 import { IOC_DETAILS_TITLE_TEST_ID, IOC_DETAILS_SUBTITLE_TEST_ID } from './test_ids';
 
 export interface HeaderProps {
+  /**
+   * The indicator document
+   */
+  indicator: Indicator;
   /**
    * Id of the tab selected in the parent component to display its content
    */
@@ -34,56 +38,56 @@ export interface HeaderProps {
 /**
  * Header of the indicator details flyout
  */
-export const Header: FC<HeaderProps> = memo(({ selectedTabId, setSelectedTabId, tabs }) => {
-  const { indicator } = useIOCDetailsContext();
+export const Header: FC<HeaderProps> = memo(
+  ({ indicator, selectedTabId, setSelectedTabId, tabs }) => {
+    const onSelectedTabChanged = useCallback(
+      (id: RightPanelPaths) => setSelectedTabId(id),
+      [setSelectedTabId]
+    );
 
-  const onSelectedTabChanged = useCallback(
-    (id: RightPanelPaths) => setSelectedTabId(id),
-    [setSelectedTabId]
-  );
+    const renderTabs = useMemo(
+      () =>
+        tabs.map((tab, index) => (
+          <EuiTab
+            onClick={() => onSelectedTabChanged(tab.id)}
+            isSelected={tab.id === selectedTabId}
+            key={index}
+            data-test-subj={tab['data-test-subj']}
+          >
+            {tab.name}
+          </EuiTab>
+        )),
+      [onSelectedTabChanged, selectedTabId, tabs]
+    );
 
-  const renderTabs = useMemo(
-    () =>
-      tabs.map((tab, index) => (
-        <EuiTab
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          key={index}
-          data-test-subj={tab['data-test-subj']}
-        >
-          {tab.name}
-        </EuiTab>
-      )),
-    [onSelectedTabChanged, selectedTabId, tabs]
-  );
+    const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
 
-  const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
-
-  return (
-    <>
-      <EuiTitle>
-        <h2 data-test-subj={IOC_DETAILS_TITLE_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.iocDetails.panelTitle"
-            defaultMessage="Indicator details"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiText size={'xs'}>
-        <p data-test-subj={IOC_DETAILS_SUBTITLE_TEST_ID}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.iocDetails.panelSubTitle"
-            defaultMessage="First seen: "
-          />
-          <DateFormatter date={firstSeen} />
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiTabs size="l" expand>
-        {renderTabs}
-      </EuiTabs>
-    </>
-  );
-});
+    return (
+      <>
+        <EuiTitle>
+          <h2 data-test-subj={IOC_DETAILS_TITLE_TEST_ID}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.iocDetails.panelTitle"
+              defaultMessage="Indicator details"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiText size={'xs'}>
+          <p data-test-subj={IOC_DETAILS_SUBTITLE_TEST_ID}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.iocDetails.panelSubTitle"
+              defaultMessage="First seen: "
+            />
+            <DateFormatter date={firstSeen} />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiTabs size="l" expand>
+          {renderTabs}
+        </EuiTabs>
+      </>
+    );
+  }
+);
 
 Header.displayName = 'Header';

@@ -135,11 +135,23 @@ export interface SecuritySolutionAlertFlyoutFooterFeature {
   renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
+export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
+  id: 'security-solution-ioc-flyout-overview-tab';
+  render: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutFooterFeature {
+  id: 'security-solution-ioc-flyout-footer';
+  renderFooter: (props: DocViewRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
   | SecuritySolutionAlertFlyoutHeaderTitleFeature
-  | SecuritySolutionAlertFlyoutFooterFeature;
+  | SecuritySolutionAlertFlyoutFooterFeature
+  | SecuritySolutionIOCFlyoutOverviewTabFeature
+  | SecuritySolutionIOCFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 

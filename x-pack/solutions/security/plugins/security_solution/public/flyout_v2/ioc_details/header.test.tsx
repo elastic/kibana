@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Header } from './header';
-import { useIOCDetailsContext } from './context';
 import { generateMockIndicator } from '../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../common/mock';
 import { getTabsDisplayed } from './tabs';
@@ -20,22 +19,19 @@ import {
   IOC_DETAILS_JSON_TAB_TEST_ID,
 } from './test_ids';
 
-jest.mock('./context');
-
 const mockIndicator = generateMockIndicator();
-const tabs = getTabsDisplayed(jest.fn());
+const tabs = getTabsDisplayed({ indicator: mockIndicator, onViewAllFieldsInTable: jest.fn() });
 
 describe('<Header />', () => {
-  beforeEach(() => {
-    (useIOCDetailsContext as jest.Mock).mockReturnValue({
-      indicator: mockIndicator,
-    });
-  });
-
   it('should render title and subtitle', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <Header tabs={tabs} selectedTabId="overview" setSelectedTabId={jest.fn()} />
+        <Header
+          indicator={mockIndicator}
+          tabs={tabs}
+          selectedTabId="overview"
+          setSelectedTabId={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -46,7 +42,12 @@ describe('<Header />', () => {
   it('should render all tabs', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <Header tabs={tabs} selectedTabId="overview" setSelectedTabId={jest.fn()} />
+        <Header
+          indicator={mockIndicator}
+          tabs={tabs}
+          selectedTabId="overview"
+          setSelectedTabId={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -59,7 +60,12 @@ describe('<Header />', () => {
     const setSelectedTabId = jest.fn();
     const { getByTestId } = render(
       <TestProviders>
-        <Header tabs={tabs} selectedTabId="overview" setSelectedTabId={setSelectedTabId} />
+        <Header
+          indicator={mockIndicator}
+          tabs={tabs}
+          selectedTabId="overview"
+          setSelectedTabId={setSelectedTabId}
+        />
       </TestProviders>
     );
 

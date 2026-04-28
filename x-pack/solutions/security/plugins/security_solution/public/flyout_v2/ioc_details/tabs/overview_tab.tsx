@@ -22,7 +22,7 @@ import { unwrapValue } from '../../../threat_intelligence/modules/indicators/uti
 import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
 import { IndicatorBlock } from '../components/block';
 import { HighlightedValuesTable } from '../components/highlighted_values_table';
-import { useIOCDetailsContext } from '../context';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 
 export const INDICATORS_FLYOUT_OVERVIEW_TITLE = 'tiFlyoutOverviewTitle';
 export const INDICATORS_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
@@ -37,17 +37,19 @@ const highLevelFields = [
 
 export interface OverviewTabProps {
   /**
-   * Callback to navigate to the table tab
+   * The indicator document
    */
-  onViewAllFieldsInTable: () => void;
+  indicator: Indicator;
+  /**
+   * Callback to navigate to the table tab, if not provided, hide the button
+   */
+  onViewAllFieldsInTable?: () => void;
 }
 
 /**
  * Overview view displayed in the ioc details flyout
  */
-export const OverviewTab = memo(({ onViewAllFieldsInTable }: OverviewTabProps) => {
-  const { indicator } = useIOCDetailsContext();
-
+export const OverviewTab = memo(({ indicator, onViewAllFieldsInTable }: OverviewTabProps) => {
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
   const highLevelBlocks = useMemo(
@@ -105,12 +107,14 @@ export const OverviewTab = memo(({ onViewAllFieldsInTable }: OverviewTabProps) =
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onViewAllFieldsInTable}>
-            <FormattedMessage
-              id="xpack.securitySolution.threatIntelligence.indicator.flyoutOverviewTable.viewAllFieldsInTable"
-              defaultMessage="View all fields in table"
-            />
-          </EuiButtonEmpty>
+          {onViewAllFieldsInTable && (
+            <EuiButtonEmpty onClick={onViewAllFieldsInTable}>
+              <FormattedMessage
+                id="xpack.securitySolution.threatIntelligence.indicator.flyoutOverviewTable.viewAllFieldsInTable"
+                defaultMessage="View all fields in table"
+              />
+            </EuiButtonEmpty>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 

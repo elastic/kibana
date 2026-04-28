@@ -7,24 +7,16 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiLoadingSpinner,
-  EuiEmptyPrompt,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { FieldTypesProvider } from '../../threat_intelligence/containers/field_types_provider';
-import { useIndicatorById } from '../../cases/attachments/indicator/hooks/use_indicator_by_id';
-import { IOCDetailsContext } from './context';
+import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
 import { useTabs } from './hooks/use_tabs';
 import { getTabsDisplayed } from './tabs';
-import { IOC_DETAILS_LOADING_TEST_ID, IOC_DETAILS_ERROR_TEST_ID } from './test_ids';
 
 /**
  * Styles applied to the EuiFlyoutBody so the JSON tab's Monaco editor
@@ -42,16 +34,19 @@ export const iocFlyoutBodyCss = css({
 
 export interface IOCDetailsProps {
   /**
-   * Id of the indicator document
+   * The indicator document, as a Discover data table record
    */
-  id: string;
+  hit: DataTableRecord;
 }
 
 /**
  * IOC details system flyout content.
  */
-export const IOCDetails: FC<IOCDetailsProps> = memo(({ id }) => {
-  const { indicator, isLoading } = useIndicatorById(id);
+export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit }) => {
+  const indicator = useMemo<Indicator>(
+    () => ({ _id: hit.raw._id, fields: hit.flattened as Indicator['fields'] }),
+    [hit]
+  );
 
   const { selectedTabId, setSelectedTabId } = useTabs({});
 
@@ -59,58 +54,27 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ id }) => {
     setSelectedTabId('table');
   }, [setSelectedTabId]);
 
-  const tabs = useMemo(() => getTabsDisplayed(onViewAllFieldsInTable), [onViewAllFieldsInTable]);
-
-  if (isLoading) {
-    return (
-      <EuiFlyoutBody>
-        <EuiEmptyPrompt
-          icon={<EuiLoadingSpinner size="xl" />}
-          data-test-subj={IOC_DETAILS_LOADING_TEST_ID}
-        />
-      </EuiFlyoutBody>
-    );
-  }
-
-  if (!indicator) {
-    return (
-      <EuiFlyoutBody>
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2>
-              {i18n.translate('xpack.securitySolution.flyout.iocDetails.errorTitle', {
-                defaultMessage: 'Unable to display indicator details',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.securitySolution.flyout.iocDetails.errorBody', {
-                defaultMessage:
-                  'There was an error displaying the indicator details. Please try again later.',
-              })}
-            </p>
-          }
-          data-test-subj={IOC_DETAILS_ERROR_TEST_ID}
-        />
-      </EuiFlyoutBody>
-    );
-  }
+  const tabs = useMemo(
+    () => getTabsDisplayed({ indicator, onViewAllFieldsInTable }),
+    [indicator, onViewAllFieldsInTable]
+  );
 
   return (
     <FieldTypesProvider>
-      <IOCDetailsContext.Provider value={{ id, indicator }}>
-        <EuiFlyoutHeader>
-          <Header tabs={tabs} selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} />
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody css={iocFlyoutBodyCss}>
-          <Content tabs={tabs} selectedTabId={selectedTabId} />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <Footer />
-        </EuiFlyoutFooter>
-      </IOCDetailsContext.Provider>
+      <EuiFlyoutHeader>
+        <Header
+          indicator={indicator}
+          tabs={tabs}
+          selectedTabId={selectedTabId}
+          setSelectedTabId={setSelectedTabId}
+        />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody css={iocFlyoutBodyCss}>
+        <Content tabs={tabs} selectedTabId={selectedTabId} />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <Footer indicator={indicator} />
+      </EuiFlyoutFooter>
     </FieldTypesProvider>
   );
 });

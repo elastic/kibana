@@ -6,17 +6,23 @@
  */
 
 import React, { memo } from 'react';
-import { useIOCDetailsContext } from '../context';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { IndicatorEmptyPrompt } from '../components/empty_prompt';
 import { IndicatorFieldsTable } from '../components/fields_table';
 
 export const FLYOUT_TABLE_TEST_ID = 'tiFlyoutTable';
 
+export interface TableTabProps {
+  /**
+   * The indicator document
+   */
+  indicator: Indicator;
+}
+
 /**
  * Table view displayed in the document details expandable flyout right section
  */
-export const TableTab = memo(() => {
-  const { indicator } = useIOCDetailsContext();
+export const TableTab = memo(({ indicator }: TableTabProps) => {
   const items: string[] = Object.keys(indicator.fields);
 
   return items.length === 0 ? (

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -40,6 +41,15 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
   const history = useHistory();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
+  const hit = useMemo<DataTableRecord>(
+    () => ({
+      id: indicator._id as string,
+      raw: { _id: indicator._id as string, fields: indicator.fields },
+      flattened: indicator.fields as Record<string, unknown>,
+    }),
+    [indicator]
+  );
+
   const open = useCallback(() => {
     if (newFlyoutSystemEnabled) {
       overlays.openSystemFlyout(
@@ -47,7 +57,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
           services,
           store,
           history,
-          children: <IOCDetails id={indicator._id as string} />,
+          children: <IOCDetails hit={hit} />,
         }),
         {
           ...defaultFlyoutProperties,
@@ -71,6 +81,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
     services,
     store,
     history,
+    hit,
     indicator._id,
     defaultFlyoutProperties,
     openFlyout,

@@ -8,6 +8,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { JsonTab } from './tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
@@ -26,11 +27,24 @@ export interface RightPanelTabType {
   'data-test-subj': string;
 }
 
+export interface GetTabsDisplayedOptions {
+  /**
+   * The indicator document to render inside each tab
+   */
+  indicator: Indicator;
+  /**
+   * Callback to navigate to the table tab from the overview tab
+   */
+  onViewAllFieldsInTable?: () => void;
+}
+
 /**
  * Returns the tabs to display in the IOC details flyout.
- * Accepts a callback for the overview tab's "View all fields in table" button.
  */
-export const getTabsDisplayed = (onViewAllFieldsInTable: () => void): RightPanelTabType[] => [
+export const getTabsDisplayed = ({
+  indicator,
+  onViewAllFieldsInTable,
+}: GetTabsDisplayedOptions): RightPanelTabType[] => [
   {
     id: 'overview',
     'data-test-subj': IOC_DETAILS_OVERVIEW_TAB_TEST_ID,
@@ -40,7 +54,7 @@ export const getTabsDisplayed = (onViewAllFieldsInTable: () => void): RightPanel
         defaultMessage="Overview"
       />
     ),
-    content: <OverviewTab onViewAllFieldsInTable={onViewAllFieldsInTable} />,
+    content: <OverviewTab indicator={indicator} onViewAllFieldsInTable={onViewAllFieldsInTable} />,
   },
   {
     id: 'table',
@@ -51,7 +65,7 @@ export const getTabsDisplayed = (onViewAllFieldsInTable: () => void): RightPanel
         defaultMessage="Table"
       />
     ),
-    content: <TableTab />,
+    content: <TableTab indicator={indicator} />,
   },
   {
     id: 'json',
@@ -62,6 +76,6 @@ export const getTabsDisplayed = (onViewAllFieldsInTable: () => void): RightPanel
         defaultMessage="JSON"
       />
     ),
-    content: <JsonTab />,
+    content: <JsonTab indicator={indicator} />,
   },
 ];

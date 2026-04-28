@@ -9,12 +9,13 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BlockListFlyout } from '../../../threat_intelligence/modules/block_list/containers/flyout';
-import { useIOCDetailsContext } from '../context';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../threat_intelligence/modules/block_list/utils/can_add_to_block_list';
 import { AddToBlockListContextMenu } from '../../../threat_intelligence/modules/block_list/components/add_to_block_list';
 import { AddToNewCase } from '../../../cases/attachments/indicator/components/add_to_new_case';
 import { AddToExistingCase } from '../../../cases/attachments/indicator/components/add_to_existing_case';
 import { InvestigateInTimelineContextMenu } from '../../../threat_intelligence/modules/timeline/components/investigate_in_timeline';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
 export const INVESTIGATE_IN_TIMELINE_TEST_ID = 'tiIndicatorFlyoutInvestigateInTimelineContextMenu';
@@ -22,17 +23,23 @@ export const ADD_TO_EXISTING_CASE_TEST_ID = 'tiIndicatorFlyoutAddToExistingCaseC
 export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
 export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
 
+export interface TakeActionProps {
+  /**
+   * The indicator document
+   */
+  indicator: Indicator;
+}
+
 /**
  * Component rendered at the bottom of the indicators flyout
  */
-export const TakeAction = memo(() => {
-  const { indicator } = useIOCDetailsContext();
-
+export const TakeAction = memo(({ indicator }: TakeActionProps) => {
   const [blockListIndicatorValue, setBlockListIndicatorValue] = useState('');
   const [isPopoverOpen, setPopover] = useState(false);
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',
   });
+  const isSecurityApp = useIsInSecurityApp();
 
   const closePopover = useCallback(() => {
     setPopover(false);
@@ -40,12 +47,16 @@ export const TakeAction = memo(() => {
 
   const items = useMemo(
     () => [
-      <InvestigateInTimelineContextMenu
-        key={'investigateInTime'}
-        data={indicator}
-        onClick={closePopover}
-        data-test-subj={INVESTIGATE_IN_TIMELINE_TEST_ID}
-      />,
+      ...(isSecurityApp
+        ? [
+            <InvestigateInTimelineContextMenu
+              key={'investigateInTime'}
+              data={indicator}
+              onClick={closePopover}
+              data-test-subj={INVESTIGATE_IN_TIMELINE_TEST_ID}
+            />,
+          ]
+        : []),
       <AddToExistingCase
         key={'attachmentsExistingCase'}
         indicator={indicator}
@@ -66,7 +77,7 @@ export const TakeAction = memo(() => {
         setBlockListIndicatorValue={setBlockListIndicatorValue}
       />,
     ],
-    [closePopover, indicator]
+    [closePopover, indicator, isSecurityApp]
   );
 
   const button = useMemo(

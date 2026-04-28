@@ -16,5 +16,3 @@ export const IOC_DETAILS_FOOTER_TEST_ID = `${IOC_DETAILS_TEST_ID}Footer` as cons
 export const IOC_DETAILS_OVERVIEW_TAB_TEST_ID = `${IOC_DETAILS_TEST_ID}OverviewTab` as const;
 export const IOC_DETAILS_TABLE_TAB_TEST_ID = `${IOC_DETAILS_TEST_ID}TableTab` as const;
 export const IOC_DETAILS_JSON_TAB_TEST_ID = `${IOC_DETAILS_TEST_ID}JsonTab` as const;
-export const IOC_DETAILS_LOADING_TEST_ID = `${IOC_DETAILS_TEST_ID}Loading` as const;
-export const IOC_DETAILS_ERROR_TEST_ID = `${IOC_DETAILS_TEST_ID}Error` as const;

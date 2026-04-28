@@ -7,20 +7,28 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { TakeAction } from './components/take_action';
 import { IOC_DETAILS_FOOTER_TEST_ID } from './test_ids';
+
+export interface FooterProps {
+  /**
+   * The indicator document
+   */
+  indicator: Indicator;
+}
 
 /**
  * Footer content of the IOC details flyout containing the take action button.
  */
-export const Footer = memo(() => (
+export const Footer = memo(({ indicator }: FooterProps) => (
   <EuiFlexGroup
     justifyContent="flexEnd"
     alignItems="center"
     data-test-subj={IOC_DETAILS_FOOTER_TEST_ID}
   >
     <EuiFlexItem grow={false}>
-      <TakeAction />
+      <TakeAction indicator={indicator} />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

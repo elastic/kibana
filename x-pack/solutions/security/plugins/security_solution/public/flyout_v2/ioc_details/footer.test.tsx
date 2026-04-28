@@ -8,22 +8,15 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Footer } from './footer';
-import { useIOCDetailsContext } from './context';
 import { generateMockIndicator } from '../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../common/mock';
 import { IOC_DETAILS_FOOTER_TEST_ID } from './test_ids';
 
-jest.mock('./context');
-
 describe('<Footer />', () => {
   it('should render the footer with take action button', () => {
-    (useIOCDetailsContext as jest.Mock).mockReturnValue({
-      indicator: generateMockIndicator(),
-    });
-
     const { getByTestId, getAllByText } = render(
       <TestProviders>
-        <Footer />
+        <Footer indicator={generateMockIndicator()} />
       </TestProviders>
     );
 
