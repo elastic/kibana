@@ -37,14 +37,9 @@ import {
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
-import { parseError } from '../errors/parse_error';
+import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
+import { searchWithKeywordFallback } from '../errors/search_with_keyword_fallback';
 import type { SearchMode } from '../../../../common/queries';
-
-/**
- * Minimum raw ELSER score threshold for semantic search results.
- * See query_client.ts for rationale — same threshold applies here.
- */
-const SEMANTIC_MIN_SCORE = 10;
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
@@ -190,7 +185,10 @@ export class FeatureClient {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
       logger: Logger;
     },
-    private readonly inferenceAvailable: boolean = false
+    private readonly config: Pick<
+      SigEventsTuningConfig,
+      'feature_ttl_days' | 'semantic_min_score' | 'rrf_rank_constant'
+    > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {}
 
   async clean() {
@@ -205,23 +203,32 @@ export class FeatureClient {
     );
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
+    const skipped = operations.length - resolvedOperations.length;
 
-    return await this.clients.storageClient.bulk({
-      operations: resolvedOperations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(stream, operation.index.feature, this.inferenceAvailable);
-          return {
-            index: {
-              document,
-              _id: document[FEATURE_UUID],
-            },
-          };
-        }
+    if (resolvedOperations.length === 0) {
+      return { applied: 0, skipped };
+    }
 
-        return { delete: { _id: operation.delete.id } };
-      }),
-      throwOnFail: true,
-    });
+    await bulkWithInferenceFallback(this.clients.logger, ({ includeEmbedding }) =>
+      this.clients.storageClient.bulk({
+        operations: resolvedOperations.map((operation) => {
+          if ('index' in operation) {
+            const document = toStorage(stream, operation.index.feature, includeEmbedding);
+            return {
+              index: {
+                document,
+                _id: document[FEATURE_UUID],
+              },
+            };
+          }
+
+          return { delete: { _id: operation.delete.id } };
+        }),
+        throwOnFail: true,
+      })
+    );
+
+    return { applied: resolvedOperations.length, skipped };
   }
 
   async getFeatures(
@@ -323,36 +330,13 @@ export class FeatureClient {
       limit?: number;
     }
   ): Promise<{ hits: Feature[]; total: number }> {
-    const effectiveMode = this.resolveSearchMode(options?.searchMode);
+    const streamNames = Array.isArray(streams) ? streams : [streams];
 
-    try {
-      return await this.executeFindFeatures(effectiveMode, streams, query, options);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !options?.searchMode) {
-        const { message } = parseError(error);
-        this.clients.logger.warn(
-          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
-        );
-        return await this.executeFindFeatures('keyword', streams, query, options);
-      }
-      throw error;
-    }
-  }
-
-  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
-    if (searchMode) {
-      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
-        this.clients.logger.debug(
-          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
-        );
-        return 'keyword';
-      }
-      return searchMode;
-    }
-    return this.inferenceAvailable ? 'hybrid' : 'keyword';
+    return searchWithKeywordFallback(
+      this.clients.logger,
+      { searchMode: options?.searchMode, label: 'Feature', streamNames },
+      (mode) => this.executeFindFeatures(mode, streams, query, options)
+    );
   }
 
   private async executeFindFeatures(
@@ -412,12 +396,23 @@ export class FeatureClient {
       size: limit ?? SEARCH_SIZE_LIMIT,
       track_total_hits: true,
       retriever: {
-        standard: {
-          query: {
-            match: { [FEATURE_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
-          min_score: SEMANTIC_MIN_SCORE,
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [FEATURE_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
+          min_score: this.config.semantic_min_score,
         },
       },
     });
@@ -447,12 +442,22 @@ export class FeatureClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [FEATURE_SEARCH_EMBEDDING]: query },
-                },
-                // See SEMANTIC_MIN_SCORE for rationale.
-                min_score: SEMANTIC_MIN_SCORE,
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [FEATURE_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
+                min_score: this.config.semantic_min_score,
               },
             },
           ],
@@ -464,7 +469,7 @@ export class FeatureClient {
           rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
           // Lower than the ES default (60) to give more weight to top-ranked
           // results from each retriever, improving precision for small catalogs.
-          rank_constant: 20,
+          rank_constant: this.config.rrf_rank_constant,
         },
       },
     });
@@ -566,7 +571,7 @@ export class FeatureClient {
   }
 }
 
-function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean): StoredFeature {
+function toStorage(stream: string, feature: Feature, includeEmbedding: boolean): StoredFeature {
   const embeddingText = buildSearchEmbeddingText(feature, stream);
   return {
     [FEATURE_UUID]: feature.uuid,
@@ -587,7 +592,7 @@ function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean
     [FEATURE_EXCLUDED_AT]: feature.excluded_at,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
-    ...(inferenceAvailable && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
+    ...(includeEmbedding && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
   } as StoredFeature;
 }
 
