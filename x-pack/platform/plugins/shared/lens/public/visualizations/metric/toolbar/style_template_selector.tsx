@@ -7,14 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  euiFocusRing,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { MetricStyleTemplateId } from '@kbn/lens-common';
@@ -119,29 +112,14 @@ function StyleTemplateCard({
         box-shadow: none !important; // sass-lint:disable-line no-important
 
         &:focus {
-          transform: none !important; // sass-lint:disable-line no-important
-          ${euiFocusRing(euiThemeContext)};
+          transform: none;
         }
         ${isSelected
           ? `
-          border: 1px solid ${
-            euiTheme.colors.borderStrongPrimary
-          } !important; // sass-lint:disable-line no-important
-
-          &:not(:focus) {
-            box-shadow: none !important; // sass-lint:disable-line no-important
-          }
-
-          &:focus {
-            ${euiFocusRing(euiThemeContext)};
-          }
-
-          &:hover {
-            transform: none !important; // sass-lint:disable-line no-important
-          }
+          border: 1px solid ${euiTheme.colors.borderStrongPrimary};
           `
           : `
-          border: 1px solid ${euiTheme.border.color} !important; // sass-lint:disable-line no-important
+          border: 1px solid ${euiTheme.border.color};
           `}
       `}
     >
