@@ -21,6 +21,7 @@ import type { DashboardState } from '../types';
 import { stripUnmappedKeys } from '../scope_tooling';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { sanitize } from './sanitize';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 const mockedTransformDashboardIn = jest.mocked(transformDashboardIn);
 const mockedTransformDashboardOut = jest.mocked(transformDashboardOut);
@@ -72,11 +73,7 @@ describe('sanitize', () => {
       warnings: [],
     }));
 
-    const dashboardStateSchema = {
-      validate: jest.fn(() => baseDashboardState),
-    };
-
-    await sanitize(dashboardStateSchema, { ...baseDashboardState, title: 'My title' });
+    await sanitize(getDashboardStateSchema(false), { ...baseDashboardState, title: 'My title' });
 
     expect(mockedTransformDashboardIn).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'My title' })
