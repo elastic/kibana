@@ -45,6 +45,7 @@
             "lineNumber": 14,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "GaugeTypeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -94,6 +95,7 @@
             "lineNumber": 18,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "GaugeTypeProps",
             "trackAdoption": false,
             "isRequired": true
           }

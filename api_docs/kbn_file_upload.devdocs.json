@@ -179,6 +179,7 @@
                 "lineNumber": 170,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Dependencies",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -406,6 +407,7 @@
                 "lineNumber": 319,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "File",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -799,6 +801,7 @@
                 "lineNumber": 511,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1130,6 +1133,7 @@
                 "lineNumber": 992,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "MappingTypeMapping",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1197,6 +1201,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CoreStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1220,6 +1225,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FileUploadStartDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1434,6 +1440,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FileUploadManager",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1457,6 +1464,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1474,6 +1482,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ApplicationStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1491,6 +1500,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1508,6 +1518,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NotificationsStart",
             "trackAdoption": false,
             "isRequired": true
           },
