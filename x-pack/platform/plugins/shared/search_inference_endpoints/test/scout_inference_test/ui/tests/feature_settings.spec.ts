@@ -92,12 +92,15 @@ test.describe(
       });
     });
 
-    test('save button is disabled when AI is on but no global model is selected', async ({
+    test('save button is disabled when AI is on, feature-specific models off, and no global model is selected', async ({
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
 
-      // Fresh test stack persists defaultModelId === NO_DEFAULT_MODEL, so Save is already disabled.
+      // With feature-specific models on, no global default is valid (scenario 4). Turn FSM off so a
+      // global default is required; persisted stack has no global model selected.
+      await featureSettings.featureSpecificModelsSwitch.click();
+
       await expect(featureSettings.saveButton).toBeDisabled();
     });
 

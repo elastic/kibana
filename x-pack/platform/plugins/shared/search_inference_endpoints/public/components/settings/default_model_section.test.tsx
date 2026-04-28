@@ -117,9 +117,9 @@ describe('DefaultModelSection', () => {
     expect(setFeatureSpecificModels).toHaveBeenCalledWith(false);
   });
 
-  it('renders validation errors on the global model field when AI is on', () => {
+  it('renders validation errors on the global model field when AI is on and a global default is required', () => {
     const settings = createMockSettings({
-      state: { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: true },
+      state: { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: false },
     });
     const invalid: DefaultModelValidationResult = {
       errors: ['Select a default model to save changes.'],

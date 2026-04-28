@@ -16,8 +16,10 @@ export interface DefaultModelValidationResult {
   isValid: boolean;
 }
 
-// Validates the Default model section: when AI is on, requires a selected model that resolves to an
-// existing connector; always valid when AI is off.
+// Validates the Default model section: when AI is on and feature-specific models are off, a global
+// default connector is required. When feature-specific models are on, an empty global default is
+// allowed (recommendations-only / per-feature lists). Otherwise requires a selected model that
+// resolves to an existing connector. Always valid when AI is off.
 export const useDefaultModelValidation = (
   state: DefaultModelSettingsState
 ): DefaultModelValidationResult => {
@@ -32,7 +34,9 @@ export const useDefaultModelValidation = (
 
     const errors: string[] = [];
 
-    if (state.defaultModelId === NO_DEFAULT_MODEL) {
+    const requiresGlobalDefaultModel = !state.featureSpecificModels;
+
+    if (requiresGlobalDefaultModel && state.defaultModelId === NO_DEFAULT_MODEL) {
       errors.push(
         i18n.translate(
           'xpack.searchInferenceEndpoints.settings.defaultModel.error.selectDefaultModel',
@@ -41,7 +45,11 @@ export const useDefaultModelValidation = (
           }
         )
       );
-    } else if (!connectorExists && !connectorExistsLoading) {
+    } else if (
+      state.defaultModelId !== NO_DEFAULT_MODEL &&
+      !connectorExists &&
+      !connectorExistsLoading
+    ) {
       errors.push(
         i18n.translate(
           'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
@@ -57,5 +65,11 @@ export const useDefaultModelValidation = (
       errors,
       isValid: errors.length === 0,
     };
-  }, [state.enableAi, state.defaultModelId, connectorExists, connectorExistsLoading]);
+  }, [
+    state.enableAi,
+    state.featureSpecificModels,
+    state.defaultModelId,
+    connectorExists,
+    connectorExistsLoading,
+  ]);
 };

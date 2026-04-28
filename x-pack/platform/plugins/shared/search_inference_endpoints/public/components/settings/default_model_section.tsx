@@ -17,65 +17,21 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useConnectors } from '../../hooks/use_connectors';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
 import type { DefaultModelValidationResult } from '../../hooks/use_default_model_validation';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
+import {
+  getGlobalModelComboOptions,
+  getGlobalModelSelectedOptions,
+} from './default_model_section_combo';
 
 interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
   validation: DefaultModelValidationResult;
 }
-
-const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<string>[] => {
-  const preconfigured =
-    connectors
-      ?.filter((c) => c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
-
-  const custom =
-    connectors
-      ?.filter((c) => !c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
-
-  return [
-    {
-      label: i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.globalModel.preconfiguredGroup',
-        {
-          defaultMessage: 'Pre-configured',
-        }
-      ),
-      value: 'preconfigured',
-      options: preconfigured,
-    },
-    {
-      label: i18n.translate('xpack.searchInferenceEndpoints.settings.globalModel.customGroup', {
-        defaultMessage: 'Custom connectors',
-      }),
-      value: 'custom',
-      options: custom,
-    },
-  ];
-};
-
-const getSelectedOptions = (
-  value: string,
-  options: EuiComboBoxOptionOption<string>[]
-): EuiComboBoxOptionOption<string>[] => {
-  if (value === NO_DEFAULT_MODEL) return [];
-  const findInOptions = (
-    option: EuiComboBoxOptionOption<string>
-  ): EuiComboBoxOptionOption<string>[] => {
-    if (!option.options && option.value === value) return [option];
-    if (option.options) return option.options.flatMap(findInOptions);
-    return [];
-  };
-  return options.flatMap(findInOptions);
-};
 
 const ENABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.enabled', {
   defaultMessage: 'Enabled',
@@ -89,10 +45,13 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const usageTracker = useUsageTracker();
 
-  const options = useMemo(() => getOptions(connectors), [connectors]);
+  const options = useMemo(
+    () => getGlobalModelComboOptions(connectors, state.featureSpecificModels),
+    [connectors, state.featureSpecificModels]
+  );
   const selectedOptions = useMemo(
-    () => getSelectedOptions(state.defaultModelId, options),
-    [state.defaultModelId, options]
+    () => getGlobalModelSelectedOptions(state.defaultModelId, options, state.featureSpecificModels),
+    [state.defaultModelId, options, state.featureSpecificModels]
   );
 
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
@@ -191,6 +150,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, val
                 onChange={onChangeDefaultModel}
                 isLoading={connectorsLoading}
                 isInvalid={validation.errors.length > 0}
+                isClearable={state.featureSpecificModels}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

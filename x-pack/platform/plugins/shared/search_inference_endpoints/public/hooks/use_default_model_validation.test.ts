@@ -48,8 +48,8 @@ describe('useDefaultModelValidation', () => {
     expect(result.current.errors).toEqual([]);
   });
 
-  it('is invalid when AI is enabled but no default model is selected, regardless of feature-specific-models', () => {
-    const { result: withFsmOn } = renderHook(() =>
+  it('is valid when AI is enabled, feature-specific models on, and no global default (recommendations-only)', () => {
+    const { result } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: NO_DEFAULT_MODEL,
@@ -57,10 +57,12 @@ describe('useDefaultModelValidation', () => {
       })
     );
 
-    expect(withFsmOn.current.isValid).toBe(false);
-    expect(withFsmOn.current.errors[0]).toMatch(/Select a default model/);
+    expect(result.current.isValid).toBe(true);
+    expect(result.current.errors).toEqual([]);
+  });
 
-    const { result: withFsmOff } = renderHook(() =>
+  it('is invalid when AI is enabled, feature-specific models off, and no global default is selected', () => {
+    const { result } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: NO_DEFAULT_MODEL,
@@ -68,8 +70,8 @@ describe('useDefaultModelValidation', () => {
       })
     );
 
-    expect(withFsmOff.current.isValid).toBe(false);
-    expect(withFsmOff.current.errors[0]).toMatch(/Select a default model/);
+    expect(result.current.isValid).toBe(false);
+    expect(result.current.errors[0]).toMatch(/Select a default model/);
   });
 
   it('reports connector-not-exist when the selected model is missing', () => {
