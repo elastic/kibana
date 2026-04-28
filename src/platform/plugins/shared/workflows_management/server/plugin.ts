@@ -11,7 +11,6 @@ import type {
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
 import type {
-  AnalyticsServiceStart,
   CoreSetup,
   CoreStart,
   Logger,
