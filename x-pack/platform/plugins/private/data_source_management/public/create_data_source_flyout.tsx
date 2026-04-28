@@ -11,6 +11,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -104,7 +106,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       ownFocus
       onClose={onClose}
       aria-labelledby="createDataSourceFlyoutTitle"
-      size="l"
+      size="m"
       data-test-subj="createDataSourceFlyout"
     >
       <EuiFlyoutHeader hasBorder>
@@ -166,19 +168,29 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={onClose}>
-          {createDataSourceFlyoutStrings.cancelButton()}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          type="button"
-          data-test-subj="createDataSourceFlyoutSubmit"
-          onClick={() => void handleSave()}
-          isLoading={isSaving}
-          disabled={isSaving}
-        >
-          {createDataSourceFlyoutStrings.saveButton()}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="createDataSourceFlyoutClose"
+              onClick={onClose}
+            >
+              {createDataSourceFlyoutStrings.closeButton()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              type="button"
+              data-test-subj="createDataSourceFlyoutSubmit"
+              onClick={() => void handleSave()}
+              isLoading={isSaving}
+              disabled={isSaving}
+            >
+              {createDataSourceFlyoutStrings.saveButton()}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

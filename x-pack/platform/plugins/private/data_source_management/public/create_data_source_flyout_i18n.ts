@@ -39,9 +39,9 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Description',
     }),
 
-  cancelButton: () =>
-    i18n.translate('dataSourceManagement.createFlyout.cancelButton', {
-      defaultMessage: 'Cancel',
+  closeButton: () =>
+    i18n.translate('dataSourceManagement.createFlyout.closeButton', {
+      defaultMessage: 'Close',
     }),
 
   saveButton: () =>
