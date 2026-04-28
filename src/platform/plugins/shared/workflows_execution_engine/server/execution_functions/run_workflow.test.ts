@@ -14,6 +14,7 @@ import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { runWorkflow } from './run_workflow';
 import { setupDependencies } from './setup_dependencies';
+import { workflowsExecutionEngineMock } from '../mocks';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
@@ -23,6 +24,7 @@ const mockSetupDependencies = setupDependencies as jest.MockedFunction<typeof se
 const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
   typeof workflowExecutionLoop
 >;
+const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('runWorkflow', () => {
   const workflowRunId = 'run-1';
@@ -35,7 +37,6 @@ describe('runWorkflow', () => {
   let mockGetWorkflowExecutionStatus: jest.Mock;
   let mockGetWorkflowExecution: jest.Mock;
   let mockGetWorkflowExecutionFromState: jest.Mock;
-  let mockEmitEvent: jest.Mock;
   let mockRuntimeStart: jest.Mock;
 
   const nonTerminalExecutionForFreshFetch = {
@@ -51,7 +52,6 @@ describe('runWorkflow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dependencies = mockContextDependencies();
-    mockEmitEvent = jest.fn().mockResolvedValue(undefined);
     mockGetWorkflowExecutionById = jest.fn();
     mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
     mockGetWorkflowExecutionStatus = jest.fn();
@@ -115,15 +115,15 @@ describe('runWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
       })
     ).rejects.toThrow('Step failed');
 
     expect(mockGetWorkflowExecutionFromState).toHaveBeenCalled();
     expect(mockGetWorkflowExecutionStatus).toHaveBeenCalled();
     expect(mockGetWorkflowExecution).toHaveBeenCalled();
-    expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-    expect(mockEmitEvent).toHaveBeenCalledWith({
+    expect(mockWorkflowExecutionEngine.triggerEvents.emitEvent).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowExecutionEngine.triggerEvents.emitEvent).toHaveBeenCalledWith({
       triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
       payload: expect.objectContaining({
         workflow: expect.objectContaining({
@@ -176,12 +176,13 @@ describe('runWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
       })
     ).rejects.toThrow('Runtime error');
 
-    expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-    const emittedPayload = mockEmitEvent.mock.calls[0][0].payload;
+    expect(mockWorkflowExecutionEngine.triggerEvents.emitEvent).toHaveBeenCalledTimes(1);
+    const emittedPayload =
+      mockWorkflowExecutionEngine.triggerEvents.emitEvent.mock.calls[0][0].payload;
     expect(emittedPayload.error.message).toBe('Runtime error');
     expect(emittedPayload.error).not.toHaveProperty('stepId');
     expect(emittedPayload.error).not.toHaveProperty('stepName');
@@ -199,9 +200,7 @@ describe('runWorkflow', () => {
       config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
       fakeRequest,
       dependencies,
-      workflowsExecutionEngine: {
-        triggerEvents: { isEnabled: true, emitEvent: mockEmitEvent },
-      } as any,
+      workflowsExecutionEngine: mockWorkflowExecutionEngine,
     });
 
     expect(mockGetWorkflowExecutionById).not.toHaveBeenCalled();
@@ -226,11 +225,11 @@ describe('runWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
       })
     ).rejects.toThrow('Step failed');
 
-    expect(mockEmitEvent).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionEngine.triggerEvents.emitEvent).not.toHaveBeenCalled();
   });
 
   it('does not emit when execution is a test run', async () => {
@@ -259,11 +258,11 @@ describe('runWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
       })
     ).rejects.toThrow('Step failed');
 
-    expect(mockEmitEvent).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionEngine.triggerEvents.emitEvent).not.toHaveBeenCalled();
   });
 
   it('returns without starting runtime when execution is already CANCELLED (e.g. cancel won race)', async () => {
@@ -287,6 +286,7 @@ describe('runWorkflow', () => {
       config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
       fakeRequest,
       dependencies,
+      workflowsExecutionEngine: mockWorkflowExecutionEngine,
       meteringService: { reportWorkflowExecution } as any,
     });
 
