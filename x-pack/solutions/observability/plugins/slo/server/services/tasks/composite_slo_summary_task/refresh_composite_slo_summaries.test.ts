@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
-import {
-  COOLDOWN_MS,
-  refreshCompositeSloSummaries,
-} from './refresh_composite_slo_summaries';
+import { COOLDOWN_MS, refreshCompositeSloSummaries } from './refresh_composite_slo_summaries';
 
 describe('refreshCompositeSloSummaries', () => {
   const logger = {
@@ -58,8 +55,7 @@ describe('refreshCompositeSloSummaries', () => {
     const taskManager = {
       get: jest.fn().mockResolvedValue({
         state: {
-          lastCompositeListVisitRunSoonAt:
-            Date.now() - COOLDOWN_MS + 60_000,
+          lastCompositeListVisitRunSoonAt: Date.now() - COOLDOWN_MS + 60_000,
         },
       }),
     };
