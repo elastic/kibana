@@ -204,6 +204,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   const [selectedTokens, setSelectedTokens] = useState<EnrollmentAPIKey[]>([]);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
   const [bulkActionPending, setBulkActionPending] = useState<BulkAction | null>(null);
+  const [isBulkActionInProgress, setIsBulkActionInProgress] = useState(false);
 
   const hasNonDefaultFilters =
     search !== '' || selectedPolicyIds.length > 0 || activeFilter !== 'active';
@@ -249,6 +250,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
 
   const selectedCount = selectionMode === 'query' ? total : selectedTokens.length;
   const showSelectionInfo =
+    isBulkActionInProgress ||
     (selectionMode === 'manual' && selectedTokens.length > 0) ||
     (selectionMode === 'query' && total > 0);
   const showSelectEverything =
@@ -269,6 +271,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   const onBulkActionConfirm = async () => {
     const action = bulkActionPending!;
     setBulkActionPending(null);
+    setIsBulkActionInProgress(true);
 
     // forceDelete=false (revoke): invalidate API key, mark token inactive.
     // forceDelete=true (delete): invalidate API key, remove token document.
@@ -315,6 +318,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       notifications.toasts.addError(err as Error, { title: 'Error' });
     }
 
+    setIsBulkActionInProgress(false);
     refresh();
   };
 
@@ -501,7 +505,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 plural: true,
               })}
               button={{
-                props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
+                props: {
+                  iconType: 'arrowDown',
+                  iconSide: 'right',
+                  color: 'primary',
+                  isLoading: isBulkActionInProgress,
+                },
                 children: i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionsButton', {
                   defaultMessage: '{count, plural, one {# token} other {# tokens}} selected',
                   values: { count: selectedCount },
