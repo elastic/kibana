@@ -34,6 +34,11 @@ if (Number.isNaN(concurrency)) {
 
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
+// Each scoutConfig now fans out to one Buildkite step per (arch, domain) mode,
+// so a single entry can multiply into many jobs. Cap per-entry runs to keep the
+// total job budget under control and to give users a clear, fast failure when
+// they request too many repetitions for a single config.
+const MAX_SCOUT_COUNT_PER_CONFIG = 50;
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
@@ -91,6 +96,15 @@ function getTestSuitesFromJson(json: string) {
       const scoutConfig = item.scoutConfig;
       if (typeof scoutConfig !== 'string') {
         fail(`testSuite.scoutConfig must be a string`);
+      }
+
+      if (count > MAX_SCOUT_COUNT_PER_CONFIG) {
+        fail(
+          `testSuite.count for scoutConfig '${scoutConfig}' is ${count}; ` +
+            `max allowed is ${MAX_SCOUT_COUNT_PER_CONFIG}. ` +
+            `Each Scout request fans out to one job per (arch x domain) mode, ` +
+            `so high counts multiply quickly. Lower the count or split the run.`
+        );
       }
 
       testSuites.push({
@@ -159,6 +173,32 @@ if (hasScoutSuites) {
       automatic: [{ exit_status: '-1', limit: 3 }],
     },
   });
+
+  // Reads scout_playwright_configs.json (uploaded by the discovery step) and emits one
+  // Buildkite step per (scoutConfig x arch x domain) so each mode runs in its own worker
+  // with `parallelism: count`. Keeping it as a separate step makes the planning logic
+  // independently retryable and visible in the BK UI.
+  const scoutFlakyRequests = testSuites.filter(
+    (t): t is { type: 'scoutConfig'; scoutConfig: string; count: number } =>
+      t.type === 'scoutConfig' && t.count > 0
+  );
+
+  steps.push({
+    command: 'ts-node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts',
+    label: 'Plan Scout flaky steps',
+    agents: expandAgentQueue('n2-4-spot'),
+    key: 'scout_flaky_planner',
+    depends_on: ['build', 'scout_playwright_configs'],
+    timeout_in_minutes: 10,
+    env: {
+      SCOUT_FLAKY_REQUESTS: JSON.stringify(scoutFlakyRequests),
+      SCOUT_FLAKY_CONCURRENCY: String(concurrency),
+      SCOUT_FLAKY_CONCURRENCY_GROUP: process.env.UUID ?? '',
+    },
+    retry: {
+      automatic: [{ exit_status: '-1', limit: 3 }],
+    },
+  });
 }
 
 let suiteIndex = 0;
@@ -190,27 +230,8 @@ for (const testSuite of testSuites) {
   }
 
   if (testSuite.type === 'scoutConfig') {
-    const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-
-    steps.push({
-      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
-      env: {
-        SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_REPORTER_ENABLED: 'true',
-      },
-      key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
-      label: `${testSuite.scoutConfig}`,
-      parallelism: testSuite.count,
-      concurrency,
-      concurrency_group: process.env.UUID,
-      concurrency_method: 'eager',
-      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-      depends_on: hasScoutSuites ? ['build', 'scout_playwright_configs'] : 'build',
-      timeout_in_minutes: 60,
-      retry: {
-        automatic: [{ exit_status: '-1', limit: 3 }],
-      },
-    });
+    // Scout entries are expanded into per-(arch, domain) BK steps by the
+    // 'scout_flaky_planner' step above, after discovery has produced the manifest.
     continue;
   }
 
