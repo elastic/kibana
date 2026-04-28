@@ -27,11 +27,11 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
 });
 
 describe('RuleInlineContent', () => {
-  it('renders the rule name', () => {
-    const { getByText } = render(
+  it('does not render the rule name in the body', () => {
+    const { queryByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
-    expect(getByText('My Rule')).toBeDefined();
+    expect(queryByText('My Rule')).toBeNull();
   });
 
   it('renders the kind badge', () => {

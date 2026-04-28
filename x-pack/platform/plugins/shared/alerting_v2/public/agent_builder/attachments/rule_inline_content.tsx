@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import type { RuleAttachment } from './rule_attachment_definition';
@@ -24,11 +24,6 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h4>{data.metadata.name}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color={statusColor}>{status}</EuiBadge>
             </EuiFlexItem>
@@ -72,21 +67,26 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
 };
 
 const getStatusInfo = (isProposed: boolean, isEnabled: boolean) => {
-  if (isProposed) return {
-    label: i18n.translate('xpack.alertingV2.ruleAttachment.statusProposed', {
-      defaultMessage: 'proposed',
-    }), color: 'default'
-  };
+  if (isProposed)
+    return {
+      label: i18n.translate('xpack.alertingV2.ruleAttachment.statusProposed', {
+        defaultMessage: 'proposed',
+      }),
+      color: 'default',
+    };
 
-  if (isEnabled) return {
-    label: i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
-      defaultMessage: 'enabled',
-    }), color: 'success'
-  };
+  if (isEnabled)
+    return {
+      label: i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
+        defaultMessage: 'enabled',
+      }),
+      color: 'success',
+    };
 
   return {
     label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
       defaultMessage: 'disabled',
-    }), color: 'warning'
+    }),
+    color: 'warning',
   };
 };
