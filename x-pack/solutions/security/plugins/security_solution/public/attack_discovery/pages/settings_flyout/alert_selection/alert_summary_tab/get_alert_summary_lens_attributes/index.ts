@@ -69,7 +69,6 @@ export const getAlertSummaryLensAttributes = ({
         },
         {
           columnId: 'count',
-          summaryRow: 'sum',
         },
       ],
       layerId: LAYER_ID,
