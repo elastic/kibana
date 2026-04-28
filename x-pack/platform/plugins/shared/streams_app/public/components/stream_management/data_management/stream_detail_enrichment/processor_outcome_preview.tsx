@@ -9,10 +9,12 @@ import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -101,6 +103,7 @@ export const ProcessorOutcomePreview = () => {
       <EuiFlexItem grow={false}>
         <PreviewDocumentsGroupBy />
       </EuiFlexItem>
+      <FetchMoreMatchingSamples />
       <EuiSpacer size="m" />
       {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
@@ -277,6 +280,70 @@ const PreviewDocumentsGroupBy = () => {
           </EuiToolTip>
         </EuiFilterGroup>
       </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+// TODO: Change back to 0.2 before opening PR — raised to 0.4 for manual testing
+const FETCH_MORE_THRESHOLD = 0.4;
+
+const FetchMoreMatchingSamples = () => {
+  const { fetchMoreMatchingSamples } = useStreamEnrichmentEvents();
+
+  const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
+
+  const conditionMatchRate = useSimulatorSelector((state) => {
+    const conditionId = state.context.selectedConditionId;
+    if (!conditionId) return undefined;
+    const metrics = state.context.simulation?.processors_metrics?.[conditionId];
+    if (!metrics) return undefined;
+    return 1 - (metrics.skipped_rate ?? 0);
+  });
+
+  const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>
+    getActiveDataSourceRef(snapshot.context.dataSourcesRefs)
+  );
+
+  const isFetchingMore = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.isFetchingMore : false
+  );
+
+  const fetchMoreError = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.fetchMoreError : undefined
+  );
+
+  const shouldShow =
+    selectedConditionId &&
+    conditionMatchRate !== undefined &&
+    conditionMatchRate < FETCH_MORE_THRESHOLD;
+
+  if (!shouldShow) return null;
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          onClick={fetchMoreMatchingSamples}
+          isLoading={isFetchingMore}
+          data-test-subj="streamsAppFetchMoreMatchingSamplesButton"
+        >
+          {i18n.translate('xpack.streams.enrichment.fetchMore.buttonLabel', {
+            defaultMessage: 'Load more matching samples',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      {fetchMoreError && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={fetchMoreError}>
+            <EuiIcon
+              type="warning"
+              color="danger"
+              data-test-subj="streamsAppFetchMoreMatchingSamplesError"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

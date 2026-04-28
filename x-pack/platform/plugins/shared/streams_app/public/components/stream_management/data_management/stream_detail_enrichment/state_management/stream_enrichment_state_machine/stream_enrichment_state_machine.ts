@@ -49,6 +49,7 @@ import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
 } from '../data_source_state_machine';
+import { findConditionById } from '../data_source_state_machine/fetch_more_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
@@ -296,6 +297,20 @@ export const streamEnrichmentMachine = setup({
     sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
 
+    fetchMoreSamples: ({ context }) => {
+      const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
+      if (!selectedConditionId) return;
+
+      const steps = context.simulatorRef.getSnapshot().context.steps;
+      const condition = findConditionById(steps, selectedConditionId);
+      if (!condition) return;
+
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      if (!activeDataSourceRef) return;
+
+      activeDataSourceRef.send({ type: 'dataSource.fetchMore', condition });
+    },
+
     filterByCondition: ({ context }, params: { conditionId: string }) => {
       context.interactiveModeRef?.send({
         type: 'step.filterByCondition',
@@ -494,6 +509,9 @@ export const streamEnrichmentMachine = setup({
               on: {
                 'simulation.refresh': {
                   actions: [{ type: 'refreshDataSources' }],
+                },
+                'simulation.fetchMore': {
+                  actions: [{ type: 'fetchMoreSamples' }],
                 },
               },
               states: {

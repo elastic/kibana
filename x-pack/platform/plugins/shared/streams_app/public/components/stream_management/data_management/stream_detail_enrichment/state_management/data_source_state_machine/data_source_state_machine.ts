@@ -22,6 +22,7 @@ import {
   createDataCollectionFailureNotifier,
   createDataCollectorActor,
 } from './data_collector_actor';
+import { createFetchMoreDocumentsActor } from './fetch_more_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
@@ -37,6 +38,7 @@ export const dataSourceMachine = setup({
   },
   actors: {
     collectData: getPlaceholderFor(createDataCollectorActor),
+    fetchMoreDocuments: getPlaceholderFor(createFetchMoreDocumentsActor),
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
@@ -71,7 +73,21 @@ export const dataSourceMachine = setup({
         dataSource: { ...params.dataSource, id: context.dataSource.id },
       })
     ),
-    storeData: assign((_, params: { data: SampleDocument[] }) => ({ data: params.data })),
+    storeData: assign((_, params: { data: SampleDocument[] }) => ({
+      data: params.data,
+      isFetchingMore: false,
+      fetchMoreError: undefined,
+    })),
+    setFetchingMore: assign({ isFetchingMore: true, fetchMoreError: undefined }),
+    storeFetchMoreData: assign((_, params: { data: SampleDocument[] }) => ({
+      data: params.data,
+      isFetchingMore: false,
+      fetchMoreError: undefined,
+    })),
+    storeFetchMoreError: assign((_, params: { error: string }) => ({
+      isFetchingMore: false,
+      fetchMoreError: params.error,
+    })),
     toggleDataSourceActivity: assign(({ context }) => ({
       dataSource: { ...context.dataSource, enabled: !context.dataSource.enabled },
     })),
@@ -112,6 +128,8 @@ export const dataSourceMachine = setup({
     streamType: input.streamType,
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type, input.isDraft),
     isDraft: input.isDraft,
+    isFetchingMore: false,
+    fetchMoreError: undefined,
   }),
   initial: 'determining',
   states: {
@@ -131,6 +149,10 @@ export const dataSourceMachine = setup({
           ],
         },
         'dataSource.refresh': { target: '.loadingData', reenter: true },
+        'dataSource.fetchMore': {
+          target: '.fetchingMore',
+          actions: [{ type: 'setFetchingMore' }],
+        },
         'dataSource.change': [
           // For custom samples with substantive changes, debounce before collecting
           {
@@ -203,6 +225,42 @@ export const dataSourceMachine = setup({
             },
           },
         },
+        fetchingMore: {
+          invoke: {
+            id: 'fetchMoreDocumentsActor',
+            src: 'fetchMoreDocuments',
+            input: ({ context, event }) => ({
+              streamName: context.streamName,
+              condition: (event as { type: 'dataSource.fetchMore'; condition: unknown }).condition,
+              existingDocuments: context.data,
+            }),
+            onSnapshot: {
+              guard: {
+                type: 'isValidData',
+                params: ({ event }) => ({ data: event.snapshot.context }),
+              },
+              target: 'idle',
+              actions: [
+                {
+                  type: 'storeFetchMoreData',
+                  params: ({ event }) => ({ data: event.snapshot.context ?? [] }),
+                },
+                { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
+              ],
+            },
+            onError: {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'storeFetchMoreError',
+                  params: ({ event }) => ({
+                    error: (event.error as Error)?.message ?? 'Unknown error',
+                  }),
+                },
+              ],
+            },
+          },
+        },
       },
     },
     disabled: {
@@ -249,6 +307,7 @@ export const createDataSourceMachineImplementations = ({
       streamsRepositoryClient,
       uiSettings,
     }),
+    fetchMoreDocuments: createFetchMoreDocumentsActor({ data }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
