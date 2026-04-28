@@ -7290,6 +7290,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inbox-common@link:x-pack/platform/packages/shared/kbn-inbox-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inbox-plugin@link:x-pack/platform/plugins/shared/inbox":
+  version "0.0.0"
+  uid ""
+
 "@kbn/index-adapter@link:x-pack/solutions/security/packages/index-adapter":
   version "0.0.0"
   uid ""
