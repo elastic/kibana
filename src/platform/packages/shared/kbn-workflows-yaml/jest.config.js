@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { InvalidYamlSchemaError } from './invalid_yaml_schema';
-export { InvalidYamlSyntaxError } from './invalid_yaml_syntax';
-export { WorkflowValidationError, isWorkflowValidationError } from './workflow_validation_error';
-export { WorkflowConflictError, isWorkflowConflictError } from './workflow_conflict_error';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-workflows-yaml'],
+};

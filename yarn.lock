@@ -9851,6 +9851,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-yaml@link:src/platform/packages/shared/kbn-workflows-yaml":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
   version "0.0.0"
   uid ""

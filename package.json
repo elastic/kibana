@@ -1252,6 +1252,7 @@
     "@kbn/workflows-extensions-example": "link:examples/workflows_extensions_example",
     "@kbn/workflows-management-plugin": "link:src/platform/plugins/shared/workflows_management",
     "@kbn/workflows-ui": "link:src/platform/packages/shared/kbn-workflows-ui",
+    "@kbn/workflows-yaml": "link:src/platform/packages/shared/kbn-workflows-yaml",
     "@kbn/workplace-ai-app": "link:x-pack/solutions/workplaceai/plugins/workplace_ai_app",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/yaml-loader": "link:src/platform/packages/shared/kbn-yaml-loader",

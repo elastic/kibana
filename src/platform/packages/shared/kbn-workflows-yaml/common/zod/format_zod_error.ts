@@ -9,6 +9,7 @@
 
 import type { Document } from 'yaml';
 import type { z } from '@kbn/zod/v4';
+import type { ConnectorParamsSchemaResolver } from './enrich_error_message';
 import { enrichErrorMessage } from './enrich_error_message';
 import type { FormattedZodError, MockZodError } from '../errors/invalid_yaml_schema';
 
@@ -17,19 +18,22 @@ interface FormatZodErrorResult {
   formattedError: FormattedZodError;
 }
 
+export interface FormatZodErrorOptions {
+  /** Optional workflow schema for enhanced error messages */
+  schema?: z.ZodType;
+  /** Optional parsed YAML document for step type lookups */
+  yamlDocument?: Document;
+  /** Optional resolver for connector-specific params schemas (injected from the host plugin) */
+  connectorParamsSchemaResolver?: ConnectorParamsSchemaResolver;
+}
+
 /**
  * Formats Zod validation errors into user-friendly messages.
  * Uses schema-aware enrichment to provide helpful hints about expected values.
- *
- * @param error - The Zod error or mock Zod error to format
- * @param schema - Optional workflow schema for enhanced error messages
- * @param yamlDocument - Optional parsed YAML document for step type lookups
- * @returns Formatted error result with enriched messages
  */
 export function formatZodError(
   error: z.ZodError | MockZodError,
-  schema?: z.ZodType,
-  yamlDocument?: Document
+  options: FormatZodErrorOptions = {}
 ): FormatZodErrorResult {
   // If it's not a Zod error structure, return as-is
   if (!error?.issues || !Array.isArray(error.issues)) {
@@ -37,7 +41,8 @@ export function formatZodError(
     return { message, formattedError: error };
   }
 
-  const context = { schema, yamlDocument };
+  const { schema, yamlDocument, connectorParamsSchemaResolver } = options;
+  const context = { schema, yamlDocument, connectorParamsSchemaResolver };
 
   const formattedIssues = error.issues.map((issue) => {
     // Build a message that includes 'received' when available, so enrichment

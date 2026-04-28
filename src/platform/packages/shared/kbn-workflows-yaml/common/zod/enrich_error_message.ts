@@ -12,11 +12,18 @@ import YAML from 'yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getDetailedTypeDescription } from './zod_type_description';
-import { getAllConnectors } from '../../schema';
+
+export type ConnectorParamsSchemaResolver = (stepType: string) => z.ZodType | null;
 
 export interface ErrorContext {
   schema?: z.ZodType;
   yamlDocument?: Document;
+  /**
+   * Optional resolver that returns the params schema for a given connector/step
+   * type. When omitted, connector-specific error enrichment is skipped and
+   * enrichment falls back to the workflow schema.
+   */
+  connectorParamsSchemaResolver?: ConnectorParamsSchemaResolver;
 }
 
 export interface EnrichmentResult {
@@ -41,20 +48,28 @@ export function enrichErrorMessage(
   errorCode: string,
   context: ErrorContext
 ): EnrichmentResult {
-  const { schema, yamlDocument } = context;
+  const { schema, yamlDocument, connectorParamsSchemaResolver } = context;
   const fieldName = path.length > 0 ? String(path[path.length - 1]) : 'field';
   const stepInfo = findStepInfoFromPath(path, yamlDocument);
 
   const cacheKey = `${path.join('.')}|${errorCode}|${originalMessage}|${
     stepInfo?.stepType ?? 'unknown'
-  }|${schema ? 'schema' : 'noschema'}`;
+  }|${schema ? 'schema' : 'noschema'}|${connectorParamsSchemaResolver ? 'conn' : 'noconn'}`;
 
   const cached = enrichmentCache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const result = computeEnrichment(path, originalMessage, errorCode, fieldName, schema, stepInfo);
+  const result = computeEnrichment(
+    path,
+    originalMessage,
+    errorCode,
+    fieldName,
+    schema,
+    stepInfo,
+    connectorParamsSchemaResolver
+  );
   enrichmentCache.set(cacheKey, result);
   return result;
 }
@@ -65,7 +80,8 @@ function computeEnrichment(
   errorCode: string,
   fieldName: string,
   schema: z.ZodType | undefined,
-  stepInfo: StepInfo | null
+  stepInfo: StepInfo | null,
+  connectorParamsSchemaResolver: ConnectorParamsSchemaResolver | undefined
 ): EnrichmentResult {
   const domainEnriched = tryDomainSpecificEnrichment(path, errorCode, originalMessage);
   if (domainEnriched) {
@@ -73,7 +89,13 @@ function computeEnrichment(
   }
 
   if (path.length > 0) {
-    const schemaEnriched = trySchemaAwareEnrichment(path, fieldName, schema, stepInfo);
+    const schemaEnriched = trySchemaAwareEnrichment(
+      path,
+      fieldName,
+      schema,
+      stepInfo,
+      connectorParamsSchemaResolver
+    );
     if (schemaEnriched) {
       return { message: schemaEnriched, enriched: true };
     }
@@ -93,9 +115,13 @@ function trySchemaAwareEnrichment(
   path: PropertyKey[],
   fieldName: string,
   schema: z.ZodType | undefined,
-  stepInfo: StepInfo | null
+  stepInfo: StepInfo | null,
+  connectorParamsSchemaResolver: ConnectorParamsSchemaResolver | undefined
 ): string | null {
-  const connectorEnriched = stepInfo ? tryConnectorSchemaEnrichment(fieldName, stepInfo) : null;
+  const connectorEnriched =
+    stepInfo && connectorParamsSchemaResolver
+      ? tryConnectorSchemaEnrichment(fieldName, stepInfo, connectorParamsSchemaResolver)
+      : null;
   if (connectorEnriched) {
     return connectorEnriched;
   }
@@ -107,10 +133,14 @@ function trySchemaAwareEnrichment(
   return null;
 }
 
-function tryConnectorSchemaEnrichment(fieldName: string, stepInfo: StepInfo): string | null {
+function tryConnectorSchemaEnrichment(
+  fieldName: string,
+  stepInfo: StepInfo,
+  connectorParamsSchemaResolver: ConnectorParamsSchemaResolver
+): string | null {
   const { stepType, pathWithinWith } = stepInfo;
 
-  const paramsSchema = getConnectorParamsSchema(stepType);
+  const paramsSchema = connectorParamsSchemaResolver(stepType);
   if (!paramsSchema) {
     return null;
   }
@@ -252,14 +282,7 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
   }
 }
 
-function getConnectorParamsSchema(stepType: string): z.ZodType | null {
-  return getAllConnectors().find((connector) => connector.type === stepType)?.paramsSchema ?? null;
-}
-
-function analyzeUnionSchema(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unionSchema: z.ZodUnion<any>
-): string[] {
+function analyzeUnionSchema(unionSchema: z.ZodUnion<any>): string[] {
   return unionSchema.def.options.map((option: z.ZodType) => analyzeUnionOption(option));
 }
 
@@ -359,7 +382,6 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
   const optionDescriptions = analyzeUnionSchema(unionSchema);
   if (optionDescriptions.length === 0) {
@@ -370,7 +392,6 @@ function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<an
   return `${fieldName} must be one of:\n${optionsList}`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
   const elementSchema = unwrapSchema(arraySchema.element);
 

@@ -11,9 +11,6 @@ import { Document, isMap, isScalar } from 'yaml';
 import type { YAMLMap } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 
-// TODO: Remove this eslint-disable once we have a better way to handle any types
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 const YAML_STRINGIFY_OPTIONS = {
   indent: 2,
   lineWidth: -1,
