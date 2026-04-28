@@ -6,6 +6,13 @@ paths:
   /api/security_ai_assistant/security_ai_prompts/_find:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/security_ai_prompts/_find?connector_id=my-connector-id' \
+             --header "Authorization: $API_KEY"
       x-internal: true
       x-labels: [ess, serverless]
       operationId: FindSecurityAIPrompts
@@ -16,19 +23,21 @@ paths:
       parameters:
         - name: connector_id
           in: query
-          description: Connector id used for prompt lookup
+          description: Connector id used for prompt lookup. When provided, connector-specific prompt overrides are applied.
           required: false
           schema:
             type: string
+          example: "my-connector-id"
         - name: prompt_group_id
           in: query
-          description: The unique identifier for the prompt group
+          description: The unique identifier for the prompt group to retrieve prompts from.
           required: true
           schema:
             type: string
+          example: "aiAssistant"
         - name: prompt_ids
           in: query
-          description: Comma-separated list of prompt IDs to retrieve
+          description: List of prompt IDs to retrieve within the specified prompt group.
           required: true
           style: form
           explode: true
@@ -36,6 +45,7 @@ paths:
             type: array
             items:
               type: string
+          example: ["systemPrompt", "welcomeMessage"]
       responses:
         '200':
           description: Indicates a successful call.
@@ -48,8 +58,17 @@ paths:
                     $ref: './common_attributes.schema.yaml#/components/schemas/PromptItemArray'
                 required:
                   - prompts
+              examples:
+                FindSecurityAIPromptsResponse200Example:
+                  summary: A successful response containing the requested Security AI prompts.
+                  value:
+                    prompts:
+                      - promptId: "systemPrompt"
+                        prompt: "You are a helpful security analyst assistant. Answer questions about security events, alerts, and investigations."
+                      - promptId: "welcomeMessage"
+                        prompt: "Welcome! I can help you investigate security alerts and threats. What would you like to explore?"
         '400':
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -61,3 +80,10 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                FindSecurityAIPromptsResponse400Example:
+                  summary: A bad request response when required parameters are missing.
+                  value:
+                    status_code: 400
+                    error: Bad Request
+                    message: "prompt_group_id is required."

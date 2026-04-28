@@ -172,11 +172,10 @@ export interface ServiceMapExitSpan extends ServiceMapService {
 export type ServiceMapSpan = ServiceMapExitSpan & {
   destinationService?: ServiceMapService;
 };
-interface BaseNodeData {
+/** Satisfies React Flow's `Record<string, unknown>` node data constraint. */
+interface BaseNodeData extends Record<string, unknown> {
   id: string;
   label: string;
-  /** Allows `Node<ServiceMapNodeData>` to satisfy React Flow's `Record<string, unknown>` node data constraint. */
-  [key: string]: unknown;
 }
 
 export interface ServiceNodeData extends BaseNodeData {

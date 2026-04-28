@@ -9,11 +9,10 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useCallback, useRef, useMemo } from 'react';
 import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { ReviewActionsWidget } from './review_actions_widget';
@@ -203,7 +202,6 @@ export const useCommentToEsql = ({
   const generateESQL = useCallback(
     async (
       nlInstruction: string,
-      sources: string[] | undefined,
       isSurgical: boolean,
       currentQuery: string
     ): Promise<GenerateResult | null> => {
@@ -213,8 +211,8 @@ export const useCommentToEsql = ({
           {
             body: JSON.stringify({
               nlInstruction,
-              sources,
-              ...(isSurgical ? { currentQuery } : {}),
+              currentQuery,
+              ...(isSurgical ? { isSurgical: true } : {}),
             }),
           }
         );
@@ -259,14 +257,12 @@ export const useCommentToEsql = ({
       .trim();
 
     const isSurgical = nonCommentContent.length > 0;
-    const sourcePattern = getIndexPatternFromESQLQuery(fullText);
-    const sources = sourcePattern ? sourcePattern.split(',').map((s) => s.trim()) : undefined;
 
     const queryForRoute = isSurgical
       ? markCommentInQuery(fullText, targetComment.lineNumber)
       : fullText;
 
-    const result = await generateESQL(nlInstruction, sources, isSurgical, queryForRoute);
+    const result = await generateESQL(nlInstruction, isSurgical, queryForRoute);
     if (!result) return;
 
     if (!isModelStillValid(editorModel.current, targetComment.lineNumber)) return;

@@ -91,6 +91,7 @@
                 "lineNumber": 19,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -181,7 +182,15 @@
             "tags": [],
             "label": "objectTransformError",
             "description": [
-              "\nError returned when a {@link SavedObjectsExportTransform | export transform} threw an error"
+              "\nError returned when a ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-server.SavedObjectsExportTransform",
+                "text": "export transform"
+              },
+              " threw an error"
             ],
             "signature": [
               "(objects: ",
@@ -227,6 +236,7 @@
                 "lineNumber": 46,
                 "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -240,7 +250,15 @@
             "tags": [],
             "label": "invalidTransformError",
             "description": [
-              "\nError returned when a {@link SavedObjectsExportTransform | export transform} performed an invalid operation\nduring the transform, such as removing objects from the export, or changing an object's type or id."
+              "\nError returned when a ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-server.SavedObjectsExportTransform",
+                "text": "export transform"
+              },
+              " performed an invalid operation\nduring the transform, such as removing objects from the export, or changing an object's type or id."
             ],
             "signature": [
               "(objectKeys: string[]) => ",

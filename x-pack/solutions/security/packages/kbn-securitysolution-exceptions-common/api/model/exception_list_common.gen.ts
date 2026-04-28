@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
@@ -23,8 +23,8 @@ import { ExceptionListItemEntryArray } from './exception_list_item_entry.gen';
 /**
  * Exception list's identifier.
  */
+export const ExceptionListId = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type ExceptionListId = z.infer<typeof ExceptionListId>;
-export const ExceptionListId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
   * The exception list's human-readable string identifier.
@@ -39,43 +39,47 @@ For endpoint artifacts, use one of the following values:
 * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
 
   */
+export const ExceptionListHumanId = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString)
+);
 export type ExceptionListHumanId = z.infer<typeof ExceptionListHumanId>;
-export const ExceptionListHumanId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * The type of exception list to be created. Different list types may denote where they can be utilized.
  */
+export const ExceptionListType = lazySchema(() =>
+  z.enum([
+    'detection',
+    'rule_default',
+    'endpoint',
+    'endpoint_trusted_apps',
+    'endpoint_trusted_devices',
+    'endpoint_events',
+    'endpoint_host_isolation_exceptions',
+    'endpoint_blocklists',
+  ])
+);
 export type ExceptionListType = z.infer<typeof ExceptionListType>;
-export const ExceptionListType = z.enum([
-  'detection',
-  'rule_default',
-  'endpoint',
-  'endpoint_trusted_apps',
-  'endpoint_trusted_devices',
-  'endpoint_events',
-  'endpoint_host_isolation_exceptions',
-  'endpoint_blocklists',
-]);
 export type ExceptionListTypeEnum = typeof ExceptionListType.enum;
 export const ExceptionListTypeEnum = ExceptionListType.enum;
 
 /**
  * The name of the exception list.
  */
+export const ExceptionListName = lazySchema(() => z.string());
 export type ExceptionListName = z.infer<typeof ExceptionListName>;
-export const ExceptionListName = z.string();
 
 /**
  * Describes the exception list.
  */
+export const ExceptionListDescription = lazySchema(() => z.string());
 export type ExceptionListDescription = z.infer<typeof ExceptionListDescription>;
-export const ExceptionListDescription = z.string();
 
 /**
  * Placeholder for metadata about the list container.
  */
+export const ExceptionListMeta = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ExceptionListMeta = z.infer<typeof ExceptionListMeta>;
-export const ExceptionListMeta = z.object({}).catchall(z.unknown());
 
 /**
   * Determines whether the exception container is available in all Kibana spaces or just the space
@@ -87,114 +91,124 @@ in which it is created, where:
 For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
 
   */
+export const ExceptionNamespaceType = lazySchema(() => z.enum(['agnostic', 'single']));
 export type ExceptionNamespaceType = z.infer<typeof ExceptionNamespaceType>;
-export const ExceptionNamespaceType = z.enum(['agnostic', 'single']);
 export type ExceptionNamespaceTypeEnum = typeof ExceptionNamespaceType.enum;
 export const ExceptionNamespaceTypeEnum = ExceptionNamespaceType.enum;
 
 /**
  * String array containing words and phrases to help categorize exception containers.
  */
+export const ExceptionListTags = lazySchema(() => z.array(z.string()));
 export type ExceptionListTags = z.infer<typeof ExceptionListTags>;
-export const ExceptionListTags = z.array(z.string());
 
 /**
  * Use this field to specify the operating system.
  */
+export const ExceptionListOsType = lazySchema(() => z.enum(['linux', 'macos', 'windows']));
 export type ExceptionListOsType = z.infer<typeof ExceptionListOsType>;
-export const ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
 export type ExceptionListOsTypeEnum = typeof ExceptionListOsType.enum;
 export const ExceptionListOsTypeEnum = ExceptionListOsType.enum;
 
 /**
  * Use this field to specify the operating system. Only enter one value.
  */
+export const ExceptionListOsTypeArray = lazySchema(() => z.array(ExceptionListOsType));
 export type ExceptionListOsTypeArray = z.infer<typeof ExceptionListOsTypeArray>;
-export const ExceptionListOsTypeArray = z.array(ExceptionListOsType);
 
 /**
  * The document version, automatically increasd on updates.
  */
+export const ExceptionListVersion = lazySchema(() => z.number().int().min(1));
 export type ExceptionListVersion = z.infer<typeof ExceptionListVersion>;
-export const ExceptionListVersion = z.number().int().min(1);
 
+export const ExceptionList = lazySchema(() =>
+  z.object({
+    id: ExceptionListId,
+    list_id: ExceptionListHumanId,
+    type: ExceptionListType,
+    name: ExceptionListName,
+    description: ExceptionListDescription,
+    immutable: z.boolean(),
+    namespace_type: ExceptionNamespaceType,
+    os_types: ExceptionListOsTypeArray.optional(),
+    tags: ExceptionListTags.optional(),
+    meta: ExceptionListMeta.optional(),
+    version: ExceptionListVersion,
+    /**
+     * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+     */
+    _version: z.string().optional(),
+    /**
+     * Field used in search to ensure all containers are sorted and returned correctly.
+     */
+    tie_breaker_id: z.string(),
+    /**
+     * Autogenerated date of object creation.
+     */
+    created_at: z.string().datetime(),
+    /**
+     * Autogenerated value - user that created object.
+     */
+    created_by: z.string(),
+    /**
+     * Autogenerated date of last object update.
+     */
+    updated_at: z.string().datetime(),
+    /**
+     * Autogenerated value - user that last updated object.
+     */
+    updated_by: z.string(),
+  })
+);
 export type ExceptionList = z.infer<typeof ExceptionList>;
-export const ExceptionList = z.object({
-  id: ExceptionListId,
-  list_id: ExceptionListHumanId,
-  type: ExceptionListType,
-  name: ExceptionListName,
-  description: ExceptionListDescription,
-  immutable: z.boolean(),
-  namespace_type: ExceptionNamespaceType,
-  os_types: ExceptionListOsTypeArray.optional(),
-  tags: ExceptionListTags.optional(),
-  meta: ExceptionListMeta.optional(),
-  version: ExceptionListVersion,
-  /**
-   * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
-   */
-  _version: z.string().optional(),
-  /**
-   * Field used in search to ensure all containers are sorted and returned correctly.
-   */
-  tie_breaker_id: z.string(),
-  /**
-   * Autogenerated date of object creation.
-   */
-  created_at: z.string().datetime(),
-  /**
-   * Autogenerated value - user that created object.
-   */
-  created_by: z.string(),
-  /**
-   * Autogenerated date of last object update.
-   */
-  updated_at: z.string().datetime(),
-  /**
-   * Autogenerated value - user that last updated object.
-   */
-  updated_by: z.string(),
-});
 
 /**
  * Exception's identifier.
  */
+export const ExceptionListItemId = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString)
+);
 export type ExceptionListItemId = z.infer<typeof ExceptionListItemId>;
-export const ExceptionListItemId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * Human readable string identifier, e.g. `trusted-linux-processes`
  */
+export const ExceptionListItemHumanId = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString)
+);
 export type ExceptionListItemHumanId = z.infer<typeof ExceptionListItemHumanId>;
-export const ExceptionListItemHumanId = z.string().min(1).superRefine(isNonEmptyString);
 
+export const ExceptionListItemType = lazySchema(() => z.literal('simple'));
 export type ExceptionListItemType = z.infer<typeof ExceptionListItemType>;
-export const ExceptionListItemType = z.literal('simple');
 
 /**
  * Exception list name.
  */
+export const ExceptionListItemName = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString)
+);
 export type ExceptionListItemName = z.infer<typeof ExceptionListItemName>;
-export const ExceptionListItemName = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * Describes the exception list.
  */
+export const ExceptionListItemDescription = lazySchema(() => z.string());
 export type ExceptionListItemDescription = z.infer<typeof ExceptionListItemDescription>;
-export const ExceptionListItemDescription = z.string();
 
+export const ExceptionListItemMeta = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ExceptionListItemMeta = z.infer<typeof ExceptionListItemMeta>;
-export const ExceptionListItemMeta = z.object({}).catchall(z.unknown());
 
 /**
  * The exception item’s expiration date, in ISO format. This field is only available for regular exception items, not endpoint exceptions.
  */
+export const ExceptionListItemExpireTime = lazySchema(() => z.string().datetime());
 export type ExceptionListItemExpireTime = z.infer<typeof ExceptionListItemExpireTime>;
-export const ExceptionListItemExpireTime = z.string().datetime();
 
+export const ExceptionListItemTags = lazySchema(() =>
+  z.array(z.string().min(1).superRefine(isNonEmptyString))
+);
 export type ExceptionListItemTags = z.infer<typeof ExceptionListItemTags>;
-export const ExceptionListItemTags = z.array(z.string().min(1).superRefine(isNonEmptyString));
 
 /**
   * Tags for categorization. Special tags for scope control:
@@ -202,250 +216,270 @@ export const ExceptionListItemTags = z.array(z.string().min(1).superRefine(isNon
 * `"policy:<policy_id>"` - Private artifact (applies to specific Elastic Defend policy only, where `<policy_id>` is the Elastic Defend integration policy ID)
 
   */
+export const EndpointArtifactTags = lazySchema(() => z.array(z.string()).default([]));
 export type EndpointArtifactTags = z.infer<typeof EndpointArtifactTags>;
-export const EndpointArtifactTags = z.array(z.string()).default([]);
 
 /**
  * Operating system types for trusted devices (Windows and macOS only - Linux not supported)
  */
+export const EndpointTrustedDeviceOsTypes = lazySchema(() =>
+  z.array(z.enum(['windows', 'macos'])).min(1)
+);
 export type EndpointTrustedDeviceOsTypes = z.infer<typeof EndpointTrustedDeviceOsTypes>;
-export const EndpointTrustedDeviceOsTypes = z.array(z.enum(['windows', 'macos'])).min(1);
 
+export const TrustedDeviceCommonFieldsEntry = lazySchema(() =>
+  z.object({
+    /**
+     * Device field to match against (available on all OS)
+     */
+    field: z.enum([
+      'device.serial_number',
+      'device.type',
+      'host.name',
+      'device.vendor.name',
+      'device.vendor.id',
+      'device.product.id',
+      'device.product.name',
+    ]),
+    /**
+     * Entry match type
+     */
+    type: z.enum(['match', 'wildcard', 'match_any']),
+    value: z.union([z.string(), z.array(z.string()).min(1)]),
+    /**
+     * Must be the value "included"
+     */
+    operator: z.literal('included'),
+  })
+);
 export type TrustedDeviceCommonFieldsEntry = z.infer<typeof TrustedDeviceCommonFieldsEntry>;
-export const TrustedDeviceCommonFieldsEntry = z.object({
-  /**
-   * Device field to match against (available on all OS)
-   */
-  field: z.enum([
-    'device.serial_number',
-    'device.type',
-    'host.name',
-    'device.vendor.name',
-    'device.vendor.id',
-    'device.product.id',
-    'device.product.name',
-  ]),
-  /**
-   * Entry match type
-   */
-  type: z.enum(['match', 'wildcard', 'match_any']),
-  value: z.union([z.string(), z.array(z.string()).min(1)]),
-  /**
-   * Must be the value "included"
-   */
-  operator: z.literal('included'),
-});
 
+export const TrustedDeviceUsernameEntry = lazySchema(() =>
+  z.object({
+    /**
+     * Username field (Windows-only, requires os_types to be exclusively Windows)
+     */
+    field: z.literal('user.name'),
+    /**
+     * Entry match type
+     */
+    type: z.enum(['match', 'wildcard', 'match_any']),
+    value: z.union([z.string(), z.array(z.string()).min(1)]),
+    /**
+     * Must be the value "included"
+     */
+    operator: z.literal('included'),
+  })
+);
 export type TrustedDeviceUsernameEntry = z.infer<typeof TrustedDeviceUsernameEntry>;
-export const TrustedDeviceUsernameEntry = z.object({
-  /**
-   * Username field (Windows-only, requires os_types to be exclusively Windows)
-   */
-  field: z.literal('user.name'),
-  /**
-   * Entry match type
-   */
-  type: z.enum(['match', 'wildcard', 'match_any']),
-  value: z.union([z.string(), z.array(z.string()).min(1)]),
-  /**
-   * Must be the value "included"
-   */
-  operator: z.literal('included'),
-});
 
+export const BlocklistHashOrPathEntry = lazySchema(() =>
+  z.object({
+    /**
+     * File hash or path field
+     */
+    field: z.enum([
+      'file.hash.md5',
+      'file.hash.sha1',
+      'file.hash.sha256',
+      'file.path',
+      'file.path.caseless',
+    ]),
+    /**
+     * Must be match_any for blocklists
+     */
+    type: z.literal('match_any'),
+    /**
+     * Array of hash values or file paths
+     */
+    value: z.array(z.string()).min(1),
+    /**
+     * Must be the value "included"
+     */
+    operator: z.literal('included'),
+  })
+);
 export type BlocklistHashOrPathEntry = z.infer<typeof BlocklistHashOrPathEntry>;
-export const BlocklistHashOrPathEntry = z.object({
-  /**
-   * File hash or path field
-   */
-  field: z.enum([
-    'file.hash.md5',
-    'file.hash.sha1',
-    'file.hash.sha256',
-    'file.path',
-    'file.path.caseless',
-  ]),
-  /**
-   * Must be match_any for blocklists
-   */
-  type: z.literal('match_any'),
-  /**
-   * Array of hash values or file paths
-   */
-  value: z.array(z.string()).min(1),
-  /**
-   * Must be the value "included"
-   */
-  operator: z.literal('included'),
-});
 
+export const BlocklistWindowsCodeSignatureEntry = lazySchema(() =>
+  z.object({
+    /**
+     * Windows code signature field
+     */
+    field: z.literal('file.Ext.code_signature'),
+    /**
+     * Must be nested for Windows code signature
+     */
+    type: z.literal('nested'),
+    /**
+     * Nested subject_name entries
+     */
+    entries: z
+      .array(
+        z.object({
+          /**
+           * Certificate subject name
+           */
+          field: z.literal('subject_name'),
+          /**
+           * Match type for subject name
+           */
+          type: z.enum(['match', 'match_any']),
+          value: z.union([z.string(), z.array(z.string()).min(1)]),
+          /**
+           * Must be the value "included"
+           */
+          operator: z.literal('included'),
+        })
+      )
+      .min(1),
+  })
+);
 export type BlocklistWindowsCodeSignatureEntry = z.infer<typeof BlocklistWindowsCodeSignatureEntry>;
-export const BlocklistWindowsCodeSignatureEntry = z.object({
-  /**
-   * Windows code signature field
-   */
-  field: z.literal('file.Ext.code_signature'),
-  /**
-   * Must be nested for Windows code signature
-   */
-  type: z.literal('nested'),
-  /**
-   * Nested subject_name entries
-   */
-  entries: z
-    .array(
-      z.object({
-        /**
-         * Certificate subject name
-         */
-        field: z.literal('subject_name'),
-        /**
-         * Match type for subject name
-         */
-        type: z.enum(['match', 'match_any']),
-        value: z.union([z.string(), z.array(z.string()).min(1)]),
-        /**
-         * Must be the value "included"
-         */
-        operator: z.literal('included'),
-      })
-    )
-    .min(1),
-});
 
+export const TrustedAppHashEntry = lazySchema(() =>
+  z.object({
+    /**
+     * Process hash field
+     */
+    field: z.enum(['process.hash.md5', 'process.hash.sha1', 'process.hash.sha256']),
+    /**
+     * Hash entries only support match type
+     */
+    type: z.literal('match'),
+    /**
+     * Hash value (MD5, SHA1, or SHA256)
+     */
+    value: z.string(),
+    operator: z.literal('included'),
+  })
+);
 export type TrustedAppHashEntry = z.infer<typeof TrustedAppHashEntry>;
-export const TrustedAppHashEntry = z.object({
-  /**
-   * Process hash field
-   */
-  field: z.enum(['process.hash.md5', 'process.hash.sha1', 'process.hash.sha256']),
-  /**
-   * Hash entries only support match type
-   */
-  type: z.literal('match'),
-  /**
-   * Hash value (MD5, SHA1, or SHA256)
-   */
-  value: z.string(),
-  operator: z.literal('included'),
-});
 
+export const TrustedAppPathEntry = lazySchema(() =>
+  z.object({
+    /**
+     * Process executable path field
+     */
+    field: z.literal('process.executable.caseless'),
+    /**
+     * Path supports both match and wildcard types
+     */
+    type: z.enum(['match', 'wildcard']),
+    /**
+     * Executable path
+     */
+    value: z.string(),
+    operator: z.literal('included'),
+  })
+);
 export type TrustedAppPathEntry = z.infer<typeof TrustedAppPathEntry>;
-export const TrustedAppPathEntry = z.object({
-  /**
-   * Process executable path field
-   */
-  field: z.literal('process.executable.caseless'),
-  /**
-   * Path supports both match and wildcard types
-   */
-  type: z.enum(['match', 'wildcard']),
-  /**
-   * Executable path
-   */
-  value: z.string(),
-  operator: z.literal('included'),
-});
 
+export const TrustedAppWindowsCodeSignatureEntry = lazySchema(() =>
+  z.object({
+    /**
+     * Windows code signature field
+     */
+    field: z.literal('process.Ext.code_signature'),
+    type: z.literal('nested'),
+    /**
+     * Must include exactly 2 entries - one for subject_name and one for trusted
+     */
+    entries: z
+      .array(
+        z.union([
+          z.object({
+            field: z.literal('subject_name'),
+            type: z.literal('match'),
+            /**
+             * Certificate subject name
+             */
+            value: z.string(),
+            operator: z.literal('included'),
+          }),
+          z.object({
+            field: z.literal('trusted'),
+            type: z.literal('match'),
+            /**
+             * Must be the string 'true'
+             */
+            value: z.literal('true'),
+            operator: z.literal('included'),
+          }),
+        ])
+      )
+      .min(2)
+      .max(2),
+  })
+);
 export type TrustedAppWindowsCodeSignatureEntry = z.infer<
   typeof TrustedAppWindowsCodeSignatureEntry
 >;
-export const TrustedAppWindowsCodeSignatureEntry = z.object({
-  /**
-   * Windows code signature field
-   */
-  field: z.literal('process.Ext.code_signature'),
-  type: z.literal('nested'),
-  /**
-   * Must include exactly 2 entries - one for subject_name and one for trusted
-   */
-  entries: z
-    .array(
-      z.union([
-        z.object({
-          field: z.literal('subject_name'),
-          type: z.literal('match'),
-          /**
-           * Certificate subject name
-           */
-          value: z.string(),
-          operator: z.literal('included'),
-        }),
-        z.object({
-          field: z.literal('trusted'),
-          type: z.literal('match'),
-          /**
-           * Must be the string 'true'
-           */
-          value: z.literal('true'),
-          operator: z.literal('included'),
-        }),
-      ])
-    )
-    .min(2)
-    .max(2),
-});
 
+export const TrustedAppMacCodeSignatureEntry = lazySchema(() =>
+  z.object({
+    /**
+     * macOS code signature field
+     */
+    field: z.literal('process.code_signature'),
+    type: z.literal('nested'),
+    /**
+     * Must include exactly 2 entries - one for subject_name and one for trusted
+     */
+    entries: z
+      .array(
+        z.union([
+          z.object({
+            field: z.literal('subject_name'),
+            type: z.literal('match'),
+            /**
+             * Certificate subject name
+             */
+            value: z.string(),
+            operator: z.literal('included'),
+          }),
+          z.object({
+            field: z.literal('trusted'),
+            type: z.literal('match'),
+            /**
+             * Must be the string 'true'
+             */
+            value: z.literal('true'),
+            operator: z.literal('included'),
+          }),
+        ])
+      )
+      .min(2)
+      .max(2),
+  })
+);
 export type TrustedAppMacCodeSignatureEntry = z.infer<typeof TrustedAppMacCodeSignatureEntry>;
-export const TrustedAppMacCodeSignatureEntry = z.object({
-  /**
-   * macOS code signature field
-   */
-  field: z.literal('process.code_signature'),
-  type: z.literal('nested'),
-  /**
-   * Must include exactly 2 entries - one for subject_name and one for trusted
-   */
-  entries: z
-    .array(
-      z.union([
-        z.object({
-          field: z.literal('subject_name'),
-          type: z.literal('match'),
-          /**
-           * Certificate subject name
-           */
-          value: z.string(),
-          operator: z.literal('included'),
-        }),
-        z.object({
-          field: z.literal('trusted'),
-          type: z.literal('match'),
-          /**
-           * Must be the string 'true'
-           */
-          value: z.literal('true'),
-          operator: z.literal('included'),
-        }),
-      ])
-    )
-    .min(2)
-    .max(2),
-});
 
+export const ExceptionListItemOsType = lazySchema(() => z.enum(['linux', 'macos', 'windows']));
 export type ExceptionListItemOsType = z.infer<typeof ExceptionListItemOsType>;
-export const ExceptionListItemOsType = z.enum(['linux', 'macos', 'windows']);
 export type ExceptionListItemOsTypeEnum = typeof ExceptionListItemOsType.enum;
 export const ExceptionListItemOsTypeEnum = ExceptionListItemOsType.enum;
 
+export const ExceptionListItemOsTypeArray = lazySchema(() => z.array(ExceptionListOsType));
 export type ExceptionListItemOsTypeArray = z.infer<typeof ExceptionListItemOsTypeArray>;
-export const ExceptionListItemOsTypeArray = z.array(ExceptionListOsType);
 
+export const ExceptionListItemComment = lazySchema(() =>
+  z.object({
+    id: NonEmptyString,
+    comment: NonEmptyString,
+    /**
+     * Autogenerated date of object creation.
+     */
+    created_at: z.string().datetime(),
+    created_by: NonEmptyString,
+    /**
+     * Autogenerated date of last object update.
+     */
+    updated_at: z.string().datetime().optional(),
+    updated_by: NonEmptyString.optional(),
+  })
+);
 export type ExceptionListItemComment = z.infer<typeof ExceptionListItemComment>;
-export const ExceptionListItemComment = z.object({
-  id: NonEmptyString,
-  comment: NonEmptyString,
-  /**
-   * Autogenerated date of object creation.
-   */
-  created_at: z.string().datetime(),
-  created_by: NonEmptyString,
-  /**
-   * Autogenerated date of last object update.
-   */
-  updated_at: z.string().datetime().optional(),
-  updated_by: NonEmptyString.optional(),
-});
 
 /**
   * Array of comment fields:
@@ -453,230 +487,246 @@ export const ExceptionListItemComment = z.object({
 - comment (string): Comments about the exception item.
 
   */
+export const ExceptionListItemCommentArray = lazySchema(() => z.array(ExceptionListItemComment));
 export type ExceptionListItemCommentArray = z.infer<typeof ExceptionListItemCommentArray>;
-export const ExceptionListItemCommentArray = z.array(ExceptionListItemComment);
 
 /**
  * Elastic Endpoint exception list item properties.
  */
-export type EndpointListProperties = z.infer<typeof EndpointListProperties>;
-export const EndpointListProperties = z.object({
-  list_id: z.literal('endpoint_list'),
-  /**
+export const EndpointListProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_list'),
+    /**
       * Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
 
 **Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
 
       */
-  entries: ExceptionListItemEntryArray.optional(),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: EndpointArtifactTags.optional(),
-});
+    entries: ExceptionListItemEntryArray.optional(),
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
+export type EndpointListProperties = z.infer<typeof EndpointListProperties>;
 
 /**
  * Trusted applications list item properties (Windows).
  */
+export const TrustedAppsWindowsProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_trusted_apps'),
+    /**
+     * Must be Windows only
+     */
+    os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
+    /**
+     * Process hash, executable path, or code signature entries
+     */
+    entries: z
+      .array(
+        z.union([TrustedAppHashEntry, TrustedAppPathEntry, TrustedAppWindowsCodeSignatureEntry])
+      )
+      .min(1)
+      .optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type TrustedAppsWindowsProperties = z.infer<typeof TrustedAppsWindowsProperties>;
-export const TrustedAppsWindowsProperties = z.object({
-  list_id: z.literal('endpoint_trusted_apps'),
-  /**
-   * Must be Windows only
-   */
-  os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
-  /**
-   * Process hash, executable path, or code signature entries
-   */
-  entries: z
-    .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry, TrustedAppWindowsCodeSignatureEntry]))
-    .min(1)
-    .optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Trusted applications list item properties (macOS).
  */
+export const TrustedAppsMacProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_trusted_apps'),
+    /**
+     * Must be macOS only
+     */
+    os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
+    /**
+     * Process hash, executable path, or code signature entries
+     */
+    entries: z
+      .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry, TrustedAppMacCodeSignatureEntry]))
+      .min(1)
+      .optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type TrustedAppsMacProperties = z.infer<typeof TrustedAppsMacProperties>;
-export const TrustedAppsMacProperties = z.object({
-  list_id: z.literal('endpoint_trusted_apps'),
-  /**
-   * Must be macOS only
-   */
-  os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
-  /**
-   * Process hash, executable path, or code signature entries
-   */
-  entries: z
-    .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry, TrustedAppMacCodeSignatureEntry]))
-    .min(1)
-    .optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Trusted applications list item properties (Linux).
  */
+export const TrustedAppsLinuxProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_trusted_apps'),
+    /**
+     * Must be Linux only
+     */
+    os_types: z.array(z.literal('linux')).min(1).max(1).optional(),
+    /**
+     * Process hash or executable path entries (code signature not supported on Linux)
+     */
+    entries: z
+      .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry]))
+      .min(1)
+      .optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type TrustedAppsLinuxProperties = z.infer<typeof TrustedAppsLinuxProperties>;
-export const TrustedAppsLinuxProperties = z.object({
-  list_id: z.literal('endpoint_trusted_apps'),
-  /**
-   * Must be Linux only
-   */
-  os_types: z.array(z.literal('linux')).min(1).max(1).optional(),
-  /**
-   * Process hash or executable path entries (code signature not supported on Linux)
-   */
-  entries: z
-    .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry]))
-    .min(1)
-    .optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Trusted devices list item properties (Windows-only, allows username field).
  */
+export const TrustedDevicesWindowsProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_trusted_devices'),
+    /**
+     * Exception entries for the trusted device (duplicate field entries are not allowed)
+     */
+    entries: z
+      .array(
+        z.object({
+          /**
+           * Device field to match against (user.name is Windows-only)
+           */
+          field: z.enum([
+            'device.serial_number',
+            'device.type',
+            'host.name',
+            'device.vendor.name',
+            'device.vendor.id',
+            'device.product.id',
+            'device.product.name',
+            'user.name',
+          ]),
+          /**
+           * Entry match type
+           */
+          type: z.enum(['match', 'wildcard', 'match_any']),
+          value: z.union([z.string(), z.array(z.string()).min(1)]),
+          /**
+           * Must be the value "included"
+           */
+          operator: z.literal('included'),
+        })
+      )
+      .min(1)
+      .optional(),
+    /**
+     * Must be Windows-only to allow username field
+     */
+    os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type TrustedDevicesWindowsProperties = z.infer<typeof TrustedDevicesWindowsProperties>;
-export const TrustedDevicesWindowsProperties = z.object({
-  list_id: z.literal('endpoint_trusted_devices'),
-  /**
-   * Exception entries for the trusted device (duplicate field entries are not allowed)
-   */
-  entries: z
-    .array(
-      z.object({
-        /**
-         * Device field to match against (user.name is Windows-only)
-         */
-        field: z.enum([
-          'device.serial_number',
-          'device.type',
-          'host.name',
-          'device.vendor.name',
-          'device.vendor.id',
-          'device.product.id',
-          'device.product.name',
-          'user.name',
-        ]),
-        /**
-         * Entry match type
-         */
-        type: z.enum(['match', 'wildcard', 'match_any']),
-        value: z.union([z.string(), z.array(z.string()).min(1)]),
-        /**
-         * Must be the value "included"
-         */
-        operator: z.literal('included'),
-      })
-    )
-    .min(1)
-    .optional(),
-  /**
-   * Must be Windows-only to allow username field
-   */
-  os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Trusted devices list item properties (macOS-only, username not supported).
  */
+export const TrustedDevicesMacProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_trusted_devices'),
+    /**
+     * Exception entries for the trusted device (duplicate field entries are not allowed)
+     */
+    entries: z
+      .array(
+        z.object({
+          /**
+           * Device field to match against
+           */
+          field: z.enum([
+            'device.serial_number',
+            'device.type',
+            'host.name',
+            'device.vendor.name',
+            'device.vendor.id',
+            'device.product.id',
+            'device.product.name',
+          ]),
+          /**
+           * Entry match type
+           */
+          type: z.enum(['match', 'wildcard', 'match_any']),
+          value: z.union([z.string(), z.array(z.string()).min(1)]),
+          /**
+           * Must be the value "included"
+           */
+          operator: z.literal('included'),
+        })
+      )
+      .min(1)
+      .optional(),
+    /**
+     * macOS-only
+     */
+    os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type TrustedDevicesMacProperties = z.infer<typeof TrustedDevicesMacProperties>;
-export const TrustedDevicesMacProperties = z.object({
-  list_id: z.literal('endpoint_trusted_devices'),
-  /**
-   * Exception entries for the trusted device (duplicate field entries are not allowed)
-   */
-  entries: z
-    .array(
-      z.object({
-        /**
-         * Device field to match against
-         */
-        field: z.enum([
-          'device.serial_number',
-          'device.type',
-          'host.name',
-          'device.vendor.name',
-          'device.vendor.id',
-          'device.product.id',
-          'device.product.name',
-        ]),
-        /**
-         * Entry match type
-         */
-        type: z.enum(['match', 'wildcard', 'match_any']),
-        value: z.union([z.string(), z.array(z.string()).min(1)]),
-        /**
-         * Must be the value "included"
-         */
-        operator: z.literal('included'),
-      })
-    )
-    .min(1)
-    .optional(),
-  /**
-   * macOS-only
-   */
-  os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Trusted devices list item properties (Windows + macOS, username not supported).
  */
+export const TrustedDevicesWindowsMacProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_trusted_devices'),
+    /**
+     * Exception entries for the trusted device (duplicate field entries are not allowed, username not available when targeting both OS)
+     */
+    entries: z
+      .array(
+        z.object({
+          /**
+           * Device field to match against (username not available for multi-OS)
+           */
+          field: z.enum([
+            'device.serial_number',
+            'device.type',
+            'host.name',
+            'device.vendor.name',
+            'device.vendor.id',
+            'device.product.id',
+            'device.product.name',
+          ]),
+          /**
+           * Entry match type
+           */
+          type: z.enum(['match', 'wildcard', 'match_any']),
+          value: z.union([z.string(), z.array(z.string()).min(1)]),
+          /**
+           * Must be the value "included"
+           */
+          operator: z.literal('included'),
+        })
+      )
+      .min(1)
+      .optional(),
+    /**
+     * Must include both Windows and macOS (username field not allowed)
+     */
+    os_types: z
+      .array(z.enum(['windows', 'macos']))
+      .min(2)
+      .max(2)
+      .optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type TrustedDevicesWindowsMacProperties = z.infer<typeof TrustedDevicesWindowsMacProperties>;
-export const TrustedDevicesWindowsMacProperties = z.object({
-  list_id: z.literal('endpoint_trusted_devices'),
-  /**
-   * Exception entries for the trusted device (duplicate field entries are not allowed, username not available when targeting both OS)
-   */
-  entries: z
-    .array(
-      z.object({
-        /**
-         * Device field to match against (username not available for multi-OS)
-         */
-        field: z.enum([
-          'device.serial_number',
-          'device.type',
-          'host.name',
-          'device.vendor.name',
-          'device.vendor.id',
-          'device.product.id',
-          'device.product.name',
-        ]),
-        /**
-         * Entry match type
-         */
-        type: z.enum(['match', 'wildcard', 'match_any']),
-        value: z.union([z.string(), z.array(z.string()).min(1)]),
-        /**
-         * Must be the value "included"
-         */
-        operator: z.literal('included'),
-      })
-    )
-    .min(1)
-    .optional(),
-  /**
-   * Must include both Windows and macOS (username field not allowed)
-   */
-  os_types: z
-    .array(z.enum(['windows', 'macos']))
-    .min(2)
-    .max(2)
-    .optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Event filters list item properties.
  */
-export type EventFiltersProperties = z.infer<typeof EventFiltersProperties>;
-export const EventFiltersProperties = z.object({
-  list_id: z.literal('endpoint_event_filters'),
-  /**
+export const EventFiltersProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_event_filters'),
+    /**
       * Exception entries for the event filter.
 
 **Flexible field support:** Any event field name is allowed (e.g., `process.name`, `file.path`, `event.action`, `dns.question.name`, etc.)
@@ -684,190 +734,204 @@ export const EventFiltersProperties = z.object({
 **Minimum requirement:** At least 1 entry required
 
       */
-  entries: ExceptionListItemEntryArray.optional(),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: EndpointArtifactTags.optional(),
-});
+    entries: ExceptionListItemEntryArray.optional(),
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
+export type EventFiltersProperties = z.infer<typeof EventFiltersProperties>;
 
 /**
  * Host isolation exceptions list item properties.
  */
+export const HostIsolationProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_host_isolation_exceptions'),
+    /**
+     * Exactly one entry allowed for host isolation exceptions
+     */
+    entries: z
+      .array(
+        z.object({
+          /**
+           * Must be destination.ip
+           */
+          field: z.literal('destination.ip'),
+          /**
+           * Must be match
+           */
+          type: z.literal('match'),
+          /**
+           * Valid IPv4 address or CIDR notation (e.g., "192.168.1.1" or "10.0.0.0/8")
+           */
+          value: z.string(),
+          /**
+           * Must be the value "included"
+           */
+          operator: z.literal('included'),
+        })
+      )
+      .min(1)
+      .max(1)
+      .optional(),
+    /**
+     * Must include all three operating systems (windows, linux, macos)
+     */
+    os_types: z
+      .array(z.enum(['windows', 'linux', 'macos']))
+      .min(3)
+      .max(3)
+      .optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
 export type HostIsolationProperties = z.infer<typeof HostIsolationProperties>;
-export const HostIsolationProperties = z.object({
-  list_id: z.literal('endpoint_host_isolation_exceptions'),
-  /**
-   * Exactly one entry allowed for host isolation exceptions
-   */
-  entries: z
-    .array(
-      z.object({
-        /**
-         * Must be destination.ip
-         */
-        field: z.literal('destination.ip'),
-        /**
-         * Must be match
-         */
-        type: z.literal('match'),
-        /**
-         * Valid IPv4 address or CIDR notation (e.g., "192.168.1.1" or "10.0.0.0/8")
-         */
-        value: z.string(),
-        /**
-         * Must be the value "included"
-         */
-        operator: z.literal('included'),
-      })
-    )
-    .min(1)
-    .max(1)
-    .optional(),
-  /**
-   * Must include all three operating systems (windows, linux, macos)
-   */
-  os_types: z
-    .array(z.enum(['windows', 'linux', 'macos']))
-    .min(3)
-    .max(3)
-    .optional(),
-  tags: EndpointArtifactTags.optional(),
-});
 
 /**
  * Blocklist list item properties (Windows, supports code signature).
  */
-export type BlocklistWindowsProperties = z.infer<typeof BlocklistWindowsProperties>;
-export const BlocklistWindowsProperties = z.object({
-  list_id: z.literal('endpoint_blocklists'),
-  /**
+export const BlocklistWindowsProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_blocklists'),
+    /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
 * Path entry: only 1 allowed
 * Code signature entry: only 1 allowed
 
       */
-  entries: z
-    .array(z.union([BlocklistHashOrPathEntry, BlocklistWindowsCodeSignatureEntry]))
-    .min(1)
-    .optional(),
-  /**
-   * Windows-only
-   */
-  os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
-  tags: EndpointArtifactTags.optional(),
-});
+    entries: z
+      .array(z.union([BlocklistHashOrPathEntry, BlocklistWindowsCodeSignatureEntry]))
+      .min(1)
+      .optional(),
+    /**
+     * Windows-only
+     */
+    os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
+export type BlocklistWindowsProperties = z.infer<typeof BlocklistWindowsProperties>;
 
 /**
  * Blocklist list item properties (Linux, code signature not supported).
  */
-export type BlocklistLinuxProperties = z.infer<typeof BlocklistLinuxProperties>;
-export const BlocklistLinuxProperties = z.object({
-  list_id: z.literal('endpoint_blocklists'),
-  /**
+export const BlocklistLinuxProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_blocklists'),
+    /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
 * Path entry: only 1 allowed
 
       */
-  entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
-  /**
-   * Linux-only
-   */
-  os_types: z.array(z.literal('linux')).min(1).max(1).optional(),
-  tags: EndpointArtifactTags.optional(),
-});
+    entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
+    /**
+     * Linux-only
+     */
+    os_types: z.array(z.literal('linux')).min(1).max(1).optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
+export type BlocklistLinuxProperties = z.infer<typeof BlocklistLinuxProperties>;
 
 /**
  * Blocklist list item properties (macOS, code signature not supported).
  */
-export type BlocklistMacProperties = z.infer<typeof BlocklistMacProperties>;
-export const BlocklistMacProperties = z.object({
-  list_id: z.literal('endpoint_blocklists'),
-  /**
+export const BlocklistMacProperties = lazySchema(() =>
+  z.object({
+    list_id: z.literal('endpoint_blocklists'),
+    /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
 * Path entry: only 1 allowed
 
       */
-  entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
-  /**
-   * macOS-only
-   */
-  os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
-  tags: EndpointArtifactTags.optional(),
-});
+    entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
+    /**
+     * macOS-only
+     */
+    os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
+    tags: EndpointArtifactTags.optional(),
+  })
+);
+export type BlocklistMacProperties = z.infer<typeof BlocklistMacProperties>;
 
+export const ExceptionListItem = lazySchema(() =>
+  z.object({
+    id: ExceptionListItemId,
+    item_id: ExceptionListItemHumanId,
+    list_id: ExceptionListHumanId,
+    type: ExceptionListItemType,
+    name: ExceptionListItemName,
+    description: ExceptionListItemDescription,
+    entries: ExceptionListItemEntryArray,
+    namespace_type: ExceptionNamespaceType,
+    os_types: ExceptionListItemOsTypeArray.optional(),
+    tags: ExceptionListItemTags.optional(),
+    meta: ExceptionListItemMeta.optional(),
+    expire_time: ExceptionListItemExpireTime.optional(),
+    comments: ExceptionListItemCommentArray,
+    /**
+     * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+     */
+    _version: z.string().optional(),
+    /**
+     * Field used in search to ensure all containers are sorted and returned correctly.
+     */
+    tie_breaker_id: z.string(),
+    /**
+     * Autogenerated date of object creation.
+     */
+    created_at: z.string().datetime(),
+    /**
+     * Autogenerated value - user that created object.
+     */
+    created_by: z.string(),
+    /**
+     * Autogenerated date of last object update.
+     */
+    updated_at: z.string().datetime(),
+    /**
+     * Autogenerated value - user that last updated object.
+     */
+    updated_by: z.string(),
+  })
+);
 export type ExceptionListItem = z.infer<typeof ExceptionListItem>;
-export const ExceptionListItem = z.object({
-  id: ExceptionListItemId,
-  item_id: ExceptionListItemHumanId,
-  list_id: ExceptionListHumanId,
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
-  namespace_type: ExceptionNamespaceType,
-  os_types: ExceptionListItemOsTypeArray.optional(),
-  tags: ExceptionListItemTags.optional(),
-  meta: ExceptionListItemMeta.optional(),
-  expire_time: ExceptionListItemExpireTime.optional(),
-  comments: ExceptionListItemCommentArray,
-  /**
-   * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
-   */
-  _version: z.string().optional(),
-  /**
-   * Field used in search to ensure all containers are sorted and returned correctly.
-   */
-  tie_breaker_id: z.string(),
-  /**
-   * Autogenerated date of object creation.
-   */
-  created_at: z.string().datetime(),
-  /**
-   * Autogenerated value - user that created object.
-   */
-  created_by: z.string(),
-  /**
-   * Autogenerated date of last object update.
-   */
-  updated_at: z.string().datetime(),
-  /**
-   * Autogenerated value - user that last updated object.
-   */
-  updated_by: z.string(),
-});
 
+export const ExceptionListSO = lazySchema(() =>
+  z.object({
+    item_id: ExceptionListItemHumanId.optional(),
+    list_id: ExceptionListHumanId,
+    list_type: z.enum(['item', 'list']),
+    immutable: z.boolean().optional(),
+    type: ExceptionListItemType,
+    name: ExceptionListItemName,
+    description: ExceptionListItemDescription,
+    entries: ExceptionListItemEntryArray.optional(),
+    os_types: ExceptionListItemOsTypeArray.optional(),
+    tags: ExceptionListItemTags.optional(),
+    meta: ExceptionListItemMeta.optional(),
+    expire_time: ExceptionListItemExpireTime.optional(),
+    comments: ExceptionListItemCommentArray.optional(),
+    version: NonEmptyString.optional(),
+    /**
+     * Field used in search to ensure all containers are sorted and returned correctly.
+     */
+    tie_breaker_id: z.string(),
+    /**
+     * Autogenerated date of object creation.
+     */
+    created_at: z.string().datetime(),
+    /**
+     * Autogenerated value - user that created object.
+     */
+    created_by: z.string(),
+    /**
+     * Autogenerated value - user that last updated object.
+     */
+    updated_by: z.string(),
+  })
+);
 export type ExceptionListSO = z.infer<typeof ExceptionListSO>;
-export const ExceptionListSO = z.object({
-  item_id: ExceptionListItemHumanId.optional(),
-  list_id: ExceptionListHumanId,
-  list_type: z.enum(['item', 'list']),
-  immutable: z.boolean().optional(),
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray.optional(),
-  os_types: ExceptionListItemOsTypeArray.optional(),
-  tags: ExceptionListItemTags.optional(),
-  meta: ExceptionListItemMeta.optional(),
-  expire_time: ExceptionListItemExpireTime.optional(),
-  comments: ExceptionListItemCommentArray.optional(),
-  version: NonEmptyString.optional(),
-  /**
-   * Field used in search to ensure all containers are sorted and returned correctly.
-   */
-  tie_breaker_id: z.string(),
-  /**
-   * Autogenerated date of object creation.
-   */
-  created_at: z.string().datetime(),
-  /**
-   * Autogenerated value - user that created object.
-   */
-  created_by: z.string(),
-  /**
-   * Autogenerated value - user that last updated object.
-   */
-  updated_by: z.string(),
-});

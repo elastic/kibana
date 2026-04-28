@@ -31,7 +31,7 @@ function createMockLinksParent({
   initialFilters?: Filter[];
 }) {
   const parent = {
-    ...getMockLinksParentApi({ savedObjectId: '456' }),
+    ...getMockLinksParentApi({ ref_id: '456' }),
     locator: {
       getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
       navigate: jest.fn(),
