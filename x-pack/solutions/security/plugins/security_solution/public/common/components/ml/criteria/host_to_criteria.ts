@@ -21,12 +21,13 @@ export const hostToCriteria = (opts: HostToCriteriaOptions): CriteriaFields[] =>
   if (hostItem == null) {
     return [];
   }
-  if (euid && entityRecord) {
-    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument('host', entityRecord);
+  if (euid) {
+    const inputDoc = entityRecord ? entityRecord : hostItem;
+    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument('host', inputDoc);
     if (scopedDsl != null) {
       return [];
     }
-    const identifiers = euid.getEntityIdentifiersFromDocument('host', entityRecord);
+    const identifiers = euid.getEntityIdentifiersFromDocument('host', inputDoc);
     if (identifiers != null && Object.keys(identifiers).length > 0) {
       return Object.entries(identifiers).map(([fieldName, fieldValue]) => ({
         fieldName,
