@@ -117,6 +117,7 @@
             "lineNumber": 17,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLEditorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -231,6 +232,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestAdapter",
             "trackAdoption": false,
             "isRequired": false
           }
