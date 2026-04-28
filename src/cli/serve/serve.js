@@ -127,7 +127,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
         extraCliOptions
       );
     } else {
-      tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
+      tryConfigureStatefulSamlProvider(rawConfig, extraCliOptions);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -361,6 +361,61 @@ function mergeAndReplaceArrays(objValue, srcValue) {
 }
 
 /**
+ * Inspects the configured authentication providers across rawConfig and extraCliOptions to detect
+ * whether the SAML Mock IdP provider can be safely added. Returns either a conflict (with reason
+ * already logged) or the result indicating whether basic/token is already configured.
+ *
+ * @param rawConfig Full configuration object.
+ * @param extraCliOptions Extra CLI options.
+ * @param mockIdpRealmName The realm name reserved for the SAML Mock IdP.
+ * @param providerLabel Human-readable label used in conflict warnings (e.g. "serverless SAML" or "SAML").
+ * @returns {{conflict: boolean, hasBasicOrTokenProviderConfigured: boolean}}
+ */
+function checkSamlProviderConflicts(rawConfig, extraCliOptions, mockIdpRealmName, providerLabel) {
+  let hasBasicOrTokenProviderConfigured = false;
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
+    for (const [providerType, providers] of Object.entries(providersConfig)) {
+      if (providerType === 'basic' || providerType === 'token') {
+        hasBasicOrTokenProviderConfigured = true;
+      }
+
+      for (const [providerName, provider] of Object.entries(providers)) {
+        if (provider.order === 0) {
+          console.warn(
+            `The ${providerLabel} authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}". ` +
+              `Please update the custom provider to use a different order or remove it to allow the ${providerLabel} provider to be configured.`
+          );
+          return { conflict: true, hasBasicOrTokenProviderConfigured };
+        }
+
+        if (providerType === 'saml' && providerName === mockIdpRealmName) {
+          console.warn(
+            `The ${providerLabel} authentication provider won't be configured because the SAML provider with "${mockIdpRealmName}" name is already configured.`
+          );
+          return { conflict: true, hasBasicOrTokenProviderConfigured };
+        }
+      }
+    }
+  }
+  return { conflict: false, hasBasicOrTokenProviderConfigured };
+}
+
+/**
+ * Returns true if the user has explicitly disabled the Mock IdP plugin via config or CLI overrides.
+ * When disabled, the SAML auto-configuration in `serve` is skipped so Kibana can be run against an
+ * Elasticsearch cluster without the SAML realm (e.g. with a `basic` license).
+ */
+function isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions) {
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    if (_.get(configSource, 'mockIdpPlugin.enabled') === false) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Tries to configure SAML provider in serverless mode and applies the necessary configuration.
  * @param rawConfig Full configuration object.
  * @param opts CLI options.
@@ -369,6 +424,13 @@ function mergeAndReplaceArrays(objValue, srcValue) {
  */
 function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (!MOCK_IDP_PLUGIN_SUPPORTED || opts.ssl === false) {
+    return false;
+  }
+
+  if (isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions)) {
+    console.info(
+      'Skipping SAML Mock IdP auto-configuration because `mockIdpPlugin.enabled` is set to `false`.'
+    );
     return false;
   }
 
@@ -384,31 +446,14 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
   // Serverless SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
   // both rawConfig and extraCliOptions because the latter can be used to override the former.
-  let hasBasicOrTokenProviderConfigured = false;
-  for (const configSource of [rawConfig, extraCliOptions]) {
-    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
-    for (const [providerType, providers] of Object.entries(providersConfig)) {
-      if (providerType === 'basic' || providerType === 'token') {
-        hasBasicOrTokenProviderConfigured = true;
-      }
-
-      for (const [providerName, provider] of Object.entries(providers)) {
-        if (provider.order === 0) {
-          console.warn(
-            `The serverless SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
-              `Please update the custom provider to use a different order or remove it to allow the serverless SAML provider to be configured.`
-          );
-          return false;
-        }
-
-        if (providerType === 'saml' && providerName === MOCK_IDP_REALM_NAME) {
-          console.warn(
-            `The serverless SAML authentication provider won't be configured because the SAML provider with "${MOCK_IDP_REALM_NAME}" name is already configured".`
-          );
-          return false;
-        }
-      }
-    }
+  const { conflict, hasBasicOrTokenProviderConfigured } = checkSamlProviderConflicts(
+    rawConfig,
+    extraCliOptions,
+    MOCK_IDP_REALM_NAME,
+    'serverless SAML'
+  );
+  if (conflict) {
+    return false;
   }
 
   if (_.has(rawConfig, 'server.basePath')) {
@@ -499,12 +544,19 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
 /**
  * Tries to configure SAML provider in stateful (traditional) mode and applies the necessary configuration.
  * @param rawConfig Full configuration object.
- * @param opts CLI options.
  * @param extraCliOptions Extra CLI options.
  * @returns {boolean} True if SAML provider was successfully configured.
  */
-function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
+function tryConfigureStatefulSamlProvider(rawConfig, extraCliOptions) {
   if (!MOCK_IDP_PLUGIN_SUPPORTED) {
+    return false;
+  }
+
+  if (isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions)) {
+    console.info(
+      'Skipping SAML Mock IdP auto-configuration because `mockIdpPlugin.enabled` is set to `false`. ' +
+        'Use this when running Kibana against a `basic` license cluster or any setup without the SAML realm.'
+    );
     return false;
   }
 
@@ -517,31 +569,14 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
   // SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
   // both rawConfig and extraCliOptions because the latter can be used to override the former.
-  let hasBasicOrTokenProviderConfigured = false;
-  for (const configSource of [rawConfig, extraCliOptions]) {
-    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
-    for (const [providerType, providers] of Object.entries(providersConfig)) {
-      if (providerType === 'basic' || providerType === 'token') {
-        hasBasicOrTokenProviderConfigured = true;
-      }
-
-      for (const [providerName, provider] of Object.entries(providers)) {
-        if (provider.order === 0) {
-          console.warn(
-            `The SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
-              `Please update the custom provider to use a different order or remove it to allow the SAML provider to be configured.`
-          );
-          return false;
-        }
-
-        if (providerType === 'saml' && providerName === MOCK_IDP_REALM_NAME) {
-          console.warn(
-            `The SAML authentication provider won't be configured because the SAML provider with "${MOCK_IDP_REALM_NAME}" name is already configured".`
-          );
-          return false;
-        }
-      }
-    }
+  const { conflict, hasBasicOrTokenProviderConfigured } = checkSamlProviderConflicts(
+    rawConfig,
+    extraCliOptions,
+    MOCK_IDP_REALM_NAME,
+    'SAML'
+  );
+  if (conflict) {
+    return false;
   }
 
   console.info(

@@ -13,11 +13,7 @@ import { offeringBasedSchema, schema } from '@kbn/config-schema';
 export type ConfigType = TypeOf<typeof ConfigSchema>;
 
 export const ConfigSchema = schema.object({
-  enabled: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: true }),
-    traditional: schema.boolean({ defaultValue: true }),
-    options: { defaultValue: true },
-  }),
+  enabled: schema.boolean({ defaultValue: true }),
   uiam: offeringBasedSchema({
     serverless: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
   }),

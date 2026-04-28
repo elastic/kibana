@@ -52,6 +52,8 @@ export const snapshot: Command = {
       --port            The port to bind to on 127.0.0.1 [default: 9200]
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
+      --kibana-url      Fully qualified URL where Kibana is hosted (including base path). Used to configure
+                        the SAML Mock IdP realm so SP/ACS endpoints match Kibana. [default: ${DEFAULT_KIBANA_URL}]
       --use-cached      Skips cache verification and use cached ES snapshot.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -84,12 +86,13 @@ export const snapshot: Command = {
         readyTimeout: 'ready-timeout',
         esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
+        kibanaUrl: 'kibana-url',
       },
 
-      string: ['version', 'ready-timeout', 'es-log-level'],
+      string: ['version', 'ready-timeout', 'es-log-level', 'kibana-url'],
       boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill'],
 
-      default: defaults,
+      default: { kibanaUrl: DEFAULT_KIBANA_URL, ...defaults },
     });
 
     const cluster = new Cluster({ ssl: options.ssl });
@@ -122,11 +125,13 @@ export const snapshot: Command = {
         arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
       );
 
+      const kibanaUrl: string = options.kibanaUrl || DEFAULT_KIBANA_URL;
+
       if (!hasSamlConfig && options.license !== 'basic') {
-        log.info('Configuring SAML realm for Mock IdP with Kibana at %s', DEFAULT_KIBANA_URL);
+        log.info('Configuring SAML realm for Mock IdP with Kibana at %s', kibanaUrl);
 
         // Generate IDP metadata with the correct Kibana URL
-        const metadata = await createMockIdpMetadata(DEFAULT_KIBANA_URL);
+        const metadata = await createMockIdpMetadata(kibanaUrl);
         const metadataPath = resolve(tmpdir(), 'mock_idp_metadata.xml');
         writeFileSync(metadataPath, metadata);
 
@@ -135,9 +140,9 @@ export const snapshot: Command = {
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${metadataPath}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${DEFAULT_KIBANA_URL}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${DEFAULT_KIBANA_URL}/api/security/saml/callback`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${DEFAULT_KIBANA_URL}/logout`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kibanaUrl}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kibanaUrl}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kibanaUrl}/logout`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
@@ -149,6 +154,15 @@ export const snapshot: Command = {
 
         // Copy stateful roles.yml so ES knows about viewer, editor, admin, system_indices_superuser
         samlResources = [resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml')];
+      } else if (options.license === 'basic') {
+        log.warning(
+          `Skipping SAML Mock IdP realm auto-configuration because --license=basic does not support the SAML realm. ` +
+            `Run Kibana with \`--mockIdpPlugin.enabled=false\` (or set it in kibana.dev.yml) so it doesn't try to enable the SAML provider.`
+        );
+      } else {
+        log.warning(
+          `Skipping SAML Mock IdP realm auto-configuration because user-provided -E args already configure the "${MOCK_IDP_REALM_NAME}" SAML realm.`
+        );
       }
 
       const installStartTime = Date.now();
