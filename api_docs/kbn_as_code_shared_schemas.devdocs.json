@@ -53,6 +53,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }

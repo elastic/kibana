@@ -33,6 +33,7 @@
             "lineNumber": 30,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -112,6 +113,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -161,6 +163,7 @@
             "lineNumber": 19,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "QueryStringInputProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -462,6 +465,7 @@
                 "lineNumber": 116,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -548,6 +552,7 @@
                 "lineNumber": 118,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1060,7 +1065,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"cases\" | \"rules\" | \"alerts\" | \"endpoints\" | \"notification_policies\""
+              "\"cases\" | \"rules\" | \"alerts\" | \"endpoints\" | \"action_policies\""
             ],
             "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
             "lineNumber": 42,
@@ -1204,6 +1209,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "QuerySuggestionGetFnArgs",
             "trackAdoption": false
           }
         ],
@@ -1248,7 +1254,14 @@
           "tags": [],
           "label": "autocomplete",
           "description": [
-            "\nautocomplete service\n{@link AutocompleteStart}"
+            "\nautocomplete service\n",
+            {
+              "pluginId": "kql",
+              "scope": "public",
+              "docId": "kibKqlPluginApi",
+              "section": "def-public.AutocompleteStart",
+              "text": "AutocompleteStart"
+            }
           ],
           "signature": [
             "{ getQuerySuggestions: ",
@@ -1384,6 +1397,7 @@
                 "lineNumber": 39,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1501,6 +1515,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1518,6 +1533,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KQLServerPluginSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1558,6 +1574,7 @@
                 "lineNumber": 52,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1575,6 +1592,7 @@
                 "lineNumber": 52,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "KQLServerPluginStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
