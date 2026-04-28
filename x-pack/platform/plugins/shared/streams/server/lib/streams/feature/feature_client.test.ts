@@ -389,13 +389,14 @@ describe('FeatureClient', () => {
       storageClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
       const { client } = createFeatureClient({ storageClient });
 
-      await client.bulk('logs.test', [
+      const result = await client.bulk('logs.test', [
         { delete: { id: 'uuid-missing' } },
         { exclude: { id: 'uuid-missing' } },
         { restore: { id: 'uuid-missing' } },
       ]);
 
-      expect(storageClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ operations: [] }));
+      expect(result).toEqual({ applied: 0, skipped: 3 });
+      expect(storageClient.bulk).not.toHaveBeenCalled();
     });
 
     it('skips exclude/restore for computed features (server protects type invariants)', async () => {
@@ -406,11 +407,10 @@ describe('FeatureClient', () => {
       });
       const { client } = createFeatureClient({ storageClient });
 
-      await client.bulk('logs.test', [{ exclude: { id: 'uuid-1' } }]);
+      const result = await client.bulk('logs.test', [{ exclude: { id: 'uuid-1' } }]);
 
-      const call = storageClient.bulk.mock.calls[0][0];
-      // The computed feature exclude is dropped, so no operations are sent
-      expect(call.operations).toEqual([]);
+      expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(storageClient.bulk).not.toHaveBeenCalled();
     });
 
     it('translates exclude into an index op that stamps excluded_at on a non-computed feature', async () => {
