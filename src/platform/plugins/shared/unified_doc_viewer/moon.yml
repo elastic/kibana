@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/lens-common'
   - '@kbn/field-types'
+  - '@kbn/ebt-click-actions'
 tags:
   - plugin
   - prod

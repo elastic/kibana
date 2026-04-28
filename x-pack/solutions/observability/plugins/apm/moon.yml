@@ -163,6 +163,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/presentation-util'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/ebt-click-actions'
 tags:
   - plugin
   - prod
