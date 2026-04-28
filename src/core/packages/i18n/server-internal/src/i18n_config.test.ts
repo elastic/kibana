@@ -8,7 +8,7 @@
  */
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '@kbn/core/server/mocks';
+import { configDeprecationsMock } from '@kbn/config-mocks';
 
 import { config } from './i18n_config';
 
