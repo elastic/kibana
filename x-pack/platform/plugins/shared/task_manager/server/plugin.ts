@@ -456,7 +456,6 @@ export class TaskManagerPlugin
         startingCapacity,
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
-        opsMetrics$: this.opsMetrics$,
       });
     }
 

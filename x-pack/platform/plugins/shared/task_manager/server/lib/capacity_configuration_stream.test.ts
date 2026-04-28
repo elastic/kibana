@@ -6,7 +6,8 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { OpsMetrics } from '@kbn/core/server';
+import * as perfHooks from 'node:perf_hooks';
+import v8 from 'node:v8';
 import type { TaskManagerConfig } from '../config';
 import { CLAIM_STRATEGY_MGET } from '../config';
 import { mockLogger } from '../test_utils';
@@ -16,16 +17,74 @@ import { createCapacityConfigurationStream } from './capacity_configuration_stre
 const logger = mockLogger();
 
 describe('createCapacityConfigurationStream', () => {
+  const signalState = {
+    elu: 0.2,
+    heapUsed: 100,
+    heapLimit: 1000,
+    eventLoopDelayP95Ms: 100,
+  };
+
+  const eventLoopDelayMonitor = {
+    enable: jest.fn(),
+    disable: jest.fn(),
+    reset: jest.fn(),
+    percentile: jest.fn((percentile: number) =>
+      percentile === 95 ? signalState.eventLoopDelayP95Ms * 1_000_000 : 0
+    ),
+  };
+
   beforeAll(() => {
     jest.useFakeTimers();
+    jest
+      .spyOn(perfHooks.performance, 'eventLoopUtilization')
+      .mockImplementation(
+        (utilizationBaseline?: ReturnType<typeof perfHooks.performance.eventLoopUtilization>) => {
+          if (utilizationBaseline) {
+            return {
+              active: 0,
+              idle: 0,
+              utilization: signalState.elu,
+            };
+          }
+          return {
+            active: 0,
+            idle: 0,
+            utilization: 0,
+          };
+        }
+      );
+    jest
+      .spyOn(v8, 'getHeapStatistics')
+      .mockImplementation(
+        () =>
+          ({ heap_size_limit: signalState.heapLimit } as ReturnType<typeof v8.getHeapStatistics>)
+      );
+    jest.spyOn(process, 'memoryUsage').mockImplementation(() => ({
+      rss: 10,
+      heapTotal: signalState.heapLimit,
+      heapUsed: signalState.heapUsed,
+      external: 10,
+      arrayBuffers: 10,
+      sharedArrayBuffers: 0,
+    }));
+    jest
+      .spyOn(perfHooks, 'monitorEventLoopDelay')
+      .mockReturnValue(
+        eventLoopDelayMonitor as unknown as ReturnType<typeof perfHooks.monitorEventLoopDelay>
+      );
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    signalState.elu = 0.2;
+    signalState.heapUsed = 100;
+    signalState.heapLimit = 1000;
+    signalState.eventLoopDelayP95Ms = 100;
   });
 
   afterAll(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   test('uses only Elasticsearch-managed capacity when capacity is numeric', () => {
@@ -51,7 +110,6 @@ describe('createCapacityConfigurationStream', () => {
   test('scales up dynamically when projected full-capacity metrics are healthy', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(100);
-    const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({}));
     const updates: number[] = [];
 
     const stream$ = createCapacityConfigurationStream({
@@ -66,7 +124,6 @@ describe('createCapacityConfigurationStream', () => {
       startingCapacity: 10,
       errorCheck$,
       postClaimUtilizationPct$: postClaimUtilization$,
-      opsMetrics$,
     });
 
     const subscription = stream$.subscribe((value) => updates.push(value));
@@ -81,7 +138,6 @@ describe('createCapacityConfigurationStream', () => {
   test('scales down immediately when unhealthy and respects cooldown', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(100);
-    const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({}));
     const updates: number[] = [];
 
     const stream$ = createCapacityConfigurationStream({
@@ -97,18 +153,17 @@ describe('createCapacityConfigurationStream', () => {
       startingCapacity: 10,
       errorCheck$,
       postClaimUtilizationPct$: postClaimUtilization$,
-      opsMetrics$,
     });
 
     const subscription = stream$.subscribe((value) => updates.push(value));
     jest.advanceTimersByTime(2000);
     expect(updates[updates.length - 1]).toBe(12);
 
-    opsMetrics$.next(createOpsMetrics({ elu: 0.95 }));
-    jest.advanceTimersByTime(1000);
+    signalState.elu = 1;
+    jest.advanceTimersByTime(15000);
     expect(updates[updates.length - 1]).toBe(10);
 
-    opsMetrics$.next(createOpsMetrics({ elu: 0.2 }));
+    signalState.elu = 0.2;
     jest.advanceTimersByTime(5000);
     expect(updates[updates.length - 1]).toBe(10);
 
@@ -120,7 +175,7 @@ describe('createCapacityConfigurationStream', () => {
   test('skips Elasticsearch recovery increase when process signals are unhealthy', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(0);
-    const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({ elu: 0.95 }));
+    signalState.elu = 1;
     const updates: number[] = [];
 
     const stream$ = createCapacityConfigurationStream({
@@ -135,7 +190,6 @@ describe('createCapacityConfigurationStream', () => {
       startingCapacity: 10,
       errorCheck$,
       postClaimUtilizationPct$: postClaimUtilization$,
-      opsMetrics$,
     });
 
     const subscription = stream$.subscribe((value) => updates.push(value));
@@ -152,7 +206,7 @@ describe('createCapacityConfigurationStream', () => {
   test('does not require high current utilization to scale up', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(10);
-    const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({ elu: 0.1 }));
+    signalState.elu = 0.1;
     const updates: number[] = [];
 
     const stream$ = createCapacityConfigurationStream({
@@ -167,7 +221,6 @@ describe('createCapacityConfigurationStream', () => {
       startingCapacity: 10,
       errorCheck$,
       postClaimUtilizationPct$: postClaimUtilization$,
-      opsMetrics$,
     });
 
     const subscription = stream$.subscribe((value) => updates.push(value));
@@ -180,7 +233,7 @@ describe('createCapacityConfigurationStream', () => {
   test('does not scale up when projected full-capacity metrics are unhealthy', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(40);
-    const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({ elu: 0.4 }));
+    signalState.elu = 0.4;
     const updates: number[] = [];
 
     const stream$ = createCapacityConfigurationStream({
@@ -195,7 +248,6 @@ describe('createCapacityConfigurationStream', () => {
       startingCapacity: 10,
       errorCheck$,
       postClaimUtilizationPct$: postClaimUtilization$,
-      opsMetrics$,
     });
 
     const subscription = stream$.subscribe((value) => updates.push(value));
@@ -208,7 +260,7 @@ describe('createCapacityConfigurationStream', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(100);
     const projectionUtilization$ = new BehaviorSubject<number>(20);
-    const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({ elu: 0.3 }));
+    signalState.elu = 0.3;
     const updates: number[] = [];
 
     const stream$ = createCapacityConfigurationStream({
@@ -224,7 +276,6 @@ describe('createCapacityConfigurationStream', () => {
       errorCheck$,
       postClaimUtilizationPct$: postClaimUtilization$,
       projectionUtilizationPct$: projectionUtilization$,
-      opsMetrics$,
     });
 
     const subscription = stream$.subscribe((value) => updates.push(value));
@@ -309,38 +360,4 @@ function createConfig(
       ...(overrides.dynamic_capacity ?? {}),
     },
   };
-}
-
-function createOpsMetrics({
-  elu = 0.2,
-  heapUsed = 100,
-  heapLimit = 1000,
-  load = 0.5,
-  eventLoopDelayMs = 100,
-}: {
-  elu?: number;
-  heapUsed?: number;
-  heapLimit?: number;
-  load?: number;
-  eventLoopDelayMs?: number;
-}): OpsMetrics {
-  return {
-    process: {
-      event_loop_utilization: {
-        utilization: elu,
-      },
-      event_loop_delay: eventLoopDelayMs,
-      memory: {
-        heap: {
-          used_in_bytes: heapUsed,
-          size_limit: heapLimit,
-        },
-      },
-    },
-    os: {
-      load: {
-        '1m': load,
-      },
-    },
-  } as OpsMetrics;
 }

@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import type { Logger, OpsMetrics } from '@kbn/core/server';
+import { performance, monitorEventLoopDelay, type IntervalHistogram } from 'node:perf_hooks';
+import v8 from 'node:v8';
+import type { Logger } from '@kbn/core/server';
 import type { TaskManagerConfig } from '../config';
 
 const HYSTERESIS_FACTOR = 0.9;
+const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
+const EMA_PERIOD_MS = 30_000;
+const EMA_SAMPLING_INTERVAL_MS = 10_000;
+const EMA_ALPHA = 1 - Math.exp(-EMA_SAMPLING_INTERVAL_MS / EMA_PERIOD_MS);
 
 interface DynamicCapacityState {
   capacity: number;
@@ -20,6 +26,12 @@ interface ProcessHealthSignals {
   heapUsedFraction: number;
   eventLoopDelayMs: number;
   isUnhealthy: boolean;
+}
+
+interface ProcessHealthMetrics {
+  eventLoopUtilization: number;
+  heapUsedFraction: number;
+  eventLoopDelayMs: number;
 }
 
 type CapacityReason =
@@ -73,7 +85,13 @@ export class DynamicCapacityController {
   private esManagedCapacity: number;
   private postClaimUtilizationPct = 0;
   private projectionUtilizationPct = 0;
+  private rawProcessHealth: ProcessHealthSignals;
   private processHealth: ProcessHealthSignals;
+  private eventLoopUtilizationBaseline = performance.eventLoopUtilization();
+  private readonly eventLoopDelayMonitor: IntervalHistogram;
+  private smoothedEventLoopUtilization?: number;
+  private smoothedHeapUsedFraction?: number;
+  private smoothedEventLoopDelayMs?: number;
 
   constructor({ config, logger, startingCapacity }: DynamicCapacityControllerOpts) {
     this.config = config;
@@ -85,7 +103,10 @@ export class DynamicCapacityController {
       config.dynamic_capacity.min_utilization_for_projection / 100,
       0.01
     );
-    this.processHealth = getProcessHealthSignals(undefined, this.config);
+    this.eventLoopDelayMonitor = monitorEventLoopDelay();
+    this.eventLoopDelayMonitor.enable();
+    this.rawProcessHealth = getProcessHealthSignals(getDefaultProcessHealthMetrics(), this.config);
+    this.processHealth = this.rawProcessHealth;
     this.esManagedCapacity = startingCapacity;
     this.state = {
       capacity: startingCapacity,
@@ -105,16 +126,18 @@ export class DynamicCapacityController {
     this.projectionUtilizationPct = utilizationPct;
   }
 
-  public setOpsMetrics(opsMetrics: OpsMetrics | undefined) {
-    this.processHealth = getProcessHealthSignals(opsMetrics, this.config);
-  }
-
   public getCapacity() {
     return this.state.capacity;
   }
 
+  public destroy() {
+    this.eventLoopDelayMonitor.disable();
+  }
+
   public evaluate(nowMs: number = Date.now()): DynamicCapacityEvaluationResult {
+    this.refreshProcessHealth();
     const processHealthForEvaluation = this.processHealth;
+    const rawProcessHealthForEvaluation = this.rawProcessHealth;
 
     const previousCapacity = this.state.capacity;
     let nextCapacity = previousCapacity;
@@ -170,6 +193,7 @@ export class DynamicCapacityController {
     const evaluationReason = getEvaluationReason({
       reason,
       processHealth: processHealthForEvaluation,
+      rawProcessHealth: rawProcessHealthForEvaluation,
       config: this.config,
       cooldownUntilMs: nextCooldownUntilMs,
       nowMs,
@@ -209,37 +233,62 @@ export class DynamicCapacityController {
 
     return { changed, capacity: this.state.capacity };
   }
+
+  private refreshProcessHealth() {
+    const rawEventLoopUtilization = performance.eventLoopUtilization(
+      this.eventLoopUtilizationBaseline
+    ).utilization;
+    this.eventLoopUtilizationBaseline = performance.eventLoopUtilization();
+
+    this.eventLoopDelayMonitor.disable();
+    const rawEventLoopDelayMs = toMilliseconds(this.eventLoopDelayMonitor.percentile(95));
+    this.eventLoopDelayMonitor.reset();
+    this.eventLoopDelayMonitor.enable();
+
+    const memoryUsage = process.memoryUsage();
+    const heapSizeLimit = v8.getHeapStatistics().heap_size_limit || 1;
+    const rawHeapUsedFraction = memoryUsage.heapUsed / heapSizeLimit;
+
+    const rawMetrics: ProcessHealthMetrics = {
+      eventLoopUtilization: rawEventLoopUtilization,
+      heapUsedFraction: rawHeapUsedFraction,
+      eventLoopDelayMs: rawEventLoopDelayMs,
+    };
+
+    this.rawProcessHealth = getProcessHealthSignals(rawMetrics, this.config);
+
+    this.smoothedEventLoopUtilization = ema(
+      this.smoothedEventLoopUtilization,
+      rawMetrics.eventLoopUtilization
+    );
+    this.smoothedHeapUsedFraction = ema(this.smoothedHeapUsedFraction, rawMetrics.heapUsedFraction);
+    this.smoothedEventLoopDelayMs = ema(this.smoothedEventLoopDelayMs, rawMetrics.eventLoopDelayMs);
+
+    this.processHealth = getProcessHealthSignals(
+      {
+        eventLoopUtilization: this.smoothedEventLoopUtilization,
+        heapUsedFraction: this.smoothedHeapUsedFraction,
+        eventLoopDelayMs: this.smoothedEventLoopDelayMs,
+      },
+      this.config
+    );
+  }
 }
 
 function getProcessHealthSignals(
-  opsMetrics: OpsMetrics | undefined,
+  processHealthMetrics: ProcessHealthMetrics,
   config: TaskManagerConfig
 ): ProcessHealthSignals {
-  if (!opsMetrics) {
-    return {
-      eventLoopUtilization: 0,
-      heapUsedFraction: 0,
-      eventLoopDelayMs: 0,
-      isUnhealthy: false,
-    };
-  }
-
-  const eventLoopUtilization = opsMetrics.process.event_loop_utilization.utilization ?? 0;
-  const heapSizeLimit = opsMetrics.process.memory.heap.size_limit || 1;
-  const heapUsedFraction = opsMetrics.process.memory.heap.used_in_bytes / heapSizeLimit;
-  const eventLoopDelayMs = opsMetrics.process.event_loop_delay;
-
   const eventLoopUnhealthy =
-    eventLoopUtilization > config.dynamic_capacity.max_event_loop_utilization;
-  const heapUnhealthy = heapUsedFraction > config.dynamic_capacity.max_heap_used_fraction;
+    processHealthMetrics.eventLoopUtilization > config.dynamic_capacity.max_event_loop_utilization;
+  const heapUnhealthy =
+    processHealthMetrics.heapUsedFraction > config.dynamic_capacity.max_heap_used_fraction;
   const delayUnhealthy =
     config.dynamic_capacity.max_event_loop_delay_ms > 0 &&
-    eventLoopDelayMs > config.dynamic_capacity.max_event_loop_delay_ms;
+    processHealthMetrics.eventLoopDelayMs > config.dynamic_capacity.max_event_loop_delay_ms;
 
   return {
-    eventLoopUtilization,
-    heapUsedFraction,
-    eventLoopDelayMs,
+    ...processHealthMetrics,
     isUnhealthy: eventLoopUnhealthy || heapUnhealthy || delayUnhealthy,
   };
 }
@@ -260,6 +309,7 @@ function getCapacityDecision(
 function getEvaluationReason({
   reason,
   processHealth,
+  rawProcessHealth,
   config,
   cooldownUntilMs,
   nowMs,
@@ -272,6 +322,7 @@ function getEvaluationReason({
 }: {
   reason: string;
   processHealth: ProcessHealthSignals;
+  rawProcessHealth: ProcessHealthSignals;
   config: TaskManagerConfig;
   cooldownUntilMs: number;
   nowMs: number;
@@ -284,6 +335,7 @@ function getEvaluationReason({
 }) {
   const metricDetails = getMetricDetails(
     processHealth,
+    rawProcessHealth,
     config,
     projectedAtFullCapacity,
     projectionFactor,
@@ -317,6 +369,7 @@ function getEvaluationReason({
 
 function getMetricDetails(
   processHealth: ProcessHealthSignals,
+  rawProcessHealth: ProcessHealthSignals,
   config: TaskManagerConfig,
   projectedAtFullCapacity: ProjectedAtFullCapacityMetrics,
   projectionFactor: number,
@@ -344,15 +397,21 @@ function getMetricDetails(
     3
   )}/${config.dynamic_capacity.max_event_loop_utilization.toFixed(
     3
-  )}(${eluStatus}), heap=${processHealth.heapUsedFraction.toFixed(
+  )}(${eluStatus}) [raw=${rawProcessHealth.eventLoopUtilization.toFixed(
+    3
+  )}], heap=${processHealth.heapUsedFraction.toFixed(
     3
   )}/${config.dynamic_capacity.max_heap_used_fraction.toFixed(
     3
-  )}(${heapStatus}), eventLoopDelayMs=${processHealth.eventLoopDelayMs.toFixed(
+  )}(${heapStatus}) [raw=${rawProcessHealth.heapUsedFraction.toFixed(
+    3
+  )}], eventLoopDelayMs(p95)=${processHealth.eventLoopDelayMs.toFixed(
     1
   )}/${config.dynamic_capacity.max_event_loop_delay_ms.toFixed(
     1
-  )}(${delayStatus}), projectedAtFull(scaleFactor=${projectionFactor.toFixed(
+  )}(${delayStatus}) [raw=${rawProcessHealth.eventLoopDelayMs.toFixed(
+    1
+  )}], projectedAtFull(scaleFactor=${projectionFactor.toFixed(
     2
   )}): elu=${projectedAtFullCapacity.eventLoopUtilization.toFixed(
     3
@@ -625,7 +684,7 @@ function buildHumanDynamicCapacitySummary({
   if (!projectedHealthyForScaleUp) {
     return (
       `Task Manager left claim concurrency at ${nextCapacity}: ` +
-      `if concurrency were increased, projected event loop, CPU, or event loop delay would likely exceed hysteresis-adjusted scale-up safety limits, so scaling up is paused.` +
+      `if concurrency were increased, projected event loop or event loop delay would likely exceed hysteresis-adjusted scale-up safety limits, so scaling up is paused.` +
       utilizationSuffix
     );
   }
@@ -666,4 +725,20 @@ function isHealthyForScaleUp(
     projectedAtFullCapacity.eventLoopDelayMs <
       config.dynamic_capacity.max_event_loop_delay_ms * HYSTERESIS_FACTOR;
   return eluHealthy && delayHealthy;
+}
+
+function getDefaultProcessHealthMetrics(): ProcessHealthMetrics {
+  return {
+    eventLoopUtilization: 0,
+    heapUsedFraction: 0,
+    eventLoopDelayMs: 0,
+  };
+}
+
+function ema(previous: number | undefined, current: number): number {
+  return previous === undefined ? current : EMA_ALPHA * current + (1 - EMA_ALPHA) * previous;
+}
+
+function toMilliseconds(nanoseconds: number): number {
+  return nanoseconds / ONE_MILLISECOND_AS_NANOSECONDS;
 }

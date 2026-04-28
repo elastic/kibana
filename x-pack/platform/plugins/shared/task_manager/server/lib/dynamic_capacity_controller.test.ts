@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { OpsMetrics } from '@kbn/core/server';
+import * as perfHooks from 'node:perf_hooks';
+import v8 from 'node:v8';
 import type { TaskManagerConfig } from '../config';
 import { CLAIM_STRATEGY_MGET } from '../config';
 import { mockLogger } from '../test_utils';
@@ -14,17 +15,79 @@ import { DynamicCapacityController } from './dynamic_capacity_controller';
 const logger = mockLogger();
 
 describe('DynamicCapacityController', () => {
+  const signalState = {
+    elu: 0.2,
+    heapUsed: 100,
+    heapLimit: 1000,
+    eventLoopDelayP95Ms: 100,
+  };
+
+  const eventLoopDelayMonitor = {
+    enable: jest.fn(),
+    disable: jest.fn(),
+    reset: jest.fn(),
+    percentile: jest.fn((percentile: number) =>
+      percentile === 95 ? signalState.eventLoopDelayP95Ms * 1_000_000 : 0
+    ),
+  };
+
   beforeAll(() => {
     jest.useFakeTimers();
+    jest
+      .spyOn(perfHooks.performance, 'eventLoopUtilization')
+      .mockImplementation(
+        (utilizationBaseline?: ReturnType<typeof perfHooks.performance.eventLoopUtilization>) => {
+          if (utilizationBaseline) {
+            return {
+              active: 0,
+              idle: 0,
+              utilization: signalState.elu,
+            };
+          }
+          return {
+            active: 0,
+            idle: 0,
+            utilization: 0,
+          };
+        }
+      );
+    jest
+      .spyOn(v8, 'getHeapStatistics')
+      .mockImplementation(
+        () =>
+          ({ heap_size_limit: signalState.heapLimit } as ReturnType<typeof v8.getHeapStatistics>)
+      );
+    jest.spyOn(process, 'memoryUsage').mockImplementation(() => ({
+      rss: 10,
+      heapTotal: signalState.heapLimit,
+      heapUsed: signalState.heapUsed,
+      external: 10,
+      arrayBuffers: 10,
+      sharedArrayBuffers: 0,
+    }));
+    jest
+      .spyOn(perfHooks, 'monitorEventLoopDelay')
+      .mockReturnValue(
+        eventLoopDelayMonitor as unknown as ReturnType<typeof perfHooks.monitorEventLoopDelay>
+      );
   });
 
   afterAll(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    signalState.elu = 0.2;
+    signalState.heapUsed = 100;
+    signalState.heapLimit = 1000;
+    signalState.eventLoopDelayP95Ms = 100;
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
   });
 
   test('scales up when projected full-capacity metrics are healthy', () => {
@@ -40,7 +103,6 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
 
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
@@ -49,6 +111,7 @@ describe('DynamicCapacityController', () => {
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(12);
+    controller.destroy();
   });
 
   test('scales down immediately when unhealthy and respects cooldown', () => {
@@ -65,7 +128,6 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
 
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
@@ -73,12 +135,10 @@ describe('DynamicCapacityController', () => {
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(12);
 
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.95 }));
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(10);
+    signalState.elu = 1;
+    expect(waitForCapacity(controller, 10)).toBe(true);
 
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
+    signalState.elu = 0.2;
     jest.advanceTimersByTime(5000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(10);
@@ -86,6 +146,7 @@ describe('DynamicCapacityController', () => {
     jest.advanceTimersByTime(30000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(11);
+    controller.destroy();
   });
 
   test('continues scaling down when unhealthy during cooldown', () => {
@@ -104,20 +165,15 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(20);
 
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.95 }));
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(17);
-
+    signalState.elu = 1;
+    expect(waitForCapacity(controller, 17)).toBe(true);
     // Cooldown is active, but unhealthy signals should still trigger another scale-down.
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(15);
+    expect(waitForCapacity(controller, 15)).toBe(true);
+    controller.destroy();
   });
 
   test('uses projection utilization for projected full-capacity health', () => {
@@ -133,7 +189,7 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(20);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.3 }));
+    signalState.elu = 0.3;
 
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
@@ -142,6 +198,7 @@ describe('DynamicCapacityController', () => {
 
     // min_utilization_for_projection default is 30% => factor 3.33.
     expect(controller.getCapacity()).toBe(10);
+    controller.destroy();
   });
 
   test('uses proportional scale-down step when overshoot is small', () => {
@@ -159,16 +216,15 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(20);
 
     // ELU is only slightly above its threshold (0.85), so proportional step is 1.
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.86 }));
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
+    signalState.elu = 0.86;
+    expect(waitForCapacity(controller, 19, 60)).toBe(true);
     expect(controller.getCapacity()).toBe(19);
+    controller.destroy();
   });
 
   test('scales down proportionally for moderate overshoot', () => {
@@ -186,16 +242,16 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(20);
 
     // heapUsedFraction=1.275 and max_heap_used_fraction=0.85 => 1.5x over threshold.
-    controller.setOpsMetrics(createOpsMetrics({ heapUsed: 1275, heapLimit: 1000 }));
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
+    signalState.heapUsed = 1275;
+    signalState.heapLimit = 1000;
+    expect(waitForCapacity(controller, 13, 30)).toBe(true);
     expect(controller.getCapacity()).toBe(13);
+    controller.destroy();
   });
 
   test('caps scale-down step by max step fraction', () => {
@@ -213,16 +269,16 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(20);
 
-    // eventLoopDelay ratio is 5x, but max step fraction limits reduction to 50% of current.
-    controller.setOpsMetrics(createOpsMetrics({ eventLoopDelayMs: 50000 }));
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
+    // Heap overshoot is large, but max step fraction limits reduction to 50% of current.
+    signalState.heapUsed = 10000;
+    signalState.heapLimit = 1000;
+    expect(waitForCapacity(controller, 10)).toBe(true);
     expect(controller.getCapacity()).toBe(10);
+    controller.destroy();
   });
 
   test('respects floor capacity even with a large proportional step', () => {
@@ -240,15 +296,15 @@ describe('DynamicCapacityController', () => {
     });
     controller.setPostClaimUtilizationPct(100);
     controller.setProjectionUtilizationPct(100);
-    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(12);
 
-    controller.setOpsMetrics(createOpsMetrics({ eventLoopDelayMs: 100000 }));
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
+    signalState.heapUsed = 10000;
+    signalState.heapLimit = 1000;
+    expect(waitForCapacity(controller, 8)).toBe(true);
     expect(controller.getCapacity()).toBe(8);
+    controller.destroy();
   });
 });
 
@@ -329,34 +385,18 @@ function createConfig(
   };
 }
 
-function createOpsMetrics({
-  elu = 0.2,
-  heapUsed = 100,
-  heapLimit = 1000,
-  eventLoopDelayMs = 100,
-}: {
-  elu?: number;
-  heapUsed?: number;
-  heapLimit?: number;
-  eventLoopDelayMs?: number;
-}): OpsMetrics {
-  return {
-    process: {
-      event_loop_utilization: {
-        utilization: elu,
-      },
-      event_loop_delay: eventLoopDelayMs,
-      memory: {
-        heap: {
-          used_in_bytes: heapUsed,
-          size_limit: heapLimit,
-        },
-      },
-    },
-    os: {
-      load: {
-        '1m': 0.5,
-      },
-    },
-  } as OpsMetrics;
+function waitForCapacity(
+  controller: DynamicCapacityController,
+  expectedCapacity: number,
+  maxCycles: number = 30
+) {
+  for (let i = 0; i < maxCycles; i++) {
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    if (controller.getCapacity() === expectedCapacity) {
+      return true;
+    }
+  }
+
+  return false;
 }

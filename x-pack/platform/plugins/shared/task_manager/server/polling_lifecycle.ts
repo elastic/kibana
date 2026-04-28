@@ -13,8 +13,6 @@ import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
-
-import type { OpsMetrics } from '@kbn/core/server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
@@ -85,7 +83,6 @@ export interface TaskPollingLifecycleOpts {
   startingCapacity: number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
-  opsMetrics$?: Observable<OpsMetrics>;
 }
 
 export type TaskLifecycleEvent =
@@ -155,7 +152,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     startingCapacity,
     apiKeyStrategy,
     eventLogger,
-    opsMetrics$,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -180,7 +176,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       errorCheck$,
       postClaimUtilizationPct$: this.currentTmUtilization$,
       projectionUtilizationPct$: this.currentTmObservedUtilization$,
-      opsMetrics$,
     });
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),

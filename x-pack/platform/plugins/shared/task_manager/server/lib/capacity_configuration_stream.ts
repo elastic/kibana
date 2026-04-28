@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, OpsMetrics } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import type { TaskManagerConfig } from '../config';
@@ -20,7 +20,6 @@ interface CapacityConfigurationStreamOpts {
   errorCheck$: Observable<ErrorScanResult>;
   postClaimUtilizationPct$: Observable<number>;
   projectionUtilizationPct$?: Observable<number>;
-  opsMetrics$?: Observable<OpsMetrics>;
 }
 
 export function createCapacityConfigurationStream({
@@ -30,7 +29,6 @@ export function createCapacityConfigurationStream({
   errorCheck$,
   postClaimUtilizationPct$,
   projectionUtilizationPct$,
-  opsMetrics$,
 }: CapacityConfigurationStreamOpts): Observable<number> {
   const elasticsearchManagedCapacity$ =
     config.adjust_capacity_for_elasticsearch_errors === true
@@ -69,13 +67,6 @@ export function createCapacityConfigurationStream({
         controller.setProjectionUtilizationPct(utilizationPct);
       })
   );
-  if (opsMetrics$) {
-    subscriptions.add(
-      opsMetrics$.subscribe((opsMetrics) => {
-        controller.setOpsMetrics(opsMetrics);
-      })
-    );
-  }
   subscriptions.add(
     elasticsearchManagedCapacity$.subscribe((capacity) => {
       controller.setEsManagedCapacity(capacity);
@@ -91,6 +82,7 @@ export function createCapacityConfigurationStream({
       capacitySubscription.unsubscribe();
       clearInterval(intervalId);
       subscriptions.unsubscribe();
+      controller.destroy();
     };
   });
 }
