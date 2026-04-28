@@ -54,11 +54,8 @@ const toApiFormat = (assignments: Assignments) =>
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 
-/**
- * Returns only the assignments that differ from the recommended defaults.
- * Features whose endpoints match the defaults are omitted so the server-side
- * fallback chain (recommendedEndpoints → parent) stays in effect.
- */
+// Returns only the assignments that differ from recommended, so the server-side fallback
+// chain (recommendedEndpoints → parent) stays in effect for unchanged features.
 const getChangedAssignments = (
   assignments: Assignments,
   registeredFeatures: InferenceFeatureResponse[],
@@ -158,14 +155,18 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [settingsData]
   );
 
-  const isDirty = useMemo(
-    () =>
-      Object.entries(assignments).some(([featureId, currentIds]) => {
-        const defaults = defaultAssignments[featureId];
-        return !defaults || !arraysEqual(currentIds, defaults);
-      }),
-    [assignments, defaultAssignments]
-  );
+  const dirtyFeatureIds = useMemo<ReadonlySet<string>>(() => {
+    const ids = new Set<string>();
+    for (const [featureId, currentIds] of Object.entries(assignments)) {
+      const defaults = defaultAssignments[featureId];
+      if (!defaults || !arraysEqual(currentIds, defaults)) {
+        ids.add(featureId);
+      }
+    }
+    return ids;
+  }, [assignments, defaultAssignments]);
+
+  const isDirty = dirtyFeatureIds.size > 0;
 
   const updateEndpoints = useCallback((featureId: string, endpointIds: string[]) => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));

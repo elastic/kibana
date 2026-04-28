@@ -97,10 +97,8 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
-  // The user has explicitly opted into custom mode this session. We need this on top of the
-  // array-equality check because the editable list is seeded with the recommended endpoints,
-  // so without this flag the toggle would snap back to ON immediately after the user confirms
-  // "Turn off recommended defaults".
+  // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
+  // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
   const [hasOptedIntoCustomMode, setHasOptedIntoCustomMode] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const { isTechPreview, isBeta } = feature;
@@ -189,15 +187,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const handleToggleRecommendedDefaults = useCallback(
     (checked: boolean) => {
       if (checked) {
-        // Going OFF -> ON: confirm before discarding the user's customizations.
         if (!useRecommendedDefaults) {
           setIsResetModalOpen(true);
-          return;
         }
-        // Already aligned with recommended; nothing to do.
         return;
       }
-      // Going ON -> OFF: warn the user about leaving the recommended set.
       setIsDisableModalOpen(true);
     },
     [useRecommendedDefaults]
@@ -210,7 +204,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
 
   const confirmDisableRecommendedDefaults = useCallback(() => {
-    // Seed the editable list with the recommended set so the user can customize from there.
     setHasOptedIntoCustomMode(true);
     onEndpointsChange(featureId, [...effectiveRecommendedEndpoints]);
     setIsDisableModalOpen(false);

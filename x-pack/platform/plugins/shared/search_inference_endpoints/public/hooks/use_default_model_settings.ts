@@ -30,24 +30,8 @@ export interface UseDefaultModelSettingsReturn {
   reset: () => void;
 }
 
-/**
- * Persisted ↔ UI state mapping
- *
- * Kibana stores two UI settings (shared across many plugins):
- *   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR        → connector ID or 'NO_DEFAULT_CONNECTOR'
- *   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY → boolean ("default only" mode)
- *
- * This hook exposes three UI controls:
- *   enableAi              → virtual toggle (not stored directly)
- *   defaultModelId        → maps 1:1 to DEFAULT_AI_CONNECTOR
- *   featureSpecificModels → inverse of DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
- *
- * "AI disabled" is encoded as:
- *   defaultModelId = NO_DEFAULT_MODEL  AND  defaultOnly = true
- *
- * derive()     reads persisted → UI state
- * toPersisted() writes UI state → persisted
- */
+// Persisted shape of the two underlying UI settings. AI is "disabled" when both
+// `defaultModelId === NO_DEFAULT_MODEL` and `defaultOnly === true`.
 interface PersistedDefaultModelState {
   defaultModelId: string;
   defaultOnly: boolean;
@@ -89,9 +73,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   );
   const [state, setState] = useState<DefaultModelSettingsState>(() => derive(getPersistedState()));
 
-  // Remembers the last "AI enabled" config so toggling the master switch OFF and
-  // back ON in the same session restores what the user had before.
-  // Stored as UI shape (DefaultModelSettingsState) to avoid back-and-forth conversions.
+  // Remembers the last AI-enabled config so toggling the master switch off and back on restores it.
   const lastEnabledRef = useRef<DefaultModelSettingsState | null>(null);
   if (lastEnabledRef.current === null) {
     const persisted = getPersistedState();
