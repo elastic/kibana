@@ -14,37 +14,42 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiHorizontalRule,
   EuiPopover,
-  EuiPopoverTitle,
-  EuiProgress,
-  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CloudHostedUsage } from './cloud_hosted_usage';
+import { ServerlessUsage } from './serverless_usage';
+
 interface TrialUsageBadgeProps {
   billingUrl?: string;
+  isServerless?: boolean;
+  trialDaysLeft?: number;
 }
 
-// TODO: Replace with real API data when available
-const MOCKED_USAGE = {
-  searchUsage: {
-    value: 84.69,
-    unit: 'ECU',
-    max: 100,
-  },
-  modelUsage: {
-    value: 9000,
-    displayValue: '9k',
-    unit: 'Tokens',
-    max: 50000,
-  },
-};
-
-export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ billingUrl }) => {
+export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
+  billingUrl,
+  isServerless = false,
+  trialDaysLeft = 12,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
+
+  const title = isServerless
+    ? i18n.translate('xpack.searchSharedUi.trialUsageBadge.serverlessTitle', {
+        defaultMessage: 'Elasticsearch Serverless',
+      })
+    : i18n.translate('xpack.searchSharedUi.trialUsageBadge.cloudHostedTitle', {
+        defaultMessage: 'Elastic Cloud Hosted',
+      });
+
+  const daysLabel = i18n.translate('xpack.searchSharedUi.trialUsageBadge.daysLeft', {
+    defaultMessage: '{days} days',
+    values: { days: trialDaysLeft },
+  });
 
   const button = (
     <EuiFlexGroup
@@ -53,6 +58,12 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ billingUrl }) 
       onClick={() => setIsPopoverOpen((prev) => !prev)}
       role="button"
       tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setIsPopoverOpen((prev) => !prev);
+        }
+      }}
       css={css({
         height: 28,
         padding: `${euiTheme.size.xxs} ${euiTheme.size.s} ${euiTheme.size.xxs} ${euiTheme.size.xs}`,
@@ -82,13 +93,15 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ billingUrl }) 
           size="xs"
           flush="both"
           color="primary"
+          iconType="arrowDown"
+          iconSide="right"
           css={css({
             height: 'auto',
             minHeight: 0,
           })}
         >
-          {i18n.translate('xpack.searchSharedUi.trialUsageBadge.viewUsage', {
-            defaultMessage: 'View usage',
+          {i18n.translate('xpack.searchSharedUi.trialUsageBadge.usageLabel', {
+            defaultMessage: 'Usage',
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -101,109 +114,58 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ billingUrl }) 
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
-      panelPaddingSize="m"
-      aria-label={i18n.translate('xpack.searchSharedUi.trialUsageBadge.popoverAriaLabel', {
-        defaultMessage: 'Serverless usage',
-      })}
+      panelPaddingSize="none"
+      aria-label={title}
       data-test-subj="trialUsagePopover"
     >
-      <EuiPopoverTitle paddingSize="m" css={css({ border: 'none', paddingBottom: 0 })}>
-        {i18n.translate('xpack.searchSharedUi.trialUsageBadge.popoverTitle', {
-          defaultMessage: 'Serverless usage',
-        })}
-      </EuiPopoverTitle>
-      <EuiFlexGroup direction="column" gutterSize="m" css={css({ width: 280 })}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        css={css({ width: 340, padding: `${euiTheme.size.base} ${euiTheme.size.s}` })}
+      >
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {i18n.translate('xpack.searchSharedUi.trialUsageBadge.searchUsageLabel', {
-                      defaultMessage: 'Search usage',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type="question"
-                    content={i18n.translate(
-                      'xpack.searchSharedUi.trialUsageBadge.searchUsageTooltip',
-                      { defaultMessage: 'Elastic Compute Units consumed by search operations' }
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiTitle size="xxs">
+                <h4>{title}</h4>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>{MOCKED_USAGE.searchUsage.value}</strong>{' '}
-                <span css={css({ color: euiTheme.colors.textSubdued })}>
-                  {MOCKED_USAGE.searchUsage.unit}
-                </span>
-              </EuiText>
+              <EuiBadge color="hollow">{daysLabel}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiProgress
-            value={MOCKED_USAGE.searchUsage.value}
-            max={MOCKED_USAGE.searchUsage.max}
-            size="s"
-            color="success"
-            css={css({ marginTop: euiTheme.size.xs })}
-          />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {i18n.translate('xpack.searchSharedUi.trialUsageBadge.modelUsageLabel', {
-                      defaultMessage: 'Model usage',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type="question"
-                    content={i18n.translate(
-                      'xpack.searchSharedUi.trialUsageBadge.modelUsageTooltip',
-                      { defaultMessage: 'Tokens consumed by ML model inference' }
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>{MOCKED_USAGE.modelUsage.displayValue}</strong>{' '}
-                <span css={css({ color: euiTheme.colors.textSubdued })}>
-                  {MOCKED_USAGE.modelUsage.unit}
-                </span>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiProgress
-            value={MOCKED_USAGE.modelUsage.value}
-            max={MOCKED_USAGE.modelUsage.max}
-            size="s"
-            color="success"
-            css={css({ marginTop: euiTheme.size.xs })}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem>{isServerless ? <ServerlessUsage /> : <CloudHostedUsage />}</EuiFlexItem>
 
         <EuiFlexItem>
+          <EuiHorizontalRule margin="m" />
           <EuiButton
             data-test-subj="sharedUiTrialUsageBadgeViewSubscriptionPlansButton"
             href={billingUrl || undefined}
             fullWidth
             color="text"
+            iconType="popout"
+            iconSide="right"
           >
             {i18n.translate('xpack.searchSharedUi.trialUsageBadge.viewSubscriptionPlans', {
               defaultMessage: 'View subscription plans',
             })}
           </EuiButton>
+        </EuiFlexItem>
+
+        <EuiFlexItem css={css({ textAlign: 'center', marginTop: euiTheme.size.s })}>
+          <EuiButtonEmpty
+            data-test-subj="sharedUiTrialUsageBadgeDocumentationButton"
+            href="https://www.elastic.co/docs"
+            target="_blank"
+            size="xs"
+            iconType="documents"
+          >
+            {i18n.translate('xpack.searchSharedUi.trialUsageBadge.documentation', {
+              defaultMessage: 'Documentation',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>

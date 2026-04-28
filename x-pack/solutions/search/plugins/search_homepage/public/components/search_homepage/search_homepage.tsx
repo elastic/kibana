@@ -100,7 +100,10 @@ export const SearchHomepagePage = () => {
               </EuiFlexItem>
               {isTrial && isTrialBadgeEnabled ? (
                 <EuiFlexItem grow={false}>
-                  <TrialUsageBadge billingUrl={billingUrl} />
+                  <TrialUsageBadge
+                    billingUrl={billingUrl}
+                    isServerless={cloud?.isServerlessEnabled}
+                  />
                 </EuiFlexItem>
               ) : (
                 !cloud?.isCloudEnabled && (

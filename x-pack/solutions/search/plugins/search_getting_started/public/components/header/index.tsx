@@ -69,7 +69,10 @@ export const SearchGettingStartedHeader: React.FC = () => {
                   alignItems: 'flex-start',
                 })}
               >
-                <TrialUsageBadge billingUrl={billingUrl} />
+                <TrialUsageBadge
+                  billingUrl={billingUrl}
+                  isServerless={cloud?.isServerlessEnabled}
+                />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
