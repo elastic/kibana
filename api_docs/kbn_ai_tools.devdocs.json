@@ -2541,6 +2541,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DocumentAnalysis",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2558,6 +2559,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatDocumentAnalysisOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2597,6 +2599,7 @@
             "lineNumber": 38,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "GetDiverseSampleDocumentsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
