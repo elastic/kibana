@@ -69,7 +69,7 @@ export const dataViewSpecSchema = schema.object(
           ),
         }),
         {
-          maxSize: 100,
+          maxSize: 1_000,
           meta: {
             description:
               'An array of field patterns to exclude from `_source` in document results.',
