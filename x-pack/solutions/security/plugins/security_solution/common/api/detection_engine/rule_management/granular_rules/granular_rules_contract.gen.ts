@@ -38,7 +38,7 @@ export const GranularRulesSearch = lazySchema(() =>
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
 
 export const GranularRulesFacetCategory = lazySchema(() =>
-  z.enum(['tags', 'type', 'enabled', 'updatedBy', 'createdBy', 'lastRunOutcome'])
+  z.enum(['tags', 'enabled', 'updatedBy', 'createdBy', 'lastRunOutcome', 'isCustomized'])
 );
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
 export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.enum;

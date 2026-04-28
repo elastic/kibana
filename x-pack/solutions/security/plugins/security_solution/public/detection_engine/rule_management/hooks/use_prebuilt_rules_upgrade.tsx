@@ -15,6 +15,7 @@ import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_pa
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
+import type { ReviewRuleInstallationField } from '../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import {
   type FindRulesSortField,
   type PrebuiltRulesFilter,
@@ -52,6 +53,19 @@ import { TabContentPadding } from '../components/rule_details/rule_details_flyou
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 const RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION = 2;
 const RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION = 2;
+
+const REVIEW_UPGRADE_AGGREGATIONS = {
+  counts: ['tags', 'enabled', 'isCustomized'],
+};
+const REVIEW_UPGRADE_FIELDS: ReviewRuleInstallationField[] = [
+  'name',
+  'tags',
+  'related_integrations',
+  'risk_score',
+  'severity',
+  'description',
+  'revision',
+];
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
@@ -122,6 +136,8 @@ export function usePrebuiltRulesUpgrade({
         ruleIds,
       },
       searchTerm,
+      aggregations: REVIEW_UPGRADE_AGGREGATIONS,
+      fields: REVIEW_UPGRADE_FIELDS,
     },
     {
       refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,

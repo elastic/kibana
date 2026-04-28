@@ -181,7 +181,7 @@ components:
         Facet categories available for prebuilt rule asset aggregations.
       enum:
         - tags
-        - type
+        - severity
 
     PrebuiltRuleAssetsAggregations:
       type: object

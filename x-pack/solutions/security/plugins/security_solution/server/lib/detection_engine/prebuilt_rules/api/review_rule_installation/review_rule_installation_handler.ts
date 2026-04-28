@@ -35,8 +35,7 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../logic/rule_assets/prebuilt_r
 
 const PREBUILT_RULE_INSTALLATION_FACET_AGG_SIZE = 200;
 
-// Minimum rule-response identity fields always surfaced to the caller so the
-// returned objects are recognizable regardless of what `fields` they asked for.
+// Minimum required identity fields.
 const REVIEW_INSTALLATION_BASELINE_FIELDS: ReadonlySet<ReviewRuleInstallationField> = new Set([
   'rule_id',
   'id',
@@ -47,14 +46,6 @@ const REVIEW_INSTALLATION_BASELINE_FIELDS: ReadonlySet<ReviewRuleInstallationFie
   'rule_source',
 ]);
 
-/**
- * Second stage of `fields` filtering (first stage is ES `_source.includes` in
- * `fetch_assets_by_version`). Required because the ES-side baseline is wider
- * than this response-side baseline — it has to include everything zod needs
- * to validate across all rule types — so without this pass the response
- * would leak schema-required fields the caller didn't ask for, plus zod
- * defaults (e.g. `tags: []`) for any unloaded array-typed keys.
- */
 const applyFieldSelection = (
   rules: RuleResponse[],
   fields: ReviewRuleInstallationField[] | undefined
@@ -76,7 +67,7 @@ const buildPrebuiltRuleInstallationAggregations = (
 ): Record<string, AggregationsAggregationContainer> => {
   const fieldByCategory: Record<PrebuiltRuleAssetsFacetCategory, string> = {
     tags: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`,
-    type: `${PREBUILT_RULE_ASSETS_SO_TYPE}.type`,
+    severity: `${PREBUILT_RULE_ASSETS_SO_TYPE}.severity`,
   };
 
   return Object.fromEntries(

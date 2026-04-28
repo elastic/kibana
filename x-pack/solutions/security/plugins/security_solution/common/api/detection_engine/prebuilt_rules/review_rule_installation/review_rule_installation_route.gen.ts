@@ -152,7 +152,7 @@ export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
   * Facet categories available for prebuilt rule asset aggregations.
 
   */
-export const PrebuiltRuleAssetsFacetCategory = lazySchema(() => z.enum(['tags', 'type']));
+export const PrebuiltRuleAssetsFacetCategory = lazySchema(() => z.enum(['tags', 'severity']));
 export type PrebuiltRuleAssetsFacetCategory = z.infer<typeof PrebuiltRuleAssetsFacetCategory>;
 export type PrebuiltRuleAssetsFacetCategoryEnum = typeof PrebuiltRuleAssetsFacetCategory.enum;
 export const PrebuiltRuleAssetsFacetCategoryEnum = PrebuiltRuleAssetsFacetCategory.enum;

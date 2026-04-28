@@ -26,7 +26,20 @@ import * as i18n from './translations';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';
-import type { PrebuiltRuleAssetsSortItem } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
+  PrebuiltRuleAssetsSortItem,
+  ReviewRuleInstallationField,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+
+const REVIEW_INSTALL_AGGREGATIONS = { counts: ['tags', 'severity'] };
+const REVIEW_INSTALL_FIELDS: ReviewRuleInstallationField[] = [
+  'name',
+  'tags',
+  'related_integrations',
+  'risk_score',
+  'severity',
+  'description',
+];
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -185,6 +198,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       perPage: pagination.perPage,
       filterOptions,
       sortingOptions,
+      aggregations: REVIEW_INSTALL_AGGREGATIONS,
+      fields: REVIEW_INSTALL_FIELDS,
     },
     {
       refetchInterval: 60000, // Refetch available rules for installation every minute

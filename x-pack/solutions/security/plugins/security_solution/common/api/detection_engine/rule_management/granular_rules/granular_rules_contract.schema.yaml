@@ -31,11 +31,11 @@ components:
       type: string
       enum:
         - tags
-        - type
         - enabled
         - updatedBy
         - createdBy
         - lastRunOutcome
+        - isCustomized
 
     SearchRulesField:
       type: string

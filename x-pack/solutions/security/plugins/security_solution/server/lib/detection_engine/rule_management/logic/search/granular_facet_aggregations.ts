@@ -52,7 +52,7 @@ export const buildAggregations = ({
 
 export const expandRawAggregationResult = (
   raw: Record<string, unknown>,
-  categories: GranularRulesFacetCategory[]
+  categories: readonly string[]
 ): FacetCounts => {
   const counts: FacetCounts = {};
   for (const category of categories) {
