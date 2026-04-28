@@ -23,23 +23,23 @@ export type UseBooleanUrlStateResult = [boolean, (next: boolean) => void];
  */
 export const useBooleanUrlState = (paramName: string): UseBooleanUrlStateResult => {
   const history = useHistory();
-  if (!history) {
-    throw new Error('useBooleanUrlState must be called inside a <Router>.');
-  }
 
+  // Compute storage as null when history is missing so every hook below registers
+  // unconditionally on every render. The misuse is surfaced via the throw at the end.
   const urlStateStorage = useMemo(
-    () => createKbnUrlStateStorage({ useHash: false, history }),
+    () => (history ? createKbnUrlStateStorage({ useHash: false, history }) : null),
     [history]
   );
 
   const readFromUrl = useCallback(
-    () => urlStateStorage.get<boolean>(paramName) === true,
+    () => urlStateStorage?.get<boolean>(paramName) === true,
     [urlStateStorage, paramName]
   );
 
   const [value, setValue] = useState<boolean>(readFromUrl);
 
   useEffect(() => {
+    if (!urlStateStorage) return;
     const sub = urlStateStorage.change$<boolean>(paramName).subscribe((next) => {
       setValue(next === true);
     });
@@ -48,6 +48,7 @@ export const useBooleanUrlState = (paramName: string): UseBooleanUrlStateResult 
 
   const setUrlValue = useCallback(
     (next: boolean) => {
+      if (!urlStateStorage) return;
       setValue(next);
       if (next) {
         urlStateStorage.set(paramName, true, { replace: false });
@@ -63,6 +64,10 @@ export const useBooleanUrlState = (paramName: string): UseBooleanUrlStateResult 
     },
     [urlStateStorage, paramName]
   );
+
+  if (!history) {
+    throw new Error('useBooleanUrlState must be called inside a <Router>.');
+  }
 
   return [value, setUrlValue];
 };
