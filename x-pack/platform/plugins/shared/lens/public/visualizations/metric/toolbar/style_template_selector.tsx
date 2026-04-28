@@ -19,6 +19,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { MetricStyleTemplateId } from '@kbn/lens-common';
 
+const customLabel = i18n.translate('xpack.lens.metric.styleTemplate.custom', {
+  defaultMessage: 'Custom',
+});
 const styleTemplates: Array<{
   id: MetricStyleTemplateId;
   label: string;
@@ -41,8 +44,8 @@ const styleTemplates: Array<{
   },
   {
     id: 'custom',
-    label: i18n.translate('xpack.lens.metric.styleTemplate.custom', { defaultMessage: 'Custom' }),
-    preview: <MetricPreview position="custom" />,
+    label: customLabel,
+    preview: <CustomStyleTemplatePreview title={customLabel} />,
   },
 ];
 
@@ -96,6 +99,7 @@ function StyleTemplateCard({
 }) {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
+  const isCustomTemplate = id === 'custom';
 
   return (
     <EuiPanel
@@ -141,18 +145,61 @@ function StyleTemplateCard({
           `}
       `}
     >
-      <EuiText
-        size="s"
-        css={css`
-          margin-bottom: ${euiTheme.size.s};
-        `}
-      >
-        <strong>{label}</strong>
-      </EuiText>
-      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s" color="plain">
-        {preview}
-      </EuiPanel>
+      {isCustomTemplate ? (
+        preview
+      ) : (
+        <>
+          <EuiText
+            size="s"
+            css={css`
+              margin-bottom: ${euiTheme.size.s};
+            `}
+          >
+            <strong>{label}</strong>
+          </EuiText>
+          <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s" color="plain">
+            {preview}
+          </EuiPanel>
+        </>
+      )}
     </EuiPanel>
+  );
+}
+
+function CustomStyleTemplatePreview({ title }: { title: string }) {
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      alignItems="center"
+      justifyContent="center"
+      responsive={false}
+      css={css`
+        min-height: 100px;
+        text-align: center;
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <strong>{title}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          color="subdued"
+          size="xs"
+          css={css`
+            max-width: 180px;
+            margin: 0 auto;
+            text-align: center;
+          `}
+        >
+          {i18n.translate('xpack.lens.metric.styleTemplate.customPreviewSubtitle', {
+            defaultMessage: 'Apply your own favorite settings',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
