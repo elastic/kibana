@@ -644,10 +644,12 @@ export class DashboardPageObject extends FtrService {
 
     if (!isSaveModalOpen) {
       if (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) {
+        this.log.debug('dashboardInteractiveSaveMenuItem exists in the app menu, clicking it');
         // Item is in the app menu (directly visible or in the overflow)
         await this.appMenu.clickMenuItem('dashboardInteractiveSaveMenuItem');
       } else {
         // Item is inside the save split button dropdown
+        this.log.debug('openSaveSplitMenu to find dashboardInteractiveSaveMenuItem');
         await this.openSaveSplitMenu();
         await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
       }
@@ -691,8 +693,10 @@ export class DashboardPageObject extends FtrService {
       !(await this.testSubjects.exists('dashboardQuickSaveMenuItem-secondary-button')) &&
       (await this.testSubjects.exists('app-menu-overflow-button'))
     ) {
+      this.log.debug('Save menu items are not directly visible, opening overflow menu');
       await this.testSubjects.click('app-menu-overflow-button');
     }
+    this.log.debug('Clicking save split menu button');
     await this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
   }
 
