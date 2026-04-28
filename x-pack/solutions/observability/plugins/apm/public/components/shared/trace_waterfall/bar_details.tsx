@@ -111,14 +111,8 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               data-test-subj="apmBarDetailsServiceNameBadge"
               data-ebt-action={getServiceBadgeHref ? EBT_CLICK_ACTION_VIEW_SERVICE : undefined}
               data-ebt-element={getServiceBadgeHref ? ebt?.serviceBadge.element : undefined}
+              data-prevent-row-click={getServiceBadgeHref ? true : undefined}
               href={getServiceBadgeHref?.(item.serviceName) as any}
-              {...(getServiceBadgeHref
-                ? ({
-                    onClick(e: React.SyntheticEvent) {
-                      e.stopPropagation(); // prevents triggering row click when navigating to service
-                    },
-                  } as object)
-                : {})}
               aria-label={
                 getServiceBadgeHref
                   ? i18n.translate('xpack.apm.trace.barDetails.serviceBadge.ariaLabel', {
@@ -166,10 +160,10 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 href={getRelatedErrorsHref?.(item.id) as any}
                 data-ebt-action={ebt?.errorBadge ? EBT_CLICK_ACTION_VIEW_ERROR : undefined}
                 data-ebt-element={ebt?.errorBadge.element}
+                data-prevent-row-click
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();
-                    e.stopPropagation();
                     onErrorClick({
                       traceId: item.traceId,
                       docId: item.id,

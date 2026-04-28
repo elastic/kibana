@@ -74,7 +74,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           border-bottom: ${euiTheme.border.thin};
           ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
         `}
-        onClick={() => {
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
           if (!hasToggle && onClick) {
             onClick(item.id);
           }
@@ -126,7 +127,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}
-              onClick={() => {
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
                 if (hasToggle && onClick) {
                   onClick(item.id);
                 }
