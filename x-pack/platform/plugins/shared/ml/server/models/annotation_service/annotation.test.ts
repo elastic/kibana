@@ -9,8 +9,8 @@ import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json'
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import type { Annotation } from '../../../common/types/annotations';
-import { isAnnotations } from '../../../common/types/annotations';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
+import { isAnnotations } from '@kbn/ml-common-types/annotations';
 
 import type { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
 import { annotationServiceProvider } from '.';

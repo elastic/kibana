@@ -36,7 +36,7 @@ export const RuleDoctorPage = () => {
           <h2>
             <FormattedMessage
               id="xpack.alertingV2.ruleDoctor.emptyTitle"
-              defaultMessage="No findings yet"
+              defaultMessage="No insights yet"
             />
           </h2>
         }

@@ -52,6 +52,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -242,6 +243,7 @@
             "lineNumber": 133,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldTypes",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -326,6 +328,7 @@
             "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataGridItem",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -421,6 +424,7 @@
             "lineNumber": 86,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -587,6 +591,7 @@
             "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -726,6 +731,7 @@
             "lineNumber": 323,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "DataGridItem",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1217,6 +1223,7 @@
             "lineNumber": 346,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IndexPagination",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2073,6 +2080,7 @@
                 "lineNumber": 93,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "SortSettings",
                 "trackAdoption": false
               }
             ]
@@ -2182,6 +2190,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2227,6 +2236,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2264,6 +2274,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2301,6 +2312,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2340,6 +2352,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2390,6 +2403,7 @@
                 "lineNumber": 253,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "RowCountInfo",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2431,6 +2445,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2476,6 +2491,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2521,6 +2537,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2558,6 +2575,7 @@
                 "lineNumber": 1792,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]
@@ -2798,6 +2816,7 @@
                 "lineNumber": 117,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "CellValue",
                 "trackAdoption": false
               }
             ]
@@ -3053,6 +3072,7 @@
             "lineNumber": 117,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "CellValue",
             "trackAdoption": false
           }
         ],

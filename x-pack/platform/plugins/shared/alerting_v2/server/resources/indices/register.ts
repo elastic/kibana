@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { IndexInitializer } from '../../lib/services/resource_service/index_initializer';
 import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
 import type { IndexResourceDefinition } from './types';
-import { getRuleDoctorFindingsResourceDefinition } from './rule_doctor_findings';
+import { getRuleDoctorInsightsResourceDefinition } from './rule_doctor_insights';
 
 export interface RegisterIndicesOptions {
   resourceManager: ResourceManagerContract;
@@ -30,5 +30,5 @@ export function registerIndices({
 }
 
 function getIndexResourceDefinitions(): IndexResourceDefinition[] {
-  return [getRuleDoctorFindingsResourceDefinition()];
+  return [getRuleDoctorInsightsResourceDefinition()];
 }

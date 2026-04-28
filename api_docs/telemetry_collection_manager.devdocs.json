@@ -1286,6 +1286,7 @@
             "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StatsCollectionConfig",
             "trackAdoption": false
           },
           {
@@ -1308,6 +1309,7 @@
             "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StatsCollectionContext",
             "trackAdoption": false
           }
         ],
@@ -1397,6 +1399,7 @@
             "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StatsCollectionConfig",
             "trackAdoption": false
           },
           {
@@ -1419,6 +1422,7 @@
             "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StatsCollectionContext",
             "trackAdoption": false
           }
         ],
@@ -1512,6 +1516,7 @@
               "lineNumber": 20,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "CollectionStrategyConfig",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1589,6 +1594,7 @@
               "lineNumber": 193,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "UnencryptedStatsGetterConfig",
               "trackAdoption": false
             }
           ]
@@ -1638,6 +1644,7 @@
               "lineNumber": 261,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "UnencryptedStatsGetterConfig",
               "trackAdoption": false
             }
           ]
