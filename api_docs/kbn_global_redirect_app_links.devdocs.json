@@ -65,6 +65,7 @@
             "lineNumber": 23,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "GlobalRedirectAppLinkProps",
             "trackAdoption": false,
             "isRequired": true
           }

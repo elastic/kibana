@@ -157,8 +157,9 @@ DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
 export const DragDropContextWrapper = React.memo(
   DragDropContextWrapperComponent,
-  // prevent re-renders when data providers are added or removed, but all other props are the same
-  (prevProps, nextProps) => deepEqual(prevProps.children, nextProps.children)
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.children, nextProps.children) &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields)
 );
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';

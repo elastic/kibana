@@ -1050,6 +1050,7 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
@@ -1776,6 +1777,8 @@ x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/feature
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
+# common
+x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -2284,7 +2287,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
-/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
+/src/platform/packages/private/kbn-validate-oas/src/oas_error_baseline.json
 # Exclude usage collection schemas from @elastic/kibana-core ownership
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
@@ -2732,6 +2735,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
 
 ## Security Solution sub teams - Cloud Security Posture
 
@@ -3076,11 +3084,6 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics

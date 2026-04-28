@@ -1426,6 +1426,7 @@
                 "lineNumber": 38,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetSLOGroupedStatsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1462,6 +1463,7 @@
                 "lineNumber": 39,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindSLOParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1515,6 +1517,7 @@
                 "lineNumber": 40,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetSLOParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1598,6 +1601,7 @@
               "lineNumber": 37,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
