@@ -249,6 +249,41 @@ describe('ConnectorFormFieldsGlobal', () => {
     });
   });
 
+  it('resumes auto-populating connector ID if both name and ID are cleared', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    const idInput = screen.getByTestId('connectorIdInput');
+
+    // Type name, ID gets auto-populated
+    await userEvent.type(nameInput, 'My Connector');
+    await waitFor(() => {
+      expect(idInput).toHaveValue('my-connector');
+    });
+
+    // Clear ID, stops auto-populating
+    await userEvent.clear(idInput);
+    await waitFor(() => {
+      expect(idInput).toHaveValue('');
+    });
+
+    // Clear name, both are now empty, should resume auto-populating
+    await userEvent.clear(nameInput);
+    await waitFor(() => {
+      expect(nameInput).toHaveValue('');
+    });
+
+    // Type name again, ID should get auto-populated
+    await userEvent.type(nameInput, 'New Connector');
+    await waitFor(() => {
+      expect(idInput).toHaveValue('new-connector');
+    });
+  });
+
   it('truncates auto-populated connector ID to 36 characters', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit}>
