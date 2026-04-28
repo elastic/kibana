@@ -14,7 +14,11 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { alertingTools } from '../../common/constants';
-import { ruleOperationSchema, executeRuleOperations } from './operations';
+import {
+  ruleOperationSchema,
+  executeRuleOperations,
+  RuleOperationValidationError,
+} from './operations';
 
 const manageRuleSchema = z.object({
   ruleAttachmentId: z
@@ -104,7 +108,11 @@ Use operations[] to:
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(`Error in manage_rule tool: ${message}`);
+      if (error instanceof RuleOperationValidationError) {
+        logger.warn(`manage_rule tool: invalid input — ${message}`);
+      } else {
+        logger.error(`Error in manage_rule tool: ${message}`);
+      }
       return {
         results: [
           {

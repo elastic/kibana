@@ -164,4 +164,34 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('Failed to persist rule attachment');
     });
   });
+
+  describe('logger severity', () => {
+    it('logs validation errors at warn level (not error)', async () => {
+      const ctx = createContext();
+
+      await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
+
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('manage_rule tool: invalid input')
+      );
+      expect(ctx.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs unexpected errors at error level (not warn)', async () => {
+      const ctx = createContext();
+      ctx.attachments.add.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(ctx.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error in manage_rule tool')
+      );
+      expect(ctx.logger.warn).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -7,7 +7,11 @@
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { executeRuleOperations, type RuleOperation } from './operations';
+import {
+  executeRuleOperations,
+  RuleOperationValidationError,
+  type RuleOperation,
+} from './operations';
 
 const createMockEsClient = () => elasticsearchServiceMock.createScopedClusterClient();
 
@@ -151,6 +155,61 @@ describe('executeRuleOperations', () => {
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
         'recovery_policy.query.base is required when recovery_policy.type is "query"'
+      );
+    });
+  });
+
+  describe('validation error class', () => {
+    const expectValidationError = async (promise: Promise<unknown>) => {
+      await expect(promise).rejects.toBeInstanceOf(RuleOperationValidationError);
+    };
+
+    it('wraps invalid ES|QL errors', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockRejectedValueOnce(new Error('boom'));
+      await expectValidationError(
+        executeRuleOperations({}, [{ operation: 'set_query', base: 'FROM x' }], esClient)
+      );
+    });
+
+    it('wraps unknown grouping fields', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'foo', type: 'keyword' }],
+        values: [],
+      } as never);
+      await expectValidationError(
+        executeRuleOperations(
+          {},
+          [
+            { operation: 'set_query', base: 'FROM x' },
+            { operation: 'set_grouping', fields: ['bar'] },
+          ],
+          esClient
+        )
+      );
+    });
+
+    it('wraps missing-name error on new rule', async () => {
+      await expectValidationError(
+        executeRuleOperations({}, [{ operation: 'set_kind', kind: 'alert' }], undefined, {
+          isNew: true,
+        })
+      );
+    });
+
+    it('wraps state_transition on non-alert kind', async () => {
+      await expectValidationError(
+        executeRuleOperations({}, [
+          { operation: 'set_kind', kind: 'signal' },
+          { operation: 'set_state_transition', pending_count: 1 },
+        ])
+      );
+    });
+
+    it('wraps recovery_policy missing query', async () => {
+      await expectValidationError(
+        executeRuleOperations({}, [{ operation: 'set_recovery_policy', type: 'query' }])
       );
     });
   });

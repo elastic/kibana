@@ -71,6 +71,20 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
 
 export type RuleOperation = z.infer<typeof ruleOperationSchema>;
 
+// ─── Validation errors ────────────────────────────────────────────────────────
+
+/**
+ * Thrown for user/agent-input validation failures (invalid ES|QL, unknown grouping
+ * field, missing required fields). Distinguished from unexpected errors so the
+ * caller can log them at a lower severity.
+ */
+export class RuleOperationValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RuleOperationValidationError';
+  }
+}
+
 // ─── ES|QL query validation ───────────────────────────────────────────────────
 
 interface EsqlColumn {
@@ -96,7 +110,7 @@ async function validateEsqlQuery(
     return (response as { columns?: EsqlColumn[] }).columns ?? [];
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    throw new Error(`Invalid ES|QL query: ${message}`);
+    throw new RuleOperationValidationError(`Invalid ES|QL query: ${message}`);
   }
 }
 
@@ -162,7 +176,7 @@ export const executeRuleOperations = async (
           const columnNames = new Set(lastQueryColumns.map((c) => c.name));
           const missing = op.fields.filter((f) => !columnNames.has(f));
           if (missing.length > 0) {
-            throw new Error(
+            throw new RuleOperationValidationError(
               `Grouping fields not found in query output columns: ${missing.join(', ')}. ` +
                 `Available columns: ${[...columnNames].join(', ')}`
             );
@@ -205,17 +219,21 @@ export const executeRuleOperations = async (
   }
 
   if (isNew && !next.metadata?.name) {
-    throw new Error(
+    throw new RuleOperationValidationError(
       'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
     );
   }
 
   if (!isStateTransitionAllowed(next)) {
-    throw new Error('state_transition is only allowed when kind is "alert".');
+    throw new RuleOperationValidationError(
+      'state_transition is only allowed when kind is "alert".'
+    );
   }
 
   if (!isRecoveryPolicyQueryProvided(next)) {
-    throw new Error('recovery_policy.query.base is required when recovery_policy.type is "query".');
+    throw new RuleOperationValidationError(
+      'recovery_policy.query.base is required when recovery_policy.type is "query".'
+    );
   }
 
   return next;
