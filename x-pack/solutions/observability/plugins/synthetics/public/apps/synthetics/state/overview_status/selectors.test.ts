@@ -203,11 +203,13 @@ describe('selectOverviewStatus', () => {
     } as any,
   });
 
-  it('returns raw status when groupBy is "monitor"', () => {
+  it('returns raw status when groupBy is "monitor" with per-monitor counts', () => {
     const state = buildState('monitor');
     const result = selectOverviewStatus(state as SyntheticsAppState);
     expect(result.status?.downConfigs).toHaveProperty('multi');
     expect(result.status?.downConfigs.multi.locations).toHaveLength(2);
+    expect(result.status?.up).toBe(1);
+    expect(result.status?.down).toBe(1);
   });
 
   it('separates multi-location monitors into per-location entries placed in the bucket matching each location status', () => {
@@ -227,6 +229,10 @@ describe('selectOverviewStatus', () => {
     expect(result.status?.upConfigs['multi-loc2'].locations).toHaveLength(1);
     expect(result.status?.upConfigs['multi-loc2'].locations[0].id).toBe('loc2');
     expect(result.status?.upConfigs['multi-loc2'].overallStatus).toBe('up');
+
+    // Counts are derived from bucket sizes: 2 up entries (single + multi-loc2), 1 down entry (multi-loc1)
+    expect(result.status?.up).toBe(2);
+    expect(result.status?.down).toBe(1);
   });
 
   it('redistributes pending locations of a down monitor into pendingConfigs', () => {
@@ -254,6 +260,9 @@ describe('selectOverviewStatus', () => {
     expect(Object.keys(result.status?.downConfigs ?? {})).toEqual(['mixed-loc1']);
     expect(Object.keys(result.status?.pendingConfigs ?? {})).toEqual(['mixed-loc2', 'mixed-loc3']);
     expect(result.status?.upConfigs).toEqual({});
+    expect(result.status?.down).toBe(1);
+    expect(result.status?.pending).toBe(2);
+    expect(result.status?.up).toBe(0);
   });
 
   it('keeps single-location monitors as-is regardless of groupBy', () => {

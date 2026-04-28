@@ -47,13 +47,23 @@ export const selectOverviewStatus = createSelector(
   (state: SyntheticsAppState) => state.overviewStatus,
   (state: SyntheticsAppState) => state.overview.groupBy.field,
   (overviewStatus, groupByField) => {
-    if (groupByField === 'monitor' || !overviewStatus.status) {
+    if (!overviewStatus.status) {
       return overviewStatus;
     }
-    const status = formatStatus(overviewStatus.status, groupByField);
+    const status =
+      groupByField === 'monitor'
+        ? overviewStatus.status
+        : formatStatus(overviewStatus.status, groupByField);
+
     return {
       ...overviewStatus,
-      status,
+      status: {
+        ...status,
+        up: Object.keys(status.upConfigs).length,
+        down: Object.keys(status.downConfigs).length,
+        pending: Object.keys(status.pendingConfigs).length,
+        disabledCount: Object.keys(status.disabledConfigs).length,
+      },
     };
   }
 );

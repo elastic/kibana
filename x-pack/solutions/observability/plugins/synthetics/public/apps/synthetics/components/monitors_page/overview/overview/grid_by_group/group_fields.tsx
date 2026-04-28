@@ -11,12 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../hooks';
 import { GroupMenu } from './group_menu';
+import { GroupByTour } from './group_by_tour';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
 import type { GroupByState } from '../../../../../state/overview';
 import { selectOverviewGroupBy, setOverviewGroupByAction } from '../../../../../state/overview';
 
-const DEFAULT_GROUP_BY: GroupByState = { field: 'monitor', order: 'asc' };
+const DEFAULT_GROUP_BY: GroupByState = { field: 'none', order: 'asc' };
 const LOCAL_STORAGE_KEY = 'synthetics.overviewGroupBy';
 
 export const GroupFields = () => {
@@ -170,20 +171,22 @@ export const GroupFields = () => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxxs">
-              <span>{GROUP_TITLE}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="syntheticsOverviewGroupButton">
-            <GroupMenu
-              groupOptions={groupByOptions}
-              orderByOptions={orderByOptions}
-              groupField={label}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <GroupByTour>
+          <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <span>{GROUP_TITLE}</span>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="syntheticsOverviewGroupButton">
+              <GroupMenu
+                groupOptions={groupByOptions}
+                orderByOptions={orderByOptions}
+                groupField={label}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </GroupByTour>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
