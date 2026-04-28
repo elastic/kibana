@@ -1148,7 +1148,11 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/search/**/*.tsx'],
+      files: [
+        'x-pack/solutions/search/**/*.tsx',
+        'x-pack/platform/plugins/shared/content_connectors/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/search_inference_endpoints/**/*.{ts,tsx}',
+      ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
@@ -2875,6 +2879,38 @@ module.exports = {
             ],
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+          },
+        ],
+      },
+    },
+
+    /**
+     * kbn-ui dependency allowlist — packages under `src/platform/kbn-ui/**` must be
+     * portable outside Kibana (e.g. Cloud UI). They may only import from the
+     * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
+     * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
+     * and stories are excluded because they reference Kibana-only tooling.
+     */
+    {
+      files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
+      excludedFiles: [
+        'src/platform/kbn-ui/**/*.test.*',
+        'src/platform/kbn-ui/**/*.stories.*',
+        'src/platform/kbn-ui/**/__stories__/**',
+        'src/platform/kbn-ui/**/__tests__/**',
+        'src/platform/kbn-ui/**/packaging/**',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              '@kbn/*',
+              '!@kbn/i18n',
+              '!@kbn/i18n-react',
+              '!@kbn/core-chrome-layout-constants',
+              '!@kbn/core-chrome-layout-utils',
+            ],
           },
         ],
       },

@@ -21,6 +21,8 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MainCategories } from '@kbn/siem-readiness';
 import { ALL_CATEGORIES } from '@kbn/siem-readiness';
 import { SIEM_READINESS_PATH } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
+import { SiemReadinessEventTypes } from '../../common/lib/telemetry/events/siem_readiness/types';
 import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
 import { VisibilitySectionTabs } from './visibility_section_tabs';
 import {
@@ -34,6 +36,7 @@ const DEFAULT_TAB: VisibilityTabId = 'coverage';
 const SiemReadinessDashboard = () => {
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
+  const { telemetry } = useKibana().services;
 
   // Persistent state for category filtering (shared with configuration panel)
   const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
@@ -54,9 +57,10 @@ const SiemReadinessDashboard = () => {
   // Handle tab selection by updating URL path
   const handleTabSelect = useCallback(
     (tabId: VisibilityTabId) => {
+      telemetry.reportEvent(SiemReadinessEventTypes.TabVisited, { tabId });
       history.push(`${SIEM_READINESS_PATH}/visibility/${tabId}`);
     },
-    [history]
+    [history, telemetry]
   );
 
   return (
