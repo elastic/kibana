@@ -1423,7 +1423,7 @@
     "jszip": "3.10.1",
     "kea": "2.6.0",
     "langchain": "1.2.30",
-    "langsmith": "0.5.7",
+    "langsmith": "0.5.25",
     "launchdarkly-js-client-sdk": "3.9.0",
     "liquidjs": "10.25.7",
     "lodash": "4.17.23",
