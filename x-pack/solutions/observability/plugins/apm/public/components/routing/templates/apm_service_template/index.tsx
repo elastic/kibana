@@ -38,6 +38,8 @@ interface Props {
   children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 export function ApmServiceTemplate(props: Props) {
@@ -50,7 +52,14 @@ export function ApmServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({ title, children, selectedTab, searchBarOptions }: Props) {
+function TemplateWithContext({
+  title,
+  children,
+  selectedTab,
+  searchBarOptions,
+  bottomHeaderContent: BottomHeaderContent,
+  contentWrapper: ContentWrapper = React.Fragment,
+}: Props) {
   const {
     path: { serviceName },
     query,
@@ -136,65 +145,72 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
 
   return (
     <ServiceSloContextProvider serviceName={serviceName} environment={environment}>
-      <ApmMainTemplate
-        showActionsMenu
-        searchBar={<SearchBar {...searchBarOptions} showEnvironmentFilter />}
-        pageHeader={{
-          tabs,
-          rightSideItems: [<AnalyzeDataButton />],
-          pageTitle: (
-            <EuiFlexGroup alignItems="center">
+      <ContentWrapper>
+        <ApmMainTemplate
+          showActionsMenu
+          searchBar={
+            <>
+              {BottomHeaderContent && <BottomHeaderContent />}
+              <SearchBar {...searchBarOptions} showEnvironmentFilter />
+            </>
+          }
+          pageHeader={{
+            tabs,
+            rightSideItems: [<AnalyzeDataButton />],
+            pageTitle: (
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ServiceIcons
+                    serviceName={serviceName}
+                    environment={environment}
+                    start={start}
+                    end={end}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            children: (
+              <ServiceHeaderBadges
+                serviceName={serviceName}
+                environment={environment}
+                start={start}
+                end={end}
+                onSloClick={openSloOverviewFlyout}
+                alertsTabHref={alertsTabHref}
+              />
+            ),
+          }}
+        >
+          {isPendingServiceAgent ? (
+            <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ServiceIcons
-                  serviceName={serviceName}
-                  environment={environment}
-                  start={start}
-                  end={end}
+                <EuiSpacer size="l" />
+                <EuiLoadingLogo
+                  logo="logoObservability"
+                  size="l"
+                  data-test-subj="apmMainTemplateServiceAgentLoader"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          ),
-          children: (
-            <ServiceHeaderBadges
-              serviceName={serviceName}
-              environment={environment}
-              start={start}
-              end={end}
-              onSloClick={openSloOverviewFlyout}
-              alertsTabHref={alertsTabHref}
+          ) : (
+            <ServiceAnomalyTimeseriesContextProvider>
+              {children}
+            </ServiceAnomalyTimeseriesContextProvider>
+          )}
+          {sloOverviewFlyout && (
+            <SloOverviewFlyout
+              serviceName={sloOverviewFlyout.serviceName}
+              agentName={sloOverviewFlyout.agentName as AgentName | undefined}
+              onClose={closeSloOverviewFlyout}
             />
-          ),
-        }}
-      >
-        {isPendingServiceAgent ? (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="l" />
-              <EuiLoadingLogo
-                logo="logoObservability"
-                size="l"
-                data-test-subj="apmMainTemplateServiceAgentLoader"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <ServiceAnomalyTimeseriesContextProvider>
-            {children}
-          </ServiceAnomalyTimeseriesContextProvider>
-        )}
-        {sloOverviewFlyout && (
-          <SloOverviewFlyout
-            serviceName={sloOverviewFlyout.serviceName}
-            agentName={sloOverviewFlyout.agentName as AgentName | undefined}
-            onClose={closeSloOverviewFlyout}
-          />
-        )}
-      </ApmMainTemplate>
+          )}
+        </ApmMainTemplate>
+      </ContentWrapper>
     </ServiceSloContextProvider>
   );
 }

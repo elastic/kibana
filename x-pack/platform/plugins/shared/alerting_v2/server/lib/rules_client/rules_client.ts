@@ -46,7 +46,7 @@ import {
   buildUpdateRuleAttributes,
 } from './utils';
 import { buildRuleSoFilter } from './build_rule_filter';
-import { buildFindRulesSearch } from './build_rule_search';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
@@ -372,13 +372,16 @@ export class RulesClient {
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
-    const filter = buildFindRulesSearch({ filter: params.filter, search: params.search });
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const search = buildSoSearch(params.search);
     const sortField = mapSortField(params.sortField);
 
     const res = await this.rulesSavedObjectService.find({
       page,
       perPage,
-      filter,
+      filter: soFilter,
+      search,
+      searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       sortField,
       sortOrder: params.sortOrder,
     });
@@ -399,8 +402,8 @@ export class RulesClient {
    * IDs up to {@link BULK_FILTER_MAX_RULES}.
    */
   private async resolveRuleIds(params: BulkRulesParams): Promise<ResolveRuleIdsResult> {
-    if (params.ids && params.filter) {
-      throw Boom.badRequest('Only one of ids or filter can be provided');
+    if (params.ids && (params.filter || params.search)) {
+      throw Boom.badRequest('ids cannot be combined with filter or search');
     }
 
     if (params.ids) {
@@ -408,6 +411,7 @@ export class RulesClient {
     }
 
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const search = buildSoSearch(params.search);
     const allIds: string[] = [];
     let currentPage = 1;
     const pageSize = 100;
@@ -418,6 +422,8 @@ export class RulesClient {
         page: currentPage,
         perPage: pageSize,
         filter: soFilter,
+        search,
+        searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       });
 
       if (currentPage === 1) {

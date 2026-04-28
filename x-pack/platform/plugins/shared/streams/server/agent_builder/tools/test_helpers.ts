@@ -7,10 +7,9 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
@@ -120,92 +119,10 @@ export const createMockToolContext = (): ToolHandlerContext => {
     output: jest.fn(),
   };
 
-  return {
-    request: httpServerMock.createKibanaRequest(),
-    spaceId: 'default',
-    esClient: elasticsearchServiceMock.createScopedClusterClient(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-    modelProvider: {
-      getDefaultModel: jest.fn().mockResolvedValue({ inferenceClient }),
-      getModel: jest.fn(),
-      getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
-    } as ToolHandlerContext['modelProvider'],
-    toolProvider: {
-      has: jest.fn(),
-      get: jest.fn(),
-      list: jest.fn(),
-    } as ToolHandlerContext['toolProvider'],
-    runner: {
-      runTool: jest.fn(),
-      runInternalTool: jest.fn(),
-      runAgent: jest.fn(),
-    } as ToolHandlerContext['runner'],
-    resultStore: {
-      has: jest.fn(),
-      get: jest.fn(),
-      add: jest.fn(),
-      delete: jest.fn(),
-      asReadonly: jest.fn(),
-    } as ToolHandlerContext['resultStore'],
-    events: {
-      reportProgress: jest.fn(),
-      sendUiEvent: jest.fn(),
-    } as ToolHandlerContext['events'],
-    logger: loggerMock.create(),
-    prompts: {
-      checkConfirmationStatus: jest.fn(),
-      askForConfirmation: jest.fn(),
-    } as ToolHandlerContext['prompts'],
-    stateManager: {
-      getState: jest.fn(),
-      setState: jest.fn(),
-    } as ToolHandlerContext['stateManager'],
-    attachments: {
-      get: jest.fn(),
-      getAttachmentRecord: jest.fn(),
-      getActive: jest.fn().mockReturnValue([]),
-      getAll: jest.fn().mockReturnValue([]),
-      getDiff: jest.fn(),
-      add: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      restore: jest.fn(),
-      permanentDelete: jest.fn(),
-      rename: jest.fn(),
-      updateOrigin: jest.fn(),
-      evaluateStalenessForActiveAttachments: jest.fn().mockResolvedValue([]),
-      getAccessedRefs: jest.fn().mockReturnValue([]),
-      clearAccessTracking: jest.fn(),
-      resolveRefs: jest.fn().mockReturnValue([]),
-      getTotalTokenEstimate: jest.fn().mockReturnValue(0),
-      hasChanges: jest.fn().mockReturnValue(false),
-      markClean: jest.fn(),
-    } as ToolHandlerContext['attachments'],
-    filestore: {
-      read: jest.fn(),
-      ls: jest.fn(),
-      glob: jest.fn(),
-      grep: jest.fn(),
-    } as ToolHandlerContext['filestore'],
-    skills: {
-      list: jest.fn(),
-      get: jest.fn(),
-      bulkGet: jest.fn(),
-      convertSkillTool: jest.fn(),
-    } as ToolHandlerContext['skills'],
-    toolManager: {
-      setEventEmitter: jest.fn(),
-      addTools: jest.fn(),
-      list: jest.fn(),
-      recordToolUse: jest.fn(),
-      getToolIdMapping: jest.fn(),
-      getToolOrigin: jest.fn(),
-      getDynamicToolIds: jest.fn(),
-      getSummarizer: jest.fn(),
-    } as ToolHandlerContext['toolManager'],
-    runContext: {
-      runId: 'test-run-id',
-      stack: [],
-    },
-  };
+  const modelProvider = agentBuilderMocks.createModelProvider();
+  modelProvider.getDefaultModel.mockResolvedValue({ inferenceClient } as never);
+  const toolHandlerContext = agentBuilderMocks.tools.createHandlerContext();
+
+  toolHandlerContext.modelProvider = modelProvider;
+  return toolHandlerContext;
 };
