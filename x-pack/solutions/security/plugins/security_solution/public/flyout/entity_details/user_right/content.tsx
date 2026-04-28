@@ -75,9 +75,7 @@ export const UserPanelContent = ({
           entityType={EntityType.user}
         />
       )}
-      {!skipRiskAndCriticality &&
-        riskScoreState.hasEngineBeenInstalled &&
-        riskScoreState.data?.length !== 0 && (
+      {!skipRiskAndCriticality && riskScoreState.data?.length !== 0 && (
           <>
             <FlyoutRiskSummary
               riskScoreData={riskScoreState}

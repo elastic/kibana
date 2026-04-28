@@ -19,7 +19,6 @@ import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_ref
 import type { Refetch } from '../../../common/types';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -114,11 +113,8 @@ export const ServicePanel = memo(function ServicePanel({
     (refetchRiskInputsTab as Refetch)();
   }, [refetch, refetchRiskInputsTab]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.service,
-    serviceName,
-    { onSuccess: refetchRiskScore }
-  );
+  const recalculatingScore = false;
+  const calculateEntityRiskScore = refetchRiskScore;
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,

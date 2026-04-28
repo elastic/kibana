@@ -190,3 +190,24 @@ export function buildRiskScoreStateFromEntityRecord<T extends EntityType>(
     error: options.error,
   };
 }
+
+export function buildEmptyRiskScoreState<T extends EntityType>(
+  options: {
+    refetch: () => void;
+    isLoading: boolean;
+    error: unknown;
+    inspect?: { dsl: string[]; response: string[] };
+  }
+): RiskScoreState<T> {
+  return {
+    data: [] as RiskScoreState<T>['data'],
+    inspect: options.inspect ?? { dsl: [], response: [] },
+    isInspected: false,
+    refetch: options.refetch,
+    totalCount: 0,
+    isAuthorized: true,
+    hasEngineBeenInstalled: true,
+    loading: options.isLoading,
+    error: options.error,
+  };
+}
