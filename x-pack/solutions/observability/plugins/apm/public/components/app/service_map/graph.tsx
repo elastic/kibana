@@ -72,7 +72,7 @@ const edgeTypes: EdgeTypes = {
 };
 
 interface GraphProps {
-  height: number;
+  height: number | string;
   nodes: ServiceMapNode[];
   edges: ServiceMapEdgeType[];
   /** Currently focused service name (for service-specific map) */
@@ -85,6 +85,8 @@ interface GraphProps {
   onToggleFullscreen?: () => void;
   /** When set, shows a "View full service map" button that links to the full map (focused map only) */
   fullMapHref?: string;
+  /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
 }
 
 function GraphInner({
@@ -99,6 +101,7 @@ function GraphInner({
   isFullscreen = false,
   onToggleFullscreen,
   fullMapHref,
+  isEmbedded = false,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -490,26 +493,28 @@ function GraphInner({
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Panel position="top-left" css={topLeftToolbarStyles}>
-          <ServiceMapOptionsPanel
-            nodes={nodesAfterFilters}
-            filterOptionCounts={filterOptionCounts}
-            alertStatusFilter={viewFilters.alertStatusFilter}
-            onAlertStatusFilterChange={(next) =>
-              setViewFilters((prev) => ({ ...prev, alertStatusFilter: next }))
-            }
-            sloStatusFilter={viewFilters.sloStatusFilter}
-            onSloStatusFilterChange={(next) =>
-              setViewFilters((prev) => ({ ...prev, sloStatusFilter: next }))
-            }
-            anomalyStatusFilter={viewFilters.anomalyStatusFilter}
-            onAnomalyStatusFilterChange={(next) =>
-              setViewFilters((prev) => ({ ...prev, anomalyStatusFilter: next }))
-            }
-            mapOrientation={mapOrientation}
-            onMapOrientationChange={setMapOrientation}
-            isExpanded={panelExpanded}
-            onExpandedChange={setPanelExpanded}
-          />
+          {!isEmbedded && (
+            <ServiceMapOptionsPanel
+              nodes={nodesAfterFilters}
+              filterOptionCounts={filterOptionCounts}
+              alertStatusFilter={viewFilters.alertStatusFilter}
+              onAlertStatusFilterChange={(next) =>
+                setViewFilters((prev) => ({ ...prev, alertStatusFilter: next }))
+              }
+              sloStatusFilter={viewFilters.sloStatusFilter}
+              onSloStatusFilterChange={(next) =>
+                setViewFilters((prev) => ({ ...prev, sloStatusFilter: next }))
+              }
+              anomalyStatusFilter={viewFilters.anomalyStatusFilter}
+              onAnomalyStatusFilterChange={(next) =>
+                setViewFilters((prev) => ({ ...prev, anomalyStatusFilter: next }))
+              }
+              mapOrientation={mapOrientation}
+              onMapOrientationChange={setMapOrientation}
+              isExpanded={panelExpanded}
+              onExpandedChange={setPanelExpanded}
+            />
+          )}
           <EuiPanel
             hasBorder
             hasShadow={false}
@@ -549,17 +554,19 @@ function GraphInner({
                 data-test-subj="serviceMapZoomOutButton"
                 css={mapToolbarControlIconCss}
               />
-              <EuiButtonIcon
-                display="empty"
-                color="text"
-                size="s"
-                iconType="crosshair"
-                onClick={() => fitView(getFitViewOptions())}
-                title={fitViewLabel}
-                aria-label={fitViewLabel}
-                data-test-subj="serviceMapFitViewButton"
-                css={mapToolbarControlIconCss}
-              />
+              {!isEmbedded && (
+                <EuiButtonIcon
+                  display="empty"
+                  color="text"
+                  size="s"
+                  iconType="crosshair"
+                  onClick={() => fitView(getFitViewOptions())}
+                  title={fitViewLabel}
+                  aria-label={fitViewLabel}
+                  data-test-subj="serviceMapFitViewButton"
+                  css={mapToolbarControlIconCss}
+                />
+              )}
               {fullMapHref && (
                 <EuiButtonIcon
                   display="empty"
@@ -589,7 +596,7 @@ function GraphInner({
             </EuiFlexGroup>
           </EuiPanel>
         </Panel>
-        <ServiceMapMinimap />
+        {!isEmbedded && <ServiceMapMinimap />}
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}
@@ -600,6 +607,7 @@ function GraphInner({
         start={start}
         end={end}
         onClose={handlePopoverClose}
+        isEmbedded={isEmbedded}
       />
     </div>
   );
