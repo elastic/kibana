@@ -181,7 +181,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: true,
+  sentinelRulesMigration: false,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
