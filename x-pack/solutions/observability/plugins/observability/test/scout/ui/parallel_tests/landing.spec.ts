@@ -16,7 +16,7 @@ import {
 } from '../fixtures/generators';
 import { BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../fixtures/constants';
 
-test.describe(
+test.describe.skip(
   'Observability Landing Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

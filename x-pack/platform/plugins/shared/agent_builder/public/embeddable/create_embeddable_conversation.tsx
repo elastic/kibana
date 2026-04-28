@@ -25,9 +25,15 @@ export const createEmbeddableConversation = ({
   services,
   coreStart,
 }: EmbeddableConversationDependencies): React.FC<
-  EmbeddableConversationProps & EmbeddableConversationSidebarProps
+  EmbeddableConversationProps & Partial<EmbeddableConversationSidebarProps>
 > => {
-  return (props: EmbeddableConversationProps & EmbeddableConversationSidebarProps) => (
-    <EmbeddableConversationInternal {...props} coreStart={coreStart} services={services} />
+  return (props: EmbeddableConversationProps & Partial<EmbeddableConversationSidebarProps>) => (
+    <EmbeddableConversationInternal
+      {...props}
+      onClose={props.onClose ?? (() => {})}
+      ariaLabelledBy={props.ariaLabelledBy ?? ''}
+      coreStart={coreStart}
+      services={services}
+    />
   );
 };

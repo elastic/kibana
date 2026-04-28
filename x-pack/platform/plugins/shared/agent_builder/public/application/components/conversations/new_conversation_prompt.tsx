@@ -22,7 +22,7 @@ const titleStyles = css`
 
 export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-  const { isEmbeddedContext } = useConversationContext();
+  const { isEmbeddedContext, hideWelcomeTitle } = useConversationContext();
 
   const centerFlexItemStyles = css`
     justify-content: center;
@@ -44,15 +44,17 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       css={conversationElementWidthStyles}
       data-test-subj="agentBuilderWelcomePage"
     >
-      <EuiFlexItem grow={isEmbeddedContext ? true : false} css={centerFlexItemStyles}>
-        <EuiTitle size="m" css={titleStyles}>
-          <h2>
-            {i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
-              defaultMessage: 'How can I help you?',
-            })}
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
+      {!hideWelcomeTitle && (
+        <EuiFlexItem grow={isEmbeddedContext ? true : false} css={centerFlexItemStyles}>
+          <EuiTitle size="m" css={titleStyles}>
+            <h2>
+              {i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
+                defaultMessage: 'How can I help you?',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         grow={false}
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}

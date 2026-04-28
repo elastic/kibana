@@ -156,7 +156,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
+  const { attachments, initialMessage, autoSendInitialMessage, autoFocus, resetInitialMessage } =
     useConversationContext();
 
   const validateAgentId = useValidateAgentId();
@@ -199,21 +199,18 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
-    if (initialMessage && !autoSendInitialMessage && isNewConversation) {
+    if (initialMessage && !autoSendInitialMessage) {
       messageEditorController.setContent(initialMessage);
       messageEditorController.focus();
-      resetInitialMessage?.(); // Reset the initial message to avoid sending it again
+      resetInitialMessage?.();
     }
-  }, [
-    initialMessage,
-    autoSendInitialMessage,
-    isNewConversation,
-    messageEditorController,
-    resetInitialMessage,
-  ]);
+  }, [initialMessage, autoSendInitialMessage, messageEditorController, resetInitialMessage]);
 
-  // Auto-focus when conversation changes
+  // Auto-focus when conversation changes (if autoFocus is enabled)
   useEffect(() => {
+    if (autoFocus === false) {
+      return;
+    }
     const timeoutId = setTimeout(() => {
       messageEditorController.focus();
     }, 200);
@@ -221,7 +218,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [conversationId, messageEditorController]);
+  }, [conversationId, messageEditorController, autoFocus]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {

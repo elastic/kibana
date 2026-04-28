@@ -24,6 +24,26 @@ export interface EmbeddableConversationProps {
   newConversation?: boolean;
 
   /**
+   * Hide the "How can I help you?" welcome title when no conversation is active.
+   * Useful for inline embeds where the surrounding context provides enough guidance.
+   * @default false
+   */
+  hideWelcomeTitle?: boolean;
+
+  /**
+   * Custom title to display in the header when no conversation is active.
+   * Overrides the default "New Conversation" text.
+   */
+  initialTitle?: string;
+
+  /**
+   * Hide the close button in the header.
+   * Useful for inline embeds where the conversation cannot be dismissed.
+   * @default false
+   */
+  hideCloseButton?: boolean;
+
+  /**
    * Session tag for conversation context. Used to maintain separate conversation
    * histories for different parts of the application.
    *
@@ -63,6 +83,12 @@ export interface EmbeddableConversationProps {
    * @default false
    */
   autoSendInitialMessage?: boolean;
+  /**
+   * Whether to automatically focus the input when the conversation loads.
+   * @default true
+   */
+  autoFocus?: boolean;
+
   /**
    * Optional attachments with lazy content loading.
    * Content will be fetched when starting a new conversation round.
