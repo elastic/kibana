@@ -91,12 +91,18 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
     const { forceDelete } = request.query;
-    await APIKeyService.deleteEnrollmentApiKeys(
+    const { successCount } = await APIKeyService.deleteEnrollmentApiKeys(
       esClient,
       [request.params.keyId],
       forceDelete,
       useSpaceAwareness ? currentNamespace : undefined
     );
+
+    if (successCount === 0) {
+      return response.notFound({
+        body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
+      });
+    }
 
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
