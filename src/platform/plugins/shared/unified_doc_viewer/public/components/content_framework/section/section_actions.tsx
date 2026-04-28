@@ -12,12 +12,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elast
 import type { IconType } from '@elastic/eui';
 import { getLinkActionProps } from '../utils/link_action';
 
+export interface EbtClickAttrs {
+  action?: string;
+  element?: string;
+  detail?: string;
+}
+
 interface BaseAction {
   icon: IconType;
   ariaLabel: string;
   dataTestSubj?: string;
   label?: string;
   id?: string;
+  ebt?: EbtClickAttrs;
 }
 
 export type Action =
@@ -35,8 +42,13 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions.map((action, idx) => {
-        const { icon, ariaLabel, dataTestSubj, label, onClick, href } = action;
+        const { icon, ariaLabel, dataTestSubj, label, onClick, href, ebt } = action;
         const buttonProps = getLinkActionProps({ href, onClick });
+        const ebtProps = {
+          ...(ebt?.action && { 'data-ebt-action': ebt.action }),
+          ...(ebt?.element && { 'data-ebt-element': ebt.element }),
+          ...(ebt?.detail && { 'data-ebt-detail': ebt.detail }),
+        };
 
         return (
           <EuiFlexItem grow={false} key={action.id ?? idx} id={action.id}>
@@ -46,6 +58,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
                 iconType={icon}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...ebtProps}
                 {...buttonProps}
               >
                 {label}
@@ -56,6 +69,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
                 iconType={icon}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...ebtProps}
                 {...buttonProps}
               />
             )}
