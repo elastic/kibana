@@ -1,16 +1,25 @@
 {
   "type": "plugin",
   "id": "@kbn/inbox-plugin",
-  "owner": ["@elastic/security-pds-deployment", "@elastic/security-generative-ai"],
+  "owner": [
+    "@elastic/security-pds-deployment"
+  ],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
     "id": "inbox",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "inbox"],
-    "requiredPlugins": ["features"],
+    "configPath": [
+      "xpack",
+      "inbox"
+    ],
+    "requiredPlugins": [
+      "features"
+    ],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }
