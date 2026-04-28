@@ -36,8 +36,8 @@ const INSTRUMENTED_APP_NAME = 'java-app';
  */
 test(
   'Otel Kubernetes',
-  { timeout: 10 * 60 * 1000 },
   async ({ page, onboardingHomePage, otelKubernetesFlowPage, wiredStreamsSelector }) => {
+    test.setTimeout(10 * 60 * 1000);
     assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
     const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
