@@ -30,8 +30,11 @@ on:
           let eligible = false;
           let reason = '';
 
-          if (eventName !== 'issues') {
-            reason = `Unsupported event '${eventName}'; expected 'issues'.`;
+          if (eventName === 'workflow_dispatch') {
+            eligible = true;
+            reason = 'Manual workflow_dispatch trigger.';
+          } else if (eventName !== 'issues') {
+            reason = `Unsupported event '${eventName}'; expected 'issues' or 'workflow_dispatch'.`;
           } else if (eventAction === 'labeled' && labelName === FACTORY_LABEL) {
             eligible = true;
             reason = `Issue labeled with ${FACTORY_LABEL}.`;
