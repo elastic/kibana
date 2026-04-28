@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+
 import { useQuery } from '@kbn/react-query';
 import type { UseQueryResult } from '@kbn/react-query';
 
 import { useKibana } from '../use_kibana';
 import { getErrorCode } from '../../utils/get_error_message';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface DashboardsStats {
   totalDashboards: number;
@@ -17,6 +21,7 @@ export interface DashboardsStats {
 
 export const useDashboardsStats = (): UseQueryResult<DashboardsStats | null> => {
   const { http } = useKibana().services;
+  const usageTracker = useUsageTracker();
 
   const queryResult = useQuery<DashboardsStats | null>({
     queryKey: ['fetchDashboardsStats'],
@@ -43,6 +48,15 @@ export const useDashboardsStats = (): UseQueryResult<DashboardsStats | null> => 
       }
     },
   });
+
+  useEffect(() => {
+    if (queryResult.isError) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_dashboards`,
+      ]);
+    }
+  }, [queryResult.isError, usageTracker]);
 
   return {
     ...queryResult,

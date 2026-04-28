@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 
 import type { StatsResponse } from '../../../server/types';
 import { useKibana } from '../use_kibana';
 import { getErrorCode } from '../../utils/get_error_message';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface SizeStats {
   hasNoDocuments: boolean;
@@ -19,6 +23,7 @@ export interface SizeStats {
 
 export const useStats = (): UseQueryResult<SizeStats | null> => {
   const { http } = useKibana().services;
+  const usageTracker = useUsageTracker();
 
   const queryResult = useQuery<SizeStats | null, Error>({
     queryKey: ['fetchSizeStats'],
@@ -38,6 +43,15 @@ export const useStats = (): UseQueryResult<SizeStats | null> => {
       }
     },
   });
+
+  useEffect(() => {
+    if (queryResult.isError) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_storage`,
+      ]);
+    }
+  }, [queryResult.isError, usageTracker]);
 
   return queryResult;
 };

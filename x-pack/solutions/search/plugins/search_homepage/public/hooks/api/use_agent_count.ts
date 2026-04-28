@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+
 import { useQuery } from '@kbn/react-query';
 
 import { useKibana } from '../use_kibana';
 import { useGetLicenseInfo } from '../use_get_license_info';
 import { getErrorCode } from '../../utils/get_error_message';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export const useAgentCount = () => {
   const {
     services: { agentBuilder },
   } = useKibana();
+  const usageTracker = useUsageTracker();
 
   const { hasEnterpriseLicense } = useGetLicenseInfo();
 
@@ -43,10 +48,19 @@ export const useAgentCount = () => {
     enabled: isAvailable,
   });
 
+  useEffect(() => {
+    if (isError) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_agents`,
+      ]);
+    }
+  }, [isError, usageTracker]);
+
   return {
     tools: data?.tools,
     agents: data?.agents,
-    isLoading: isAvailable ? isLoading : false,
-    isError: isError || !isAvailable,
+    isLoading,
+    isError,
   };
 };

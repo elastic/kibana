@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { EuiBadge, EuiFlexGroup, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,8 +14,6 @@ import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useStats } from '../../hooks/api/use_stats';
 import { useAgentCount } from '../../hooks/api/use_agent_count';
-import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../../analytics/constants';
 import { useKibana } from '../../hooks/use_kibana';
 
 const BASIC_METRIC_PANEL_TYPES = ['indices', 'storage', 'agentBuilder', 'discover'] as const;
@@ -71,46 +69,12 @@ const BasicMetricPanel = ({ title, metric, isError = false }: BasicMetricPanelPr
 
 export const BasicMetricBadges = () => {
   const { chrome } = useKibana().services;
-  const usageTracker = useUsageTracker();
   const { data: storageStats, isError: isErrorStorageStats } = useStats();
   const { data: indicesData, isError: isErrorIndicesStats } = useIndicesStats();
   const { data: dashboardsData, isError: isErrorDashboards } = useDashboardsStats();
   const { tools, agents, isError: isErrorAgents } = useAgentCount();
 
   const hasDashboardsNavLink = chrome.navLinks.get('dashboards') !== undefined;
-
-  useEffect(() => {
-    if (isErrorStorageStats) {
-      usageTracker.count([
-        AnalyticsEvents.metricFetchFailed,
-        `${AnalyticsEvents.metricFetchFailed}_storage`,
-      ]);
-    }
-  }, [isErrorStorageStats, usageTracker]);
-  useEffect(() => {
-    if (isErrorIndicesStats) {
-      usageTracker.count([
-        AnalyticsEvents.metricFetchFailed,
-        `${AnalyticsEvents.metricFetchFailed}_indices`,
-      ]);
-    }
-  }, [isErrorIndicesStats, usageTracker]);
-  useEffect(() => {
-    if (isErrorDashboards) {
-      usageTracker.count([
-        AnalyticsEvents.metricFetchFailed,
-        `${AnalyticsEvents.metricFetchFailed}_dashboards`,
-      ]);
-    }
-  }, [isErrorDashboards, usageTracker]);
-  useEffect(() => {
-    if (isErrorAgents) {
-      usageTracker.count([
-        AnalyticsEvents.metricFetchFailed,
-        `${AnalyticsEvents.metricFetchFailed}_agents`,
-      ]);
-    }
-  }, [isErrorAgents, usageTracker]);
 
   const basicPanels: Array<BasicMetricPanel> = [
     {

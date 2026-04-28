@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+
 import { useQuery } from '@kbn/react-query';
 import type { UseQueryResult } from '@kbn/react-query';
 import type { Index } from '@kbn/index-management-shared-types';
 
 import { useKibana } from '../use_kibana';
 import { getErrorCode } from '../../utils/get_error_message';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface IndicesStats {
   totalIndices: number;
@@ -22,6 +26,7 @@ const API_BASE_PATH = '/api/index_management';
 
 export const useIndicesStats = (): UseQueryResult<IndicesStats | null> => {
   const { http } = useKibana().services;
+  const usageTracker = useUsageTracker();
 
   const queryResult = useQuery<Index[] | null, Error, IndicesStats | null>({
     queryKey: ['fetchIndicesStats'],
@@ -53,6 +58,15 @@ export const useIndicesStats = (): UseQueryResult<IndicesStats | null> => {
       };
     },
   });
+
+  useEffect(() => {
+    if (queryResult.isError) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_indices`,
+      ]);
+    }
+  }, [queryResult.isError, usageTracker]);
 
   return {
     ...queryResult,
