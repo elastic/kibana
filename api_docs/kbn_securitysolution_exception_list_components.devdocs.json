@@ -34,6 +34,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -78,6 +79,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -122,6 +124,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -160,6 +163,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -204,6 +208,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -248,6 +253,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -284,6 +290,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -320,6 +327,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -355,6 +363,7 @@
             "lineNumber": 22,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "MenuItemLinkedRulesProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -393,6 +402,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -437,6 +447,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -492,6 +503,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -1187,6 +1199,7 @@
                 "lineNumber": 38,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CommentsArray",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1237,6 +1250,7 @@
                 "lineNumber": 39,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExceptionListItemIdentifiers",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1273,6 +1287,7 @@
                 "lineNumber": 40,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExceptionListItemSchema",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1621,6 +1636,7 @@
                 "lineNumber": 22,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetExceptionItemProps",
                 "trackAdoption": false,
                 "isRequired": true
               }

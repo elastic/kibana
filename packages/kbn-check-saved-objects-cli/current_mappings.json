@@ -313,21 +313,7 @@
       }
     }
   },
-  "alerting_api_key_pending_invalidation": {
-    "dynamic": false,
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "uiamApiKey": {
-        "type": "binary"
-      }
-    }
-  },
-  "alerting_notification_policy": {
+  "alerting_action_policy": {
     "dynamic": false,
     "properties": {
       "auth": {
@@ -413,6 +399,20 @@
       },
       "updatedByUsername": {
         "type": "keyword"
+      }
+    }
+  },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
