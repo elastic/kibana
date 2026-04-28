@@ -100,6 +100,7 @@
                 "lineNumber": 29,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "IEsError",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -242,6 +243,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IEsError",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -276,6 +278,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Services",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -300,6 +303,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AbstractDataView",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -376,6 +380,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }

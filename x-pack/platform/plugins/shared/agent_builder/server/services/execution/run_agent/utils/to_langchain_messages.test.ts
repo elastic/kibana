@@ -13,7 +13,12 @@ import type {
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ExecutionStatus,
+} from '@kbn/agent-builder-common';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
@@ -764,6 +769,92 @@ describe('convertPreviousRounds', () => {
         _reasoning: 'reason for call-2',
         id: 42,
       });
+    });
+  });
+
+  describe('background execution notices (from round steps)', () => {
+    const makeBgStep = (overrides: Partial<BackgroundExecutionState> = {}): ConversationRoundStep =>
+      ({
+        type: ConversationRoundStepType.backgroundAgentComplete,
+        execution_id: 'bg-exec-1',
+        status: ExecutionStatus.completed,
+        response: { message: 'Background result' },
+        completed_at: { round_id: 'round-1' },
+        ...overrides,
+      } as ConversationRoundStep);
+
+    it('injects system notice for background execution complete step', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+        steps: [makeBgStep()],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('bg-exec-1');
+      expect((noticeMessage as any).content).toContain('Background result');
+    });
+
+    it('injects error system notice for failed background step', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+        steps: [
+          makeBgStep({
+            execution_id: 'bg-fail-1',
+            status: ExecutionStatus.failed,
+            response: undefined,
+            error: { code: 'internalError' as any, message: 'Something broke' },
+          }),
+        ],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('has failed');
+      expect((noticeMessage as any).content).toContain('Something broke');
+    });
+
+    it('does not inject notices when no background steps exist', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+        steps: [],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessages = result.filter(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessages).toHaveLength(0);
     });
   });
 });

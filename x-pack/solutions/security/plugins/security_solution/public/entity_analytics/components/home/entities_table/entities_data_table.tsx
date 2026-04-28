@@ -42,6 +42,7 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
@@ -54,6 +55,10 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import {
+  EntitySourceValue,
+  toEntitySourceArray,
+} from '../../../../flyout/entity_details/shared/components/entity_source_value';
 
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../asset_criticality';
@@ -184,27 +189,29 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
   const { setQuery, deleteQuery } = useGlobalTime();
 
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
   const openTableFlyout = useCallback(
     (doc?: DataTableRecord | undefined) => {
-      if (doc) {
-        setExpandedDoc(doc);
-        const { entityType, entityName, entityId } = getEntityFields(doc);
-        if (!entityType || !entityName) return;
+      if (!doc) {
+        closeFlyout();
+        return;
+      }
 
-        const panelKey = EntityPanelKeyByType[entityType];
-        const panelParam = EntityPanelParamByType[entityType];
-        if (!panelKey || !panelParam) return;
+      const { entityType, entityName, entityId } = getEntityFields(doc);
+      if (!entityType || !entityName) return;
 
-        openRightPanel({
+      const panelKey = EntityPanelKeyByType[entityType];
+      const panelParam = EntityPanelParamByType[entityType];
+      if (!panelKey || !panelParam) return;
+
+      openFlyout({
+        right: {
           id: panelKey,
           params: {
             [panelParam]: entityName,
@@ -212,13 +219,10 @@ export const EntitiesDataTable = ({
             contextID: ENTITY_ANALYTICS_TABLE_ID,
             scopeId: ENTITY_ANALYTICS_TABLE_ID,
           },
-        });
-      } else {
-        closeFlyout();
-        setExpandedDoc(undefined);
-      }
+        },
+      });
     },
-    [openRightPanel, closeFlyout]
+    [openFlyout, closeFlyout]
   );
 
   const {
@@ -298,6 +302,7 @@ export const EntitiesDataTable = ({
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
     const config: CustomGridColumnsConfiguration = {
       alerts: ({ column }) => ({ ...column, isExpandable: false }),
+      [ENTITY_FIELDS.ENTITY_SOURCE]: ({ column }) => ({ ...column, isExpandable: false }),
     };
     if (dataView.timeFieldName) {
       config[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
@@ -449,6 +454,11 @@ export const EntitiesDataTable = ({
         if (value == null) return getEmptyTagValue();
         return <>{_.capitalize(value)}</>;
       },
+      [ENTITY_FIELDS.ENTITY_SOURCE]: ({ row }: DataGridCellValueElementProps) => {
+        const values = toEntitySourceArray(row.flattened[ENTITY_FIELDS.ENTITY_SOURCE]);
+        if (values.length === 0) return getEmptyTagValue();
+        return <EntitySourceValue values={values} />;
+      },
       [ENTITY_FIELDS.ASSET_CRITICALITY]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ASSET_CRITICALITY] as
           | CriticalityLevelWithUnassigned
@@ -465,7 +475,14 @@ export const EntitiesDataTable = ({
         if (!doc) return null;
         const { entityType, entityName } = getEntityFields(doc);
         if (!entityName || !entityType) return null;
-        return <EntityAlertsCell entityName={entityName} entityType={entityType} />;
+        const entityRecord = doc?.raw?._source ? (doc.raw._source as EntityStoreRecord) : null;
+        return (
+          <EntityAlertsCell
+            entityRecord={entityRecord}
+            entityName={entityName}
+            entityType={entityType}
+          />
+        );
       },
     };
 
@@ -604,7 +621,6 @@ export const EntitiesDataTable = ({
             onSort={onSort}
             rows={rows}
             sampleSizeState={MAX_ENTITIES_TO_LOAD}
-            expandedDoc={expandedDoc}
             setExpandedDoc={openTableFlyout}
             renderDocumentView={EmptyComponent}
             sort={sort}

@@ -74,6 +74,34 @@ export default ({ getService }: FtrProviderContext) => {
       expect(euids.filter((euid: string) => euid === 'user:C-3PO')).toHaveLength(1);
     });
 
+    it('should exclude documents outside the lookback period', async () => {
+      // Create a separate watchlist with a short lookback (1 day)
+      const shortLookbackName = 'sync-test-short-lookback';
+      const shortResult = await utils.createWatchlistAndEntitySource(shortLookbackName, {
+        start: 'now-1d',
+        end: 'now',
+      });
+
+      // Add users with a recent timestamp (within lookback)
+      await utils.addUsersToSourceIndex(['recent-user'], new Date().toISOString());
+
+      // Add users with an old timestamp (outside lookback)
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 10);
+      await utils.addUsersToSourceIndex(['old-user'], oldDate.toISOString());
+
+      await utils.syncWatchlist(shortResult.watchlistId);
+
+      const entities = await utils.queryWatchlistIndex(shortLookbackName);
+      const euids = entities.map((e) => (e.entity as { id: string }).id);
+
+      // Only the recent user should be synced
+      expect(euids).toContain('user:recent-user');
+      expect(euids).not.toContain('user:old-user');
+
+      await utils.deleteWatchlistIndex(shortLookbackName);
+    });
+
     it('should not update timestamps when re-syncing the same user', async () => {
       await utils.addUsersToSourceIndex(['user1']);
       await utils.syncWatchlist(watchlistId);

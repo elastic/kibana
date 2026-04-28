@@ -741,6 +741,7 @@ export class SyntheticsService {
         configId: monitor.id,
         heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
         spaceId: monitorSpace,
+        kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
       };
     });
 

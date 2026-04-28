@@ -347,3 +347,10 @@ export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
     defaultMessage: 'Details for alert "{alertDescription}"',
     values: { alertDescription },
   });
+
+export const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.bulkActionsAriaLabel',
+  {
+    defaultMessage: 'Bulk actions',
+  }
+);

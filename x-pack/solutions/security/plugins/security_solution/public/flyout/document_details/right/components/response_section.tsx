@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ResponseButton } from './response_button';
@@ -24,14 +25,19 @@ const KEY = 'response';
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection = memo(() => {
-  const { isRulePreview, getFieldsData } = useDocumentDetailsContext();
+  const { isRulePreview, getFieldsData, indexName } = useDocumentDetailsContext();
+
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
     title: KEY,
     defaultValue: false,
   });
-  const eventKind = getField(getFieldsData('event.kind'));
+  const isAlert = useMemo(
+    () => getField(getFieldsData('event.kind')) === EventKind.signal,
+    [getFieldsData]
+  );
 
   const content = useMemo(() => {
     if (isRulePreview) {
@@ -62,7 +68,7 @@ export const ResponseSection = memo(() => {
     return <ResponseButton />;
   }, [isRulePreview]);
 
-  if (eventKind !== EventKind.signal) {
+  if (!isAlert || isRemoteDocument) {
     return null;
   }
 

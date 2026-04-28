@@ -30,6 +30,7 @@ export interface ProcessorFields {
   test_run_id: string;
   run_once: boolean;
   space_id: string;
+  kibanaUrl?: string;
 }
 
 export const formatSyntheticsPolicy = (

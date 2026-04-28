@@ -22,16 +22,16 @@ type ReplaceableControl = Record<
 const commonControlPanelConfig: ControlPanels = {
   [CLOUD_PROVIDER]: {
     order: 1,
-    width: 'medium',
-    grow: false,
+    width: 'small',
+    grow: true,
     type: OPTIONS_LIST_CONTROL,
     fieldName: CLOUD_PROVIDER,
     title: 'Cloud Provider',
   },
   [SERVICE_NAME]: {
     order: 2,
-    width: 'medium',
-    grow: false,
+    width: 'small',
+    grow: true,
     type: OPTIONS_LIST_CONTROL,
     fieldName: SERVICE_NAME,
     title: 'Service Name',
@@ -42,8 +42,8 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
   ecs: {
     [HOST_OS_NAME]: {
       order: 0,
-      width: 'medium',
-      grow: false,
+      width: 'small',
+      grow: true,
       type: OPTIONS_LIST_CONTROL,
       fieldName: HOST_OS_NAME,
       title: 'Operating System',
@@ -52,8 +52,8 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
   semconv: {
     [OS_TYPE]: {
       order: 0,
-      width: 'medium',
-      grow: false,
+      width: 'small',
+      grow: true,
       type: OPTIONS_LIST_CONTROL,
       fieldName: OS_TYPE,
       title: 'Operating System',
