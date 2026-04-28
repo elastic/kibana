@@ -30,6 +30,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStartDependencies } from '../plugin';
+import type {} from './user_activity_service';
 
 export let coreServices: CoreStart;
 export let cpsService: CPSPluginStart | undefined;

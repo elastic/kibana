@@ -59,7 +59,7 @@ export async function trackDeleteDashboardAction(
   });
 }
 
-async function getUserActivityObject(
+export async function getUserActivityObject(
   result: { id: string; data: Pick<DashboardState, 'title' | 'tags'> },
   request: KibanaRequest
 ): Promise<UserActivityObject> {

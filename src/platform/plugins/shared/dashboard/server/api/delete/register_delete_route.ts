@@ -14,7 +14,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { getRouteConfig } from '../get_route_config';
-import { trackDeleteDashboardAction } from '../user_actions';
+import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
 
 export function registerDeleteRoute(

@@ -58,6 +58,12 @@ export const userActivityActions = {
     groupName: 'Dashboard',
     versionAddedAt: '9.5',
   },
+  dashboard_view: {
+    description: 'User viewed a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 
 /** Closed union derived from the keys of {@link userActivityActions}. @public */

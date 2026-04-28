@@ -26,6 +26,7 @@ import {
   getDashboardBackupService,
   initializeDashboardApiServices,
 } from '../../services/dashboard_api_services';
+import { getDashboardUserActivityService } from '../../services/user_activity_service';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -132,10 +133,20 @@ export async function loadDashboardApi({
     contentInsightsClient.track(savedObjectId, 'viewed');
   }
 
+  getDashboardUserActivityService().startDashboardView(api.uuid);
+
   return {
     api,
     cleanup: () => {
       cleanup();
+      if (savedObjectId) {
+        (async () => {
+          await getDashboardUserActivityService().endDashboardView(
+            api.uuid,
+            api.title$.value ?? ''
+          );
+        })();
+      }
       if (onApiCleanup) {
         onApiCleanup();
       }
