@@ -8982,6 +8982,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-url-state@link:src/platform/packages/shared/kbn-shared-url-state":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-ai-components@link:src/platform/packages/shared/shared-ux/ai-components":
   version "0.0.0"
   uid ""
