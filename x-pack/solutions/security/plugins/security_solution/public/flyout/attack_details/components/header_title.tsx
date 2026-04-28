@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
@@ -16,10 +17,12 @@ import { Status } from './status';
 import { Assignees } from './assignees';
 import { Notes } from '../../../flyout_v2/shared/components/notes';
 import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
+import { DetailsFlyout } from '../../../attack_discovery/pages/settings_flyout/schedule/details_flyout';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
   HEADER_BADGE_TEST_ID,
+  HEADER_TITLE_LINK_TEST_ID,
   HEADER_TITLE_TEST_ID,
 } from '../constants/test_ids';
 import { useHeaderData } from '../hooks/use_header_data';
@@ -33,13 +36,59 @@ const ATTACK_HEADER_BADGE = i18n.translate(
   }
 );
 
+const OPEN_SCHEDULE_DETAILS_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDetailsFlyout.header.openScheduleDetailsLabel',
+  {
+    defaultMessage: 'Open schedule details',
+  }
+);
+
 /**
  * Header data for the Attack details flyout
  */
 export const HeaderTitle = memo(() => {
   const { title, timestamp, alertsCount } = useHeaderData();
-  const { attackId } = useAttackDetailsContext();
+  const { attackId, attack, isPreviewMode } = useAttackDetailsContext();
   const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
+  const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>();
+
+  const scheduleIdForDetails = useMemo(() => {
+    const uuid = attack.alertRuleUuid;
+    if (!uuid || uuid === ATTACK_DISCOVERY_AD_HOC_RULE_ID) {
+      return undefined;
+    }
+    return uuid;
+  }, [attack.alertRuleUuid]);
+
+  const showScheduleTitleLink = scheduleIdForDetails != null && !isPreviewMode;
+
+  const openScheduleDetails = useCallback(() => {
+    if (scheduleIdForDetails) {
+      setScheduleDetailsId(scheduleIdForDetails);
+    }
+  }, [scheduleIdForDetails]);
+
+  const onCloseScheduleDetails = useCallback(() => setScheduleDetailsId(undefined), []);
+
+  const onScheduleTitleClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      event.preventDefault();
+      openScheduleDetails();
+    },
+    [openScheduleDetails]
+  );
+
+  const titleBlock = showScheduleTitleLink ? (
+    <EuiLink
+      aria-label={OPEN_SCHEDULE_DETAILS_LABEL}
+      data-test-subj={HEADER_TITLE_LINK_TEST_ID}
+      onClick={onScheduleTitleClick}
+    >
+      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} isLink />
+    </EuiLink>
+  ) : (
+    <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
+  );
 
   return (
     <>
@@ -49,7 +98,7 @@ export const HeaderTitle = memo(() => {
           <EuiSpacer size="xs" />
         </>
       )}
-      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
+      {titleBlock}
       <EuiSpacer size="s" />
       <EuiBadge
         aria-label={ATTACK_HEADER_BADGE}
@@ -104,6 +153,9 @@ export const HeaderTitle = memo(() => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {scheduleDetailsId ? (
+        <DetailsFlyout scheduleId={scheduleDetailsId} onClose={onCloseScheduleDetails} />
+      ) : null}
     </>
   );
 });
