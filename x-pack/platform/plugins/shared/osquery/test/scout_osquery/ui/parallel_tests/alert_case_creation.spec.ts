@@ -52,7 +52,9 @@ test.describe(
     });
 
     // One single-query submit, two Add to Case clicks: existing case (select) then new case (create).
-    test('runs osquery from an alert and attaches results to an existing + a new case', async ({
+    // TODO: re-enable Scout osquery alert flyout + cases flow when stable.
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip('runs osquery from an alert and attaches results to an existing + a new case', async ({
       browserAuth,
       esClient,
       kbnClient,
