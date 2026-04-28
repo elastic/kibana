@@ -34,7 +34,14 @@
             "tags": [],
             "label": "getRegistered",
             "description": [
-              "\nReturns registered uiSettings values {@link UiSettingsParams}"
+              "\nReturns registered uiSettings values ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.UiSettingsParams",
+                "text": "UiSettingsParams"
+              }
             ],
             "signature": [
               "() => Readonly<Record<string, Omit<",
@@ -101,6 +108,7 @@
                 "lineNumber": 37,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetUiSettingsContext",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -142,6 +150,7 @@
                 "lineNumber": 41,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetUiSettingsContext",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -220,6 +229,7 @@
                 "lineNumber": 55,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -637,6 +647,7 @@
                 "lineNumber": 33,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -679,6 +690,7 @@
                 "lineNumber": 51,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -746,7 +758,23 @@
             "tags": [],
             "label": "asScopedToClient",
             "description": [
-              "\nCreates a {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a {@link RequestHandler}.\n"
+              "\nCreates a ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              " with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              ".\n"
             ],
             "signature": [
               "(savedObjectsClient: ",
@@ -774,6 +802,7 @@
                 "lineNumber": 83,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -787,7 +816,23 @@
             "tags": [],
             "label": "globalAsScopedToClient",
             "description": [
-              "\nCreates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a {@link RequestHandler}.\n"
+              "\nCreates a global ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              " with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              ".\n"
             ],
             "signature": [
               "(savedObjectsClient: ",
@@ -815,6 +860,7 @@
                 "lineNumber": 99,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               }

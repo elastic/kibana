@@ -259,6 +259,7 @@
                 "lineNumber": 64,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -308,6 +309,7 @@
                 "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -325,6 +327,7 @@
                 "lineNumber": 68,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMPluginSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -365,6 +368,7 @@
                 "lineNumber": 278,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -382,6 +386,7 @@
                 "lineNumber": 278,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMPluginStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
