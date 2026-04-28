@@ -27,7 +27,9 @@
         "tags": [],
         "label": "HelperDelegateFixed",
         "description": [
-          "\nA {@link https://handlebarsjs.com/api-reference/helpers.html helper-function} type.\n\nWhen registering a helper function, it should be of this type."
+          "\nA ",
+          "helper-function",
+          " type.\n\nWhen registering a helper function, it should be of this type."
         ],
         "signature": [
           "HelperDelegate"
@@ -84,7 +86,9 @@
         "tags": [],
         "label": "HelperOptions",
         "description": [
-          "\nThe last argument being passed to a helper function is a an {@link https://handlebarsjs.com/api-reference/helpers.html#the-options-parameter options object}."
+          "\nThe last argument being passed to a helper function is a an ",
+          "options object",
+          "."
         ],
         "signature": [
           {
@@ -149,6 +153,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -172,6 +177,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false
               }
             ]
@@ -208,6 +214,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -231,6 +238,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false
               }
             ]
@@ -282,6 +290,7 @@
                 "lineNumber": 167,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               },
               {
@@ -390,7 +399,11 @@
         "tags": [],
         "label": "TemplateDelegateFixed",
         "description": [
-          "\nA template-function type.\n\nThis type is primarily used for the return value of by calls to\n{@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-compile-template-options Handlebars.compile},\nHandlebars.compileAST and {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-precompile-template-options Handlebars.template}."
+          "\nA template-function type.\n\nThis type is primarily used for the return value of by calls to\n",
+          "Handlebars.compile",
+          ",\nHandlebars.compileAST and ",
+          "Handlebars.template",
+          "."
         ],
         "signature": [
           "TemplateDelegate",
@@ -432,6 +445,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -456,6 +470,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -546,7 +561,9 @@
         "tags": [],
         "label": "DecoratorDelegate",
         "description": [
-          "\nA {@link https://github.com/handlebars-lang/handlebars.js/blob/master/docs/decorators-api.md decorator-function} type.\n\nWhen registering a decorator function, it should be of this type."
+          "\nA ",
+          "decorator-function",
+          " type.\n\nWhen registering a decorator function, it should be of this type."
         ],
         "signature": [
           "(prog: ",
@@ -577,6 +594,7 @@
             "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TemplateDelegateFixed",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -594,6 +612,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -617,6 +636,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false
               }
             ]
@@ -635,6 +655,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false
           },
           {
@@ -651,6 +672,7 @@
             "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Container",
             "trackAdoption": false
           },
           {

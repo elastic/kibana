@@ -122,6 +122,7 @@
               "lineNumber": 31,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "UseFieldsMetadataParams",
               "trackAdoption": false
             },
             {
@@ -212,6 +213,7 @@
                 "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -230,6 +232,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetFieldsMetadataOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -270,6 +273,7 @@
                 "lineNumber": 50,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindFieldsMetadataOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -377,6 +381,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -395,6 +400,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetFieldsMetadataOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -561,6 +567,7 @@
               "lineNumber": 26,
               "columnNumber": 40,
               "deprecated": false,
+              "docsReferencedTypeName": "IntegrationFieldsExtractor",
               "trackAdoption": false,
               "returnComment": [],
               "children": [
@@ -578,6 +585,7 @@
                   "lineNumber": 22,
                   "columnNumber": 3,
                   "deprecated": false,
+                  "docsReferencedTypeName": "IntegrationFieldsSearchParams",
                   "trackAdoption": false
                 }
               ]
@@ -619,6 +627,7 @@
               "lineNumber": 27,
               "columnNumber": 38,
               "deprecated": false,
+              "docsReferencedTypeName": "IntegrationListExtractor",
               "trackAdoption": false,
               "returnComment": [],
               "children": []
@@ -664,6 +673,7 @@
               "lineNumber": 28,
               "columnNumber": 36,
               "deprecated": false,
+              "docsReferencedTypeName": "StreamsFieldsExtractor",
               "trackAdoption": false,
               "returnComment": [],
               "children": [
@@ -749,6 +759,7 @@
               "lineNumber": 32,
               "columnNumber": 13,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false
             }
           ]

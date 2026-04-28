@@ -131,7 +131,15 @@
           }
         ],
         "returnComment": [
-          "A {@link CategoryCounts } object."
+          "A ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.CategoryCounts",
+            "text": "CategoryCounts"
+          },
+          " object."
         ],
         "initialIsOpen": false
       },
@@ -179,7 +187,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `array` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `array` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"array\">, change: C<\"array\"> | undefined) => [string[], boolean]"
@@ -206,6 +230,7 @@
             "lineNumber": 26,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -225,6 +250,7 @@
             "lineNumber": 26,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -239,7 +265,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `color` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `color` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"color\">, change: C<\"color\"> | undefined) => [string, boolean]"
@@ -266,6 +308,7 @@
             "lineNumber": 33,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -285,6 +328,7 @@
             "lineNumber": 33,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -299,7 +343,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `boolean` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `boolean` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"boolean\">, change: C<\"boolean\"> | undefined) => [boolean, boolean]"
@@ -326,6 +386,7 @@
             "lineNumber": 40,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -345,6 +406,7 @@
             "lineNumber": 40,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -359,7 +421,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `image` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `image` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"image\">, change: C<\"image\"> | undefined) => [string, boolean]"
@@ -386,6 +464,7 @@
             "lineNumber": 47,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -405,6 +484,7 @@
             "lineNumber": 47,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -419,7 +499,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `json` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `json` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"json\">, change: C<\"json\"> | undefined) => [string, boolean]"
@@ -446,6 +542,7 @@
             "lineNumber": 54,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -465,6 +562,7 @@
             "lineNumber": 54,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -479,7 +577,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `markdown` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `markdown` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"markdown\">, change: C<\"markdown\"> | undefined) => [string, boolean]"
@@ -506,6 +620,7 @@
             "lineNumber": 61,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -525,6 +640,7 @@
             "lineNumber": 61,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -539,7 +655,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `number` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `number` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"number\">, change: C<\"number\"> | undefined) => [number, boolean]"
@@ -566,6 +698,7 @@
             "lineNumber": 68,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -585,6 +718,7 @@
             "lineNumber": 68,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -599,7 +733,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `select` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `select` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"select\">, change: C<\"select\"> | undefined) => [string, boolean]"
@@ -626,6 +776,7 @@
             "lineNumber": 75,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -645,6 +796,7 @@
             "lineNumber": 75,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -659,7 +811,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `string` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `string` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"string\">, change: C<\"string\"> | undefined) => [string, boolean]"
@@ -686,6 +854,7 @@
             "lineNumber": 82,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -705,6 +874,7 @@
             "lineNumber": 82,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -719,7 +889,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function to compare an `undefined` {@link FieldDefinition} and its {@link UnsavedFieldChange},\n"
+          "\nConvenience function to compare an `undefined` ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and its ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\n"
         ],
         "signature": [
           "(field: F<\"undefined\">, change: C<\"undefined\"> | undefined) => [string | null | undefined, boolean]"
@@ -746,6 +932,7 @@
             "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -765,6 +952,7 @@
             "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -779,7 +967,23 @@
         "tags": [],
         "label": "getFieldInputValue",
         "description": [
-          "\nConvenience function that, given a {@link FieldDefinition} and an {@link UnsavedFieldChange},\nreturns the value to be displayed in the input field, and a boolean indicating whether the\nvalue is an unsaved value.\n"
+          "\nConvenience function that, given a ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " and an ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          ",\nreturns the value to be displayed in the input field, and a boolean indicating whether the\nvalue is an unsaved value.\n"
         ],
         "signature": [
           "(field: F<S>, change: C<S> | undefined) => (boolean | ",
@@ -814,6 +1018,7 @@
             "lineNumber": 101,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -833,6 +1038,7 @@
             "lineNumber": 101,
             "columnNumber": 72,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -847,7 +1053,23 @@
         "tags": [],
         "label": "hasUnsavedChange",
         "description": [
-          "\nCompares a given {@link FieldDefinition} to an {@link UnsavedFieldChange} to determine\nif the field has an unsaved change in the UI.\n"
+          "\nCompares a given ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " to an ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " to determine\nif the field has an unsaved change in the UI.\n"
         ],
         "signature": [
           "<T extends ",
@@ -916,6 +1138,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -943,6 +1166,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -957,7 +1181,15 @@
         "tags": [],
         "label": "isFieldDefaultValue",
         "description": [
-          "\nUtility function to determine if a given value is equal to the default value of\na {@link FieldDefinition}.\n"
+          "\nUtility function to determine if a given value is equal to the default value of\na ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          ".\n"
         ],
         "signature": [
           "(field: F<S>, change: C<S> | undefined) => boolean"
@@ -984,6 +1216,7 @@
             "lineNumber": 29,
             "columnNumber": 60,
             "deprecated": false,
+            "docsReferencedTypeName": "F",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1003,6 +1236,7 @@
             "lineNumber": 29,
             "columnNumber": 73,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1017,7 +1251,15 @@
         "tags": [],
         "label": "isSettingDefaultValue",
         "description": [
-          "\nUtility function to compare a value to the default value of a {@link UiSettingMetadata}."
+          "\nUtility function to compare a value to the default value of a ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "."
         ],
         "signature": [
           "(setting: ",
@@ -1071,6 +1313,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UiSettingMetadata",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1096,6 +1339,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Value",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1112,7 +1356,15 @@
         "tags": [],
         "label": "normalizeSettings",
         "description": [
-          "\nUiSettings have an extremely permissive set of types, which makes it difficult to code\nagainst them.  The `type` and `value` properties are inherently related, and important,\nbut in some cases one or both are missing.  This function attempts to normalize the\nsettings to a strongly-typed format, {@link UiSettingMetadata} based on the information\nin the setting at runtime.\n"
+          "\nUiSettings have an extremely permissive set of types, which makes it difficult to code\nagainst them.  The `type` and `value` properties are inherently related, and important,\nbut in some cases one or both are missing.  This function attempts to normalize the\nsettings to a strongly-typed format, ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          " based on the information\nin the setting at runtime.\n"
         ],
         "signature": [
           "(rawSettings: RawSettings) => Record<string, ",
@@ -1149,12 +1401,21 @@
             "lineNumber": 105,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "RawSettings",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "A mapped collection of normalized {@link UiSetting } objects."
+          "A mapped collection of normalized ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " objects."
         ],
         "initialIsOpen": false
       },
@@ -1165,7 +1426,15 @@
         "tags": [],
         "label": "useUpdate",
         "description": [
-          "\nHook to provide a standard {@link OnInputChangeFn} that will send an update to the\nfield.\n"
+          "\nHook to provide a standard ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.OnInputChangeFn",
+            "text": "OnInputChangeFn"
+          },
+          " that will send an update to the\nfield.\n"
         ],
         "signature": [
           "<T extends ",
@@ -1217,12 +1486,21 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseUpdateParameters",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "An {@link OnInputChangeFn } that will send an update to the field."
+          "An ",
+          {
+            "pluginId": "@kbn/management-settings-utilities",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+            "section": "def-public.OnInputChangeFn",
+            "text": "OnInputChangeFn"
+          },
+          " that will send an update to the field."
         ],
         "initialIsOpen": false
       }
@@ -1258,7 +1536,15 @@
             "tags": [],
             "label": "onInputChange",
             "description": [
-              "The {@link OnInputChangeFn} to invoke."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-utilities",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+                "section": "def-public.OnInputChangeFn",
+                "text": "OnInputChangeFn"
+              },
+              " to invoke."
             ],
             "signature": [
               "(change?: ",
@@ -1299,6 +1585,7 @@
                 "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]
@@ -1310,7 +1597,15 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The {@link FieldDefinition} to use to create an update."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-utilities",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              " to use to create an update."
             ],
             "signature": [
               "{ defaultValue?: ",
