@@ -1,5 +1,5 @@
 {
-  "sha1": "bf614af63cde638568d4422ca4dc62817a9b6ef9",
+  "sha1": "fb2f269fd1dce105c019821bab549cb53ec03bcc",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -8,7 +8,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 21,
+        "line": 24,
         "column": 16
       }
     },
@@ -75,6 +75,50 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/brush_to_zoom.spec.ts",
         "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "c87148d6c664208-70bc8f10babd4cc",
+      "title": "Metrics in Discover - Dimensions wipe on stream switch drops a selected dimension when switching to a stream that does not emit it, and keeps the chart rendered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/dimensions_wipe.spec.ts",
+        "line": 35,
+        "column": 14
+      }
+    },
+    {
+      "id": "c87148d6c664208-fd7c0486ff4d467",
+      "title": "Metrics in Discover - Dimensions wipe on stream switch preserves the breakdown when the dimension is shared across streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/dimensions_wipe.spec.ts",
+        "line": 82,
         "column": 14
       }
     },
@@ -686,7 +730,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 44,
+        "line": 71,
         "column": 14
       }
     },
@@ -708,7 +752,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 73,
+        "line": 100,
         "column": 14
       }
     },
@@ -730,7 +774,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 114,
+        "line": 147,
         "column": 14
       }
     },
@@ -752,7 +796,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 153,
+        "line": 192,
         "column": 14
       }
     },
@@ -774,7 +818,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 220,
+        "line": 265,
         "column": 14
       }
     },
@@ -796,7 +840,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 246,
+        "line": 293,
         "column": 14
       }
     },
@@ -818,7 +862,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 291,
+        "line": 345,
         "column": 14
       }
     },

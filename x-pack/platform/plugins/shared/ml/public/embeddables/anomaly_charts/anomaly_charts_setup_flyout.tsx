@@ -8,8 +8,8 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalyChartsEmbeddableState } from '..';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { getMlGlobalServices } from '../../application/util/get_services';

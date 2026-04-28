@@ -94,6 +94,7 @@
                 "lineNumber": 21,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -117,6 +118,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "BackoffFactory",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -223,6 +225,7 @@
                 "lineNumber": 86,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
