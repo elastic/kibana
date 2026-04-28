@@ -2,30 +2,23 @@
 
 **Applies to:** `EuiButton`, `EuiButtonIcon`, `EuiLink`, `EuiToolTip`
 
-## Interactive EUI controls stay in tab order
+Built-in interactive EUI controls participate in **sequential focus navigation** (WCAG 2.1.1) automatically — do not interfere with `tabIndex`. Non-interactive children of `EuiToolTip` need an explicit tab stop so keyboard users can reveal the tooltip.
 
-Built-in interactive EUI controls (buttons, links, icon buttons, tabs, …) participate in **sequential focus navigation** (WCAG 2.1.1). They have an implicit tab stop — do **not** add **`tabIndex={-1}`**.
+## Canonical usage
 
-- For conditional disabling, use **`disabled`** (or conditional render), not **`tabIndex={-1}`**.
-- Reach for **`tabIndex`** on these controls only inside a documented, reviewed pattern (e.g. roving tabindex) — and only in components that explicitly opt into it.
+- **Interactive EUI controls** (`EuiButton`, `EuiButtonIcon`, `EuiLink`, tabs, …) — never set **`tabIndex={-1}`**. For conditional disabling, use **`disabled`** or conditional render. `tabIndex` is allowed only inside a documented pattern (e.g. roving tabindex) on a component that explicitly opts into it.
+- **`EuiToolTip` anchors** — the **direct child** is the keyboard anchor:
+  - Already interactive (`EuiButton`, `EuiButtonIcon`, `EuiLink`, anything with `tabIndex` / `href` / `onClick`) → leave as-is.
+  - Non-interactive (`EuiText`, `EuiImage`, `EuiBadge` without `onClick`, plain `span`, `EuiIcon`, `EuiHealth`, `EuiAvatar`, …) → add **`tabIndex={0}`**.
+- Tooltip **`content`** and any new accessible name uses **`i18n.translate`**.
+
+## Examples
 
 ```tsx
-// Prefer disabled over tabIndex tricks
 <EuiButton disabled={isDisabled} onClick={onSave}>
   Save
 </EuiButton>
-```
 
-## `EuiToolTip` anchors must be focusable
-
-The **direct child** of **`EuiToolTip`** is the keyboard anchor.
-
-- Child **already interactive** (`EuiButton`, `EuiLink`, `EuiButtonIcon`, anything with `tabIndex` / `href` / `onClick`) → leave as-is.
-- Child **non-interactive** (`EuiText`, `EuiImage`, `EuiBadge` without `onClick`, plain `span`, `EuiIcon`, `EuiHealth`, `EuiAvatar`, …) → add **`tabIndex={0}`** so keyboard users can reach the tooltip.
-
-Tooltip **`content`** and any new accessible names use **`i18n.translate`**.
-
-```tsx
 <EuiToolTip
   content={i18n.translate('myView.infoTooltip', { defaultMessage: 'Info' })}
 >

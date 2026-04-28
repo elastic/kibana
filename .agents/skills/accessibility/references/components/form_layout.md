@@ -13,7 +13,7 @@
 - If the child is **`{...fieldProps}`**, confirm `isInvalid` is not already in the spread before adding another.
 - **`isInvalid`** is a boolean — **no i18n** on it. Visible **`label`** / **`error`** text uses `i18n.translate` when added or changed.
 
-## Example
+## Examples
 
 ```tsx
 <EuiFormRow label="Name" isInvalid={!!errors.name} error={errors.name}>

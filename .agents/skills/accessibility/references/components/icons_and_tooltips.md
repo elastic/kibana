@@ -2,36 +2,22 @@
 
 **Applies to:** `EuiIcon`, `EuiIconTip`, `EuiToolTip`
 
-## `EuiIcon`: decorative vs meaningful
+Each `EuiIcon` is **either decorative or meaningful** — pick one and mark it accordingly. When a tooltip wraps a single icon, `EuiIconTip` is the canonical component.
 
-Every **`EuiIcon`** is **either decorative or meaningful** — pick one, then mark it accordingly.
+## When to use which
 
-- **Decorative.** The icon repeats or ornaments visible text → **`aria-hidden={true}`**. Do not combine **`aria-hidden`** with **`tabIndex`** — focusable nodes must be perceivable.
-- **Meaningful.** The icon alone carries information → give it an **accessible name** (`aria-label` with `i18n.translate`, or `aria-labelledby` to visible text). See *Localization (i18n)* and *HTML ids* in **`../shared_principles.md`**.
-- **`title`** — only for a **native browser tooltip** on built-in icon types. For **SVG React components** passed as `type`, **`title` is not supported** — use `aria-label` / `aria-labelledby` instead.
+- **`EuiIcon` alone** — decorative (repeats nearby visible text), or meaningful with its own accessible name.
+- **`EuiIconTip`** — the icon needs a tooltip (help, hint, info). One component, clearer semantics, better defaults than `EuiToolTip` + `EuiIcon`.
+- **`EuiToolTip` + `EuiIcon`** — only when `EuiIconTip` doesn't fit: multiple tooltip children, child has `onClick` / handlers `EuiIconTip` doesn't support, or the tooltip uses props `EuiIconTip` cannot accept. Otherwise migrate to `EuiIconTip`.
 
-## Prefer `EuiIconTip` for "icon + tooltip"
+## Canonical usage
 
-When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, use **`EuiIconTip`** instead — one component, clearer semantics, better defaults.
-
-- Move supported props (`content`, `position`, `delay`, `title`, `id`, `aria-label`, `data-test-subj`, icon `type` / `color` / `size`).
-- **Do not** carry **`tabIndex`** from the old **`EuiIcon`** into **`EuiIconTip`**.
-- New tooltip **`content`** / accessible names → **`i18n.translate`**.
-
-**Stay with `EuiToolTip` + `EuiIcon`** when there are multiple tooltip children, the child has `onClick` / handlers `EuiIconTip` doesn't support, or the tooltip uses props `EuiIconTip` cannot accept — escalate manually.
+- **Decorative** → **`aria-hidden={true}`**. Do **not** combine `aria-hidden` with `tabIndex`; focusable nodes must be perceivable.
+- **Meaningful** → give the icon an **accessible name** (`aria-label` or `aria-labelledby`). See *Accessible naming*, *Localization (i18n)*, and *HTML ids* in **`../shared_principles.md`**.
+- **`title` is not a substitute.** Native browser tooltip on built-in icon types only — **not supported on SVG React components passed as `type`**.
+- **Migrating to `EuiIconTip`** — move supported props (`content`, `position`, `delay`, `title`, `id`, `aria-label`, `data-test-subj`, icon `type` / `color` / `size`). Do **not** carry `tabIndex` over.
 
 ## Examples
-
-**Decorative icon**
-
-```tsx
-<EuiFlexItem>
-  <EuiIcon type="check" color="success" aria-hidden={true} />
-  <span>Completed</span>
-</EuiFlexItem>
-```
-
-**Meaningful icon**
 
 ```tsx
 <EuiIcon
@@ -41,11 +27,12 @@ When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, use **`EuiIconTip`*
     defaultMessage: 'Warning',
   })}
 />
-```
 
-**`EuiIconTip` (preferred over `EuiToolTip` + single `EuiIcon`)**
+<EuiFlexItem>
+  <EuiIcon type="check" color="success" aria-hidden={true} />
+  <span>Completed</span>
+</EuiFlexItem>
 
-```tsx
 <EuiIconTip
   content={i18n.translate('myFeature.helpTip', { defaultMessage: 'Help info' })}
   position="right"
@@ -62,13 +49,6 @@ When **`EuiToolTip`** wraps **only** a single **`EuiIcon`**, use **`EuiIconTip`*
 
 // WRONG — focusable but hidden from assistive technology
 <EuiIcon type="help" tabIndex={0} aria-hidden={true} />
-
-// RIGHT — remove aria-hidden, add an accessible name
-<EuiIcon
-  type="help"
-  tabIndex={0}
-  aria-label={i18n.translate('x.help', { defaultMessage: 'Help' })}
-/>
 
 // WRONG — verbose wrapper for a single icon
 <EuiToolTip content="Help">

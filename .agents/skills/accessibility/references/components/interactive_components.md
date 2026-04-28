@@ -2,24 +2,22 @@
 
 **Applies to:** `EuiBetaBadge`, `EuiButtonIcon`, `EuiComboBox`, `EuiSelect`, `EuiSuperSelect`, `EuiPagination`, `EuiTreeView`, `EuiBreadcrumbs`
 
-These controls render as interactive elements (buttons, listboxes, pagination, …). Each one must expose an **accessible name** — from visible text via **`aria-labelledby`**, or from **`aria-label`** when no visible label exists.
+These controls render as interactive elements (buttons, listboxes, pagination, …). Each one needs an **accessible name**. Read *Accessible naming* in **`../shared_principles.md`** for the general rule; this guide adds component-specific notes.
 
-## Decision order
+## Canonical usage
 
-For every control that needs a name, walk down this list and stop at the first that fits:
+Walk the naming hierarchy and stop at the first that fits:
 
-1. If **`aria-label`** / **`aria-labelledby`** is already correct, leave it.
-2. Prefer a **visible label** — `EuiFormLabel`, `EuiTitle`, `<label>`, nearby heading — and wire it with **`aria-labelledby`** + a stable `id` (use `useGeneratedHtmlId` / `htmlIdGenerator`, see *HTML ids* in **`../shared_principles.md`**). Do **not** duplicate the same text into `aria-label`.
-3. Only when no visible label applies, set **`aria-label={i18n.translate(...)}`**.
-4. Use **exactly one** naming mechanism — never both `aria-label` and `aria-labelledby` on the same control.
+1. Existing `aria-label` / `aria-labelledby` is correct → leave it.
+2. **Visible label** (`EuiFormLabel`, `EuiTitle`, `<label>`, nearby heading) → wire with **`aria-labelledby`** + a stable `id` (see *HTML ids* in **`../shared_principles.md`**). Don't duplicate that text into `aria-label`.
+3. No visible label → **`aria-label={i18n.translate(...)}`**.
 
-**`EuiFormRow`** already names its direct child — do **not** add redundant `aria-*` to controls inside a form row.
+Use **exactly one** mechanism per control — never both `aria-label` and `aria-labelledby`.
 
-When **`EuiToolTip`** wraps **`EuiButtonIcon`** with matching tooltip text and `aria-label`, see **`tooltip_icon.md`** for the duplicate-screen-reader-output pattern.
+- **`EuiFormRow`** already names its direct child — do **not** add redundant `aria-*` to controls inside a form row.
+- When **`EuiToolTip`** wraps **`EuiButtonIcon`** with matching tooltip text, see **`tooltip_icon.md`** for the duplicate-screen-reader-output pattern.
 
 ## Examples
-
-**Visible label → `aria-labelledby` (preferred)**
 
 ```tsx
 const fieldLabelId = useGeneratedHtmlId();
@@ -28,21 +26,13 @@ const fieldLabelId = useGeneratedHtmlId();
   Field (using {bucketAggType} buckets)
 </EuiFormLabel>
 <EuiComboBox aria-labelledby={fieldLabelId} {...rest} />
-```
 
-**No visible label → `aria-label`**
-
-```tsx
 <EuiSuperSelect
   aria-label={i18n.translate('myView.options.ariaLabel', {
     defaultMessage: 'Fancy options',
   })}
 />
-```
 
-**Pagination / breadcrumbs (no visible label)**
-
-```tsx
 <EuiPagination
   aria-label={i18n.translate('results.pagination', {
     defaultMessage: 'Results pagination',

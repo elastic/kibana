@@ -11,7 +11,7 @@ Tables need a **caption** exposed to assistive technology so users understand wh
 - If visible nearby text already names the table, you may align caption wording with it; otherwise use **`i18n.translate`** for new strings (see *Localization (i18n)* in **`../shared_principles.md`**).
 - If **`tableCaption`** is supplied through **`{...tableProps}`**, fix it at the **source** or merge explicitly at the callsite — never duplicate conflicting captions.
 
-## Example
+## Examples
 
 ```tsx
 <EuiBasicTable

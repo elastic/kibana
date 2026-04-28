@@ -16,7 +16,7 @@ Prefer a single **`i18n.translate`** call (same id + `defaultMessage`) for both 
 
 For `{...tooltipProps}` spreads, merge **`disableScreenReaderOutput`** at the callsite or in the spread source.
 
-## Example
+## Examples
 
 ```tsx
 <EuiToolTip

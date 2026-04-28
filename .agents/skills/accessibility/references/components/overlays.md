@@ -2,7 +2,7 @@
 
 **Applies to:** `EuiModal`, `EuiFlyout`, `EuiFlyoutResizable`, `EuiConfirmModal`, `EuiPopover`
 
-Use this guide when building or refactoring **layered UI** that traps or shifts focus: dialogs, side panels, and anchored popovers. The overlay container needs a **programmatic accessible name** that stays aligned with the visible title.
+Layered UI that traps or shifts focus needs a **programmatic accessible name** that stays aligned with the visible title.
 
 ## When to use which
 
@@ -11,7 +11,7 @@ Use this guide when building or refactoring **layered UI** that traps or shifts 
 - **`EuiConfirmModal`** — yes / no or destructive actions; uses the `title` prop API.
 - **`EuiPopover`** — contextual menus, filters, or short anchored content; may or may not have a visible title.
 
-## Naming contract
+## Canonical usage
 
 Prefer **`aria-labelledby`** pointing at the **visible title** so the spoken name matches what sighted users see.
 
@@ -19,12 +19,14 @@ Prefer **`aria-labelledby`** pointing at the **visible title** so the spoken nam
 2. Give that title element a stable **`id`** — use `useGeneratedHtmlId()` (or `htmlIdGenerator()` in class components), see *HTML ids* in **`../shared_principles.md`**.
 3. Set **`aria-labelledby`** on the overlay container to that `id`.
 4. Reuse one ID variable for both the title and `aria-labelledby` — never orphan references.
+5. **`EuiConfirmModal`** exposes the title as a prop — wire its rendered DOM through **`titleProps={{ id }}`** so the id matches `aria-labelledby`.
+6. **No suitable visible title** (rare for popovers) → use **`aria-label`** with `i18n.translate` instead.
 
-If there is **no** suitable visible title (rare for popovers), use **`aria-label`** with `i18n.translate` instead.
+Suggested variable names: `modalTitleId`, `flyoutTitleId`, `confirmModalTitleId`, `popoverTitleId`.
 
-### `EuiModal` / `EuiFlyout` / `EuiFlyoutResizable`
+## Examples
 
-Title element gets **`id={modalTitleId}`** (or `flyoutTitleId`); container gets **`aria-labelledby`** with the same variable.
+**`EuiModal` / `EuiFlyout` / `EuiFlyoutResizable`** — title gets `id={...TitleId}`, container gets matching `aria-labelledby`:
 
 ```tsx
 const flyoutTitleId = useGeneratedHtmlId();
@@ -34,14 +36,7 @@ const flyoutTitleId = useGeneratedHtmlId();
 </EuiFlyout>
 ```
 
-Suggested variable names: `modalTitleId`, `flyoutTitleId`.
-
-### `EuiConfirmModal`
-
-`EuiConfirmModal` exposes the title as a **prop** — wire its rendered DOM through **`titleProps`** so the id matches **`aria-labelledby`**.
-
-1. **`aria-labelledby={confirmModalTitleId}`**
-2. **`titleProps={{ id: confirmModalTitleId }}`** — same variable.
+**`EuiConfirmModal`** — `aria-labelledby` + matching `titleProps.id`:
 
 ```tsx
 const confirmModalTitleId = useGeneratedHtmlId();
@@ -57,23 +52,19 @@ return (
 );
 ```
 
-Class component: `const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');` inside `render()`.
-
-### `EuiPopover`
+**`EuiPopover`** — visible title:
 
 ```tsx
 const popoverTitleId = useGeneratedHtmlId();
 
-return (
-  <EuiPopover aria-labelledby={popoverTitleId}>
-    <EuiPopoverTitle>
-      <h2 id={popoverTitleId}>Title</h2>
-    </EuiPopoverTitle>
-  </EuiPopover>
-);
+<EuiPopover aria-labelledby={popoverTitleId}>
+  <EuiPopoverTitle>
+    <h2 id={popoverTitleId}>Title</h2>
+  </EuiPopoverTitle>
+</EuiPopover>
 ```
 
-**No title element** — use **`aria-label`** with `i18n.translate`:
+**`EuiPopover`** — no title, fall back to `aria-label`:
 
 ```tsx
 <EuiPopover
@@ -93,15 +84,9 @@ return (
   <EuiModalTitle>Settings</EuiModalTitle>
 </EuiModal>
 
-// RIGHT — point at the visible title
-const modalTitleId = useGeneratedHtmlId();
-<EuiModal aria-labelledby={modalTitleId}>
-  <EuiModalTitle id={modalTitleId}>Settings</EuiModalTitle>
-</EuiModal>
-
-// WRONG — aria-labelledby points at nothing
+// WRONG — aria-labelledby points at nothing (no titleProps.id wiring)
 <EuiConfirmModal aria-labelledby={id} title="Delete?" />
 
-// RIGHT — titleProps wires the id to the rendered title
+// RIGHT
 <EuiConfirmModal aria-labelledby={id} title="Delete?" titleProps={{ id }} />
 ```
