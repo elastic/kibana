@@ -90,6 +90,7 @@
                 "lineNumber": 58,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -261,6 +262,7 @@
               "lineNumber": 36,
               "columnNumber": 14,
               "deprecated": false,
+              "docsReferencedTypeName": "CreateDevToolArgs",
               "trackAdoption": false,
               "isRequired": true
             }

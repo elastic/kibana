@@ -120,6 +120,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'knowledge-indicators-management',
+  'ki-identification-management',
 
   // Platform – Workflows
   'workflow-authoring',

@@ -86,6 +86,7 @@
                 "lineNumber": 164,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -172,6 +173,7 @@
                 "lineNumber": 192,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -189,6 +191,7 @@
                 "lineNumber": 193,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TaskManagerPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -236,6 +239,7 @@
                 "lineNumber": 339,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -253,6 +257,7 @@
                 "lineNumber": 340,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TaskManagerPluginsStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -407,6 +412,7 @@
             "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -521,6 +527,7 @@
             "lineNumber": 39,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "RunInvalidateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -558,6 +565,7 @@
             "lineNumber": 54,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -612,6 +620,7 @@
             "lineNumber": 36,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1900,6 +1909,7 @@
                 "lineNumber": 163,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunContext",
                 "trackAdoption": false
               }
             ]
@@ -2193,6 +2203,7 @@
             "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunContext",
             "trackAdoption": false
           }
         ],
@@ -2583,6 +2594,7 @@
               "lineNumber": 85,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "Middleware",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2637,6 +2649,7 @@
               "lineNumber": 90,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "TaskDefinitionRegistry",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2711,6 +2724,7 @@
               "lineNumber": 92,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "TaskEventLogger",
               "trackAdoption": false,
               "isRequired": true
             }
