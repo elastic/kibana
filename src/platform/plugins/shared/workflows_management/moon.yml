@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
   - '@kbn/monaco'

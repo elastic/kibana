@@ -127,6 +127,7 @@
             "lineNumber": 13,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "UseEuiTheme",
             "trackAdoption": false,
             "isRequired": true
           }

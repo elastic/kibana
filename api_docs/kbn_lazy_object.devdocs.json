@@ -90,6 +90,7 @@
             "lineNumber": 39,
             "columnNumber": 80,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -127,6 +128,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TFactories",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -183,6 +185,7 @@
             "lineNumber": 10,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
