@@ -14,7 +14,7 @@ export const ruleManagementSkill = defineSkillType({
   name: 'rule-management',
   basePath: 'skills/platform/alerting',
   description:
-    'Compose, discover, and modify alerting V2 rules within a conversation using ES|QL-based detection queries.',
+    'Compose, discover, and modify alerting V2 rules within a conversation using ES|QL-based queries.',
   content: `## When to Use This Skill
 
 Use this skill when:
