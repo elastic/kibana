@@ -10,6 +10,7 @@
 import { useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
 import { useCallback, useState } from 'react';
 import { css } from '@emotion/css';
+import { LAYOUT_ABOVE_FULL_SCREEN_CLASS } from '@kbn/core-chrome-layout-constants';
 
 export const useFullScreenWatcher = () => {
   const dataGridId = useGeneratedHtmlId({ prefix: 'unifiedDataTable' });
@@ -52,7 +53,8 @@ const fullScreenStyles = css`
   *:not(
       .${EUI_DATA_GRID_FULL_SCREEN_CLASS}, .${EUI_DATA_GRID_FULL_SCREEN_CLASS} *,
       [data-euiportal='true'],
-      [data-euiportal='true'] *
+      [data-euiportal='true'] *,
+      .${LAYOUT_ABOVE_FULL_SCREEN_CLASS}, .${LAYOUT_ABOVE_FULL_SCREEN_CLASS} *
     ) {
     z-index: unset !important;
   }

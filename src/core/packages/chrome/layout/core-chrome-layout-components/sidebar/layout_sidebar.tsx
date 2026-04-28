@@ -9,7 +9,10 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+import {
+  euiIncludeSelectorInFocusTrap,
+  LAYOUT_ABOVE_FULL_SCREEN_CLASS,
+} from '@kbn/core-chrome-layout-constants';
 
 import { styles } from './layout_sidebar.styles';
 
@@ -27,7 +30,7 @@ export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
   return (
     <div
       css={styles.root}
-      className="kbnChromeLayoutSidebar"
+      className={`kbnChromeLayoutSidebar ${LAYOUT_ABOVE_FULL_SCREEN_CLASS}`}
       data-test-subj="kbnChromeLayoutSidebar"
       {...euiIncludeSelectorInFocusTrap.prop}
     >

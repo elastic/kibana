@@ -50,3 +50,5 @@ export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
+
+export { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from './src/hooks/use_full_screen_watcher';

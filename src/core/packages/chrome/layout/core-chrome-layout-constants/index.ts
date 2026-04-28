@@ -53,6 +53,13 @@ export const MAIN_CONTENT_SELECTORS = [
 export const SIDE_PANEL_CONTENT_GAP = 8;
 
 /**
+ * Apply this class to any layout element that must remain above a fullscreen data grid.
+ * The unified data table's fullscreen mode resets z-index on all elements except those
+ * matching this class (and EUI portals), preserving their stacking order.
+ */
+export const LAYOUT_ABOVE_FULL_SCREEN_CLASS = 'kbnLayoutAboveFullScreen';
+
+/**
  * The selector for elements that should be included in the focus trap of a flyout.
  * This will allow the flyout focus trap to include header and sidenav by default.
  */
