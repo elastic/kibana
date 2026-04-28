@@ -30,7 +30,7 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
 
   it('creates and stores feature KI with server-managed fields', async () => {
     const featureClient = {
-      bulk: jest.fn().mockResolvedValue(undefined),
+      bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     };
 
     const result = await createFeatureKnowledgeIndicatorToolHandler({

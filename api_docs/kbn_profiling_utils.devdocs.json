@@ -111,6 +111,7 @@
             "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFlameGraph",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -313,6 +314,7 @@
             "lineNumber": 217,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -583,6 +585,7 @@
             "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StackTraceResponse",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -657,6 +660,7 @@
             "lineNumber": 101,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "FrameType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -714,6 +718,7 @@
             "lineNumber": 293,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "StackFrameMetadata",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -771,6 +776,7 @@
             "lineNumber": 362,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "StackFrameMetadata",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -828,6 +834,7 @@
             "lineNumber": 235,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "TopNType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -878,6 +885,7 @@
             "lineNumber": 326,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "FrameSymbolStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -921,6 +929,7 @@
             "lineNumber": 351,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "LanguageTypeParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1004,6 +1013,7 @@
             "lineNumber": 399,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1031,6 +1041,7 @@
             "lineNumber": 400,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1058,6 +1069,7 @@
             "lineNumber": 401,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1122,6 +1134,7 @@
             "lineNumber": 82,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "FrameType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3106,7 +3119,9 @@
             "type": "number",
             "tags": [],
             "label": "selfAnnualCO2Kgs",
-            "description": [],
+            "description": [
+              "\nEmpty stack trace"
+            ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "lineNumber": 138,
             "columnNumber": 3,
@@ -3119,7 +3134,9 @@
             "type": "number",
             "tags": [],
             "label": "selfAnnualCostUSD",
-            "description": [],
+            "description": [
+              "\nEmpty stack trace"
+            ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "lineNumber": 139,
             "columnNumber": 3,
@@ -3132,7 +3149,9 @@
             "type": "number",
             "tags": [],
             "label": "Count",
-            "description": [],
+            "description": [
+              "\nEmpty stack trace"
+            ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "lineNumber": 140,
             "columnNumber": 3,

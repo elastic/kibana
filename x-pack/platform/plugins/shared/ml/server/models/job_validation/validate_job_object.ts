@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 
 export function validateJobObject(job: CombinedJob | null | undefined): job is CombinedJob | never {
   if (job === null || typeof job !== 'object') {
