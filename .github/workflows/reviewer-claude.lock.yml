@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"fbebb27003352df0936a75f1f5aee572ad7ab660def9d7d13e0b3cb910f36d38","compiler_version":"v0.68.3","strict":true,"agent_id":"claude","agent_model":"llm-gateway/claude-opus-4-7"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"3248cde3edef61fe9ec7ab1d30be116e984bbc37ee7801ef959bd1f546ab93fe","compiler_version":"v0.68.3","strict":true,"agent_id":"claude","agent_model":"llm-gateway/claude-opus-4-7"}
 # gh-aw-manifest: {"version":1,"secrets":["GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","LITELLM_API_KEY"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"373c709c69115d41ff229c7e5df9f8788daa9553","version":"v9"},{"repo":"actions/setup-node","sha":"53b83947a5a98c8d113130e565377fae1a50d02f","version":"v6.3.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"ba90f2186d7ad780ec640f364005fa24e797b360","version":"v0.68.3"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.20"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.20"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.20"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.2.19"},{"image":"ghcr.io/github/github-mcp-server:v0.32.0"},{"image":"node:lts-alpine"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -55,11 +55,20 @@
 
 name: "Claude Reviewer"
 "on":
+  issue_comment:
+    types:
+    - created
   pull_request:
     types:
     - opened
     - synchronize
     - reopened
+  pull_request_review:
+    types:
+    - submitted
+  pull_request_review_comment:
+    types:
+    - created
   workflow_dispatch:
     inputs:
       aw_context:
@@ -76,13 +85,13 @@ permissions: {}
 
 concurrency:
   cancel-in-progress: true
-  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}-${{ github.event.comment.id || github.event.review.id || 'review' }}
 
 run-name: "Claude Reviewer"
 
 env:
-  PR_CONTEXT_ARTIFACT_NAME: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-  PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  PR_CONTEXT_ARTIFACT_NAME: prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
 
 jobs:
   activation:
@@ -91,9 +100,26 @@ jobs:
       needs.pre_activation.outputs.activated == 'true' && ((!github.event.repository.fork && (
       github.event_name == 'workflow_dispatch' ||
       (
-      github.event.pull_request.user.type != 'Bot' &&
-      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+      (github.event.pull_request.user.type || github.event.comment.user.type || github.event.review.user.type) != 'Bot' &&
+      contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
+      !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
+      (
+      github.event_name == 'pull_request' ||
+      (
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude')
+      ) ||
+      (
+      github.event_name == 'pull_request_review_comment' &&
+      contains(github.event.comment.body, '@claude')
+      ) ||
+      (
+      github.event_name == 'pull_request_review' &&
+      github.event.review.body &&
+      contains(github.event.review.body, '@claude')
+      )
+      )
       )
       )) && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.repository_id))
     runs-on: ubuntu-slim
@@ -202,20 +228,21 @@ jobs:
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
+          GH_AW_IS_PR_COMMENT: ${{ github.event.issue.pull_request && 'true' || '' }}
         # poutine:ignore untrusted_checkout_exec
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_8e4838a3e38ff24e_EOF'
+          cat << 'GH_AW_PROMPT_4998ebdd43321dd9_EOF'
           <system>
-          GH_AW_PROMPT_8e4838a3e38ff24e_EOF
+          GH_AW_PROMPT_4998ebdd43321dd9_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_8e4838a3e38ff24e_EOF'
+          cat << 'GH_AW_PROMPT_4998ebdd43321dd9_EOF'
           <safe-output-tools>
-          Tools: create_pull_request_review_comment(max:10), submit_pull_request_review, missing_tool, missing_data, noop
+          Tools: add_comment, create_pull_request_review_comment(max:10), submit_pull_request_review, reply_to_pull_request_review_comment(max:10), missing_tool, missing_data, noop
           </safe-output-tools>
           <github-context>
           The following GitHub context information is available for this workflow:
@@ -245,13 +272,16 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_8e4838a3e38ff24e_EOF
+          GH_AW_PROMPT_4998ebdd43321dd9_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_8e4838a3e38ff24e_EOF'
+          if [ "$GITHUB_EVENT_NAME" = "issue_comment" ] && [ -n "$GH_AW_IS_PR_COMMENT" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review_comment" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review" ]; then
+            cat "${RUNNER_TEMP}/gh-aw/prompts/pr_context_prompt.md"
+          fi
+          cat << 'GH_AW_PROMPT_4998ebdd43321dd9_EOF'
           </system>
           {{#runtime-import .github/agents/code-reviewer.md}}
           {{#runtime-import .github/workflows/reviewer-claude.md}}
-          GH_AW_PROMPT_8e4838a3e38ff24e_EOF
+          GH_AW_PROMPT_4998ebdd43321dd9_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
@@ -275,6 +305,7 @@ jobs:
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
+          GH_AW_IS_PR_COMMENT: ${{ github.event.issue.pull_request && 'true' || '' }}
           GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: ${{ needs.pre_activation.outputs.activated }}
         with:
           script: |
@@ -295,6 +326,7 @@ jobs:
                 GH_AW_GITHUB_REPOSITORY: process.env.GH_AW_GITHUB_REPOSITORY,
                 GH_AW_GITHUB_RUN_ID: process.env.GH_AW_GITHUB_RUN_ID,
                 GH_AW_GITHUB_WORKSPACE: process.env.GH_AW_GITHUB_WORKSPACE,
+                GH_AW_IS_PR_COMMENT: process.env.GH_AW_IS_PR_COMMENT,
                 GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED
               }
             });
@@ -440,15 +472,17 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_32e0f78cdf1ff490_EOF'
-          {"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"report_incomplete":{},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"none","max":1,"target":"${{ env.PR_NUMBER }}"}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_32e0f78cdf1ff490_EOF
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_e4c983bdad3776ea_EOF'
+          {"add_comment":{"footer":false,"max":1,"target":"${{ env.PR_NUMBER }}"},"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"reply_to_pull_request_review_comment":{"footer":false,"max":10,"target":"${{ env.PR_NUMBER }}"},"report_incomplete":{},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"none","max":1,"target":"${{ env.PR_NUMBER }}"}}
+          GH_AW_SAFE_OUTPUTS_CONFIG_e4c983bdad3776ea_EOF
       - name: Write Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
             {
               "description_suffixes": {
+                "add_comment": " CONSTRAINTS: Maximum 1 comment(s) can be added. Target: ${{ env.PR_NUMBER }}. Supports reply_to_id for discussion threading.",
                 "create_pull_request_review_comment": " CONSTRAINTS: Maximum 10 review comment(s) can be created. Comments will be on the RIGHT side of the diff.",
+                "reply_to_pull_request_review_comment": " CONSTRAINTS: Maximum 10 reply/replies can be created.",
                 "submit_pull_request_review": " CONSTRAINTS: Maximum 1 review(s) can be submitted."
               },
               "repo_params": {},
@@ -456,6 +490,28 @@ jobs:
             }
           GH_AW_VALIDATION_JSON: |
             {
+              "add_comment": {
+                "defaultMax": 1,
+                "fields": {
+                  "body": {
+                    "required": true,
+                    "type": "string",
+                    "sanitize": true,
+                    "maxLength": 65000
+                  },
+                  "item_number": {
+                    "issueOrPRNumber": true
+                  },
+                  "reply_to_id": {
+                    "type": "string",
+                    "maxLength": 256
+                  },
+                  "repo": {
+                    "type": "string",
+                    "maxLength": 256
+                  }
+                }
+              },
               "create_pull_request_review_comment": {
                 "defaultMax": 1,
                 "fields": {
@@ -547,6 +603,28 @@ jobs:
                     "type": "string",
                     "sanitize": true,
                     "maxLength": 65000
+                  }
+                }
+              },
+              "reply_to_pull_request_review_comment": {
+                "defaultMax": 10,
+                "fields": {
+                  "body": {
+                    "required": true,
+                    "type": "string",
+                    "sanitize": true,
+                    "maxLength": 65000
+                  },
+                  "comment_id": {
+                    "required": true,
+                    "positiveInteger": true
+                  },
+                  "pull_request_number": {
+                    "optionalPositiveInteger": true
+                  },
+                  "repo": {
+                    "type": "string",
+                    "maxLength": 256
                   }
                 }
               },
@@ -659,7 +737,7 @@ jobs:
           export GH_AW_ENGINE="claude"
           export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host -v /var/run/docker.sock:/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e GH_AW_SAFE_OUTPUTS_PORT -e GH_AW_SAFE_OUTPUTS_API_KEY -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.2.19'
           
-          cat << GH_AW_MCP_CONFIG_b579857a0ad2b056_EOF | bash "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.sh"
+          cat << GH_AW_MCP_CONFIG_1c1e3368cb323543_EOF | bash "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.sh"
           {
             "mcpServers": {
               "github": {
@@ -699,7 +777,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_b579857a0ad2b056_EOF
+          GH_AW_MCP_CONFIG_1c1e3368cb323543_EOF
       - name: Download activation artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -959,9 +1037,10 @@ jobs:
     runs-on: ubuntu-slim
     permissions:
       contents: read
+      issues: write
       pull-requests: write
     concurrency:
-      group: "gh-aw-conclusion-reviewer-claude-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}"
+      group: "gh-aw-conclusion-reviewer-claude-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}"
       cancel-in-progress: false
     outputs:
       incomplete_count: ${{ steps.report_incomplete.outputs.incomplete_count }}
@@ -1256,9 +1335,26 @@ jobs:
       (!github.event.repository.fork && (
       github.event_name == 'workflow_dispatch' ||
       (
-      github.event.pull_request.user.type != 'Bot' &&
-      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+      (github.event.pull_request.user.type || github.event.comment.user.type || github.event.review.user.type) != 'Bot' &&
+      contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
+      !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
+      (
+      github.event_name == 'pull_request' ||
+      (
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude')
+      ) ||
+      (
+      github.event_name == 'pull_request_review_comment' &&
+      contains(github.event.comment.body, '@claude')
+      ) ||
+      (
+      github.event_name == 'pull_request_review' &&
+      github.event.review.body &&
+      contains(github.event.review.body, '@claude')
+      )
+      )
       )
       )) && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.repository_id)
     runs-on: ubuntu-slim
@@ -1295,8 +1391,8 @@ jobs:
 
     uses: ./.github/workflows/prefetch-pr-context.yml
     with:
-      artifact_name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-      pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+      artifact_name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+      pr_number: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
       repo: ${{ github.repository }}
 
   safe_outputs:
@@ -1308,6 +1404,7 @@ jobs:
     runs-on: ubuntu-slim
     permissions:
       contents: read
+      issues: write
       pull-requests: write
     timeout-minutes: 15
     env:
@@ -1323,6 +1420,8 @@ jobs:
     outputs:
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
       code_push_failure_errors: ${{ steps.process_safe_outputs.outputs.code_push_failure_errors }}
+      comment_id: ${{ steps.process_safe_outputs.outputs.comment_id }}
+      comment_url: ${{ steps.process_safe_outputs.outputs.comment_url }}
       create_discussion_error_count: ${{ steps.process_safe_outputs.outputs.create_discussion_error_count }}
       create_discussion_errors: ${{ steps.process_safe_outputs.outputs.create_discussion_errors }}
       process_safe_outputs_processed_count: ${{ steps.process_safe_outputs.outputs.processed_count }}
@@ -1366,7 +1465,7 @@ jobs:
           GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.playwright.dev,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"create_pull_request_review_comment\":{\"max\":10,\"side\":\"RIGHT\",\"target\":\"${{ env.PR_NUMBER }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"report_incomplete\":{},\"submit_pull_request_review\":{\"allowed_events\":[\"COMMENT\"],\"footer\":\"none\",\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"footer\":false,\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"},\"create_pull_request_review_comment\":{\"max\":10,\"side\":\"RIGHT\",\"target\":\"${{ env.PR_NUMBER }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"reply_to_pull_request_review_comment\":{\"footer\":false,\"max\":10,\"target\":\"${{ env.PR_NUMBER }}\"},\"report_incomplete\":{},\"submit_pull_request_review\":{\"allowed_events\":[\"COMMENT\"],\"footer\":\"none\",\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"}}"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |

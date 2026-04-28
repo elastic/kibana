@@ -3,6 +3,12 @@ name: Claude Reviewer
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -27,22 +33,39 @@ if: >-
   (
     github.event_name == 'workflow_dispatch' ||
     (
-      github.event.pull_request.user.type != 'Bot' &&
-      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+      (github.event.pull_request.user.type || github.event.comment.user.type || github.event.review.user.type) != 'Bot' &&
+      contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
+      !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
+      (
+        github.event_name == 'pull_request' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.issue.pull_request &&
+          contains(github.event.comment.body, '@claude')
+        ) ||
+        (
+          github.event_name == 'pull_request_review_comment' &&
+          contains(github.event.comment.body, '@claude')
+        ) ||
+        (
+          github.event_name == 'pull_request_review' &&
+          github.event.review.body &&
+          contains(github.event.review.body, '@claude')
+        )
+      )
     )
   )
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}-${{ github.event.comment.id || github.event.review.id || 'review' }}
   cancel-in-progress: true
-  job-discriminator: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
+  job-discriminator: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}
 permissions:
   contents: read
   issues: read
   pull-requests: read
 env:
-  PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-  PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
 tools:
   github:
     toolsets: [default]
@@ -79,12 +102,19 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
     footer: none
+  add-comment:
+    max: 1
+    target: ${{ env.PR_NUMBER }}
+    discussions: false
+    footer: false
+  reply-to-pull-request-review-comment:
+    max: 10
+    target: ${{ env.PR_NUMBER }}
+    footer: false
 ---
 
 # Claude PR Reviewer
 
-Review the pull request identified by `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` and `GH_AW_GITHUB_REPOSITORY` in the `<github-context>` block using the imported reviewer instructions.
-
-This workflow runs automatically for eligible pull request events and can still be triggered manually for testing.
-
-Do not handle `@claude` comments, review replies, or follow-up conversational requests in this workflow.
+Using the imported reviewer instructions:
+- Run in review mode for `pull_request` and `workflow_dispatch` workflow events.
+- Run in follow-up response mode for `issue_comment`, `pull_request_review_comment`, and `pull_request_review` events that mention `@claude`.
