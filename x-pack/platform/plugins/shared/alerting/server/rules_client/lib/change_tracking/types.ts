@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
 import type {
@@ -37,9 +36,6 @@ export interface GetRuleHistoryResult extends GetHistoryResult {
 }
 
 export interface IChangeTrackingService {
-  register(module: RuleTypeSolution): void;
-  isInitialized(module: RuleTypeSolution): boolean;
-  initialize(elasticsearchClient: ElasticsearchClient): void;
   log(change: RuleChange, opts: LogChangeHistoryOptions): Promise<void>;
   logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
