@@ -15483,7 +15483,7 @@
   resolved "https://registry.yarnpkg.com/@types/use-sync-external-store/-/use-sync-external-store-0.0.6.tgz#60be8d21baab8c305132eb9cb912ed497852aadc"
   integrity sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==
 
-"@types/uuid@10.0.0", "@types/uuid@^10.0.0":
+"@types/uuid@10.0.0":
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-10.0.0.tgz#e9c07fe50da0f53dc24970cca94d619ff03f6f6d"
   integrity sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==
@@ -18758,13 +18758,6 @@ console-log-level@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/console-log-level/-/console-log-level-1.4.1.tgz#9c5a6bb9ef1ef65b05aba83028b0ff894cdf630a"
   integrity sha512-VZzbIORbP+PPcN/gg3DXClTLPLg5Slwd5fL2MIc+o1qZ4BXBvWyc6QxPk6T/Mkr6IVjRpoAGf32XxP3ZWMVRcQ==
-
-console-table-printer@^2.12.1:
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/console-table-printer/-/console-table-printer-2.12.1.tgz#4a9646537a246a6d8de57075d4fae1e08abae267"
-  integrity sha512-wKGOQRRvdnd89pCeH96e2Fn4wkbenSP6LMHfjfyNLMbGuHEFbMqQNuxXqd0oXG9caIOQ1FTvc5Uijp9/4jujnQ==
-  dependencies:
-    simple-wcswidth "^1.0.1"
 
 console.table@^0.10.0:
   version "0.10.0"
@@ -26116,17 +26109,12 @@ langchain@1.2.30:
     uuid "^11.1.0"
     zod "^3.25.76 || ^4"
 
-langsmith@0.5.7, "langsmith@>=0.4.0 <1.0.0", "langsmith@>=0.5.0 <1.0.0":
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.5.7.tgz#7f70d8058b0e9d3cb3e45dc8a1bd188322b5b40c"
-  integrity sha512-FjYf2oBGMoSXnaT4SRaFguIiGJaonZ5VKWKJDPl9awLZjz2RkN29AcQWceecSINVzXzTvtRWPOjAWT+XggqNNg==
+langsmith@0.5.25, "langsmith@>=0.4.0 <1.0.0", "langsmith@>=0.5.0 <1.0.0":
+  version "0.5.25"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.5.25.tgz#5d05ece666fa92b3174e2be0b67cc51fa53455d4"
+  integrity sha512-AG7NOymrDmwaWq+wus5hJHZjPFKXwsEdfqGBU3eZiF5242mme+5wuJocdBJKGyU1kgBO7TuLHiqtdyIwl4V4yQ==
   dependencies:
-    "@types/uuid" "^10.0.0"
-    chalk "^5.6.2"
-    console-table-printer "^2.12.1"
-    p-queue "^6.6.2"
-    semver "^7.6.3"
-    uuid "^10.0.0"
+    p-queue "6.6.2"
 
 language-subtag-registry@~0.3.2:
   version "0.3.21"
@@ -29256,7 +29244,7 @@ p-map@^3.0.0:
   dependencies:
     aggregate-error "^3.0.0"
 
-p-queue@^6.6.2:
+p-queue@6.6.2, p-queue@^6.6.2:
   version "6.6.2"
   resolved "https://registry.yarnpkg.com/p-queue/-/p-queue-6.6.2.tgz#2068a9dcf8e67dd0ec3e7a2bcb76810faa85e426"
   integrity sha512-RwFpb72c/BhQLEXIZ5K2e+AhgNVmIejGlTgiB9MzZ0e93GRvqZ7uSi0dvRF7/XIXDeNkra2fNHBxTyPDGySpjQ==
@@ -33001,11 +32989,6 @@ simple-statistics@7.8.8:
   version "7.8.8"
   resolved "https://registry.yarnpkg.com/simple-statistics/-/simple-statistics-7.8.8.tgz#8acf4f78ba5a111e7c8424ffda2ac32fe353198c"
   integrity sha512-CUtP0+uZbcbsFpqEyvNDYjJCl+612fNgjT8GaVuvMG7tBuJg8gXGpsP5M7X658zy0IcepWOZ6nPBu1Qb9ezA1w==
-
-simple-wcswidth@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/simple-wcswidth/-/simple-wcswidth-1.0.1.tgz#8ab18ac0ae342f9d9b629604e54d2aa1ecb018b2"
-  integrity sha512-xMO/8eNREtaROt7tJvWJqHBDTMFN4eiQ5I4JRMuilwfnFcV5W9u7RUkueNkdw0jPqGMX36iCywelS5yilTuOxg==
 
 simple-websocket@^9.0.0:
   version "9.1.0"
