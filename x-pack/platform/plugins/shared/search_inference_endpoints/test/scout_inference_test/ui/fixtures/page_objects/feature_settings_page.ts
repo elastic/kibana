@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
+import { EuiComboBoxWrapper, type ScoutPage, type Locator } from '@kbn/scout';
 
 export class FeatureSettingsPage {
   // Header
@@ -21,7 +21,7 @@ export class FeatureSettingsPage {
   readonly aiCapabilitiesRow: Locator;
   readonly enableAiSwitch: Locator;
   readonly globalModelRow: Locator;
-  readonly globalModelComboBox: Locator;
+  readonly globalModelComboBox: EuiComboBoxWrapper;
   readonly featureSpecificModelsRow: Locator;
   readonly featureSpecificModelsSwitch: Locator;
 
@@ -46,9 +46,6 @@ export class FeatureSettingsPage {
   readonly resetToDefaultsModal: Locator;
   readonly resetToDefaultsConfirm: Locator;
 
-  // Combobox primitives
-  readonly globalModelClearButton: Locator;
-
   // Empty State
   readonly noModelsEmptyPrompt: Locator;
   readonly addModelsButton: Locator;
@@ -67,7 +64,7 @@ export class FeatureSettingsPage {
     this.aiCapabilitiesRow = this.page.testSubj.locator('aiCapabilitiesRow');
     this.enableAiSwitch = this.page.testSubj.locator('enableAiSwitch');
     this.globalModelRow = this.page.testSubj.locator('globalModelRow');
-    this.globalModelComboBox = this.page.testSubj.locator('globalModelComboBox');
+    this.globalModelComboBox = new EuiComboBoxWrapper(this.page, 'globalModelComboBox');
     this.featureSpecificModelsRow = this.page.testSubj.locator('featureSpecificModelsRow');
     this.featureSpecificModelsSwitch = this.page.testSubj.locator('featureSpecificModelsSwitch');
 
@@ -97,11 +94,6 @@ export class FeatureSettingsPage {
     this.resetToDefaultsConfirm = this.resetToDefaultsModal.getByRole('button', {
       name: /reset to default/i,
     });
-
-    // Combobox primitives
-    this.globalModelClearButton = this.globalModelComboBox.locator(
-      '[data-test-subj="comboBoxClearButton"]'
-    );
 
     // Empty State
     this.noModelsEmptyPrompt = this.page.testSubj.locator('settings-no-models');
@@ -173,7 +165,6 @@ export class FeatureSettingsPage {
 
   /** Picks a connector by visible name in the Global model combobox. */
   public async selectGlobalModel(name: string): Promise<void> {
-    await this.globalModelComboBox.click();
-    await this.page.getByRole('option', { name }).click();
+    await this.globalModelComboBox.selectSingleOption(name);
   }
 }
