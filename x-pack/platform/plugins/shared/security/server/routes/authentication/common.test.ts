@@ -461,6 +461,58 @@ describe('Common authentication routes', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[params.password]: value has length [0] but it must have a minimum length of [1]."`
       );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'a'.repeat(1025),
+          providerName: 'saml1',
+          currentURL: '/some-url',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerType]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'a'.repeat(1025),
+          currentURL: '/some-url',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerName]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: 'a'.repeat(8193),
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[currentURL]: value has length [8193] but it must have a maximum length of [8192]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/some-url',
+          params: { username: 'a'.repeat(1025), password: 'some-password' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[params.username]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/some-url',
+          params: { username: 'some-user', password: 'a'.repeat(1025) },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[params.password]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
     });
 
     it('returns 500 if login throws unhandled exception.', async () => {
