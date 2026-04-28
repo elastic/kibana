@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment/moment';
-import datemath from '@kbn/datemath';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
@@ -60,19 +59,10 @@ export class OverviewStatusService {
   async getOverviewStatus() {
     this.filterData = await getMonitorFilters(this.routeContext);
 
-    const [rawConfigs, statusResult] = await Promise.all([
+    const [allConfigs, statusResult] = await Promise.all([
       this.getMonitorConfigs(),
       this.getQueryResult(),
     ]);
-
-    // When the user opts into date-range filtering, drop any configured
-    // monitor that has no final summary in the selected window. Disabled
-    // monitors (which never run) get filtered out as a side effect — that's
-    // intentional: the toggle is about "what ran in the window".
-    const filterByDateRange = Boolean(this.routeContext.request.query?.filterByDateRange);
-    const allConfigs = filterByDateRange
-      ? rawConfigs.filter((c) => statusResult.has(c.attributes[ConfigKey.MONITOR_QUERY_ID]))
-      : rawConfigs;
 
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
       this.processOverviewStatus(allConfigs, statusResult);
@@ -153,51 +143,18 @@ export class OverviewStatusService {
     return filters;
   }
 
-  /**
-   * Compute the `[from, to]` window we use to pull final-summary docs. By
-   * default we look back 4h+20m so we always capture the latest summary for
-   * every enabled monitor (max schedule is 4h). When the user has explicitly
-   * opted into `filterByDateRange`, we honor their picker range — but we only
-   * narrow, never widen below the default window, because the picker can be
-   * useful even with `now-15m` style values.
-   */
-  getStatusQueryRange(): { from: string; to: string } {
-    const params = this.routeContext.request.query || {};
-    const { filterByDateRange, dateRangeStart, dateRangeEnd } = params;
-    const defaultFrom = moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString();
-
-    if (!filterByDateRange || !dateRangeStart || !dateRangeEnd) {
-      return { from: defaultFrom, to: 'now' };
-    }
-
-    // Datemath returns undefined on bad input; fall back to defaults rather
-    // than failing the query.
-    const fromDate = datemath.parse(dateRangeStart);
-    const toDate = datemath.parse(dateRangeEnd, { roundUp: true });
-    if (!fromDate?.isValid() || !toDate?.isValid()) {
-      return { from: defaultFrom, to: 'now' };
-    }
-
-    return {
-      from: fromDate.toISOString(),
-      to: toDate.toISOString(),
-    };
-  }
-
   async getQueryResult() {
     return withApmSpan('monitor_status_data', async () => {
-      const range = this.getStatusQueryRange();
+      const range = {
+        // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe side
+        from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
+        to: 'now',
+      };
 
       let hasMoreData = true;
       const monitorByIds = new Map<string, LocationStatus>();
       let afterKey: any;
       let count = 0;
-
-      // The `timespan` filter is a "currently fresh" constraint anchored to
-      // `now` — when the user is explicitly inspecting a historic window via
-      // the date picker we drop it, otherwise older summaries inside the
-      // window would be filtered out unfairly.
-      const isUserSelectedRange = Boolean(this.routeContext.request.query?.filterByDateRange);
 
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
@@ -208,9 +165,7 @@ export class OverviewStatusService {
                 filter: [
                   FINAL_SUMMARY_FILTER,
                   getRangeFilter({ from: range.from, to: range.to }),
-                  ...(isUserSelectedRange
-                    ? []
-                    : [getTimespanFilter({ from: 'now-15m', to: 'now' })]),
+                  getTimespanFilter({ from: 'now-15m', to: 'now' }),
                   ...this.getEsDataFilters(),
                 ] as QueryDslQueryContainer[],
               },

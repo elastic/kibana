@@ -19,7 +19,6 @@ import { MonitorTypeEnum } from '../../../../../../../../../common/runtime_types
 import { MONITOR_STATUS_ENUM } from '../../../../../../../../../common/constants/monitor_management';
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { getLatestDownSummary } from '../get_latest_down_summary';
-import { useOverviewDisplayOptions } from '../../../../common/use_overview_display_options';
 
 export const MonitorStatusCol = ({
   monitor,
@@ -29,10 +28,7 @@ export const MonitorStatusCol = ({
   openFlyout: (monitor: OverviewStatusMetaData) => void;
 }) => {
   const timestamp = monitor.timestamp ? parseTimestamp(monitor.timestamp) : null;
-
-  const {
-    options: { absoluteTimestamps },
-  } = useOverviewDisplayOptions();
+  const absoluteTimestamps = false;
 
   // The most recent down-since across this monitor's currently-down locations.
   // The error message itself lives in its own column now; here we only need

@@ -17,20 +17,6 @@ import { apiService } from '../../../../utils/api_service';
 export function toStatusOverviewQueryArgs(
   pageState: MonitorOverviewPageState
 ): FetchMonitorOverviewQueryArgs {
-  // Only forward the date-range arguments when the user has opted in via the
-  // toggle — otherwise the server keeps its legacy behavior of listing every
-  // configured monitor regardless of recent activity.
-  const dateRangeArgs: Pick<
-    FetchMonitorOverviewQueryArgs,
-    'filterByDateRange' | 'dateRangeStart' | 'dateRangeEnd'
-  > = pageState.filterByDateRange
-    ? {
-        filterByDateRange: true,
-        dateRangeStart: pageState.dateRangeStart,
-        dateRangeEnd: pageState.dateRangeEnd,
-      }
-    : {};
-
   return {
     query: pageState.query,
     tags: pageState.tags,
@@ -42,7 +28,6 @@ export function toStatusOverviewQueryArgs(
     showFromAllSpaces: pageState.showFromAllSpaces,
     searchFields: [],
     useLogicalAndFor: pageState.useLogicalAndFor,
-    ...dateRangeArgs,
   };
 }
 
