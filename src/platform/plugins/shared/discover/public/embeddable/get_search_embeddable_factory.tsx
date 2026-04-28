@@ -29,6 +29,11 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
+import {
+  getDiscoverSessionEmbeddableComparators,
+  getSearchEmbeddableComparators,
+} from './utils/get_search_embeddable_comparators';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -43,7 +48,6 @@ import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
-import { compareSelectedTabId } from './utils/compare_selected_tab_id';
 import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
@@ -100,8 +104,14 @@ export const getSearchEmbeddableFactory = ({
 
       const tabs = runtimeState.tabs ?? [];
 
-      const isSelectedTabDeleted = (tabId: string | undefined, availableTabs: typeof tabs = tabs) =>
-        isTabDeleted(tabId, availableTabs);
+      const defaultState = embeddableTransformsEnabled
+        ? { selected_tab_id: tabs[0]?.id }
+        : {
+            selectedTabId: tabs[0]?.id,
+            sort: [],
+            grid: {},
+            ...getSearchEmbeddableDefaults(discoverServices.uiSettings),
+          };
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -136,7 +146,9 @@ export const getSearchEmbeddableFactory = ({
         uuid,
         parentApi,
         tabs,
+        analytics: discoverServices.analytics,
         selectedTabId$,
+        savedObjectId$,
         searchEmbeddable,
         blockingError$,
         dataLoading$,
@@ -145,6 +157,7 @@ export const getSearchEmbeddableFactory = ({
       const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
+        defaultState,
         serializeState: () => serialize(savedObjectId$.getValue()),
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
@@ -158,52 +171,18 @@ export const getSearchEmbeddableFactory = ({
           inlineEditingApi.anyStateChange$
         ),
         getComparators: () => {
-          const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
-          const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
-
-          if (embeddableTransformsEnabled) {
-            const isByValue = !savedObjectId$.getValue();
-            return {
-              ...drilldownsManager.comparators,
-              ...titleComparators,
-              ...timeRangeComparators,
-              discover_session_id: 'skip',
-              selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-              overrides: shouldSkipTabComparators ? 'skip' : 'deepEquality',
-              tabs: !isByValue || shouldSkipTabComparators ? 'skip' : 'deepEquality',
-            };
-          }
+          const isByValue = !savedObjectId$.getValue();
+          const shouldSkipTabComparators =
+            isTabDeleted(selectedTabId$.getValue(), tabs) || inlineEditingApi.isEditing();
 
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...searchEmbeddable.comparators,
-            // While the selected tab is missing or inline editing is in progress,
-            // skip tab-dependent comparators so unsaved-changes badges don't appear
-            // until the user explicitly applies a tab change.
-            ...(shouldSkipTabComparators
-              ? Object.fromEntries(
-                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
-                )
-              : {}),
-            selectedTabId: shouldSkipTabComparators
-              ? 'skip'
-              : (last, current) => compareSelectedTabId(tabs[0]?.id, last, current),
-            attributes: 'skip',
-            breakdownField: 'skip',
-            hideAggregatedPreview: 'skip',
-            hideChart: 'skip',
-            isTextBasedQuery: 'skip',
-            kibanaSavedObjectMeta: 'skip',
+            ...(embeddableTransformsEnabled
+              ? getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators)
+              : getSearchEmbeddableComparators(isByValue, shouldSkipTabComparators)),
             nonPersistedDisplayOptions: 'skip',
-            refreshInterval: 'skip',
-            savedObjectId: 'skip',
-            timeRestore: 'skip',
-            usesAdHocDataView: 'skip',
-            controlGroupJson: 'skip',
-            visContext: 'skip',
-            tabs: 'skip',
           };
         },
         onReset: async (lastSaved) => {

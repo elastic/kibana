@@ -609,7 +609,7 @@ export function registerInternalToolsRoutes({
       const connector = await actionsClient.get({ id: connectorId });
 
       if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
-        response.badRequest({
+        return response.badRequest({
           body: {
             message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,
           },

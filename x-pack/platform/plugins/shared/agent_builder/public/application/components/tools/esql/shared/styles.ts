@@ -20,6 +20,10 @@ export const visualizationWrapper = (euiTheme: UseEuiTheme['euiTheme'], height: 
     '.echChart ul': {
       marginInlineStart: 0,
     },
+
+    '.expExpressionRenderer__expression': {
+      padding: `${euiTheme.size.s} 0`,
+    },
   });
 
 export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>

@@ -6,9 +6,21 @@
  */
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
   describe('SyntheticsAPITests', () => {
+    // Run Fleet setup + synthetics package install exactly once for the whole
+    // suite. The underlying helper is idempotent, so every per-describe
+    // `installSyntheticsPackage()` call inside a child test file becomes a
+    // cheap GET. This removes ~24 redundant uninstall/reinstall cycles per
+    // CI run, which were the primary source of 502 / "backend closed
+    // connection" flakes against Fleet.
+    before(async () => {
+      const privateLocationService = new PrivateLocationTestService(getService);
+      await privateLocationService.installSyntheticsPackage();
+    });
+
     loadTestFile(require.resolve('./legacy_and_multispace_monitor_api'));
     loadTestFile(require.resolve('./create_monitor_private_location'));
     loadTestFile(require.resolve('./create_monitor_project_private_location'));

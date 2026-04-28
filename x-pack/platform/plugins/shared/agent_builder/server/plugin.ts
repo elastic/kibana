@@ -25,7 +25,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition } from './step_types';
+import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -37,7 +37,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
+import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
@@ -167,6 +167,7 @@ export class AgentBuilderPlugin
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
     );
+    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -195,7 +196,10 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerSkillToolsLoaderHook(serviceSetups, {
+      analyticsService: this.analyticsService,
+      trackingService: this.trackingService,
+    });
 
     const smlTools = createSmlTools({
       getSmlService: () => {
@@ -257,12 +261,19 @@ export class AgentBuilderPlugin
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
+      topSnippets: this.config.topSnippets,
     };
   }
 
   start(
     coreStart: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
+    {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+    }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -280,6 +291,7 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      searchInferenceEndpoints,
     });
 
     const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
@@ -295,6 +307,7 @@ export class AgentBuilderPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      searchInferenceEndpoints,
     });
 
     // Schedule SML crawler tasks for all registered types
@@ -354,7 +367,6 @@ export class AgentBuilderPlugin
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
             logger: this.logger.get('services.sml'),
-            request: params.request,
           });
         },
       },

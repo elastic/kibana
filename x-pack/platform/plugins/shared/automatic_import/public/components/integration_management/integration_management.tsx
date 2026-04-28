@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -19,43 +19,58 @@ import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { ManagementContents } from './management_contents/management_contents';
 import { ButtonsFooter } from '../../common/components/button_footer';
 import { ConnectorSelector } from '../../common/components/connector_selector';
-import { IntegrationFormProvider } from './forms/integration_form';
+import { IntegrationFormProvider, useIntegrationForm } from './forms/integration_form';
 import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
 import * as i18n from './translations';
-import { useDeleteIntegration, useGetIntegrationById, useKibana } from '../../common';
+import {
+  useCreateUpdateIntegration,
+  useDeleteIntegration,
+  useGetIntegrationById,
+  useKibana,
+} from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
 import { useTelemetry } from '../telemetry_context';
 import { LicensePaywallCard } from '../license_paywall/license_paywall_card';
+import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
 
 const INTEGRATIONS_APP_ID = 'integrations';
 const INTEGRATIONS_MANAGE_PATH = '/browse?view=manage';
 
-const IntegrationManagementContents: React.FC = () => {
-  const { application } = useKibana().services;
+interface IntegrationManagementContentsProps {
+  navigateToManage: () => void;
+}
+
+const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps> = ({
+  navigateToManage,
+}) => {
   const { integrationId } = useParams<{ integrationId?: string }>();
+  const { state: locationState } = useLocation<{ isNew?: boolean }>();
+  const isNewlyCreated = locationState?.isNew === true;
   const { integration } = useGetIntegrationById(integrationId);
   const { deleteIntegrationMutation } = useDeleteIntegration();
+  const { submit, isFormModified } = useIntegrationForm();
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+  const isDeletingDataStream =
+    integration?.dataStreams?.some((ds) => ds.status === 'deleting') ?? false;
   const shouldOfferIntegrationDelete = Boolean(
     integrationId && integration && (integration.dataStreams?.length ?? 0) === 0
   );
   const [isDeleteIntegrationModalVisible, setIsDeleteIntegrationModalVisible] = useState(false);
   const deleteIntegrationModalTitleId = useGeneratedHtmlId();
   const { reportCancelButtonClicked, reportDoneButtonClicked } = useTelemetry();
-
-  const navigateToManage = useCallback(() => {
-    application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
-  }, [application]);
+  // Reanalysis updates data streams on the server but not integration form fields, so
+  // useFormIsModified stays false; allow Done so the user can leave after scheduling reanalysis.
+  const [reanalysisJustScheduled, setReanalysisJustScheduled] = useState(false);
 
   const performCancelNavigation = useCallback(() => {
-    reportCancelButtonClicked();
+    reportCancelButtonClicked({ integrationId });
     if (window.history.length > 1) {
       window.history.back();
     } else {
       navigateToManage();
     }
-  }, [navigateToManage, reportCancelButtonClicked]);
+  }, [integrationId, navigateToManage, reportCancelButtonClicked]);
 
   const handleCancel = useCallback(() => {
     if (shouldOfferIntegrationDelete) {
@@ -83,9 +98,17 @@ const IntegrationManagementContents: React.FC = () => {
   }, [deleteIntegrationMutation, integrationId, navigateToManage]);
 
   const handleDone = useCallback(() => {
-    reportDoneButtonClicked();
-    navigateToManage();
-  }, [navigateToManage, reportDoneButtonClicked]);
+    reportDoneButtonClicked({ integrationId });
+    submit();
+  }, [integrationId, reportDoneButtonClicked, submit]);
+
+  const handleDataStreamReanalyzeSuccess = useCallback(() => {
+    setReanalysisJustScheduled(true);
+  }, []);
+
+  useEffect(() => {
+    setReanalysisJustScheduled(false);
+  }, [integrationId]);
 
   return (
     <>
@@ -93,12 +116,17 @@ const IntegrationManagementContents: React.FC = () => {
         <KibanaPageTemplate.Header pageTitle={i18n.PAGE_TITLE_NEW_INTEGRATION} />
         <KibanaPageTemplate.Section>
           <ConnectorSelector />
-          <ManagementContents />
+          <ManagementContents onDataStreamReanalyzeSuccess={handleDataStreamReanalyzeSuccess} />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
       <ButtonsFooter
         onAction={handleDone}
-        isActionDisabled={!hasDataStreams}
+        isActionDisabled={
+          !hasDataStreams ||
+          isDeletingDataStream ||
+          (Boolean(integrationId) && !isNewlyCreated && !isFormModified && !reanalysisJustScheduled)
+        }
+        isCancelDisabled={isDeletingDataStream}
         onCancel={handleCancel}
       />
       {isDeleteIntegrationModalVisible && (
@@ -135,17 +163,36 @@ export const IntegrationManagement = React.memo(() => {
 
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
-  const { reportCancelButtonClicked } = useTelemetry();
+  const { reportCancelButtonClicked, sessionId } = useTelemetry();
+  const { telemetry } = services;
+
+  useEffect(() => {
+    if (integrationId) {
+      telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditIntegrationPageLoaded, {
+        sessionId,
+        integrationId,
+      });
+    } else {
+      telemetry?.reportEvent(AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded, {
+        sessionId,
+      });
+    }
+  }, [telemetry, sessionId, integrationId]);
+  const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
 
   const integrationsHomeHref = useMemo(
     () => application.getUrlForApp(INTEGRATIONS_APP_ID),
     [application]
   );
 
+  const navigateToManage = useCallback(() => {
+    application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
+  }, [application]);
+
   const handlePaywallCancel = useCallback(() => {
-    reportCancelButtonClicked();
+    reportCancelButtonClicked({ integrationId });
     application.navigateToUrl(integrationsHomeHref);
-  }, [application, integrationsHomeHref, reportCancelButtonClicked]);
+  }, [application, integrationId, integrationsHomeHref, reportCancelButtonClicked]);
 
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;
@@ -155,10 +202,27 @@ export const IntegrationManagement = React.memo(() => {
       title: integration.title,
       description: integration.description,
       logo: integration.logo,
+      connectorId: integration.connectorId ?? '',
     };
   }, [integration]);
 
-  const handleSubmit = useCallback(async (_data: IntegrationFormData) => {}, []);
+  const handleSubmit = useCallback(
+    async (data: IntegrationFormData) => {
+      const resolvedIntegrationId = integrationId ?? data.integrationId;
+      if (!resolvedIntegrationId) return;
+
+      await createUpdateIntegrationMutation.mutateAsync({
+        connectorId: data.connectorId,
+        integrationId: resolvedIntegrationId,
+        title: data.title,
+        description: data.description,
+        ...(data.logo ? { logo: data.logo } : {}),
+      });
+
+      navigateToManage();
+    },
+    [createUpdateIntegrationMutation, integrationId, navigateToManage]
+  );
 
   const existingDataStreamTitles = useMemo(
     () =>
@@ -195,15 +259,7 @@ export const IntegrationManagement = React.memo(() => {
         title={<h2>{i18n.INTEGRATION_NOT_FOUND_TITLE}</h2>}
         body={<p>{i18n.INTEGRATION_NOT_FOUND_DESCRIPTION}</p>}
         actions={
-          <EuiButton
-            color="primary"
-            fill
-            onClick={() =>
-              application.navigateToApp(INTEGRATIONS_APP_ID, {
-                path: INTEGRATIONS_MANAGE_PATH,
-              })
-            }
-          >
+          <EuiButton color="primary" fill onClick={navigateToManage}>
             {i18n.GO_BACK_BUTTON}
           </EuiButton>
         }
@@ -218,7 +274,7 @@ export const IntegrationManagement = React.memo(() => {
       existingDataStreamTitles={existingDataStreamTitles}
       onSubmit={handleSubmit}
     >
-      <IntegrationManagementContents />
+      <IntegrationManagementContents navigateToManage={navigateToManage} />
     </IntegrationFormProvider>
   );
 });

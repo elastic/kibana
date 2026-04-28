@@ -63,13 +63,43 @@ describe('useContentListSearch', () => {
     jest.clearAllMocks();
   });
 
-  describe('initial state', () => {
-    it('returns empty search text by default', () => {
+  describe('public API shape', () => {
+    it('exposes queryText, setQueryFromText, setQueryFromEuiQuery, isSupported, and fieldNames', () => {
       const { result } = renderHook(() => useContentListSearch(), {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.search).toBe('');
+      expect(result.current).toHaveProperty('queryText');
+      expect(result.current).toHaveProperty('setQueryFromText');
+      expect(result.current).toHaveProperty('setQueryFromEuiQuery');
+      expect(result.current).toHaveProperty('isSupported');
+      expect(result.current).toHaveProperty('fieldNames');
+    });
+
+    it('does not expose the removed search alias', () => {
+      const { result } = renderHook(() => useContentListSearch(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current).not.toHaveProperty('search');
+    });
+
+    it('does not expose the removed setSearch alias', () => {
+      const { result } = renderHook(() => useContentListSearch(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current).not.toHaveProperty('setSearch');
+    });
+  });
+
+  describe('initial state', () => {
+    it('returns empty queryText by default', () => {
+      const { result } = renderHook(() => useContentListSearch(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.queryText).toBe('');
     });
 
     it('returns initial search from features config', () => {
@@ -77,7 +107,7 @@ describe('useContentListSearch', () => {
         wrapper: createWrapper({ initialSearch: 'hello' }),
       });
 
-      expect(result.current.search).toBe('hello');
+      expect(result.current.queryText).toBe('hello');
     });
 
     it('returns isSupported true by default', () => {
@@ -97,29 +127,29 @@ describe('useContentListSearch', () => {
     });
   });
 
-  describe('setSearch', () => {
-    it('updates the search text', () => {
+  describe('setQueryFromText', () => {
+    it('updates the queryText', () => {
       const { result } = renderHook(() => useContentListSearch(), {
         wrapper: createWrapper(),
       });
 
       act(() => {
-        result.current.setSearch('dashboard', { search: 'dashboard' });
+        result.current.setQueryFromText('dashboard');
       });
 
-      expect(result.current.search).toBe('dashboard');
+      expect(result.current.queryText).toBe('dashboard');
     });
 
-    it('clears search text when set to empty string', () => {
+    it('clears queryText when set to empty string', () => {
       const { result } = renderHook(() => useContentListSearch(), {
         wrapper: createWrapper({ initialSearch: 'initial' }),
       });
 
       act(() => {
-        result.current.setSearch('', { search: undefined });
+        result.current.setQueryFromText('');
       });
 
-      expect(result.current.search).toBe('');
+      expect(result.current.queryText).toBe('');
     });
 
     it('is a no-op when search is disabled', () => {
@@ -127,14 +157,13 @@ describe('useContentListSearch', () => {
         wrapper: createWrapper({ searchDisabled: true }),
       });
 
-      const initialSearch = result.current.search;
+      const initialQueryText = result.current.queryText;
 
       act(() => {
-        result.current.setSearch('should not update', { search: 'should not update' });
+        result.current.setQueryFromText('should not update');
       });
 
-      // Search should not change when disabled.
-      expect(result.current.search).toBe(initialSearch);
+      expect(result.current.queryText).toBe(initialQueryText);
     });
 
     it('can be called multiple times', () => {
@@ -143,32 +172,58 @@ describe('useContentListSearch', () => {
       });
 
       act(() => {
-        result.current.setSearch('first', { search: 'first' });
+        result.current.setQueryFromText('first');
       });
 
       act(() => {
-        result.current.setSearch('second', { search: 'second' });
+        result.current.setQueryFromText('second');
       });
 
       act(() => {
-        result.current.setSearch('third', { search: 'third' });
+        result.current.setQueryFromText('third');
       });
 
-      expect(result.current.search).toBe('third');
+      expect(result.current.queryText).toBe('third');
+    });
+
+    it('accepts unparseable text (e.g. from URL params) without throwing', () => {
+      // setQueryFromText stores raw text without parsing — invalid EUI query
+      // syntax must be accepted so URL-param state round-trips work correctly.
+      const { result } = renderHook(() => useContentListSearch(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(() => {
+        act(() => {
+          result.current.setQueryFromText('status:open (unclosed');
+        });
+      }).not.toThrow();
+
+      expect(result.current.queryText).toBe('status:open (unclosed');
     });
   });
 
   describe('function stability', () => {
-    it('provides stable setSearch reference across renders', () => {
+    it('provides stable setQueryFromText reference across renders', () => {
       const { result, rerender } = renderHook(() => useContentListSearch(), {
         wrapper: createWrapper(),
       });
 
-      const firstSetSearch = result.current.setSearch;
+      const first = result.current.setQueryFromText;
       rerender();
-      const secondSetSearch = result.current.setSearch;
 
-      expect(firstSetSearch).toBe(secondSetSearch);
+      expect(result.current.setQueryFromText).toBe(first);
+    });
+
+    it('provides stable setQueryFromEuiQuery reference across renders', () => {
+      const { result, rerender } = renderHook(() => useContentListSearch(), {
+        wrapper: createWrapper(),
+      });
+
+      const first = result.current.setQueryFromEuiQuery;
+      rerender();
+
+      expect(result.current.setQueryFromEuiQuery).toBe(first);
     });
   });
 
@@ -188,7 +243,7 @@ describe('useContentListSearch', () => {
   });
 
   describe('state integration', () => {
-    it('updates filters and resets page index when setSearch is called', () => {
+    it('updates queryText in state and resets page index when setQueryFromText is called', () => {
       const { result } = renderHook(
         () => ({
           searchHook: useContentListSearch(),
@@ -209,12 +264,11 @@ describe('useContentListSearch', () => {
 
       expect(result.current.stateHook.state.page.index).toBe(2);
 
-      // Calling `setSearch` should update filters and reset page index to 0.
       act(() => {
-        result.current.searchHook.setSearch('dashboard', { search: 'dashboard' });
+        result.current.searchHook.setQueryFromText('dashboard');
       });
 
-      expect(result.current.stateHook.state.filters).toEqual({ search: 'dashboard' });
+      expect(result.current.stateHook.state.queryText).toBe('dashboard');
       expect(result.current.stateHook.state.page.index).toBe(0);
       expect(result.current.stateHook.state.page.size).toBe(10);
     });

@@ -194,6 +194,11 @@ export enum ProductFeatureAlertsKey {
   externalDetections = 'external_detections',
 }
 
+export enum ProductFeatureWorkflowsKey {
+  /** Enables Workflows feature in a general sense */
+  workflows = 'workflows',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -205,6 +210,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureNotesKey,
   ...ProductFeatureRulesKey,
   ...ProductFeatureAlertsKey,
+  ...ProductFeatureWorkflowsKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -216,7 +222,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureTimelineKey
   | ProductFeatureNotesKey
   | ProductFeatureRulesKey
-  | ProductFeatureAlertsKey;
+  | ProductFeatureAlertsKey
+  | ProductFeatureWorkflowsKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -266,4 +273,9 @@ export enum AttackDiscoverySubFeatureId {
 /** Sub-features IDs for Security Rules */
 export enum RulesSubFeatureId {
   exceptions = 'exceptionsSubFeature',
+  investigationGuide = 'investigationGuideSubFeature',
+  customHighlightedFields = 'customHighlightedFieldsSubFeature',
+  enableDisableRules = 'enableDisableRulesSubFeature',
+  manualRunRules = 'manualRunRulesSubFeature',
+  rulesManagementSettings = 'rulesManagementSettingsSubFeature',
 }

@@ -70,6 +70,7 @@
             "lineNumber": 16,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "FsRepositoryConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -128,6 +129,7 @@
             "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "GcsRepositoryConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -187,6 +189,7 @@
             "lineNumber": 12,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -290,6 +293,7 @@
             "lineNumber": 54,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ReplayConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -349,6 +353,7 @@
             "lineNumber": 13,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "RestoreConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1198,6 +1203,23 @@
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
         "lineNumber": 11,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.TEMP_INDEX_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "TEMP_INDEX_PREFIX",
+        "description": [],
+        "signature": [
+          "\"snapshot-loader-temp-\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/replay/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

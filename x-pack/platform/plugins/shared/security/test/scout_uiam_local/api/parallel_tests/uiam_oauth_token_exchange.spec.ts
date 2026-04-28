@@ -20,7 +20,7 @@ apiTest.describe(
     let oauthAccessToken: string;
 
     apiTest.beforeAll(async ({ kbnUrl, config: { organizationId, projectType } }) => {
-      const audience = new URL(kbnUrl.get()).origin;
+      const audience = `${new URL(kbnUrl.get()).origin}/`;
 
       oauthAccessToken = await createUiamOAuthAccessToken({
         username: '1234567890',

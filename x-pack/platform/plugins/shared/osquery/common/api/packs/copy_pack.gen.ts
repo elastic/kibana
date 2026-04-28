@@ -14,7 +14,70 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+import {
+  PackName,
+  PackDescriptionOrUndefined,
+  ECSMappingArrayOrUndefined,
+  EnabledOrUndefined,
+  PolicyIdsOrUndefined,
+} from '../model/schema/common_attributes.gen';
+
+/**
+ * The response for copying a pack.
+ */
+export const CopyPacksResponse = lazySchema(() =>
+  z.object({
+    data: z.object({
+      /**
+       * The saved object ID of the copied pack.
+       */
+      saved_object_id: z.string(),
+      name: PackName,
+      description: PackDescriptionOrUndefined.optional(),
+      /**
+       * Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.
+       */
+      queries: z
+        .array(
+          z.object({
+            id: z.string().optional(),
+            query: z.string().optional(),
+            interval: z.number().int().optional(),
+            platform: z.string().optional(),
+            version: z.string().optional(),
+            snapshot: z.boolean().optional(),
+            removed: z.boolean().optional(),
+            timeout: z.number().int().optional(),
+            ecs_mapping: ECSMappingArrayOrUndefined.optional(),
+          })
+        )
+        .optional(),
+      /**
+       * The pack version number.
+       */
+      version: z.number().int().optional(),
+      enabled: EnabledOrUndefined.optional(),
+      created_at: z.string().datetime().optional(),
+      created_by: z.string().nullable().optional(),
+      created_by_profile_uid: z.string().optional(),
+      updated_at: z.string().datetime().optional(),
+      updated_by: z.string().nullable().optional(),
+      updated_by_profile_uid: z.string().optional(),
+      policy_ids: PolicyIdsOrUndefined.optional(),
+      /**
+       * Shard configuration as an array of key-value pairs.
+       */
+      shards: z
+        .array(
+          z.object({
+            key: z.string().optional(),
+            value: z.number().optional(),
+          })
+        )
+        .optional(),
+    }),
+  })
+);
 export type CopyPacksResponse = z.infer<typeof CopyPacksResponse>;
-export const CopyPacksResponse = z.object({});

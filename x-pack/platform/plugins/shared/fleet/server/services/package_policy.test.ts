@@ -161,6 +161,19 @@ hosts:
 timeout: 30s
 `),
   ],
+  // Integration stream template using data_stream.dataset (package-spec dataset var parity)
+  [
+    '/dsvarpkg-1.0.0/data_stream/customds/agent/stream/stream_ds.yml',
+    Buffer.from(`
+type: log
+data_stream:
+  dataset: {{data_stream.dataset}}
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+`),
+  ],
 ]) as PackagePolicyAssetsMap;
 
 async function mockedGetInstallation(params: any) {
@@ -524,6 +537,52 @@ describe('Package policy service', () => {
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
       ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
+    });
+
+    it('should throw validation error when global_data_tags is set on a non-agentless package policy', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      // Mock a non-agentless agent policy
+      mockAgentPolicyGet(undefined, { supports_agentless: false });
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            supports_agentless: false,
+            global_data_tags: [{ name: 'client_id', value: 'acme' }],
+            inputs: [
+              {
+                type: 'logfile',
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrowError(
+        /`global_data_tags` can only be set on agentless integration policies/
+      );
     });
 
     beforeEach(() => {
@@ -1981,6 +2040,42 @@ describe('Package policy service', () => {
   });
 
   describe('list', () => {
+    it('should use NOT latest_revision:false filter to include 8.x policies without the field', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        page: 1,
+        per_page: 20,
+        saved_objects: [],
+      });
+
+      await packagePolicyService.list(soClient, {});
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
+        })
+      );
+    });
+
+    it('should combine user kuery with NOT latest_revision:false filter', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        page: 1,
+        per_page: 20,
+        saved_objects: [],
+      });
+
+      await packagePolicyService.list(soClient, { kuery: 'ingest-package-policies.name: nginx' });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (ingest-package-policies.attributes.name: nginx)`,
+        })
+      );
+    });
+
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       soClient.find.mockResolvedValueOnce({
@@ -2092,6 +2187,163 @@ describe('Package policy service', () => {
           ],
         },
       ]);
+    });
+
+    it('should compile stream templates when stream.input references a named input (name ?? type)', async () => {
+      const inputs = await _compilePackagePolicyInputs(
+        {
+          name: 'test',
+          version: '1.0.0',
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'package.dataset1',
+              streams: [{ input: 'named_logfile', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log', name: 'named_logfile' }],
+            },
+          ],
+        } as unknown as PackageInfo,
+        {},
+        [
+          {
+            type: 'log',
+            name: 'named_logfile',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: {
+                    value: ['/var/log/set.log'],
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        metricset: ['dataset1'],
+        paths: ['/var/log/set.log'],
+        type: 'log',
+      });
+    });
+
+    it('should compile integration stream data_stream.dataset from package stream var default value', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-ds-default',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': {
+                    value: 'dsvarpkg.customds',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'dsvarpkg.customds' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
+    it('should compile integration stream with overridden data_stream.dataset stream var', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-ds-override',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': {
+                    value: 'other.integration_dataset',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'other.integration_dataset' },
+        paths: ['/var/log/app.log'],
+      });
     });
 
     it('should work with a two level dataset name', async () => {
@@ -9159,6 +9411,253 @@ describe('Package policy service', () => {
           // Stream vars should NOT be carried over from the old httpjson stream
           expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/default/path.log');
         });
+
+        it('carries input-level vars from old input to new input when only streams declare migrate_from', () => {
+          // Mirrors the SentinelOne scenario: url and api_token remain at input level in
+          // both old (httpjson) and new (cel) inputs; only streams declare migrate_from.
+          const policyWithInputLevelVars: NewPackagePolicy = {
+            name: 'stream-only-migration-policy',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'url', value: 'http://user-configured.com' },
+                  api_token: { type: 'password', value: 'user-secret' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: { paths: { type: 'text', value: '/var/log/app.log' } },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const celOverrideWithInputVars: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              // No input-level migrate_from — only streams declare it
+              vars: {
+                url: { type: 'url', value: 'http://package-default.com' },
+                api_token: { type: 'password', value: '' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { paths: { type: 'text', value: '/default/path.log' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const celPackageInfo = {
+            ...makeCelPackageInfo(),
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'cel',
+                    title: 'CEL',
+                    description: 'CEL Input',
+                    vars: [
+                      { name: 'url', type: 'url' },
+                      { name: 'api_token', type: 'password' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo;
+
+          const result = updatePackageInputs(
+            policyWithInputLevelVars,
+            celPackageInfo,
+            celOverrideWithInputVars,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // Input-level vars from the old httpjson input must be carried to the new cel input
+          expect(celInput?.vars?.url?.value).toBe('http://user-configured.com');
+          expect(celInput?.vars?.api_token?.value).toBe('user-secret');
+          // Stream vars should also be carried over
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/var/log/app.log');
+        });
+
+        it('uses new package defaults for input-level vars when old values are null', () => {
+          const policyWithNullInputVars: NewPackagePolicy = {
+            name: 'stream-only-migration-policy',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'url', value: null },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: { paths: { type: 'text', value: '/var/log/app.log' } },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const celOverrideWithDefault: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {
+                url: { type: 'url', value: 'http://package-default.com' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { paths: { type: 'text', value: '/default/path.log' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const celPackageInfo = {
+            ...makeCelPackageInfo(),
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'cel',
+                    title: 'CEL',
+                    description: 'CEL Input',
+                    vars: [{ name: 'url', type: 'url' }],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo;
+
+          const result = updatePackageInputs(
+            policyWithNullInputVars,
+            celPackageInfo,
+            celOverrideWithDefault,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // Old value was null → new package default must win
+          expect(celInput?.vars?.url?.value).toBe('http://package-default.com');
+        });
+
+        it('removes stale input-level vars not present in the new input schema', () => {
+          const policyWithStaleVar: NewPackagePolicy = {
+            name: 'stream-only-migration-policy',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'url', value: 'http://user-configured.com' },
+                  stale_var: { type: 'text', value: 'should-not-appear' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: {},
+                  },
+                ],
+              },
+            ],
+          };
+
+          const celOverrideNoStaleVar: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {
+                url: { type: 'url', value: 'http://package-default.com' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: {},
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const celPackageInfo = {
+            ...makeCelPackageInfo(),
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'cel',
+                    title: 'CEL',
+                    description: 'CEL Input',
+                    vars: [{ name: 'url', type: 'url' }],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo;
+
+          const result = updatePackageInputs(
+            policyWithStaleVar,
+            celPackageInfo,
+            celOverrideNoStaleVar,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput?.vars?.url?.value).toBe('http://user-configured.com');
+          // stale_var is not in the new cel schema — must be stripped
+          expect(celInput?.vars?.stale_var).toBeUndefined();
+        });
       });
 
       describe('when vars move from input-level in the old input to stream-level in the new input', () => {
@@ -9729,6 +10228,289 @@ describe('Package policy service', () => {
         expect(eventStream?.vars?.consumer_group?.value).toBe('my-group');
       });
 
+      it('enables the pre-existing cel input when stream migrate_from succeeds and the old httpjson input was enabled', () => {
+        // Scenario from issue #261398: cel input existed in the old policy but was disabled
+        // because the user was using httpjson. After upgrade, cel should be auto-enabled.
+        const basePolicyWithDisabledCel: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              // cel existed alongside httpjson but user never enabled it
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {
+                url: { type: 'text', value: '' },
+                api_token: { type: 'password', value: '' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithDisabledCel,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Old httpjson was enabled → cel must be auto-enabled after migration
+        expect(celInput?.enabled).toBe(true);
+      });
+
+      it('disables the pre-existing cel input when the old httpjson input was disabled, even if cel was enabled', () => {
+        const basePolicyWithDisabledHttpjson: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: '' },
+                api_token: { type: 'password', value: '' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithDisabledHttpjson,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Old httpjson was disabled → cel must be disabled after migration
+        expect(celInput?.enabled).toBe(false);
+      });
+
+      it('keeps the pre-existing cel input disabled when the old httpjson input was also disabled', () => {
+        const basePolicyWithBothDisabled: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {
+                url: { type: 'text', value: '' },
+                api_token: { type: 'password', value: '' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithBothDisabled,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Both old inputs were disabled → cel must remain disabled
+        expect(celInput?.enabled).toBe(false);
+      });
+
+      it.each([
+        { url: null, api_token: null, label: 'null' },
+        { url: '', api_token: '', label: 'empty string' },
+      ])(
+        'seeds httpjson input-level vars into cel input-level vars where cel values are $label (partial migration)',
+        ({ url, api_token }) => {
+          // Issue #261398: cel existed alongside httpjson but the user only configured httpjson.
+          // After upgrade, cel's url/api_token must be filled from httpjson, not left as defaults.
+          // Covers both null and '' (empty string) — both mean "user never set this".
+          const basePolicyWithEmptyCelVars: NewPackagePolicy = {
+            ...makePartialMigrationBasePolicy(),
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'text', value: 'http://httpjson-configured.com' },
+                  api_token: { type: 'password', value: 'httpjson-secret' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                    vars: { interval: { type: 'text', value: '5m' } },
+                  },
+                ],
+              },
+              {
+                type: 'cel',
+                policy_template: 'template_1',
+                enabled: false,
+                // User never configured cel — vars are null or empty string
+                vars: {
+                  url: { type: 'text', value: url },
+                  api_token: { type: 'password', value: api_token },
+                },
+                streams: [],
+              },
+            ],
+          };
+
+          const result = updatePackageInputs(
+            basePolicyWithEmptyCelVars,
+            makePartialMigrationPackageInfo(),
+            makePartialMigrationOverride(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // httpjson values must be seeded into cel where cel's own values were null/empty
+          expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
+          expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
+        }
+      );
+
+      it('seeds httpjson input-level vars into cel input-level vars even when cel vars are non-empty (partial migration)', () => {
+        // Regression test for the SentinelOne upgrade scenario: cel existed alongside httpjson
+        // with url: 'elastic' (non-empty). httpjson always wins for shared keys during
+        // stream migration — that is the purpose of migrate_from.
+        const basePolicyWithDisabledCelNonEmpty: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://httpjson-configured.com' },
+                api_token: { type: 'password', value: 'httpjson-secret' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {
+                url: { type: 'text', value: 'elastic' },
+                api_token: { type: 'password', value: '' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithDisabledCelNonEmpty,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // httpjson always wins for shared keys — cel's non-empty 'elastic' value is overridden
+        expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
+        expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
+      });
+
+      it('httpjson input-level vars always win over cel vars for shared keys during stream migration', () => {
+        // When stream migrate_from fires, httpjson is the authoritative source for shared vars
+        // (url, api_token). Even if cel had non-empty values, httpjson wins because the whole
+        // point of migrate_from is to carry over the user's configuration from the old input.
+        const basePolicyWithBothConfigured: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://httpjson-url.com' },
+                api_token: { type: 'password', value: 'httpjson-token' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://cel-url.com' },
+                api_token: { type: 'password', value: 'cel-token' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithBothConfigured,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // httpjson values win for shared keys — that is the purpose of migrate_from
+        expect(celInput?.vars?.url?.value).toBe('http://httpjson-url.com');
+        expect(celInput?.vars?.api_token?.value).toBe('httpjson-token');
+      });
+
       it('migrates old httpjson input-level vars to new cel stream-level vars when going through packageToPackagePolicyInputs end-to-end', () => {
         // 2.5.0 packageInfo: only cel input remains; activity stream declares migrate_from: httpjson
         const packageInfo250: PackageInfo = {
@@ -9872,6 +10654,280 @@ describe('Package policy service', () => {
           (s) => s.data_stream.dataset === 'test_package.application'
         );
         expect(appStream?.vars?.batch_size?.value).toBe('500');
+      });
+    });
+
+    describe('when inputs have name for disambiguation', () => {
+      it('matches the correct original input by name during upgrade when multiple inputs share the same type', () => {
+        const basePolicy: NewPackagePolicy = {
+          name: 'nginx-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              name: 'filelog_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {
+                log_path: { type: 'text', value: '/var/log/nginx/access.log' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'nginx.access', type: 'logs' },
+                },
+              ],
+            },
+            {
+              type: 'otelcol',
+              name: 'nginx_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {
+                endpoint: { type: 'text', value: 'http://localhost:8080/stub_status' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'nginx.stubstatus', type: 'metrics' },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfoV2: PackageInfo = {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          description: 'Nginx integration',
+          type: 'integration',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx',
+              description: 'Nginx',
+              data_streams: ['access', 'stubstatus'],
+              inputs: [
+                {
+                  name: 'filelog_otel',
+                  type: 'otelcol',
+                  title: 'Logs via filelog',
+                  description: 'Logs',
+                  vars: [{ name: 'log_path', type: 'text' }],
+                },
+                {
+                  name: 'nginx_otel',
+                  type: 'otelcol',
+                  title: 'Metrics',
+                  description: 'Metrics',
+                  vars: [
+                    { name: 'endpoint', type: 'text' },
+                    { name: 'timeout', type: 'text' },
+                  ],
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'nginx.access',
+              title: 'Access logs',
+              path: 'access',
+              release: 'ga',
+              package: 'nginx',
+              streams: [{ input: 'filelog_otel', title: 'Access logs', vars: [] }],
+            },
+            {
+              type: 'metrics',
+              dataset: 'nginx.stubstatus',
+              title: 'Stub status',
+              path: 'stubstatus',
+              release: 'ga',
+              package: 'nginx',
+              streams: [{ input: 'nginx_otel', title: 'Stub status', vars: [] }],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = packageToPackagePolicyInputs(
+          packageInfoV2
+        ) as InputsOverride[];
+
+        const result = updatePackageInputs(basePolicy, packageInfoV2, inputsOverride, false);
+
+        const filelogInput = result.inputs.find((i) => i.name === 'filelog_otel');
+        const nginxInput = result.inputs.find((i) => i.name === 'nginx_otel');
+
+        expect(filelogInput).toBeDefined();
+        expect(nginxInput).toBeDefined();
+
+        // User-configured var should be preserved on the correct input
+        expect(filelogInput?.vars?.log_path?.value).toBe('/var/log/nginx/access.log');
+        expect(nginxInput?.vars?.endpoint?.value).toBe('http://localhost:8080/stub_status');
+
+        // New var added in v2 should get default value
+        expect(nginxInput?.vars?.timeout).toBeDefined();
+      });
+
+      it('uses name to determine which inputs still exist in the new package version', () => {
+        const basePolicy: NewPackagePolicy = {
+          name: 'nginx-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              name: 'filelog_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {},
+              streams: [],
+            },
+            {
+              type: 'otelcol',
+              name: 'nginx_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {},
+              streams: [],
+            },
+          ],
+        };
+
+        // New package version removes the nginx_otel input
+        const packageInfoV2: PackageInfo = {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          description: 'Nginx integration',
+          type: 'integration',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx',
+              description: 'Nginx',
+              inputs: [
+                {
+                  name: 'filelog_otel',
+                  type: 'otelcol',
+                  title: 'Logs',
+                  description: 'Logs',
+                },
+              ],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = packageToPackagePolicyInputs(
+          packageInfoV2
+        ) as InputsOverride[];
+
+        const result = updatePackageInputs(basePolicy, packageInfoV2, inputsOverride, false);
+
+        // Only the filelog_otel input should remain
+        const otelInputs = result.inputs.filter((i) => i.type === 'otelcol');
+        expect(otelInputs).toHaveLength(1);
+        expect(otelInputs[0].name).toBe('filelog_otel');
+      });
+
+      it('supports migrate_from referencing an name', () => {
+        const basePolicy: NewPackagePolicy = {
+          name: 'nginx-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              name: 'filelog_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {
+                log_path: { type: 'text', value: '/var/log/nginx/access.log' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'nginx.access', type: 'logs' },
+                },
+              ],
+            },
+          ],
+        };
+
+        // New package replaces filelog_otel with filelog_otel_v2
+        const packageInfoV2: PackageInfo = {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          description: 'Nginx integration',
+          type: 'integration',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx',
+              description: 'Nginx',
+              data_streams: ['access'],
+              inputs: [
+                {
+                  name: 'filelog_otel_v2',
+                  type: 'otelcol',
+                  title: 'Logs v2',
+                  description: 'Logs v2',
+                  migrate_from: 'filelog_otel',
+                  vars: [{ name: 'log_path', type: 'text' }],
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'nginx.access',
+              title: 'Access logs',
+              path: 'access',
+              release: 'ga',
+              package: 'nginx',
+              streams: [{ input: 'filelog_otel_v2', title: 'Access logs', vars: [] }],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = packageToPackagePolicyInputs(
+          packageInfoV2
+        ) as InputsOverride[];
+
+        const result = updatePackageInputs(basePolicy, packageInfoV2, inputsOverride, false);
+
+        const v2Input = result.inputs.find((i) => i.name === 'filelog_otel_v2');
+        expect(v2Input).toBeDefined();
+        // Var should be migrated from the old filelog_otel input
+        expect(v2Input?.vars?.log_path?.value).toBe('/var/log/nginx/access.log');
+        // Old input should be removed
+        expect(result.inputs.find((i) => i.name === 'filelog_otel')).toBeUndefined();
       });
     });
 
@@ -10307,7 +11363,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -10327,7 +11383,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (one=two)`,
         })
       );
     });
@@ -10381,7 +11437,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -10399,7 +11455,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -10420,7 +11476,7 @@ describe('Package policy service', () => {
           perPage: 12,
           sortField: 'updated_by',
           sortOrder: 'desc',
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (one=two)`,
         })
       );
     });
@@ -11780,6 +12836,29 @@ describe('getCompiledVersionsForAgentPolicy()', () => {
 
     expect(result).toEqual([]);
     expect(soClient.find).not.toHaveBeenCalled();
+  });
+
+  it('uses NOT latest_revision:false filter so 8.x policies are included', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 10000,
+      page: 1,
+    });
+
+    await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('NOT'),
+      })
+    );
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.not.stringContaining('latest_revision:true'),
+      })
+    );
   });
 
   it('returns empty array when no package policies have inputs_for_versions', async () => {

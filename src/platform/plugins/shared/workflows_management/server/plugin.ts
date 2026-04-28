@@ -21,8 +21,10 @@ import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { defineRoutes } from './api/routes';
-import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
+import { AvailabilityUpdater } from './availability';
+import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -75,9 +77,12 @@ export class WorkflowsPlugin
   private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
   private analytics?: AnalyticsServiceStart;
   private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
+  private config: WorkflowsManagementConfig;
+  private availabilityUpdater: AvailabilityUpdater | null = null;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   public setup(
@@ -213,15 +218,18 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
-    // Register server side APIs
-    defineRoutes(
-      router,
-      this.api,
-      this.logger,
-      this.spaces,
-      getWorkflowExecutionEngine,
-      () => this.securityStart
-    );
+    if (this.config.available) {
+      // Register server side APIs only when the plugin is available (only set to false in serverless)
+      // TODO: improve this logic and define all the routes but respond with a 403 when the plugin is not available
+      defineRoutes(
+        router,
+        this.api,
+        this.logger,
+        this.spaces,
+        getWorkflowExecutionEngine,
+        () => this.securityStart
+      );
+    }
 
     this.setupAiIntegration(core, api, this.aiTelemetryClient);
 
@@ -249,6 +257,15 @@ export class WorkflowsPlugin
       if (plugins.security) {
         this.workflowsService.setSecurityService(core.security);
       }
+    }
+
+    if (this.api) {
+      this.availabilityUpdater = new AvailabilityUpdater({
+        licensing: plugins.licensing,
+        config: this.config,
+        api: this.api,
+        logger: this.logger,
+      });
     }
 
     const actionsTypes = plugins.actions.getAllTypes();
@@ -285,6 +302,26 @@ export class WorkflowsPlugin
           `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
         );
       });
+
+    void core.plugins
+      .onStart<{ agentBuilder: { sml: { indexAttachment: SmlIndexAttachmentFn } } }>('agentBuilder')
+      .then(({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          api.setSmlIndexAttachment(
+            agentBuilder.contract.sml.indexAttachment,
+            this.logger.get('sml')
+          );
+          this.logger.debug(
+            'Workflows Management: SML event-driven indexing wired to workflow CRUD'
+          );
+        }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(
+          `Workflows Management: Failed to wire SML indexing with Agent Builder: ${message}`
+        );
+      });
   }
 
   private async initializeTriggerEventsClient(core: CoreStart): Promise<void> {
@@ -299,5 +336,7 @@ export class WorkflowsPlugin
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.availabilityUpdater?.stop();
+  }
 }

@@ -75,9 +75,9 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
 
   const { data, loading } = useReduxEsSearch<Ping, typeof params>(
     params,
-    [lastRefresh, monitorId],
+    [lastRefresh, monitorId, from, to],
     {
-      name: `getFailedTestsByStep/${monitorId}`,
+      name: `getFailedTestsByStep/${monitorId}/${from}/${to}`,
       isRequestReady: !!selectedLocation,
     }
   );

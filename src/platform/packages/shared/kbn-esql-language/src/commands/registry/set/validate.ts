@@ -11,12 +11,11 @@ import type {
   ESQLAstAllCommands,
   ESQLCommand,
   ESQLIdentifier,
-  ESQLMessage,
   ESQLSingleAstItem,
 } from '@elastic/esql/types';
 import { getExpressionType, getMessageFromId } from '../../definitions/utils';
 import { settings } from '../../definitions/generated/settings';
-import type { SupportedDataType } from '../..';
+import type { ESQLMessage, SupportedDataType } from '../..';
 import { TypeMap, validateMap } from '../../definitions/utils/validation/map';
 
 export const validate = (command: ESQLAstAllCommands, commands: ESQLCommand[]): ESQLMessage[] => {

@@ -95,6 +95,7 @@
               "lineNumber": 21,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "OsqueryActionResultProps",
               "trackAdoption": false
             }
           ]
@@ -132,6 +133,7 @@
               "lineNumber": 21,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "OsqueryActionResultsProps",
               "trackAdoption": false
             }
           ]
@@ -254,6 +256,7 @@
               "lineNumber": 18,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "OsqueryResponseActionsParamsFormProps",
               "trackAdoption": false
             }
           ]
@@ -296,6 +299,7 @@
               "lineNumber": 65,
               "columnNumber": 25,
               "deprecated": false,
+              "docsReferencedTypeName": "UseAllLiveQueriesConfig",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -322,7 +326,7 @@
       "label": "OsqueryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
-      "lineNumber": 29,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -348,10 +352,72 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
-          "lineNumber": 30,
+          "lineNumber": 36,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-server.OsqueryPluginSetup.checkResponseActionAuthz",
+          "type": "Function",
+          "tags": [],
+          "label": "checkResponseActionAuthz",
+          "description": [
+            "\nValidates that the requesting user has the required osquery privileges\nfor the given response action configuration.\nThrows a 403 CustomHttpRequestError if the user lacks authorization.\n\nUsed by security_solution when creating/updating detection rules\nthat include osquery response actions."
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>, actionParams: ",
+            "CheckResponseActionAuthzParams",
+            ") => Promise<void>"
+          ],
+          "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.checkResponseActionAuthz.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
+              "lineNumber": 46,
+              "columnNumber": 5,
+              "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.checkResponseActionAuthz.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "actionParams",
+              "description": [],
+              "signature": [
+                "CheckResponseActionAuthzParams"
+              ],
+              "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
+              "lineNumber": 47,
+              "columnNumber": 5,
+              "deprecated": false,
+              "docsReferencedTypeName": "CheckResponseActionAuthzParams",
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -365,7 +431,7 @@
       "label": "OsqueryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/server/types.ts",
-      "lineNumber": 34,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -544,7 +610,7 @@
           "\nA list of allowed values that can be used in `xpack.osquery.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly queryHistoryRework: false; readonly unifiedDataTable: false; }"
+          "{ readonly queryHistoryRework: true; readonly unifiedDataTable: true; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
         "lineNumber": 12,

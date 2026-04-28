@@ -28,6 +28,7 @@ export const getRiskInputTab = <T extends EntityType>({
   entityType,
   entityName,
   scopeId,
+  entityId,
 }: RiskInputsTabProps<T>) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
@@ -37,7 +38,14 @@ export const getRiskInputTab = <T extends EntityType>({
       defaultMessage="Risk contributions"
     />
   ),
-  content: <RiskInputsTab entityType={entityType} entityName={entityName} scopeId={scopeId} />,
+  content: (
+    <RiskInputsTab
+      entityType={entityType}
+      entityName={entityName}
+      scopeId={scopeId}
+      entityId={entityId}
+    />
+  ),
 });
 
 export const getInsightsInputTab = ({
@@ -91,9 +99,11 @@ export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProp
 export const getResolutionGroupTab = ({
   entityId,
   entityType,
+  scopeId,
 }: {
   entityId: string;
   entityType: EntityStoreEntityType;
+  scopeId: string;
 }) => ({
   id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
   'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
@@ -103,5 +113,5 @@ export const getResolutionGroupTab = ({
       defaultMessage="Resolution group"
     />
   ),
-  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} />,
+  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
 });

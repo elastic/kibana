@@ -14,297 +14,315 @@
  *   version: 0.1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * An array containing users that are assigned to the case.
  */
+export const Assignees = lazySchema(() =>
+  z
+    .array(
+      z.object({
+        /**
+         * A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
+         */
+        uid: z.string(),
+      })
+    )
+    .max(10)
+    .nullable()
+);
 export type Assignees = z.infer<typeof Assignees>;
-export const Assignees = z
-  .array(
-    z.object({
-      /**
-       * A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
-       */
-      uid: z.string(),
-    })
-  )
-  .max(10)
-  .nullable();
 
 /**
  * Defines properties for connectors when type is `.none`.
  */
+export const ConnectorPropertiesNone = lazySchema(() =>
+  z.object({
+    /**
+     * An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.
+     */
+    fields: z.string().nullable(),
+    /**
+     * The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
+     */
+    name: z.string(),
+    /**
+     * The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.
+     */
+    type: z.literal('.none'),
+  })
+);
 export type ConnectorPropertiesNone = z.infer<typeof ConnectorPropertiesNone>;
-export const ConnectorPropertiesNone = z.object({
-  /**
-   * An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.
-   */
-  fields: z.string().nullable(),
-  /**
-   * The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
-   */
-  name: z.string(),
-  /**
-   * The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.
-   */
-  type: z.literal('.none'),
-});
 
 /**
  * Defines properties for connectors when type is `.cases-webhook`.
  */
+export const ConnectorPropertiesCasesWebhook = lazySchema(() =>
+  z.object({
+    fields: z.string().nullable(),
+    /**
+     * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector.
+     */
+    name: z.string(),
+    /**
+     * The type of connector.
+     */
+    type: z.literal('.cases-webhook'),
+  })
+);
 export type ConnectorPropertiesCasesWebhook = z.infer<typeof ConnectorPropertiesCasesWebhook>;
-export const ConnectorPropertiesCasesWebhook = z.object({
-  fields: z.string().nullable(),
-  /**
-   * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector.
-   */
-  name: z.string(),
-  /**
-   * The type of connector.
-   */
-  type: z.literal('.cases-webhook'),
-});
 
 /**
  * Defines properties for connectors when type is `.jira`.
  */
+export const ConnectorPropertiesJira = lazySchema(() =>
+  z.object({
+    /**
+     * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+     */
+    fields: z.object({
+      /**
+       * The type of issue.
+       */
+      issueType: z.string().nullable(),
+      /**
+       * The key of the parent issue, when the issue type is sub-task.
+       */
+      parent: z.string().nullable(),
+      /**
+       * The priority of the issue.
+       */
+      priority: z.string().nullable(),
+    }),
+    /**
+     * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector.
+     */
+    name: z.string(),
+    /**
+     * The type of connector.
+     */
+    type: z.literal('.jira'),
+  })
+);
 export type ConnectorPropertiesJira = z.infer<typeof ConnectorPropertiesJira>;
-export const ConnectorPropertiesJira = z.object({
-  /**
-   * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-   */
-  fields: z.object({
-    /**
-     * The type of issue.
-     */
-    issueType: z.string().nullable(),
-    /**
-     * The key of the parent issue, when the issue type is sub-task.
-     */
-    parent: z.string().nullable(),
-    /**
-     * The priority of the issue.
-     */
-    priority: z.string().nullable(),
-  }),
-  /**
-   * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector.
-   */
-  name: z.string(),
-  /**
-   * The type of connector.
-   */
-  type: z.literal('.jira'),
-});
 
 /**
  * Defines properties for connectors when type is `.resilient`.
  */
+export const ConnectorPropertiesResilient = lazySchema(() =>
+  z.object({
+    /**
+     * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+     */
+    fields: z
+      .object({
+        /**
+         * The type of incident.
+         */
+        issueTypes: z.array(z.string()),
+        /**
+         * The severity code of the incident.
+         */
+        severityCode: z.string(),
+      })
+      .nullable(),
+    /**
+     * The identifier for the connector.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector.
+     */
+    name: z.string(),
+    /**
+     * The type of connector.
+     */
+    type: z.literal('.resilient'),
+  })
+);
 export type ConnectorPropertiesResilient = z.infer<typeof ConnectorPropertiesResilient>;
-export const ConnectorPropertiesResilient = z.object({
-  /**
-   * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-   */
-  fields: z
-    .object({
-      /**
-       * The type of incident.
-       */
-      issueTypes: z.array(z.string()),
-      /**
-       * The severity code of the incident.
-       */
-      severityCode: z.string(),
-    })
-    .nullable(),
-  /**
-   * The identifier for the connector.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector.
-   */
-  name: z.string(),
-  /**
-   * The type of connector.
-   */
-  type: z.literal('.resilient'),
-});
 
 /**
  * Defines properties for connectors when type is `.servicenow`.
  */
+export const ConnectorPropertiesServicenow = lazySchema(() =>
+  z.object({
+    /**
+     * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+     */
+    fields: z.object({
+      /**
+       * The category of the incident.
+       */
+      category: z.string().nullable(),
+      /**
+       * The effect an incident had on business.
+       */
+      impact: z.string().nullable(),
+      /**
+       * The severity of the incident.
+       */
+      severity: z.string().nullable(),
+      /**
+       * The subcategory of the incident.
+       */
+      subcategory: z.string().nullable(),
+      /**
+       * The extent to which the incident resolution can be delayed.
+       */
+      urgency: z.string().nullable(),
+    }),
+    /**
+     * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector.
+     */
+    name: z.string(),
+    /**
+     * The type of connector.
+     */
+    type: z.literal('.servicenow'),
+  })
+);
 export type ConnectorPropertiesServicenow = z.infer<typeof ConnectorPropertiesServicenow>;
-export const ConnectorPropertiesServicenow = z.object({
-  /**
-   * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-   */
-  fields: z.object({
-    /**
-     * The category of the incident.
-     */
-    category: z.string().nullable(),
-    /**
-     * The effect an incident had on business.
-     */
-    impact: z.string().nullable(),
-    /**
-     * The severity of the incident.
-     */
-    severity: z.string().nullable(),
-    /**
-     * The subcategory of the incident.
-     */
-    subcategory: z.string().nullable(),
-    /**
-     * The extent to which the incident resolution can be delayed.
-     */
-    urgency: z.string().nullable(),
-  }),
-  /**
-   * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector.
-   */
-  name: z.string(),
-  /**
-   * The type of connector.
-   */
-  type: z.literal('.servicenow'),
-});
 
 /**
  * Defines properties for connectors when type is `.servicenow-sir`.
  */
+export const ConnectorPropertiesServicenowSir = lazySchema(() =>
+  z.object({
+    /**
+     * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+     */
+    fields: z.object({
+      /**
+       * The category of the incident.
+       */
+      category: z.string().nullable(),
+      /**
+       * Indicates whether cases will send a comma-separated list of destination IPs.
+       */
+      destIp: z.boolean().nullable(),
+      /**
+       * Indicates whether cases will send a comma-separated list of malware hashes.
+       */
+      malwareHash: z.boolean().nullable(),
+      /**
+       * Indicates whether cases will send a comma-separated list of malware URLs.
+       */
+      malwareUrl: z.boolean().nullable(),
+      /**
+       * The priority of the issue.
+       */
+      priority: z.string().nullable(),
+      /**
+       * Indicates whether cases will send a comma-separated list of source IPs.
+       */
+      sourceIp: z.boolean().nullable(),
+      /**
+       * The subcategory of the incident.
+       */
+      subcategory: z.string().nullable(),
+    }),
+    /**
+     * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector.
+     */
+    name: z.string(),
+    /**
+     * The type of connector.
+     */
+    type: z.literal('.servicenow-sir'),
+  })
+);
 export type ConnectorPropertiesServicenowSir = z.infer<typeof ConnectorPropertiesServicenowSir>;
-export const ConnectorPropertiesServicenowSir = z.object({
-  /**
-   * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-   */
-  fields: z.object({
-    /**
-     * The category of the incident.
-     */
-    category: z.string().nullable(),
-    /**
-     * Indicates whether cases will send a comma-separated list of destination IPs.
-     */
-    destIp: z.boolean().nullable(),
-    /**
-     * Indicates whether cases will send a comma-separated list of malware hashes.
-     */
-    malwareHash: z.boolean().nullable(),
-    /**
-     * Indicates whether cases will send a comma-separated list of malware URLs.
-     */
-    malwareUrl: z.boolean().nullable(),
-    /**
-     * The priority of the issue.
-     */
-    priority: z.string().nullable(),
-    /**
-     * Indicates whether cases will send a comma-separated list of source IPs.
-     */
-    sourceIp: z.boolean().nullable(),
-    /**
-     * The subcategory of the incident.
-     */
-    subcategory: z.string().nullable(),
-  }),
-  /**
-   * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector.
-   */
-  name: z.string(),
-  /**
-   * The type of connector.
-   */
-  type: z.literal('.servicenow-sir'),
-});
 
 /**
  * Defines properties for connectors when type is `.swimlane`.
  */
-export type ConnectorPropertiesSwimlane = z.infer<typeof ConnectorPropertiesSwimlane>;
-export const ConnectorPropertiesSwimlane = z.object({
-  /**
-   * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-   */
-  fields: z.object({
+export const ConnectorPropertiesSwimlane = lazySchema(() =>
+  z.object({
     /**
-     * The case identifier for Swimlane connectors.
+     * An object containing the connector fields. If you want to omit any individual field, specify null as its value.
      */
-    caseId: z.string().nullable(),
-  }),
-  /**
-   * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
-   */
-  id: z.string(),
-  /**
-   * The name of the connector.
-   */
-  name: z.string(),
-  /**
-   * The type of connector.
-   */
-  type: z.literal('.swimlane'),
-});
+    fields: z.object({
+      /**
+       * The case identifier for Swimlane connectors.
+       */
+      caseId: z.string().nullable(),
+    }),
+    /**
+     * The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+     */
+    id: z.string(),
+    /**
+     * The name of the connector.
+     */
+    name: z.string(),
+    /**
+     * The type of connector.
+     */
+    type: z.literal('.swimlane'),
+  })
+);
+export type ConnectorPropertiesSwimlane = z.infer<typeof ConnectorPropertiesSwimlane>;
 
 /**
  * The description for the case.
  */
+export const CaseDescription = lazySchema(() => z.string().max(30000));
 export type CaseDescription = z.infer<typeof CaseDescription>;
-export const CaseDescription = z.string().max(30000);
 
 /**
   * The application that owns the cases: Stack Management, Observability, or Elastic Security.
 
   */
+export const Owner = lazySchema(() => z.enum(['cases', 'observability', 'securitySolution']));
 export type Owner = z.infer<typeof Owner>;
-export const Owner = z.enum(['cases', 'observability', 'securitySolution']);
 export type OwnerEnum = typeof Owner.enum;
 export const OwnerEnum = Owner.enum;
 
 /**
  * An object that contains the case settings.
  */
-export type Settings = z.infer<typeof Settings>;
-export const Settings = z.object({
-  /**
-   * Turns alert syncing on or off.
-   */
-  syncAlerts: z.boolean(),
-  /**
+export const Settings = lazySchema(() =>
+  z.object({
+    /**
+     * Turns alert syncing on or off.
+     */
+    syncAlerts: z.boolean(),
+    /**
       * When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
 
       */
-  extractObservables: z.boolean().optional(),
-});
+    extractObservables: z.boolean().optional(),
+  })
+);
+export type Settings = z.infer<typeof Settings>;
 
 /**
  * The severity of the case.
  */
+export const CaseSeverity = lazySchema(() => z.enum(['critical', 'high', 'low', 'medium']));
 export type CaseSeverity = z.infer<typeof CaseSeverity>;
-export const CaseSeverity = z.enum(['critical', 'high', 'low', 'medium']);
 export type CaseSeverityEnum = typeof CaseSeverity.enum;
 export const CaseSeverityEnum = CaseSeverity.enum;
 
@@ -312,470 +330,564 @@ export const CaseSeverityEnum = CaseSeverity.enum;
   * The words and phrases that help categorize cases. It can be an empty array.
 
   */
+export const CaseTags = lazySchema(() => z.array(z.string().max(256)).max(200));
 export type CaseTags = z.infer<typeof CaseTags>;
-export const CaseTags = z.array(z.string().max(256)).max(200);
 
 /**
  * A word or phrase that categorizes the case.
  */
+export const CaseCategory = lazySchema(() => z.string().max(50));
 export type CaseCategory = z.infer<typeof CaseCategory>;
-export const CaseCategory = z.string().max(50);
 
 /**
  * A title for the case.
  */
+export const CaseTitle = lazySchema(() => z.string().max(160));
 export type CaseTitle = z.infer<typeof CaseTitle>;
-export const CaseTitle = z.string().max(160);
 
 /**
  * The create case API request body varies depending on the type of connector.
  */
-export type CreateCaseRequest = z.infer<typeof CreateCaseRequest>;
-export const CreateCaseRequest = z.object({
-  assignees: Assignees.optional(),
-  connector: z.union([
-    ConnectorPropertiesNone,
-    ConnectorPropertiesCasesWebhook,
-    ConnectorPropertiesJira,
-    ConnectorPropertiesResilient,
-    ConnectorPropertiesServicenow,
-    ConnectorPropertiesServicenowSir,
-    ConnectorPropertiesSwimlane,
-  ]),
-  description: CaseDescription,
-  owner: Owner,
-  settings: Settings,
-  severity: CaseSeverity.optional(),
-  tags: CaseTags,
-  category: CaseCategory.optional(),
-  title: CaseTitle,
-  /**
+export const CreateCaseRequest = lazySchema(() =>
+  z.object({
+    assignees: Assignees.optional(),
+    connector: z.union([
+      ConnectorPropertiesNone,
+      ConnectorPropertiesCasesWebhook,
+      ConnectorPropertiesJira,
+      ConnectorPropertiesResilient,
+      ConnectorPropertiesServicenow,
+      ConnectorPropertiesServicenowSir,
+      ConnectorPropertiesSwimlane,
+    ]),
+    description: CaseDescription,
+    owner: Owner,
+    settings: Settings,
+    severity: CaseSeverity.optional(),
+    tags: CaseTags,
+    category: CaseCategory.optional(),
+    title: CaseTitle,
+    /**
       * Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
 
       */
-  customFields: z
-    .array(
-      z.object({
-        /**
+    customFields: z
+      .array(
+        z.object({
+          /**
       * The unique identifier for the custom field. The key value must exist in the case configuration settings.
 
       */
-        key: z.string(),
-        /**
+          key: z.string(),
+          /**
       * The custom field type. It must match the type specified in the case configuration settings.
 
       */
-        type: z.enum(['text', 'toggle']),
-        /**
+          type: z.enum(['text', 'toggle']),
+          /**
       * The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
 
       */
-        value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]),
-      })
-    )
-    .max(10)
-    .optional(),
-});
+          value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]),
+        })
+      )
+      .max(10)
+      .optional(),
+  })
+);
+export type CreateCaseRequest = z.infer<typeof CreateCaseRequest>;
 
+export const CaseResponseClosedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
 export type CaseResponseClosedByProperties = z.infer<typeof CaseResponseClosedByProperties>;
-export const CaseResponseClosedByProperties = z
-  .object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  })
-  .nullable();
 
-export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
-export const CaseResponseCreatedByProperties = z.object({
-  email: z.string().nullable(),
-  full_name: z.string().nullable(),
-  username: z.string().nullable(),
-  profile_uid: z.string().optional(),
-});
-
-export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
-export const CaseResponsePushedByProperties = z
-  .object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  })
-  .nullable();
-
-export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
-export const CaseResponseUpdatedByProperties = z
-  .object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  })
-  .nullable();
-
-export type ActionsCommentResponseProperties = z.infer<typeof ActionsCommentResponseProperties>;
-export const ActionsCommentResponseProperties = z.object({
-  actions: z
-    .object({
-      targets: z
-        .array(
-          z.object({
-            endpointId: z.string().optional(),
-            hostname: z.string().optional(),
-          })
-        )
-        .optional(),
-      type: z.string().optional(),
-    })
-    .optional(),
-  comment: z.string().optional(),
-  created_at: z.string().datetime().optional(),
-  created_by: CaseResponseCreatedByProperties.optional(),
-  id: z.string().optional(),
-  owner: Owner.optional(),
-  pushed_at: z.string().datetime().nullable().optional(),
-  pushed_by: CaseResponsePushedByProperties.optional(),
-  type: z.literal('actions'),
-  updated_at: z.string().datetime().nullable().optional(),
-  updated_by: CaseResponseUpdatedByProperties.optional(),
-  version: z.string().optional(),
-});
-
-export type AlertCommentResponseProperties = z.infer<typeof AlertCommentResponseProperties>;
-export const AlertCommentResponseProperties = z.object({
-  alertId: z.array(z.string()).optional(),
-  created_at: z.string().datetime().optional(),
-  created_by: z
-    .object({
-      email: z.string().nullable(),
-      full_name: z.string().nullable(),
-      username: z.string().nullable(),
-      profile_uid: z.string().optional(),
-    })
-    .optional(),
-  id: z.string().optional(),
-  index: z.array(z.string()).optional(),
-  owner: Owner.optional(),
-  pushed_at: z.string().datetime().nullable().optional(),
-  pushed_by: z
-    .object({
-      email: z.string().nullable(),
-      full_name: z.string().nullable(),
-      username: z.string().nullable(),
-      profile_uid: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
-  rule: z
-    .object({
-      /**
-       * The rule identifier.
-       */
-      id: z.string().nullable().optional(),
-      /**
-       * The rule name.
-       */
-      name: z.string().nullable().optional(),
-    })
-    .optional(),
-  type: z.literal('alert'),
-  updated_at: z.string().datetime().nullable().optional(),
-  updated_by: z
-    .object({
-      email: z.string().nullable(),
-      full_name: z.string().nullable(),
-      username: z.string().nullable(),
-      profile_uid: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
-  version: z.string().optional(),
-});
-
-export type EventCommentResponseProperties = z.infer<typeof EventCommentResponseProperties>;
-export const EventCommentResponseProperties = z.object({
-  created_at: z.string().datetime().optional(),
-  created_by: CaseResponseCreatedByProperties.optional(),
-  eventId: z.array(z.string()).optional(),
-  id: z.string().optional(),
-  index: z.array(z.string()).optional(),
-  owner: Owner.optional(),
-  pushed_at: z.string().datetime().nullable().optional(),
-  pushed_by: CaseResponsePushedByProperties.optional(),
-  type: z.literal('event'),
-  updated_at: z.string().datetime().nullable().optional(),
-  updated_by: CaseResponseUpdatedByProperties.optional(),
-  version: z.string().optional(),
-});
-
-export type UserCommentResponseProperties = z.infer<typeof UserCommentResponseProperties>;
-export const UserCommentResponseProperties = z.object({
-  comment: z.string().optional(),
-  created_at: z.string().datetime().optional(),
-  created_by: CaseResponseCreatedByProperties.optional(),
-  id: z.string().optional(),
-  owner: Owner.optional(),
-  pushed_at: z.string().datetime().nullable().optional(),
-  pushed_by: CaseResponsePushedByProperties.optional(),
-  type: z.literal('user'),
-  updated_at: z.string().datetime().nullable().optional(),
-  updated_by: CaseResponseUpdatedByProperties.optional(),
-  version: z.string().optional(),
-});
-
-export type ExternalService = z.infer<typeof ExternalService>;
-export const ExternalService = z
-  .object({
-    connector_id: z.string().optional(),
-    connector_name: z.string().optional(),
-    external_id: z.string().optional(),
-    external_title: z.string().optional(),
-    external_url: z.string().optional(),
-    pushed_at: z.string().datetime().optional(),
+export const AlertCommentResponseProperties = lazySchema(() =>
+  z.object({
+    alertId: z.array(z.string()).optional(),
+    created_at: z.string().datetime().optional(),
+    created_by: z
+      .object({
+        email: z.string().nullable(),
+        full_name: z.string().nullable(),
+        username: z.string().nullable(),
+        profile_uid: z.string().optional(),
+      })
+      .optional(),
+    id: z.string().optional(),
+    index: z.array(z.string()).optional(),
+    owner: Owner.optional(),
+    pushed_at: z.string().datetime().nullable().optional(),
     pushed_by: z
       .object({
-        email: z.string().nullable().optional(),
-        full_name: z.string().nullable().optional(),
-        username: z.string().nullable().optional(),
+        email: z.string().nullable(),
+        full_name: z.string().nullable(),
+        username: z.string().nullable(),
         profile_uid: z.string().optional(),
       })
       .nullable()
       .optional(),
+    rule: z
+      .object({
+        /**
+         * The rule identifier.
+         */
+        id: z.string().nullable().optional(),
+        /**
+         * The rule name.
+         */
+        name: z.string().nullable().optional(),
+      })
+      .optional(),
+    type: z.literal('alert'),
+    updated_at: z.string().datetime().nullable().optional(),
+    updated_by: z
+      .object({
+        email: z.string().nullable(),
+        full_name: z.string().nullable(),
+        username: z.string().nullable(),
+        profile_uid: z.string().optional(),
+      })
+      .nullable()
+      .optional(),
+    version: z.string().optional(),
   })
-  .nullable();
+);
+export type AlertCommentResponseProperties = z.infer<typeof AlertCommentResponseProperties>;
+
+export const CaseResponseCreatedByProperties = lazySchema(() =>
+  z.object({
+    email: z.string().nullable(),
+    full_name: z.string().nullable(),
+    username: z.string().nullable(),
+    profile_uid: z.string().optional(),
+  })
+);
+export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
+
+export const CaseResponsePushedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
+export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
+
+export const CaseResponseUpdatedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
+export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
+
+export const EventCommentResponseProperties = lazySchema(() =>
+  z.object({
+    created_at: z.string().datetime().optional(),
+    created_by: CaseResponseCreatedByProperties.optional(),
+    eventId: z.array(z.string()).optional(),
+    id: z.string().optional(),
+    index: z.array(z.string()).optional(),
+    owner: Owner.optional(),
+    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_by: CaseResponsePushedByProperties.optional(),
+    type: z.literal('event'),
+    updated_at: z.string().datetime().nullable().optional(),
+    updated_by: CaseResponseUpdatedByProperties.optional(),
+    version: z.string().optional(),
+  })
+);
+export type EventCommentResponseProperties = z.infer<typeof EventCommentResponseProperties>;
+
+export const UserCommentResponseProperties = lazySchema(() =>
+  z.object({
+    comment: z.string().optional(),
+    created_at: z.string().datetime().optional(),
+    created_by: CaseResponseCreatedByProperties.optional(),
+    id: z.string().optional(),
+    owner: Owner.optional(),
+    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_by: CaseResponsePushedByProperties.optional(),
+    type: z.literal('user'),
+    updated_at: z.string().datetime().nullable().optional(),
+    updated_by: CaseResponseUpdatedByProperties.optional(),
+    version: z.string().optional(),
+  })
+);
+export type UserCommentResponseProperties = z.infer<typeof UserCommentResponseProperties>;
+
+export const ExternalService = lazySchema(() =>
+  z
+    .object({
+      connector_id: z.string().optional(),
+      connector_name: z.string().optional(),
+      external_id: z.string().optional(),
+      external_title: z.string().optional(),
+      external_url: z.string().optional(),
+      pushed_at: z.string().datetime().optional(),
+      pushed_by: z
+        .object({
+          email: z.string().nullable().optional(),
+          full_name: z.string().nullable().optional(),
+          username: z.string().nullable().optional(),
+          profile_uid: z.string().optional(),
+        })
+        .nullable()
+        .optional(),
+    })
+    .nullable()
+);
+export type ExternalService = z.infer<typeof ExternalService>;
+
+/**
+ * A single observable attached to a case.
+ */
+export const CaseObservable = lazySchema(() =>
+  z.object({
+    /**
+     * The observable identifier.
+     */
+    id: z.string(),
+    /**
+     * The observable type key.
+     */
+    typeKey: z.string(),
+    /**
+     * The observable value.
+     */
+    value: z.string(),
+    /**
+     * An optional description for the observable.
+     */
+    description: z.string().nullable(),
+    /**
+     * When the observable was created.
+     */
+    createdAt: z.string().datetime(),
+    /**
+     * When the observable was last updated.
+     */
+    updatedAt: z.string().datetime().nullable(),
+  })
+);
+export type CaseObservable = z.infer<typeof CaseObservable>;
 
 /**
  * The status of the case.
  */
+export const CaseStatus = lazySchema(() => z.enum(['closed', 'in-progress', 'open']));
 export type CaseStatus = z.infer<typeof CaseStatus>;
-export const CaseStatus = z.enum(['closed', 'in-progress', 'open']);
 export type CaseStatusEnum = typeof CaseStatus.enum;
 export const CaseStatusEnum = CaseStatus.enum;
 
-export type CaseResponseProperties = z.infer<typeof CaseResponseProperties>;
-export const CaseResponseProperties = z.object({
-  assignees: Assignees.optional(),
-  /**
-   * The case category.
-   */
-  category: z.string().nullable().optional(),
-  closed_at: z.string().datetime().nullable(),
-  closed_by: CaseResponseClosedByProperties,
-  /**
-   * An array of comment objects for the case.
-   */
-  comments: z
-    .array(
-      z.discriminatedUnion('type', [
-        ActionsCommentResponseProperties,
-        AlertCommentResponseProperties,
-        EventCommentResponseProperties,
-        UserCommentResponseProperties,
-      ])
-    )
-    .max(10000),
-  connector: z.discriminatedUnion('type', [
-    ConnectorPropertiesNone,
-    ConnectorPropertiesCasesWebhook,
-    ConnectorPropertiesJira,
-    ConnectorPropertiesResilient,
-    ConnectorPropertiesServicenow,
-    ConnectorPropertiesServicenowSir,
-    ConnectorPropertiesSwimlane,
-  ]),
-  created_at: z.string().datetime(),
-  created_by: CaseResponseCreatedByProperties,
-  /**
-   * Custom field values for the case.
-   */
-  customFields: z
-    .array(
-      z.object({
-        /**
+export const CaseResponseProperties = lazySchema(() =>
+  z.object({
+    assignees: Assignees.optional(),
+    /**
+     * The case category.
+     */
+    category: z.string().nullable().optional(),
+    closed_at: z.string().datetime().nullable(),
+    closed_by: CaseResponseClosedByProperties,
+    /**
+     * An array of comment objects for the case.
+     */
+    comments: z
+      .array(
+        z.discriminatedUnion('type', [
+          AlertCommentResponseProperties,
+          EventCommentResponseProperties,
+          UserCommentResponseProperties,
+        ])
+      )
+      .max(10000),
+    connector: z.discriminatedUnion('type', [
+      ConnectorPropertiesNone,
+      ConnectorPropertiesCasesWebhook,
+      ConnectorPropertiesJira,
+      ConnectorPropertiesResilient,
+      ConnectorPropertiesServicenow,
+      ConnectorPropertiesServicenowSir,
+      ConnectorPropertiesSwimlane,
+    ]),
+    created_at: z.string().datetime(),
+    created_by: CaseResponseCreatedByProperties,
+    /**
+     * Custom field values for the case.
+     */
+    customFields: z
+      .array(
+        z.object({
+          /**
       * The unique identifier for the custom field. The key value must exist in the case configuration settings.
 
       */
-        key: z.string().optional(),
-        /**
+          key: z.string().optional(),
+          /**
       * The custom field type. It must match the type specified in the case configuration settings.
 
       */
-        type: z.enum(['text', 'toggle']).optional(),
-        /**
+          type: z.enum(['text', 'toggle']).optional(),
+          /**
       * The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
 
       */
-        value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]).optional(),
-      })
-    )
-    .optional(),
-  description: z.string(),
-  /**
+          value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]).optional(),
+        })
+      )
+      .optional(),
+    description: z.string(),
+    /**
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
 
       */
-  duration: z.number().int().nullable(),
-  external_service: ExternalService,
-  id: z.string(),
-  owner: Owner,
-  settings: Settings,
-  severity: CaseSeverity,
-  status: CaseStatus,
-  tags: z.array(z.string()),
-  title: z.string(),
-  totalAlerts: z.number().int(),
-  totalComment: z.number().int(),
-  /**
-   * The number of events attached to the case.
-   */
-  totalEvents: z.number().int().optional(),
-  updated_at: z.string().datetime().nullable(),
-  updated_by: CaseResponseUpdatedByProperties,
-  version: z.string(),
-});
+    duration: z.number().int().nullable(),
+    external_service: ExternalService,
+    id: z.string(),
+    /**
+      * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
 
+      */
+    incremental_id: z.number().int().nullable().optional(),
+    /**
+     * Observables attached to the case.
+     */
+    observables: z.array(CaseObservable),
+    owner: Owner,
+    settings: Settings,
+    severity: CaseSeverity,
+    status: CaseStatus,
+    tags: z.array(z.string()),
+    title: z.string(),
+    totalAlerts: z.number().int(),
+    totalComment: z.number().int(),
+    /**
+     * The number of observables attached to the case.
+     */
+    total_observables: z.number().int().nullable(),
+    /**
+     * The number of events attached to the case.
+     */
+    totalEvents: z.number().int().optional(),
+    updated_at: z.string().datetime().nullable(),
+    updated_by: CaseResponseUpdatedByProperties,
+    version: z.string(),
+  })
+);
+export type CaseResponseProperties = z.infer<typeof CaseResponseProperties>;
+
+export const Response4Xx = lazySchema(() =>
+  z.object({
+    error: z.string().optional(),
+    message: z.string().optional(),
+    statusCode: z.number().int().optional(),
+  })
+);
 export type Response4Xx = z.infer<typeof Response4Xx>;
-export const Response4Xx = z.object({
-  error: z.string().optional(),
-  message: z.string().optional(),
-  statusCode: z.number().int().optional(),
-});
 
 /**
   * The close reason to sync to attached alerts when closing the case. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user.
 
   */
+export const CaseCloseSyncReason = lazySchema(() =>
+  z.union([
+    z.enum([
+      'false_positive',
+      'duplicate',
+      'true_positive',
+      'benign_positive',
+      'automated_closure',
+      'other',
+    ]),
+    z.string(),
+  ])
+);
 export type CaseCloseSyncReason = z.infer<typeof CaseCloseSyncReason>;
-export const CaseCloseSyncReason = z.union([
-  z.enum([
-    'false_positive',
-    'duplicate',
-    'true_positive',
-    'benign_positive',
-    'automated_closure',
-    'other',
-  ]),
-  z.string(),
-]);
 
 /**
  * The update case API request body varies depending on the type of connector.
  */
-export type UpdateCaseRequest = z.infer<typeof UpdateCaseRequest>;
-export const UpdateCaseRequest = z.object({
-  /**
-   * An array containing one or more case objects.
-   */
-  cases: z
-    .array(
-      z.object({
-        assignees: Assignees.optional(),
-        category: CaseCategory.optional(),
-        connector: z
-          .union([
-            ConnectorPropertiesNone,
-            ConnectorPropertiesCasesWebhook,
-            ConnectorPropertiesJira,
-            ConnectorPropertiesResilient,
-            ConnectorPropertiesServicenow,
-            ConnectorPropertiesServicenowSir,
-            ConnectorPropertiesSwimlane,
-          ])
-          .optional(),
-        /**
+export const UpdateCaseRequest = lazySchema(() =>
+  z.object({
+    /**
+     * An array containing one or more case objects.
+     */
+    cases: z
+      .array(
+        z.object({
+          assignees: Assignees.optional(),
+          category: CaseCategory.optional(),
+          connector: z
+            .union([
+              ConnectorPropertiesNone,
+              ConnectorPropertiesCasesWebhook,
+              ConnectorPropertiesJira,
+              ConnectorPropertiesResilient,
+              ConnectorPropertiesServicenow,
+              ConnectorPropertiesServicenowSir,
+              ConnectorPropertiesSwimlane,
+            ])
+            .optional(),
+          /**
       * Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
 
       */
-        customFields: z
-          .array(
-            z.object({
-              /**
+          customFields: z
+            .array(
+              z.object({
+                /**
       * The unique identifier for the custom field. The key value must exist in the case configuration settings.
 
       */
-              key: z.string(),
-              /**
+                key: z.string(),
+                /**
       * The custom field type. It must match the type specified in the case configuration settings.
 
       */
-              type: z.enum(['text', 'toggle']),
-              /**
+                type: z.enum(['text', 'toggle']),
+                /**
       * The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
 
       */
-              value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]),
-            })
-          )
-          .max(10)
-          .optional(),
-        description: CaseDescription.optional(),
-        /**
-         * The identifier for the case.
-         */
-        id: z.string().max(30000),
-        settings: Settings.optional(),
-        severity: CaseSeverity.optional(),
-        status: CaseStatus.optional(),
-        tags: CaseTags.optional(),
-        title: CaseTitle.optional(),
-        closeReason: CaseCloseSyncReason.optional(),
-        /**
+                value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]),
+              })
+            )
+            .max(10)
+            .optional(),
+          description: CaseDescription.optional(),
+          /**
+           * The identifier for the case.
+           */
+          id: z.string().max(30000),
+          settings: Settings.optional(),
+          severity: CaseSeverity.optional(),
+          status: CaseStatus.optional(),
+          tags: CaseTags.optional(),
+          title: CaseTitle.optional(),
+          closeReason: CaseCloseSyncReason.optional(),
+          /**
       * The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
 
       */
-        version: z.string(),
-      })
-    )
-    .min(1)
-    .max(100),
-});
+          version: z.string(),
+        })
+      )
+      .min(1)
+      .max(100),
+  })
+);
+export type UpdateCaseRequest = z.infer<typeof UpdateCaseRequest>;
 
+export const String = lazySchema(() => z.string());
 export type String = z.infer<typeof String>;
-export const String = z.string();
 
+export const StringArray = lazySchema(() => z.array(String).max(100));
 export type StringArray = z.infer<typeof StringArray>;
-export const StringArray = z.array(String).max(100);
 
+export const CaseCategories = lazySchema(() => z.array(CaseCategory).max(100));
 export type CaseCategories = z.infer<typeof CaseCategories>;
-export const CaseCategories = z.array(CaseCategory).max(100);
 
+export const Owners = lazySchema(() => z.array(Owner));
 export type Owners = z.infer<typeof Owners>;
-export const Owners = z.array(Owner);
 
 /**
  * The fields to perform the `simple_query_string` parsed query against.
  */
+export const SearchFieldsType = lazySchema(() => z.enum(['description', 'title']));
 export type SearchFieldsType = z.infer<typeof SearchFieldsType>;
-export const SearchFieldsType = z.enum(['description', 'title']);
 export type SearchFieldsTypeEnum = typeof SearchFieldsType.enum;
 export const SearchFieldsTypeEnum = SearchFieldsType.enum;
 
+export const SearchFieldsTypeArray = lazySchema(() => z.array(SearchFieldsType));
 export type SearchFieldsTypeArray = z.infer<typeof SearchFieldsTypeArray>;
-export const SearchFieldsTypeArray = z.array(SearchFieldsType);
+
+/**
+ * Counts of alerts, events, and user comments attached to a case.
+ */
+export const AttachmentTotals = lazySchema(() =>
+  z.object({
+    /**
+     * Number of alert attachments on the case.
+     */
+    alerts: z.number().int(),
+    /**
+     * Number of event attachments on the case.
+     */
+    events: z.number().int(),
+    /**
+     * Number of user comment attachments on the case.
+     */
+    userComments: z.number().int(),
+  })
+);
+export type AttachmentTotals = z.infer<typeof AttachmentTotals>;
+
+/**
+  * Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
+
+  */
+export const RelatedCase = lazySchema(() =>
+  z.object({
+    /**
+     * The case identifier.
+     */
+    id: z.string(),
+    /**
+     * The case title.
+     */
+    title: z.string(),
+    /**
+     * The case description.
+     */
+    description: z.string(),
+    status: CaseStatus,
+    /**
+     * When the case was created.
+     */
+    createdAt: z.string().datetime(),
+    totals: AttachmentTotals,
+  })
+);
+export type RelatedCase = z.infer<typeof RelatedCase>;
 
 /**
  * Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
  */
+export const ClosureTypes = lazySchema(() => z.enum(['close-by-pushing', 'close-by-user']));
 export type ClosureTypes = z.infer<typeof ClosureTypes>;
-export const ClosureTypes = z.enum(['close-by-pushing', 'close-by-user']);
 export type ClosureTypesEnum = typeof ClosureTypes.enum;
 export const ClosureTypesEnum = ClosureTypes.enum;
 
 /**
  * The type of connector.
  */
+export const ConnectorTypes = lazySchema(() =>
+  z.enum([
+    '.cases-webhook',
+    '.jira',
+    '.none',
+    '.resilient',
+    '.servicenow',
+    '.servicenow-sir',
+    '.swimlane',
+  ])
+);
 export type ConnectorTypes = z.infer<typeof ConnectorTypes>;
-export const ConnectorTypes = z.enum([
-  '.cases-webhook',
-  '.jira',
-  '.none',
-  '.resilient',
-  '.servicenow',
-  '.servicenow-sir',
-  '.swimlane',
-]);
 export type ConnectorTypesEnum = typeof ConnectorTypes.enum;
 export const ConnectorTypesEnum = ConnectorTypes.enum;
 
@@ -783,152 +895,91 @@ export const ConnectorTypesEnum = ConnectorTypes.enum;
   * The words and phrases that help categorize templates. It can be an empty array.
 
   */
+export const TemplateTags = lazySchema(() => z.array(z.string().max(256)).max(200));
 export type TemplateTags = z.infer<typeof TemplateTags>;
-export const TemplateTags = z.array(z.string().max(256)).max(200);
 
-export type Templates = z.infer<typeof Templates>;
-export const Templates = z.array(
-  z.object({
-    caseFields: z
-      .object({
-        assignees: Assignees.optional(),
-        category: CaseCategory.optional(),
-        connector: z
-          .object({
-            /**
-             * The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-             */
-            fields: z.object({}).nullable().optional(),
-            /**
-             * The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
-             */
-            id: z.string().optional(),
-            /**
-             * The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
-             */
-            name: z.string().optional(),
-            type: ConnectorTypes.optional(),
-          })
-          .optional(),
-        /**
-         * Custom field values in the template.
-         */
-        customFields: z
-          .array(
-            z.object({
+export const Templates = lazySchema(() =>
+  z.array(
+    z.object({
+      caseFields: z
+        .object({
+          assignees: Assignees.optional(),
+          category: CaseCategory.optional(),
+          connector: z
+            .object({
               /**
-               * The unique key for the custom field.
+               * The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
                */
-              key: z.string().optional(),
+              fields: z.object({}).nullable().optional(),
               /**
-               * The type of the custom field.
+               * The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                */
-              type: z.enum(['text', 'toggle']).optional(),
+              id: z.string().optional(),
               /**
+               * The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+               */
+              name: z.string().optional(),
+              type: ConnectorTypes.optional(),
+            })
+            .optional(),
+          /**
+           * Custom field values in the template.
+           */
+          customFields: z
+            .array(
+              z.object({
+                /**
+                 * The unique key for the custom field.
+                 */
+                key: z.string().optional(),
+                /**
+                 * The type of the custom field.
+                 */
+                type: z.enum(['text', 'toggle']).optional(),
+                /**
       * The default value for the custom field when a case uses the template. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.
 
       */
-              value: z.union([z.string(), z.boolean()]).optional(),
-            })
-          )
-          .optional(),
-        description: CaseDescription.optional(),
-        settings: Settings.optional(),
-        severity: CaseSeverity.optional(),
-        tags: CaseTags.optional(),
-        title: CaseTitle.optional(),
-      })
-      .optional(),
-    /**
-     * A description for the template.
-     */
-    description: z.string().optional(),
-    /**
+                value: z.union([z.string(), z.boolean()]).optional(),
+              })
+            )
+            .optional(),
+          description: CaseDescription.optional(),
+          settings: Settings.optional(),
+          severity: CaseSeverity.optional(),
+          tags: CaseTags.optional(),
+          title: CaseTitle.optional(),
+        })
+        .optional(),
+      /**
+       * A description for the template.
+       */
+      description: z.string().optional(),
+      /**
       * A unique key for the template. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific template.
 
       */
-    key: z.string().optional(),
-    /**
-     * The name of the template.
-     */
-    name: z.string().optional(),
-    tags: TemplateTags.optional(),
-  })
+      key: z.string().optional(),
+      /**
+       * The name of the template.
+       */
+      name: z.string().optional(),
+      tags: TemplateTags.optional(),
+    })
+  )
 );
+export type Templates = z.infer<typeof Templates>;
 
 /**
  * External connection details, such as the closure type and default connector for cases.
  */
-export type SetCaseConfigurationRequest = z.infer<typeof SetCaseConfigurationRequest>;
-export const SetCaseConfigurationRequest = z.object({
-  closure_type: ClosureTypes,
-  /**
-   * An object that contains the connector configuration.
-   */
-  connector: z.object({
+export const SetCaseConfigurationRequest = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypes,
     /**
-     * The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+     * An object that contains the connector configuration.
      */
-    fields: z.object({}).nullable(),
-    /**
-     * The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
-     */
-    id: z.string(),
-    /**
-     * The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
-     */
-    name: z.string(),
-    type: ConnectorTypes,
-  }),
-  /**
-   * Custom fields case configuration.
-   */
-  customFields: z
-    .array(
-      z.object({
-        /**
-      * A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.
-
-      */
-        defaultValue: z.union([z.string(), z.boolean()]).optional(),
-        /**
-      * A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
-
-      */
-        key: z.string().min(1).max(36),
-        /**
-         * The custom field label that is displayed in the case.
-         */
-        label: z.string().min(1).max(50),
-        /**
-      * Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
-
-      */
-        required: z.boolean(),
-        /**
-         * The type of the custom field.
-         */
-        type: z.enum(['text', 'toggle']),
-      })
-    )
-    .max(10)
-    .optional(),
-  owner: Owner,
-  templates: Templates.optional(),
-});
-
-/**
-  * You can update settings such as the closure type, custom fields, templates, and the default connector for cases.
-
-  */
-export type UpdateCaseConfigurationRequest = z.infer<typeof UpdateCaseConfigurationRequest>;
-export const UpdateCaseConfigurationRequest = z.object({
-  closure_type: ClosureTypes.optional(),
-  /**
-   * An object that contains the connector configuration.
-   */
-  connector: z
-    .object({
+    connector: z.object({
       /**
        * The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
        */
@@ -942,611 +993,745 @@ export const UpdateCaseConfigurationRequest = z.object({
        */
       name: z.string(),
       type: ConnectorTypes,
-    })
-    .optional(),
-  /**
-   * Custom fields case configuration.
-   */
-  customFields: z
-    .array(
-      z.object({
-        /**
+    }),
+    /**
+     * Custom fields case configuration.
+     */
+    customFields: z
+      .array(
+        z.object({
+          /**
       * A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.
 
       */
-        defaultValue: z.union([z.string(), z.boolean()]).optional(),
-        /**
+          defaultValue: z.union([z.string(), z.boolean()]).optional(),
+          /**
       * A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
 
       */
-        key: z.string().min(1).max(36),
-        /**
-         * The custom field label that is displayed in the case.
-         */
-        label: z.string().min(1).max(50),
-        /**
+          key: z.string().min(1).max(36),
+          /**
+           * The custom field label that is displayed in the case.
+           */
+          label: z.string().min(1).max(50),
+          /**
       * Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
 
       */
-        required: z.boolean(),
+          required: z.boolean(),
+          /**
+           * The type of the custom field.
+           */
+          type: z.enum(['text', 'toggle']),
+        })
+      )
+      .max(10)
+      .optional(),
+    owner: Owner,
+    templates: Templates.optional(),
+  })
+);
+export type SetCaseConfigurationRequest = z.infer<typeof SetCaseConfigurationRequest>;
+
+/**
+  * You can update settings such as the closure type, custom fields, templates, and the default connector for cases.
+
+  */
+export const UpdateCaseConfigurationRequest = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypes.optional(),
+    /**
+     * An object that contains the connector configuration.
+     */
+    connector: z
+      .object({
         /**
-         * The type of the custom field.
+         * The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
          */
-        type: z.enum(['text', 'toggle']),
+        fields: z.object({}).nullable(),
+        /**
+         * The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+         */
+        id: z.string(),
+        /**
+         * The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+         */
+        name: z.string(),
+        type: ConnectorTypes,
       })
-    )
-    .optional(),
-  templates: Templates.optional(),
-  /**
+      .optional(),
+    /**
+     * Custom fields case configuration.
+     */
+    customFields: z
+      .array(
+        z.object({
+          /**
+      * A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.
+
+      */
+          defaultValue: z.union([z.string(), z.boolean()]).optional(),
+          /**
+      * A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+
+      */
+          key: z.string().min(1).max(36),
+          /**
+           * The custom field label that is displayed in the case.
+           */
+          label: z.string().min(1).max(50),
+          /**
+      * Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+
+      */
+          required: z.boolean(),
+          /**
+           * The type of the custom field.
+           */
+          type: z.enum(['text', 'toggle']),
+        })
+      )
+      .optional(),
+    templates: Templates.optional(),
+    /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
 
       */
-  version: z.string(),
-});
+    version: z.string(),
+  })
+);
+export type UpdateCaseConfigurationRequest = z.infer<typeof UpdateCaseConfigurationRequest>;
 
 /**
   * Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.
 
   */
-export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
-export const CaseResponseGetCase = z.object({
-  assignees: Assignees.optional(),
-  /**
-   * The case category.
-   */
-  category: z.string().nullable().optional(),
-  closed_at: z.string().datetime().nullable(),
-  closed_by: CaseResponseClosedByProperties,
-  connector: z.discriminatedUnion('type', [
-    ConnectorPropertiesNone,
-    ConnectorPropertiesCasesWebhook,
-    ConnectorPropertiesJira,
-    ConnectorPropertiesResilient,
-    ConnectorPropertiesServicenow,
-    ConnectorPropertiesServicenowSir,
-    ConnectorPropertiesSwimlane,
-  ]),
-  created_at: z.string().datetime(),
-  created_by: CaseResponseCreatedByProperties,
-  /**
-   * Custom field values for the case.
-   */
-  customFields: z
-    .array(
-      z.object({
-        /**
+export const CaseResponseGetCase = lazySchema(() =>
+  z.object({
+    assignees: Assignees.optional(),
+    /**
+     * The case category.
+     */
+    category: z.string().nullable().optional(),
+    closed_at: z.string().datetime().nullable(),
+    closed_by: CaseResponseClosedByProperties,
+    connector: z.discriminatedUnion('type', [
+      ConnectorPropertiesNone,
+      ConnectorPropertiesCasesWebhook,
+      ConnectorPropertiesJira,
+      ConnectorPropertiesResilient,
+      ConnectorPropertiesServicenow,
+      ConnectorPropertiesServicenowSir,
+      ConnectorPropertiesSwimlane,
+    ]),
+    created_at: z.string().datetime(),
+    created_by: CaseResponseCreatedByProperties,
+    /**
+     * Custom field values for the case.
+     */
+    customFields: z
+      .array(
+        z.object({
+          /**
       * The unique identifier for the custom field. The key value must exist in the case configuration settings.
 
       */
-        key: z.string().optional(),
-        /**
+          key: z.string().optional(),
+          /**
       * The custom field type. It must match the type specified in the case configuration settings.
 
       */
-        type: z.enum(['text', 'toggle']).optional(),
-        /**
+          type: z.enum(['text', 'toggle']).optional(),
+          /**
       * The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
 
       */
-        value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]).optional(),
-      })
-    )
-    .optional(),
-  description: z.string(),
-  /**
+          value: z.union([z.string().min(1).max(160).nullable(), z.boolean()]).optional(),
+        })
+      )
+      .optional(),
+    description: z.string(),
+    /**
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
 
       */
-  duration: z.number().int().nullable(),
-  external_service: ExternalService,
-  id: z.string(),
-  owner: Owner,
-  settings: Settings,
-  severity: CaseSeverity,
-  status: CaseStatus,
-  tags: z.array(z.string()),
-  title: z.string(),
-  totalAlerts: z.number().int(),
-  /**
-   * The number of user comments on the case. Use the find case comments API to retrieve comment content.
-   */
-  totalComment: z.number().int(),
-  /**
-   * The number of events attached to the case.
-   */
-  totalEvents: z.number().int().optional(),
-  updated_at: z.string().datetime().nullable(),
-  updated_by: CaseResponseUpdatedByProperties,
-  version: z.string(),
-});
+    duration: z.number().int().nullable(),
+    external_service: ExternalService,
+    id: z.string(),
+    /**
+      * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
 
+      */
+    incremental_id: z.number().int().nullable().optional(),
+    /**
+     * Observables attached to the case.
+     */
+    observables: z.array(CaseObservable),
+    owner: Owner,
+    settings: Settings,
+    severity: CaseSeverity,
+    status: CaseStatus,
+    tags: z.array(z.string()),
+    title: z.string(),
+    totalAlerts: z.number().int(),
+    /**
+     * The number of user comments on the case. Use the find case comments API to retrieve comment content.
+     */
+    totalComment: z.number().int(),
+    /**
+     * The number of observables attached to the case.
+     */
+    total_observables: z.number().int().nullable(),
+    /**
+     * The number of events attached to the case.
+     */
+    totalEvents: z.number().int().optional(),
+    updated_at: z.string().datetime().nullable(),
+    updated_by: CaseResponseUpdatedByProperties,
+    version: z.string(),
+  })
+);
+export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
+
+export const AlertResponseProperties = lazySchema(() =>
+  z.object({
+    attached_at: z.string().datetime().optional(),
+    /**
+     * The alert identifier.
+     */
+    id: z.string().optional(),
+    /**
+     * The alert index.
+     */
+    index: z.string().optional(),
+  })
+);
 export type AlertResponseProperties = z.infer<typeof AlertResponseProperties>;
-export const AlertResponseProperties = z.object({
-  attached_at: z.string().datetime().optional(),
-  /**
-   * The alert identifier.
-   */
-  id: z.string().optional(),
-  /**
-   * The alert index.
-   */
-  index: z.string().optional(),
-});
 
 /**
   * The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
   */
+export const AlertIdentifiers = lazySchema(() =>
+  z.union([z.string(), z.array(z.string()).max(1000)])
+);
 export type AlertIdentifiers = z.infer<typeof AlertIdentifiers>;
-export const AlertIdentifiers = z.union([z.string(), z.array(z.string()).max(1000)]);
 
 /**
   * The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
   */
+export const AlertIndices = lazySchema(() => z.union([z.string(), z.array(z.string()).max(1000)]));
 export type AlertIndices = z.infer<typeof AlertIndices>;
-export const AlertIndices = z.union([z.string(), z.array(z.string()).max(1000)]);
 
 /**
   * The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
   */
+export const Rule = lazySchema(() =>
+  z.object({
+    /**
+     * The rule identifier.
+     */
+    id: z.string().optional(),
+    /**
+     * The rule name.
+     */
+    name: z.string().optional(),
+  })
+);
 export type Rule = z.infer<typeof Rule>;
-export const Rule = z.object({
-  /**
-   * The rule identifier.
-   */
-  id: z.string().optional(),
-  /**
-   * The rule name.
-   */
-  name: z.string().optional(),
-});
 
 /**
  * Defines properties for case comment requests when type is alert.
  */
+export const AddAlertCommentRequestProperties = lazySchema(() =>
+  z.object({
+    alertId: AlertIdentifiers,
+    index: AlertIndices,
+    owner: Owner,
+    rule: Rule,
+    /**
+     * The type of comment.
+     */
+    type: z.literal('alert'),
+  })
+);
 export type AddAlertCommentRequestProperties = z.infer<typeof AddAlertCommentRequestProperties>;
-export const AddAlertCommentRequestProperties = z.object({
-  alertId: AlertIdentifiers,
-  index: AlertIndices,
-  owner: Owner,
-  rule: Rule,
-  /**
-   * The type of comment.
-   */
-  type: z.literal('alert'),
-});
 
 /**
  * Defines properties for case comment requests when type is user.
  */
+export const AddUserCommentRequestProperties = lazySchema(() =>
+  z.object({
+    /**
+     * The new comment. It is required only when `type` is `user`.
+     */
+    comment: z.string().max(30000),
+    owner: Owner,
+    /**
+     * The type of comment.
+     */
+    type: z.literal('user'),
+  })
+);
 export type AddUserCommentRequestProperties = z.infer<typeof AddUserCommentRequestProperties>;
-export const AddUserCommentRequestProperties = z.object({
-  /**
-   * The new comment. It is required only when `type` is `user`.
-   */
-  comment: z.string().max(30000),
-  owner: Owner,
-  /**
-   * The type of comment.
-   */
-  type: z.literal('user'),
-});
 
 /**
  * The add comment to case API request body varies depending on whether you are adding an alert or a comment.
  */
+export const AddCaseCommentRequest = lazySchema(() =>
+  z.discriminatedUnion('type', [AddAlertCommentRequestProperties, AddUserCommentRequestProperties])
+);
 export type AddCaseCommentRequest = z.infer<typeof AddCaseCommentRequest>;
-export const AddCaseCommentRequest = z.discriminatedUnion('type', [
-  AddAlertCommentRequestProperties,
-  AddUserCommentRequestProperties,
-]);
 
 /**
  * Defines properties for case comment requests when type is alert.
  */
-export type UpdateAlertCommentRequestProperties = z.infer<
-  typeof UpdateAlertCommentRequestProperties
->;
-export const UpdateAlertCommentRequestProperties = z.object({
-  alertId: AlertIdentifiers,
-  /**
+export const UpdateAlertCommentRequestProperties = lazySchema(() =>
+  z.object({
+    alertId: AlertIdentifiers,
+    /**
       * The identifier for the comment. To retrieve comment IDs, use the get comments API.
 
       */
-  id: z.string(),
-  index: AlertIndices,
-  owner: Owner,
-  rule: Rule,
-  /**
-   * The type of comment.
-   */
-  type: z.literal('alert'),
-  /**
+    id: z.string(),
+    index: AlertIndices,
+    owner: Owner,
+    rule: Rule,
+    /**
+     * The type of comment.
+     */
+    type: z.literal('alert'),
+    /**
       * The current comment version. To retrieve version values, use the get comments API.
 
       */
-  version: z.string(),
-});
+    version: z.string(),
+  })
+);
+export type UpdateAlertCommentRequestProperties = z.infer<
+  typeof UpdateAlertCommentRequestProperties
+>;
 
 /**
  * Defines properties for case comment requests when type is user.
  */
-export type UpdateUserCommentRequestProperties = z.infer<typeof UpdateUserCommentRequestProperties>;
-export const UpdateUserCommentRequestProperties = z.object({
-  /**
-   * The new comment. It is required only when `type` is `user`.
-   */
-  comment: z.string().max(30000),
-  /**
+export const UpdateUserCommentRequestProperties = lazySchema(() =>
+  z.object({
+    /**
+     * The new comment. It is required only when `type` is `user`.
+     */
+    comment: z.string().max(30000),
+    /**
       * The identifier for the comment. To retrieve comment IDs, use the get comments API.
 
       */
-  id: z.string(),
-  owner: Owner,
-  /**
-   * The type of comment.
-   */
-  type: z.literal('user'),
-  /**
+    id: z.string(),
+    owner: Owner,
+    /**
+     * The type of comment.
+     */
+    type: z.literal('user'),
+    /**
       * The current comment version. To retrieve version values, use the get comments API.
 
       */
-  version: z.string(),
-});
+    version: z.string(),
+  })
+);
+export type UpdateUserCommentRequestProperties = z.infer<typeof UpdateUserCommentRequestProperties>;
 
 /**
  * The update case comment API request body varies depending on whether you are updating an alert or a comment.
  */
+export const UpdateCaseCommentRequest = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    UpdateAlertCommentRequestProperties,
+    UpdateUserCommentRequestProperties,
+  ])
+);
 export type UpdateCaseCommentRequest = z.infer<typeof UpdateCaseCommentRequest>;
-export const UpdateCaseCommentRequest = z.discriminatedUnion('type', [
-  UpdateAlertCommentRequestProperties,
-  UpdateUserCommentRequestProperties,
-]);
 
+export const FindCommentsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Paginated list of user comments for the case.
+     */
+    comments: z.array(UserCommentResponseProperties),
+    /**
+     * The current page index.
+     */
+    page: z.number().int(),
+    /**
+     * The number of items per page.
+     */
+    per_page: z.number().int(),
+    /**
+     * The total number of comments.
+     */
+    total: z.number().int(),
+  })
+);
 export type FindCommentsResponse = z.infer<typeof FindCommentsResponse>;
-export const FindCommentsResponse = z.object({
-  /**
-   * Paginated list of user comments for the case.
-   */
-  comments: z.array(UserCommentResponseProperties),
-  /**
-   * The current page index.
-   */
-  page: z.number().int(),
-  /**
-   * The number of items per page.
-   */
-  per_page: z.number().int(),
-  /**
-   * The total number of comments.
-   */
-  total: z.number().int(),
-});
 
+export const Actions = lazySchema(() =>
+  z.enum(['add', 'create', 'delete', 'push_to_service', 'update'])
+);
 export type Actions = z.infer<typeof Actions>;
-export const Actions = z.enum(['add', 'create', 'delete', 'push_to_service', 'update']);
 export type ActionsEnum = typeof Actions.enum;
 export const ActionsEnum = Actions.enum;
 
+export const PayloadAlertComment = lazySchema(() =>
+  z.object({
+    comment: z
+      .object({
+        alertId: z.union([z.string(), z.array(z.string())]).optional(),
+        index: z.union([z.string(), z.array(z.string())]).optional(),
+        owner: Owner.optional(),
+        rule: z
+          .object({
+            /**
+             * The rule identifier.
+             */
+            id: z.string().nullable().optional(),
+            /**
+             * The rule name.
+             */
+            name: z.string().nullable().optional(),
+          })
+          .optional(),
+        type: z.literal('alert').optional(),
+      })
+      .optional(),
+  })
+);
 export type PayloadAlertComment = z.infer<typeof PayloadAlertComment>;
-export const PayloadAlertComment = z.object({
-  comment: z
-    .object({
-      alertId: z.union([z.string(), z.array(z.string())]).optional(),
-      index: z.union([z.string(), z.array(z.string())]).optional(),
-      owner: Owner.optional(),
-      rule: z
-        .object({
-          /**
-           * The rule identifier.
-           */
-          id: z.string().nullable().optional(),
-          /**
-           * The rule name.
-           */
-          name: z.string().nullable().optional(),
-        })
-        .optional(),
-      type: z.literal('alert').optional(),
-    })
-    .optional(),
-});
 
+export const PayloadAssignees = lazySchema(() =>
+  z.object({
+    assignees: Assignees.optional(),
+  })
+);
 export type PayloadAssignees = z.infer<typeof PayloadAssignees>;
-export const PayloadAssignees = z.object({
-  assignees: Assignees.optional(),
-});
 
+export const PayloadConnector = lazySchema(() =>
+  z.object({
+    connector: z
+      .object({
+        /**
+         * An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+         */
+        fields: z
+          .object({
+            /**
+             * The case identifier for Swimlane connectors.
+             */
+            caseId: z.string().optional(),
+            /**
+             * The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
+             */
+            category: z.string().optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
+             */
+            destIp: z.boolean().nullable().optional(),
+            /**
+             * The effect an incident had on business for ServiceNow ITSM connectors.
+             */
+            impact: z.string().optional(),
+            /**
+             * The type of issue for Jira connectors.
+             */
+            issueType: z.string().optional(),
+            /**
+             * The type of incident for IBM Resilient connectors.
+             */
+            issueTypes: z.array(z.string()).optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
+             */
+            malwareHash: z.boolean().nullable().optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
+             */
+            malwareUrl: z.boolean().nullable().optional(),
+            /**
+             * The key of the parent issue, when the issue type is sub-task for Jira connectors.
+             */
+            parent: z.string().optional(),
+            /**
+             * The priority of the issue for Jira and ServiceNow SecOps connectors.
+             */
+            priority: z.string().optional(),
+            /**
+             * The severity of the incident for ServiceNow ITSM connectors.
+             */
+            severity: z.string().optional(),
+            /**
+             * The severity code of the incident for IBM Resilient connectors.
+             */
+            severityCode: z.string().optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
+             */
+            sourceIp: z.boolean().nullable().optional(),
+            /**
+             * The subcategory of the incident for ServiceNow ITSM connectors.
+             */
+            subcategory: z.string().optional(),
+            /**
+             * The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
+             */
+            urgency: z.string().optional(),
+          })
+          .nullable()
+          .optional(),
+        /**
+         * The identifier for the connector. To create a case without a connector, use `none`.
+         */
+        id: z.string().optional(),
+        /**
+         * The name of the connector. To create a case without a connector, use `none`.
+         */
+        name: z.string().optional(),
+        type: ConnectorTypes.optional(),
+      })
+      .optional(),
+  })
+);
 export type PayloadConnector = z.infer<typeof PayloadConnector>;
-export const PayloadConnector = z.object({
-  connector: z
-    .object({
-      /**
-       * An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-       */
-      fields: z
-        .object({
-          /**
-           * The case identifier for Swimlane connectors.
-           */
-          caseId: z.string().optional(),
-          /**
-           * The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
-           */
-          category: z.string().optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-           */
-          destIp: z.boolean().nullable().optional(),
-          /**
-           * The effect an incident had on business for ServiceNow ITSM connectors.
-           */
-          impact: z.string().optional(),
-          /**
-           * The type of issue for Jira connectors.
-           */
-          issueType: z.string().optional(),
-          /**
-           * The type of incident for IBM Resilient connectors.
-           */
-          issueTypes: z.array(z.string()).optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
-           */
-          malwareHash: z.boolean().nullable().optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
-           */
-          malwareUrl: z.boolean().nullable().optional(),
-          /**
-           * The key of the parent issue, when the issue type is sub-task for Jira connectors.
-           */
-          parent: z.string().optional(),
-          /**
-           * The priority of the issue for Jira and ServiceNow SecOps connectors.
-           */
-          priority: z.string().optional(),
-          /**
-           * The severity of the incident for ServiceNow ITSM connectors.
-           */
-          severity: z.string().optional(),
-          /**
-           * The severity code of the incident for IBM Resilient connectors.
-           */
-          severityCode: z.string().optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-           */
-          sourceIp: z.boolean().nullable().optional(),
-          /**
-           * The subcategory of the incident for ServiceNow ITSM connectors.
-           */
-          subcategory: z.string().optional(),
-          /**
-           * The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
-           */
-          urgency: z.string().optional(),
-        })
-        .nullable()
-        .optional(),
-      /**
-       * The identifier for the connector. To create a case without a connector, use `none`.
-       */
-      id: z.string().optional(),
-      /**
-       * The name of the connector. To create a case without a connector, use `none`.
-       */
-      name: z.string().optional(),
-      type: ConnectorTypes.optional(),
-    })
-    .optional(),
-});
 
+export const PayloadCreateCase = lazySchema(() =>
+  z.object({
+    assignees: Assignees.optional(),
+    connector: z
+      .object({
+        /**
+         * An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+         */
+        fields: z
+          .object({
+            /**
+             * The case identifier for Swimlane connectors.
+             */
+            caseId: z.string().optional(),
+            /**
+             * The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
+             */
+            category: z.string().optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
+             */
+            destIp: z.boolean().nullable().optional(),
+            /**
+             * The effect an incident had on business for ServiceNow ITSM connectors.
+             */
+            impact: z.string().optional(),
+            /**
+             * The type of issue for Jira connectors.
+             */
+            issueType: z.string().optional(),
+            /**
+             * The type of incident for IBM Resilient connectors.
+             */
+            issueTypes: z.array(z.string()).optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
+             */
+            malwareHash: z.boolean().nullable().optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
+             */
+            malwareUrl: z.boolean().nullable().optional(),
+            /**
+             * The key of the parent issue, when the issue type is sub-task for Jira connectors.
+             */
+            parent: z.string().optional(),
+            /**
+             * The priority of the issue for Jira and ServiceNow SecOps connectors.
+             */
+            priority: z.string().optional(),
+            /**
+             * The severity of the incident for ServiceNow ITSM connectors.
+             */
+            severity: z.string().optional(),
+            /**
+             * The severity code of the incident for IBM Resilient connectors.
+             */
+            severityCode: z.string().optional(),
+            /**
+             * Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
+             */
+            sourceIp: z.boolean().nullable().optional(),
+            /**
+             * The subcategory of the incident for ServiceNow ITSM connectors.
+             */
+            subcategory: z.string().optional(),
+            /**
+             * The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
+             */
+            urgency: z.string().optional(),
+          })
+          .nullable()
+          .optional(),
+        /**
+         * The identifier for the connector. To create a case without a connector, use `none`.
+         */
+        id: z.string().optional(),
+        /**
+         * The name of the connector. To create a case without a connector, use `none`.
+         */
+        name: z.string().optional(),
+        type: ConnectorTypes.optional(),
+      })
+      .optional(),
+    description: z.string().optional(),
+    owner: Owner.optional(),
+    settings: Settings.optional(),
+    severity: CaseSeverity.optional(),
+    status: CaseStatus.optional(),
+    tags: z.array(z.string()).optional(),
+    title: z.string().optional(),
+  })
+);
 export type PayloadCreateCase = z.infer<typeof PayloadCreateCase>;
-export const PayloadCreateCase = z.object({
-  assignees: Assignees.optional(),
-  connector: z
-    .object({
-      /**
-       * An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-       */
-      fields: z
-        .object({
-          /**
-           * The case identifier for Swimlane connectors.
-           */
-          caseId: z.string().optional(),
-          /**
-           * The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
-           */
-          category: z.string().optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-           */
-          destIp: z.boolean().nullable().optional(),
-          /**
-           * The effect an incident had on business for ServiceNow ITSM connectors.
-           */
-          impact: z.string().optional(),
-          /**
-           * The type of issue for Jira connectors.
-           */
-          issueType: z.string().optional(),
-          /**
-           * The type of incident for IBM Resilient connectors.
-           */
-          issueTypes: z.array(z.string()).optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
-           */
-          malwareHash: z.boolean().nullable().optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
-           */
-          malwareUrl: z.boolean().nullable().optional(),
-          /**
-           * The key of the parent issue, when the issue type is sub-task for Jira connectors.
-           */
-          parent: z.string().optional(),
-          /**
-           * The priority of the issue for Jira and ServiceNow SecOps connectors.
-           */
-          priority: z.string().optional(),
-          /**
-           * The severity of the incident for ServiceNow ITSM connectors.
-           */
-          severity: z.string().optional(),
-          /**
-           * The severity code of the incident for IBM Resilient connectors.
-           */
-          severityCode: z.string().optional(),
-          /**
-           * Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-           */
-          sourceIp: z.boolean().nullable().optional(),
-          /**
-           * The subcategory of the incident for ServiceNow ITSM connectors.
-           */
-          subcategory: z.string().optional(),
-          /**
-           * The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
-           */
-          urgency: z.string().optional(),
-        })
-        .nullable()
-        .optional(),
-      /**
-       * The identifier for the connector. To create a case without a connector, use `none`.
-       */
-      id: z.string().optional(),
-      /**
-       * The name of the connector. To create a case without a connector, use `none`.
-       */
-      name: z.string().optional(),
-      type: ConnectorTypes.optional(),
-    })
-    .optional(),
-  description: z.string().optional(),
-  owner: Owner.optional(),
-  settings: Settings.optional(),
-  severity: CaseSeverity.optional(),
-  status: CaseStatus.optional(),
-  tags: z.array(z.string()).optional(),
-  title: z.string().optional(),
-});
 
 /**
  * If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable.
  */
+export const PayloadDelete = lazySchema(() => z.object({}).nullable());
 export type PayloadDelete = z.infer<typeof PayloadDelete>;
-export const PayloadDelete = z.object({}).nullable();
 
+export const PayloadDescription = lazySchema(() =>
+  z.object({
+    description: z.string().optional(),
+  })
+);
 export type PayloadDescription = z.infer<typeof PayloadDescription>;
-export const PayloadDescription = z.object({
-  description: z.string().optional(),
-});
 
+export const PayloadPushed = lazySchema(() =>
+  z.object({
+    externalService: ExternalService.optional(),
+  })
+);
 export type PayloadPushed = z.infer<typeof PayloadPushed>;
-export const PayloadPushed = z.object({
-  externalService: ExternalService.optional(),
-});
 
+export const PayloadSettings = lazySchema(() =>
+  z.object({
+    settings: Settings.optional(),
+  })
+);
 export type PayloadSettings = z.infer<typeof PayloadSettings>;
-export const PayloadSettings = z.object({
-  settings: Settings.optional(),
-});
 
+export const PayloadSeverity = lazySchema(() =>
+  z.object({
+    severity: CaseSeverity.optional(),
+  })
+);
 export type PayloadSeverity = z.infer<typeof PayloadSeverity>;
-export const PayloadSeverity = z.object({
-  severity: CaseSeverity.optional(),
-});
 
+export const PayloadStatus = lazySchema(() =>
+  z.object({
+    status: CaseStatus.optional(),
+  })
+);
 export type PayloadStatus = z.infer<typeof PayloadStatus>;
-export const PayloadStatus = z.object({
-  status: CaseStatus.optional(),
-});
 
+export const PayloadTags = lazySchema(() =>
+  z.object({
+    tags: z.array(z.string()).optional(),
+  })
+);
 export type PayloadTags = z.infer<typeof PayloadTags>;
-export const PayloadTags = z.object({
-  tags: z.array(z.string()).optional(),
-});
 
+export const PayloadTitle = lazySchema(() =>
+  z.object({
+    title: z.string().optional(),
+  })
+);
 export type PayloadTitle = z.infer<typeof PayloadTitle>;
-export const PayloadTitle = z.object({
-  title: z.string().optional(),
-});
 
+export const PayloadUserComment = lazySchema(() =>
+  z.object({
+    comment: z
+      .object({
+        comment: z.string().optional(),
+        owner: Owner.optional(),
+        type: z.literal('user').optional(),
+      })
+      .optional(),
+  })
+);
 export type PayloadUserComment = z.infer<typeof PayloadUserComment>;
-export const PayloadUserComment = z.object({
-  comment: z
-    .object({
-      comment: z.string().optional(),
-      owner: Owner.optional(),
-      type: z.literal('user').optional(),
-    })
-    .optional(),
-});
 
+export const UserActionsFindResponseProperties = lazySchema(() =>
+  z.object({
+    action: Actions,
+    comment_id: z.string().nullable(),
+    created_at: z.string().datetime(),
+    created_by: z.object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    }),
+    id: z.string(),
+    owner: Owner,
+    payload: z.union([
+      PayloadAlertComment,
+      PayloadAssignees,
+      PayloadConnector,
+      PayloadCreateCase,
+      PayloadDelete,
+      PayloadDescription,
+      PayloadPushed,
+      PayloadSettings,
+      PayloadSeverity,
+      PayloadStatus,
+      PayloadTags,
+      PayloadTitle,
+      PayloadUserComment,
+    ]),
+    version: z.string(),
+    /**
+     * The type of action.
+     */
+    type: z.enum([
+      'assignees',
+      'category',
+      'comment',
+      'connector',
+      'create_case',
+      'customFields',
+      'delete_case',
+      'description',
+      'extended_fields',
+      'observables',
+      'pushed',
+      'settings',
+      'severity',
+      'status',
+      'tags',
+      'title',
+    ]),
+  })
+);
 export type UserActionsFindResponseProperties = z.infer<typeof UserActionsFindResponseProperties>;
-export const UserActionsFindResponseProperties = z.object({
-  action: Actions,
-  comment_id: z.string().nullable(),
-  created_at: z.string().datetime(),
-  created_by: z.object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  }),
-  id: z.string(),
-  owner: Owner,
-  payload: z.union([
-    PayloadAlertComment,
-    PayloadAssignees,
-    PayloadConnector,
-    PayloadCreateCase,
-    PayloadDelete,
-    PayloadDescription,
-    PayloadPushed,
-    PayloadSettings,
-    PayloadSeverity,
-    PayloadStatus,
-    PayloadTags,
-    PayloadTitle,
-    PayloadUserComment,
-  ]),
-  version: z.string(),
-  /**
-   * The type of action.
-   */
-  type: z.enum([
-    'assignees',
-    'create_case',
-    'comment',
-    'connector',
-    'description',
-    'pushed',
-    'tags',
-    'title',
-    'status',
-    'settings',
-    'severity',
-  ]),
-});
 
 /**
  * Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
  */
+export const AddCaseFileRequest = lazySchema(() =>
+  z.object({
+    /**
+     * The file being attached to the case.
+     */
+    file: z.string(),
+    /**
+     * The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
+     */
+    filename: z.string().optional(),
+  })
+);
 export type AddCaseFileRequest = z.infer<typeof AddCaseFileRequest>;
-export const AddCaseFileRequest = z.object({
-  /**
-   * The file being attached to the case.
-   */
-  file: z.string(),
-  /**
-   * The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
-   */
-  filename: z.string().optional(),
-});

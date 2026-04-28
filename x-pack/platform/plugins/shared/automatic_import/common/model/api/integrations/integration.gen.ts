@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { NonEmptyString } from '../../primitive.gen';
+import { NonEmptyString, SafeIdentifier, SemVer } from '../../primitive.gen';
 import {
   LangSmithOptions,
   DataStream,
@@ -25,13 +25,21 @@ import {
   IntegrationResponse,
 } from '../../common_attributes.gen';
 
+/**
+ * The intent of the download request.
+ */
+export type DownloadIntent = z.infer<typeof DownloadIntent>;
+export const DownloadIntent = z.enum(['download', 'install']);
+export type DownloadIntentEnum = typeof DownloadIntent.enum;
+export const DownloadIntentEnum = DownloadIntent.enum;
+
 export type ApproveIntegrationRequest = z.infer<typeof ApproveIntegrationRequest>;
 export const ApproveIntegrationRequest = z
   .object({
     /**
      * The version of the integration
      */
-    version: NonEmptyString,
+    version: SemVer,
     /**
      * The categories of the integration
      */
@@ -50,7 +58,7 @@ export const ApproveAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type ApproveAutoImportIntegrationRequestParamsInput = z.input<
   typeof ApproveAutoImportIntegrationRequestParams
@@ -76,7 +84,7 @@ export const CreateAutoImportIntegrationRequestBody = z
     /**
      * The integration id
      */
-    integrationId: NonEmptyString,
+    integrationId: SafeIdentifier,
     /**
      * The title of the integration
      */
@@ -122,10 +130,23 @@ export const DeleteAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
+>;
+
+export type DownloadAutoImportIntegrationRequestQuery = z.infer<
+  typeof DownloadAutoImportIntegrationRequestQuery
+>;
+export const DownloadAutoImportIntegrationRequestQuery = z.object({
+  /**
+   * The intent of the download request. When set to 'install', install telemetry is reported.
+   */
+  intent: DownloadIntent.optional(),
+});
+export type DownloadAutoImportIntegrationRequestQueryInput = z.input<
+  typeof DownloadAutoImportIntegrationRequestQuery
 >;
 
 export type DownloadAutoImportIntegrationRequestParams = z.infer<
@@ -135,7 +156,7 @@ export const DownloadAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
   typeof DownloadAutoImportIntegrationRequestParams
@@ -153,7 +174,7 @@ export const GetAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type GetAutoImportIntegrationRequestParamsInput = z.input<
   typeof GetAutoImportIntegrationRequestParams
@@ -173,7 +194,7 @@ export const UpdateAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type UpdateAutoImportIntegrationRequestParamsInput = z.input<
   typeof UpdateAutoImportIntegrationRequestParams

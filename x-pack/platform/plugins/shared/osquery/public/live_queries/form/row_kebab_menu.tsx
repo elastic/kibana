@@ -95,6 +95,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         closePopover={close}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={kebabLabel}
       >
         <EuiContextMenuPanel size="s" items={menuItems} />
       </EuiPopover>

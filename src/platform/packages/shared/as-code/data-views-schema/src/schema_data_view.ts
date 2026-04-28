@@ -8,20 +8,33 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema } from './schema_runtime_field';
+import { fieldSettingsBaseSchema } from './schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
-import { runtimeFieldSchema } from './schema_runtime_field';
+
+export const fieldSettingsSchema = schema.oneOf(
+  [compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema],
+  {
+    meta: {
+      id: 'kbn-field-settings-entry',
+      title: 'Field settings or runtime field',
+      description:
+        'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
+    },
+  }
+);
 
 export const dataViewReferenceSchema = schema.object(
   {
     type: schema.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
-    id: schema.string({
+    ref_id: schema.string({
       meta: {
         description:
           'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
       },
     }),
   },
-  { meta: { id: 'dataViewReferenceDataSourceTypeSchema' } }
+  { meta: { id: 'kbn-data-view-reference-schema', title: 'Data view reference' } }
 );
 
 export const dataViewSpecSchema = schema.object(
@@ -41,9 +54,11 @@ export const dataViewSpecSchema = schema.object(
         },
       })
     ),
-    runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 100 })),
+    field_settings: schema.maybe(
+      schema.recordOf(schema.string({ minLength: 1 }), fieldSettingsSchema)
+    ),
   },
-  { meta: { id: 'dataViewSpecDataSourceTypeSchema' } }
+  { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
 );
 
 export const dataViewSchema = schema.discriminatedUnion('type', [

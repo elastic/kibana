@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -42,8 +42,6 @@ export interface SmlContext {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  /** The current user's request, when available. Absent during background crawler runs. */
-  request?: KibanaRequest;
 }
 
 /**
@@ -198,7 +196,7 @@ export interface SmlService {
     query: string;
     size?: number;
     spaceId: string;
-    esClient: ElasticsearchClient;
+    esClient: IScopedClusterClient;
     request: KibanaRequest;
     /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
     skipContent?: boolean;
@@ -211,7 +209,7 @@ export interface SmlService {
   checkItemsAccess: (params: {
     ids: string[];
     spaceId: string;
-    esClient: ElasticsearchClient;
+    esClient: IScopedClusterClient;
     request: KibanaRequest;
   }) => Promise<Map<string, boolean>>;
 
@@ -224,14 +222,13 @@ export interface SmlService {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
-    request?: KibanaRequest;
   }) => Promise<void>;
 
   /** Fetch SML documents by their chunk IDs, scoped to a space */
   getDocuments: (params: {
     ids: string[];
     spaceId: string;
-    esClient: ElasticsearchClient;
+    esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 
   /** Get a type definition by ID */

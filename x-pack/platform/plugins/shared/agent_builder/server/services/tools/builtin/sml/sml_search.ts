@@ -40,8 +40,9 @@ export const createSmlSearchTool = ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
   description:
-    'Search the Semantic Metadata Layer (SML) for saved visualizations and other Kibana assets. ' +
+    'Search the Semantic Metadata Layer (SML) for Kibana assets such as saved visualizations, dashboards, workflows, and more. ' +
     'Provide a natural-language query string; titles and types are matched using Elasticsearch text analysis (bool_prefix on search_as_you_type fields). ' +
+    'Pass "*" to return all available assets. ' +
     'Each result includes a title, content snippet, attachment_id, attachment_type, and chunk_id. ' +
     'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
   schema: smlSearchSchema,
@@ -68,7 +69,7 @@ export const createSmlSearchTool = ({
         query,
         size,
         spaceId,
-        esClient: esClient.asCurrentUser,
+        esClient,
         request,
       });
     } catch (error) {

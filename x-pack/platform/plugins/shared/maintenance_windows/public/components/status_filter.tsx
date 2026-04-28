@@ -41,6 +41,7 @@ export const StatusFilter: React.FC<RuleStatusFilterProps> = React.memo(
     return (
       <EuiFilterGroup>
         <EuiPopover
+          aria-label={i18n.TABLE_STATUS}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           button={

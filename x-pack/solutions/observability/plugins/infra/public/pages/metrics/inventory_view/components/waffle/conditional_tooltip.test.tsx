@@ -36,6 +36,7 @@ const NODE: InfraWaffleMapNode = {
 };
 
 const mockedUseWaffleOptionsContextReturnValue = {
+  preferredSchema: 'ecs' as const,
   metric: {
     type: 'cpu',
     field: 'host.cpuV2.pct',
@@ -164,6 +165,7 @@ describe('ConditionalToolTip', () => {
       currentTime,
       accountId: '',
       region: '',
+      schema: 'ecs',
     } as UseSnapshotRequest);
 
     expect(tooltip).toMatchSnapshot();

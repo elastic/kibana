@@ -8,7 +8,7 @@
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { tags } from '@kbn/scout';
-import kbnDatemath from '@kbn/datemath';
+
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { Feature, Streams } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
@@ -21,9 +21,8 @@ import {
   SIGEVENTS_SNAPSHOT_RUN,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
-import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation/evaluators';
+import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
 import { createScenarioCriteriaLlmEvaluator } from '../../src/evaluators/scenario_criteria/evaluators';
-import { createCorrectnessEvaluators } from '../../src/evaluators/correctness/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -34,8 +33,7 @@ import {
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
-
-const SAMPLE_DOCS_SIZE = 500;
+import { collectSampleDocuments } from './collect_sample_documents';
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
@@ -65,6 +63,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
     for (const kiSource of KI_FEATURE_SOURCES_TO_RUN) {
       evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id} (${kiSource})`, () => {
         let sampleLogs: string[] = [];
+        let sampleDocs: Array<Record<string, unknown>> = [];
         let kis: Feature[] = [];
 
         evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
@@ -146,22 +145,21 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const query = extractionScenario?.input.log_query_filter ?? [{ match_all: {} }];
-          const searchResult = await esClient.search<Record<string, unknown>>({
-            index: MANAGED_STREAM_SEARCH_PATTERN,
-            size: SAMPLE_DOCS_SIZE,
-            query: { bool: { filter: query } },
-            sort: [{ '@timestamp': { order: 'desc' } }],
+          const sampleHits = await collectSampleDocuments({
+            esClient,
+            extractionScenario,
+            queryGenerationScenario: scenario,
+            log,
           });
 
-          sampleLogs = searchResult.hits.hits.map((hit) =>
-            extractLogTextFromSourceDoc(hit._source)
-          );
+          sampleDocs = sampleHits
+            .map((hit) => hit._source)
+            .filter((doc): doc is Record<string, unknown> => doc != null);
+
+          sampleLogs = sampleDocs.map((doc) => extractLogTextFromSourceDoc(doc));
 
           if (shouldUseCanonicalKIs) {
-            const sourceDocs = searchResult.hits.hits
-              .map((hit) => hit._source)
-              .filter((doc): doc is Record<string, unknown> => doc != null);
+            const sourceDocs = sampleDocs;
 
             const computedKIs = getComputedKIFeaturesFromDocs({
               streamName: scenario.input.stream_name,
@@ -190,26 +188,24 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             evaluators,
             esClient,
             inferenceClient,
-            evaluationConnector,
             logger,
             apiServices,
             traceEsClient,
             log,
           }) => {
-            const evaluatorInferenceClient = inferenceClient.bindTo({
-              connectorId: evaluationConnector.id,
-            });
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: KI query generation: ${scenario.input.scenario_id} (${dataset.id}) (${kiSource})`,
-                  description: `[${dataset.id}] ${scenario.input.stream_description}`,
+                  name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
+                  description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
                   examples: [
                     {
+                      id: scenario.input.scenario_id,
                       input: {
                         ...scenario.input,
                         features: kis,
                         sample_logs: sampleLogs,
+                        sample_docs: sampleDocs,
                       },
                       output: {
                         ...scenario.output,
@@ -245,8 +241,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   const { queries, toolUsage } = await generateSignificantEvents({
                     stream,
                     esClient,
-                    start: kbnDatemath.parse('now-24h')!.valueOf(),
-                    end: kbnDatemath.parse('now')!.valueOf(),
                     inferenceClient,
                     logger,
                     signal: new AbortController().signal,
@@ -270,34 +264,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   },
                   logger
                 ),
-                ...createCorrectnessEvaluators({
-                  inferenceClient: evaluatorInferenceClient,
-                  log,
-                  extractContext: (input) => {
-                    const { stream_name: streamName, stream_description: streamDescription } =
-                      input as Record<string, unknown>;
-                    return `Generate significant event queries for stream "${streamName}": ${streamDescription}`;
-                  },
-                  extractResponse: (output) => {
-                    const queries = (output as Record<string, unknown>)?.queries as Array<{
-                      esql: string;
-                      title: string;
-                      category: string;
-                      severity_score: number;
-                    }>;
-                    if (!queries?.length) return '';
-                    return queries
-                      .map(
-                        (q) =>
-                          `[${q.category}] ${q.title} (severity: ${q.severity_score})\nES|QL: ${q.esql}`
-                      )
-                      .join('\n\n');
-                  },
-                  extractGroundTruth: (expected) => {
-                    const value = (expected as Record<string, unknown>)?.expected;
-                    return typeof value === 'string' ? value : '';
-                  },
-                }),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
@@ -355,8 +321,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               const { queries } = await generateSignificantEvents({
                 stream: streamFromApi as Streams.all.Definition,
                 esClient,
-                start: kbnDatemath.parse('now-24h')!.valueOf(),
-                end: kbnDatemath.parse('now')!.valueOf(),
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,

@@ -44,6 +44,27 @@ describe('GithubConnector', () => {
     mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
   });
 
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(GithubConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct GitHub defaults', () => {
+      const oauthType = GithubConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://github.com/login/oauth/authorize',
+          tokenUrl: 'https://github.com/login/oauth/access_token',
+          scope: 'repo',
+        },
+      });
+    });
+  });
+
   describe('getMe action', () => {
     it('calls get_me tool and returns content', async () => {
       const result = await GithubConnector.actions.getMe.handler(mockContext, {});

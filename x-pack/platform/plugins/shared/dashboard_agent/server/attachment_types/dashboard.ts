@@ -13,8 +13,9 @@ import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-c
 import deepEqual from 'fast-deep-equal';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  attachmentDataToDashboardState,
   dashboardAttachmentDataSchema,
-  dashboardStateToAttachment,
+  dashboardStateToAttachmentData,
   isSection,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
@@ -26,6 +27,12 @@ interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
+
+const normalizeDashboardAttachmentData = (
+  data: DashboardAttachmentData
+): DashboardAttachmentData => {
+  return dashboardStateToAttachmentData(attachmentDataToDashboardState(data));
+};
 
 /**
  * Creates the definition for the `dashboard` attachment type.
@@ -70,7 +77,7 @@ export const createDashboardAttachmentType = ({
           return undefined;
         }
 
-        return dashboardStateToAttachment(dashboard.data);
+        return dashboardStateToAttachmentData(dashboard.data);
       } catch (error) {
         logger.warn(`Failed to resolve dashboard attachment for origin "${origin}": ${error}`);
         return undefined;
@@ -98,8 +105,14 @@ export const createDashboardAttachmentType = ({
             );
             return false;
           }
-          // if the content is equal, we don't consider it stale
-          return !deepEqual(dashboardStateToAttachment(dashboard.data), latestVersion.data);
+          const resolvedDashboardData = normalizeDashboardAttachmentData(
+            dashboardStateToAttachmentData(dashboard.data)
+          );
+          // Compare canonicalized attachment data so Lens panel shape differences do not cause false staleness.
+          return !deepEqual(
+            resolvedDashboardData,
+            normalizeDashboardAttachmentData(latestVersion.data)
+          );
         }
         return false;
       } catch (error) {
@@ -120,7 +133,7 @@ export const createDashboardAttachmentType = ({
       };
     },
     getAgentDescription: () =>
-      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment.`,
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this attachment, use the \`platform.dashboard.manage_dashboard\` tool (load the dashboard-management skill first).`,
     getTools: () => [],
   };
 };

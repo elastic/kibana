@@ -83,16 +83,19 @@ const StickySidebar = styled(EuiFlexItem)`
   @media screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.m}px) {
     position: sticky;
     top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
-    max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
+    max-height: calc(
+      100vh - var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'))
+    );
     overflow: scroll;
   }
   padding-top: ${(props) => props.theme.euiTheme.size.m};
-  padding-right: ${(props) => props.theme.euiTheme.size.l};
+  padding-right: ${(props) => props.theme.euiTheme.size.m};
 `;
 
 export interface SidebarProps extends Props {
   CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
+  isLoadingCreatedIntegrations?: boolean;
   onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -103,15 +106,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCategoryChange,
   CreateIntegrationCardButton,
   hasCreatedIntegrations,
+  isLoadingCreatedIntegrations,
   onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <StickySidebar>
-      {CreateIntegrationCardButton && (
+      {CreateIntegrationCardButton && !isLoadingCreatedIntegrations && (
         <>
-          <EuiSpacer size="s" />
           {hasCreatedIntegrations ? (
             <EuiLink
               color="text"

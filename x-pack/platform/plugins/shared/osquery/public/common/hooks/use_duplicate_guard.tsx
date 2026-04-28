@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -15,6 +15,7 @@ interface UseDuplicateGuardParams {
 }
 
 export const useDuplicateGuard = ({ copyMutation, resourceType }: UseDuplicateGuardParams) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const bodyText = useMemo(
     () =>
       i18n.translate('xpack.osquery.duplicateConfirmation.body', {
@@ -48,8 +49,12 @@ export const useDuplicateGuard = ({ copyMutation, resourceType }: UseDuplicateGu
     setIsFormDirty(isDirty);
   }, []);
 
+  const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
+
   const duplicateModal = isDuplicateModalVisible ? (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={titleProps}
       title={i18n.translate('xpack.osquery.duplicateConfirmation.title', {
         defaultMessage: 'You have unsaved changes',
       })}

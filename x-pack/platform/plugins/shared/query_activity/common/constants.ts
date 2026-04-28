@@ -17,5 +17,5 @@ export const QUERY_ACTIVITY_WRITE_PRIVILEGE = 'query_activity-write';
 
 export const CANCELLATION_POLL_INTERVAL_MS = 5_000;
 
-export const QUERY_ACTIVITY_MIN_RUNNING_TIME_SETTING = 'query_activity:minRunningTime';
+export { QUERY_ACTIVITY_MIN_RUNNING_TIME_ID as QUERY_ACTIVITY_MIN_RUNNING_TIME_SETTING } from '@kbn/management-settings-ids';
 export const QUERY_ACTIVITY_MIN_RUNNING_TIME_DEFAULT_MS = 100;

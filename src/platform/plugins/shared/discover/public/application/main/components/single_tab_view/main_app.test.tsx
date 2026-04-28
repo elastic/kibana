@@ -8,17 +8,20 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverMainApp } from './main_app';
-import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+
+jest.mock('../top_nav/discover_topnav', () => ({
+  DiscoverTopNav: jest.fn(() => <div data-test-subj="discoverTopNavMock" />),
+}));
 
 describe('DiscoverMainApp', () => {
   test('renders', async () => {
@@ -46,20 +49,14 @@ describe('DiscoverMainApp', () => {
       initialEntries: ['/'],
     });
 
-    await act(async () => {
-      const component = mountWithIntl(
-        <Router history={history}>
-          <DiscoverToolkitTestProvider toolkit={toolkit}>
-            <DiscoverMainApp />
-          </DiscoverToolkitTestProvider>
-        </Router>
-      );
+    renderWithKibanaRenderContext(
+      <Router history={history}>
+        <DiscoverToolkitTestProvider toolkit={toolkit}>
+          <DiscoverMainApp />
+        </DiscoverToolkitTestProvider>
+      </Router>
+    );
 
-      // wait for lazy modules
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
-
-      expect(component.find(DiscoverTopNav).exists()).toBe(true);
-    });
+    expect(screen.getByTestId('discoverTopNavMock')).toBeVisible();
   });
 });

@@ -162,6 +162,7 @@ export function useMonitorListColumns({
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
             overviewStatus={overviewStatus}
+            spaces={monitor.spaces}
           />
         ) : null,
     },
@@ -407,7 +408,7 @@ export function useMonitorListColumns({
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <EuiButtonIcon
             data-test-subj="syntheticsUseMonitorListColumnsButton"
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             isDisabled={true}
             aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
           />

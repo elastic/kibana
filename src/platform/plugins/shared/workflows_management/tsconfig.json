@@ -26,6 +26,7 @@
     "@kbn/config-schema",
     "@kbn/workflows",
     "@kbn/workflows-ui",
+    "@kbn/workflows-yaml",
     "@kbn/zod",
     "@kbn/code-editor",
     "@kbn/monaco",
@@ -90,6 +91,16 @@
     "@kbn/agent-builder-browser",
     "@kbn/share-plugin",
     "@kbn/core-security-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/management-settings-ids",
+    "@kbn/std",
+    "@kbn/use-observable",
+    "@kbn/cloud-plugin",
+    "@kbn/kbn-client",
+    "@kbn/rule-data-utils",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

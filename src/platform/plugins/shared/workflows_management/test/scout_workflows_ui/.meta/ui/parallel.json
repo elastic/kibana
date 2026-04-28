@@ -1,5 +1,5 @@
 {
-  "sha1": "530beed816d7fce80594b32c260642314a8922ed",
+  "sha1": "9bc13e904388c5b1310d722b6b4881ceccdc81d6",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -79,7 +79,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 108,
+        "line": 104,
         "column": 9
       }
     },
@@ -93,7 +93,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 9
       }
     },
@@ -107,7 +107,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 108,
+        "line": 104,
         "column": 9
       }
     },
@@ -121,7 +121,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 9
       }
     },
@@ -135,7 +135,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 108,
+        "line": 104,
         "column": 9
       }
     },
@@ -149,7 +149,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 9
       }
     },
@@ -163,7 +163,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 125,
+        "line": 121,
         "column": 7
       }
     },
@@ -177,7 +177,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 133,
+        "line": 129,
         "column": 7
       }
     },
@@ -191,7 +191,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 141,
+        "line": 137,
         "column": 7
       }
     },
@@ -205,7 +205,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 163,
+        "line": 159,
         "column": 7
       }
     },
@@ -219,7 +219,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 182,
+        "line": 178,
         "column": 7
       }
     },
@@ -233,7 +233,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 201,
+        "line": 197,
         "column": 7
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 214,
+        "line": 210,
         "column": 7
       }
     },
@@ -261,7 +261,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 241,
+        "line": 237,
         "column": 7
       }
     },
@@ -275,7 +275,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 254,
+        "line": 250,
         "column": 7
       }
     },
@@ -289,7 +289,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 273,
+        "line": 269,
         "column": 7
       }
     },
@@ -303,7 +303,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 295,
+        "line": 291,
         "column": 7
       }
     },
@@ -500,7 +500,7 @@
     {
       "id": "8a478a8cadc4edc-063497b8c9edff4",
       "title": "Workflow execution - Alert triggers should trigger workflow from alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -511,14 +511,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 9
       }
     },
     {
       "id": "8a478a8cadc4edc-c4010c12909cde8",
       "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -529,8 +529,36 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 224,
+        "line": 225,
         "column": 9
+      }
+    },
+    {
+      "id": "bd0da7b20f7ccf7-fc39598781b03ea",
+      "title": "Workflow execution - Cancellation should cancel a single running execution from the execution details panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "bd0da7b20f7ccf7-54e0484e76de34d",
+      "title": "Workflow execution - Cancellation should cancel all active executions from the execution list via Cancel all active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
+        "line": 48,
+        "column": 7
       }
     },
     {
@@ -755,6 +783,118 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
         "line": 112,
         "column": 9
+      }
+    },
+    {
+      "id": "ef72364997f95f7-afa16fc0f50d98a",
+      "title": "Workflows UI availability stateful: workflows list page renders when license is valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-dcff524993d5030",
+      "title": "Workflows UI availability stateful: workflows list page renders when using basic (invalid) license",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-f0d666479a28b93",
+      "title": "Workflows UI availability observability complete: workflows list page renders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-c5f784bc4d5c3a9",
+      "title": "Workflows UI availability security complete: workflows list page renders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-cca99e1134e2a61",
+      "title": "Workflows UI availability security EASE (AI for SOC): workflows list page renders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-3fc97b37b0c2d57",
+      "title": "Workflows UI availability search: workflows list page renders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-e25567fc8ed262d",
+      "title": "Workflows UI availability observability logs essentials: shows serverless tier access denied screen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef72364997f95f7-c26f554882a5b30",
+      "title": "Workflows UI availability security essentials: shows serverless tier access denied screen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_availability.spec.ts",
+        "line": 108,
+        "column": 7
       }
     },
     {

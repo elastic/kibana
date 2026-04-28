@@ -10,3 +10,6 @@ export const SUPPORTED_FILE_TYPES = [
   'text/plain',
   '.csv', // if windows can't recognise the file extension.
 ];
+
+export const MAX_WATCHLIST_NAME_LENGTH = 256;
+export const MAX_WATCHLIST_DESCRIPTION_LENGTH = 1000;

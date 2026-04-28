@@ -2,10 +2,12 @@ summary: Get case response. Comments are not included; use the find case comment
 value: 
   {
     "id":"31cdada0-02c1-11ed-85f2-4f7c222ca2fa",
+    "incremental_id":1,
     "version":"WzM2LDFd",
     "totalComment":1,
     "totalAlerts":1,
     "totalEvents":0,
+    "total_observables":0,
     "title":"Case title 1",
     "tags":["tag 1"],
     "settings":{"syncAlerts":true,"extractObservables":false},
@@ -23,6 +25,7 @@ value:
         "value": null
       }
     ],
+    "observables": [],
     "description":"A case description",
     "duration":null,
     "severity":"low",

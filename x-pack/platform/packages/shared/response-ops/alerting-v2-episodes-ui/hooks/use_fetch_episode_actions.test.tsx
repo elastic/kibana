@@ -7,13 +7,14 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
+import type { AlertEpisodeAction } from '../queries/episode_actions_query';
 import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeActions } from './use_fetch_episode_actions';
 
-jest.mock('../utils/execute_esql_query');
+jest.mock('../apis/fetch_episode_actions');
 
-const executeEsqlQueryMock = jest.mocked(executeEsqlQuery);
+const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
 const mockExpressions = {} as ExpressionsStart;
 
 const queryClient = createTestQueryClient();
@@ -28,7 +29,7 @@ describe('useFetchEpisodeActions', () => {
     queryClient.clear();
   });
 
-  it('does not call ES|QL when episodeIds is empty', () => {
+  it('does not fetch when episodeIds is empty', () => {
     renderHook(
       () =>
         useFetchEpisodeActions({
@@ -37,20 +38,20 @@ describe('useFetchEpisodeActions', () => {
         }),
       { wrapper }
     );
-    expect(executeEsqlQueryMock).not.toHaveBeenCalled();
+    expect(fetchEpisodeActionsMock).not.toHaveBeenCalled();
   });
 
   it('fetches and builds episodeActionsMap keyed by episode id', async () => {
-    executeEsqlQueryMock.mockResolvedValue({
-      rows: [
-        {
-          episode_id: 'ep-1',
-          rule_id: 'rule-1',
-          group_hash: 'gh-1',
-          last_ack_action: 'ack',
-        },
-      ],
-    } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
+    const rows: AlertEpisodeAction[] = [
+      {
+        episode_id: 'ep-1',
+        rule_id: 'rule-1',
+        group_hash: 'gh-1',
+        last_ack_action: 'ack',
+        last_assignee_uid: 'u-1',
+      },
+    ];
+    fetchEpisodeActionsMock.mockResolvedValue(rows);
 
     const { result } = renderHook(
       () =>
@@ -63,33 +64,35 @@ describe('useFetchEpisodeActions', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
+    expect(fetchEpisodeActionsMock).toHaveBeenCalledTimes(1);
 
     expect(result.current.data?.get('ep-1')).toEqual({
       episodeId: 'ep-1',
       ruleId: 'rule-1',
       groupHash: 'gh-1',
       lastAckAction: 'ack',
+      lastAssigneeUid: 'u-1',
     });
   });
 
   it('keeps the last row when duplicate episode ids are returned', async () => {
-    executeEsqlQueryMock.mockResolvedValue({
-      rows: [
-        {
-          episode_id: 'dup',
-          rule_id: 'r1',
-          group_hash: null,
-          last_ack_action: 'ack',
-        },
-        {
-          episode_id: 'dup',
-          rule_id: 'r2',
-          group_hash: null,
-          last_ack_action: 'unack',
-        },
-      ],
-    } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
+    const rows: AlertEpisodeAction[] = [
+      {
+        episode_id: 'dup',
+        rule_id: 'r1',
+        group_hash: null,
+        last_ack_action: 'ack',
+        last_assignee_uid: null,
+      },
+      {
+        episode_id: 'dup',
+        rule_id: 'r2',
+        group_hash: null,
+        last_ack_action: 'unack',
+        last_assignee_uid: 'u-2',
+      },
+    ];
+    fetchEpisodeActionsMock.mockResolvedValue(rows);
 
     const { result } = renderHook(
       () =>

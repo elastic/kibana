@@ -119,15 +119,17 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 export const resolveCase = async ({
   caseId,
   signal,
+  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
+  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true },
+      query: { includeComments: true, mode },
       signal,
     }
   );
@@ -298,6 +300,7 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
     to: DEFAULT_TO_DATE,
   },
@@ -328,6 +331,9 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
+      ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
+      : {}),
     ...(filterOptions.from ? { from: filterOptions.from } : {}),
     ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
@@ -384,6 +390,7 @@ export const patchCase = async ({
     | 'category'
     | 'customFields'
     | 'extended_fields'
+    | 'template'
   >;
   version: string;
   signal?: AbortSignal;
