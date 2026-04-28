@@ -243,18 +243,23 @@ export const MetricItem = ({
                   title: truncateText(monitor.name),
                   subtitle: metricSubtitle,
                   body: (
-                    <MetricItemBody
-                      monitor={monitor}
-                      onLocationClick={(locId, locLabel) => {
-                        onClick({
-                          locationId: locId,
-                          configId: monitor.configId,
-                          id: monitor.configId,
-                          location: locLabel,
-                          spaces: monitor.spaces,
-                        });
-                      }}
-                    />
+                    <div
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onMouseUp={(e) => e.stopPropagation()}
+                    >
+                      <MetricItemBody
+                        monitor={monitor}
+                        onLocationClick={(locId, locLabel) => {
+                          onClick({
+                            locationId: locId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locLabel,
+                            spaces: monitor.spaces,
+                          });
+                        }}
+                      />
+                    </div>
                   ),
                   color: getColor(euiTheme, monitor.isEnabled, status),
                   trendShape: MetricTrendShape.Area,
