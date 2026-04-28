@@ -1226,7 +1226,10 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/search/**/*.tsx'],
+      files: [
+        'x-pack/solutions/search/**/*.tsx',
+        'x-pack/platform/plugins/shared/content_connectors/**/*.{ts,tsx}',
+      ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
