@@ -120,7 +120,7 @@ export function Card({
         titleSize="m"
         descriptionElement="div"
         css={css`
-          padding: ${euiTheme.size.xs};
+          padding: ${euiTheme.size.xs} 0;
           color: ${isSelected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
         `}
         description={
