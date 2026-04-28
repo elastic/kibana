@@ -19,5 +19,5 @@ export const jobAuditMessagesQuerySchema = schema.object({
 
 export const clearJobAuditMessagesBodySchema = schema.object({
   jobId: schema.string(),
-  notificationIndices: schema.arrayOf(schema.string()),
+  notificationIndices: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });

@@ -162,6 +162,7 @@
             "lineNumber": 273,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProcessingOptions",
             "trackAdoption": false,
             "isRequired": true
           }

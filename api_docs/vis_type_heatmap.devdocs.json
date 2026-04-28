@@ -45,6 +45,7 @@
             "lineNumber": 13,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "HeatmapTypeProps",
             "trackAdoption": false,
             "isRequired": true
           }
