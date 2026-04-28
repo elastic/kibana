@@ -83,6 +83,7 @@
                 "lineNumber": 36,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawConfigurationProvider",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -106,6 +107,7 @@
                 "lineNumber": 37,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Env",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -281,6 +283,7 @@
             "lineNumber": 48,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ConfigService",
             "trackAdoption": false,
             "isRequired": true
           }
