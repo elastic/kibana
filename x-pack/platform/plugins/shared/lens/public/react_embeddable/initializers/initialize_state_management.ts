@@ -12,6 +12,7 @@ import {
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
+import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
@@ -21,6 +22,7 @@ import type {
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
@@ -46,6 +48,23 @@ export function initializeStateManagement(
 ): StateManagementConfig {
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
+  const resolveAttributes = (
+    value: LensSerializedState['attributes'] | undefined,
+    state?: unknown
+  ) => {
+    if (value) return value;
+    if (typeof state === 'object' && state !== null) {
+      // If the state is a nested object with an 'attributes' property, return the attributes
+      if ('attributes' in state && state.attributes) {
+        return state.attributes;
+      }
+      // If the state is a flattened API config, unflatten it and return the attributes
+      if (isFlattenedAPIConfig(state)) {
+        return unflattenAPIConfig(state).attributes;
+      }
+    }
+    return value;
+  };
 
   return {
     api: {
@@ -60,7 +79,14 @@ export function initializeStateManagement(
     anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
     getComparators: () => {
       return {
-        attributes: initialState.ref_id === undefined ? 'deepEquality' : 'skip',
+        attributes:
+          initialState.ref_id === undefined
+            ? (lastValue, currentValue, lastState, currentState) => {
+                const lastAttributes = resolveAttributes(lastValue, lastState);
+                const currentAttributes = resolveAttributes(currentValue, currentState);
+                return deepEqual(lastAttributes, currentAttributes);
+              }
+            : 'skip',
         ref_id: 'skip',
       };
     },
