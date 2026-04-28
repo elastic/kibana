@@ -239,7 +239,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         ],
         min_features: 8,
         max_features: 40,
-        required_types: ['entity'],
+        required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
           'entities=[rest-heroes, rest-villains, rest-fights, rest-narration, event-statistics, apicurio, heroes-db, fights-db, villains-db, fights-kafka, grpc-locations, locations-db, ui-super-heroes], deps=[rest-fights->rest-heroes, rest-heroes->heroes-db, rest-fights->rest-villains, rest-fights->fights-db, rest-villains->villains-db, grpc-locations->locations-db, rest-narration->open-ai, event-statistics->fights-kafka], infra=[kubernetes]',

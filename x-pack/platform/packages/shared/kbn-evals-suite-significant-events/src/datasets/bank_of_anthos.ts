@@ -88,7 +88,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'ledgerwriter' } },
+                    { term: { 'resource.attributes.app.keyword': 'ledgerwriter' } },
                     { match_phrase: { 'body.text': 'JDBC connections' } },
                   ],
                 },
@@ -100,8 +100,14 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify the dependency balancereader -> ledger-db (evidence: JDBC read connections for balance lookups)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'balancereader' } },
-              { match_phrase: { 'body.text': 'jdbc' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'balancereader' } },
+                    { match_phrase: { 'body.text': 'jdbc' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -109,8 +115,14 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify the dependency transactionhistory -> ledger-db (evidence: JDBC read connections for transaction history)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'transactionhistory' } },
-              { match_phrase: { 'body.text': 'jdbc' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'transactionhistory' } },
+                    { match_phrase: { 'body.text': 'jdbc' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -118,14 +130,20 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify the dependency userservice -> accounts-db (evidence: JDBC connections for user account storage)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'userservice' } },
               {
                 bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'create_user' } },
-                    { match_phrase: { 'body.text': 'login' } },
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'userservice' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': 'create_user' } },
+                          { match_phrase: { 'body.text': 'login' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   ],
-                  minimum_should_match: 1,
                 },
               },
             ],
@@ -138,7 +156,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { term: { 'resource.attributes.app.keyword': 'frontend' } },
                     {
                       match_phrase: {
                         'body.text': "HTTPConnectionPool(host='balancereader', port=8080)",
@@ -157,7 +175,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { term: { 'resource.attributes.app.keyword': 'frontend' } },
                     {
                       bool: {
                         should: [
@@ -185,15 +203,21 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify the dependency frontend -> userservice (evidence: HTTP calls from frontend for login/account lookup)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'frontend' } },
               {
                 bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'logout' } },
-                    { match_phrase: { 'body.text': '_login_helper' } },
-                    { match_phrase: { 'body.text': 'signup' } },
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'frontend' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': 'logout' } },
+                          { match_phrase: { 'body.text': '_login_helper' } },
+                          { match_phrase: { 'body.text': 'signup' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   ],
-                  minimum_should_match: 1,
                 },
               },
             ],
@@ -203,18 +227,24 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Should identify the dependency loadgenerator -> frontend (evidence: HTTP request statistics to frontend endpoints)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'loadgenerator' } },
               {
                 bool: {
-                  should: [
-                    { match_phrase: { 'body.text': '/home' } },
-                    { match_phrase: { 'body.text': '/payment' } },
-                    { match_phrase: { 'body.text': '/deposit' } },
-                    { match_phrase: { 'body.text': '/login' } },
-                    { match_phrase: { 'body.text': '/logout' } },
-                    { match_phrase: { 'body.text': '/signup' } },
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'loadgenerator' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': '/home' } },
+                          { match_phrase: { 'body.text': '/payment' } },
+                          { match_phrase: { 'body.text': '/deposit' } },
+                          { match_phrase: { 'body.text': '/login' } },
+                          { match_phrase: { 'body.text': '/logout' } },
+                          { match_phrase: { 'body.text': '/signup' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   ],
-                  minimum_should_match: 1,
                 },
               },
             ],
@@ -244,7 +274,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
         log_query_filter: [
           {
             terms: {
-              'resource.attributes.app': [
+              'resource.attributes.app.keyword': [
                 'ledgerwriter',
                 'balancereader',
                 'transactionhistory',
@@ -291,11 +321,11 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify ledgerwriter as a failing entity (evidence: resource.attributes.app=ledgerwriter; JDBC connection errors to ledger-db)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'ledgerwriter' } },
+              { term: { 'resource.attributes.app.keyword': 'ledgerwriter' } },
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'ledgerwriter' } },
+                    { term: { 'resource.attributes.app.keyword': 'ledgerwriter' } },
                     { match_phrase: { 'body.text': 'SQLState: 08001' } },
                   ],
                 },
@@ -307,11 +337,11 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify balancereader as a failing entity (evidence: resource.attributes.app=balancereader; cannot read balances from ledger-db, cache errors)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'balancereader' } },
+              { term: { 'resource.attributes.app.keyword': 'balancereader' } },
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'balancereader' } },
+                    { term: { 'resource.attributes.app.keyword': 'balancereader' } },
                     { match_phrase: { 'body.text': 'getBalance | Cache error' } },
                   ],
                 },
@@ -323,11 +353,11 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify transactionhistory as a failing entity (evidence: resource.attributes.app=transactionhistory; cannot read transactions from ledger-db, cache errors)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'transactionhistory' } },
+              { term: { 'resource.attributes.app.keyword': 'transactionhistory' } },
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'transactionhistory' } },
+                    { term: { 'resource.attributes.app.keyword': 'transactionhistory' } },
                     { match_phrase: { 'body.text': 'getTransactions | Cache error' } },
                   ],
                 },
@@ -339,11 +369,11 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Must identify frontend service (evidence: resource.attributes.app=frontend; upstream impact)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'frontend' } },
+              { term: { 'resource.attributes.app.keyword': 'frontend' } },
               {
                 bool: {
                   filter: [
-                    { term: { 'resource.attributes.app': 'frontend' } },
+                    { term: { 'resource.attributes.app.keyword': 'frontend' } },
                     { match_phrase: { 'body.text': 'Read timed out' } },
                   ],
                 },
@@ -359,11 +389,26 @@ export const bankOfAnthosDataset: DatasetConfig = {
                 bool: {
                   should: [
                     {
-                      terms: {
-                        'resource.attributes.app': [
-                          'ledgerwriter',
-                          'balancereader',
-                          'transactionhistory',
+                      bool: {
+                        filter: [
+                          { term: { 'resource.attributes.app.keyword': 'ledgerwriter' } },
+                          { match_phrase: { 'body.text': 'SQLState: 08001' } },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        filter: [
+                          { term: { 'resource.attributes.app.keyword': 'balancereader' } },
+                          { match_phrase: { 'body.text': 'getBalance | Cache error' } },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        filter: [
+                          { term: { 'resource.attributes.app.keyword': 'transactionhistory' } },
+                          { match_phrase: { 'body.text': 'getTransactions | Cache error' } },
                         ],
                       },
                     },
