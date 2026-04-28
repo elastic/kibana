@@ -2,7 +2,8 @@
 name: Claude Reviewer
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
+    names: [reviewer:claude]
   issue_comment:
     types: [created]
   pull_request_review_comment:
