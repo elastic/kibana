@@ -14,14 +14,12 @@ import type {
   EsWorkflowCreate,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
-import {
-  parseYamlToJSONWithoutValidation,
-  updateWorkflowYamlFields,
-} from '../../../common/lib/yaml';
+import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 /** Derives a list of trigger type ids from a workflow definition. */

@@ -17,8 +17,8 @@ import type {
 } from '@kbn/workflows';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { WorkflowCrudDeps } from './types';
-import { WorkflowConflictError } from '../../common/lib/errors';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows } from '../api/lib/workflow_disable_all';
