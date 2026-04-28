@@ -6,15 +6,10 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
-import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
-import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { AlertSummarySection } from '../../../shared/alert_summary';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getRawData } from '../../../../assistant/helpers';
 import { AI_SUMMARY_TEST_ID } from './test_ids';
-
-const KEY = 'aiSummary';
 
 /**
  * AI summary section under the overview tab of the legacy alert details
@@ -24,12 +19,6 @@ const KEY = 'aiSummary';
  */
 export const AISummarySection = memo(() => {
   const { eventId, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
-
-  const expanded = useExpandSection({
-    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-    title: KEY,
-    defaultValue: false,
-  });
 
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser),
@@ -41,18 +30,6 @@ export const AISummarySection = memo(() => {
       alertId={eventId}
       getPromptContext={getPromptContext}
       data-test-subj={AI_SUMMARY_TEST_ID}
-      renderLayout={({ title, optionsMenu, body }) => (
-        <ExpandableSection
-          expanded={expanded}
-          title={typeof title === 'string' ? title : <>{title}</>}
-          localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
-          sectionId={KEY}
-          extraAction={optionsMenu}
-          data-test-subj={AI_SUMMARY_TEST_ID}
-        >
-          {body}
-        </ExpandableSection>
-      )}
     />
   );
 });

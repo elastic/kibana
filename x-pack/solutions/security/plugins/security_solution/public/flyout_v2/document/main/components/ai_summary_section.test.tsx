@@ -9,17 +9,12 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { AISummarySection } from './ai_summary_section';
-import { AI_SUMMARY_SECTION_CONTENT_TEST_ID, AI_SUMMARY_SECTION_HEADER_TEST_ID } from './test_ids';
+import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
 import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from '../../../../flyout/shared/alert_summary';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
 
 jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
   useEventDetails: jest.fn(),
@@ -86,12 +81,10 @@ const createMockHit = (): DataTableRecord =>
   } as unknown as DataTableRecord);
 
 describe('AISummarySection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
   const mockUseEventDetails = jest.mocked(useEventDetails);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseExpandSection.mockReturnValue(true);
     mockUseEventDetails.mockReturnValue({
       browserFields: {},
       dataAsNestedObject: null,
@@ -103,7 +96,7 @@ describe('AISummarySection', () => {
     });
   });
 
-  it('renders the AI summary expandable section header and options menu', async () => {
+  it('renders the AI summary accordion with title, sparkles icon, and options menu', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <IntlProvider locale="en">
@@ -113,40 +106,10 @@ describe('AISummarySection', () => {
     );
 
     await act(async () => {
-      expect(getByTestId(AI_SUMMARY_SECTION_HEADER_TEST_ID)).toHaveTextContent('AI summary');
+      const section = getByTestId(AI_SUMMARY_SECTION_TEST_ID);
+      expect(section).toHaveTextContent('AI summary');
+      expect(section.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
       expect(getByTestId(ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-  });
-
-  it('renders expanded when section is expanded', async () => {
-    mockUseExpandSection.mockReturnValue(true);
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <IntlProvider locale="en">
-          <AISummarySection hit={createMockHit()} />
-        </IntlProvider>
-      </TestProviders>
-    );
-
-    await act(async () => {
-      expect(getByTestId(AI_SUMMARY_SECTION_CONTENT_TEST_ID)).toBeVisible();
-    });
-  });
-
-  it('renders collapsed when section is not expanded', async () => {
-    mockUseExpandSection.mockReturnValue(false);
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <IntlProvider locale="en">
-          <AISummarySection hit={createMockHit()} />
-        </IntlProvider>
-      </TestProviders>
-    );
-
-    await act(async () => {
-      expect(getByTestId(AI_SUMMARY_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
     });
   });
 });

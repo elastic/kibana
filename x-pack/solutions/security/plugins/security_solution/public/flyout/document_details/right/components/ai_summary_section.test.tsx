@@ -10,15 +10,10 @@ import { act, render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { AISummarySection } from './ai_summary_section';
-import { AI_SUMMARY_CONTENT_TEST_ID, AI_SUMMARY_HEADER_TEST_ID } from './test_ids';
+import { AI_SUMMARY_TEST_ID } from './test_ids';
 import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from '../../../shared/alert_summary';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-
-jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
 
 jest.mock('../../../shared/alert_summary/hooks/use_anonymization_toggle', () => ({
   useAnonymizationToggle: () => ({
@@ -79,37 +74,18 @@ const renderAISummarySection = () =>
   );
 
 describe('<AISummarySection />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseExpandSection.mockReturnValue(true);
   });
 
-  it('should render AI summary section header and options menu', async () => {
+  it('should render the AI summary accordion with title, sparkles icon, and options menu', async () => {
     const { getByTestId } = renderAISummarySection();
 
     await act(async () => {
-      expect(getByTestId(AI_SUMMARY_HEADER_TEST_ID)).toHaveTextContent('AI summary');
+      const section = getByTestId(AI_SUMMARY_TEST_ID);
+      expect(section).toHaveTextContent('AI summary');
+      expect(section.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
       expect(getByTestId(ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-  });
-
-  it('should render expanded when section is expanded', async () => {
-    mockUseExpandSection.mockReturnValue(true);
-    const { getByTestId } = renderAISummarySection();
-
-    await act(async () => {
-      expect(getByTestId(AI_SUMMARY_CONTENT_TEST_ID)).toBeVisible();
-    });
-  });
-
-  it('should render collapsed when section is not expanded', async () => {
-    mockUseExpandSection.mockReturnValue(false);
-    const { getByTestId } = renderAISummarySection();
-
-    await act(async () => {
-      expect(getByTestId(AI_SUMMARY_CONTENT_TEST_ID)).not.toBeVisible();
     });
   });
 });

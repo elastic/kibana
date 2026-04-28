@@ -63,17 +63,24 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('AlertSummarySection', () => {
-  it('should render the AI summary section', () => {
+  it('should render the AI summary section with title, sparkles icon, options menu, and trailing rule', () => {
     const getPromptContext = jest.fn();
 
-    const { getByTestId } = render(
+    const { getByTestId, container } = render(
       <TestProviders>
         <AlertSummarySection alertId="test-alert-id" getPromptContext={getPromptContext} />
       </TestProviders>
     );
 
-    expect(getByTestId(ALERT_SUMMARY_SECTION_TEST_ID)).toHaveTextContent('AI summary');
+    const section = getByTestId(ALERT_SUMMARY_SECTION_TEST_ID);
+    expect(section).toHaveTextContent('AI summary');
+    // The section title renders the sparkles icon next to the text (mirrors
+    // the "Entity summary" section).
+    expect(section.querySelector('[data-euiicon-type="sparkles"]')).toBeInTheDocument();
     expect(getByTestId(ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
+    // The section owns its own trailing horizontal rule for parity with
+    // the entity summary section.
+    expect(container.querySelector('hr')).toBeInTheDocument();
   });
 
   it('should render with custom data-test-subj', () => {
@@ -90,28 +97,5 @@ describe('AlertSummarySection', () => {
     );
 
     expect(getByTestId('custom-test-id')).toHaveTextContent('AI summary');
-  });
-
-  it('should use renderLayout when provided', () => {
-    const getPromptContext = jest.fn();
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <AlertSummarySection
-          alertId="test-alert-id"
-          getPromptContext={getPromptContext}
-          renderLayout={({ title, optionsMenu, body }) => (
-            <div data-test-subj="custom-layout">
-              <span data-test-subj="custom-layout-title">{title}</span>
-              <span data-test-subj="custom-layout-menu">{optionsMenu}</span>
-              <div data-test-subj="custom-layout-body">{body}</div>
-            </div>
-          )}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('custom-layout')).toBeInTheDocument();
-    expect(getByTestId('custom-layout-title')).toHaveTextContent('AI summary');
   });
 });

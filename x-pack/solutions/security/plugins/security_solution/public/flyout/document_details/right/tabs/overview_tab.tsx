@@ -29,6 +29,8 @@ export const OverviewTab = memo(() => {
         { defaultMessage: 'Overview' }
       )}
     >
+      <AISummarySection />
+      <EuiHorizontalRule margin="m" />
       <AboutSection />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection />
@@ -36,9 +38,6 @@ export const OverviewTab = memo(() => {
       <VisualizationsSection />
       <EuiHorizontalRule margin="m" />
       <InsightsSection />
-      <EuiHorizontalRule margin="m" />
-      <AISummarySection />
-      <EuiHorizontalRule margin="m" />
       <ResponseSection />
     </EuiPanel>
   );
