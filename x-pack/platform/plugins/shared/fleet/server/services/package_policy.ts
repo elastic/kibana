@@ -4044,7 +4044,10 @@ export function updatePackageInputs(
       ? getRegistryStreamWithDataStreamForInputType(updateType, packageInfo)
       : undefined;
     const registryInputVarDefs = updateType
-      ? packageInfo.policy_templates
+      ? (update.policy_template
+          ? packageInfo.policy_templates?.filter((pt) => pt.name === update.policy_template)
+          : packageInfo.policy_templates
+        )
           ?.flatMap((pt) => getNormalizedInputs(pt))
           .find(
             (ri) =>
