@@ -9,6 +9,10 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
+
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
 import type { QueryStorageSettings } from '../storage_settings';
@@ -342,34 +346,36 @@ describe('QueryClient backward compatibility', () => {
       );
     });
 
-    it('retries the bulk write without the embedding field when the first attempt throws an inference-related BulkOperationError', async () => {
+    it('retries the bulk write with the embedding field after a transient inference-related BulkOperationError', async () => {
       const storageClient = createMockStorageClient();
       storageClient.search.mockResolvedValue({ hits: { hits: [] } });
-      storageClient.bulk
-        .mockRejectedValueOnce(
-          new BulkOperationError('Unable to find model deployment task [elser-endpoint]', {
-            errors: true,
-            took: 0,
-            items: [
-              {
-                index: {
-                  _index: '.kibana_streams_assets',
-                  _id: 'doc-1',
-                  status: 500,
-                  error: {
-                    type: 'exception',
-                    reason:
-                      'Exception when running inference id [elser-endpoint] on field [query.search_embedding]',
-                    caused_by: {
-                      type: 'status_exception',
-                      reason: 'Unable to find model deployment task [elser-endpoint]',
-                    },
+      const inferenceError = new BulkOperationError(
+        'Unable to find model deployment task [elser-endpoint]',
+        {
+          errors: true,
+          took: 0,
+          items: [
+            {
+              index: {
+                _index: '.kibana_streams_assets',
+                _id: 'doc-1',
+                status: 500,
+                error: {
+                  type: 'exception',
+                  reason:
+                    'Exception when running inference id [elser-endpoint] on field [query.search_embedding]',
+                  caused_by: {
+                    type: 'status_exception',
+                    reason: 'Unable to find model deployment task [elser-endpoint]',
                   },
                 },
               },
-            ],
-          })
-        )
+            },
+          ],
+        }
+      );
+      storageClient.bulk
+        .mockRejectedValueOnce(inferenceError)
         .mockResolvedValueOnce({ errors: false, items: [] });
       const logger = createMockLogger();
       const { client } = createQueryClient({ storageClient, logger });
@@ -388,11 +394,69 @@ describe('QueryClient backward compatibility', () => {
       const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index!.document;
       const secondDoc = storageClient.bulk.mock.calls[1][0].operations[0].index!.document;
       expect(firstDoc[QUERY_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      expect(secondDoc[QUERY_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('retrying in 2000ms (attempt 1/3)')
+      );
+    });
+
+    it('falls back to writing without the embedding only after every backoff retry fails', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const inferenceError = new BulkOperationError(
+        'Unable to find model deployment task [elser-endpoint]',
+        {
+          errors: true,
+          took: 0,
+          items: [
+            {
+              index: {
+                _index: '.kibana_streams_assets',
+                _id: 'doc-1',
+                status: 500,
+                error: {
+                  type: 'exception',
+                  reason:
+                    'Exception when running inference id [elser-endpoint] on field [query.search_embedding]',
+                  caused_by: {
+                    type: 'status_exception',
+                    reason: 'Unable to find model deployment task [elser-endpoint]',
+                  },
+                },
+              },
+            },
+          ],
+        }
+      );
+      storageClient.bulk
+        .mockRejectedValueOnce(inferenceError)
+        .mockRejectedValueOnce(inferenceError)
+        .mockRejectedValueOnce(inferenceError)
+        .mockResolvedValueOnce({ errors: false, items: [] });
+      const logger = createMockLogger();
+      const { client } = createQueryClient({ storageClient, logger });
+
+      await client.syncQueryList(createMockDefinition(), [
+        {
+          [ASSET_ID]: 'q-1',
+          [ASSET_TYPE]: 'query',
+          query: createQuery({ id: 'q-1' }),
+          rule_backed: true,
+          rule_id: 'rule-1',
+        },
+      ]);
+
+      expect(storageClient.bulk).toHaveBeenCalledTimes(4);
+      const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index!.document;
+      const fallbackDoc = storageClient.bulk.mock.calls[3][0].operations[0].index!.document;
+      expect(firstDoc[QUERY_SEARCH_EMBEDDING]).toEqual(expect.any(String));
       // QUERY_SEARCH_EMBEDDING contains a dot, so we cannot use toHaveProperty
       // (Jest treats dotted strings as nested paths).
-      expect(QUERY_SEARCH_EMBEDDING in secondDoc).toBe(false);
+      expect(QUERY_SEARCH_EMBEDDING in fallbackDoc).toBe(false);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Bulk write failed due to inference error')
+        expect.stringContaining(
+          'after 3 attempts -- falling back to writing without semantic_text embedding'
+        )
       );
     });
 

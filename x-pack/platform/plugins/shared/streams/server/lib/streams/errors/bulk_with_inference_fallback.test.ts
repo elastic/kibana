@@ -14,6 +14,12 @@ import {
   isInferenceRelatedBulkError,
 } from './bulk_with_inference_fallback';
 
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
+
+import { setTimeout as mockedSetTimeout } from 'timers/promises';
+
 const createLogger = () => loggerMock.create() as unknown as Logger;
 
 function inferenceErrorResponse(reason: string): BulkResponse {
@@ -269,6 +275,10 @@ describe('isInferenceRelatedBulkError', () => {
 });
 
 describe('bulkWithInferenceFallback', () => {
+  beforeEach(() => {
+    (mockedSetTimeout as jest.Mock).mockClear();
+  });
+
   it('runs attempt once with includeEmbedding=true on success', async () => {
     const attempt = jest.fn().mockResolvedValue('ok');
 
@@ -277,9 +287,10 @@ describe('bulkWithInferenceFallback', () => {
     expect(result).toBe('ok');
     expect(attempt).toHaveBeenCalledTimes(1);
     expect(attempt).toHaveBeenCalledWith({ includeEmbedding: true });
+    expect(mockedSetTimeout).not.toHaveBeenCalled();
   });
 
-  it('retries without embedding when the first attempt throws an inference-related BulkOperationError', async () => {
+  it('retries with embedding (not stripping it) on transient inference errors and returns when one succeeds', async () => {
     const bulkError = new BulkOperationError(
       'inference unavailable',
       inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
@@ -292,30 +303,81 @@ describe('bulkWithInferenceFallback', () => {
     expect(result).toBe('retried');
     expect(attempt).toHaveBeenCalledTimes(2);
     expect(attempt).toHaveBeenNthCalledWith(1, { includeEmbedding: true });
-    expect(attempt).toHaveBeenNthCalledWith(2, { includeEmbedding: false });
+    expect(attempt).toHaveBeenNthCalledWith(2, { includeEmbedding: true });
+    expect(mockedSetTimeout).toHaveBeenCalledTimes(1);
+    expect(mockedSetTimeout).toHaveBeenNthCalledWith(1, 2000);
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Bulk write failed due to inference error (1/1 items)')
+      expect.stringContaining('retrying in 2000ms (attempt 1/3)')
     );
-    expect(logger.debug).toHaveBeenCalledWith('Bulk write retry without embedding succeeded');
   });
 
-  it('propagates the retry error when the second attempt also fails', async () => {
-    const firstError = new BulkOperationError(
-      'first failure',
-      inferenceErrorResponse(
-        'Error in inference process: [inference canceled as process is stopping]'
-      )
+  it('uses exponential backoff between retry attempts', async () => {
+    const bulkError = new BulkOperationError(
+      'inference unavailable',
+      inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
     );
-    const secondError = new BulkOperationError(
-      'second failure',
-      inferenceErrorResponse(
-        'Error in inference process: [inference canceled as process is stopping]'
-      )
-    );
-    const attempt = jest.fn().mockRejectedValueOnce(firstError).mockRejectedValueOnce(secondError);
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(bulkError)
+      .mockRejectedValueOnce(bulkError)
+      .mockResolvedValueOnce('finally-ok');
 
-    await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(secondError);
-    expect(attempt).toHaveBeenCalledTimes(2);
+    const result = await bulkWithInferenceFallback(createLogger(), attempt);
+
+    expect(result).toBe('finally-ok');
+    expect(attempt).toHaveBeenCalledTimes(3);
+    expect(mockedSetTimeout).toHaveBeenCalledTimes(2);
+    expect(mockedSetTimeout).toHaveBeenNthCalledWith(1, 2000);
+    expect(mockedSetTimeout).toHaveBeenNthCalledWith(2, 4000);
+  });
+
+  it('falls back to writing without embedding only after all backoff retries fail', async () => {
+    const bulkError = new BulkOperationError(
+      'inference unavailable',
+      inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
+    );
+    const logger = createLogger();
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(bulkError)
+      .mockRejectedValueOnce(bulkError)
+      .mockRejectedValueOnce(bulkError)
+      .mockResolvedValueOnce('fallback-ok');
+
+    const result = await bulkWithInferenceFallback(logger, attempt);
+
+    expect(result).toBe('fallback-ok');
+    expect(attempt).toHaveBeenCalledTimes(4);
+    expect(attempt).toHaveBeenNthCalledWith(1, { includeEmbedding: true });
+    expect(attempt).toHaveBeenNthCalledWith(2, { includeEmbedding: true });
+    expect(attempt).toHaveBeenNthCalledWith(3, { includeEmbedding: true });
+    expect(attempt).toHaveBeenNthCalledWith(4, { includeEmbedding: false });
+    expect(mockedSetTimeout).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'after 3 attempts -- falling back to writing without semantic_text embedding'
+      )
+    );
+    expect(logger.debug).toHaveBeenCalledWith('Bulk write fallback without embedding succeeded');
+  });
+
+  it('propagates the fallback error when the embedding-stripped attempt also fails', async () => {
+    const bulkError = new BulkOperationError(
+      'inference unavailable',
+      inferenceErrorResponse(
+        'Error in inference process: [inference canceled as process is stopping]'
+      )
+    );
+    const fallbackError = new Error('mapping conflict');
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(bulkError)
+      .mockRejectedValueOnce(bulkError)
+      .mockRejectedValueOnce(bulkError)
+      .mockRejectedValueOnce(fallbackError);
+
+    await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(fallbackError);
+    expect(attempt).toHaveBeenCalledTimes(4);
   });
 
   it('does not retry when a non-BulkOperationError is thrown', async () => {
@@ -324,6 +386,7 @@ describe('bulkWithInferenceFallback', () => {
 
     await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);
+    expect(mockedSetTimeout).not.toHaveBeenCalled();
   });
 
   it('does not retry when BulkOperationError items contain only non-inference errors', async () => {
@@ -332,6 +395,7 @@ describe('bulkWithInferenceFallback', () => {
 
     await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);
+    expect(mockedSetTimeout).not.toHaveBeenCalled();
   });
 
   it('does not retry when BulkOperationError has mixed inference and non-inference item failures', async () => {
@@ -341,6 +405,7 @@ describe('bulkWithInferenceFallback', () => {
 
     await expect(bulkWithInferenceFallback(logger, attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);
+    expect(mockedSetTimeout).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('mixed errors (1 inference + 1 other out of 2 items)')
     );

@@ -8,6 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
+
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 import type { Feature } from '@kbn/streams-schema';
 import {
   STREAM_NAME,
@@ -601,34 +605,33 @@ describe('FeatureClient', () => {
       expect(document[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
     });
 
-    it('retries once without the embedding field when the bulk write throws an inference-related BulkOperationError', async () => {
+    it('retries with the embedding field after a transient inference-related BulkOperationError', async () => {
       const storageClient = createMockStorageClient();
       const logger = createMockLogger();
-      storageClient.bulk
-        .mockRejectedValueOnce(
-          new BulkOperationError('inference unavailable', {
-            errors: true,
-            took: 0,
-            items: [
-              {
-                index: {
-                  _index: '.kibana_streams_features',
-                  _id: 'doc-1',
-                  status: 500,
-                  error: {
-                    type: 'exception',
-                    reason:
-                      'Exception when running inference id [elser-endpoint] on field [feature.search_embedding]',
-                    caused_by: {
-                      type: 'status_exception',
-                      reason: 'Unable to find model deployment task [elser-endpoint]',
-                    },
-                  },
+      const inferenceError = new BulkOperationError('inference unavailable', {
+        errors: true,
+        took: 0,
+        items: [
+          {
+            index: {
+              _index: '.kibana_streams_features',
+              _id: 'doc-1',
+              status: 500,
+              error: {
+                type: 'exception',
+                reason:
+                  'Exception when running inference id [elser-endpoint] on field [feature.search_embedding]',
+                caused_by: {
+                  type: 'status_exception',
+                  reason: 'Unable to find model deployment task [elser-endpoint]',
                 },
               },
-            ],
-          })
-        )
+            },
+          },
+        ],
+      });
+      storageClient.bulk
+        .mockRejectedValueOnce(inferenceError)
         .mockResolvedValueOnce({ errors: false, items: [] });
       const { client } = createFeatureClient({ storageClient, logger });
 
@@ -638,11 +641,57 @@ describe('FeatureClient', () => {
       const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index.document;
       const secondDoc = storageClient.bulk.mock.calls[1][0].operations[0].index.document;
       expect(firstDoc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      expect(secondDoc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('retrying in 2000ms (attempt 1/3)')
+      );
+    });
+
+    it('falls back to writing without the embedding only after every backoff retry fails', async () => {
+      const storageClient = createMockStorageClient();
+      const logger = createMockLogger();
+      const inferenceError = new BulkOperationError('inference unavailable', {
+        errors: true,
+        took: 0,
+        items: [
+          {
+            index: {
+              _index: '.kibana_streams_features',
+              _id: 'doc-1',
+              status: 500,
+              error: {
+                type: 'exception',
+                reason:
+                  'Exception when running inference id [elser-endpoint] on field [feature.search_embedding]',
+                caused_by: {
+                  type: 'status_exception',
+                  reason: 'Unable to find model deployment task [elser-endpoint]',
+                },
+              },
+            },
+          },
+        ],
+      });
+      storageClient.bulk
+        .mockRejectedValueOnce(inferenceError)
+        .mockRejectedValueOnce(inferenceError)
+        .mockRejectedValueOnce(inferenceError)
+        .mockResolvedValueOnce({ errors: false, items: [] });
+      const { client } = createFeatureClient({ storageClient, logger });
+
+      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
+
+      expect(storageClient.bulk).toHaveBeenCalledTimes(4);
+      const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index.document;
+      const fallbackDoc = storageClient.bulk.mock.calls[3][0].operations[0].index.document;
+      expect(firstDoc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
       // FEATURE_SEARCH_EMBEDDING contains a dot, so we cannot use toHaveProperty
       // (Jest treats dotted strings as nested paths).
-      expect(FEATURE_SEARCH_EMBEDDING in secondDoc).toBe(false);
+      expect(FEATURE_SEARCH_EMBEDDING in fallbackDoc).toBe(false);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Bulk write failed due to inference error')
+        expect.stringContaining(
+          'after 3 attempts -- falling back to writing without semantic_text embedding'
+        )
       );
     });
 
