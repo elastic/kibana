@@ -36,7 +36,6 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
     "@kbn/react-query",
-    "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
     "@kbn/core-http-router-server-mocks",
     "@kbn/logging-mocks",
@@ -46,7 +45,10 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/search-api-panels"
+    "@kbn/scout",
+    "@kbn/search-api-panels",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics"
   ],
   "exclude": [
     "target/**/*"

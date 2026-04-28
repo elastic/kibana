@@ -13,7 +13,6 @@ import type {
 
 import { createUsageTracker, createEmptyUsageTracker } from '../usage_tracker';
 import type { AppUsageTracker } from '../types';
-import { AnalyticsEvents } from '../analytics/constants';
 
 const UsageTrackerContext = createContext<AppUsageTracker>(createEmptyUsageTracker());
 
@@ -21,19 +20,16 @@ export interface UsageTrackerContextProviderProps {
   children: React.ReactNode | React.ReactNode[];
   usageCollection?: UsageCollectionSetup | UsageCollectionStart;
 }
-export function UsageTrackerContextProvider({
+
+export const UsageTrackerContextProvider = ({
   children,
   usageCollection,
-}: UsageTrackerContextProviderProps) {
-  const usageTracker = useMemo(() => {
-    const homePageUsageTracker = createUsageTracker(usageCollection);
-    homePageUsageTracker.load(AnalyticsEvents.openedApp);
-    return homePageUsageTracker;
-  }, [usageCollection]);
+}: UsageTrackerContextProviderProps) => {
+  const usageTracker = useMemo(() => createUsageTracker(usageCollection), [usageCollection]);
   return (
     <UsageTrackerContext.Provider value={usageTracker}>{children}</UsageTrackerContext.Provider>
   );
-}
+};
 
 export const useUsageTracker = () => {
   const ctx = useContext(UsageTrackerContext);
