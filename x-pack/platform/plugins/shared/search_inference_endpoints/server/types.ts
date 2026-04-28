@@ -11,7 +11,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceConnector } from '@kbn/inference-common';
-import type { ApiInferenceConnector } from '@kbn/search-inference-endpoints/server/lib/merge_connectors';
+import type { ApiInferenceConnector } from './lib/merge_connectors';
 
 export type { InferenceTaskType, InferenceConnector };
 

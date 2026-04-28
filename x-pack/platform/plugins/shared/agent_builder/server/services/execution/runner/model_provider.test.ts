@@ -24,7 +24,10 @@ const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as jest.Mocked
   typeof resolveSelectedConnectorId
 >;
 
-type FastEndpointMock = { connectorId: string; isRecommended?: boolean };
+interface FastEndpointMock {
+  connectorId: string;
+  isRecommended?: boolean;
+}
 
 const createSearchInferenceEndpointsMock = (
   endpoints: FastEndpointMock[] = []
