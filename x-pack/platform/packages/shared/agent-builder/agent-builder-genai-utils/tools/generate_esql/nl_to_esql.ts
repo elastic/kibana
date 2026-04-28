@@ -10,12 +10,12 @@ import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
+import { loadEsqlDocumentBaseOnce } from './shared/bundled_esql_prompts';
 
 export interface GenerateEsqlResponse {
   /**
@@ -106,7 +106,7 @@ export const generateEsql = async ({
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
-  const docBase = await EsqlDocumentBase.load();
+  const docBase = await loadEsqlDocumentBaseOnce();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
   const graph = createNlToEsqlGraph({

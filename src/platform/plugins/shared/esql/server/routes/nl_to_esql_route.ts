@@ -15,7 +15,11 @@ import type {
 } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import {
+  buildNlToEsqlAdditionalContext,
+  generateEsql,
+  generateSurgicalEsql,
+} from '@kbn/agent-builder-genai-utils';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
@@ -68,56 +72,6 @@ const resolveConnectorId = async ({
   return undefined;
 };
 
-const buildSurgicalPrompt = (currentQuery: string): string => {
-  return `You are an ES|QL expert. The user has an existing ES|QL query.
-The target comment line is marked with >>> and <<< delimiters in the query below.
-That comment is a natural-language instruction describing what ES|QL code should replace it.
-Other comment lines (without >>> <<<) are regular documentation comments — ignore them as instructions.
-
-Your task: output ONLY the ES|QL pipe(s) that should replace the marked comment. Do not output the full query.
-Fence the replacement code with the esql tag. Do not explain it.
-
-If the instruction asks to modify or extend an existing pipe command (e.g. "also add ...", "change ...", "add a column"),
-output the complete modified version of that pipe. Otherwise output only new pipe(s).
-
-Before the code block, output exactly one of these lines:
-  REPLACES_NEXT: true
-  REPLACES_NEXT: false
-Output "true" when your generated code is a modified version of the pipe immediately after the marked comment
-(i.e. it should replace that pipe, not be added alongside it).
-Output "false" when your generated code is new and should be inserted without removing any existing pipe.
-
-<CurrentQuery>
-${currentQuery}
-</CurrentQuery>`;
-};
-
-const buildAdditionalContext = (currentQuery: string, isSurgical: boolean): string => {
-  if (isSurgical && currentQuery) {
-    return buildSurgicalPrompt(currentQuery);
-  }
-  if (currentQuery) {
-    return [
-      'The user is in the ES|QL editor. Below is their current query.',
-      'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-      'If the request is for a new or unrelated query, you may produce a full replacement.',
-      '',
-      '<current_query>',
-      currentQuery,
-      '</current_query>',
-    ].join('\n');
-  }
-  return '';
-};
-
-const extractSurgicalResponse = (content: string): { esql: string; replacesNext: boolean } => {
-  const codeMatch = content.match(/```esql\s*([\s\S]*?)```/);
-  const esql = codeMatch ? codeMatch[1].trim() : content.trim();
-  const flagMatch = content.match(/REPLACES_NEXT:\s*(true|false)/i);
-  const replacesNext = flagMatch ? flagMatch[1].toLowerCase() === 'true' : false;
-  return { esql, replacesNext };
-};
-
 export const registerNLtoESQLRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
@@ -164,8 +118,20 @@ export const registerNLtoESQLRoute = (
 
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
+        const isSurgicalRequest = Boolean(isSurgical && trimmedCurrent);
 
-        const additionalContext = buildAdditionalContext(trimmedCurrent ?? '', isSurgical ?? false);
+        if (isSurgicalRequest) {
+          const { content, replacesNext } = await generateSurgicalEsql({
+            model,
+            nlInstruction,
+            currentQuery: trimmedCurrent ?? '',
+          });
+          return response.ok({
+            body: { content, replacesNext },
+          });
+        }
+
+        const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
 
         const result = await generateEsql({
           model,
@@ -176,13 +142,6 @@ export const registerNLtoESQLRoute = (
           executeQuery: false,
         });
 
-        const rawContent = result.query ?? '';
-        if (currentQuery && isSurgical) {
-          const { esql, replacesNext } = extractSurgicalResponse(rawContent);
-          return response.ok({
-            body: { content: esql, replacesNext },
-          });
-        }
         return response.ok({
           body: { content: result.query },
         });
