@@ -180,8 +180,7 @@ describe('WorkflowsPlugin', () => {
         plugin.start(coreStart, startDeps as any);
 
         expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch']);
-        expect(updates[0].visibleIn).not.toContain('sideNav');
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
       });
     });
   });
