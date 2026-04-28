@@ -198,7 +198,54 @@ Follow the side-navigation pattern exactly:
 - Add `@ts-expect-error` for intentional simplifications (e.g. `IconType → string`)
 - Export `export const TYPE_VALIDATION_PASSED = true;`
 
-### 4e. Generate @kbn/* service stubs
+### 4e. Create packaging/example/ scaffold
+
+```bash
+mkdir -p src/platform/kbn-ui/{folderName}/packaging/example/src
+mkdir -p src/platform/kbn-ui/{folderName}/packaging/example/public
+```
+
+The example is a minimal runnable app that imports from `../../target` (the built package), so consumers can see the component in action without a full Kibana setup.
+
+**`packaging/example/package.json`** — replace `{folderName}`:
+```json
+{
+  "name": "{folderName}-example",
+  "version": "1.0.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "description": "Example application demonstrating {ExportedComponentName} usage. Uses dependencies from Kibana root.",
+  "scripts": {
+    "start": "./start.sh"
+  }
+}
+```
+
+**`packaging/example/tsconfig.json`** — copy verbatim from side-navigation (it's fully generic).
+
+**`packaging/example/webpack.config.js`** — copy from side-navigation, update only the alias:
+```js
+alias: {
+  '{packageName}': path.resolve(__dirname, '../../target'),
+},
+```
+
+**`packaging/example/start.sh`** — copy verbatim from side-navigation (fully relative, no substitution needed).
+
+**`packaging/example/public/index.html`** — copy from side-navigation, update `<title>` to `{ExportedComponentName} Example`.
+
+**`packaging/example/src/index.tsx`** — copy verbatim from side-navigation (generic React bootstrap).
+
+**`packaging/example/src/app.tsx`** — generate a minimal working demo from the component's public API (derived from `packaging/react/types.ts` in step 4d):
+- Wrap in `EuiProvider`
+- Import the component and its required types from `'{packageName}'` (the webpack alias resolves to `../../target`)
+- Initialise required props with realistic minimal values
+- Wire up any callback props (e.g. `onChange`, `onItemClick`) with `useState` and display the current value
+- Add an `<EuiText>` block listing manual test cases relevant to the component
+
+**`packaging/example/README.md`** — copy from side-navigation, substituting `{packageName}` and `{folderName}`.
+
+### 4f. Generate @kbn/* service stubs
 
 For each `@kbn/*` package identified for stubbing in Phase 2:
 
@@ -217,7 +264,7 @@ For each `@kbn/*` package identified for stubbing in Phase 2:
    - Types/interfaces → skip (compile-time only, no runtime representation)
 3. Top comment: `// Stub for @kbn/{name} — no-op implementation for standalone bundle`
 
-### 4f. Update all Kibana imports
+### 4g. Update all Kibana imports
 
 Find and update every file importing the old package name:
 
@@ -242,7 +289,7 @@ grep -rl '"${oldName}"' src/ x-pack/ packages/ --include="tsconfig.json" | \
   xargs sed -i "s|\"${oldName}\"|\"${packageName}\"|g"
 ```
 
-### 4g. Verify old location is gone
+### 4h. Verify old location is gone
 
 ```bash
 ls {sourcePath} 2>/dev/null && echo "ERROR: old path still exists" || echo "OK: old path removed"
@@ -264,6 +311,9 @@ Tell the engineer to run:
 # Re-bootstrap so yarn workspaces and kbn-ts-projects pick up the rename
 yarn kbn bootstrap
 
+# Regenerate moon.yml for the new package (auto-derived from kibana.jsonc + package.json)
+node scripts/regenerate_moon_projects.js --update --filter {packageName}
+
 # Type-check workspace package
 node scripts/type_check --project src/platform/kbn-ui/{folderName}/tsconfig.json
 
@@ -275,6 +325,9 @@ node scripts/jest --testPathPattern="src/platform/kbn-ui/{folderName}"
 
 # Full distribution build
 bash src/platform/kbn-ui/{folderName}/packaging/scripts/build.sh
+
+# Smoke-test the example app (requires the build above to have run first)
+cd src/platform/kbn-ui/{folderName}/packaging/example && ./start.sh
 ```
 
 Remind the engineer:
