@@ -51,7 +51,13 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
     keyId: schema.string(),
   }),
   query: schema.object({
-    forceDelete: schema.boolean({ defaultValue: false }),
+    forceDelete: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.',
+      },
+    }),
   }),
 };
 
@@ -70,9 +76,15 @@ export const PostEnrollmentAPIKeyRequestSchema = {
 export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
   body: schema.object(
     {
-      tokenIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+      tokenIds: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          maxSize: 10000,
+          meta: { description: 'List of enrollment token IDs to delete.' },
+        })
+      ),
       kuery: schema.maybe(
         schema.string({
+          meta: { description: 'KQL query to select enrollment tokens to delete.' },
           validate: (value: string) => {
             const validationObj = validateKuery(
               value,
@@ -86,7 +98,13 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
           },
         })
       ),
-      forceDelete: schema.boolean({ defaultValue: false }),
+      forceDelete: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.',
+        },
+      }),
     },
     {
       validate: (value) => {

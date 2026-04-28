@@ -180,6 +180,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/bulk_delete_enrollment_api_keys.yaml'),
+        },
         validate: {
           request: BulkDeleteEnrollmentAPIKeysRequestSchema,
           response: {
