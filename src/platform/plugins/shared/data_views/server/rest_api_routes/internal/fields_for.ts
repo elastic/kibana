@@ -94,7 +94,7 @@ export const querySchema = schema.object({
   allow_no_index: schema.maybe(schema.boolean()),
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 1_000 })])
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 50_000 })])
   ),
   allow_hidden: schema.maybe(schema.boolean()),
   field_types: schema.maybe(
@@ -116,7 +116,7 @@ const FieldDescriptorSchema = schema.object({
   readFromDocValues: schema.boolean(),
   searchable: schema.boolean(),
   type: schema.string(),
-  esTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 60 })),
+  esTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
   subType: fieldSubTypeSchema,
   metadata_field: schema.maybe(schema.boolean()),
   fixedInterval: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
@@ -132,7 +132,7 @@ const FieldDescriptorSchema = schema.object({
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
   conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 10_000 }))
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 100_000 }))
   ),
   defaultFormatter: schema.maybe(schema.string()),
 });
@@ -147,8 +147,8 @@ export const validate: VersionedRouteValidation<any, any, any> = {
     200: {
       body: () =>
         schema.object({
-          fields: schema.arrayOf(FieldDescriptorSchema, { maxSize: 50_000 }),
-          indices: schema.arrayOf(schema.string(), { maxSize: 10_000 }),
+          fields: schema.arrayOf(FieldDescriptorSchema, { maxSize: 100_000 }),
+          indices: schema.arrayOf(schema.string(), { maxSize: 100_000 }),
         }),
     },
   },

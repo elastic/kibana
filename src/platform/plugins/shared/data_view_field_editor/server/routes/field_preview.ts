@@ -38,7 +38,7 @@ const responseSchema = () => {
   return schema.object({
     values: schema.oneOf([
       // composite field
-      schema.recordOf(schema.string(), schema.arrayOf(valueSchema, { maxSize: 100 })),
+      schema.recordOf(schema.string(), schema.arrayOf(valueSchema, { maxSize: 1_000 })),
       // primitive field
       schema.arrayOf(valueSchema, { maxSize: 100 }),
     ]),

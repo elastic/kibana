@@ -32,7 +32,7 @@ const dataViewAttributesSchema = schema.object(
           value: schema.string(),
           clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         }),
-        { maxSize: 100 }
+        { maxSize: 1_000 }
       )
     ),
     fields: schema.maybe(schema.arrayOf(fieldSpecSchema, { maxSize: 50_000 })),

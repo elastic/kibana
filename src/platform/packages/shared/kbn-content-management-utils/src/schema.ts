@@ -41,7 +41,7 @@ export const savedObjectSchema = <T extends ObjectType<any>>(attributesSchema: T
       error: schema.maybe(apiError),
       attributes: attributesSchema,
       references: referencesSchema,
-      namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1_000 })),
+      namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10_000 })),
       originId: schema.maybe(schema.string()),
       managed: schema.maybe(schema.boolean()),
     },
@@ -92,7 +92,7 @@ export const searchOptionsSchemas = {
   perPage: schema.maybe(schema.number()),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1_000 })),
   search: schema.maybe(schema.string()),
   searchFields: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])

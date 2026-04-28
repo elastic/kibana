@@ -71,13 +71,13 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
             query: schema.object({
               indices: schema.oneOf([
                 schema.string(),
-                schema.arrayOf(schema.string(), { maxSize: 1000 }),
+                schema.arrayOf(schema.string(), { maxSize: 50_000 }),
               ]),
             }),
           },
           response: {
             200: {
-              body: () => schema.arrayOf(schema.string(), { maxSize: 1000 }),
+              body: () => schema.arrayOf(schema.string(), { maxSize: 50_000 }),
             },
           },
         },
