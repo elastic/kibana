@@ -49,6 +49,15 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
     loadingEventIds,
   } = useSelector((state: State) => selectTableById(state, tableType) ?? defaults);
   const eventContext = useContext(StatefulEventContext);
+  const { openAlertFlyout } = useAlertsContext();
+
+  // `rowIndex` is absolute (it crosses page boundaries), which is also what
+  // the AlertsContext expects (`flyoutAlertIndex`). See `ActionsCellHost` in
+  // `@kbn/response-ops-alerts-table` for where the page-relative index is
+  // computed back from this absolute one.
+  const onExpandFlyout = useCallback(() => {
+    openAlertFlyout(rowIndex);
+  }, [openAlertFlyout, rowIndex]);
 
   // Derive ecsAlert (nested) from alert
   const ecsAlert = useMemo(() => expandDottedObject(alert) as Ecs, [alert]);
@@ -124,6 +133,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       setEventsLoading={setEventsLoading}
       setEventsDeleted={noop}
       refetch={alertsTableRefresh}
+      onExpandFlyout={onExpandFlyout}
     />
   );
 };
