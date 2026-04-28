@@ -43,8 +43,14 @@ upload_cypress_artifacts() {
     buildkite-agent artifact upload "$LOG_FILE" || true
     return
   fi
+
+  echo "--- Artifacts check"
+  pwd
+  ls -laR target/test_failures 2>&1 | head -200
+  find target -path '*test_failures*' 2>/dev/null | head -100
+
   # Capture *.log under test_failures output
-  buildkite-agent artifact upload "target/test_failures/*.log" || true
+  buildkite-agent artifact upload "target/test_failures/**/*.log" || true
 }
 
 echo "--- Uploading step log and Cypress / JUnit artifacts"
