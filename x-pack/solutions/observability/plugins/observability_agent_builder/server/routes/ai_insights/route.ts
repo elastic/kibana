@@ -47,12 +47,14 @@ function getRawErrorMessage(error: unknown): string {
 function aiInsightSseErrorResponse({
   response,
   message,
+  retryable,
   isCloudEnabled,
   logger,
   request,
 }: {
   response: KibanaResponseFactory;
   message: string;
+  retryable: boolean;
   isCloudEnabled: boolean;
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
@@ -60,7 +62,7 @@ function aiInsightSseErrorResponse({
   const err$ = throwError(
     () =>
       new ServerSentEventError(ServerSentEventErrorCode.internalError, message, {
-        retryable: false,
+        retryable,
       })
   );
   return response.ok({
@@ -85,32 +87,25 @@ function toErrorForAiInsightStream({
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
 }) {
-  const rawErrorMessage = getRawErrorMessage(error);
   if (isNoMatchingProjectError(error)) {
-    const message = i18n.translate(
-      'xpack.observabilityAgentBuilder.aiInsight.error.noMatchingProject',
-      {
-        defaultMessage: 'AI insights are not supported for data from linked projects.',
-      }
-    );
     return aiInsightSseErrorResponse({
       response,
-      message: `${message}\n\nError details: ${rawErrorMessage}`,
+      message: i18n.translate('xpack.observabilityAgentBuilder.aiInsight.error.noMatchingProject', {
+        defaultMessage: 'AI insights are not supported for data from linked projects.',
+      }),
+      retryable: false,
       isCloudEnabled,
       logger,
       request,
     });
   }
   if (isIndexNotFoundError(error)) {
-    const message = i18n.translate(
-      'xpack.observabilityAgentBuilder.aiInsight.error.indexUnavailable',
-      {
-        defaultMessage: 'The source index for this data is unavailable.',
-      }
-    );
     return aiInsightSseErrorResponse({
       response,
-      message: `${message}\n\nError details: ${rawErrorMessage}`,
+      message: i18n.translate('xpack.observabilityAgentBuilder.aiInsight.error.indexUnavailable', {
+        defaultMessage: 'The source index for this data is unavailable.',
+      }),
+      retryable: false,
       isCloudEnabled,
       logger,
       request,
@@ -118,7 +113,8 @@ function toErrorForAiInsightStream({
   }
   return aiInsightSseErrorResponse({
     response,
-    message: rawErrorMessage,
+    message: getRawErrorMessage(error),
+    retryable: true,
     isCloudEnabled,
     logger,
     request,
