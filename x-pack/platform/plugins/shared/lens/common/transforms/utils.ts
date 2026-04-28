@@ -15,6 +15,7 @@ import type {
   LensSerializedAPIConfig,
 } from '@kbn/lens-common-2';
 
+import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 import { DOC_TYPE } from '../constants';
 
@@ -64,13 +65,17 @@ export function unflattenAPIConfig(
 /**
  * Inverse of {@link unflattenAPIConfig}: merges nested `attributes` (Lens API chart shape)
  * into the root object for dashboard app wire format when `lens.apiFormat` is enabled.
+ *
+ * Panel-level `title`/`description` take precedence over chart-level ones
  */
 export function flattenApiConfig(
   config: LensByValueSerializedAPIConfig
 ): LensByValueFlattenedSerializedAPIConfig {
   const { attributes, ...panelState } = config;
+  const { title: _title, description: _description, ...chartFields } = attributes as LensApiConfig;
+
   return {
     ...panelState,
-    ...attributes,
-  } as LensByValueFlattenedSerializedAPIConfig;
+    ...chartFields,
+  } satisfies LensByValueFlattenedSerializedAPIConfig;
 }

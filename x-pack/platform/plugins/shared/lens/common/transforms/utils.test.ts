@@ -29,4 +29,40 @@ describe('flattenApiConfig / unflattenAPIConfig', () => {
     expect(back.title).toBe('Panel');
     expect(back.attributes).toEqual(chartFields);
   });
+
+  it('panel-level title and description take precedence over chart-level ones', () => {
+    const chartFields = {
+      type: 'xy',
+      title: 'Chart Title',
+      description: 'Chart Desc',
+    } as LensApiConfig;
+    const nested: LensByValueSerializedAPIConfig = {
+      title: 'Panel Title',
+      description: 'Panel Desc',
+      attributes: chartFields,
+    };
+
+    const flat = flattenApiConfig(nested);
+
+    expect(flat.title).toBe('Panel Title');
+    expect(flat.description).toBe('Panel Desc');
+    expect(flat.type).toBe('xy');
+  });
+
+  it('strips chart-level title/description even when no panel-level ones are set', () => {
+    const chartFields = {
+      type: 'metric',
+      title: 'Chart Title',
+      description: 'Chart Desc',
+    } as LensApiConfig;
+    const nested: LensByValueSerializedAPIConfig = {
+      attributes: chartFields,
+    };
+
+    const flat = flattenApiConfig(nested);
+
+    expect(flat.title).toBeUndefined();
+    expect(flat.description).toBeUndefined();
+    expect(flat.type).toBe('metric');
+  });
 });
