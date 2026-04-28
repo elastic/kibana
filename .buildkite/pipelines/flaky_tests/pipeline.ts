@@ -174,6 +174,15 @@ if (hasScoutSuites) {
       t.type === 'scoutConfig' && t.count > 0
   );
 
+  // Tell the planner how many jobs are already committed by FTR/Cypress + fixed-overhead
+  // steps, so it can refuse to fan out Scout into a build that would bust the platform's
+  // 500-job cap. Mirrors the BASE_JOBS + non-Scout sum used in the pre-flight check above.
+  const reservedJobsForPlanner =
+    BASE_JOBS +
+    testSuites
+      .filter((t) => t.type !== 'scoutConfig')
+      .reduce((acc, t) => acc + t.count, 0);
+
   steps.push({
     command: '.buildkite/scripts/steps/test/scout/discover_and_plan_flaky.sh',
     label: 'Discover and plan Scout flaky steps',
@@ -185,6 +194,7 @@ if (hasScoutSuites) {
       SCOUT_FLAKY_REQUESTS: JSON.stringify(scoutFlakyRequests),
       SCOUT_FLAKY_CONCURRENCY: String(concurrency),
       SCOUT_FLAKY_CONCURRENCY_GROUP: process.env.UUID ?? '',
+      SCOUT_FLAKY_RESERVED_JOBS: String(reservedJobsForPlanner),
     },
     retry: {
       automatic: [{ exit_status: '-1', limit: 3 }],

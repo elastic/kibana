@@ -32,6 +32,13 @@ export interface PickScoutFlakyRunOrderOptions {
   concurrencyGroup?: string;
   /** Step keys the generated steps must wait for (defaults to ['build']). */
   dependsOn?: string[];
+  /**
+   * Number of Buildkite jobs already reserved by other parts of the build (e.g. FTR/Cypress
+   * suites and fixed-overhead steps like build_kibana / post_stats). Counted against the
+   * MAX_JOBS budget so the planner doesn't expand Scout fan-out past the platform cap.
+   * Defaults to 0 (Scout is the only contributor).
+   */
+  reservedJobs?: number;
 }
 
 // Normalize "./foo/bar.config.ts" -> "foo/bar.config.ts" so it matches manifest entries.
@@ -53,13 +60,14 @@ const buildSteps = (
   requests: ScoutFlakyRequest[],
   configIndex: Map<string, ModuleDiscoveryInfo['configs'][number]>,
   options: Required<Pick<PickScoutFlakyRunOrderOptions, 'concurrency'>> &
-    Pick<PickScoutFlakyRunOrderOptions, 'concurrencyGroup' | 'dependsOn'> & {
+    Pick<PickScoutFlakyRunOrderOptions, 'concurrencyGroup' | 'dependsOn' | 'reservedJobs'> & {
       extraEnv: Record<string, string>;
     }
 ): BuildkiteCommandStep[] => {
   const steps: BuildkiteCommandStep[] = [];
   let suiteIndex = 0;
-  let totalJobs = 0;
+  let scoutJobs = 0;
+  const reservedJobs = options.reservedJobs ?? 0;
 
   for (const req of requests) {
     if (!req || req.type !== 'scoutConfig') {
@@ -89,12 +97,24 @@ const buildSteps = (
       );
     }
 
-    for (const mode of entry.serverRunFlags) {
-      totalJobs += req.count;
-      if (totalJobs > MAX_JOBS) {
+    // Dedupe modes in case the manifest contains duplicate (arch, domain) entries, and
+    // log a warning so the upstream issue is visible.
+    const modes = [...new Set(entry.serverRunFlags)];
+    if (modes.length !== entry.serverRunFlags.length) {
+      console.warn(
+        `⚠️ scoutConfig '${normalized}' had duplicate serverRunFlags in the manifest ` +
+          `(${entry.serverRunFlags.length} entries, ${modes.length} unique). ` +
+          `Deduping for step generation; consider fixing the discovery output.`
+      );
+    }
+
+    for (const mode of modes) {
+      scoutJobs += req.count;
+      if (reservedJobs + scoutJobs > MAX_JOBS) {
         throw new Error(
-          `Expanding scoutConfigs across (arch, domain) modes produced more than ${MAX_JOBS} ` +
-            `Buildkite jobs (counted ${totalJobs} so far). Lower the per-config 'count' or ` +
+          `Total Buildkite jobs would exceed the platform cap of ${MAX_JOBS} ` +
+            `(${reservedJobs} reserved by FTR/Cypress + fixed steps, ${scoutJobs} from Scout ` +
+            `fan-out across (arch, domain) modes). Lower per-config 'count' values or ` +
             `request fewer configs in this run.`
         );
       }
@@ -157,6 +177,7 @@ export async function pickScoutFlakyRunOrder(
     concurrency: options.concurrency,
     concurrencyGroup: options.concurrencyGroup,
     dependsOn: options.dependsOn,
+    reservedJobs: options.reservedJobs,
     extraEnv,
   });
 

@@ -40,6 +40,12 @@ const parseRequests = (raw: string): ScoutFlakyRequest[] => {
     if (Number.isNaN(concurrency)) {
       throw new Error(`Invalid SCOUT_FLAKY_CONCURRENCY: ${process.env.SCOUT_FLAKY_CONCURRENCY}`);
     }
+    const reservedJobs = parseInt(process.env.SCOUT_FLAKY_RESERVED_JOBS ?? '0', 10);
+    if (Number.isNaN(reservedJobs) || reservedJobs < 0) {
+      throw new Error(
+        `Invalid SCOUT_FLAKY_RESERVED_JOBS: ${process.env.SCOUT_FLAKY_RESERVED_JOBS}`
+      );
+    }
     const concurrencyGroup = process.env.SCOUT_FLAKY_CONCURRENCY_GROUP || undefined;
 
     const manifestPath = path.resolve(getKibanaDir(), MANIFEST_RELATIVE_PATH);
@@ -47,6 +53,7 @@ const parseRequests = (raw: string): ScoutFlakyRequest[] => {
     await pickScoutFlakyRunOrder(manifestPath, requests, {
       concurrency,
       concurrencyGroup,
+      reservedJobs,
     });
   } catch (ex) {
     console.error(`+++ Scout flaky planner error: ${ex.message}`);
