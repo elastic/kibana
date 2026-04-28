@@ -39,10 +39,15 @@ export interface PrefixResult {
 }
 
 export enum ReplacementRangeStrategyKind {
+  /** Replace the active prefix inside a scoped fragment. */
   SCOPED_PREFIX = 'scoped_prefix',
+  /** Replace the whole scoped fragment. */
   WHOLE_SCOPE = 'whole_scope',
+  /** Replace a quoted literal's value, keeping the quotes. */
   QUOTED_VALUE = 'quoted_value',
+  /** Replace trailing whitespace before the cursor. */
   TRAILING_WHITESPACE = 'trailing_whitespace',
+  /** Replace the entire root query. */
   ROOT_QUERY = 'root_query',
 }
 
