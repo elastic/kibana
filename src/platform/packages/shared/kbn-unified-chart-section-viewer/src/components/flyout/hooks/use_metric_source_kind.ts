@@ -12,23 +12,18 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
 import { useExternalServices } from '../../../context/external_services';
 
-/**
- * Source kinds the metrics flyout knows about. `INDEX` doubles as the tag key
- * produced by the data_views plugin's `responseToItemArray` for plain indices,
- * so we can compare against it directly when reading `_resolve/index` results.
- * See:
- * https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_views/public/services/get_indices.ts
- *
- * TODO: Replace this string literal with a constant exported from
- * @kbn/data-views-plugin so producer and consumer share the same source of
- * truth. See https://github.com/elastic/kibana/issues/265126
- */
+// Tag key emitted by data_views.getIndices() / responseToItemArray for plain
+// indices (vs data streams). Coupled to that plugin's response shape.
+// TODO: import from @kbn/data-views-plugin once exported
+// (https://github.com/elastic/kibana/issues/265126).
+const DATA_VIEWS_INDEX_TAG_KEY = 'index';
+
 export const METRIC_SOURCE_KIND = {
   DATA_STREAM: 'data_stream',
   INDEX: 'index',
 } as const;
 
-export type MetricSourceKind = 'data_stream' | 'index';
+export type MetricSourceKind = (typeof METRIC_SOURCE_KIND)[keyof typeof METRIC_SOURCE_KIND];
 
 export interface UseMetricSourceKindResult {
   kind: MetricSourceKind;
@@ -36,11 +31,11 @@ export interface UseMetricSourceKindResult {
 
 /**
  * Classifies a metric source via `dataViews.getIndices` (`_resolve/index`).
- * Best-effort: returns `fallbackKind` for every "I don't know yet" case (no
- * `dataViews`, no `name`, in flight, fetch error, source not found). Only
- * flips when the response confirms a different kind. Caller owns the
- * optimistic default, which lets the hook stay a pure classifier with no
- * flicker.
+ * Best-effort: returns `fallbackKind` whenever the kind cannot be determined
+ * (missing `dataViews`, missing `name`, request in flight, fetch error, or
+ * source not found in the response). Only flips when the response confirms a
+ * different kind. The caller owns the optimistic default, which keeps this
+ * hook a pure classifier and avoids flicker.
  */
 export const useMetricSourceKind = (
   name: string | undefined,
@@ -116,7 +111,7 @@ const fetchSourceKind = async (
   });
   const item = matched.find((m) => m.name === name);
   if (!item) return undefined;
-  return item.tags.some((t) => t.key === METRIC_SOURCE_KIND.INDEX)
+  return item.tags.some((t) => t.key === DATA_VIEWS_INDEX_TAG_KEY)
     ? METRIC_SOURCE_KIND.INDEX
     : METRIC_SOURCE_KIND.DATA_STREAM;
 };
