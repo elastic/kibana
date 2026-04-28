@@ -124,6 +124,28 @@ describe('useMetricSourceKind', () => {
     expect(getIndices).toHaveBeenCalledTimes(2);
   });
 
+  it('evicts the cache when source is not in the response so subsequent lookups retry', async () => {
+    const getIndices = jest
+      .fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([matchedItem('eventually-found', 'data_stream')]);
+    mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
+
+    const first = renderHook(() =>
+      useMetricSourceKind('eventually-found', METRIC_SOURCE_KIND.INDEX)
+    );
+    await waitFor(() => expect(getIndices).toHaveBeenCalledTimes(1));
+    expect(first.result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX);
+
+    const second = renderHook(() =>
+      useMetricSourceKind('eventually-found', METRIC_SOURCE_KIND.INDEX)
+    );
+    await waitFor(() =>
+      expect(second.result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM)
+    );
+    expect(getIndices).toHaveBeenCalledTimes(2);
+  });
+
   it('deduplicates concurrent requests for the same name (cache)', async () => {
     const getIndices = jest.fn().mockResolvedValue([matchedItem('dedup-source', 'index')]);
     mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
