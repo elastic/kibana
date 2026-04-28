@@ -45,11 +45,28 @@ const checkLicense: CheckLicense = (license) => {
   return { valid: true, message: null };
 };
 
+const withServerlessAvailabilityCheck =
+  <P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = never>(
+    handler: RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method>
+  ): RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method> =>
+  async (context, request, response) => {
+    const { isWorkflowsAvailable } = await context.workflows;
+    if (!isWorkflowsAvailable) {
+      return response.forbidden({
+        body: {
+          message:
+            'Your project does not have Workflows available. Please upgrade your tier subscription.',
+        },
+      });
+    }
+    return handler(context, request, response);
+  };
+
 /**
- * Wraps a request handler with a license check.
- * If the license is not valid, it will return a 403 error with a message.
+ * Wraps a request handler with a license and serverless availability check.
+ * If workflows are not available in this environment, it will return a 403 (FORBIDDEN) error with a message.
  */
-export const withLicenseCheck = <
+export const withAvailabilityCheck = <
   P = unknown,
   Q = unknown,
   B = unknown,
@@ -57,4 +74,4 @@ export const withLicenseCheck = <
 >(
   handler: RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method>
 ): RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method> =>
-  wrapRouteWithLicenseCheck(checkLicense, handler);
+  wrapRouteWithLicenseCheck(checkLicense, withServerlessAvailabilityCheck(handler));

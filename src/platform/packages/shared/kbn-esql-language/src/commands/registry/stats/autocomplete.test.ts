@@ -145,7 +145,7 @@ describe('STATS Autocomplete', () => {
       contextWithRoot,
       cursorPosition
     );
-    return attachReplacementRanges(innerText, suggestions, contextWithRoot);
+    return attachReplacementRanges(innerText, suggestions, { commandContext: contextWithRoot });
   };
   describe('STATS ...', () => {
     afterEach(() => setTestFunctions([]));
