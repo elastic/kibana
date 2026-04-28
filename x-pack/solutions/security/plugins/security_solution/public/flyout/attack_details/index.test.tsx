@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { ATTACK_PREVIEW_BANNER, AttackDetailsPreviewPanel, AttackDetailsRightPanel } from '.';
 import { AttackDetailsPreviewPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
 import { useAttackDetailsContext } from './context';
@@ -138,6 +139,31 @@ describe('AttackDetailsPanel', () => {
       },
     });
     expect(openRightPanel).not.toHaveBeenCalled();
+  });
+
+  it('shows the remote document callout when searchHit._index is a CCS remote index', () => {
+    jest.mocked(useAttackDetailsContext).mockReturnValue({
+      attackId: 'attack-1',
+      indexName: 'remote-cluster:.alerts-security.alerts-default',
+      attack: null,
+      scopeId: 'scope',
+      isPreviewMode: false,
+      getFieldsData: jest.fn(),
+      browserFields: {},
+      dataFormattedForFieldBrowser: [],
+      searchHit: {
+        _id: 'attack-1',
+        _index: 'remote-cluster:.alerts-security.alerts-default',
+        _source: { [EVENT_KIND]: 'signal' },
+      },
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useAttackDetailsContext>);
+
+    const { getByText } = render(<AttackDetailsRightPanel />);
+
+    expect(
+      getByText('This alert originates from a remote cluster. Some features may not be available.')
+    ).toBeInTheDocument();
   });
 
   it('uses default preview banner', () => {

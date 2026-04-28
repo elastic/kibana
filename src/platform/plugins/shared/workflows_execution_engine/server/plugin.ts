@@ -17,8 +17,9 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
+  BulkScheduleWorkflowResult,
   ConcurrencySettings,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
@@ -48,6 +49,7 @@ import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
@@ -55,6 +57,7 @@ import type {
   ExecuteWorkflowStep,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
+  TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -141,6 +144,7 @@ export class WorkflowsExecutionEnginePlugin
     this.coreSetup = core;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
+    initializeTriggerEventsDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -240,8 +244,6 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
-                  isEventDrivenExecutionEnabled:
-                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -630,28 +632,17 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
-    // Helper function to create and persist a workflow execution
-    const createAndPersistWorkflowExecution = async (
-      workflow: WorkflowExecutionEngineModel,
-      context: Record<string, unknown>,
-      defaultTriggeredBy: string,
-      request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
-    ): Promise<{
-      workflowExecution: Partial<EsWorkflowExecution>;
-      repository: WorkflowExecutionRepository;
-    }> => {
-      await this.initialize(coreStart);
-
-      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
-
-      const workflowCreatedAt = new Date();
+    // Builds an execution document without persisting it. Shared by the
+    // single-item persist helper and the bulk scheduling path.
+    const buildWorkflowExecutionDocument = (args: {
+      workflow: WorkflowExecutionEngineModel;
+      context: Record<string, unknown>;
+      defaultTriggeredBy: string;
+      authenticatedUser: string;
+      now: Date;
+    }): Partial<EsWorkflowExecution> => {
+      const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-      const executedBy = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const dispatchEventId =
@@ -665,8 +656,8 @@ export class WorkflowsExecutionEnginePlugin
         yaml: workflow.yaml,
         context,
         status: ExecutionStatus.PENDING,
-        createdAt: workflowCreatedAt.toISOString(),
-        executedBy,
+        createdAt: now.toISOString(),
+        executedBy: authenticatedUser,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
@@ -682,13 +673,44 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
+      return workflowExecution;
+    };
+
+    const createAndPersistWorkflowExecution = async (
+      workflow: WorkflowExecutionEngineModel,
+      context: Record<string, unknown>,
+      defaultTriggeredBy: string,
+      request: KibanaRequest,
+      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+    ): Promise<{
+      workflowExecution: Partial<EsWorkflowExecution>;
+      repository: WorkflowExecutionRepository;
+    }> => {
+      await this.initialize(coreStart);
+
+      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+
+      const authenticatedUser = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+
+      const workflowExecution = buildWorkflowExecutionDocument({
+        workflow,
+        context,
+        defaultTriggeredBy,
+        authenticatedUser,
+        now: new Date(),
+      });
+
       // Only pay the refresh cost when the concurrency check will actually run.
       // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
       // When a check will run, the caller dictates the strategy: manual/UI paths use
       // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
       // (piggybacks on the scheduled cycle, lower cluster cost).
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: concurrencyGroupKey ? options.refresh : false,
+        refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
       });
 
       return { workflowExecution, repository: workflowExecutionRepository };
@@ -854,6 +876,165 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    const bulkScheduleWorkflow = async (
+      items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+      request: KibanaRequest
+    ): Promise<BulkScheduleWorkflowResult> => {
+      if (items.length === 0) {
+        return [];
+      }
+
+      await checkLicense(plugins.licensing);
+      await this.initialize(coreStart);
+
+      const authenticatedUser = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+      const now = new Date();
+
+      const results: BulkScheduleWorkflowResult = new Array(items.length);
+
+      const spaceIdFor = (item: (typeof items)[number]) =>
+        (item.context.spaceId as string | undefined) || 'default';
+
+      // Single ES search for the enabled flags of every (workflowId, spaceId)
+      // referenced by the batch. Skips `isTestRun` items (they are not indexed).
+      const enabledRefs = items
+        .filter((item) => !item.workflow.isTestRun)
+        .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
+      const enabledMap =
+        enabledRefs.length === 0
+          ? new Map<string, boolean>()
+          : await workflowRepository.areWorkflowsEnabled(enabledRefs);
+
+      interface PreparedItem {
+        idx: number;
+        workflowExecution: Partial<EsWorkflowExecution>;
+      }
+      const prepared: PreparedItem[] = [];
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        try {
+          if (!item.workflow.isTestRun) {
+            const spaceId = spaceIdFor(item);
+            const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
+            if (!enabled) {
+              throw new Error(
+                `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
+              );
+            }
+          }
+          const workflowExecution = buildWorkflowExecutionDocument({
+            workflow: item.workflow,
+            context: item.context,
+            defaultTriggeredBy: 'alert',
+            authenticatedUser,
+            now,
+          });
+          prepared.push({ idx, workflowExecution });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          results[idx] = { status: 'error', error: { message } };
+        }
+      }
+
+      if (prepared.length === 0) {
+        return results;
+      }
+
+      // Bulk write all prepared executions in a single _bulk call.
+      // `refresh: 'wait_for'` matches the single-item scheduleWorkflow path
+      // so downstream concurrency checks see the freshly-written docs.
+      const bulkWriteResults = await workflowExecutionRepository.bulkCreateWorkflowExecutions(
+        prepared.map((p) => p.workflowExecution),
+        { refresh: 'wait_for' }
+      );
+
+      // Map per-doc bulk errors back to results; keep succeeded items for the
+      // concurrency + task-scheduling passes.
+      const succeeded: PreparedItem[] = [];
+      for (let i = 0; i < prepared.length; i++) {
+        const p = prepared[i];
+        const writeResult = bulkWriteResults[i];
+        if ('error' in writeResult) {
+          results[p.idx] = {
+            status: 'error',
+            error: { message: writeResult.error },
+          };
+        } else {
+          succeeded.push(p);
+        }
+      }
+
+      if (succeeded.length === 0) {
+        return results;
+      }
+
+      // Every item with a persisted doc returns 'scheduled' with its id, regardless
+      // of whether the concurrency check drops it (matches single-item scheduleWorkflow).
+      for (const p of succeeded) {
+        results[p.idx] = {
+          status: 'scheduled',
+          workflowExecutionId: p.workflowExecution.id as string,
+        };
+      }
+
+      // Concurrency checks for items in the same group must run sequentially:
+      // they read and mutate the same ES state, so running them in parallel
+      // would let siblings in one batch see each other as "in flight" and,
+      // with max=1 and strategy='drop', drop every item; with
+      // 'cancel-in-progress' they would also race to cancel each other.
+      // Items without a key, and items in different groups, stay parallel.
+      const keylessItems: PreparedItem[] = [];
+      const bucketsByGroup = new Map<string, PreparedItem[]>();
+      for (const p of succeeded) {
+        const groupKey = p.workflowExecution.concurrencyGroupKey;
+        if (!groupKey) {
+          keylessItems.push(p);
+        } else {
+          const bucketKey = `${p.workflowExecution.spaceId ?? 'default'}:${groupKey}`;
+          const existing = bucketsByGroup.get(bucketKey);
+          if (existing) {
+            existing.push(p);
+          } else {
+            bucketsByGroup.set(bucketKey, [p]);
+          }
+        }
+      }
+
+      const passingIdx = new Set<number>();
+      const runCheck = async (p: PreparedItem) => {
+        if (await this.checkConcurrencyIfNeeded(p.workflowExecution)) {
+          passingIdx.add(p.idx);
+        }
+      };
+      await Promise.all([
+        ...keylessItems.map(runCheck),
+        ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
+          for (const p of bucket) {
+            await runCheck(p);
+          }
+        }),
+      ]);
+
+      const toSchedule = succeeded.filter((p) => passingIdx.has(p.idx));
+      if (toSchedule.length > 0) {
+        const tasks = toSchedule.map((p) =>
+          createTaskInstance(
+            p.workflowExecution,
+            generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
+          )
+        );
+        await plugins.taskManager.bulkSchedule(tasks, { request });
+        this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
+      }
+
+      return results;
+    };
+
     const executeWorkflowStep: ExecuteWorkflowStep = async (
       workflow,
       stepId,
@@ -940,16 +1121,9 @@ export class WorkflowsExecutionEnginePlugin
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
       }
 
-      if (
-        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-          workflowExecution.status
-        )
-      ) {
-        // Already in a terminal state or being canceled
+      if (isTerminalStatus(workflowExecution.status)) {
         return;
       }
-
-      const cancelledAt = new Date().toISOString();
 
       if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
         await cancelWaitingWorkflow({
@@ -964,9 +1138,12 @@ export class WorkflowsExecutionEnginePlugin
 
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
+        ...(workflowExecution.status === ExecutionStatus.PENDING
+          ? { status: ExecutionStatus.CANCELLED }
+          : {}),
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt,
+        cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
@@ -1056,38 +1233,36 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const triggerEventHandler = new TriggerEventHandler({
+      coreStart,
+      workflowsExtensions: plugins.workflowsExtensions,
+      spaces: plugins.spaces?.spacesService,
+      scheduleWorkflow,
+      logger: this.logger,
+      config: this.config.eventDriven,
+    });
+
+    const triggerEvents: TriggerEventsContract = {
+      emitEvent: (params) => triggerEventHandler.handleEvent(params),
+      isEnabled: this.config.eventDriven.enabled,
+      isLogEventsEnabled: this.config.eventDriven.logEvents,
+      maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+    };
+
     return {
       workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,
       scheduleWorkflow,
+      bulkScheduleWorkflow,
       cancelWorkflowExecution,
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
-      isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
-      isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
-      getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),
-      getMaxWorkflowDepth: this.getMaxWorkflowDepth.bind(this),
+      triggerEvents,
     };
   }
 
   public stop() {}
-
-  private isEventDrivenExecutionEnabled(): boolean {
-    return this.config?.eventDriven?.enabled ?? true;
-  }
-
-  private isLogTriggerEventsEnabled(): boolean {
-    return this.config?.eventDriven?.logEvents ?? true;
-  }
-
-  private getMaxEventChainDepth(): number {
-    return this.config?.eventDriven?.maxChainDepth ?? 10;
-  }
-
-  private getMaxWorkflowDepth(): number {
-    return this.config?.maxWorkflowDepth ?? 10;
-  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

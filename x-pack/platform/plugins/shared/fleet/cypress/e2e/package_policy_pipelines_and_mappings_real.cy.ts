@@ -97,14 +97,12 @@ describe('Input package create and edit package policy', () => {
   it('should show pipelines editor with link to pipeline', () => {
     editPackagePolicyandShowAdvanced(INPUT_TEST_PACKAGE, packagePolicyName);
     cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('not.contain', 'Pipeline not found');
     cy.get('body').should('contain', '"managed_by": "fleet"');
   });
   it('should show mappings editor with link to create custom template', () => {
     editPackagePolicyandShowAdvanced(INPUT_TEST_PACKAGE, packagePolicyName);
     cy.getBySel(POLICY_EDITOR.CREATE_MAPPINGS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('contain', `Create component template`);
   });
 });

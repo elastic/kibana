@@ -14,14 +14,17 @@ export type EntitySourceInput = NonNullable<
   CreateWatchlistRequestBodyInput['entitySources']
 >[number];
 
-export type ToggleId = 'entityStore' | 'indexPattern';
+export type ToggleId = 'none' | 'entityStore' | 'indexPattern';
 export type SourceType = 'store' | 'index';
+
+export const DEFAULT_RANGE = { start: 'now-10d', end: 'now' };
 
 /** State kept independently for each source type. */
 export interface PerTypeState {
   filterQuery: Query;
   indexPatterns: Array<EuiComboBoxOptionOption<string>>;
   entityField: string;
+  range: { start: string; end: string };
   /** True once the user (or hydration) has supplied data for this type. */
   dirty: boolean;
 }
@@ -43,8 +46,11 @@ export const ENTITY_FIELD_OPTIONS = [
   { value: 'user.email', inputDisplay: 'user.email' },
 ];
 
-export const toggleToType = (id: ToggleId): SourceType =>
-  id === 'entityStore' ? 'store' : 'index';
+export const toggleToType = (id: ToggleId): SourceType | undefined => {
+  if (id === 'entityStore') return 'store';
+  if (id === 'indexPattern') return 'index';
+  return undefined;
+};
 
 /** Extract the query string from a persisted entity source. */
 export const queryFromSource = (s?: EntitySourceInput): string =>
@@ -61,7 +67,8 @@ export const stateFromSource = (s?: EntitySourceInput): PerTypeState => ({
   filterQuery: s ? { query: queryFromSource(s), language: 'kuery' } : EMPTY_QUERY,
   indexPatterns: indexPatternsFromSource(s),
   entityField: s?.identifierField ?? '',
-  dirty: Boolean(s),
+  range: s?.range ?? DEFAULT_RANGE,
+  dirty: false,
 });
 
 export const buildStoreSource = (
@@ -85,6 +92,7 @@ export const buildIndexSource = (state: PerTypeState, watchlistName: string): En
     indexPattern: patternValue || undefined,
     identifierField: state.entityField || undefined,
     queryRule: (state.filterQuery.query as string) || undefined,
+    range: state.range,
   };
 };
 
@@ -114,8 +122,11 @@ export const splitInitialSources = (
 };
 
 /** Pick the default toggle based on which initial sources exist. */
-export const computeDefaultToggle = (initial: InitialByType): ToggleId =>
-  initial.index && !initial.store ? 'indexPattern' : 'entityStore';
+export const computeDefaultToggle = (initial: InitialByType): ToggleId => {
+  if (initial.index) return 'indexPattern';
+  if (initial.store) return 'entityStore';
+  return 'none';
+};
 
 /**
  * Build the entitySources array that gets written into the form state.
@@ -129,8 +140,12 @@ export const buildEntitySources = (
   isManaged: boolean,
   watchlistName: string
 ): EntitySourceInput[] | undefined => {
+  const type = toggleToType(toggle);
+
+  // "None" selected — explicitly clear all sources for both managed and non-managed
+  if (!type) return [];
+
   if (!isManaged) {
-    const type = toggleToType(toggle);
     return [buildSource(type, states[type], watchlistName)];
   }
 
@@ -146,24 +161,60 @@ export const buildEntitySources = (
   return sources.length ? sources : undefined;
 };
 
-export const getToggleButtons = (
-  isEditMode: boolean,
-  isManaged: boolean,
-  initialEntitySource?: EntitySourceInput
-) => {
-  // Lock the toggle in edit mode for non-managed watchlists so users can't
-  // switch an existing source's type.  Managed watchlists keep both enabled.
-  const lockedType = initialEntitySource?.type === 'index' ? 'indexPattern' : 'entityStore';
+export const getToggleButtons = () => {
   return [
+    {
+      id: 'none',
+      label: 'None',
+    },
     {
       id: 'entityStore',
       label: 'Entity Store',
-      isDisabled: isEditMode && !isManaged && lockedType !== 'entityStore',
     },
     {
       id: 'indexPattern',
       label: 'IndexPattern',
-      isDisabled: isEditMode && !isManaged && lockedType !== 'indexPattern',
     },
   ];
+};
+
+const hasFilterQuery = (state: PerTypeState): boolean =>
+  Boolean((state.filterQuery.query as string)?.trim());
+
+/**
+ * Validates that all required rule-based fields are filled for the active source type.
+ * - Entity store: filter is required
+ * - Index pattern: index pattern, filter, lookback period, and entity field are required
+ */
+export const validateRuleBasedSource = (
+  toggle: ToggleId,
+  states: Record<SourceType, PerTypeState>
+): { isValid: boolean; errors: Partial<Record<string, boolean>> } => {
+  const type = toggleToType(toggle);
+  if (!type) return { isValid: true, errors: {} };
+  const state = states[type];
+
+  if (type === 'store') {
+    const filterMissing = !hasFilterQuery(state);
+    return {
+      isValid: !filterMissing,
+      errors: { filterQuery: filterMissing },
+    };
+  }
+
+  // index type
+  const indexPatternMissing = state.indexPatterns.length === 0;
+  const filterMissing = !hasFilterQuery(state);
+  const rangeMissing = !state.range?.start || !state.range?.end;
+  const entityFieldMissing = !state.entityField;
+
+  return {
+    isValid: !indexPatternMissing && !filterMissing && !rangeMissing && !entityFieldMissing,
+    errors: {
+      indexPattern: indexPatternMissing,
+      filterQuery: filterMissing,
+      range: rangeMissing,
+      entityField: entityFieldMissing,
+    },
+  };
 };

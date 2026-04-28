@@ -9,5 +9,6 @@ export * from './create';
 export * from './delete';
 export * from './get';
 export * from './list';
+export * from './prebuilt_install';
 export * from './search_indices';
 export * from './update';

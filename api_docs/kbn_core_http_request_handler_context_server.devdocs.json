@@ -19,7 +19,39 @@
         "tags": [],
         "label": "CoreRequestHandlerContext",
         "description": [
-          "\nThe `core` context provided to route handler.\n\nProvides the following clients and services:\n   - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client\n     which uses the credentials of the incoming request\n   - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing\n     all the registered types.\n   - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch\n     data client which uses the credentials of the incoming request\n   - {@link IUiSettingsClient | uiSettings.client} - uiSettings client\n     which uses the credentials of the incoming request"
+          "\nThe `core` context provided to route handler.\n\nProvides the following clients and services:\n   - ",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.SavedObjectsClient",
+            "text": "savedObjects.client"
+          },
+          " - Saved Objects client\n     which uses the credentials of the incoming request\n   - ",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.ISavedObjectTypeRegistry",
+            "text": "savedObjects.typeRegistry"
+          },
+          " - Type registry containing\n     all the registered types.\n   - ",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.IScopedClusterClient",
+            "text": "elasticsearch.client"
+          },
+          " - Elasticsearch\n     data client which uses the credentials of the incoming request\n   - ",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.IUiSettingsClient",
+            "text": "uiSettings.client"
+          },
+          " - uiSettings client\n     which uses the credentials of the incoming request"
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
         "lineNumber": 19,
@@ -34,7 +66,14 @@
             "tags": [],
             "label": "savedObjects",
             "description": [
-              "\n{@link SavedObjectsRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.SavedObjectsRequestHandlerContext",
+                "text": "SavedObjectsRequestHandlerContext"
+              }
             ],
             "signature": [
               "SavedObjectsRequestHandlerContext"
@@ -52,7 +91,14 @@
             "tags": [],
             "label": "elasticsearch",
             "description": [
-              "\n{@link ElasticsearchRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.ElasticsearchRequestHandlerContext",
+                "text": "ElasticsearchRequestHandlerContext"
+              }
             ],
             "signature": [
               "ElasticsearchRequestHandlerContext"
@@ -70,7 +116,14 @@
             "tags": [],
             "label": "featureFlags",
             "description": [
-              "\n{@link FeatureFlagsRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.FeatureFlagsRequestHandlerContext",
+                "text": "FeatureFlagsRequestHandlerContext"
+              }
             ],
             "signature": [
               "{ getBooleanValue: (flagName: string, fallbackValue: boolean) => Promise<boolean>; getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>; getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>; }"
@@ -88,7 +141,14 @@
             "tags": [],
             "label": "uiSettings",
             "description": [
-              "\n{@link UiSettingsRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.UiSettingsRequestHandlerContext",
+                "text": "UiSettingsRequestHandlerContext"
+              }
             ],
             "signature": [
               "UiSettingsRequestHandlerContext"
@@ -106,7 +166,14 @@
             "tags": [],
             "label": "deprecations",
             "description": [
-              "\n{@link DeprecationsRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.DeprecationsRequestHandlerContext",
+                "text": "DeprecationsRequestHandlerContext"
+              }
             ],
             "signature": [
               "DeprecationsRequestHandlerContext"
@@ -124,7 +191,14 @@
             "tags": [],
             "label": "security",
             "description": [
-              "\n{@link SecurityRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.SecurityRequestHandlerContext",
+                "text": "SecurityRequestHandlerContext"
+              }
             ],
             "signature": [
               "SecurityRequestHandlerContext"
@@ -142,7 +216,14 @@
             "tags": [],
             "label": "userProfile",
             "description": [
-              "\n{@link UserProfileRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.UserProfileRequestHandlerContext",
+                "text": "UserProfileRequestHandlerContext"
+              }
             ],
             "signature": [
               "UserProfileRequestHandlerContext"
@@ -178,7 +259,14 @@
             "tags": [],
             "label": "uiSettings",
             "description": [
-              "\n{@link PrebootUiSettingsRequestHandlerContext}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.PrebootUiSettingsRequestHandlerContext",
+                "text": "PrebootUiSettingsRequestHandlerContext"
+              }
             ],
             "signature": [
               "PrebootUiSettingsRequestHandlerContext"
@@ -219,7 +307,14 @@
             "tags": [],
             "label": "core",
             "description": [
-              "\nPromise that resolves the {@link PrebootCoreRequestHandlerContext}"
+              "\nPromise that resolves the ",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.PrebootCoreRequestHandlerContext",
+                "text": "PrebootCoreRequestHandlerContext"
+              }
             ],
             "signature": [
               "Promise<",
@@ -257,7 +352,15 @@
             "tags": [],
             "label": "client",
             "description": [
-              "\nThe {@link IUiSettingsClient | UI Settings client}."
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "UI Settings client"
+              },
+              "."
             ],
             "signature": [
               "IUiSettingsClient"
@@ -298,7 +401,14 @@
             "tags": [],
             "label": "core",
             "description": [
-              "\nPromise that resolves the {@link CoreRequestHandlerContext}"
+              "\nPromise that resolves the ",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.CoreRequestHandlerContext",
+                "text": "CoreRequestHandlerContext"
+              }
             ],
             "signature": [
               "Promise<",

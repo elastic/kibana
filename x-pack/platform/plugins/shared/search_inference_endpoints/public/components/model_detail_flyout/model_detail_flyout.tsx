@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -26,15 +26,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
+import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/endpoint_info';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -56,6 +58,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
+  const usageTracker = useUsageTracker();
+
+  useEffect(() => {
+    usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
+  }, [usageTracker, modelId]);
 
   const { endpoints, displayName, modelAuthor } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
@@ -83,25 +90,32 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       taskTypeOptions: taskTypes.map((tt) => ({
         value: tt,
         label: tt,
-        description: TASK_TYPE_TOOLTIPS[tt] ?? '',
+        description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
       })),
     };
   }, [endpoints]);
 
   const handleOpenAddModal = useCallback(() => {
+    usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_add_endpoint`]);
     setEditingEndpoint(undefined);
     setIsModalOpen(true);
-  }, []);
+  }, [usageTracker]);
 
-  const handleOpenEditModal = useCallback((endpoint: InferenceAPIConfigResponse) => {
-    setEditingEndpoint(endpoint);
-    setIsModalOpen(true);
-  }, []);
+  const handleOpenEditModal = useCallback(
+    (endpoint: InferenceAPIConfigResponse) => {
+      usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_edit_endpoint`]);
+      setEditingEndpoint(endpoint);
+      setIsModalOpen(true);
+    },
+    [usageTracker]
+  );
 
   const handleCloseModal = useCallback(() => {
+    const modalKind = editingEndpoint ? 'edit_endpoint' : 'add_endpoint';
+    usageTracker.count([EventType.MODAL_CLOSED, `${EventType.MODAL_CLOSED}_${modalKind}`]);
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
-  }, []);
+  }, [usageTracker, editingEndpoint]);
 
   const descriptionListItems = [
     {
@@ -115,7 +129,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         defaultMessage: 'Documentation',
       }),
       description: (
-        <EuiLink href={docLinks.elasticInferenceService} target="_blank" external>
+        <EuiLink
+          data-test-subj="searchInferenceEndpointsModelDetailFlyoutViewDocumentationLink"
+          href={docLinks.elasticInferenceService}
+          target="_blank"
+          external
+        >
           {i18n.translate(
             'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
             { defaultMessage: 'View documentation' }
