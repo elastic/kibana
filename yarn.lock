@@ -7779,6 +7779,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-common-types@link:x-pack/platform/packages/shared/ml/common-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-creation-wizard-utils@link:x-pack/platform/packages/private/ml/creation_wizard_utils":
   version "0.0.0"
   uid ""
@@ -7860,6 +7864,10 @@
   uid ""
 
 "@kbn/ml-runtime-field-utils@link:x-pack/platform/packages/shared/ml/runtime_field_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-server-schemas@link:x-pack/platform/packages/shared/ml/server-schemas":
   version "0.0.0"
   uid ""
 

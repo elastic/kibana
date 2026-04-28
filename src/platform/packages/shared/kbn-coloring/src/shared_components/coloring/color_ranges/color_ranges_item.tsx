@@ -197,6 +197,7 @@ export function ColorRangeItem({
               setPopoverInFocus(false);
             }}
             isInvalid={!isColorValid}
+            aria-label={selectNewColorText}
           />
         ) : (
           <EuiIcon

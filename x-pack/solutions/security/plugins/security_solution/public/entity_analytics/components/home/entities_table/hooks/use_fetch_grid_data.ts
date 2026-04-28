@@ -74,6 +74,11 @@ interface Entity {
 type LatestEntitiesRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestEntitiesResponse = IKibanaSearchResponse<estypes.SearchResponse<Entity, never>>;
 
+export const buildInspectData = (queryParams: object, rawResponse: object) => ({
+  dsl: [JSON.stringify(queryParams)],
+  response: [JSON.stringify(rawResponse, null, 2)],
+});
+
 export function useFetchGridData(options: UseEntitiesOptions) {
   const {
     data,
@@ -102,10 +107,7 @@ export function useFetchGridData(options: UseEntitiesOptions) {
       return {
         page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
-        inspect: {
-          dsl: [JSON.stringify(queryParams)],
-          response: [JSON.stringify(rawResponse)],
-        },
+        inspect: buildInspectData(queryParams, rawResponse),
       };
     },
     {

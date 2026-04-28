@@ -61,6 +61,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "WorkflowRepositoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -209,6 +210,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -299,6 +301,7 @@
             "lineNumber": 65,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -356,6 +359,7 @@
             "lineNumber": 30,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorContractUnion",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -419,6 +423,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -537,6 +542,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -788,6 +794,7 @@
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "JSONSchema7",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -811,6 +818,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RootSchemaType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -825,7 +833,15 @@
         "tags": [],
         "label": "createWorkflowLiquidEngine",
         "description": [
-          "\nCreates a LiquidJS engine configured for workflow templates.\nUses an in-memory filesystem, restricts tags to the supported set,\nand enables ownPropertyOnly.\n\nCallers can pass additional {@link LiquidOptions} (e.g. `strictFilters`)\nwhich are merged with the enforced defaults."
+          "\nCreates a LiquidJS engine configured for workflow templates.\nUses an in-memory filesystem, restricts tags to the supported set,\nand enables ownPropertyOnly.\n\nCallers can pass additional ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.LiquidOptions",
+            "text": "LiquidOptions"
+          },
+          " (e.g. `strictFilters`)\nwhich are merged with the enforced defaults."
         ],
         "signature": [
           "(options?: ",
@@ -854,6 +870,7 @@
             "lineNumber": 78,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "LiquidOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1013,6 +1030,7 @@
             "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExtractSchemaPropertyPathsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1095,6 +1113,7 @@
             "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowGraph",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1406,6 +1425,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StepDeprecationInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2576,6 +2596,7 @@
             "lineNumber": 79,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2627,6 +2648,7 @@
             "lineNumber": 64,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2722,6 +2744,7 @@
             "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorContractUnion",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2759,6 +2782,7 @@
             "lineNumber": 90,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2968,6 +2992,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3029,6 +3054,7 @@
             "lineNumber": 93,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3110,6 +3136,7 @@
             "lineNumber": 95,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3161,6 +3188,7 @@
             "lineNumber": 55,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3219,6 +3247,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorContractUnion",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3256,6 +3285,7 @@
             "lineNumber": 92,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3293,6 +3323,7 @@
             "lineNumber": 97,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3330,6 +3361,7 @@
             "lineNumber": 96,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3404,6 +3436,7 @@
             "lineNumber": 98,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3455,6 +3488,7 @@
             "lineNumber": 68,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3529,6 +3563,7 @@
             "lineNumber": 89,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3612,6 +3647,7 @@
             "lineNumber": 94,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Step",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3736,6 +3772,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowYaml",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3843,6 +3880,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidateKqlAgainstSchemaOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -6125,6 +6163,7 @@
                 "lineNumber": 562,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6179,6 +6218,7 @@
                 "lineNumber": 571,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6203,6 +6243,7 @@
                 "lineNumber": 572,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6289,6 +6330,7 @@
                 "lineNumber": 582,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectionContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6378,6 +6420,7 @@
                 "lineNumber": 135,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -8807,6 +8850,7 @@
                 "lineNumber": 403,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "WorkflowListItemDto",
                 "trackAdoption": false,
                 "isRequired": true
               }
