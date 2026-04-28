@@ -28,9 +28,9 @@ export class GenAiSettingsPage {
       await this.page.gotoApp('management/ai/genAiSettings');
       await this.page.testSubj.waitForSelector('genAiSettingsPage', {
         state: 'visible',
-        timeout: 3_000,
+        timeout: 10_000,
       });
-    }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
+    }).toPass({ timeout: 35_000, intervals: [500, 1_000, 2_000] });
   }
 
   /**

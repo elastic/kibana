@@ -48,6 +48,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 )}
               >
                 <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsModelEndpointRowViewButton"
                   iconType="eye"
                   size="xs"
                   color="primary"
@@ -70,6 +71,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 )}
               >
                 <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsModelEndpointRowCopyButton"
                   iconType="copyClipboard"
                   size="xs"
                   color="text"
@@ -101,6 +103,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 >
                   <span tabIndex={0}>
                     <EuiButtonIcon
+                      data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
                       iconType="lock"
                       size="xs"
                       isDisabled

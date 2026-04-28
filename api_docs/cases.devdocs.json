@@ -35,6 +35,7 @@
             "lineNumber": 62,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "CaseViewPathParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1297,6 +1298,7 @@
                 "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CasesClientArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1426,7 +1428,15 @@
         "tags": [],
         "label": "CloseReasonValidator",
         "description": [
-          "\nValidates a close reason.\nRegister via {@link CasesServerSetup.registerCloseReasonValidator}."
+          "\nValidates a close reason.\nRegister via ",
+          {
+            "pluginId": "cases",
+            "scope": "server",
+            "docId": "kibCasesPluginApi",
+            "section": "def-server.CasesServerSetup.registerCloseReasonValidator",
+            "text": "CasesServerSetup.registerCloseReasonValidator"
+          },
+          "."
         ],
         "signature": [
           "(closeReason: string, request: ",
@@ -1472,6 +1482,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -1587,6 +1598,7 @@
               "lineNumber": 123,
               "columnNumber": 49,
               "deprecated": false,
+              "docsReferencedTypeName": "CloseReasonValidator",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1657,12 +1669,20 @@
               "lineNumber": 109,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
           ],
           "returnComment": [
-            "a {@link CasesClient }"
+            "a ",
+            {
+              "pluginId": "cases",
+              "scope": "server",
+              "docId": "kibCasesPluginApi",
+              "section": "def-server.CasesClient",
+              "text": "CasesClient"
+            }
           ]
         },
         {
@@ -1848,6 +1868,7 @@
             "lineNumber": 24,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Owner",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1961,6 +1982,7 @@
             "lineNumber": 30,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2426,6 +2448,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttachmentRequestV2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2735,6 +2758,7 @@
             "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttachmentRequestV2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2774,6 +2798,7 @@
             "lineNumber": 13,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorFactory",
             "trackAdoption": false,
             "isRequired": true
           }
