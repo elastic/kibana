@@ -232,7 +232,15 @@
         "tags": [],
         "label": "createUiamOAuthAccessToken",
         "description": [
-          "\nCreates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.\n\nUnlike {@link createUiamSessionTokens}, this creates a token with `typ: 'oauth-access-token'`\nthat includes OAuth-specific claims (audience, scope, client_id, connection_id)."
+          "\nCreates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.\n\nUnlike ",
+          {
+            "pluginId": "@kbn/mock-idp-utils",
+            "scope": "common",
+            "docId": "kibKbnMockIdpUtilsPluginApi",
+            "section": "def-common.createUiamSessionTokens",
+            "text": "createUiamSessionTokens"
+          },
+          ", this creates a token with `typ: 'oauth-access-token'`\nthat includes OAuth-specific claims (audience, scope, client_id, connection_id)."
         ],
         "signature": [
           "({\n  username,\n  organizationId,\n  projectType,\n  roles,\n  audience,\n  fullName,\n  email,\n  accessTokenLifetimeSec = 3600,\n}: { username: string; organizationId: string; projectType: string; roles: string[]; audience: string; fullName?: string | undefined; email?: string | undefined; accessTokenLifetimeSec?: number | undefined; }) => Promise<string>"
@@ -566,6 +574,7 @@
             "lineNumber": 249,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
