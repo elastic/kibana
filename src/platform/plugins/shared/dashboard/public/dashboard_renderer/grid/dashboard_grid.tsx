@@ -14,8 +14,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
-import { GridLayout } from '@kbn/grid-layout';
+import type { GridLayoutData, GridPanelData } from '@kbn/ui-grid-layout';
+import { GridLayout } from '@kbn/ui-grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';

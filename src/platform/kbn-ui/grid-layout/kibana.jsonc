@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/grid-layout",
+  "id": "@kbn/ui-grid-layout",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",
   "visibility": "private"

@@ -11,7 +11,7 @@ import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable, PublishesESQLVariables } from '@kbn/esql-types';
-import type { GridLayoutData } from '@kbn/grid-layout';
+import type { GridLayoutData } from '@kbn/ui-grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   CanExpandPanels,

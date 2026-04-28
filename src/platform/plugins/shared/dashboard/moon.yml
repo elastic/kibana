@@ -87,7 +87,7 @@ dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/visualization-utils'
   - '@kbn/core-rendering-browser'
-  - '@kbn/grid-layout'
+  - '@kbn/ui-grid-layout'
   - '@kbn/ui-actions-browser'
   - '@kbn/esql-types'
   - '@kbn/saved-objects-tagging-plugin'

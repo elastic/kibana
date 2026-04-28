@@ -28,7 +28,7 @@ import { v4 } from 'uuid';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
+import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/ui-grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
