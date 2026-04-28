@@ -8,13 +8,13 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SEMANTIC_LAYER_FEATURE_ID, apiPrivileges } from '../common/features';
+import { AGENT_CONTEXT_LAYER_FEATURE_ID, apiPrivileges } from '../common/features';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
-    id: SEMANTIC_LAYER_FEATURE_ID,
-    name: i18n.translate('xpack.semanticLayer.feature.name', {
-      defaultMessage: 'Semantic Layer',
+    id: AGENT_CONTEXT_LAYER_FEATURE_ID,
+    name: i18n.translate('xpack.agentContextLayer.feature.name', {
+      defaultMessage: 'Agent Context Layer',
     }),
     minimumLicense: 'enterprise',
     order: 1001,
@@ -24,7 +24,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        api: [apiPrivileges.readSemanticLayer],
+        api: [apiPrivileges.readAgentContextLayer],
         catalogue: [],
         savedObject: {
           all: [],
@@ -34,7 +34,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       },
       read: {
         app: [],
-        api: [apiPrivileges.readSemanticLayer],
+        api: [apiPrivileges.readAgentContextLayer],
         catalogue: [],
         savedObject: {
           all: [],

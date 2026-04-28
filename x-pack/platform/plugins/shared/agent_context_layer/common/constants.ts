@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export const SEMANTIC_LAYER_FEATURE_ID = 'semanticLayer';
-
-export const apiPrivileges = {
-  readSemanticLayer: `${SEMANTIC_LAYER_FEATURE_ID}:read`,
-};
+export const internalApiPath = '/internal/agent_context_layer';
+export const smlSearchPath = `${internalApiPath}/sml/_search`;

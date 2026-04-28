@@ -37,9 +37,9 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-} from '@kbn/semantic-layer-plugin/server';
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
@@ -62,7 +62,7 @@ export interface AgentBuilderSetupDependencies {
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
-  semanticLayer: SemanticLayerPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -75,7 +75,7 @@ export interface AgentBuilderStartDependencies {
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
-  semanticLayer: SemanticLayerPluginStart;
+  agentContextLayer: AgentContextLayerPluginStart;
 }
 
 export interface AttachmentsSetup {

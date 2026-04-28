@@ -49,7 +49,7 @@ export class AgentBuilderPlatformPlugin
       setupDeps,
     });
     registerSkills(setupDeps.agentBuilder);
-    setupDeps.semanticLayer.registerType(visualizationSmlType);
+    setupDeps.agentContextLayer.registerType(visualizationSmlType);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {
@@ -58,7 +58,7 @@ export class AgentBuilderPlatformPlugin
       },
       logger: this.logger.get('sml-connector'),
     });
-    setupDeps.semanticLayer.registerType(connectorSmlType);
+    setupDeps.agentContextLayer.registerType(connectorSmlType);
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),

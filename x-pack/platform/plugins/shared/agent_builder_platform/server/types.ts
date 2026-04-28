@@ -11,9 +11,9 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server';
 import type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-} from '@kbn/semantic-layer-plugin/server';
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
@@ -22,13 +22,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
-  semanticLayer: SemanticLayerPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
   actions: ActionsPluginSetup;
 }
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  semanticLayer: SemanticLayerPluginStart;
+  agentContextLayer: AgentContextLayerPluginStart;
   llmTasks?: LlmTasksPluginStart;
   cases?: CasesServerStart;
   spaces?: SpacesPluginStart;

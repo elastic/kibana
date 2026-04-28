@@ -14,7 +14,7 @@
       "dashboard",
       "dashboardMarkdown",
       "data",
-      "semanticLayer",
+      "agentContextLayer",
       "share",
       "unifiedSearch"
     ]

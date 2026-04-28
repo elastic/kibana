@@ -6,12 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { SemanticLayerPluginSetup } from '@kbn/semantic-layer-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  semanticLayer: SemanticLayerPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
 }
 
 export interface DashboardAgentStartDependencies {

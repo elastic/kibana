@@ -7,23 +7,23 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
 const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
+    if (key === AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
     return undefined;
   }),
 });
 
-const createMockSemanticLayer = () => ({
+const createMockAgentContextLayer = () => ({
   indexAttachment: jest.fn().mockResolvedValue(undefined),
 });
 
 const createMockGetStartServices = (
   uiSettingsClient = createMockUiSettingsClient(),
-  semanticLayer = createMockSemanticLayer()
+  agentContextLayer = createMockAgentContextLayer()
 ) =>
   jest.fn().mockResolvedValue([
     {
@@ -33,7 +33,7 @@ const createMockGetStartServices = (
     },
     {
       spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } },
-      semanticLayer,
+      agentContextLayer,
     },
     {},
   ]);
@@ -60,40 +60,40 @@ describe('createConnectorLifecycleHandler', () => {
 
   describe('onPostCreate', () => {
     it('skips unsuccessful saves', async () => {
-      const semanticLayer = createMockSemanticLayer();
+      const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
       });
 
       await handler.onPostCreate(createBaseParams({ wasSuccessful: false }) as any);
 
-      expect(semanticLayer.indexAttachment).not.toHaveBeenCalled();
+      expect(agentContextLayer.indexAttachment).not.toHaveBeenCalled();
     });
 
     it('skips when experimental features are disabled', async () => {
       const uiSettingsClient = createMockUiSettingsClient(false);
-      const semanticLayer = createMockSemanticLayer();
+      const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(uiSettingsClient, semanticLayer),
+        getStartServices: createMockGetStartServices(uiSettingsClient, agentContextLayer),
       });
 
       await handler.onPostCreate(createBaseParams() as any);
 
-      expect(semanticLayer.indexAttachment).not.toHaveBeenCalled();
+      expect(agentContextLayer.indexAttachment).not.toHaveBeenCalled();
     });
 
     it('indexes connector into SML', async () => {
-      const semanticLayer = createMockSemanticLayer();
+      const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
       });
 
       await handler.onPostCreate(createBaseParams() as any);
 
-      expect(semanticLayer.indexAttachment).toHaveBeenCalledWith(
+      expect(agentContextLayer.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
           originId: 'connector-abc',
           attachmentType: AttachmentType.connector,
@@ -103,11 +103,11 @@ describe('createConnectorLifecycleHandler', () => {
     });
 
     it('logs warning but does not throw when indexAttachment fails', async () => {
-      const semanticLayer = createMockSemanticLayer();
-      semanticLayer.indexAttachment.mockRejectedValue(new Error('SML error'));
+      const agentContextLayer = createMockAgentContextLayer();
+      agentContextLayer.indexAttachment.mockRejectedValue(new Error('SML error'));
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
       });
 
       await expect(handler.onPostCreate(createBaseParams() as any)).resolves.toBeUndefined();
@@ -120,15 +120,15 @@ describe('createConnectorLifecycleHandler', () => {
 
   describe('onPostDelete', () => {
     it('removes connector from SML', async () => {
-      const semanticLayer = createMockSemanticLayer();
+      const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
       });
 
       await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
 
-      expect(semanticLayer.indexAttachment).toHaveBeenCalledWith(
+      expect(agentContextLayer.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
           originId: 'connector-abc',
           attachmentType: AttachmentType.connector,
@@ -138,11 +138,11 @@ describe('createConnectorLifecycleHandler', () => {
     });
 
     it('logs warning but does not throw when SML delete fails', async () => {
-      const semanticLayer = createMockSemanticLayer();
-      semanticLayer.indexAttachment.mockRejectedValue(new Error('SML delete error'));
+      const agentContextLayer = createMockAgentContextLayer();
+      agentContextLayer.indexAttachment.mockRejectedValue(new Error('SML delete error'));
       const handler = createConnectorLifecycleHandler({
         logger,
-        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), agentContextLayer),
       });
 
       await expect(

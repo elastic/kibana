@@ -24,22 +24,22 @@ import type {
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
-export interface SemanticLayerSetupDependencies {
+export interface AgentContextLayerSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
 
-export interface SemanticLayerStartDependencies {
+export interface AgentContextLayerStartDependencies {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
 }
 
-export interface SemanticLayerPluginSetup {
+export interface AgentContextLayerPluginSetup {
   registerType: (definition: SmlTypeDefinition) => void;
 }
 
-export interface SemanticLayerPluginStart {
+export interface AgentContextLayerPluginStart {
   search: (params: {
     query: string;
     size?: number;

@@ -1,11 +1,11 @@
 {
   "type": "plugin",
-  "id": "@kbn/semantic-layer-plugin",
+  "id": "@kbn/agent-context-layer-plugin",
   "owner": "@elastic/workchat-eng",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "semanticLayer",
+    "id": "agentContextLayer",
     "server": true,
     "browser": true,
     "requiredPlugins": ["features", "taskManager"],

@@ -46,7 +46,7 @@ import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
-import type { SmlIndexAttachmentParams, SmlIndexAction } from '@kbn/semantic-layer-plugin/server';
+import type { SmlIndexAttachmentParams, SmlIndexAction } from '@kbn/agent-context-layer-plugin/server';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 

@@ -8,18 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '../../common/features';
-import { smlSearchPath } from '../../common/constants';
 import type { SmlSearchHttpResponse } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '../../common/http_api/sml';
+import { smlSearchPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
-import type { SemanticLayerStartDependencies, SemanticLayerPluginStart } from '../types';
+import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 
 const SML_SEARCH_SIZE_MAX = 1000;
 
-const SEMANTIC_LAYER_READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.readSemanticLayer] },
+const AGENT_CONTEXT_LAYER_READ_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [apiPrivileges.readAgentContextLayer] },
 };
 
 export const registerSearchRoute = ({
@@ -29,7 +29,7 @@ export const registerSearchRoute = ({
   getSmlService,
 }: {
   router: IRouter;
-  coreSetup: CoreSetup<SemanticLayerStartDependencies, SemanticLayerPluginStart>;
+  coreSetup: CoreSetup<AgentContextLayerStartDependencies, AgentContextLayerPluginStart>;
   logger: Logger;
   getSmlService: () => SmlService;
 }) => {
@@ -44,7 +44,7 @@ export const registerSearchRoute = ({
         }),
       },
       options: { access: 'internal' },
-      security: SEMANTIC_LAYER_READ_SECURITY,
+      security: AGENT_CONTEXT_LAYER_READ_SECURITY,
     },
     async (ctx, request, response) => {
       try {
@@ -52,7 +52,7 @@ export const registerSearchRoute = ({
         const uiSettingsClient = coreContext.uiSettings.client;
 
         const isEnabled = await uiSettingsClient.get<boolean>(
-          SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isEnabled) {
           return response.notFound();

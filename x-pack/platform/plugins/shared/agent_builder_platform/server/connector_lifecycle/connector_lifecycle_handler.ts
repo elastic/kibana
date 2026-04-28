@@ -7,19 +7,19 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
-import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
 } from '@kbn/actions-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SemanticLayerPluginStart } from '@kbn/semantic-layer-plugin/server';
+import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
 
 interface ConnectorLifecycleHandlerDeps {
   logger: Logger;
   getStartServices: () => Promise<
-    [CoreStart, { spaces?: SpacesPluginStart; semanticLayer: SemanticLayerPluginStart }, unknown]
+    [CoreStart, { spaces?: SpacesPluginStart; agentContextLayer: AgentContextLayerPluginStart }, unknown]
   >;
 }
 
@@ -43,12 +43,12 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
         const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-          SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isExperimentalFeaturesEnabled) return;
 
         try {
-          await startDeps.semanticLayer.indexAttachment({
+          await startDeps.agentContextLayer.indexAttachment({
             request,
             originId: connectorId,
             attachmentType: AttachmentType.connector,
@@ -84,7 +84,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
 
         try {
-          await startDeps.semanticLayer.indexAttachment({
+          await startDeps.agentContextLayer.indexAttachment({
             request,
             originId: connectorId,
             attachmentType: AttachmentType.connector,

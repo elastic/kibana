@@ -106,7 +106,7 @@
     "@kbn/es-query",
     "@kbn/core-saved-objects-api-server",
     "@kbn/security-plugin-types-server",
-    "@kbn/semantic-layer-plugin",
+    "@kbn/agent-context-layer-plugin",
     "@kbn/shared-ux-ai-components",
     "@kbn/fs",
     "@kbn/react-hooks",

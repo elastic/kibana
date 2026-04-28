@@ -35,9 +35,9 @@ export type {
   SmlListItem,
   SmlSearchResult,
   SmlIndexAttachmentParams,
-} from '@kbn/semantic-layer-plugin/server';
+} from '@kbn/agent-context-layer-plugin/server';
 
-export { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/semantic-layer-plugin/server';
+export { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-context-layer-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

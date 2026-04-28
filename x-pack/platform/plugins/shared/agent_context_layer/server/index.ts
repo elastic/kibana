@@ -7,16 +7,16 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
 import type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-  SemanticLayerSetupDependencies,
-  SemanticLayerStartDependencies,
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+  AgentContextLayerSetupDependencies,
+  AgentContextLayerStartDependencies,
 } from './types';
-import { SemanticLayerPlugin } from './plugin';
+import { AgentContextLayerPlugin } from './plugin';
 
 export type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
   SmlIndexAttachmentParams,
 } from './types';
 
@@ -36,10 +36,10 @@ export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_it
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
 
 export const plugin: PluginInitializer<
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-  SemanticLayerSetupDependencies,
-  SemanticLayerStartDependencies
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+  AgentContextLayerSetupDependencies,
+  AgentContextLayerStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext) => {
-  return new SemanticLayerPlugin(pluginInitializerContext);
+  return new AgentContextLayerPlugin(pluginInitializerContext);
 };

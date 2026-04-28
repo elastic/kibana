@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/semantic_layer'],
+export const AGENT_CONTEXT_LAYER_FEATURE_ID = 'agentContextLayer';
+
+export const apiPrivileges = {
+  readAgentContextLayer: `${AGENT_CONTEXT_LAYER_FEATURE_ID}:read`,
 };

@@ -182,11 +182,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getSemanticLayer: () => {
+      getAgentContextLayer: () => {
         if (!this.startDeps) {
-          throw new Error('Semantic layer not available — plugin has not started');
+          throw new Error('Agent Context Layer not available — plugin has not started');
         }
-        return this.startDeps.semanticLayer;
+        return this.startDeps.agentContextLayer;
       },
     });
     smlTools.forEach((tool) => {
@@ -307,7 +307,7 @@ export class AgentBuilderPlugin
 
   /**
    * Remove orphaned `agent_builder:sml_crawler` tasks that were migrated
-   * to `semantic_layer:sml_crawler`. Safe to call on every start —
+   * to `agent_context_layer:sml_crawler`. Safe to call on every start —
    * removeIfExists is a no-op when the task doesn't exist.
    */
   private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {

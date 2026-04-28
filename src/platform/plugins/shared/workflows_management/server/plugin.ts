@@ -17,9 +17,9 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-} from '@kbn/semantic-layer-plugin/server';
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
@@ -310,17 +310,17 @@ export class WorkflowsPlugin
 
     void core.plugins
       .onSetup<{
-        semanticLayer: SemanticLayerPluginSetup;
-      }>('semanticLayer')
-      .then(({ semanticLayer }) => {
-        if (semanticLayer.found) {
-          semanticLayer.contract.registerType(createWorkflowSmlType(api));
+        agentContextLayer: AgentContextLayerPluginSetup;
+      }>('agentContextLayer')
+      .then(({ agentContextLayer }) => {
+        if (agentContextLayer.found) {
+          agentContextLayer.contract.registerType(createWorkflowSmlType(api));
           this.logger.debug(
-            'Workflows Management: Workflow SML type registered with Semantic Layer'
+            'Workflows Management: Workflow SML type registered with Agent Context Layer'
           );
         } else {
           this.logger.warn(
-            'Workflows Management: semanticLayer not available — workflow SML type not registered'
+            'Workflows Management: agentContextLayer not available — workflow SML type not registered'
           );
         }
       })
@@ -330,10 +330,10 @@ export class WorkflowsPlugin
       });
 
     void core.plugins
-      .onStart<{ semanticLayer: SemanticLayerPluginStart }>('semanticLayer')
-      .then(({ semanticLayer }) => {
-        if (semanticLayer.found) {
-          api.setSmlIndexAttachment(semanticLayer.contract.indexAttachment, this.logger.get('sml'));
+      .onStart<{ agentContextLayer: AgentContextLayerPluginStart }>('agentContextLayer')
+      .then(({ agentContextLayer }) => {
+        if (agentContextLayer.found) {
+          api.setSmlIndexAttachment(agentContextLayer.contract.indexAttachment, this.logger.get('sml'));
           this.logger.debug(
             'Workflows Management: SML event-driven indexing wired to workflow CRUD'
           );
@@ -342,7 +342,7 @@ export class WorkflowsPlugin
       .catch((err) => {
         const message = err instanceof Error ? err.message : String(err);
         this.logger.warn(
-          `Workflows Management: Failed to wire SML indexing with Semantic Layer: ${message}`
+          `Workflows Management: Failed to wire SML indexing with Agent Context Layer: ${message}`
         );
       });
   }

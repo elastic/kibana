@@ -6,12 +6,12 @@
  */
 
 /**
- * Max length of `query` for POST `/internal/semantic_layer/sml/_search`.
+ * Max length of `query` for POST `/internal/agent_context_layer/sml/_search`.
  */
 export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
 
 /**
- * Response body for `POST /internal/semantic_layer/sml/_search`.
+ * Response body for `POST /internal/agent_context_layer/sml/_search`.
  */
 export interface SmlSearchHttpResponse {
   total: number;

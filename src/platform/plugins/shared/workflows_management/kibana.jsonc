@@ -33,6 +33,6 @@
       "licensing"
     ],
     "optionalPlugins": ["alerting", "serverless", "cloud"],
-    "runtimePluginDependencies": ["agentBuilder", "semanticLayer"]
+    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer"]
   }
 }

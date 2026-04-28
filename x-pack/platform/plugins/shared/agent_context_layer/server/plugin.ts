@@ -8,10 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type {
-  SemanticLayerPluginSetup,
-  SemanticLayerPluginStart,
-  SemanticLayerSetupDependencies,
-  SemanticLayerStartDependencies,
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+  AgentContextLayerSetupDependencies,
+  AgentContextLayerStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
 import { registerUISettings } from './ui_settings';
@@ -24,13 +24,13 @@ import {
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 
-export class SemanticLayerPlugin
+export class AgentContextLayerPlugin
   implements
     Plugin<
-      SemanticLayerPluginSetup,
-      SemanticLayerPluginStart,
-      SemanticLayerSetupDependencies,
-      SemanticLayerStartDependencies
+      AgentContextLayerPluginSetup,
+      AgentContextLayerPluginStart,
+      AgentContextLayerSetupDependencies,
+      AgentContextLayerStartDependencies
     >
 {
   private logger: Logger;
@@ -43,9 +43,9 @@ export class SemanticLayerPlugin
   }
 
   setup(
-    coreSetup: CoreSetup<SemanticLayerStartDependencies, SemanticLayerPluginStart>,
-    setupDeps: SemanticLayerSetupDependencies
-  ): SemanticLayerPluginSetup {
+    coreSetup: CoreSetup<AgentContextLayerStartDependencies, AgentContextLayerPluginStart>,
+    setupDeps: AgentContextLayerSetupDependencies
+  ): AgentContextLayerPluginSetup {
     registerFeatures({ features: setupDeps.features });
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
@@ -90,8 +90,8 @@ export class SemanticLayerPlugin
 
   start(
     coreStart: CoreStart,
-    { taskManager, spaces, security }: SemanticLayerStartDependencies
-  ): SemanticLayerPluginStart {
+    { taskManager, spaces, security }: AgentContextLayerStartDependencies
+  ): AgentContextLayerPluginStart {
     const { elasticsearch, savedObjects } = coreStart;
 
     this.smlService = this.smlServiceInstance.start({

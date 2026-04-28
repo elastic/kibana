@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SemanticLayerPluginStart } from '@kbn/semantic-layer-plugin/server';
+import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
 
 /**
  * Options for creating SML tools.
- * Uses a getter for lazy resolution — the semantic layer start contract
+ * Uses a getter for lazy resolution — the agent context layer start contract
  * is not available until after plugin start.
  */
 export interface SmlToolsOptions {
-  getSemanticLayer: () => SemanticLayerPluginStart;
+  getAgentContextLayer: () => AgentContextLayerPluginStart;
 }

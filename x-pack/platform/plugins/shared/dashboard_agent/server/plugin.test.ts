@@ -24,7 +24,7 @@ describe('DashboardAgentPlugin', () => {
           attachments: { registerType: registerAttachmentType },
           skills: { register: registerSkill },
         },
-        semanticLayer: {
+        agentContextLayer: {
           registerType: registerSmlType,
         },
       } as never

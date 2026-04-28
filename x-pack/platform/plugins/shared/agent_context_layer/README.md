@@ -1,6 +1,6 @@
-# Semantic Layer (`semanticLayer`)
+# Agent Context Layer (`agentContextLayer`)
 
-The Semantic Layer plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, etc.) via the **Semantic Metadata Layer (SML)**.
+The Agent Context Layer plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, etc.) via the **Semantic Metadata Layer (SML)**.
 
 It was extracted from the `agentBuilder` plugin to serve as an independent, shared platform service.
 
@@ -19,7 +19,7 @@ The SML makes Kibana content discoverable by maintaining a search index of asset
 ### Setup
 
 ```typescript
-interface SemanticLayerPluginSetup {
+interface AgentContextLayerPluginSetup {
   registerType(definition: SmlTypeDefinition): void;
 }
 ```
@@ -27,7 +27,7 @@ interface SemanticLayerPluginSetup {
 ### Start
 
 ```typescript
-interface SemanticLayerPluginStart {
+interface AgentContextLayerPluginStart {
   search(params): Promise<{ results: SmlSearchResult[]; total: number }>;
   checkItemsAccess(params): Promise<Map<string, boolean>>;
   getDocuments(params): Promise<Map<string, SmlDocument>>;
@@ -39,11 +39,11 @@ interface SemanticLayerPluginStart {
 
 ## Registering an SML type
 
-During plugin setup, call `semanticLayer.registerType()` with an `SmlTypeDefinition`:
+During plugin setup, call `agentContextLayer.registerType()` with an `SmlTypeDefinition`:
 
 ```typescript
-setup(core, { semanticLayer }) {
-  semanticLayer.registerType({
+setup(core, { agentContextLayer }) {
+  agentContextLayer.registerType({
     id: 'my-asset',
     list: async function* (context) { /* yield pages of items */ },
     getSmlData: async (originId, context) => { /* return chunks to index */ },
@@ -63,7 +63,7 @@ setup(core, { semanticLayer }) {
 
 ## Feature gating
 
-SML functionality is gated behind the `semanticLayer:experimentalFeatures` UI setting. The search route, crawler tasks, and Agent Builder SML tools all check this flag.
+SML functionality is gated behind the `agentContextLayer:experimentalFeatures` UI setting. The search route, crawler tasks, and Agent Builder SML tools all check this flag.
 
 ## Index naming
 
