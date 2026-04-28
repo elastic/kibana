@@ -544,6 +544,7 @@ function QueryModeChildrenList() {
   );
   const { createQueryStream, editQueryStream } = useStreamRoutingEvents();
   const canManage = 'privileges' in definition ? definition.privileges.manage : true;
+  const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   // Get child query stream names from the definition
   const childQueryStreamNames = useMemo(() => {
@@ -636,7 +637,9 @@ function QueryModeChildrenList() {
               <EuiToolTip
                 position="bottom"
                 content={
-                  !canManage
+                  isAtMaxNestingLevel
+                    ? maxNestingLevelText
+                    : !canManage
                     ? i18n.translate(
                         'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
                         {
@@ -651,7 +654,7 @@ function QueryModeChildrenList() {
                   size="s"
                   data-test-subj="streamsAppQueryModeCreateButton"
                   onClick={createQueryStream}
-                  disabled={!canManage}
+                  disabled={!canManage || isAtMaxNestingLevel}
                 >
                   {i18n.translate('xpack.streams.queryModeChildrenList.createQueryStream', {
                     defaultMessage: 'Create query sub-stream',
