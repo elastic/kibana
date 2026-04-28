@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import type { CloudInfo } from '../services/ml_server_info';
+import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
 import {
   DeploymentSetup,
