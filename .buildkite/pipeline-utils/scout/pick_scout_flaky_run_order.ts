@@ -30,7 +30,7 @@ export interface PickScoutFlakyRunOrderOptions {
   concurrency: number;
   /** Concurrency group key (typically the trigger UUID); empty string disables grouping. */
   concurrencyGroup?: string;
-  /** Step keys the generated steps must wait for (defaults to ['build', 'scout_playwright_configs']). */
+  /** Step keys the generated steps must wait for (defaults to ['build']). */
   dependsOn?: string[];
 }
 
@@ -114,7 +114,7 @@ const buildSteps = (
         concurrency_group: options.concurrencyGroup,
         concurrency_method: 'eager',
         agents: expandAgentQueue(entry.usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-        depends_on: options.dependsOn ?? ['build', 'scout_playwright_configs'],
+        depends_on: options.dependsOn ?? ['build'],
         timeout_in_minutes: 60,
         retry: {
           automatic: [{ exit_status: '-1', limit: 3 }],

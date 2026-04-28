@@ -8,7 +8,6 @@
  */
 
 import path from 'path';
-import { execFileSync } from 'child_process';
 import {
   getKibanaDir,
   getRequiredEnv,
@@ -16,7 +15,10 @@ import {
   type ScoutFlakyRequest,
 } from '#pipeline-utils';
 
-const MANIFEST_ARTIFACT = 'scout_playwright_configs.json';
+// The manifest is produced earlier in the same step by `discover_and_plan_flaky.sh`
+// (which runs `scout discover-playwright-configs --save`); we read it directly from
+// disk rather than going through a BK artifact round-trip.
+const MANIFEST_RELATIVE_PATH = path.join('.scout', 'test_configs', 'scout_playwright_configs.json');
 
 const parseRequests = (raw: string): ScoutFlakyRequest[] => {
   let parsed: unknown;
@@ -31,14 +33,6 @@ const parseRequests = (raw: string): ScoutFlakyRequest[] => {
   return parsed as ScoutFlakyRequest[];
 };
 
-const downloadManifest = (destinationDir: string): string => {
-  console.log(`--- Downloading Scout Playwright config manifest (${MANIFEST_ARTIFACT})`);
-  execFileSync('buildkite-agent', ['artifact', 'download', MANIFEST_ARTIFACT, destinationDir], {
-    stdio: ['ignore', 'inherit', 'inherit'],
-  });
-  return path.resolve(destinationDir, MANIFEST_ARTIFACT);
-};
-
 (async () => {
   try {
     const requests = parseRequests(getRequiredEnv('SCOUT_FLAKY_REQUESTS'));
@@ -48,7 +42,7 @@ const downloadManifest = (destinationDir: string): string => {
     }
     const concurrencyGroup = process.env.SCOUT_FLAKY_CONCURRENCY_GROUP || undefined;
 
-    const manifestPath = downloadManifest(getKibanaDir());
+    const manifestPath = path.resolve(getKibanaDir(), MANIFEST_RELATIVE_PATH);
 
     await pickScoutFlakyRunOrder(manifestPath, requests, {
       concurrency,

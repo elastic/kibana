@@ -163,33 +163,24 @@ steps.push({
 });
 
 if (hasScoutSuites) {
-  steps.push({
-    command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
-    label: 'Discover Scout Playwright configs',
-    agents: expandAgentQueue('n2-4-spot'),
-    key: 'scout_playwright_configs',
-    timeout_in_minutes: 30,
-    retry: {
-      automatic: [{ exit_status: '-1', limit: 3 }],
-    },
-  });
-
-  // Reads scout_playwright_configs.json (uploaded by the discovery step) and emits one
-  // Buildkite step per (scoutConfig x arch x domain) so each mode runs in its own worker
-  // with `parallelism: count`. Keeping it as a separate step makes the planning logic
-  // independently retryable and visible in the BK UI.
+  // Single step that bootstraps Kibana, runs Scout config discovery, and dynamically
+  // uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
+  // Discovery requires a full `yarn kbn bootstrap`, which is too heavy to run inside
+  // pipeline.ts itself; combining discovery + planning here avoids paying for an
+  // extra agent boot and an artifact round-trip just to hand the manifest between
+  // two otherwise-coupled steps.
   const scoutFlakyRequests = testSuites.filter(
     (t): t is { type: 'scoutConfig'; scoutConfig: string; count: number } =>
       t.type === 'scoutConfig' && t.count > 0
   );
 
   steps.push({
-    command: 'ts-node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts',
-    label: 'Plan Scout flaky steps',
+    command: '.buildkite/scripts/steps/test/scout/discover_and_plan_flaky.sh',
+    label: 'Discover and plan Scout flaky steps',
     agents: expandAgentQueue('n2-4-spot'),
-    key: 'scout_flaky_planner',
-    depends_on: ['build', 'scout_playwright_configs'],
-    timeout_in_minutes: 10,
+    key: 'scout_flaky_setup',
+    depends_on: 'build',
+    timeout_in_minutes: 30,
     env: {
       SCOUT_FLAKY_REQUESTS: JSON.stringify(scoutFlakyRequests),
       SCOUT_FLAKY_CONCURRENCY: String(concurrency),
