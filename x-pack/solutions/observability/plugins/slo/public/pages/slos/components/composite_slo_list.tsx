@@ -11,7 +11,7 @@ import type { FindCompositeSLOResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDeleteCompositeSlo } from '../../../hooks/use_delete_composite_slo';
-import { useRefreshCompositeSloSummaries } from '../../../hooks/use_request_composite_slo_summary_on_list_visit';
+import { useRefreshCompositeSloSummaries } from '../../../hooks/use_refresh_composite_slo_summaries';
 import { useFetchCompositeHistoricalSummary } from '../../../hooks/use_fetch_composite_historical_summary';
 import { useFetchCompositeSloDetails } from '../../../hooks/use_fetch_composite_slo_details';
 import {
