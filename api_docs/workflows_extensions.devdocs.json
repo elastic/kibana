@@ -58,6 +58,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PublicStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -522,6 +523,7 @@
               "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicStepDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -575,6 +577,7 @@
               "lineNumber": 56,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicTriggerDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -706,6 +709,7 @@
                 "lineNumber": 55,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerTriggerDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -922,6 +926,7 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServerStepDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -972,6 +977,7 @@
             "lineNumber": 102,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1014,6 +1020,7 @@
             "lineNumber": 135,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1064,6 +1071,7 @@
             "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1087,6 +1095,7 @@
             "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventChainContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1309,6 +1318,7 @@
                 "lineNumber": 112,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "StepHandlerContext",
                 "trackAdoption": false
               }
             ]
@@ -1780,6 +1790,7 @@
                 "lineNumber": 71,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1988,6 +1999,7 @@
             "lineNumber": 58,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "EmitEventParams",
             "trackAdoption": false
           }
         ],
@@ -2079,6 +2091,7 @@
             "lineNumber": 122,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "StepHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -2170,6 +2183,7 @@
             "lineNumber": 112,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "StepHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -2310,6 +2324,7 @@
               "lineNumber": 96,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "ServerStepDefinitionOrLoader",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2375,6 +2390,7 @@
               "lineNumber": 105,
               "columnNumber": 29,
               "deprecated": false,
+              "docsReferencedTypeName": "ServerTriggerDefinition",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2417,6 +2433,7 @@
               "lineNumber": 113,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "TriggerEventHandler",
               "trackAdoption": false,
               "isRequired": true
             }

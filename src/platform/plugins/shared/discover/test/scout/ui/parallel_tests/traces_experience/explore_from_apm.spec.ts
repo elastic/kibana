@@ -18,6 +18,13 @@ import {
   expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
 
+// APM chart toolbars re-layout as sparkline data streams in, which can push the
+// "Open in Discover" icon out of the actionability window while Playwright is
+// retrying a click. Scout's default actionTimeout is 10s; on cloud CI the chart
+// can still be settling past that budget. Give these clicks the same 20s head
+// room we use for the waterfall render.
+const CHART_LINK_CLICK_TIMEOUT = 20000;
+
 // Kibana's redirect URL resolution + cold Discover load can exceed the default
 // 10s actionTimeout in CI, so navigation gets its own budget.
 const DISCOVER_NAVIGATION_TIMEOUT = 30000;
@@ -26,11 +33,15 @@ const DISCOVER_NAVIGATION_TIMEOUT = 30000;
 // 10s expect.timeout on cloud CI.
 const WATERFALL_RENDER_TIMEOUT = 20000;
 
-const clickAndWaitForDiscover = (page: ScoutPage, target: string | Locator) => {
+const clickAndWaitForDiscover = (
+  page: ScoutPage,
+  target: string | Locator,
+  clickOptions?: { timeout?: number }
+) => {
   const locator = typeof target === 'string' ? page.testSubj.locator(target) : target;
   return Promise.all([
     page.waitForURL('**/app/discover**', { timeout: DISCOVER_NAVIGATION_TIMEOUT }),
-    locator.click(),
+    locator.click(clickOptions),
   ]);
 };
 
@@ -96,7 +107,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmLatencyChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmLatencyChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
           await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
@@ -104,13 +117,17 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Throughput chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmServiceOverviewThroughputChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmServiceOverviewThroughputChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
@@ -137,19 +154,25 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmLatencyChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmLatencyChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Throughput chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmServiceOverviewThroughputChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmServiceOverviewThroughputChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
@@ -182,19 +205,25 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmLatencyChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmLatencyChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Throughput chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmServiceOverviewThroughputChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmServiceOverviewThroughputChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
@@ -243,7 +272,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover');
+          await clickAndWaitForDiscover(page, 'apmFailedTransactionRateChartOpenInDiscover', {
+            timeout: CHART_LINK_CLICK_TIMEOUT,
+          });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });

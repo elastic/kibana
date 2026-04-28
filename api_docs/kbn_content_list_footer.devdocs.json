@@ -49,6 +49,7 @@
             "lineNumber": 38,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentListFooterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -102,6 +103,7 @@
             "lineNumber": 39,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "PaginationComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -118,7 +120,15 @@
         "tags": [],
         "label": "ContentListFooterProps",
         "description": [
-          "\nProps for the {@link ContentListFooter} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-list-footer",
+            "scope": "public",
+            "docId": "kibKbnContentListFooterPluginApi",
+            "section": "def-public.ContentListFooter",
+            "text": "ContentListFooter"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
         "lineNumber": 14,
@@ -154,7 +164,15 @@
         "tags": [],
         "label": "PaginationComponentProps",
         "description": [
-          "\nProps for the pure {@link PaginationComponent}."
+          "\nProps for the pure ",
+          {
+            "pluginId": "@kbn/content-list-footer",
+            "scope": "public",
+            "docId": "kibKbnContentListFooterPluginApi",
+            "section": "def-public.PaginationComponent",
+            "text": "PaginationComponent"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
         "lineNumber": 13,
