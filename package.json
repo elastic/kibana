@@ -1268,7 +1268,7 @@
     "@langchain/langgraph": "1.2.0",
     "@langchain/langgraph-checkpoint": "1.0.0",
     "@langchain/openai": "1.2.12",
-    "@launchdarkly/node-server-sdk": "9.10.9",
+    "@launchdarkly/node-server-sdk": "9.10.10",
     "@launchdarkly/openfeature-node-server": "1.2.0",
     "@loaders.gl/core": "3.4.7",
     "@loaders.gl/json": "3.4.7",
