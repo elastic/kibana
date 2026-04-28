@@ -75,6 +75,15 @@ describe('useModelSettingsForm', () => {
     expect(result.current.isDirty).toBe(false);
   });
 
+  it('exposes effective recommended endpoints per child feature', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.effectiveRecommendedEndpoints).toEqual({
+      child_1: ['endpoint-a', 'endpoint-b'],
+      child_2: ['endpoint-c'],
+    });
+  });
+
   it('uses saved settings over recommendedEndpoints', () => {
     mockUseInferenceSettings.mockReturnValue({
       data: {
@@ -147,33 +156,6 @@ describe('useModelSettingsForm', () => {
     });
   });
 
-  it('resetSection restores recommendedEndpoints and saves immediately', () => {
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    act(() => {
-      result.current.updateEndpoints('child_1', ['custom-ep']);
-    });
-
-    act(() => {
-      result.current.resetSection('search');
-    });
-
-    expect(result.current.assignments.child_1).toEqual(['endpoint-a', 'endpoint-b']);
-    expect(result.current.assignments.child_2).toEqual(['endpoint-c']);
-    expect(mockSaveSettings).toHaveBeenCalledTimes(1);
-    expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
-  });
-
-  it('resetSection does nothing for unknown section', () => {
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    act(() => {
-      result.current.resetSection('nonexistent');
-    });
-
-    expect(mockSaveSettings).not.toHaveBeenCalled();
-  });
-
   it('falls back to Kibana default endpoint when child and parent have no recommendations', () => {
     const childWithNoRecommended: InferenceFeatureConfig = {
       ...childFeature2,
@@ -187,6 +169,9 @@ describe('useModelSettingsForm', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
     expect(result.current.assignments.child_2).toEqual([
+      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
+    ]);
+    expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual([
       defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
     ]);
   });
@@ -208,35 +193,10 @@ describe('useModelSettingsForm', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
     expect(result.current.assignments.child_2).toEqual(['parent-ep']);
+    expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual(['parent-ep']);
   });
 
-  it('resetSection falls back to parent recommendedEndpoints when child has none', () => {
-    const parentWithEndpoints: InferenceFeatureConfig = {
-      ...parentFeature,
-      recommendedEndpoints: ['parent-ep'],
-    };
-    const childWithNoRecommended: InferenceFeatureConfig = {
-      ...childFeature2,
-      recommendedEndpoints: [],
-    };
-    mockUseRegisteredFeatures.mockReturnValue({
-      features: [parentWithEndpoints, childFeature1, childWithNoRecommended],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    act(() => {
-      result.current.updateEndpoints('child_2', ['custom-ep']);
-    });
-    act(() => {
-      result.current.resetSection('search');
-    });
-
-    expect(result.current.assignments.child_2).toEqual(['parent-ep']);
-  });
-
-  it('save excludes features matching Kibana default endpoint from payload', () => {
+  it('save excludes features matching effective recommended endpoints from payload', () => {
     const childWithNoRecommended: InferenceFeatureConfig = {
       ...childFeature2,
       recommendedEndpoints: [],

@@ -9,36 +9,37 @@ import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface ResetDefaultsModalProps {
+interface Props {
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export const ResetDefaultsModal: React.FC<ResetDefaultsModalProps> = ({ onConfirm, onCancel }) => {
-  const modalTitleId = useGeneratedHtmlId();
+export const ResetToDefaultsModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
+  const titleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
-      aria-labelledby={modalTitleId}
-      titleProps={{ id: modalTitleId }}
-      title={i18n.translate('xpack.searchInferenceEndpoints.settings.resetModal.title', {
+      aria-labelledby={titleId}
+      titleProps={{ id: titleId }}
+      title={i18n.translate('xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.title', {
         defaultMessage: 'Reset to defaults',
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.resetModal.cancel',
+        'xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.cancel',
         { defaultMessage: 'Cancel' }
       )}
       confirmButtonText={i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.resetModal.confirm',
+        'xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.confirm',
         { defaultMessage: 'Reset to default' }
       )}
       buttonColor="primary"
-      data-test-subj="resetDefaultsModal"
+      defaultFocusedButton="confirm"
+      data-test-subj="resetToDefaultsModal"
     >
       <p>
-        {i18n.translate('xpack.searchInferenceEndpoints.settings.resetModal.body', {
+        {i18n.translate('xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.body', {
           defaultMessage:
             'This will discard your custom model selections for this feature and restore the recommended defaults.',
         })}

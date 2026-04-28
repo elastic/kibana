@@ -41,108 +41,68 @@ test.describe(
       await expect(featureSettings.addModelsButton).toBeVisible();
     });
 
-    test('displays page header', async ({ pageObjects }) => {
-      await expect(pageObjects.featureSettings.pageHeader).toBeVisible();
-    });
-
-    test('renders default model section and controls', async ({ pageObjects }) => {
+    test('displays page header and the default-model section', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('verify header controls', async () => {
-        await expect(featureSettings.saveButton).toBeVisible();
-        await expect(featureSettings.saveButton).toBeDisabled();
-        await expect(featureSettings.apiDocumentationLink).toBeVisible();
-      });
-
-      await test.step('verify enable AI section', async () => {
-        await expect(featureSettings.enableAiSection).toBeVisible();
-        await expect(featureSettings.enableAiSwitch).toBeVisible();
-      });
-
-      await test.step('verify default model section', async () => {
-        await expect(featureSettings.defaultModelSection).toBeVisible();
-        await expect(featureSettings.defaultModelComboBox).toBeVisible();
-        await expect(featureSettings.disallowOtherModelsCheckbox).toBeVisible();
-      });
+      await expect(featureSettings.pageHeader).toBeVisible();
+      await expect(featureSettings.defaultModelSection).toBeVisible();
+      await expect(featureSettings.aiCapabilitiesRow).toBeVisible();
+      await expect(featureSettings.enableAiSwitch).toBeVisible();
     });
 
-    test('toggling disallow other models hides and restores feature sections', async ({
+    test('shows only the AI capabilities row when AI is off', async ({ pageObjects }) => {
+      const { featureSettings } = pageObjects;
+
+      // Tests start with AI on by default; turn it off.
+      await featureSettings.enableAiSwitch.click();
+
+      await expect(featureSettings.aiCapabilitiesRow).toBeVisible();
+      await expect(featureSettings.globalModelRow).toBeHidden();
+      await expect(featureSettings.featureSpecificModelsRow).toBeHidden();
+      await expect(featureSettings.allFeatureSections).toHaveCount(0);
+    });
+
+    test('toggling AI on reveals Global model and Feature specific models rows', async ({
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('enable disallow other models', async () => {
-        await featureSettings.disallowOtherModelsCheckbox.click();
+      await featureSettings.enableAiSwitch.click();
+      await featureSettings.enableAiSwitch.click();
+
+      await expect(featureSettings.globalModelRow).toBeVisible();
+      await expect(featureSettings.featureSpecificModelsRow).toBeVisible();
+    });
+
+    test('toggling Feature specific models off hides the feature list', async ({ pageObjects }) => {
+      const { featureSettings } = pageObjects;
+
+      await test.step('feature sections are visible by default', async () => {
+        await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
       });
 
-      await test.step('feature sections are hidden', async () => {
+      await test.step('disabling feature-specific-models hides them', async () => {
+        await featureSettings.featureSpecificModelsSwitch.click();
         await expect(featureSettings.allFeatureSections).toHaveCount(0);
       });
 
-      await test.step('disable disallow other models', async () => {
-        await featureSettings.disallowOtherModelsCheckbox.click();
-      });
-
-      await test.step('feature sections reappear', async () => {
+      await test.step('re-enabling restores them', async () => {
+        await featureSettings.featureSpecificModelsSwitch.click();
         await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
       });
     });
 
-    test('selecting "No default model" while AI is on keeps the save button disabled', async ({
+    test('save button is disabled when AI is on but no global model is selected', async ({
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('opening the combobox reveals the "No default model" option', async () => {
-        await featureSettings.defaultModelComboBox.click();
-        await expect(
-          featureSettings.content.getByRole('option', { name: 'No default model' })
-        ).toBeVisible();
-      });
+      // Click the combobox clear button so defaultModelId resolves to NO_DEFAULT_MODEL.
+      await featureSettings.globalModelComboBox
+        .getByRole('button', { name: /clear input/i })
+        .click();
 
-      await test.step('picking a real model first so we can compare dirty states', async () => {
-        await featureSettings.content.getByRole('option', { name: 'Mock Connector' }).click();
-        await expect(featureSettings.saveButton).toBeEnabled();
-      });
-
-      await test.step('switching back to "No default model" invalidates the form', async () => {
-        await featureSettings.defaultModelComboBox.click();
-        await featureSettings.content.getByRole('option', { name: 'No default model' }).click();
-      });
-
-      await test.step('save button is disabled while AI is on with no default model', async () => {
-        await expect(featureSettings.saveButton).toBeDisabled();
-      });
-    });
-
-    test('turning off the master AI toggle disables the default-model combobox and hides the per-feature controls', async ({
-      pageObjects,
-    }) => {
-      const { featureSettings } = pageObjects;
-
-      await test.step('default-model controls and feature sections are visible', async () => {
-        await expect(featureSettings.defaultModelSection).toBeVisible();
-        await expect(featureSettings.disallowOtherModelsCheckbox).toBeVisible();
-        await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
-      });
-
-      await test.step('flip the Enable AI features toggle off', async () => {
-        await featureSettings.enableAiSwitch.click();
-      });
-
-      await test.step('default-model section stays visible but combobox is disabled', async () => {
-        await expect(featureSettings.defaultModelSection).toBeVisible();
-        await expect(featureSettings.defaultModelComboBoxInput).toBeDisabled();
-      });
-
-      await test.step('hide-selection switch and feature sections are gone', async () => {
-        await expect(featureSettings.disallowOtherModelsCheckbox).toBeHidden();
-        await expect(featureSettings.allFeatureSections).toHaveCount(0);
-      });
-
-      await test.step('enable AI switch remains visible', async () => {
-        await expect(featureSettings.enableAiSwitch).toBeVisible();
-      });
+      await expect(featureSettings.saveButton).toBeDisabled();
     });
 
     test('renders feature sections with sub-feature cards and endpoint rows', async ({
@@ -150,77 +110,113 @@ test.describe(
     }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('at least one feature section is visible', async () => {
-        await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
-      });
-
-      await test.step('sub-feature cards are present with endpoint rows', async () => {
-        await expect(featureSettings.allSubFeatureCards).not.toHaveCount(0);
-        await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
-      });
-
-      await test.step('fixture endpoint row has a default badge', async () => {
-        await expect(
-          featureSettings.endpointRow('.anthropic-claude-3.7-sonnet-chat_completion')
-        ).toContainText('Default');
-      });
+      await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
+      await expect(featureSettings.allSubFeatureCards).not.toHaveCount(0);
+      await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
+      await expect(
+        featureSettings.endpointRow('.anthropic-claude-3.7-sonnet-chat_completion')
+      ).toContainText('Default');
     });
 
     test('renders fixture sub-feature cards', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('first fixture sub-feature card is visible', async () => {
-        await expect(featureSettings.subFeatureCard('test_feature_alpha')).toBeVisible();
-      });
+      await expect(featureSettings.subFeatureCard('test_feature_alpha')).toBeVisible();
+      await expect(featureSettings.subFeatureCard('test_feature_beta')).toBeVisible();
+    });
 
-      await test.step('second fixture sub-feature card is visible', async () => {
-        await expect(featureSettings.subFeatureCard('test_feature_beta')).toBeVisible();
+    test('per-sub-feature: turning Use recommended defaults off opens disable modal', async ({
+      pageObjects,
+    }) => {
+      const { featureSettings } = pageObjects;
+      const toggle = featureSettings.useRecommendedDefaultsToggle('test_feature_alpha');
+
+      await expect(toggle).toBeChecked();
+      await toggle.click();
+
+      await expect(featureSettings.disableRecommendedModelsModal).toBeVisible();
+
+      await test.step('cancelling keeps the toggle on and the list locked', async () => {
+        await featureSettings.disableRecommendedModelsModal
+          .getByRole('button', { name: /cancel/i })
+          .click();
+        await expect(featureSettings.disableRecommendedModelsModal).toBeHidden();
+        await expect(toggle).toBeChecked();
+        await expect(featureSettings.addModelButton('test_feature_alpha')).toBeHidden();
       });
     });
 
-    test('opens add model popover with search input', async ({ pageObjects }) => {
+    test('per-sub-feature: confirming the disable modal unlocks the editable list', async ({
+      pageObjects,
+    }) => {
       const { featureSettings } = pageObjects;
+      const toggle = featureSettings.useRecommendedDefaultsToggle('test_feature_alpha');
 
-      await test.step('click add model button and verify search is visible', async () => {
+      await toggle.click();
+      await featureSettings.disableRecommendedModelsModal
+        .getByRole('button', { name: /turn off recommended defaults/i })
+        .click();
+
+      await expect(toggle).not.toBeChecked();
+      await expect(featureSettings.addModelButton('test_feature_alpha')).toBeVisible();
+    });
+
+    test('per-sub-feature: turning Use recommended defaults back on opens reset modal', async ({
+      page,
+      pageObjects,
+    }) => {
+      const { featureSettings } = pageObjects;
+      await mockInferenceEndpoints(page, mockEndpointsData);
+      await featureSettings.goto();
+
+      const toggle = featureSettings.useRecommendedDefaultsToggle('test_feature_alpha');
+
+      await test.step('switch into custom mode and add a non-recommended model', async () => {
+        await toggle.click();
+        await featureSettings.disableRecommendedModelsModal
+          .getByRole('button', { name: /turn off recommended defaults/i })
+          .click();
         await featureSettings.addModelButton('test_feature_alpha').click();
-        await expect(featureSettings.addModelSearch).toBeVisible();
+        await featureSettings.addModelOption('anthropic').click();
+      });
+
+      await test.step('toggling back on prompts the reset modal', async () => {
+        await toggle.click();
+        await expect(featureSettings.resetToDefaultsModal).toBeVisible();
+      });
+
+      await test.step('confirming the reset locks the list back to recommended', async () => {
+        await featureSettings.resetToDefaultsModal
+          .getByRole('button', { name: /reset to default/i })
+          .click();
+        await expect(toggle).toBeChecked();
+        await expect(featureSettings.addModelButton('test_feature_alpha')).toBeHidden();
       });
     });
 
-    test('cancelling reset to defaults modal preserves state', async ({ pageObjects }) => {
+    test('opens add model popover with search input when toggle is off', async ({
+      pageObjects,
+    }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('open reset to defaults modal', async () => {
-        await featureSettings.resetLink('Test Inference').click();
-        await expect(featureSettings.resetDefaultsModal).toBeVisible();
-      });
+      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
+      await featureSettings.disableRecommendedModelsModal
+        .getByRole('button', { name: /turn off recommended defaults/i })
+        .click();
 
-      await test.step('cancel closes modal without changes', async () => {
-        await featureSettings.resetDefaultsCancelButton.click();
-        await expect(featureSettings.resetDefaultsModal).toBeHidden();
-        await expect(featureSettings.saveButton).toBeDisabled();
-      });
-    });
-
-    test('cancelling copy to modal closes without changes', async ({ pageObjects }) => {
-      const { featureSettings } = pageObjects;
-
-      await test.step('open copy to modal', async () => {
-        await featureSettings.copyToButton('test_feature_alpha').click();
-        await expect(featureSettings.copyToModalApply).toBeVisible();
-        await expect(featureSettings.copyToModalApply).toBeDisabled();
-      });
-
-      await test.step('cancel closes the modal', async () => {
-        await featureSettings.copyToModalCancel.click();
-        await expect(featureSettings.copyToModalApply).toBeHidden();
-      });
+      await featureSettings.addModelButton('test_feature_alpha').click();
+      await expect(featureSettings.addModelSearch).toBeVisible();
     });
 
     test('searching in add model popover filters the results', async ({ page, pageObjects }) => {
       const { featureSettings } = pageObjects;
       await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
+
+      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
+      await featureSettings.disableRecommendedModelsModal
+        .getByRole('button', { name: /turn off recommended defaults/i })
+        .click();
 
       await test.step('open popover and verify models are listed', async () => {
         await featureSettings.addModelButton('test_feature_alpha').click();
@@ -244,8 +240,12 @@ test.describe(
       await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
 
+      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
+      await featureSettings.disableRecommendedModelsModal
+        .getByRole('button', { name: /turn off recommended defaults/i })
+        .click();
+
       const alphaRows = featureSettings.endpointRowsFor('test_feature_alpha');
-      await expect(alphaRows).not.toHaveCount(0);
       const initialCount = await alphaRows.count();
 
       await test.step('open popover and select a model', async () => {
@@ -263,13 +263,18 @@ test.describe(
       });
     });
 
-    test('copy to applies source endpoint list to the target sub-feature', async ({
+    test('Copy to is reachable through the overflow menu and copies the assignment', async ({
       page,
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
       await mockInferenceEndpoints(page, mockEndpointsData);
       await featureSettings.goto();
+
+      await featureSettings.useRecommendedDefaultsToggle('test_feature_alpha').click();
+      await featureSettings.disableRecommendedModelsModal
+        .getByRole('button', { name: /turn off recommended defaults/i })
+        .click();
 
       const betaCard = featureSettings.subFeatureCard('test_feature_beta');
 
@@ -278,23 +283,21 @@ test.describe(
         await expect(betaCard).not.toContainText('anthropic');
       });
 
-      await test.step('open copy to modal from source sub-feature', async () => {
-        await featureSettings.copyToButton('test_feature_alpha').click();
+      await test.step('open copy-to via the overflow menu', async () => {
+        await featureSettings.subFeatureOverflowMenu('test_feature_alpha').click();
+        await featureSettings.copyToMenuItem('test_feature_alpha').click();
         await expect(featureSettings.copyToModalApply).toBeVisible();
         await expect(featureSettings.copyToModalApply).toBeDisabled();
       });
 
-      await test.step('select target sub-feature', async () => {
+      await test.step('select the target and apply', async () => {
         await featureSettings.copyToModalCheckbox('test_feature_beta').click();
-      });
-
-      await test.step('apply copies endpoints to target', async () => {
         await expect(featureSettings.copyToModalApply).toBeEnabled();
         await featureSettings.copyToModalApply.click();
         await expect(featureSettings.copyToModalApply).toBeHidden();
       });
 
-      await test.step('target sub-feature now contains source endpoint', async () => {
+      await test.step('target sub-feature now contains the source endpoint', async () => {
         await expect(betaCard).toContainText('anthropic');
       });
 

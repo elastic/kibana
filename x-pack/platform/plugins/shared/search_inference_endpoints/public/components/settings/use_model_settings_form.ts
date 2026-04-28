@@ -22,11 +22,11 @@ export interface ModelSettingsForm {
   isSaving: boolean;
   isDirty: boolean;
   assignments: Assignments;
+  effectiveRecommendedEndpoints: Record<string, string[]>;
   sections: FeatureSection[];
   invalidEndpointIds: Set<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   save: () => void;
-  resetSection: (sectionId: string) => void;
 }
 
 const getEffectiveEndpoints = (
@@ -113,6 +113,19 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [registeredFeatures]
   );
 
+  const effectiveRecommendedEndpoints = useMemo<Record<string, string[]>>(
+    () =>
+      Object.fromEntries(
+        sections.flatMap(({ children }) =>
+          children.map((f): [string, string[]] => [
+            f.featureId,
+            [...getEffectiveEndpoints(f, recommendedEndpointsById)],
+          ])
+        )
+      ),
+    [sections, recommendedEndpointsById]
+  );
+
   const defaultAssignments = useMemo((): Assignments => {
     const savedMap = new Map<string, string[]>(
       (settingsData?.data?.features ?? [])
@@ -159,34 +172,15 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     saveSettings({ features: toApiFormat(changed) });
   }, [saveSettings, assignments, registeredFeatures, recommendedEndpointsById]);
 
-  const resetSection = useCallback(
-    (sectionId: string) => {
-      const section = sections.find((s) => s.featureId === sectionId);
-      if (!section) return;
-
-      const resetEntries = Object.fromEntries(
-        section.children.map((f) => [
-          f.featureId,
-          [...getEffectiveEndpoints(f, recommendedEndpointsById)],
-        ])
-      );
-      const updated = { ...assignments, ...resetEntries };
-      setAssignments(updated);
-      const changed = getChangedAssignments(updated, registeredFeatures, recommendedEndpointsById);
-      saveSettings({ features: toApiFormat(changed) });
-    },
-    [assignments, sections, saveSettings, recommendedEndpointsById, registeredFeatures]
-  );
-
   return {
     isLoading,
     isSaving,
     isDirty,
     assignments,
+    effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
     updateEndpoints,
     save,
-    resetSection,
   };
 };

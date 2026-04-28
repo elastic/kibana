@@ -25,7 +25,7 @@ describe('useDefaultModelValidation', () => {
       useDefaultModelValidation({
         enableAi: false,
         defaultModelId: NO_DEFAULT_MODEL,
-        disallowOtherModels: true,
+        featureSpecificModels: false,
       })
     );
 
@@ -41,7 +41,7 @@ describe('useDefaultModelValidation', () => {
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: 'pre-1',
-        disallowOtherModels: false,
+        featureSpecificModels: true,
       })
     );
 
@@ -49,30 +49,30 @@ describe('useDefaultModelValidation', () => {
     expect(result.current.errors).toEqual([]);
   });
 
-  it('is invalid when AI is enabled but no default model is selected, regardless of hide-selection', () => {
-    const { result: withAllowOthers } = renderHook(() =>
+  it('is invalid when AI is enabled but no default model is selected, regardless of feature-specific-models', () => {
+    const { result: withFsmOn } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: NO_DEFAULT_MODEL,
-        disallowOtherModels: false,
+        featureSpecificModels: true,
       })
     );
 
-    expect(withAllowOthers.current.isValid).toBe(false);
-    expect(withAllowOthers.current.missingDefaultModel).toBe(true);
-    expect(withAllowOthers.current.errors[0]).toMatch(/Select a default model/);
+    expect(withFsmOn.current.isValid).toBe(false);
+    expect(withFsmOn.current.missingDefaultModel).toBe(true);
+    expect(withFsmOn.current.errors[0]).toMatch(/Select a default model/);
 
-    const { result: withHide } = renderHook(() =>
+    const { result: withFsmOff } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: NO_DEFAULT_MODEL,
-        disallowOtherModels: true,
+        featureSpecificModels: false,
       })
     );
 
-    expect(withHide.current.isValid).toBe(false);
-    expect(withHide.current.missingDefaultModel).toBe(true);
-    expect(withHide.current.errors[0]).toMatch(/Select a default model/);
+    expect(withFsmOff.current.isValid).toBe(false);
+    expect(withFsmOff.current.missingDefaultModel).toBe(true);
+    expect(withFsmOff.current.errors[0]).toMatch(/Select a default model/);
   });
 
   it('reports connector-not-exist when the selected model is missing', () => {
@@ -82,7 +82,7 @@ describe('useDefaultModelValidation', () => {
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: 'deleted-connector',
-        disallowOtherModels: false,
+        featureSpecificModels: true,
       })
     );
 
@@ -97,7 +97,7 @@ describe('useDefaultModelValidation', () => {
       useDefaultModelValidation({
         enableAi: true,
         defaultModelId: 'maybe-deleted',
-        disallowOtherModels: false,
+        featureSpecificModels: true,
       })
     );
 

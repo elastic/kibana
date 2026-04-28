@@ -22,7 +22,6 @@ import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
 import { NoModelsEmptyPrompt } from './no_models_empty_prompt';
-import { ResetDefaultsModal } from './reset_defaults_modal';
 import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
@@ -36,11 +35,11 @@ export const ModelSettings: React.FC = () => {
     isSaving: isFeatureSaving,
     isDirty: isFeatureDirty,
     assignments,
+    effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
     updateEndpoints,
     save: saveFeatures,
-    resetSection,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
@@ -57,7 +56,6 @@ export const ModelSettings: React.FC = () => {
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
-  const [resetParentKey, setResetParentKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isDirty) {
@@ -103,27 +101,19 @@ export const ModelSettings: React.FC = () => {
     setPendingLocation(null);
   }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
-  const handleResetConfirm = useCallback(() => {
-    if (!resetParentKey) return;
-    resetSection(resetParentKey);
-    setResetParentKey(null);
-  }, [resetParentKey, resetSection]);
-
   const enableAi = defaultModelSettings.state.enableAi;
-  const disallowOtherModels = defaultModelSettings.state.disallowOtherModels;
-  const hideFeatureSections = !enableAi || disallowOtherModels;
+  const featureSpecificModels = defaultModelSettings.state.featureSpecificModels;
+  const showFeatureSections = enableAi && featureSpecificModels;
 
   if (connectorsLoading || isLoading) {
     return (
-      <>
-        <EuiPageTemplate.Section
-          paddingSize="none"
-          data-test-subj="modelSettingsContent"
-          restrictWidth={true}
-        >
-          <EuiLoadingSpinner size="l" />
-        </EuiPageTemplate.Section>
-      </>
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="modelSettingsContent"
+        restrictWidth={true}
+      >
+        <EuiLoadingSpinner size="l" />
+      </EuiPageTemplate.Section>
     );
   }
 
@@ -178,7 +168,7 @@ export const ModelSettings: React.FC = () => {
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
         />
-        {hideFeatureSections ? null : (
+        {showFeatureSections && (
           <>
             {invalidEndpointIds.size > 0 && (
               <>
@@ -244,9 +234,10 @@ export const ModelSettings: React.FC = () => {
                     parentDescription={section.featureDescription}
                     features={section.children.map((f) => ({
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
+                      effectiveRecommendedEndpoints:
+                        effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
                       feature: f,
                     }))}
-                    onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
@@ -259,13 +250,6 @@ export const ModelSettings: React.FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
-
-      {resetParentKey && (
-        <ResetDefaultsModal
-          onConfirm={handleResetConfirm}
-          onCancel={() => setResetParentKey(null)}
-        />
-      )}
 
       {pendingLocation && (
         <UnsavedChangesModal

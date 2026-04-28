@@ -51,7 +51,7 @@ describe('useDefaultModelSettings', () => {
     jest.clearAllMocks();
   });
 
-  it('derives enableAi=true when AI is configured', () => {
+  it('derives enableAi=true and featureSpecificModels=true when AI is configured', () => {
     const settingsClient = buildSettingsClient({
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'pre-1',
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
@@ -64,7 +64,22 @@ describe('useDefaultModelSettings', () => {
 
     expect(result.current.state.enableAi).toBe(true);
     expect(result.current.state.defaultModelId).toBe('pre-1');
-    expect(result.current.state.disallowOtherModels).toBe(false);
+    expect(result.current.state.featureSpecificModels).toBe(true);
+  });
+
+  it('derives featureSpecificModels=false when the persisted disallow flag is true', () => {
+    const settingsClient = buildSettingsClient({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'pre-1',
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: true,
+    });
+    mockUseKibana.mockReturnValue({
+      services: { settings: { client: settingsClient }, notifications: buildNotifications() },
+    });
+
+    const { result } = renderHook(() => useDefaultModelSettings());
+
+    expect(result.current.state.enableAi).toBe(true);
+    expect(result.current.state.featureSpecificModels).toBe(false);
   });
 
   it('derives enableAi=false when both settings indicate AI is opted-out', () => {
@@ -99,7 +114,7 @@ describe('useDefaultModelSettings', () => {
     expect(result.current.state).toEqual({
       enableAi: false,
       defaultModelId: NO_DEFAULT_MODEL,
-      disallowOtherModels: true,
+      featureSpecificModels: false,
     });
     expect(result.current.isDirty).toBe(true);
   });
@@ -125,7 +140,7 @@ describe('useDefaultModelSettings', () => {
     expect(result.current.state).toEqual({
       enableAi: true,
       defaultModelId: 'pre-1',
-      disallowOtherModels: true,
+      featureSpecificModels: false,
     });
   });
 
@@ -147,11 +162,11 @@ describe('useDefaultModelSettings', () => {
     expect(result.current.state).toEqual({
       enableAi: true,
       defaultModelId: NO_DEFAULT_MODEL,
-      disallowOtherModels: false,
+      featureSpecificModels: true,
     });
   });
 
-  it('save() writes only changed underlying settings', async () => {
+  it('save() writes only changed underlying settings (featureSpecificModels off persists disallow=true)', async () => {
     const settingsClient = buildSettingsClient({
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'pre-1',
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
@@ -164,7 +179,7 @@ describe('useDefaultModelSettings', () => {
     const { result } = renderHook(() => useDefaultModelSettings());
 
     act(() => {
-      result.current.setDisallowOtherModels(true);
+      result.current.setFeatureSpecificModels(false);
     });
 
     await act(async () => {
