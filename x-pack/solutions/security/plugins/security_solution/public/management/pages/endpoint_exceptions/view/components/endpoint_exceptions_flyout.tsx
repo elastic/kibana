@@ -180,7 +180,6 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      {isFormValid}
 
       <EuiFlyoutBody>
         {exception && (
