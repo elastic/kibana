@@ -218,7 +218,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             title={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.syncIntegrationsServerlessCallout',
               {
-                defaultMessage: 'Integration sync is not supported for serverless projects.',
+                defaultMessage:
+                  'Integration sync is not supported when the remote cluster is a serverless project.',
               }
             )}
             iconType="warning"
