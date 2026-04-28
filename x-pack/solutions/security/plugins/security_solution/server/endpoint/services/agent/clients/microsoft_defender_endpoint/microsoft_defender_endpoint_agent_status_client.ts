@@ -169,32 +169,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
         return acc;
       }, {});
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch Microsoft Defender for Endpoint agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
-        500,
-        err
-      );
-
-      this.log.error(error);
-
-      this.log.debug(
-        `Returning default response since agent status could not be fetched for [${this.agentType}] hosts`
-      );
-
-      return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
-        acc[agentId] = {
-          agentId,
-          agentType: this.agentType,
-          found: false,
-          isolated: false,
-          lastSeen: '',
-          status: HostStatus.OFFLINE,
-          pendingActions: {},
-          error: error.message,
-        };
-
-        return acc;
-      }, {});
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }
