@@ -148,6 +148,7 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiTablePersistProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -192,6 +193,7 @@
             "lineNumber": 60,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiTablePersistProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -398,6 +400,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false
           }
         ],

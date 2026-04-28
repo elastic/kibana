@@ -573,7 +573,14 @@
             "tags": [],
             "label": "category",
             "description": [
-              "{@link FeatureCatalogueCategory} to display this feature in."
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueCategory",
+                "text": "FeatureCatalogueCategory"
+              },
+              " to display this feature in."
             ],
             "signature": [
               "\"data\" | \"other\" | \"admin\""
@@ -864,6 +871,7 @@
                 "lineNumber": 59,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "Capabilities",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -970,6 +978,7 @@
                 "lineNumber": 21,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "WelcomeRenderTelemetryNotice",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1088,6 +1097,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -1140,6 +1150,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -2254,6 +2265,7 @@
             "lineNumber": 31,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "SampleDatasetProviderContext",
             "trackAdoption": false
           }
         ],
@@ -2357,6 +2369,7 @@
             "lineNumber": 33,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TutorialContext",
             "trackAdoption": false
           }
         ],
