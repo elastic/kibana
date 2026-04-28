@@ -21,7 +21,6 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/component
 import { useRefetchQueryById } from '../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../common/types';
-import { useCalculateEntityRiskScore } from '../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../common/components/page/manage_query';
 import { useGlobalTime } from '../../common/containers/use_global_time';
@@ -262,11 +261,8 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     (refetchRiskInputsTab as Refetch | null)?.();
   }, [refetch, refetchRiskInputsTab]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.host,
-    hostName,
-    { onSuccess: refetchRiskScore }
-  );
+  const recalculatingScore = false;
+  const calculateEntityRiskScore = refetchRiskScore;
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
@@ -606,11 +602,8 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     (refetchRiskInputsTab as Refetch | null)?.();
   }, [refetch, refetchRiskInputsTab]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.user,
-    userName,
-    { onSuccess: refetchRiskScore }
-  );
+  const recalculatingScore = false;
+  const calculateEntityRiskScore = refetchRiskScore;
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
@@ -909,11 +902,8 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     (refetchRiskInputsTab as Refetch)();
   }, [refetch, refetchRiskInputsTab]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.service,
-    serviceName,
-    { onSuccess: refetchRiskScore }
-  );
+  const recalculatingScore = false;
+  const calculateEntityRiskScore = refetchRiskScore;
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,

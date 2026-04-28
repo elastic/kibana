@@ -27,7 +27,6 @@ import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
-import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
@@ -415,9 +414,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, detailName, {
-    onSuccess: refetchRiskScore,
-  });
+  const calculateEntityRiskScore = refetchRiskScore;
 
   const { updateAssetCriticalityRecord } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,

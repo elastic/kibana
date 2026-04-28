@@ -8,6 +8,6 @@ import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const useRiskEnginePrivileges = () => {
-  const { fetchRiskEnginePrivileges } = useEntityAnalyticsRoutes();
-  return useQuery(['GET', 'FETCH_RISK_ENGINE_PRIVILEGES'], fetchRiskEnginePrivileges);
+  const { fetchEntityStoreV2Privileges } = useEntityAnalyticsRoutes();
+  return useQuery(['GET', 'FETCH_RISK_ENGINE_PRIVILEGES'], fetchEntityStoreV2Privileges);
 };

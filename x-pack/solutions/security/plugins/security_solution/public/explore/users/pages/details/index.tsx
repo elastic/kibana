@@ -27,7 +27,6 @@ import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hook
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
-import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
@@ -415,9 +414,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.user, detailName, {
-    onSuccess: refetchRiskScore,
-  });
+  const calculateEntityRiskScore = refetchRiskScore;
 
   const { updateAssetCriticalityRecord } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,

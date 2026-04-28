@@ -73,7 +73,6 @@ export const HostPanelContent = ({
         />
       )}
       {!skipRiskAndCriticality &&
-        riskScoreState.hasEngineBeenInstalled &&
         (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
           <>
             <FlyoutRiskSummary
