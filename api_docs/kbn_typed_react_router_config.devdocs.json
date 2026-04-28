@@ -264,6 +264,7 @@
             "lineNumber": 50,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "TRoutes",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -472,6 +473,7 @@
             "lineNumber": 10,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1283,6 +1285,7 @@
                 "lineNumber": 123,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPath",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1301,6 +1304,7 @@
                 "lineNumber": 124,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1374,6 +1378,7 @@
                 "lineNumber": 126,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1564,6 +1569,7 @@
                 "lineNumber": 128,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPath",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1582,6 +1588,7 @@
                 "lineNumber": 129,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1772,6 +1779,7 @@
                 "lineNumber": 132,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPath",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1790,6 +1798,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1807,6 +1816,7 @@
                 "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOptional",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1997,6 +2007,7 @@
                 "lineNumber": 137,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T1",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2014,6 +2025,7 @@
                 "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T2",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2032,6 +2044,7 @@
                 "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2222,6 +2235,7 @@
                 "lineNumber": 142,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T1",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2239,6 +2253,7 @@
                 "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T2",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2256,6 +2271,7 @@
                 "lineNumber": 144,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T3",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2274,6 +2290,7 @@
                 "lineNumber": 145,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2464,6 +2481,7 @@
                 "lineNumber": 148,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPath",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2482,6 +2500,7 @@
                 "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Location",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2499,6 +2518,7 @@
                 "lineNumber": 150,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOptional",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2559,6 +2579,7 @@
                 "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPath",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2591,6 +2612,7 @@
                 "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeAsArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2641,6 +2663,7 @@
                 "lineNumber": 156,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteWithPath",
                 "trackAdoption": false,
                 "isRequired": true
               }
