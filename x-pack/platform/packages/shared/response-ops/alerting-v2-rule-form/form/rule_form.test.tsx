@@ -142,16 +142,16 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
     });
 
-    it('shows Rule configuration heading when includeYaml is true', () => {
+    it('shows Configure Rule Behavior heading when includeYaml is true', () => {
       render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
 
-      expect(screen.getByText('Rule configuration')).toBeInTheDocument();
+      expect(screen.getByText('Configure Rule Behavior')).toBeInTheDocument();
     });
 
-    it('does not show Rule configuration heading when includeYaml is false', () => {
+    it('does not show Configure Rule Behavior heading when includeYaml is false', () => {
       render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
 
-      expect(screen.queryByText('Rule configuration')).not.toBeInTheDocument();
+      expect(screen.queryByText('Configure Rule Behavior')).not.toBeInTheDocument();
     });
 
     it('starts in form mode by default', () => {

@@ -22,6 +22,8 @@ export interface DynamicRuleFormFlyoutProps {
   query: string;
   /** Required services */
   services: RuleFormServices;
+  /** Whether to include the Form/YAML edit mode toggle (default: false) */
+  includeYaml?: boolean;
 }
 
 /**
@@ -39,6 +41,7 @@ const DynamicRuleFormFlyoutInner = ({
   onClose,
   query,
   services,
+  includeYaml = false,
 }: DynamicRuleFormFlyoutProps) => {
   const { createRule, isLoading } = useCreateRule({
     http: services.http,
@@ -57,6 +60,7 @@ const DynamicRuleFormFlyoutInner = ({
         query={query}
         services={services}
         layout="flyout"
+        includeYaml={includeYaml}
       />
     </RuleFormFlyout>
   );

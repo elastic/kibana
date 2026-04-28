@@ -146,7 +146,7 @@ const RuleFormContent = ({
               <h3>
                 <FormattedMessage
                   id="xpack.alertingV2.ruleForm.ruleConfigurationHeading"
-                  defaultMessage="Rule configuration"
+                  defaultMessage="Configure Rule Behavior"
                 />
               </h3>
             </EuiTitle>
