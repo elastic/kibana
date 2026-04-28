@@ -94,6 +94,15 @@ export const useLensProps = ({
   // errors use applies to builder errors too.
   const [buildError, setBuildError] = useState<Error | undefined>();
   const effectiveError = error ?? buildError;
+  // Identity key (name + message) of the most recent build failure that
+  // was reported / latched. A persistent failure (e.g. malformed query)
+  // throws a new Error instance every retry, so without dedup the
+  // `setBuildError` below would change `effectiveError`'s reference each
+  // time, re-fire the useEffect on line 100, kick off another build via
+  // `chartConfigUpdates$`, and loop forever — spamming APM/EBT and
+  // re-rendering. Keying on name+message keeps repeat emissions of the
+  // same logical failure quiet while still surfacing distinct ones.
+  const lastBuildErrorKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
@@ -184,13 +193,26 @@ export const useLensProps = ({
           // A successful build clears any previously latched builder error so
           // the chart can recover from transient failures. Without this,
           // `effectiveError = error ?? buildError` stays truthy for the rest
-          // of the component's lifetime once any build throws.
+          // of the component's lifetime once any build throws. Also clear
+          // the dedup key so that if the same logical failure resurfaces
+          // later it is reported again (one report per failure streak).
           tap((attributes) => {
             if (attributes !== null) {
+              lastBuildErrorKeyRef.current = null;
               setBuildError(undefined);
             }
           }),
           catchError((buildErr: unknown) => {
+            // Dedup persistent failures so the catchError → setBuildError →
+            // effectiveError-change → useEffect → rebuild loop above can't
+            // run away. Plain string values fall through to the report
+            // branch (the util no-ops on non-Error values internally).
+            const errorKey =
+              buildErr instanceof Error ? `${buildErr.name}:${buildErr.message}` : null;
+            if (errorKey !== null && errorKey === lastBuildErrorKeyRef.current) {
+              return of(null);
+            }
+            lastBuildErrorKeyRef.current = errorKey;
             reportMetricsGridError({
               error: buildErr,
               source: 'useLensProps',

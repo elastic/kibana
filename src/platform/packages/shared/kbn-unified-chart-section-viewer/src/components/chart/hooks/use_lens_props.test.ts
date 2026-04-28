@@ -452,6 +452,93 @@ describe('useLensProps', () => {
       expect(result.current).toBeDefined();
     });
 
+    it('reports a persistent build failure only once across repeat fetches', async () => {
+      const chartRef = createMockChartRef();
+
+      // Every build rejects with a freshly constructed Error sharing the
+      // same name+message — that's exactly the shape that would create the
+      // tight loop the dedup guards against (each retry produces a new
+      // reference, so React state and the useEffect dep on `effectiveError`
+      // keep changing).
+      LensConfigBuilderMock.prototype.build.mockImplementation(() =>
+        Promise.reject(new Error('persistent failure'))
+      );
+
+      renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      // First failure surfaces.
+      await waitFor(() => {
+        expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      });
+
+      // Drive several additional triggers; without dedup these would each
+      // produce a new Error instance, change `effectiveError`, re-fire the
+      // useEffect, and emit another report.
+      for (let i = 0; i < 5; i++) {
+        await act(async () => {
+          discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+        });
+      }
+
+      // Still only one report — the same logical failure was suppressed.
+      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports again after a recovery when the same failure resurfaces', async () => {
+      const chartRef = createMockChartRef();
+      const failureMessage = 'flaky failure';
+
+      // Mock sequence: first build rejects (failure streak A), second
+      // build resolves (recovery — clears the dedup key), third build
+      // rejects with the same name+message (a new streak that should be
+      // reported again because the previous streak ended in success).
+      // Anything after the third call falls through to the default
+      // resolve from beforeEach so the hook can settle.
+      LensConfigBuilderMock.prototype.build
+        .mockImplementationOnce(() => Promise.reject(new Error(failureMessage)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            attributes: {},
+            state: {},
+            visualizationType: 'lnsXY',
+          } as unknown as LensAttributes)
+        )
+        .mockImplementationOnce(() => Promise.reject(new Error(failureMessage)));
+
+      renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      // Two distinct failure streaks separated by a successful build, so
+      // both should be reported. Without the on-success ref clear, only
+      // the first would land and the second would be wrongly suppressed.
+      await waitFor(() => {
+        expect(mockReportMetricsGridError).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('does not terminate the subscription — subsequent fetches continue to build', async () => {
       const chartRef = createMockChartRef();
       const builderError = new Error('first build fails');
