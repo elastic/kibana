@@ -17,7 +17,15 @@
         "tags": [],
         "label": "DocumentMigrator",
         "description": [
-          "\nA concrete implementation of the {@link IDocumentMigrator} interface."
+          "\nA concrete implementation of the ",
+          {
+            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
+            "section": "def-server.IDocumentMigrator",
+            "text": "IDocumentMigrator"
+          },
+          " interface."
         ],
         "signature": [
           "DocumentMigrator",
@@ -67,6 +75,7 @@
                 "lineNumber": 73,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "DocumentMigratorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -106,6 +115,7 @@
                 "lineNumber": 84,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "MigrationVersionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -171,6 +181,7 @@
                 "lineNumber": 124,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectUnsanitizedDoc",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -188,6 +199,7 @@
                 "lineNumber": 125,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DocumentMigrateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -231,6 +243,7 @@
                 "lineNumber": 138,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectUnsanitizedDoc",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -274,6 +287,7 @@
                 "lineNumber": 151,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectUnsanitizedDoc",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -291,6 +305,7 @@
                 "lineNumber": 152,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IsDowngradeRequiredOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -381,6 +396,7 @@
                 "lineNumber": 99,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaMigratorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -570,6 +586,7 @@
                 "lineNumber": 240,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectUnsanitizedDoc",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -587,6 +604,7 @@
                 "lineNumber": 241,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MigrateDocumentOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -655,6 +673,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "QueryDslBoolQuery",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -725,6 +744,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IndexMappingMeta",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -821,6 +841,7 @@
             "lineNumber": 57,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "BulkOverwriteTransformedDocumentsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -866,6 +887,7 @@
             "lineNumber": 33,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "CalculateExcludeFiltersParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -911,6 +933,7 @@
             "lineNumber": 26,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -956,6 +979,7 @@
             "lineNumber": 118,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckForUnknownDocsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1011,6 +1035,7 @@
             "lineNumber": 55,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "CloneIndexParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1054,6 +1079,7 @@
             "lineNumber": 28,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "ClosePitParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1136,6 +1162,7 @@
             "lineNumber": 283,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsRawDoc",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1153,6 +1180,7 @@
             "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1204,6 +1232,7 @@
             "lineNumber": 68,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateIndexParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1251,6 +1280,7 @@
             "lineNumber": 35,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "FetchIndicesParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1291,6 +1321,7 @@
             "lineNumber": 35,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorCause",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1331,6 +1362,7 @@
             "lineNumber": 19,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorCause",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1371,6 +1403,7 @@
             "lineNumber": 27,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorCause",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1411,6 +1444,7 @@
             "lineNumber": 12,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorCause",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1456,6 +1490,7 @@
             "lineNumber": 35,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "OpenPitParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1505,6 +1540,7 @@
             "lineNumber": 39,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1556,6 +1592,7 @@
             "lineNumber": 42,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "QueryDslQueryContainer",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1603,6 +1640,7 @@
             "lineNumber": 47,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "ReadWithPitParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1648,6 +1686,7 @@
             "lineNumber": 28,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "RefreshIndexParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1695,6 +1734,7 @@
             "lineNumber": 50,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "ReindexParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1740,6 +1780,7 @@
             "lineNumber": 30,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "RemoveWriteBlockParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1787,6 +1828,7 @@
             "lineNumber": 38,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "SetWriteBlockParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1832,6 +1874,7 @@
             "lineNumber": 23,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "TransformDocsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1883,6 +1926,7 @@
             "lineNumber": 46,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdateAliasesParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1930,6 +1974,7 @@
             "lineNumber": 40,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdateAndPickupMappingsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1977,6 +2022,7 @@
             "lineNumber": 37,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdateMappingsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2118,6 +2164,7 @@
             "lineNumber": 69,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForIndexStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2166,6 +2213,7 @@
             "lineNumber": 166,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "A",
             "trackAdoption": false
           }
         ],
@@ -2216,6 +2264,7 @@
             "lineNumber": 166,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "A",
             "trackAdoption": false
           }
         ],
@@ -2263,6 +2312,7 @@
             "lineNumber": 95,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForTaskParams",
             "trackAdoption": false,
             "isRequired": true
           }

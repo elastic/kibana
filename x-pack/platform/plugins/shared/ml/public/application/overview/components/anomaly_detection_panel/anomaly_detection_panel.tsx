@@ -12,18 +12,18 @@ import { i18n } from '@kbn/i18n';
 import { zipObject, groupBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useStorage } from '@kbn/ml-local-storage';
-import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
-import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
+import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
+import { ML_OVERVIEW_PANELS } from '@kbn/ml-common-types/storage';
+import type { Dictionary } from '@kbn/ml-common-types/common';
+import type {
+  MlSummaryJob,
+  MlSummaryJobs,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
 import { useMlApi, useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
-import type { Dictionary } from '../../../../../common/types/common';
-import type {
-  MlSummaryJob,
-  MlSummaryJobs,
-} from '../../../../../common/types/anomaly_detection_jobs';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import type { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';

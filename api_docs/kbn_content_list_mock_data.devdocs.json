@@ -97,6 +97,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MockFindItemsConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -180,6 +181,7 @@
             "lineNumber": 462,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FavoritesClientPublic",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -273,7 +275,7 @@
             "id": "def-public.mockFindDashboards.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
@@ -319,7 +321,7 @@
             "id": "def-public.mockFindFiles.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
@@ -365,7 +367,7 @@
             "id": "def-public.mockFindMaps.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
@@ -411,7 +413,7 @@
             "id": "def-public.mockFindVisualizations.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n    searchQuery,\n    filters,\n    sort,\n    page,\n  }",
             "description": [],
             "signature": [
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
@@ -856,6 +858,7 @@
                 "lineNumber": 58,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -873,6 +876,7 @@
                 "lineNumber": 58,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -903,7 +907,15 @@
             "tags": [],
             "label": "favoritesClient",
             "description": [
-              "\nFavorites client instance used to resolve starred-item filtering.\n\nDefaults to the module-level {@link mockFavoritesClient} singleton.\nPass a story-specific client to ensure the same instance is shared\nbetween the provider (`services.favorites`) and `findItems`, so that\nstarred items are immediately visible when the `starred` filter is toggled."
+              "\nFavorites client instance used to resolve starred-item filtering.\n\nDefaults to the module-level ",
+              {
+                "pluginId": "@kbn/content-list-mock-data",
+                "scope": "public",
+                "docId": "kibKbnContentListMockDataPluginApi",
+                "section": "def-public.mockFavoritesClient",
+                "text": "mockFavoritesClient"
+              },
+              " singleton.\nPass a story-specific client to ensure the same instance is shared\nbetween the provider (`services.favorites`) and `findItems`, so that\nstarred items are immediately visible when the `starred` filter is toggled."
             ],
             "signature": [
               {
@@ -1430,7 +1442,9 @@
             "type": "Object",
             "tags": [],
             "label": "result",
-            "description": [],
+            "description": [
+              "\nDashboard mock data wrapped in search response format"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
             "lineNumber": 202,
             "columnNumber": 3,
@@ -1596,7 +1610,9 @@
             "type": "Function",
             "tags": [],
             "label": "bulkResolve",
-            "description": [],
+            "description": [
+              "\nMock `ContentListUserProfilesServices` for content list provider.\n\nProvides `bulkResolve` backed by the static `MOCK_USER_PROFILES` data."
+            ],
             "signature": [
               "(uids: string[]) => Promise<",
               {
@@ -1670,7 +1686,15 @@
         "tags": [],
         "label": "mockTagsService",
         "description": [
-          "\nPre-configured mock tags service backed by {@link MOCK_TAGS}.\n\nProvides `getTagList` and `parseSearchQuery` ready for use as\n`services.tags` on `ContentListProvider`."
+          "\nPre-configured mock tags service backed by ",
+          {
+            "pluginId": "@kbn/content-list-mock-data",
+            "scope": "public",
+            "docId": "kibKbnContentListMockDataPluginApi",
+            "section": "def-public.MOCK_TAGS",
+            "text": "MOCK_TAGS"
+          },
+          ".\n\nProvides `getTagList` and `parseSearchQuery` ready for use as\n`services.tags` on `ContentListProvider`."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
         "lineNumber": 133,
@@ -1684,7 +1708,17 @@
             "type": "Function",
             "tags": [],
             "label": "getTagList",
-            "description": [],
+            "description": [
+              "\nPre-configured mock tags service backed by ",
+              {
+                "pluginId": "@kbn/content-list-mock-data",
+                "scope": "public",
+                "docId": "kibKbnContentListMockDataPluginApi",
+                "section": "def-public.MOCK_TAGS",
+                "text": "MOCK_TAGS"
+              },
+              ".\n\nProvides `getTagList` and `parseSearchQuery` ready for use as\n`services.tags` on `ContentListProvider`."
+            ],
             "signature": [
               "() => ",
               {
@@ -1767,7 +1801,9 @@
             "type": "Array",
             "tags": [],
             "label": "tags",
-            "description": [],
+            "description": [
+              "\nTag mock data wrapped in search response format"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/content-list-mock-data",
@@ -1808,7 +1844,9 @@
             "type": "Object",
             "tags": [],
             "label": "lens",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 33,
             "columnNumber": 3,
@@ -1849,7 +1887,9 @@
             "type": "Object",
             "tags": [],
             "label": "area",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 34,
             "columnNumber": 3,
@@ -1890,7 +1930,9 @@
             "type": "Object",
             "tags": [],
             "label": "line",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 35,
             "columnNumber": 3,
@@ -1931,7 +1973,9 @@
             "type": "Object",
             "tags": [],
             "label": "bar",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 36,
             "columnNumber": 3,
@@ -1972,7 +2016,9 @@
             "type": "Object",
             "tags": [],
             "label": "pie",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 37,
             "columnNumber": 3,
@@ -2013,7 +2059,9 @@
             "type": "Object",
             "tags": [],
             "label": "metric",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 38,
             "columnNumber": 3,
@@ -2054,7 +2102,9 @@
             "type": "Object",
             "tags": [],
             "label": "gauge",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 39,
             "columnNumber": 3,
@@ -2095,7 +2145,9 @@
             "type": "Object",
             "tags": [],
             "label": "goal",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 40,
             "columnNumber": 3,
@@ -2136,7 +2188,9 @@
             "type": "Object",
             "tags": [],
             "label": "table",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 41,
             "columnNumber": 3,
@@ -2177,7 +2231,9 @@
             "type": "Object",
             "tags": [],
             "label": "tagcloud",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 42,
             "columnNumber": 3,
@@ -2218,7 +2274,9 @@
             "type": "Object",
             "tags": [],
             "label": "markdown",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 43,
             "columnNumber": 3,
@@ -2259,7 +2317,9 @@
             "type": "Object",
             "tags": [],
             "label": "vega",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 44,
             "columnNumber": 3,
@@ -2300,7 +2360,9 @@
             "type": "Object",
             "tags": [],
             "label": "timelion",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 45,
             "columnNumber": 3,
@@ -2341,7 +2403,9 @@
             "type": "Object",
             "tags": [],
             "label": "tsvb",
-            "description": [],
+            "description": [
+              "\nVisualization type configuration"
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
             "lineNumber": 46,
             "columnNumber": 3,

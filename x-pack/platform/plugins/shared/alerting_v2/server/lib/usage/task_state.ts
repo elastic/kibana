@@ -73,14 +73,14 @@ const stateSchemaV1 = schema.object({
   executions_delay_p99_ms: schema.maybe(schema.nullable(schema.number())),
   dispatcher_executions_count_24hr: schema.maybe(schema.number()),
 
-  // notification policy stats
-  notification_policies_count: schema.maybe(schema.number()),
-  notification_policies_unique_workflow_count: schema.maybe(schema.number()),
-  notification_policies_count_with_matcher: schema.maybe(schema.number()),
-  notification_policies_count_with_group_by: schema.maybe(schema.number()),
-  notification_policies_avg_group_by_fields_count: schema.maybe(schema.nullable(schema.number())),
-  notification_policies_count_by_throttle_interval: schema.maybe(
-    schema.arrayOf(nameValuePairSchema)
+  // action policy stats
+  action_policies_count: schema.maybe(schema.number()),
+  action_policies_unique_workflow_count: schema.maybe(schema.number()),
+  action_policies_count_with_matcher: schema.maybe(schema.number()),
+  action_policies_count_with_group_by: schema.maybe(schema.number()),
+  action_policies_avg_group_by_fields_count: schema.maybe(schema.nullable(schema.number())),
+  action_policies_count_by_throttle_interval: schema.maybe(
+    schema.arrayOf(nameValuePairSchema, { maxSize: 100 })
   ),
 
   // alert event stats
@@ -134,17 +134,15 @@ export const stateSchemaByVersion = {
       executions_delay_p95_ms: state.executions_delay_p95_ms ?? undefined,
       executions_delay_p99_ms: state.executions_delay_p99_ms ?? undefined,
       dispatcher_executions_count_24hr: state.dispatcher_executions_count_24hr ?? undefined,
-      notification_policies_count: state.notification_policies_count ?? undefined,
-      notification_policies_unique_workflow_count:
-        state.notification_policies_unique_workflow_count ?? undefined,
-      notification_policies_count_with_matcher:
-        state.notification_policies_count_with_matcher ?? undefined,
-      notification_policies_count_with_group_by:
-        state.notification_policies_count_with_group_by ?? undefined,
-      notification_policies_avg_group_by_fields_count:
-        state.notification_policies_avg_group_by_fields_count ?? undefined,
-      notification_policies_count_by_throttle_interval:
-        state.notification_policies_count_by_throttle_interval ?? undefined,
+      action_policies_count: state.action_policies_count ?? undefined,
+      action_policies_unique_workflow_count:
+        state.action_policies_unique_workflow_count ?? undefined,
+      action_policies_count_with_matcher: state.action_policies_count_with_matcher ?? undefined,
+      action_policies_count_with_group_by: state.action_policies_count_with_group_by ?? undefined,
+      action_policies_avg_group_by_fields_count:
+        state.action_policies_avg_group_by_fields_count ?? undefined,
+      action_policies_count_by_throttle_interval:
+        state.action_policies_count_by_throttle_interval ?? undefined,
       alerts_count: state.alerts_count ?? undefined,
       alerts_count_by_kind: state.alerts_count_by_kind ?? undefined,
       alerts_count_by_source: state.alerts_count_by_source ?? undefined,
