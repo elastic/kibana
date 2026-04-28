@@ -47,6 +47,7 @@
             "lineNumber": 57,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "AnonymizationProfilesSectionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -85,6 +86,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AnonymizationProfilesHttpService",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -123,6 +125,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AnonymizationReplacementsHttpService",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -174,6 +177,7 @@
             "lineNumber": 25,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "ProfileFlyoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -225,6 +229,7 @@
             "lineNumber": 15,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ProfileFormProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -300,6 +305,7 @@
             "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ProfileFormProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -338,6 +344,7 @@
             "lineNumber": 29,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDeleteProfileFlowParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -375,6 +382,7 @@
             "lineNumber": 30,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "UseProfileEditorParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -413,6 +421,7 @@
             "lineNumber": 74,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "UseProfileFormParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -451,6 +460,7 @@
             "lineNumber": 58,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "UseProfilesListViewParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -489,6 +499,7 @@
             "lineNumber": 42,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "UseResolveAnonymizedValuesParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1249,6 +1260,7 @@
                 "lineNumber": 40,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "TargetType",
                 "trackAdoption": false,
                 "isRequired": true
               }

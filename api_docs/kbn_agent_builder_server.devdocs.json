@@ -78,6 +78,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AfterToolCallHookContext",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -169,6 +170,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BeforeAgentHookContext",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -231,6 +233,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BeforeToolCallHookContext",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -379,6 +382,7 @@
             "lineNumber": 37,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -425,6 +429,7 @@
             "lineNumber": 24,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -471,6 +476,7 @@
             "lineNumber": 59,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -526,6 +532,7 @@
             "lineNumber": 13,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "RunContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -733,6 +740,7 @@
                 "lineNumber": 135,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "E",
                 "trackAdoption": false
               },
               {
@@ -756,6 +764,7 @@
                 "lineNumber": 135,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "HookContext",
                 "trackAdoption": false
               }
             ]
@@ -919,6 +928,7 @@
                 "lineNumber": 218,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChatAgentEvent",
                 "trackAdoption": false
               }
             ]
@@ -1753,6 +1763,7 @@
                 "lineNumber": 75,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "TParams",
                 "trackAdoption": false
               },
               {
@@ -1775,6 +1786,7 @@
                 "lineNumber": 75,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolHandlerContext",
                 "trackAdoption": false
               }
             ]
@@ -1786,7 +1798,14 @@
             "tags": [],
             "label": "availability",
             "description": [
-              "\nOptional dynamic availability configuration.\nRefer to {@link ToolAvailabilityConfig}"
+              "\nOptional dynamic availability configuration.\nRefer to ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolAvailabilityConfig",
+                "text": "ToolAvailabilityConfig"
+              }
             ],
             "signature": [
               {
@@ -1937,6 +1956,7 @@
                 "lineNumber": 83,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecutableToolHandlerParams",
                 "trackAdoption": false
               }
             ]
@@ -2260,6 +2280,7 @@
                 "lineNumber": 127,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "HookRegistrationsBundle",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2338,6 +2359,7 @@
                 "lineNumber": 135,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "E",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2362,6 +2384,7 @@
                 "lineNumber": 135,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "HookContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2467,6 +2490,7 @@
                 "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolAvailabilityContext",
                 "trackAdoption": false
               }
             ]
@@ -2929,7 +2953,14 @@
         "tags": [],
         "label": "RunAgentParams",
         "description": [
-          "\nParams for {@link RunAgentFn}"
+          "\nParams for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.RunAgentFn",
+            "text": "RunAgentFn"
+          }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/runner.ts",
         "lineNumber": 17,
@@ -3259,6 +3290,7 @@
                 "lineNumber": 199,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunToolParams",
                 "trackAdoption": false
               }
             ]
@@ -3330,6 +3362,7 @@
                 "lineNumber": 203,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunInternalToolParams",
                 "trackAdoption": false
               }
             ]
@@ -3389,6 +3422,7 @@
                 "lineNumber": 66,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunAgentParams",
                 "trackAdoption": false
               }
             ]
@@ -3403,7 +3437,14 @@
         "tags": [],
         "label": "RunToolParams",
         "description": [
-          "\nParams for {@link RunToolFn}"
+          "\nParams for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.RunToolFn",
+            "text": "RunToolFn"
+          }
         ],
         "signature": [
           {
@@ -3819,6 +3860,7 @@
                 "lineNumber": 80,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopedRunnerRunToolsParams",
                 "trackAdoption": false
               }
             ]
@@ -3892,6 +3934,7 @@
                 "lineNumber": 87,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopedRunnerRunInternalToolParams",
                 "trackAdoption": false
               }
             ]
@@ -3963,6 +4006,7 @@
                 "lineNumber": 71,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopedRunnerRunAgentParams",
                 "trackAdoption": false
               }
             ]
@@ -4355,6 +4399,7 @@
                 "lineNumber": 47,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolAvailabilityContext",
                 "trackAdoption": false
               }
             ]
@@ -4405,7 +4450,15 @@
         "tags": [],
         "label": "ToolAvailabilityContext",
         "description": [
-          "\nInformation exposed to the {@link ToolAvailabilityHandler}."
+          "\nInformation exposed to the ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ToolAvailabilityHandler",
+            "text": "ToolAvailabilityHandler"
+          },
+          "."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "lineNumber": 20,
@@ -4469,7 +4522,15 @@
         "tags": [],
         "label": "ToolAvailabilityResult",
         "description": [
-          "\nInformation exposed to the {@link ToolAvailabilityHandler}."
+          "\nInformation exposed to the ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ToolAvailabilityHandler",
+            "text": "ToolAvailabilityHandler"
+          },
+          "."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "lineNumber": 29,
@@ -4743,6 +4804,7 @@
                 "lineNumber": 55,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEvent",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4760,6 +4822,7 @@
                 "lineNumber": 55,
                 "columnNumber": 75,
                 "deprecated": false,
+                "docsReferencedTypeName": "TData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5318,6 +5381,7 @@
                 "lineNumber": 41,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConfirmPromptDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5388,6 +5452,7 @@
                 "lineNumber": 22,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolProviderHasOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5452,6 +5517,7 @@
                 "lineNumber": 27,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolProviderGetOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5516,6 +5582,7 @@
                 "lineNumber": 31,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolProviderListOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5532,7 +5599,14 @@
         "tags": [],
         "label": "ToolProviderGetOptions",
         "description": [
-          "\nOptions for {@link ToolProvider.get}"
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ToolProvider.get",
+            "text": "ToolProvider.get"
+          }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
         "lineNumber": 94,
@@ -5580,7 +5654,14 @@
         "tags": [],
         "label": "ToolProviderHasOptions",
         "description": [
-          "\nOptions for {@link ToolProvider.has}"
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ToolProvider.has",
+            "text": "ToolProvider.has"
+          }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
         "lineNumber": 86,
@@ -5628,7 +5709,14 @@
         "tags": [],
         "label": "ToolProviderListOptions",
         "description": [
-          "\nOptions for {@link ToolProvider.list}"
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ToolProvider.list",
+            "text": "ToolProvider.list"
+          }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
         "lineNumber": 102,
@@ -5834,6 +5922,7 @@
                 "lineNumber": 64,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolListParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5907,6 +5996,7 @@
                 "lineNumber": 68,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolCreateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5997,6 +6087,7 @@
                 "lineNumber": 72,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolUpdateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6096,6 +6187,7 @@
                 "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopedRunnerRunToolsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6269,6 +6361,7 @@
                 "lineNumber": 32,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6418,6 +6511,7 @@
                 "lineNumber": 22,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolResultWithMeta",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6689,6 +6783,7 @@
             "lineNumber": 218,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatAgentEvent",
             "trackAdoption": false
           }
         ],
@@ -6755,6 +6850,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentHandlerParams",
             "trackAdoption": false
           },
           {
@@ -6777,6 +6873,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -6861,6 +6958,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HookContext",
             "trackAdoption": false
           }
         ],
@@ -6929,7 +7027,14 @@
         "tags": [],
         "label": "ExecutableToolHandlerFn",
         "description": [
-          "\nExecution handler for {@link ExecutableTool}"
+          "\nExecution handler for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ExecutableTool",
+            "text": "ExecutableTool"
+          }
         ],
         "signature": [
           "(params: ",
@@ -6981,6 +7086,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecutableToolHandlerParams",
             "trackAdoption": false
           }
         ],
@@ -6993,7 +7099,14 @@
         "tags": [],
         "label": "ExecutableToolHandlerParams",
         "description": [
-          "\nParam type for {@link ExecutableToolHandlerFn}"
+          "\nParam type for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ExecutableToolHandlerFn",
+            "text": "ExecutableToolHandlerFn"
+          }
         ],
         "signature": [
           "{ source?: ",
@@ -7143,6 +7256,7 @@
             "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolAvailabilityContext",
             "trackAdoption": false
           }
         ],
@@ -7202,6 +7316,7 @@
             "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LLmDescriptionHandlerParams",
             "trackAdoption": false
           }
         ],
@@ -7262,6 +7377,7 @@
             "lineNumber": 66,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "RunAgentParams",
             "trackAdoption": false
           }
         ],
@@ -7410,6 +7526,7 @@
             "lineNumber": 56,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatAgentEvent",
             "trackAdoption": false
           }
         ],
@@ -7492,6 +7609,7 @@
             "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunToolParams",
             "trackAdoption": false
           }
         ],
@@ -7564,6 +7682,7 @@
             "lineNumber": 71,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ScopedRunnerRunAgentParams",
             "trackAdoption": false
           }
         ],
@@ -7576,7 +7695,14 @@
         "tags": [],
         "label": "ScopedRunnerRunAgentParams",
         "description": [
-          "\nParams for {@link ScopedRunner.runTool}"
+          "\nParams for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ScopedRunner.runTool",
+            "text": "ScopedRunner.runTool"
+          }
         ],
         "signature": [
           "{ executionId?: string | undefined; abortSignal?: AbortSignal | undefined; onEvent?: ",
@@ -7613,7 +7739,14 @@
         "tags": [],
         "label": "ScopedRunnerRunToolsParams",
         "description": [
-          "\nParams for {@link ScopedRunner.runTool}"
+          "\nParams for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ScopedRunner.runTool",
+            "text": "ScopedRunner.runTool"
+          }
         ],
         "signature": [
           "{ source?: ",
@@ -7694,6 +7827,7 @@
             "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ScopedRunnerRunToolsParams",
             "trackAdoption": false
           }
         ],
@@ -7878,6 +8012,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolAvailabilityContext",
             "trackAdoption": false
           }
         ],
@@ -7927,6 +8062,7 @@
             "lineNumber": 37,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "AgentBuilderToolEvent",
             "trackAdoption": false
           }
         ],
@@ -7939,7 +8075,15 @@
         "tags": [],
         "label": "ToolHandlerFn",
         "description": [
-          "\nTool handler function for {@link BuiltinToolDefinition} handlers."
+          "\nTool handler function for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.BuiltinToolDefinition",
+            "text": "BuiltinToolDefinition"
+          },
+          " handlers."
         ],
         "signature": [
           "(args: TParams, context: ",
@@ -7989,6 +8133,7 @@
             "lineNumber": 75,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false
           },
           {
@@ -8011,6 +8156,7 @@
             "lineNumber": 75,
             "columnNumber": 21,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolHandlerContext",
             "trackAdoption": false
           }
         ],
@@ -8042,7 +8188,22 @@
         "tags": [],
         "label": "ToolHandlerReturn",
         "description": [
-          "\nReturn value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}"
+          "\nReturn value for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.ToolHandlerFn",
+            "text": "ToolHandlerFn"
+          },
+          " / ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.BuiltinToolDefinition",
+            "text": "BuiltinToolDefinition"
+          }
         ],
         "signature": [
           "ToolHandlerPromptReturn",
@@ -8116,6 +8277,7 @@
             "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolCallWithResult",
             "trackAdoption": false
           }
         ],
@@ -8196,6 +8358,7 @@
                 "lineNumber": 24,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "BeforeAgentHookContext",
                 "trackAdoption": false
               },
               {
@@ -8255,6 +8418,7 @@
                 "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "BeforeToolCallHookContext",
                 "trackAdoption": false
               },
               {
@@ -8335,6 +8499,7 @@
                 "lineNumber": 40,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "AfterToolCallHookContext",
                 "trackAdoption": false
               },
               {
