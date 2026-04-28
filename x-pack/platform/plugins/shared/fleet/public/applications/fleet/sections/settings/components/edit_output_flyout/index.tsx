@@ -180,30 +180,22 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       return null;
     }
 
-    const generateWarningMessage = () => {
-      switch (inputs.typeInput.value) {
-        default:
-        case outputType.Elasticsearch:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
-            defaultMessage:
-              'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
-          });
-        case outputType.RemoteElasticsearch:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout', {
-            defaultMessage:
-              'Remote Elasticsearch output does not support connectivity to a serverless project.',
-          });
+    const warningMessage = i18n.translate(
+      'xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout',
+      {
+        defaultMessage:
+          'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
       }
-    };
+    );
     return (
       <>
-        {!isServerless ? (
+        {isESOutput && !isServerless ? (
           <>
             <EuiSpacer size="xs" />
             <EuiCallOut
               announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
-              title={generateWarningMessage()}
+              title={warningMessage}
               iconType="warning"
               color="warning"
               size="s"
