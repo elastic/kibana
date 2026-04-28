@@ -41,22 +41,30 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
 
   private async getAgentStatusFromConnectorAction(agentIds: string[]) {
-    const connectorActions = new NormalizedExternalConnectorClient(
-      this.options.connectorActionsClient as ActionsClient,
-      this.log
-    );
-    connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
+    try {
+      const connectorActions = new NormalizedExternalConnectorClient(
+        this.options.connectorActionsClient as ActionsClient,
+        this.log
+      );
+      connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
 
-    const agentStatusResponse = (await connectorActions.execute({
-      params: {
-        subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
-        subActionParams: {
-          ids: agentIds,
+      const agentStatusResponse = (await connectorActions.execute({
+        params: {
+          subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
+          subActionParams: {
+            ids: agentIds,
+          },
         },
-      },
-    })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
+      })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
 
-    return keyBy(agentStatusResponse.data?.resources, 'id');
+      return keyBy(agentStatusResponse.data?.resources, 'id');
+    } catch (error) {
+      this.log.error(`Error fetching agent status using crowdstrike connector: ${error.message}`, {
+        error,
+      });
+    }
+
+    return {};
   }
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
