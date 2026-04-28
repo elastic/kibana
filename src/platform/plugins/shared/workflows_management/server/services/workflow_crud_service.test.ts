@@ -450,6 +450,151 @@ describe('WorkflowCrudService', () => {
       expect(result.failed).toHaveLength(1);
       expect(result.failed[0].id).toBe('same');
     });
+
+    const makeTaskScheduler = () => ({
+      scheduleWorkflowTasks: jest.fn().mockResolvedValue([]),
+      scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
+      unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+    });
+
+    it('overwrite=true unschedules orphaned tasks when the new workflow has no scheduled triggers', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+
+      client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
+      // Post-write re-read: persisted document has only a manual trigger.
+      client.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({
+                enabled: true,
+                valid: true,
+                definition: {
+                  name: 'A',
+                  enabled: true,
+                  triggers: [{ type: 'manual' }],
+                  steps: [],
+                } as any,
+              }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
+      expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+    });
+
+    it('overwrite=true reschedules in place when the persisted workflow still has a scheduled trigger', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+
+      client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
+      client.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({
+                enabled: true,
+                valid: true,
+                definition: {
+                  name: 'A',
+                  enabled: true,
+                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                  steps: [],
+                } as any,
+              }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledTimes(1);
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'wf-1' }),
+        'default',
+        request
+      );
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    });
+
+    it('overwrite=true unschedules when the persisted workflow has scheduled triggers but is disabled', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+
+      client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
+      client.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({
+                enabled: false,
+                valid: true,
+                definition: {
+                  name: 'A',
+                  enabled: false,
+                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                  steps: [],
+                } as any,
+              }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
+      expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+    });
+
+    it('overwrite=false keeps the additive schedule path and never issues a post-write re-read', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'gen-id', status: 201 } }] });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows([{ yaml: validYaml('A') }], 'default', request);
+
+      expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+      expect(taskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+      // Only the ID-resolution search runs — no post-write re-read for `syncSchedulerAfterSave`.
+      expect(client.search).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('updateWorkflow', () => {
