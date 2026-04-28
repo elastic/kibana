@@ -57,7 +57,12 @@ export interface GenerateKIQueriesDependencies {
 export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
-): Promise<SignificantEventsQueriesGenerationResult & { toolUsage: SignificantEventsToolUsage }> {
+): Promise<
+  SignificantEventsQueriesGenerationResult & {
+    toolUsage: SignificantEventsToolUsage;
+    connectorId: string;
+  }
+> {
   const { streamName, connectorId: connectorIdOverride, maxExistingQueriesForContext } = params;
   const {
     streamsClient,
@@ -135,5 +140,5 @@ export async function generateKIQueries(
     tool_usage: result.toolUsage,
   });
 
-  return result;
+  return { ...result, connectorId };
 }

@@ -12,7 +12,7 @@ import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { AnnotationDescriptionList } from '.';
-import type { Annotation } from '../../../../../common/types/annotations';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 
 describe('AnnotationDescriptionList', () => {
   beforeEach(() => {
