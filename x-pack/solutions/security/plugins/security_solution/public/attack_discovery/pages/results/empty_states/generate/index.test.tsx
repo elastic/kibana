@@ -10,8 +10,15 @@ import React from 'react';
 
 import { Generate } from '.';
 import * as i18n from '../empty_prompt/translations';
+import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
+
+jest.mock('../../../../../assistant/use_assistant_availability');
 
 describe('Generate Component', () => {
+  beforeEach(() => {
+    (useAssistantAvailability as jest.Mock).mockReturnValue({ hasAssistantPrivilege: true });
+  });
+
   it('calls onGenerate when the button is clicked', () => {
     const onGenerate = jest.fn();
 
@@ -41,6 +48,19 @@ describe('Generate Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(i18n.SELECT_A_CONNECTOR)).toBeInTheDocument();
+    });
+  });
+
+  it('shows missing privileges tooltip when hasAssistantPrivilege is false', async () => {
+    (useAssistantAvailability as jest.Mock).mockReturnValue({ hasAssistantPrivilege: false });
+    render(<Generate isLoading={false} isDisabled={false} onGenerate={jest.fn()} />);
+
+    expect(screen.getByTestId('generate')).toBeDisabled();
+
+    fireEvent.mouseOver(screen.getByTestId('generate'));
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.MISSING_PRIVILEGES)).toBeInTheDocument();
     });
   });
 });

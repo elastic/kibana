@@ -83,6 +83,39 @@ describe('EmptyPrompt', () => {
     });
   });
 
+  describe('when aiConnectorsCount is null and hasAssistantPrivilege is false', () => {
+    beforeEach(() => {
+      (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasAssistantPrivilege: false,
+        isAssistantEnabled: true,
+      });
+
+      render(
+        <TestProviders>
+          <EmptyPrompt
+            aiConnectorsCount={null} // <--  null
+            attackDiscoveriesCount={0} // <-- no discoveries
+            isLoading={false} // <-- not loading
+            isDisabled={false}
+            onGenerate={onGenerate}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('renders the empty prompt avatar', () => {
+      const emptyPromptAvatar = screen.getByTestId('emptyPromptAvatar');
+
+      expect(emptyPromptAvatar).toBeInTheDocument();
+    });
+
+    it('renders the disabled generate button', () => {
+      const generateButton = screen.getByTestId('generate');
+
+      expect(generateButton).toBeDisabled();
+    });
+  });
+
   describe('when aiConnectorsCount is null', () => {
     beforeEach(() => {
       (useAssistantAvailability as jest.Mock).mockReturnValue({

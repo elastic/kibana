@@ -8,6 +8,7 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
+import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import * as i18n from '../empty_prompt/translations';
 import type { SettingsOverrideOptions } from '../../history/types';
 
@@ -18,11 +19,18 @@ interface Props {
 }
 
 const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onGenerate }) => {
-  const disabled = isLoading || isDisabled;
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const disabled = isLoading || isDisabled || !hasAssistantPrivilege;
+
+  const tooltipContent = !hasAssistantPrivilege
+    ? i18n.MISSING_PRIVILEGES
+    : disabled
+    ? i18n.SELECT_A_CONNECTOR
+    : null;
 
   return (
     <EuiToolTip
-      content={disabled ? i18n.SELECT_A_CONNECTOR : null}
+      content={tooltipContent}
       data-test-subj="generateTooltip"
     >
       <EuiButton

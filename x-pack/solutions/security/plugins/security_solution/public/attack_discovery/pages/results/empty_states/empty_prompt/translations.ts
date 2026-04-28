@@ -55,3 +55,10 @@ export const SELECT_A_CONNECTOR = i18n.translate(
     defaultMessage: 'Select a connector',
   }
 );
+
+export const MISSING_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.missingPrivilegesTooltip',
+  {
+    defaultMessage: 'Missing privileges',
+  }
+);

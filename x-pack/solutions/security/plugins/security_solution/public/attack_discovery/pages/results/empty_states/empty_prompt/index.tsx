@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
+import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { Generate } from '../generate';
 import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
@@ -95,11 +96,13 @@ const EmptyPromptComponent: React.FC<Props> = ({
     []
   );
 
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+
   const actions = useMemo(() => {
     return <Generate isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />;
   }, [isDisabled, isLoading, onGenerate]);
 
-  if (isLoading || aiConnectorsCount == null || attackDiscoveriesCount > 0) {
+  if (isLoading || (aiConnectorsCount == null && hasAssistantPrivilege) || attackDiscoveriesCount > 0) {
     return null;
   }
 
