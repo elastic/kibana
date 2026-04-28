@@ -12,11 +12,10 @@ import {
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
@@ -29,6 +28,7 @@ import type { RulesSavedObjectServiceContract } from '../services/rules_saved_ob
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { RulesClientSpaceIdToken } from './tokens';
 import type {
   BulkOperationError,
   BulkOperationResponse,
@@ -80,7 +80,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 export class RulesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(CoreStart('http')) private readonly http: HttpServiceStart,
+    @inject(RulesClientSpaceIdToken) private readonly spaceId: string,
     @inject(RulesSavedObjectServiceScopedToken)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
@@ -88,10 +88,7 @@ export class RulesClient {
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
-    const requestBasePath = this.http.basePath.get(this.request);
-    const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
-    const spaceId = space?.spaceId || 'default';
-    return { spaceId };
+    return { spaceId: this.spaceId };
   }
 
   @withApm
