@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CoreAuthenticationService, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  CoreAuthenticationService,
+  ElasticsearchClient,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
 import type {
@@ -39,6 +43,13 @@ export interface GetRuleHistoryResult extends GetHistoryResult {
 export interface ChangeTrackingServiceInitializeParams {
   elasticsearchClient: ElasticsearchClient;
   authService: CoreAuthenticationService;
+}
+
+export interface IChangeTrackingService {
+  register(module: RuleTypeSolution): void;
+  isInitialized(module: RuleTypeSolution): boolean;
+  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams): void;
+  asScoped(request: KibanaRequest): IScopedChangeTrackingService;
 }
 
 export interface IScopedChangeTrackingService {

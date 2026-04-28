@@ -20,16 +20,17 @@ import type {
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type {
   ChangeTrackingServiceInitializeParams,
+  IChangeTrackingService,
   IScopedChangeTrackingService,
   RuleChange,
   ScopedLogChangeHistoryOptions,
 } from './types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
 
-export class ChangeTrackingService {
+export class ChangeTrackingService implements IChangeTrackingService {
   private clients: Record<RuleTypeSolution, ChangeHistoryClient>;
   private logger: Logger;
   private kibanaVersion: string;
@@ -44,7 +45,7 @@ export class ChangeTrackingService {
     this.modules = [];
   }
 
-  register(module: RuleTypeSolution) {
+  register(module: RuleTypeSolution): void {
     if (this.modules.includes(module)) {
       return;
     }
@@ -55,11 +56,11 @@ export class ChangeTrackingService {
     this.logger.debug(`Change tracking registered for [${module}, ${this.dataset}]`);
   }
 
-  isInitialized(module: RuleTypeSolution) {
+  isInitialized(module: RuleTypeSolution): boolean {
     return !!this.clients[module]?.isInitialized();
   }
 
-  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams) {
+  initialize({ elasticsearchClient, authService }: ChangeTrackingServiceInitializeParams): void {
     this.logger.debug(`Initializing change tracking..`);
     this.authService = authService;
 

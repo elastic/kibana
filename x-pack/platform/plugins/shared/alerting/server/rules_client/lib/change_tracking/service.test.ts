@@ -14,8 +14,8 @@ import {
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { ChangeTrackingService } from './service';
 import type { RuleChange, RuleSnapshot } from './types';
+import { ChangeTrackingService } from './service';
 
 jest.mock('@kbn/change-history', () => ({
   ChangeHistoryClient: jest.fn(),
@@ -50,10 +50,14 @@ describe('ChangeTrackingService', () => {
     references: [],
   });
 
-  const baseOpts = {
-    action: 'rule_update',
-    username: 'user',
-    spaceId: 'default',
+  const initializeService = (user: { username: string; profile_uid?: string } | null) => {
+    const authService = coreMock.createStart().security.authc;
+    (authService.getCurrentUser as jest.Mock).mockReturnValue(user);
+    service.initialize({
+      elasticsearchClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+      authService,
+    });
+    return { authService };
   };
 
   beforeEach(() => {
@@ -132,21 +136,51 @@ describe('ChangeTrackingService', () => {
       snapshot: { attributes: { name: 'after' } as RawRule, references: [] },
     };
 
-    const setupScopedService = (user: { username: string; profile_uid?: string } | null) => {
-      service.register('stack');
-      const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
-      const authService = coreMock.createStart().security.authc;
-      (authService.getCurrentUser as jest.Mock).mockReturnValue(user);
-      service.initialize({
-        elasticsearchClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-        authService,
-      });
-      return { client, authService };
-    };
-
     describe('log', () => {
-      it('resolves user identity from the request and forwards to logBulk', async () => {
-        const { client, authService } = setupScopedService({
+      it('throws when called before initialize()', async () => {
+        service.register('stack');
+        await expect(
+          service
+            .asScoped(httpServerMock.createKibanaRequest())
+            .log(change, { action: 'rule_update', spaceId: 'default' })
+        ).rejects.toThrow(/before initialize/);
+      });
+
+      it('forwards a single change to logBulk', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        const request = httpServerMock.createKibanaRequest();
+
+        initializeService({
+          username: 'alice',
+          profile_uid: 'profile-123',
+        });
+
+        await service.asScoped(request).log(change, { action: 'rule_update', spaceId: 'default' });
+
+        expect(client.logBulk).toHaveBeenCalledTimes(1);
+        expect(client.logBulk).toHaveBeenCalledWith(
+          [
+            {
+              objectType: RULE_SAVED_OBJECT_TYPE,
+              objectId: 'rule-1',
+              before: undefined,
+              snapshot: ruleSnapshot('after'),
+            },
+          ],
+          expect.objectContaining({
+            action: 'rule_update',
+            spaceId: 'default',
+            fieldsToHash: { attributes: { apiKey: true, uiamApiKey: true } },
+            correlationId: expect.any(String),
+          })
+        );
+      });
+
+      it('resolves user identity from the request and forwards a single change to the underlying client logBulk', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        const { authService } = initializeService({
           username: 'alice',
           profile_uid: 'profile-123',
         });
@@ -155,19 +189,20 @@ describe('ChangeTrackingService', () => {
         await service.asScoped(request).log(change, { action: 'rule_update', spaceId: 'default' });
 
         expect(authService.getCurrentUser).toHaveBeenCalledWith(request);
+        expect(client.logBulk).toHaveBeenCalledTimes(1);
         expect(client.logBulk).toHaveBeenCalledWith(
           expect.any(Array),
           expect.objectContaining({
             username: 'alice',
             userProfileId: 'profile-123',
-            spaceId: 'default',
-            action: 'rule_update',
           })
         );
       });
 
       it('falls back to an empty username when no user is on the request', async () => {
-        const { client } = setupScopedService(null);
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        initializeService(null);
 
         await service
           .asScoped(httpServerMock.createKibanaRequest())
@@ -181,24 +216,21 @@ describe('ChangeTrackingService', () => {
           })
         );
       });
+    });
 
+    describe('logBulk', () => {
       it('throws when called before initialize()', async () => {
         service.register('stack');
         await expect(
           service
             .asScoped(httpServerMock.createKibanaRequest())
-            .log(change, { action: 'rule_update', spaceId: 'default' })
+            .logBulk([change], { action: 'rule_update', spaceId: 'default' })
         ).rejects.toThrow(/before initialize/);
       });
-    });
 
-    describe('logBulk', () => {
-      it('resolves user identity from the request and forwards to logBulk', async () => {
-        const { client, authService } = setupScopedService({
-          username: 'alice',
-          profile_uid: 'profile-123',
-        });
-
+      it('forwards multiple changes to logBulk', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
         const request = httpServerMock.createKibanaRequest();
         const changes: RuleChange[] = [
           {
@@ -214,84 +246,14 @@ describe('ChangeTrackingService', () => {
             snapshot: ruleSnapshot('b'),
           },
         ];
-        await service
-          .asScoped(request)
-          .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
 
-        expect(authService.getCurrentUser).toHaveBeenCalledWith(request);
-        expect(client.logBulk).toHaveBeenCalledWith(
-          expect.any(Array),
-          expect.objectContaining({
-            username: 'alice',
-            userProfileId: 'profile-123',
-            spaceId: 'default',
-            action: 'rule_update',
-          })
-        );
-      });
-
-      it('falls back to an empty username when no user is on the request', async () => {
-        const { client } = setupScopedService(null);
-
-        const changes: RuleChange[] = [
-          {
-            module: 'stack',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            objectId: 'rule-1',
-            snapshot: ruleSnapshot('a'),
-          },
-          {
-            module: 'stack',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            objectId: 'rule-2',
-            snapshot: ruleSnapshot('b'),
-          },
-        ];
-        await service
-          .asScoped(httpServerMock.createKibanaRequest())
-          .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
-
-        expect(client.logBulk).toHaveBeenCalledWith(
-          expect.any(Array),
-          expect.objectContaining({
-            username: '',
-            userProfileId: undefined,
-          })
-        );
-      });
-
-      it('throws when called before initialize()', async () => {
-        service.register('stack');
-        await expect(
-          service
-            .asScoped(httpServerMock.createKibanaRequest())
-            .log(change, { action: 'rule_update', spaceId: 'default' })
-        ).rejects.toThrow(/before initialize/);
-      });
-
-      it('forwards multiple changes to the underlying client logBulk', async () => {
-        const { client } = setupScopedService({
+        initializeService({
           username: 'alice',
           profile_uid: 'profile-123',
         });
 
-        const changes: RuleChange[] = [
-          {
-            module: 'stack',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            objectId: 'rule-1',
-            snapshot: ruleSnapshot('a'),
-          },
-          {
-            module: 'stack',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            objectId: 'rule-2',
-            snapshot: ruleSnapshot('b'),
-          },
-        ];
-
         await service
-          .asScoped(httpServerMock.createKibanaRequest())
+          .asScoped(request)
           .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
 
         expect(client.logBulk).toHaveBeenCalledTimes(1);
@@ -313,9 +275,155 @@ describe('ChangeTrackingService', () => {
           expect.objectContaining({
             action: 'rule_update',
             spaceId: 'default',
+            correlationId: expect.any(String),
+          })
+        );
+      });
+
+      it('resolves user identity from the request and forwards multiple changes to the underlying client logBulk', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        const { authService } = initializeService({
+          username: 'alice',
+          profile_uid: 'profile-123',
+        });
+
+        const request = httpServerMock.createKibanaRequest();
+        const changes: RuleChange[] = [
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'rule-1',
+            snapshot: ruleSnapshot('a'),
+          },
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'rule-2',
+            snapshot: ruleSnapshot('b'),
+          },
+        ];
+
+        await service
+          .asScoped(request)
+          .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
+
+        expect(authService.getCurrentUser).toHaveBeenCalledWith(request);
+        expect(client.logBulk).toHaveBeenCalledTimes(1);
+        expect(client.logBulk).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
             username: 'alice',
             userProfileId: 'profile-123',
-            correlationId: expect.any(String),
+          })
+        );
+      });
+
+      it('falls back to an empty username when no user is on the request', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        initializeService(null);
+
+        await service
+          .asScoped(httpServerMock.createKibanaRequest())
+          .logBulk([change], { action: 'rule_update', spaceId: 'default' });
+
+        expect(client.logBulk).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            username: '',
+            userProfileId: undefined,
+          })
+        );
+      });
+
+      it('groups changes by module and shares one correlationId across bulk calls', async () => {
+        service.register('stack');
+        service.register('security');
+        const stackClient = ChangeHistoryClientMock.mock.results[0]!
+          .value as MockChangeHistoryClient;
+        const securityClient = ChangeHistoryClientMock.mock.results[1]!
+          .value as MockChangeHistoryClient;
+        initializeService({ username: 'alice' });
+
+        const changes: RuleChange[] = [
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'a',
+            snapshot: ruleSnapshot('a'),
+          },
+          {
+            module: 'security',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'b',
+            snapshot: ruleSnapshot('b'),
+          },
+        ];
+
+        await service
+          .asScoped(httpServerMock.createKibanaRequest())
+          .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
+
+        expect(stackClient.logBulk).toHaveBeenCalledTimes(1);
+        expect(securityClient.logBulk).toHaveBeenCalledTimes(1);
+
+        const stackOpts = stackClient.logBulk.mock.calls[0]![1] as { correlationId: string };
+        const securityOpts = securityClient.logBulk.mock.calls[0]![1] as { correlationId: string };
+        expect(stackOpts.correlationId).toBe(securityOpts.correlationId);
+      });
+
+      it('swallows logBulk errors and logs them', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        client.logBulk.mockRejectedValueOnce(new Error('es down'));
+        initializeService({ username: 'alice' });
+
+        const failingChange: RuleChange = {
+          module: 'stack',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          objectId: 'rule-1',
+          snapshot: ruleSnapshot('x'),
+        };
+
+        await expect(
+          service
+            .asScoped(httpServerMock.createKibanaRequest())
+            .logBulk([failingChange], { action: 'rule_update', spaceId: 'default' })
+        ).resolves.toBeUndefined();
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringMatching(
+              /^Error saving change history for \[stack, alerting-rules\], missing 1 change\(s\) with correlationId=[a-f0-9]{32}: Error: es down$/
+            ),
+          })
+        );
+      });
+
+      it('does not call logBulk when the change module was never registered', async () => {
+        service.register('stack');
+        const stackClient = ChangeHistoryClientMock.mock.results[0]!
+          .value as MockChangeHistoryClient;
+        initializeService({ username: 'alice' });
+
+        const securityChange: RuleChange = {
+          module: 'security',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          objectId: 'rule-1',
+          snapshot: ruleSnapshot('x'),
+        };
+
+        await service
+          .asScoped(httpServerMock.createKibanaRequest())
+          .logBulk([securityChange], { action: 'rule_update', spaceId: 'default' });
+
+        expect(stackClient.logBulk).not.toHaveBeenCalled();
+        expect(logger.error).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringMatching(
+              /^Unable to log changes\. Change history client not initialized for \[security, alerting-rules\] correlationId=[a-f0-9]{32}; dropped 1 change\(s\)$/
+            ),
           })
         );
       });
@@ -323,10 +431,8 @@ describe('ChangeTrackingService', () => {
 
     describe('getHistory', () => {
       it('delegates to the underlying client getHistory with rule saved object type', async () => {
-        const { client } = setupScopedService({
-          username: 'alice',
-          profile_uid: 'profile-123',
-        });
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
         const opts = { size: 10 };
 
         await service
@@ -341,30 +447,12 @@ describe('ChangeTrackingService', () => {
           opts
         );
       });
-    });
-
-    describe('getHistory', () => {
-      it('delegates to the client with rule saved object type', async () => {
-        service.register('stack');
-        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
-        const opts = { size: 10 };
-        const request = httpServerMock.createKibanaRequest();
-
-        await service.asScoped(request).getHistory('stack', 'default', 'rule-1', opts);
-
-        expect(client.getHistory).toHaveBeenCalledWith(
-          'default',
-          RULE_SAVED_OBJECT_TYPE,
-          'rule-1',
-          opts
-        );
-      });
 
       it('throws when the module has no client and adds a warning to the logs', async () => {
-        const request = httpServerMock.createKibanaRequest();
-
         await expect(
-          service.asScoped(request).getHistory('stack', 'default', 'rule-1', {})
+          service
+            .asScoped(httpServerMock.createKibanaRequest())
+            .getHistory('stack', 'default', 'rule-1', {})
         ).rejects.toThrow(
           'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
         );
