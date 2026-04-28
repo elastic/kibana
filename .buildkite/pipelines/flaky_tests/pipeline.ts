@@ -179,9 +179,7 @@ if (hasScoutSuites) {
   // 500-job cap. Mirrors the BASE_JOBS + non-Scout sum used in the pre-flight check above.
   const reservedJobsForPlanner =
     BASE_JOBS +
-    testSuites
-      .filter((t) => t.type !== 'scoutConfig')
-      .reduce((acc, t) => acc + t.count, 0);
+    testSuites.filter((t) => t.type !== 'scoutConfig').reduce((acc, t) => acc + t.count, 0);
 
   steps.push({
     command: '.buildkite/scripts/steps/test/scout/discover_and_plan_flaky.sh',
