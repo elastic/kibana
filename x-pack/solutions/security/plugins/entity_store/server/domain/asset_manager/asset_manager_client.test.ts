@@ -228,6 +228,19 @@ describe('AssetManagerClient', () => {
       );
     });
 
+    it('re-install with empty params object preserves existing config', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host'], {});
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+      );
+    });
+
     it('re-install with params overwrites existing config with parsed params', async () => {
       mockGlobalStateClient.find.mockResolvedValue({
         historySnapshot: {},

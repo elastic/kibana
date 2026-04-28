@@ -24,8 +24,8 @@ export function registerInstall(router: EntityStorePluginRouter) {
       description:
         'Install the Entity Store, creating engines for the specified entity types and configuring log extraction. ' +
         'Log extraction config resolution: ' +
-        'when `logExtraction` is omitted, an existing config is preserved on re-install, otherwise defaults are applied; ' +
-        'when `logExtraction` is provided, the supplied fields are merged with defaults and replace any existing config.',
+        'when `logExtraction` is omitted or an empty object, an existing config is preserved on re-install, otherwise defaults are applied; ' +
+        'when `logExtraction` has at least one field, the supplied fields are merged with defaults and replace any existing config.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },

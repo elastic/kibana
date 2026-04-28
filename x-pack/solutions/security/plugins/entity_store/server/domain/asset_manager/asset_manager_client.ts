@@ -541,7 +541,8 @@ function resolveLogsExtractionOnInstall(
   existing: LogExtractionConfig | undefined,
   params: LogExtractionInstallParams | undefined
 ): LogExtractionConfig {
-  if (params !== undefined) {
+  const hasParams = params !== undefined && Object.keys(params).length > 0;
+  if (hasParams) {
     return LogExtractionConfig.parse(params);
   }
   if (existing !== undefined) {
