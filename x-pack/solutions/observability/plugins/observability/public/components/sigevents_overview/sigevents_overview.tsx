@@ -161,7 +161,7 @@ export function SigeventsOverview({
   const resolvedHealthyMetrics = healthyMetrics ?? defaultHealthyMetrics;
   const hasLowerPriorityVerdicts = lowerPriorityVerdicts && lowerPriorityVerdicts.length > 0;
 
-  if (state === 'healthy') {
+  if (state === 'healthy' || state === 'warning') {
     return (
       <div data-test-subj="sigeventsOverview" css={containerCss}>
         <StatusHeader variant="noCriticalEvents" title={title} description={description} />

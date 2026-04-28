@@ -247,6 +247,8 @@ export function SigeventsOverviewPage() {
                   severityColor={eventData.severityColor}
                   impactedServices={eventData.impactedServices}
                   impactedCards={eventData.impactedCards}
+                  healthyMetrics={healthyMetrics}
+                  lowerPriorityVerdicts={overviewData?.verdicts}
                   lastUpdatedLabel={lastUpdatedLabel}
                   onViewDetails={openDetailFlyout}
                   onRemediate={handleRemediate}
