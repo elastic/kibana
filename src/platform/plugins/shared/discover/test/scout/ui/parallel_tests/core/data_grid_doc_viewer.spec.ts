@@ -91,15 +91,12 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
       await page.testSubj.click('docViewerTab-doc_view_source');
       const flyoutDoc = await pageObjects.discover.readMonacoJson();
       expect(flyoutDoc._id).toBe(popoverDoc._id);
-
-      await pageObjects.discover.closeDocViewerFlyout();
     }
   );
 
   spaceTest('expands a document row via the row toggle', async ({ page, pageObjects }) => {
     await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     await expect(page.testSubj.locator('docViewerRowDetailsTitle')).toBeVisible();
-    await pageObjects.discover.closeDocViewerFlyout();
   });
 
   spaceTest('shows the detail panel row actions', async ({ page, pageObjects }) => {
@@ -109,8 +106,6 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
       .locator('docViewerFlyout')
       .locator('[data-test-subj*="docTableRowAction"]');
     await expect(rowActions).toHaveCount(2);
-
-    await pageObjects.discover.closeDocViewerFlyout();
   });
 
   spaceTest(
