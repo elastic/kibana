@@ -20,6 +20,7 @@ export const useAgentCount = () => {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['fetchAgentCount'],
+    retry: false,
     queryFn: async () => {
       try {
         const [agents, tools] = await Promise.all([

@@ -25,6 +25,7 @@ export const useIndicesStats = (): UseQueryResult<IndicesStats | undefined> => {
 
   const queryResult = useQuery<Index[] | undefined, Error, IndicesStats | undefined>({
     queryKey: ['fetchIndicesStats'],
+    retry: false,
     queryFn: async () => {
       try {
         const response = await http.get<Index[]>(`${API_BASE_PATH}/indices`);

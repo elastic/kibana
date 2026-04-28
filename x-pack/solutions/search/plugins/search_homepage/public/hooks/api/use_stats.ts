@@ -22,6 +22,7 @@ export const useStats = (): UseQueryResult<SizeStats | undefined> => {
 
   const queryResult = useQuery<SizeStats | undefined, Error>({
     queryKey: ['fetchSizeStats'],
+    retry: false,
     queryFn: async () => {
       try {
         const response = await http.get<StatsResponse>('/internal/search_homepage/stats');

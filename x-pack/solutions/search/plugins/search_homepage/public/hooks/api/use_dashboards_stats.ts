@@ -20,6 +20,7 @@ export const useDashboardsStats = (): UseQueryResult<DashboardsStats | undefined
 
   const queryResult = useQuery<DashboardsStats | undefined>({
     queryKey: ['fetchDashboardsStats'],
+    retry: false,
     queryFn: async () => {
       try {
         const response = await http.get<{
