@@ -15,12 +15,7 @@ import type {
   ESQLLocation,
 } from '@elastic/esql/types';
 import { isIdentifier, isList, isSource, Walker } from '@elastic/esql';
-import type {
-  PromQLBinaryExpression,
-  PromQLFunction,
-  PromQLLabelName,
-  PromQLSelector,
-} from '@elastic/esql';
+import type { PromQLBinaryExpression, PromQLFunction } from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
@@ -31,7 +26,6 @@ import {
 import { getPromqlExpressionType } from '../../definitions/utils/expressions';
 import { sourceExists } from '../../definitions/utils/sources';
 import { errors } from '../../definitions/utils/errors';
-import { validateColumnForCommand } from '../../definitions/utils/validation/column';
 import type { ESQLMessage, PromQLFunctionDefinition } from '../../definitions/types';
 import {
   getPromqlFunctionArityCheck,
