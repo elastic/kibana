@@ -17,19 +17,7 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
   const { data, origin } = attachment;
   const isProposed = !origin;
   const isEnabled = data.enabled ?? true;
-
-  const status = isProposed
-    ? i18n.translate('xpack.alertingV2.ruleAttachment.statusProposed', {
-        defaultMessage: 'proposed',
-      })
-    : isEnabled
-    ? i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
-        defaultMessage: 'enabled',
-      })
-    : i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
-        defaultMessage: 'disabled',
-      });
-  const statusColor = isProposed ? 'default' : isEnabled ? 'success' : 'warning';
+  const { label: status, color: statusColor } = getStatusInfo(isProposed, isEnabled);
 
   return (
     <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
@@ -81,4 +69,24 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
       </EuiFlexGroup>
     </EuiPanel>
   );
+};
+
+const getStatusInfo = (isProposed: boolean, isEnabled: boolean) => {
+  if (isProposed) return {
+    label: i18n.translate('xpack.alertingV2.ruleAttachment.statusProposed', {
+      defaultMessage: 'proposed',
+    }), color: 'default'
+  };
+
+  if (isEnabled) return {
+    label: i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
+      defaultMessage: 'enabled',
+    }), color: 'success'
+  };
+
+  return {
+    label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
+      defaultMessage: 'disabled',
+    }), color: 'warning'
+  };
 };
