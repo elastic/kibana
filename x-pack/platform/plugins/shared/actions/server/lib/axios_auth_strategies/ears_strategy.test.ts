@@ -135,25 +135,6 @@ describe('EarsStrategy', () => {
       expect(mockRequest).toHaveBeenCalledWith(error.config);
     });
 
-    it('normalizes lowercase bearer scheme from refresh to Bearer', async () => {
-      const { instance, mockRequest } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, baseDeps);
-      const onRejected = getOnRejected(instance);
-
-      mockGetEarsAccessToken.mockResolvedValue('bearer refreshed-token');
-      mockRequest.mockResolvedValue({ status: 200 });
-
-      const error = {
-        config: { _retry: false, headers: {} as Record<string, string> },
-        response: { status: 401 },
-        message: 'Unauthorized',
-      };
-      await onRejected(error);
-
-      expect(error.config.headers.Authorization).toBe('Bearer refreshed-token');
-      expect(instance.defaults.headers.common.Authorization).toBe('Bearer refreshed-token');
-    });
-
     it('rejects with message when token refresh returns null', async () => {
       const { instance } = createMockAxiosInstance();
       strategy.installResponseInterceptor(instance, baseDeps);
@@ -201,7 +182,7 @@ describe('EarsStrategy', () => {
       ['bearer initial-token', 'Bearer initial-token'],
       ['Bearer initial-token', 'Bearer initial-token'],
     ])(
-      'sets Authorization header with title-case Bearer scheme (%s → %s) at setup time',
+      'sets Authorization header with title-case Bearer scheme at setup time (%s -> %s)',
       async (input, expected) => {
         const ctx = {
           getToken: jest.fn().mockResolvedValue(input),
@@ -213,6 +194,25 @@ describe('EarsStrategy', () => {
         expect(instance.defaults.headers.common.Authorization).toBe(expected);
       }
     );
+
+    it('sets Authorization header with title-case Bearer scheme at refresh time', async () => {
+      const { instance, mockRequest } = createMockAxiosInstance();
+      strategy.installResponseInterceptor(instance, baseDeps);
+      const onRejected = getOnRejected(instance);
+
+      mockGetEarsAccessToken.mockResolvedValue('bearer refreshed-token');
+      mockRequest.mockResolvedValue({ status: 200 });
+
+      const error = {
+        config: { _retry: false, headers: {} as Record<string, string> },
+        response: { status: 401 },
+        message: 'Unauthorized',
+      };
+      await onRejected(error);
+
+      expect(error.config.headers.Authorization).toBe('Bearer refreshed-token');
+      expect(instance.defaults.headers.common.Authorization).toBe('Bearer refreshed-token');
+    });
   });
 
   describe('getToken', () => {
