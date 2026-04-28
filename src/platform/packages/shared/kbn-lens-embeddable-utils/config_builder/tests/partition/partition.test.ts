@@ -97,7 +97,10 @@ describe('Partition', () => {
   describe('api transform validation', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
-        validator[config.type].fromApi(config as any); // TODO fix test types here
+        validator[config.type].fromApi(
+          config as any, // TODO fix test types here'
+          ['ignore_global_filters', 'sampling']
+        );
       });
     }
   });
