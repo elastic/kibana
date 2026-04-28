@@ -28,7 +28,7 @@ import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 import { StreamFieldSection } from './stream_field_section';
 import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../../../hooks/use_metric_source_kind';
-import { useExternalServices } from '../../../context/external_services';
+import { useStreamsFlyoutRenderer } from '../../../hooks/use_streams_flyout_renderer';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -46,14 +46,10 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     metricItem.dataStream,
     METRIC_SOURCE_KIND.DATA_STREAM
   );
-  const externalServices = useExternalServices();
-  const hasStreamsFlyout = Boolean(
-    externalServices?.discoverShared?.features.registry.getById('streams')
-      ?.renderFlyoutStreamFieldByStreamName
-  );
+  const renderStreamFlyout = useStreamsFlyoutRenderer();
 
   const streamFieldSourceName =
-    metricItem.dataStream && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && hasStreamsFlyout
+    metricItem.dataStream && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamFlyout
       ? metricItem.dataStream
       : undefined;
   const metadataSourceKind = !streamFieldSourceName ? sourceKind : undefined;

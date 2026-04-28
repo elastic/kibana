@@ -8,18 +8,14 @@
  */
 
 import React from 'react';
-import { useExternalServices } from '../../../context/external_services';
+import { useStreamsFlyoutRenderer } from '../../../hooks/use_streams_flyout_renderer';
 
 interface StreamFieldSectionProps {
   sourceName: string;
 }
 
 export const StreamFieldSection = ({ sourceName }: StreamFieldSectionProps) => {
-  const externalServices = useExternalServices();
-  const renderByStreamName =
-    externalServices?.discoverShared?.features.registry.getById(
-      'streams'
-    )?.renderFlyoutStreamFieldByStreamName;
+  const renderByStreamName = useStreamsFlyoutRenderer();
 
   if (!renderByStreamName || !sourceName) {
     return null;
