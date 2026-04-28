@@ -207,73 +207,81 @@ for (const testSuite of testSuites) {
     continue;
   }
 
-  if (testSuite.type === 'ftrConfig') {
-    steps.push({
-      command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
-      env: {
-        FTR_CONFIG: testSuite.ftrConfig,
-      },
-      key: `${TestSuiteType.FTR}-${suiteIndex++}`,
-      label: `${testSuite.ftrConfig}`,
-      parallelism: testSuite.count,
-      concurrency,
-      concurrency_group: process.env.UUID,
-      concurrency_method: 'eager',
-      agents: expandAgentQueue('n2-4-spot'),
-      depends_on: 'build',
-      timeout_in_minutes: 150,
-      retry: {
-        automatic: [{ exit_status: '-1', limit: 3 }],
-      },
-    });
-    continue;
-  }
-
-  if (testSuite.type === 'scoutConfig') {
-    // Scout entries are expanded into per-(arch, domain) BK steps by the
-    // 'scout_flaky_planner' step above, after discovery has produced the manifest.
-    continue;
-  }
-
-  const [category, suiteName] = testSuite.key.split('/');
-  switch (category) {
-    case 'cypress':
-      const group = groups.find((g) => g.key === testSuite.key);
-      if (!group) {
-        throw new Error(
-          `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
-        );
-      }
-      const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
-      const diskSizeGb = suiteName.includes('defend_workflows') ? 120 : undefined;
+  switch (testSuite.type) {
+    case 'ftrConfig':
       steps.push({
-        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
-        label: group.name,
-        agents: expandAgentQueue(agentQueue, diskSizeGb),
-        key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
-        depends_on: 'build',
-        timeout_in_minutes: 150,
+        command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
+        env: {
+          FTR_CONFIG: testSuite.ftrConfig,
+        },
+        key: `${TestSuiteType.FTR}-${suiteIndex++}`,
+        label: `${testSuite.ftrConfig}`,
         parallelism: testSuite.count,
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
+        agents: expandAgentQueue('n2-4-spot'),
+        depends_on: 'build',
+        timeout_in_minutes: 150,
         retry: {
           automatic: [{ exit_status: '-1', limit: 3 }],
-        },
-        env: {
-          // disable split of test cases between parallel jobs when running them in flaky test runner
-          // by setting chunks vars to value 1, which means all test will run in one job
-          CLI_NUMBER: 1,
-          CLI_COUNT: 1,
-          // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
-          // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
-          RUN_ALL_TESTS: 'true',
         },
       });
       break;
 
-    default:
-      throw new Error(`unknown test suite: ${testSuite.key}`);
+    case 'scoutConfig':
+      // Scout entries are expanded into per-(arch, domain) BK steps by the
+      // 'scout_flaky_planner' step above, after discovery has produced the manifest.
+      break;
+
+    case 'group': {
+      const [category, suiteName] = testSuite.key.split('/');
+      switch (category) {
+        case 'cypress':
+          const group = groups.find((g) => g.key === testSuite.key);
+          if (!group) {
+            throw new Error(
+              `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
+            );
+          }
+          const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
+          const diskSizeGb = suiteName.includes('defend_workflows') ? 120 : undefined;
+          steps.push({
+            command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
+            label: group.name,
+            agents: expandAgentQueue(agentQueue, diskSizeGb),
+            key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
+            depends_on: 'build',
+            timeout_in_minutes: 150,
+            parallelism: testSuite.count,
+            concurrency,
+            concurrency_group: process.env.UUID,
+            concurrency_method: 'eager',
+            retry: {
+              automatic: [{ exit_status: '-1', limit: 3 }],
+            },
+            env: {
+              // disable split of test cases between parallel jobs when running them in flaky test runner
+              // by setting chunks vars to value 1, which means all test will run in one job
+              CLI_NUMBER: 1,
+              CLI_COUNT: 1,
+              // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
+              // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
+              RUN_ALL_TESTS: 'true',
+            },
+          });
+          break;
+
+        default:
+          throw new Error(`unknown test suite: ${testSuite.key}`);
+      }
+      break;
+    }
+
+    default: {
+      const exhaustiveCheck: never = testSuite;
+      throw new Error(`unknown testSuite type: ${JSON.stringify(exhaustiveCheck)}`);
+    }
   }
 }
 
