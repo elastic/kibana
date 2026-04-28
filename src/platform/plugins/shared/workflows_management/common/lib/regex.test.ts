@@ -8,10 +8,8 @@
  */
 
 import {
-  ALLOWED_KEY_REGEX,
   isLiquidTagValue,
   LIQUID_FILTER_REGEX,
-  PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
 } from './regex';
@@ -73,91 +71,6 @@ describe('regex patterns', () => {
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
 
       expect(matches).toHaveLength(0);
-    });
-  });
-
-  describe('ALLOWED_KEY_REGEX', () => {
-    it('should match valid property paths', () => {
-      const validPaths = [
-        'user',
-        'user.name',
-        'steps.step1.output',
-        'items[0]',
-        'users["john"]',
-        "data['key']",
-        'user.contacts[0].email',
-        'response.data["user-info"].name',
-      ];
-
-      validPaths.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should match paths with liquid filters', () => {
-      const pathsWithFilters = [
-        'user.name | upcase',
-        'price | round: 2',
-        'items | map: "title" | join: ", "',
-      ];
-
-      pathsWithFilters.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should not match invalid property paths', () => {
-      const invalidPaths = [
-        '123invalid', // starts with number
-        '.user', // starts with dot
-        'user..name', // double dots
-        'user[abc]', // unquoted string in brackets
-        'user]invalid[', // wrong bracket order
-      ];
-
-      invalidPaths.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(false);
-      });
-    });
-  });
-
-  describe('PROPERTY_PATH_REGEX', () => {
-    it('should match valid property paths without filters', () => {
-      const validPaths = [
-        'user',
-        'user.name',
-        'steps.step1.output',
-        'items[0]',
-        'users["john"]',
-        "data['key']",
-        'user.contacts[0].email',
-        'response.data["user-info"].name',
-      ];
-
-      validPaths.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should not match paths with liquid filters', () => {
-      const pathsWithFilters = ['user.name | upcase', 'price | round: 2', 'items | map: "title"'];
-
-      pathsWithFilters.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
-      });
-    });
-
-    it('should not match invalid property paths', () => {
-      const invalidPaths = [
-        '123invalid', // starts with number
-        '.user', // starts with dot
-        'user..name', // double dots
-        'user[abc]', // unquoted string in brackets
-      ];
-
-      invalidPaths.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
-      });
     });
   });
 

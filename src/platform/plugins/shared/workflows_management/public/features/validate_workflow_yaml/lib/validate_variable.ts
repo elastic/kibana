@@ -9,12 +9,116 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
 import { z } from '@kbn/zod/v4';
+import type {
+  DynamicBracketAccessInfo,
+  ParsedVariablePath,
+} from '../../../../common/lib/parse_variable_path';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { getSchemaAtPath } from '../../../../common/lib/zod';
 import { getDetailedTypeDescription } from '../../../../common/lib/zod/zod_type_description';
 import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
+
+function validateDynamicBracketAccess(
+  dynamicAccess: DynamicBracketAccessInfo,
+  context: typeof DynamicStepContextSchema
+): string[] {
+  const { prefixPath, dynamicKeys } = dynamicAccess;
+  const errors: string[] = [];
+
+  if (prefixPath) {
+    const { schema: prefixSchema } = getSchemaAtPath(context, prefixPath);
+    if (!prefixSchema) {
+      errors.push(`Invalid prefix path: ${prefixPath}`);
+    }
+  }
+
+  for (const key of dynamicKeys) {
+    const { schema: keySchema } = getSchemaAtPath(context, key);
+    if (!keySchema) {
+      errors.push(`Key ${key} is invalid`);
+    }
+  }
+
+  return errors;
+}
+
+function validateStaticPath(
+  variableItem: VariableItem,
+  propertyPath: string,
+  context: typeof DynamicStepContextSchema
+): YamlValidationResult {
+  const { schema: refSchema } = getSchemaAtPath(context, propertyPath);
+
+  if (!refSchema) {
+    return {
+      ...variableItem,
+      message: `Variable ${propertyPath} is invalid`,
+      severity: 'error',
+      owner: 'variable-validation',
+      hoverMessage: null,
+    };
+  }
+
+  if (refSchema instanceof z.ZodAny && refSchema.description) {
+    return {
+      ...variableItem,
+      message: refSchema.description,
+      severity: 'warning',
+      owner: 'variable-validation',
+      hoverMessage: getVariableHoverMessage(propertyPath, refSchema),
+    };
+  }
+
+  if (refSchema instanceof z.ZodUnknown) {
+    return {
+      ...variableItem,
+      message: `Variable ${propertyPath} cannot be validated, because it's type is unknown`,
+      severity: 'warning',
+      owner: 'variable-validation',
+      hoverMessage: getVariableHoverMessage(propertyPath, refSchema),
+    };
+  }
+
+  return {
+    ...variableItem,
+    message: null,
+    severity: null,
+    owner: 'variable-validation',
+    hoverMessage: getVariableHoverMessage(propertyPath, refSchema),
+  };
+}
+
+function validateParsedPath(
+  variableItem: VariableItem,
+  parsedPath: ParsedVariablePath,
+  propertyPath: string,
+  context: typeof DynamicStepContextSchema
+): YamlValidationResult {
+  if (parsedPath.hasDynamicBracketAccess && parsedPath.dynamicAccess) {
+    const errors = validateDynamicBracketAccess(parsedPath.dynamicAccess, context);
+    if (errors.length > 0) {
+      return {
+        ...variableItem,
+        message: errors.join(', '),
+        severity: 'error',
+        owner: 'variable-validation',
+        hoverMessage: null,
+      };
+    }
+
+    return {
+      ...variableItem,
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+      hoverMessage: `Dynamic bracket access — prefix and key are valid, suffix resolved at runtime: \`${propertyPath}\``,
+    };
+  }
+
+  return validateStaticPath(variableItem, propertyPath, context);
+}
 
 export function validateVariable(
   variableItem: VariableItem,
@@ -97,7 +201,7 @@ export function validateVariable(
     };
   }
 
-  if (!parsedPath?.propertyPath) {
+  if (!parsedPath.propertyPath) {
     return {
       ...variableItem,
       message: 'Failed to parse variable path',
@@ -107,45 +211,7 @@ export function validateVariable(
     };
   }
 
-  const { schema: refSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
-
-  if (!refSchema) {
-    return {
-      ...variableItem,
-      message: `Variable ${parsedPath.propertyPath} is invalid`,
-      severity: 'error',
-      owner: 'variable-validation',
-      hoverMessage: null,
-    };
-  }
-
-  if (refSchema instanceof z.ZodAny && refSchema.description) {
-    return {
-      ...variableItem,
-      message: refSchema.description,
-      severity: 'warning',
-      owner: 'variable-validation',
-      hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
-    };
-  }
-
-  if (refSchema instanceof z.ZodUnknown) {
-    return {
-      ...variableItem,
-      message: `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`,
-      severity: 'warning',
-      owner: 'variable-validation',
-      hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
-    };
-  }
-
-  return {
-    ...variableItem,
-    message: null,
-    severity: null,
-    owner: 'variable-validation',
-    hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
-  };
+  return validateParsedPath(variableItem, parsedPath, parsedPath.propertyPath, context);
 }
 
 // This function will be replaced with a hover provider,

@@ -12,12 +12,6 @@ export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
 export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
   /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
 
-export const ALLOWED_KEY_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;
-
-export const PROPERTY_PATH_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*$/;
-
 // Liquid-specific regex patterns
 // Matches: {{ variable | filter_prefix (but not {{ variable | filter }})
 export const LIQUID_FILTER_REGEX = /\{\{\s*[^}]*\|\s*(\w*)\s*$/;
