@@ -41,7 +41,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: baseFeatureSchema,
+    body: baseFeatureSchema.and(z.object({ uuid: z.string().optional() })),
   }),
   handler: async ({
     params,
@@ -59,14 +59,15 @@ export const upsertFeatureRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const featureClient = await getFeatureClient();
+    const { uuid: existingUuid, ...baseBody } = params.body;
     await featureClient.bulk(params.path.name, [
       {
         index: {
           feature: {
-            ...params.body,
+            ...baseBody,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            uuid: uuid(),
+            uuid: existingUuid ?? uuid(),
           },
         },
       },
