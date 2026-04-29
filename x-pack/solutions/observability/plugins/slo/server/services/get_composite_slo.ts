@@ -23,7 +23,7 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
 import {
   computeCompositeSummary,
-  getNoDataCompositeSloSummary,
+  buildNoDataSummary,
   type MemberSummaryData,
 } from './compute_composite_summary';
 
@@ -107,7 +107,7 @@ export class GetCompositeSLO {
 
     const { members } = computeCompositeSummary(compositeSlo, memberSummaries);
     const persistedSummary = persistedSummaryById.get(id);
-    const summary = persistedSummary ?? getNoDataCompositeSloSummary();
+    const summary = persistedSummary ?? buildNoDataSummary();
 
     return {
       ...compositeSlo,

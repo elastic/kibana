@@ -45,7 +45,7 @@ export function computeCompositeSummary(
 
   if (status === 'NO_DATA') {
     return {
-      compositeSummary: getNoDataCompositeSloSummary(),
+      compositeSummary: buildNoDataSummary(),
       members: memberSummaries.map((ms) => buildMemberSummary(ms, 0)),
     };
   }
@@ -114,7 +114,7 @@ function buildMemberSummary(
   };
 }
 
-export function getNoDataCompositeSloSummary(): CompositeSLOSummary {
+export function buildNoDataSummary(): CompositeSLOSummary {
   return {
     sliValue: NO_DATA,
     errorBudget: toErrorBudget(0, 0),
