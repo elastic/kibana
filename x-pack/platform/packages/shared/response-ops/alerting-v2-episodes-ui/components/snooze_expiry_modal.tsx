@@ -9,25 +9,39 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AlertEpisodeSnoozeForm, computeEpisodeSnoozedUntil } from './actions/snooze_form';
+import {
+  PANEL_TITLE,
+  QUICK_SNOOZE_POPOVER_APPLY,
+  QUICK_SNOOZE_POPOVER_SUBTITLE,
+  QuickSnoozePanel,
+} from '@kbn/response-ops-alert-snooze';
 import * as i18n from '../actions/translations';
 
+export type SnoozeExpiryModalResult = string | null;
+
 interface SnoozeExpiryModalProps {
-  onConfirm: (expiry: string) => void;
+  onConfirm: (expiry: SnoozeExpiryModalResult) => void;
   onCancel: () => void;
 }
 
 const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
-  const [pendingExpiry, setPendingExpiry] = useState<string>(computeEpisodeSnoozedUntil(1, 'h'));
+  const [pendingExpiry, setPendingExpiry] = useState<string | null | undefined>(null);
+  const isConfirmDisabled = pendingExpiry === undefined;
 
   return (
     <EuiModal
@@ -36,13 +50,23 @@ const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
       data-test-subj="snoozeExpiryModal"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id="snoozeExpiryModalTitle">
-          {i18n.SNOOZE_MODAL_TITLE}
-        </EuiModalHeaderTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="bellSlash" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiModalHeaderTitle id="snoozeExpiryModalTitle">{PANEL_TITLE}</EuiModalHeaderTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
+        <EuiText size="xs" color="subdued">
+          <p>{QUICK_SNOOZE_POPOVER_SUBTITLE}</p>
+        </EuiText>
+        <EuiHorizontalRule margin="m" />
+        <EuiSpacer size="xs" />
         <div data-test-subj="snoozeExpiryInput">
-          <AlertEpisodeSnoozeForm onApplySnooze={setPendingExpiry} />
+          <QuickSnoozePanel onScheduleChange={setPendingExpiry} />
         </div>
       </EuiModalBody>
       <EuiModalFooter>
@@ -51,10 +75,11 @@ const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
         </EuiButtonEmpty>
         <EuiButton
           data-test-subj="snoozeExpiryConfirm"
-          onClick={() => onConfirm(pendingExpiry)}
+          onClick={() => onConfirm(pendingExpiry ?? null)}
+          isDisabled={isConfirmDisabled}
           fill
         >
-          {i18n.SNOOZE}
+          {QUICK_SNOOZE_POPOVER_APPLY}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
@@ -64,8 +89,8 @@ const SnoozeExpiryModal = ({ onConfirm, onCancel }: SnoozeExpiryModalProps) => {
 export const openSnoozeExpiryModal = (
   overlays: OverlayStart,
   rendering: CoreStart['rendering']
-): Promise<string | undefined> => {
-  return new Promise<string | undefined>((resolve) => {
+): Promise<SnoozeExpiryModalResult | undefined> => {
+  return new Promise<SnoozeExpiryModalResult | undefined>((resolve) => {
     const ref = overlays.openModal(
       toMountPoint(
         <SnoozeExpiryModal

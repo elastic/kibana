@@ -53,13 +53,6 @@ export const OPEN_IN_DISCOVER = i18n.translate(
   }
 );
 
-export const SNOOZE_MODAL_TITLE = i18n.translate(
-  'xpack.alertingV2.episodesUi.bulkSnoozeModal.title',
-  {
-    defaultMessage: 'Snooze selected episodes',
-  }
-);
-
 export const TAGS_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {

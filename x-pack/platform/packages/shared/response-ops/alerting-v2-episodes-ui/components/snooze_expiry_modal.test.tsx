@@ -21,14 +21,20 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   },
 }));
 
-jest.mock('./actions/snooze_form', () => ({
-  AlertEpisodeSnoozeForm: ({ onApplySnooze }: { onApplySnooze: (expiry: string) => void }) => (
+jest.mock('@kbn/response-ops-alert-snooze', () => ({
+  QuickSnoozePanel: ({
+    onScheduleChange,
+  }: {
+    onScheduleChange: (endDate: string | null | undefined) => void;
+  }) => (
     <input
       data-test-subj="snoozeFormInput"
-      onChange={(e) => onApplySnooze((e.target as HTMLInputElement).value)}
+      onChange={(e) => {
+        const raw = (e.target as HTMLInputElement).value;
+        onScheduleChange(raw === '' ? null : raw);
+      }}
     />
   ),
-  computeEpisodeSnoozedUntil: jest.fn(() => '2026-01-01T01:00:00.000Z'),
 }));
 
 const mockOverlays = overlayServiceMock.createStartContract();

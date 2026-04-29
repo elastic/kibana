@@ -35,6 +35,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     groupHash: row.flattened.group_hash as string | null,
     lastAckAction: (row.flattened.last_ack_action as string | undefined) ?? null,
     lastAssigneeUid: (row.flattened.last_assignee_uid as string | undefined) ?? null,
+    lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
   };
 
   const groupAction: AlertEpisodeGroupAction = {
@@ -44,6 +45,8 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
     snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
     tags: (row.flattened.last_tags as string[] | undefined) ?? [],
+    lastSnoozeActor: (row.flattened.last_snooze_actor as string | undefined) ?? null,
+    lastDeactivateActor: (row.flattened.last_deactivate_actor as string | undefined) ?? null,
   };
 
   return (

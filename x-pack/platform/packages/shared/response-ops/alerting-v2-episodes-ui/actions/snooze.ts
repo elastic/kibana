@@ -32,12 +32,12 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
     episodes.length > 0 && episodes.some((ep) => ep.last_snooze_action !== 'snooze'),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
-    if (expiry == null) return;
+    if (expiry === undefined) return;
 
     const items = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-      expiry,
+      ...(expiry === null ? {} : { expiry }),
     }));
     if (!items.length) return;
 
