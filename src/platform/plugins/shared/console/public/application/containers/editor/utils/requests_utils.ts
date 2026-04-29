@@ -320,20 +320,28 @@ const replaceVariables = (
   variables: DevToolsVariable[],
   isDataVariable: boolean
 ): string => {
-  const variableRegex = isDataVariable ? dataVariableTemplateRegex : urlVariableTemplateRegex;
-  if (variableRegex.test(text)) {
-    text = text.replaceAll(variableRegex, (match, key) => {
+  if (!isDataVariable) {
+    return text.replaceAll(urlVariableTemplateRegex, (match, key) => {
       const variable = variables.find(({ name }) => name === key);
-      const value = variable?.value;
-
-      if (isDataVariable && value) {
-        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
-        return isJsonString(value) ? value : `"${value}"`;
-      }
-
-      return value ?? match;
+      return variable?.value ?? match;
     });
   }
+
+  // Pass 1: replace "${var}" (whole string value) — preserves JSON type coercion so objects,
+  // arrays, numbers, and booleans are inserted without surrounding quotes.
+  text = text.replaceAll(dataVariableTemplateRegex, (match, key) => {
+    const variable = variables.find(({ name }) => name === key);
+    const value = variable?.value;
+    if (!value) return match;
+    return isJsonString(value) ? value : `"${value}"`;
+  });
+
+  // Pass 2: replace any ${var} remaining inside strings (e.g. "frozen_${var}")
+  text = text.replaceAll(urlVariableTemplateRegex, (match, key) => {
+    const variable = variables.find(({ name }) => name === key);
+    return variable?.value ?? match;
+  });
+
   return text;
 };
 
