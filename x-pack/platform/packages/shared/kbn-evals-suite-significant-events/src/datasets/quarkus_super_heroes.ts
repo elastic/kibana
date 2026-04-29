@@ -323,7 +323,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'entity-fights-kafka',
-            text: 'Must identify fights-kafka as a failing entity (evidence: fights-kafka logs show disconnected, topic not present in metadata, and timeout exceptions)',
+            text: 'Must identify fights-kafka as a failing entity (evidence: rest-fights producer logs show fights-kafka broker disconnected, topic not present in metadata, and timeout exceptions)',
             score: 2,
             sampling_filters: [
               {
@@ -540,7 +540,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         log_query_filter: [
           {
             match_phrase: {
-              'resource.attributes.app': 'rest-fights',
+              'resource.attributes.app.keyword': 'rest-fights',
             },
           },
           {
