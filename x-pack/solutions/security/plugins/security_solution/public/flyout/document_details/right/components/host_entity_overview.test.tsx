@@ -14,7 +14,6 @@ import { useHostDetails } from '../../../../explore/hosts/containers/hosts/detai
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,

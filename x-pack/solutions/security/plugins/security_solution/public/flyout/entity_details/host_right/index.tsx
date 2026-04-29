@@ -110,10 +110,8 @@ export const HostPanel = memo(function HostPanel({
     const legacyFields =
       hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
     const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument(
-        'host',
-        entityFromStoreResult.entityRecord
-      ) ?? {};
+      euidApi?.euid?.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ??
+      {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
   }, [euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
 

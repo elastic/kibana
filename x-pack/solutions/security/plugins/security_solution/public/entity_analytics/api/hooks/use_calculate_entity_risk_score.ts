@@ -16,9 +16,7 @@ export const useCalculateEntityRiskScore = (
   _identifier: string,
   _options: { onSuccess: () => void }
 ) => {
-  const calculateEntityRiskScoreCb = useCallback(async () => {
-    return;
-  }, []);
+  const calculateEntityRiskScoreCb = useCallback(async () => {}, []);
 
   return {
     isLoading: false,

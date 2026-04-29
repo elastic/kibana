@@ -229,10 +229,8 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     const legacyFields =
       hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
     const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument(
-        'host',
-        entityFromStoreResult.entityRecord
-      ) ?? {};
+      euidApi?.euid?.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ??
+      {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
   }, [euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
 
@@ -342,8 +340,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     searchSession,
   });
 
-  const noEntityInStore =
-    !entityFromStoreResult.isLoading && !observedHost.entityRecord;
+  const noEntityInStore = !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
@@ -540,10 +537,8 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     const legacyFields =
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument(
-        'user',
-        entityFromStoreResult.entityRecord
-      ) ?? {};
+      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
+      {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
   }, [euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
 

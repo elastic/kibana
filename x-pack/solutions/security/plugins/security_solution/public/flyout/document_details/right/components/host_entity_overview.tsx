@@ -243,8 +243,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const isLoading =
-    isHostDetailsLoading || (riskFromEntityRecord == null && isRiskScoreLoading);
+  const isLoading = isHostDetailsLoading || (riskFromEntityRecord == null && isRiskScoreLoading);
 
   const [hostRiskLevel] = useMemo(() => {
     const level = hostRiskData?.host?.risk?.calculated_level;
