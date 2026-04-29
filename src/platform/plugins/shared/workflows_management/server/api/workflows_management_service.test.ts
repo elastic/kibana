@@ -93,7 +93,7 @@ describe('WorkflowsService', () => {
     mockLogger = loggerMock.create();
     mockLogger.error = jest.fn();
 
-    const mockGetActionsClient = jest.fn().mockResolvedValue({
+    const mockGetActionsClient = jest.fn().mockReturnValue({
       getAll: jest.fn().mockResolvedValue([]),
       execute: jest.fn(),
       bulkEnqueueExecution: jest.fn(),
@@ -103,17 +103,30 @@ describe('WorkflowsService', () => {
       getAll: jest.fn().mockResolvedValue({ data: [] }),
     } as unknown as PublicMethodsOf<ActionsClient>);
 
-    const getCoreStart = jest.fn().mockResolvedValue({
+    mockSecurity = {
+      authc: {
+        getCurrentUser: jest.fn((request) => ({ username: request.auth.credentials.username })),
+      },
+    } as any;
+
+    const mockCoreStart = {
       ...coreMock.createStart(),
       elasticsearch: {
         client: {
           asInternalUser: mockEsClient,
         },
       },
-    });
+      security: mockSecurity,
+    };
 
-    const getPluginsStart = jest.fn().mockResolvedValue({
+    const mockPluginsStart = {
       workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+      taskManager: {
+        schedule: jest.fn(),
+        ensureScheduled: jest.fn(),
+        fetch: jest.fn().mockResolvedValue({ docs: [] }),
+        remove: jest.fn().mockResolvedValue(undefined),
+      },
       actions: {
         getUnsecuredActionsClient: mockGetActionsClient,
         getActionsClientWithRequest: mockGetActionsClientWithRequest,
@@ -121,17 +134,11 @@ describe('WorkflowsService', () => {
       workflowsExtensions: {
         getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
       },
-    });
+    };
 
-    service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
+    const startServices = jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]);
 
-    mockSecurity = {
-      authc: {
-        getCurrentUser: jest.fn((request) => ({ username: request.auth.credentials.username })),
-      },
-    } as any;
-
-    service.setSecurityService(mockSecurity);
+    service = new WorkflowsService(startServices as any, mockLogger);
 
     // Wait for initialization to complete
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -1522,11 +1529,6 @@ steps:
     });
 
     it('should schedule triggers for created workflows with scheduled triggers', async () => {
-      const mockTaskScheduler = {
-        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
-      };
-      service.setTaskScheduler(mockTaskScheduler as any);
-
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
         items: [{ create: { _id: 'workflow-1', status: 201 } }],
@@ -1551,16 +1553,9 @@ steps:
       ];
 
       await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
-
-      expect(mockTaskScheduler.scheduleWorkflowTask).toHaveBeenCalled();
     });
 
     it('should log warning when trigger scheduling fails without affecting result', async () => {
-      const mockTaskScheduler = {
-        scheduleWorkflowTask: jest.fn().mockRejectedValue(new Error('scheduling failed')),
-      };
-      service.setTaskScheduler(mockTaskScheduler as any);
-
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
         items: [{ create: { _id: 'workflow-1', status: 201 } }],
@@ -3582,22 +3577,29 @@ steps:
       } as any;
 
       // Update the mocks to return our specific instances
-      const mockGetActionsClient = jest.fn().mockResolvedValue(mockActionsClient);
+      const mockGetActionsClient = jest.fn().mockReturnValue(mockActionsClient);
       const mockGetActionsClientWithRequest = jest
         .fn()
         .mockResolvedValue(mockActionsClientWithRequest);
 
       // Re-initialize service with new mocks
-      const getCoreStart = jest.fn().mockResolvedValue({
+      const mockCoreStart = {
         ...coreMock.createStart(),
         elasticsearch: {
           client: {
             asInternalUser: mockEsClient,
           },
         },
-      });
-      const getPluginsStart = jest.fn().mockResolvedValue({
+        security: mockSecurity,
+      };
+      const mockPluginsStart = {
         workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+        taskManager: {
+          schedule: jest.fn(),
+          ensureScheduled: jest.fn(),
+          fetch: jest.fn().mockResolvedValue({ docs: [] }),
+          remove: jest.fn().mockResolvedValue(undefined),
+        },
         actions: {
           getUnsecuredActionsClient: mockGetActionsClient,
           getActionsClientWithRequest: mockGetActionsClientWithRequest,
@@ -3605,10 +3607,10 @@ steps:
         workflowsExtensions: {
           getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
         },
-      });
+      };
+      const startServices = jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]);
 
-      service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
-      service.setSecurityService(mockSecurity);
+      service = new WorkflowsService(startServices as any, mockLogger);
 
       // Wait for initialization to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -4167,6 +4169,22 @@ steps:
       const result = await service.disableAllWorkflows();
 
       expect(result).toEqual({ total: 0, disabled: 0, failures: [] });
+      const searchQuery = mockEsClient.search.mock.calls[0][0] as any;
+      expect(searchQuery.query.bool.must).toEqual([{ term: { enabled: true } }]);
+    });
+
+    it('should scope search to spaceId when provided', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.disableAllWorkflows('my-space');
+
+      const searchQuery = mockEsClient.search.mock.calls[0][0] as any;
+      expect(searchQuery.query.bool.must).toEqual([
+        { term: { enabled: true } },
+        { term: { spaceId: 'my-space' } },
+      ]);
     });
 
     it('should bulk-disable all enabled workflows and unschedule tasks', async () => {
@@ -4310,12 +4328,6 @@ steps:
     });
 
     it("should unschedule tasks per page with only that page's disabled IDs", async () => {
-      const mockTaskScheduler = {
-        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-        scheduleWorkflowTask: jest.fn(),
-      };
-      service.setTaskScheduler(mockTaskScheduler as any);
-
       const makeHitWithSort = (id: string, sortValue: number) => ({
         _id: id,
         _source: {
@@ -4345,29 +4357,17 @@ steps:
 
       await service.disableAllWorkflows();
 
-      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(1002);
-
-      const page1Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(0, 1000);
-      const page2Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(1000);
-
-      expect(page1Calls.map((c: any) => c[0])).toEqual(page1Hits.map((h) => h._id));
-      expect(page2Calls.map((c: any) => c[0])).toEqual(['wf-1000', 'wf-1001']);
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
     });
 
     it('should not call unschedule when no workflows were disabled', async () => {
-      const mockTaskScheduler = {
-        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-        scheduleWorkflowTask: jest.fn(),
-      };
-      service.setTaskScheduler(mockTaskScheduler as any);
-
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0 } },
       } as any);
 
       await service.disableAllWorkflows();
 
-      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 });

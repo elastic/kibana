@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   // FLAKY: https://github.com/elastic/kibana/issues/244018
-  describe.skip('Kibana Tags Page Accessibility', () => {
+  describe('Kibana Tags Page Accessibility', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
       await testSubjects.click('tags');

@@ -1497,6 +1497,7 @@
                 "lineNumber": 58,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRateAnalysisResultsData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1706,6 +1707,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {

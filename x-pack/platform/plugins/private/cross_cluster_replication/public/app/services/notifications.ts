@@ -7,13 +7,24 @@
 
 import type { IToasts, FatalErrorsSetup } from '@kbn/core/public';
 
-let _toasts: IToasts;
-let _fatalErrors: FatalErrorsSetup;
+let _toasts: IToasts | undefined;
+let _fatalErrors: FatalErrorsSetup | undefined;
 
-export const init = (toasts: IToasts, fatalErrors: FatalErrorsSetup) => {
+export const init = (toasts: IToasts, fatalErrors: FatalErrorsSetup): void => {
   _toasts = toasts;
   _fatalErrors = fatalErrors;
 };
 
-export const getToasts = () => _toasts;
-export const getFatalErrors = () => _fatalErrors;
+export const getToasts = (): IToasts => {
+  if (_toasts === undefined) {
+    throw new Error('CCR notifications were used before init() was called');
+  }
+  return _toasts;
+};
+
+export const getFatalErrors = (): FatalErrorsSetup => {
+  if (_fatalErrors === undefined) {
+    throw new Error('CCR notifications were used before init() was called');
+  }
+  return _fatalErrors;
+};

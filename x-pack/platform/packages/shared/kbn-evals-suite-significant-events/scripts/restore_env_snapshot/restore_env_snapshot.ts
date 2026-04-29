@@ -143,7 +143,7 @@ export const restoreEnvSnapshot = async ({
   const clean = Boolean(flags.clean);
   const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
-  log.info(`Restore: ${snapshotName} | ES: ${config.esUrl}`);
+  log.info(`Restore: ${snapshotName} | ES: ${config.esUrl} | Kibana: ${config.kibanaUrl}`);
   log.info(`GCS bucket: ${gcsBucket} | Base path: ${gcsBasePath}`);
   log.info(`Data indices: ${[logsIndex, ...alertIndices].join(', ')}`);
   log.info(`System indices: ${systemIndices.join(', ')}`);

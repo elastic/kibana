@@ -11,9 +11,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,
