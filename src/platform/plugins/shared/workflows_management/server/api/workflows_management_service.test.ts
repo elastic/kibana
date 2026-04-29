@@ -16,13 +16,12 @@
  *   - services/workflow_execution_query_service.test.ts
  *   - api/lib/*.test.ts and task_defs/*.test.ts (library-function specs)
  *
- * The facade owns exactly three concerns:
+ * The facade owns exactly two concerns:
  *   1. initPromise sequencing — every public method awaits init before delegating.
- *   2. setTaskScheduler / setSecurityService late-binding.
- *   3. error propagation from sub-services.
+ *   2. error propagation from sub-services.
  */
 
-import type { CoreStart, ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
@@ -73,8 +72,14 @@ const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
 const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
   ({
     workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+    taskManager: {
+      schedule: jest.fn(),
+      ensureScheduled: jest.fn(),
+      fetch: jest.fn().mockResolvedValue({ docs: [] }),
+      remove: jest.fn().mockResolvedValue(undefined),
+    },
     actions: {
-      getUnsecuredActionsClient: jest.fn().mockResolvedValue({}),
+      getUnsecuredActionsClient: jest.fn().mockReturnValue({}),
       getActionsClientWithRequest: jest.fn().mockResolvedValue({}),
     },
     workflowsExtensions: {
@@ -82,24 +87,22 @@ const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
     },
   } as unknown as WorkflowsServerPluginStartDeps);
 
+const makeCoreStart = (esClient: ElasticsearchClient): CoreStart =>
+  ({
+    ...coreMock.createStart(),
+    elasticsearch: { client: { asInternalUser: esClient } },
+  } as unknown as CoreStart);
+
 describe('WorkflowsService (facade)', () => {
   let crudSpies: PrototypeSpies;
   let searchSpies: PrototypeSpies;
   let executionQuerySpies: PrototypeSpies;
   let validationSpies: PrototypeSpies;
-  let esClient: jest.Mocked<ElasticsearchClient>;
 
   const buildService = async (): Promise<WorkflowsService> => {
-    esClient = makeEsClient();
-    const coreStart = {
-      ...coreMock.createStart(),
-      elasticsearch: { client: { asInternalUser: esClient } },
-    } as unknown as CoreStart;
-    const service = new WorkflowsService(
-      loggerMock.create(),
-      jest.fn().mockResolvedValue(coreStart),
-      jest.fn().mockResolvedValue(makePluginsStart())
-    );
+    const coreStart = makeCoreStart(makeEsClient());
+    const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
+    const service = new WorkflowsService(startServices as any, loggerMock.create());
     // Wait a tick so initialize() completes.
     await Promise.resolve();
     await Promise.resolve();
@@ -147,47 +150,26 @@ describe('WorkflowsService (facade)', () => {
 
   describe('initialization', () => {
     it('awaits initPromise before delegating to a sub-service', async () => {
-      let releaseCoreStart: (value: CoreStart) => void = () => undefined;
-      const coreStartPromise = new Promise<CoreStart>((resolve) => {
-        releaseCoreStart = resolve;
-      });
-
-      const service = new WorkflowsService(
-        loggerMock.create(),
-        jest.fn().mockReturnValue(coreStartPromise),
-        jest.fn().mockResolvedValue(makePluginsStart())
+      let releaseStartServices: (value: [CoreStart, WorkflowsServerPluginStartDeps]) => void = () =>
+        undefined;
+      const startServicesPromise = new Promise<[CoreStart, WorkflowsServerPluginStartDeps]>(
+        (resolve) => {
+          releaseStartServices = resolve;
+        }
       );
+
+      const startServices = jest.fn().mockReturnValue(startServicesPromise);
+      const service = new WorkflowsService(startServices as any, loggerMock.create());
 
       const call = service.getWorkflow('wf-1', 'default');
       // Give the microtask queue a chance to run — the call must still be pending.
       await Promise.resolve();
       expect(crudSpies.getWorkflow).not.toHaveBeenCalled();
 
-      releaseCoreStart({
-        ...coreMock.createStart(),
-        elasticsearch: { client: { asInternalUser: makeEsClient() } },
-      } as unknown as CoreStart);
+      releaseStartServices([makeCoreStart(makeEsClient()), makePluginsStart()]);
 
       await call;
       expect(crudSpies.getWorkflow).toHaveBeenCalledTimes(1);
-    });
-
-    it('setSecurityService and setTaskScheduler late-bind before any call that needs them', async () => {
-      const service = await buildService();
-
-      const security = { authc: {} } as unknown as SecurityServiceStart;
-      const taskScheduler = {
-        updateWorkflowTasks: jest.fn(),
-        unscheduleWorkflowTasks: jest.fn(),
-        scheduleWorkflowTasks: jest.fn(),
-      } as any;
-
-      expect(() => service.setSecurityService(security)).not.toThrow();
-      expect(() => service.setTaskScheduler(taskScheduler)).not.toThrow();
-
-      // A subsequent call still works — the facade does not reject when scheduler was unset earlier.
-      await service.getWorkflow('wf-1', 'default');
-      expect(crudSpies.getWorkflow).toHaveBeenCalled();
     });
   });
 

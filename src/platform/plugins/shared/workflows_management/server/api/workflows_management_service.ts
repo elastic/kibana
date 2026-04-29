@@ -13,7 +13,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
   Logger,
-  SecurityServiceStart,
+  StartServicesAccessor,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
@@ -38,8 +38,8 @@ import type {
   WorkflowPartialDetailDto,
 } from '@kbn/workflows/types/v1';
 import type {
-  IWorkflowEventLoggerService,
   LogSearchResult,
+  WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
@@ -64,7 +64,7 @@ import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
 import type { WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage } from '../storage/workflow_storage';
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchWorkflowExecutionsParams {
@@ -78,67 +78,54 @@ export interface SearchWorkflowExecutionsParams {
 }
 
 export class WorkflowsService {
-  private esClient!: ElasticsearchClient;
+  // The following attributes require `ensureInitialized` to be called before use
+  private coreStart!: CoreStart;
+  private pluginsStart!: WorkflowsServerPluginStartDeps;
+  private workflowsExecutionEngine!: WorkflowsExecutionEnginePluginStart;
+  private workflowsExtensions!: WorkflowsExtensionsServerPluginStart;
   private workflowStorage!: WorkflowStorage;
-  private workflowEventLoggerService!: IWorkflowEventLoggerService;
-  private taskScheduler: WorkflowTaskScheduler | null = null;
-  private readonly logger: Logger;
-  private security?: SecurityServiceStart;
-  private workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  private taskScheduler!: WorkflowTaskScheduler;
+  private esClient!: ElasticsearchClient;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
-  private getActionsClient: () => Promise<IUnsecuredActionsClient>;
-  private getActionsClientWithRequest: (
+  private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
+  private getActionsClientWithRequest!: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<ActionsClient>>;
+
   private readonly initPromise: Promise<void>;
 
   constructor(
-    logger: Logger,
-    getCoreStart: () => Promise<CoreStart>,
-    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
+    startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
+    private readonly logger: Logger
   ) {
-    this.logger = logger;
-    this.getActionsClient = () =>
-      getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
-    this.getActionsClientWithRequest = (request: KibanaRequest) =>
-      getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
-
-    this.initPromise = this.initialize(getCoreStart, getPluginsStart);
-  }
-
-  public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
-    this.taskScheduler = taskScheduler;
-  }
-
-  public setSecurityService(security: SecurityServiceStart) {
-    this.security = security;
+    this.initPromise = this.initialize(startServices);
   }
 
   private async ensureInitialized(): Promise<void> {
     await this.initPromise;
   }
 
-  private async initialize(
-    getCoreStart: () => Promise<CoreStart>,
-    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
-  ) {
-    const coreStart = await getCoreStart();
-    const pluginsStart = await getPluginsStart();
-
+  private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
+    const [coreStart, pluginsStart] = await startServices();
+    this.coreStart = coreStart;
+    this.pluginsStart = pluginsStart;
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
+    this.taskScheduler = new WorkflowTaskScheduler(this.logger, pluginsStart.taskManager);
 
-    // Initialize workflow storage
     this.workflowStorage = createStorage({
       logger: this.logger,
       esClient: this.esClient,
     });
 
-    this.workflowEventLoggerService =
-      pluginsStart.workflowsExecutionEngine.workflowEventLoggerService;
+    this.workflowsExecutionEngine = pluginsStart.workflowsExecutionEngine;
     this.workflowsExtensions = pluginsStart.workflowsExtensions;
+
+    this.getActionsClient = async () => pluginsStart.actions.getUnsecuredActionsClient();
+    this.getActionsClientWithRequest = (request: KibanaRequest) =>
+      pluginsStart.actions.getActionsClientWithRequest(request);
 
     this.validationService = new WorkflowValidationService({
       workflowsExtensions: this.workflowsExtensions,
@@ -149,7 +136,7 @@ export class WorkflowsService {
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
-      workflowEventLoggerService: this.workflowEventLoggerService,
+      workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 
     this.searchService = new WorkflowSearchService({
@@ -162,12 +149,32 @@ export class WorkflowsService {
       logger: this.logger,
       esClient: this.esClient,
       workflowStorage: this.workflowStorage,
-      getSecurity: () => this.security,
+      getSecurity: () => this.coreStart.security,
       workflowsExtensions: this.workflowsExtensions,
       getTaskScheduler: () => this.taskScheduler,
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
     });
+  }
+
+  public async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
+    await this.ensureInitialized();
+    return this.workflowsExecutionEngine;
+  }
+
+  public async getWorkflowsExtensions(): Promise<WorkflowsExtensionsServerPluginStart> {
+    await this.ensureInitialized();
+    return this.workflowsExtensions;
+  }
+
+  public async getCoreStart(): Promise<CoreStart> {
+    await this.ensureInitialized();
+    return this.coreStart;
+  }
+
+  public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
+    await this.ensureInitialized();
+    return this.pluginsStart;
   }
 
   public async getWorkflow(
