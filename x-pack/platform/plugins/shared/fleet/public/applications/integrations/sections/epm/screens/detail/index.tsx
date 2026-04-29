@@ -199,15 +199,15 @@ export function Detail() {
   const isViewingOldPackage =
     packageInfo && semverLt(packageInfo.version, packageInfo.latestVersion);
 
-  const isOlderThanInstalledVersion =
+  const isViewingDifferentVersion =
     isInstalled &&
     packageInfo &&
     'installationInfo' in packageInfo &&
     packageInfo.installationInfo?.version &&
-    semverLt(packageInfo.version, packageInfo.installationInfo.version);
+    packageInfo.version !== packageInfo.installationInfo.version;
 
   const isViewingOlderVersion = Boolean(
-    isOlderThanInstalledVersion || (!isInstalled && isViewingOldPackage)
+    isViewingDifferentVersion || (!isInstalled && isViewingOldPackage)
   );
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
@@ -614,6 +614,7 @@ export function Detail() {
                             <AddIntegrationButton
                               userCanInstallPackages={userCanInstallPackages}
                               isViewingOlderVersion={isViewingOlderVersion}
+                              isInstalled={isInstalled}
                               href={getHref('add_integration_to_policy', {
                                 pkgkey,
                                 ...(integration ? { integration } : {}),

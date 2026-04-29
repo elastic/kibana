@@ -240,9 +240,6 @@ export const SettingsPage: React.FC<Props> = memo(
       installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
     const isViewingOldPackage = semverLt(version, latestVersion);
-    const isOlderThanInstalledVersion = installedVersion
-      ? semverLt(version, installedVersion)
-      : false;
     // hide install/remove options if the user has version of the package is installed
     // and this package is out of date or if they do have a version installed but it's not this one
     const hideInstallOptions =
@@ -536,34 +533,42 @@ export const SettingsPage: React.FC<Props> = memo(
                   )}
                 </div>
               )}
-              {hideInstallOptions &&
-                !isUpdating &&
-                (!installedVersion || isOlderThanInstalledVersion) && (
+              {hideInstallOptions && !isUpdating && (
                   <div>
                     <EuiSpacer size="s" />
                     <div>
                       <EuiTitle>
                         <h4>
-                          <FormattedMessage
-                            id="xpack.fleet.integrations.settings.packageInstallTitle"
-                            defaultMessage="Install {title}"
-                            values={{
-                              title,
-                            }}
-                          />
+                          {installedVersion ? (
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.packageManageTitle"
+                              defaultMessage="Manage {title}"
+                              values={{
+                                title,
+                              }}
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.packageInstallTitle"
+                              defaultMessage="Install {title}"
+                              values={{
+                                title,
+                              }}
+                            />
+                          )}
                         </h4>
                       </EuiTitle>
                       <EuiSpacer size="s" />
                       <p>
                         <EuiText color="subdued">
-                          {isOlderThanInstalledVersion ? (
+                          {installedVersion ? (
                             <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageSettingsOlderThanInstalledMessage"
-                              defaultMessage="Version {version} is older than the currently installed version. Navigate to the {installedVersionLink} to add this integration."
+                              id="xpack.fleet.integrations.settings.packageSettingsDifferentVersionMessage"
+                              defaultMessage="Version {version} is different from the currently installed version. Navigate to the {installedVersionLink} to add or manage this integration."
                               values={{
                                 version,
                                 installedVersionLink: (
-                                  <InstalledVersionLink name={name} version={installedVersion!} />
+                                  <InstalledVersionLink name={name} version={installedVersion} />
                                 ),
                               }}
                             />
