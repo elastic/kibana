@@ -17,7 +17,9 @@ export const mountManagementSection = (
   { element }: ManagementAppMountParams
 ) => {
   ReactDOM.render(
-    coreStart.rendering.addContext(<DataSourcesPage pageTitle={PLUGIN_NAME} />),
+    coreStart.rendering.addContext(
+      <DataSourcesPage pageTitle={PLUGIN_NAME} httpClient={coreStart.http} />
+    ),
     element
   );
 

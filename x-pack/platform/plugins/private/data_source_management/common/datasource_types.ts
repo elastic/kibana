@@ -13,7 +13,7 @@
 export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
   type: T;
   description: string;
-  id: string;
+  name: string;
   settings: S;
 }
 

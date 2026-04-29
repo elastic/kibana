@@ -26,6 +26,11 @@ export const DATA_SOURCES_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sour
  */
 export const DATA_SOURCE_BY_ID_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources/{id}` as const;
 
+/** Resolves `DATA_SOURCE_BY_ID_ROUTE_PATH` with a URL-encoded id segment. */
+export function getDataSourceByIdApiPath(id: string): string {
+  return DATA_SOURCE_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
+}
+
 export const PLUGIN_NAME = i18n.translate('dataSourceManagement.pluginName', {
   defaultMessage: 'Data sources',
 });

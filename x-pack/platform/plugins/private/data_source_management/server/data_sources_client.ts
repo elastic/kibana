@@ -26,7 +26,7 @@ export class DataSourcesClient {
   public async getAll(): Promise<Omit<DataSource, 'settings'>[]> {
     return await this.esClient.transport.request({
       method: 'GET',
-      path: '/_query/datasource',
+      path: '/_query/data_source',
     });
   }
 
@@ -40,7 +40,7 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'GET',
-      path: `/_query/datasource/${encoded}`,
+      path: `/_query/data_source/${encoded}`,
     });
   }
 
@@ -54,7 +54,7 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'PUT',
-      path: `/_query/datasource/${encoded}`,
+      path: `/_query/data_source/${encoded}`,
       body,
     });
   }
@@ -69,7 +69,7 @@ export class DataSourcesClient {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'DELETE',
-      path: `/_query/datasource/${encoded}`,
+      path: `/_query/data_source/${encoded}`,
     });
   }
 }

@@ -20,24 +20,25 @@ import {
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataSourceWithSecrets } from '../common';
-import type { DataSetListItem } from '../common/sample_data_sets_client';
-import { SampleDataSetsClient } from '../common/sample_data_sets_client';
-import type { DataSourceListItem } from '../common/sample_data_sources_client';
-import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DataSourceWithSecrets, DataSource } from '../common';
+import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
 export interface DataSourcesPageProps {
   pageTitle: string;
+  httpClient: HttpSetup;
 }
 
-export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageTitle }) => {
-  const dataClient = useMemo(() => new SampleDataSourcesClient(), []);
-  const dataSetsClient = useMemo(() => new SampleDataSetsClient(), []);
-  const [items, setItems] = useState<DataSourceListItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<DataSourceListItem[]>([]);
-  const [dataSetItems, setDataSetItems] = useState<DataSetListItem[]>([]);
+export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
+  pageTitle,
+  httpClient,
+}) => {
+  const dataClient = useMemo(() => new HttpDataSourcesClient(httpClient), [httpClient]);
+  const [items, setItems] = useState<DataSource[]>([]);
+  const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
+  const [dataSetItems, setDataSetItems] = useState<DataSource[]>([]);
   const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const nextItems = await dataSetsClient.get();
+      const nextItems = await dataClient.get();
       if (!cancelled) {
         setDataSetItems(nextItems);
       }
@@ -64,7 +65,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
     return () => {
       cancelled = true;
     };
-  }, [dataSetsClient]);
+  }, [dataClient]);
 
   const handleCreateDataSourceSave = useCallback(
     async (values: {
@@ -72,7 +73,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
       dataSource: Omit<DataSourceWithSecrets, 'id'>;
     }): Promise<string | null> => {
       try {
-        await dataClient.add(values);
+        await dataClient.add({ id: values.name, ...values.dataSource } as DataSourceWithSecrets);
         setItems(await dataClient.get());
         return null;
       } catch (e) {
@@ -82,12 +83,12 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
     [dataClient]
   );
 
-  const columns = useMemo<Array<EuiBasicTableColumn<DataSourceListItem>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
       {
         field: 'name',
         name: i18n.translate('dataSourceManagement.table.columnName', {
-          defaultMessage: 'Name',
+          defaultMessage: 'name',
         }),
         sortable: true,
         width: '24%',
@@ -100,7 +101,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         }),
         sortable: true,
         width: '20%',
-        render: (value: DataSourceListItem['type']) => getDataSourceTypeLabel(value),
+        render: (value: DataSource['type']) => getDataSourceTypeLabel(value),
         'data-test-subj': 'dataSourceManagementColType',
       },
       {
@@ -116,7 +117,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
     []
   );
 
-  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListItem>>>(
+  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
       {
         field: 'name',
@@ -159,9 +160,9 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         content: (
           <>
             <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSourceListItem>
+            <EuiInMemoryTable<DataSource>
               items={items}
-              itemId="id"
+              itemId="name"
               columns={columns}
               search={{
                 box: {
@@ -264,7 +265,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         content: (
           <>
             <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSetListItem>
+            <EuiInMemoryTable<DataSource>
               items={dataSetItems}
               itemId="id"
               columns={dataSetColumns}
@@ -297,7 +298,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                     data-test-subj="dataSourceManagementSetsRefreshButton"
                     onClick={() => {
                       void (async () => {
-                        setDataSetItems(await dataSetsClient.get());
+                        setDataSetItems(await dataClient.get());
                       })();
                     }}
                   />
@@ -323,7 +324,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         ),
       },
     ],
-    [columns, dataClient, dataSetColumns, dataSetItems, dataSetsClient, items, selectedItems]
+    [columns, dataClient, dataSetColumns, dataSetItems, items, selectedItems]
   );
 
   return (

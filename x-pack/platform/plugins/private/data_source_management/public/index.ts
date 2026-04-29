@@ -9,6 +9,7 @@ import { DataSourceManagementPlugin } from './plugin';
 
 export type { CreateDataSourceFlyoutProps } from './create_data_source_flyout';
 export { CreateDataSourceFlyout } from './create_data_source_flyout';
+export { HttpDataSourcesClient } from './http_data_sources_client';
 export type { DataSourceManagementPluginStart } from './plugin_start_contract';
 
 export function plugin() {
