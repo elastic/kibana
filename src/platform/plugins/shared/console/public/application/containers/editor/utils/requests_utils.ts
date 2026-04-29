@@ -321,7 +321,7 @@ const replaceVariables = (
   isDataVariable: boolean
 ): string => {
   if (!isDataVariable) {
-    return text.replaceAll(urlVariableTemplateRegex, (match, key) => {
+    return text.replaceAll(new RegExp(urlVariableTemplateRegex.source, 'g'), (match, key) => {
       const variable = variables.find(({ name }) => name === key);
       return variable?.value ?? match;
     });
@@ -329,15 +329,15 @@ const replaceVariables = (
 
   // Pass 1: replace "${var}" (whole string value) — preserves JSON type coercion so objects,
   // arrays, numbers, and booleans are inserted without surrounding quotes.
-  text = text.replaceAll(dataVariableTemplateRegex, (match, key) => {
+  text = text.replaceAll(new RegExp(dataVariableTemplateRegex.source, 'g'), (match, key) => {
     const variable = variables.find(({ name }) => name === key);
-    const value = variable?.value;
-    if (!value) return match;
+    if (!variable) return match;
+    const { value } = variable;
     return isJsonString(value) ? value : `"${value}"`;
   });
 
   // Pass 2: replace any ${var} remaining inside strings (e.g. "frozen_${var}")
-  text = text.replaceAll(urlVariableTemplateRegex, (match, key) => {
+  text = text.replaceAll(new RegExp(urlVariableTemplateRegex.source, 'g'), (match, key) => {
     const variable = variables.find(({ name }) => name === key);
     return variable?.value ?? match;
   });

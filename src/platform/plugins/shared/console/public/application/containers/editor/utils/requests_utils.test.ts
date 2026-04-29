@@ -163,6 +163,23 @@ describe('requests_utils', () => {
         );
         expect(JSON.parse(result.data[0])).toMatchObject({ match_test1: {} });
       });
+
+      it('replaces an empty-string variable value with an empty JSON string', () => {
+        const emptyVar = [{ id: '4', name: 'empty', value: '' }];
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ key: '${empty}' }, null, 2)] },
+          emptyVar
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({ key: '' });
+      });
+
+      it('leaves the placeholder when the variable is not defined', () => {
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ key: '${undefined_var}' }, null, 2)] },
+          variables
+        );
+        expect(result.data[0]).toContain('${undefined_var}');
+      });
     });
   });
 
