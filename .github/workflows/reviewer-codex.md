@@ -19,7 +19,6 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: codex
-  version: "0.118.0"
   model: gpt-5.3-codex
   args:
     - -c
