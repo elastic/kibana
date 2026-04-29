@@ -17,14 +17,12 @@ const CATEGORICAL_PALETTE_PREVIEW_STEPS = 5;
 /**
  * getAll() excludes the only light/dark palette color difference, so light palettes are enough here.
  */
-const lightKbnPalettes = getPalettes(false);
+const lensColorPalettes = getPalettes(false).getAll();
 
 /**
  * Mirrors the Lens dynamic color picker: gradient palettes.
  */
-const lensDynamicColorPalettes = lightKbnPalettes
-  .getAll()
-  .filter((palette) => palette.type === 'gradient');
+const lensDynamicColorPalettes = lensColorPalettes.filter((palette) => palette.type === 'gradient');
 
 const LEGACY_CATEGORICAL_PALETTE_IDS = new Set<string>([
   KbnPalette.Kibana7,
@@ -35,11 +33,9 @@ const LEGACY_CATEGORICAL_PALETTE_IDS = new Set<string>([
 /**
  * Mirrors the Lens categorical color picker, excluding legacy palettes.
  */
-const lensCategoricalColorPalettes = lightKbnPalettes
-  .getAll()
-  .filter(
-    (palette) => palette.type === 'categorical' && !LEGACY_CATEGORICAL_PALETTE_IDS.has(palette.id)
-  );
+const lensCategoricalColorPalettes = lensColorPalettes.filter(
+  (palette) => palette.type === 'categorical' && !LEGACY_CATEGORICAL_PALETTE_IDS.has(palette.id)
+);
 
 const formatPalettePreview = ({
   name,
@@ -103,14 +99,14 @@ const getChartSpecificRules = (chartType: SupportedChartType): string[] => {
  */
 export const getColorPalettesPromptContent = (chartType: SupportedChartType): string => {
   const entry = chartTypeRegistry[chartType];
-  const supportsDynamic = entry?.supportsDynamicColoring ?? false;
-  const supportsCategorical = entry?.supportsCategoricalColoring ?? false;
+  const supportsDynamic = entry.supportsDynamicColoring ?? false;
+  const supportsCategorical = entry.supportsCategoricalColoring ?? false;
 
   if (!supportsDynamic && !supportsCategorical) {
     return '';
   }
 
-  const stepsCount = entry?.paletteStepsCount ?? 5;
+  const stepsCount = entry.paletteStepsCount ?? 5;
   const lines: string[] = ['COLOR PALETTE RULES:', ''];
   let sectionNumber = 1;
   const nextSection = () => sectionNumber++;
@@ -160,7 +156,7 @@ export const getColorPalettesPromptContent = (chartType: SupportedChartType): st
     lines.push(
       `${nextSection()}) CATEGORICAL MAPPING — pick a palette by id`,
       '- Set `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` and let Lens auto-assign a distinct color per distinct value at render time.',
-      '- The `palette` value MUST be one of the categorical palette ids listed below verbatim (e.g. `"default"`, `"eui_amsterdam"`).',
+      '- The `palette` value MUST be one of the categorical palette ids listed below verbatim (e.g. `"default"`, `"severity"`).',
       '- Leave `mapping: []` by default. Only define explicit `mapping[]` entries when the user names specific values to color.',
       '- When the user does name explicit values, use `color: { type: "color_code", value: "#hex" }` for each entry, drawing the hex from one of the palettes below.',
       ''
