@@ -287,18 +287,25 @@ export const createAgentGraph = ({
   };
 
   const finalize = async (state: StateType) => {
-    const answerAction = state.answerActions[state.answerActions.length - 1];
-    if (isStructuredAnswerAction(answerAction)) {
-      return {
-        finalAnswer: answerAction.data,
-      };
-    } else if (isAnswerAction(answerAction)) {
-      return {
-        finalAnswer: answerAction.message,
-      };
-    } else {
-      throw invalidState(`[finalize] expect answer action, got ${answerAction.type} instead.`);
+    if (structuredOutput) {
+      const answerAction = state.answerActions[state.answerActions.length - 1];
+      if (isStructuredAnswerAction(answerAction)) {
+        return { finalAnswer: answerAction.data };
+      }
+      throw invalidState(
+        `[finalize] expected structured answer action, got ${answerAction.type} instead.`
+      );
     }
+
+    // Non-structured: the research agent's terminal HandoverAction (real or
+    // synthetic from prepareFallbackAnswer) carries the user-facing answer.
+    const lastMainAction = state.mainActions[state.mainActions.length - 1];
+    if (isHandoverAction(lastMainAction)) {
+      return { finalAnswer: lastMainAction.message };
+    }
+    throw invalidState(
+      `[finalize] expected handover action, got ${lastMainAction.type} instead.`
+    );
   };
 
   const selectedAnswerAgent = structuredOutput ? answerAgentStructured : answerAgent;
