@@ -306,12 +306,18 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const allItems = useMemo(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
-    const firstAttackDiscovery = isSingleAttackDiscovery ? attackDiscoveries[0] : null;
-    const isAlert = firstAttackDiscovery != null && isAttackDiscoveryAlert(firstAttackDiscovery);
 
-    const isOpen = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'open';
-    const isAcknowledged = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'acknowledged';
-    const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
+    const isOpen = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'open'
+    );
+
+    const isAcknowledged = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'acknowledged'
+    );
+
+    const isClosed = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'closed'
+    );
 
     const markAsOpenItem =
       !isOpen && hasAlertsUpdate
@@ -349,22 +355,22 @@ const TakeActionComponent: React.FC<Props> = ({
           ]
         : [];
 
-    const caseItems = [
-      {
-        'data-test-subj': 'addToCase',
-        disabled: addToCaseDisabled,
-        key: 'addToCase',
-        name: i18n.ADD_TO_NEW_CASE,
-        onClick: onClickAddToNewCase,
-      },
-      {
-        'data-test-subj': 'addToExistingCase',
-        disabled: addToCaseDisabled,
-        key: 'addToExistingCase',
-        name: i18n.ADD_TO_EXISTING_CASE,
-        onClick: onClickAddToExistingCase,
-      },
-    ];
+    const caseItems = !addToCaseDisabled
+      ? [
+          {
+            'data-test-subj': 'addToCase',
+            key: 'addToCase',
+            name: i18n.ADD_TO_NEW_CASE,
+            onClick: onClickAddToNewCase,
+          },
+          {
+            'data-test-subj': 'addToExistingCase',
+            key: 'addToExistingCase',
+            name: i18n.ADD_TO_EXISTING_CASE,
+            onClick: onClickAddToExistingCase,
+          },
+        ]
+      : [];
 
     const aiItems = isSingleAttackDiscovery
       ? isAgentChatExperienceEnabled
