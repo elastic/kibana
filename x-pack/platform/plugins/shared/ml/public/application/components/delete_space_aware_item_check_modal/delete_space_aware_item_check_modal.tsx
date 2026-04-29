@@ -27,7 +27,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type {
   CanDeleteMLSpaceAwareItemsResponse,
   MlSavedObjectType,
-} from '../../../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
