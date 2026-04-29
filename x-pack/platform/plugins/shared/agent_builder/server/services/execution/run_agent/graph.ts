@@ -237,6 +237,7 @@ export const createAgentGraph = ({
         await promptFactory.getAnswerPrompt({
           actions: state.mainActions,
           answerActions: state.answerActions,
+          cycleLimit: state.cycleLimit,
         })
       );
 
