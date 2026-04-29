@@ -140,18 +140,19 @@ for tarball in "${built_tarballs[@]}"; do
 
   report_step "Publishing $(basename "$new_tarball") → $NPM_REGISTRY"
   # --userconfig isolates our .npmrc from any global one.
-  if ! npm publish "$new_tarball" --userconfig "$NPMRC"; then
-    # A 409 (already published with this version) is the expected no-op
-    # for a content-hash-versioned artifact that hasn't changed. Convert
-    # that into a success; anything else is still fatal.
-    exit_code=$?
+  # Capture the exit code before any `if`/`!` negation changes $?.
+  # A 409 (already published with this version) is the expected no-op
+  # for a content-hash-versioned artifact that hasn't changed. Convert
+  # that into a success; anything else is still fatal.
+  npm publish "$new_tarball" --userconfig "$NPMRC" || {
+    publish_rc=$?
     if npm view "$(node -p "require('$pkg_manifest').name")@$(node -p "require('$pkg_manifest').version")" \
          --userconfig "$NPMRC" >/dev/null 2>&1; then
       echo "Already published at this version — no-op."
     else
-      exit $exit_code
+      exit $publish_rc
     fi
-  fi
+  }
 done
 
 report_step "Done"
