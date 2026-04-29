@@ -12,6 +12,7 @@ import React from 'react';
 import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EuiBadge } from '@elastic/eui';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 
@@ -43,12 +44,15 @@ export function VisualizeESQL({
   });
 
   return (
-    <BaseVisualization
-      lens={lens}
-      uiActions={uiActions}
-      lensInput={lensInput}
-      setLensInput={setLensInput}
-      isLoading={isLoading}
-    />
+    <>
+      <EuiBadge color="subdued">Legacy</EuiBadge>
+      <BaseVisualization
+        lens={lens}
+        uiActions={uiActions}
+        lensInput={lensInput}
+        setLensInput={setLensInput}
+        isLoading={isLoading}
+      />
+    </>
   );
 }

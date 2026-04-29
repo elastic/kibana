@@ -9,7 +9,7 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiBadge, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { useLensInput } from './use_lens_input';
@@ -49,14 +49,16 @@ export function VisualizeLens({
       </EuiCallOut>
     );
   }
-
   return (
-    <BaseVisualization
-      lens={lens}
-      uiActions={uiActions}
-      lensInput={lensInput}
-      setLensInput={setLensInput}
-      isLoading={isLoading}
-    />
+    <>
+      <EuiBadge color="subdued">New attachment</EuiBadge>
+      <BaseVisualization
+        lens={lens}
+        uiActions={uiActions}
+        lensInput={lensInput}
+        setLensInput={setLensInput}
+        isLoading={isLoading}
+      />
+    </>
   );
 }
