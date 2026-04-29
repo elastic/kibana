@@ -10,36 +10,25 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-    });
-
-    esServer = await startES();
     root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
-    await root.setup();
-    const coreStart = await root.start();
-    typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const coreSetup: InternalCoreSetup = await root.setup();
+    typeRegistry = coreSetup.savedObjects.getTypeRegistry();
   });
 
   afterAll(async () => {
     await root?.shutdown();
-    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
@@ -60,7 +49,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "3ab1aa6b6d32d7704fa2dc5fe34c65d632d869af3736f5d08a761d09b93430e2",
         "action_task_params": "6751dc8a4707a432bc9b90f5a025f183aefc84bca5ec26c29ce6939b24ea81e4",
         "ad_hoc_run_params": "9c372f2a8f8b468e9b699a6df633c7f14fab7f13216c9ec160813e75bae56098",
-        "alert": "0652df24a4ec968c4aec201cb94a6492d5124d43d837dad4364f5f1c819d05b6",
+        "alert": "d6e9b2927554e4db7d2de1bd47f4c993a0f1579c2f9d17a700941e901b63c3e5",
         "alerting_rule_template": "a26521005d8a51af336ec95a2097c4bd073980c050e3c675cec3851acff78fd9",
         "anonymization-salt": "487fee82ef036b64199d1eb26b9834c0f67d94d2ed7b74e5c10e04fa8616554a",
         "api_key_pending_invalidation": "c1c0f5cbb1175a7d25c762b290d9d46c04557e4a8ae6a2c7bf77b8fd99b2146d",
@@ -102,9 +91,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-analytics-monitoring-entity-source": "a7307895e5c38accc21ebea852bd46ef98ebb73f7a73d116c8dfcd3932f57899",
         "entity-definition": "28cde811da5815b6fdebb0112419b593253fb5053d60c2cf29b50af3be058c67",
         "entity-discovery-api-key": "2350e2ce1b6e913f55aef2cd04971b15604b03e049370ef10949c3eeec38c46f",
-        "entity-engine-descriptor-v2": "3f8591c96ffe6b7e3b315702a5a15bfc432cb748431f8fefd9b9d19e3969ba9b",
+        "entity-engine-descriptor-v2": "44b60aa3d3d4583082b58500b297f2dddb4ffc14b77ad1d568b70536ca4ae787",
         "entity-engine-status": "005903620a00737932aa54ae57817b078810b2f71cc42e7715d1c22c5e5b715e",
-        "entity-store-global-state": "ccf23d3535d949155e1e21e594270789e484e1348fce0a1b2a56f4faeaa6a4ac",
+        "entity-store-global-state": "8581bc65d1b2bf6d0218b693509129a2515599aeff8933d85353a3fb28d52bda",
         "epm-packages": "46e4129dba3ac33d4924239672169f12ad75536e9f44f695964220a80ebfeaca",
         "epm-packages-assets": "1095b56fabdeb3994a60f4da02e87179dfaf57d5bb23b97458129bf14c66b46e",
         "event-annotation-group": "21141aa64bba4d05ee6ebe0b0d75475452bca50e73f902a38800457d0727014d",
@@ -115,7 +104,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file": "5d2da4f1b03f551745b938f4e71b3d328bb65d3ff5ed89ae42a66240fa358346",
         "file-upload-usage-collection-telemetry": "d6d7e6f366e33ec93a4996229e44d32aea97e04f696259b9915c0d21001ff698",
         "fileShare": "5f3b4cb0a3aa1d3b03f31b2f0741baa548068f2ec478b8632ef4f02cb65f2b75",
-        "fleet-agent-policies": "e2d47efb16de69c3c16808d86b9b8997c7e29a0d50c184dbde7092fa62f3b150",
+        "fleet-agent-policies": "c2ef685a0f53cd71b96da1e971c425587c69cb43b7c9609e1a8e2a5ccacee227",
         "fleet-cloud-connector": "4ba1a68000e83dfb9d9f92e840d9840274fdd15419d0dd7a805d90e0ee08fdce",
         "fleet-fleet-server-host": "edbc06c4a73586e7820549ab481244989af89ba9191b002cce97d0843a01008e",
         "fleet-message-signing-keys": "67aecd34e081183b2a99cc1451583977e4ad918074dc5b1579cc4b23750d3829",
@@ -132,16 +121,17 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infra-custom-dashboards": "ecf04d387399d169ab60737f6869f1e564d03dd683315c486ac50984ecf9c9e9",
         "infrastructure-monitoring-log-view": "a15ae1d2c400f2ea175cd407705dccd85178f9db82def8137b24c4ee4a489ae9",
         "infrastructure-ui-source": "498c2ba7abd4329a0d8b40efd98b4b16991107512d38141707f9f2e10521b367",
-        "ingest-agent-policies": "ce61ba4808deecd27dce770799be59f212ebe1c0d76bcc4298aafa4cfce7aa15",
+        "ingest-agent-policies": "afcda3d8837107fcbdff9be60e5a75634e36a08122cee5261a735e9eb50e3d2d",
         "ingest-download-sources": "c87e062ef293585e85fccec0c865d7cef48e0ff9a919d7781d5f7627d275484b",
-        "ingest-outputs": "4f3451469b080548fd0f2ca414a81d91bd0d5690c34378376433ab1ae960ce5c",
+        "ingest-outputs": "8ea9ade69e9ced03cf5700086f454adf3fc46918317b6150e127fdd5829a56a6",
         "ingest-package-policies": "7817460ef093393f7fce067f91186003e41246a69f32344b1cd68fe19f43a24e",
         "ingest_manager_settings": "6cd91fe6c52c516676d99021f51a4b3a162686880198ba3c556983f5fffbb5a3",
-        "integration-config": "b5fba732f6835532e971c81f5703c3c2018fa93686e83a5c2dd9c56cb4e10578",
+        "integration-config": "5f95ba3784d5d50d04d8ad3489fc4c0a50db34da049a69e754a48c80172ee948",
         "intercept_interaction_record": "02437dc1b92c7bc77563f8e8d758a13435080d493d21a5fd49d124d468cdeb20",
         "intercept_trigger_record": "141c827f6553a4b758290690e9ac3ec26f4e6aeedc05a8fc9e0ea163ebfcd8db",
         "inventory-view": "0583a6777ec2687968aa10e9a184670402a61f30478e8c944f7353e1488ad51e",
         "kql-telemetry": "348e73949f6a751bbfcbc96f6cf3ed2793ee521ef3079dfc1085d04feccf50b1",
+        "lead-generation-config": "d2898f730434dcdef595311d6cfbc63f12abe02fb84a8a4433b88308f2849e8f",
         "legacy-url-alias": "a3c430a3bd271bdf83034db890cc691bea82aa94b546b1088a234899a95666c0",
         "lens": "29efa8813637e7129582b3206783c06c7c588a2751ba1feae3541ad878f86840",
         "lens-ui-telemetry": "9e0ba2dd36440fcaf97368f118cf51094bd62a47a45e1be9728b92d469d80d83",
@@ -194,7 +184,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "f5efabeefafbb12ed0809db3cd04f893ff9099ead8f526be82a9b0348e444f65",
         "synthetics-privates-locations": "42aebb3aa4f3710a3e270d54bf33718a4d1d7a983556a51f75bd96b1e4fdf048",
         "tag": "03a522e92aed789a4bbf1a5dd19159c3ec061cb052337df9270728def4b3bbe0",
-        "task": "52bb9355724d6546a8e485c161c7f039493acb79e913b31ce1d0b9839fe38117",
+        "task": "4e6f0a8e825e3159959f1dc0fd4d6c5d9b15707863a741905b183dc6d1144f44",
         "telemetry": "fb5e3ce0b2955f10aa8cd75fdafdd0559bf5d77eaf6e2c228079684f01f28fbd",
         "threshold-explorer-view": "9b0a770f5444531f92dd50832dcf655cb0c9cd7f18af205338e0c9d73c6df6a6",
         "trial-companion-nba-milestone": "83f29f99e2ffaf00ed8e05f3366ed0df1fb36a77193aeb151e13bae8b1d9692f",
@@ -210,7 +200,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "524b43a59d7bbc5b0430b19332f8f0f69e323dec2e391a87c568bb4fb4b3690c",
         "visualization": "b7c299233eb6fc88faccdf5924d4cff9fc2f4c3fe8acf5376d7232c05c9a3cfd",
         "watchlist-config": "447ff0c6227fa2ca64fe05afb5b3bc4808063926c1da3edacb9c28d52c1fb86a",
-        "watchlist-entity-source": "842a0b6c668784c51c0f62c316f22101200fd1872296c63edcceb2ae726b8152",
+        "watchlist-entity-source": "c51b3021ff12acaa47d35e3ead5236e9956e211cd928becb1d7636854595c1a2",
         "workplace_search_telemetry": "b17dd0963b685cea46246d00b7da598822668434659b7e698313da6c2212febb",
       }
     `);
@@ -275,8 +265,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ad_hoc_run_params|10.1.0: 2189eaa92bd66dfcc4ea2e5ec0e63ead9341a96eddd671def942ffd51bb2be0e",
         "==========================================================================================",
         "alert|global: 8365bd1a75d780902feb5f272ed0d6c430d3d63f",
-        "alert|mappings: bd90b2061275655e3dad670cf7d9c3aaace56c6b",
+        "alert|mappings: 220390ae081ad1b259dd4616b729748f1db94d5b",
         "alert|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "alert|10.12.0: caa8f52d7ff180c8ccd3bbabdb35ea71fc32efe1c35109a3ce81750b77c1e9d3",
         "alert|10.11.0: 733056b6ebff34603bf990f09f8776c5b7231967f447ad166310c57618c4e830",
         "alert|10.10.0: 34ac91258cc70cff691a8c2549ef5a834ee3b6ef6348ddee6c582b8e23aea704",
         "alert|10.9.0: 2d45844f7ac6873a16c579f4bee9086e8059a2ec52803a3ab94b990795bf1aa2",
@@ -643,6 +634,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-engine-descriptor-v2|global: ae6bdc1b39c24032ba32bbc8a5d032f63d576bb0",
         "entity-engine-descriptor-v2|mappings: c8194b9fb0346df2967cedb78fb4a3c7139f5ff1",
         "entity-engine-descriptor-v2|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "entity-engine-descriptor-v2|10.5.0: 33de56b01a358e06b3e3729f22b7f281e51c9f4bce4dd86067d368462018d258",
+        "entity-engine-descriptor-v2|10.4.0: 52668e17842853b15deb997ceddb19b551e6d38b18d2440123db05bf844e157e",
         "entity-engine-descriptor-v2|10.3.0: 14e40ca4628481c3db33990704f13a4dcef6e9ae2e6e7539606dc58194169c96",
         "entity-engine-descriptor-v2|10.2.0: 114c9ccc2679bf611a71b9ba2fc9ee842ab1372e808dc4bf45a061c5ae0e2081",
         "entity-engine-descriptor-v2|10.1.0: 9f9336b5f964fdc500230c25f4c1635d48fde720d8dc3ce48a8001612870bf1e",
@@ -656,7 +649,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-store-global-state|global: f625b80f055d7a5a819b3b312d6cf51a5e10b61f",
         "entity-store-global-state|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "entity-store-global-state|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "entity-store-global-state|10.1.0: de243abf4e086c35862d7cb56fcaa2350399bbcf4a007d42725fb1fc6334231b",
+        "entity-store-global-state|10.1.0: e142dccd899fda050613a1fc6414807296969934f97cbebe4a2b1dd02d20a4a0",
         "==================================================================================================",
         "epm-packages|global: 9d90d41b665a6b53aa6e984ad0e100ff733e05b9",
         "epm-packages|mappings: 844a8b808ed08f7a8bacb4ffb545cc144ec0dac2",
@@ -725,9 +718,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-agent-policies|global: 21f06d2abf533c0fb63934a6229bd7b0ce7ed97b",
         "fleet-agent-policies|mappings: 7a6aef21c517facd41e5df4c7fa7f66d1ef68829",
         "fleet-agent-policies|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "fleet-agent-policies|10.5.0: 948d498d482410622232b397dc6879828b0656d64b17ccd7699a4a2a874832ff",
-        "fleet-agent-policies|10.4.0: 62ca2214880c9e5aa1514e4286c80bcd050a82018f0611f1eb25869d47ee5bd5",
-        "fleet-agent-policies|10.3.0: 30b4003ea0d78179ec010a85f80cc70a5723175153553fab6a2d0126a4d3747b",
+        "fleet-agent-policies|10.5.0: 5067514447d239e0f03eaa0710d8a6d2497fc4ffce7727b7e1f59ac7a8132c29",
+        "fleet-agent-policies|10.4.0: 4706b6195269758ea2a49edcbd886d119d065831625942c9eba4447b3f0b6140",
+        "fleet-agent-policies|10.3.0: 3cbc181193b9b31bbe95c7903dc35c49e8db5b142337f21f2c172b4fb5eee919",
         "fleet-agent-policies|10.2.0: b0042f8a6c0373d27acc94bb2ddc913c1d2f8847961d8b75b0c99b2b4ce71b2c",
         "fleet-agent-policies|10.1.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "=============================================================================================",
@@ -823,15 +816,15 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "infrastructure-ui-source|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "infrastructure-ui-source|7.16.2: 4be5e4f58ef2424cf27809a4ac53214c958fda09",
-        "infrastructure-ui-source|7.13.0: c4fb38da02b6901c06ac3b6356b0fd06aeda2940",
+        "infrastructure-ui-source|7.13.0: 024f7c871de336cb3757b95e2244fd3cb43559eb",
         "infrastructure-ui-source|7.9.0: 214a790607e1034dba6625bd5e2674c22f5a51db",
         "========================================================================",
         "ingest-agent-policies|global: c3b43ce09de4bc7883a7ef73aec64d7d679b28d2",
         "ingest-agent-policies|mappings: ebeefa360c807146ea4645800fedad0869063ac1",
         "ingest-agent-policies|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "ingest-agent-policies|10.10.0: 948d498d482410622232b397dc6879828b0656d64b17ccd7699a4a2a874832ff",
-        "ingest-agent-policies|10.9.0: 62ca2214880c9e5aa1514e4286c80bcd050a82018f0611f1eb25869d47ee5bd5",
-        "ingest-agent-policies|10.8.0: 30b4003ea0d78179ec010a85f80cc70a5723175153553fab6a2d0126a4d3747b",
+        "ingest-agent-policies|10.10.0: 5067514447d239e0f03eaa0710d8a6d2497fc4ffce7727b7e1f59ac7a8132c29",
+        "ingest-agent-policies|10.9.0: 4706b6195269758ea2a49edcbd886d119d065831625942c9eba4447b3f0b6140",
+        "ingest-agent-policies|10.8.0: 3cbc181193b9b31bbe95c7903dc35c49e8db5b142337f21f2c172b4fb5eee919",
         "ingest-agent-policies|10.7.0: b0042f8a6c0373d27acc94bb2ddc913c1d2f8847961d8b75b0c99b2b4ce71b2c",
         "ingest-agent-policies|10.6.0: 5cb51278f489660ab671e971b91569729d498aae1feaceeca2c2f57c93246b65",
         "ingest-agent-policies|10.5.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
@@ -851,8 +844,10 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest-download-sources|10.1.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "================================================================================================",
         "ingest-outputs|global: 3e72116f17fda6ec9c5269cb42eb42e3f686b313",
-        "ingest-outputs|mappings: a88cd423056155f954a3877a082c0f8d1273468a",
+        "ingest-outputs|mappings: a48fa4cb62d321c8ed0ffe84c80db2cbf7f7258b",
         "ingest-outputs|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "ingest-outputs|10.10.0: 25066fec2f6c80607e652ddd82d32976ec25492c26e18fec0b22b1c01c0eae65",
+        "ingest-outputs|10.9.0: 50a325af05e7b9b3f7383f1e525388c9cecf00a14b9924409a262f6c3058840b",
         "ingest-outputs|10.8.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "ingest-outputs|10.7.0: 2f5dfca42d489deaa60da45c020e92fdae21e5e3d0e5e60153c0d18039715bd7",
         "ingest-outputs|10.6.0: f224697a876b316945536829900df70c8c6af40c28ccd1b1be4854a1df7442dc",
@@ -922,8 +917,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest_manager_settings|7.10.0: 701c9d979b496fc93cec0440fa243705b3d1c15b",
         "========================================================================",
         "integration-config|global: 5460d6a59a046897e67545fca31348e4182add93",
-        "integration-config|mappings: 7ca30be9b66cc3cffd26a6b34306d5bf48d8beb8",
+        "integration-config|mappings: 755a3a078360f52f60608957ee4cb0638ee1a724",
         "integration-config|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "integration-config|10.3.0: 60963c840af4624ba51c3f77c3b3fcf9a9383b39a6f45154a91220e2c63b8fef",
         "integration-config|10.2.0: 934367c385659f0e6ef4e1e97720843a7d87f942c483cb541988724e94ad66a4",
         "integration-config|10.1.0: 3f840d64f1b85d2d036d33e38d1e98490739f11da0fd89022c8ecae20289cd2b",
         "===========================================================================================",
@@ -947,6 +943,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "kql-telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "kql-telemetry|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
         "===============================================================",
+        "lead-generation-config|global: 9214fc6b463c04cd8ae1254844c0554e51a11bc9",
+        "lead-generation-config|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
+        "lead-generation-config|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "lead-generation-config|10.1.0: e39d0d079d4d5cc138b6c9cec4f920c0327ec9ac6c63e5fcf6cec5f86ba8dac1",
+        "===============================================================================================",
         "legacy-url-alias|global: 75ba31d71f16b30f2af93e89a5a4d2e4337bd39d",
         "legacy-url-alias|mappings: 3fab23423850717103cdd4cbbc53bc55b0a7f884",
         "legacy-url-alias|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -1282,8 +1283,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "tag|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "=====================================================",
         "task|global: 8277e4031824bb161fa73897294701786c15eb9a",
-        "task|mappings: 02ff4224787d1516899101bacf1c411fa0149383",
+        "task|mappings: a4616c952ab46648bba6f807a339d76b1388078e",
         "task|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "task|10.9.0: 2c8f74c9a9d07540f767ad8e99174474da9bec93ab858ae1e005a301f620c39b",
         "task|10.8.0: deed2eb105aa3f19fa1827868c6b5569523624614fb73a8fcb8600d86c0dface",
         "task|10.7.0: 6afacb50669e4a3ebd48d5790d1677c138885b1540acf5e832dbe8dc82e7cd5c",
         "task|10.6.0: a554a701424daf84a260b61390464deb9296c7372ac3438301c2fb046ded11f9",
@@ -1391,8 +1393,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "watchlist-config|10.1.0: 895160f5280b70553de3e5afb38ab5d7ff43d4ea54cffc4aa5255c1793a8d840",
         "=========================================================================================",
         "watchlist-entity-source|global: c1a10635e0b47578006f9ba55d1a8cc8b5fc29db",
-        "watchlist-entity-source|mappings: 6fb587c32f08d6f56a1d7316a2b0d7259ba671bf",
+        "watchlist-entity-source|mappings: 9ffd89787c09633c55456fc1d46ebd2cfd4db1cc",
         "watchlist-entity-source|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "watchlist-entity-source|10.2.0: 6014db43a6561ba3b1995e33475b129082222bbe08d6a784b680ed5a806e17a6",
         "watchlist-entity-source|10.1.0: 7a6b96c670be283b52b768a0d3ec4f80ad7523beefc39fb63dc361611db476b7",
         "================================================================================================",
         "workplace_search_telemetry|global: 1788a0f48253a7ac02a9d00de8047bc5128cd4be",
@@ -1411,7 +1414,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
-        "alert": "10.11.0",
+        "alert": "10.12.0",
         "alerting_rule_template": "10.3.0",
         "anonymization-salt": "10.1.0",
         "api_key_pending_invalidation": "10.2.0",
@@ -1453,7 +1456,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-analytics-monitoring-entity-source": "10.2.0",
         "entity-definition": "10.4.0",
         "entity-discovery-api-key": "10.0.0",
-        "entity-engine-descriptor-v2": "10.3.0",
+        "entity-engine-descriptor-v2": "10.5.0",
         "entity-engine-status": "10.2.0",
         "entity-store-global-state": "10.1.0",
         "epm-packages": "10.8.0",
@@ -1485,14 +1488,15 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "10.0.0",
         "ingest-agent-policies": "10.10.0",
         "ingest-download-sources": "10.1.0",
-        "ingest-outputs": "10.8.0",
+        "ingest-outputs": "10.10.0",
         "ingest-package-policies": "10.22.0",
         "ingest_manager_settings": "10.8.0",
-        "integration-config": "10.2.0",
+        "integration-config": "10.3.0",
         "intercept_interaction_record": "10.1.0",
         "intercept_trigger_record": "10.1.0",
         "inventory-view": "10.2.0",
         "kql-telemetry": "10.0.0",
+        "lead-generation-config": "10.1.0",
         "legacy-url-alias": "10.0.0",
         "lens": "10.1.0",
         "lens-ui-telemetry": "10.0.0",
@@ -1545,7 +1549,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "10.0.0",
         "synthetics-privates-locations": "10.1.0",
         "tag": "10.0.0",
-        "task": "10.8.0",
+        "task": "10.9.0",
         "telemetry": "10.0.0",
         "threshold-explorer-view": "10.0.0",
         "trial-companion-nba-milestone": "10.1.0",
@@ -1561,7 +1565,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "10.1.0",
         "visualization": "10.0.0",
         "watchlist-config": "10.1.0",
-        "watchlist-entity-source": "10.1.0",
+        "watchlist-entity-source": "10.2.0",
         "workplace_search_telemetry": "10.0.0",
       }
     `);
@@ -1576,7 +1580,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
-        "alert": "10.11.0",
+        "alert": "10.12.0",
         "alerting_rule_template": "10.3.0",
         "anonymization-salt": "10.1.0",
         "api_key_pending_invalidation": "10.2.0",
@@ -1618,7 +1622,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-analytics-monitoring-entity-source": "10.2.0",
         "entity-definition": "10.4.0",
         "entity-discovery-api-key": "0.0.0",
-        "entity-engine-descriptor-v2": "10.3.0",
+        "entity-engine-descriptor-v2": "10.5.0",
         "entity-engine-status": "10.2.0",
         "entity-store-global-state": "10.1.0",
         "epm-packages": "10.8.0",
@@ -1650,14 +1654,15 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "7.16.2",
         "ingest-agent-policies": "10.10.0",
         "ingest-download-sources": "10.1.0",
-        "ingest-outputs": "10.8.0",
+        "ingest-outputs": "10.10.0",
         "ingest-package-policies": "10.22.0",
         "ingest_manager_settings": "10.8.0",
-        "integration-config": "10.2.0",
+        "integration-config": "10.3.0",
         "intercept_interaction_record": "10.1.0",
         "intercept_trigger_record": "10.1.0",
         "inventory-view": "10.2.0",
         "kql-telemetry": "0.0.0",
+        "lead-generation-config": "10.1.0",
         "legacy-url-alias": "8.2.0",
         "lens": "10.1.0",
         "lens-ui-telemetry": "0.0.0",
@@ -1710,7 +1715,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "0.0.0",
         "synthetics-privates-locations": "10.1.0",
         "tag": "0.0.0",
-        "task": "10.8.0",
+        "task": "10.9.0",
         "telemetry": "0.0.0",
         "threshold-explorer-view": "0.0.0",
         "trial-companion-nba-milestone": "10.1.0",
@@ -1726,7 +1731,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "10.1.0",
         "visualization": "8.5.0",
         "watchlist-config": "10.1.0",
-        "watchlist-entity-source": "10.1.0",
+        "watchlist-entity-source": "10.2.0",
         "workplace_search_telemetry": "0.0.0",
       }
     `);

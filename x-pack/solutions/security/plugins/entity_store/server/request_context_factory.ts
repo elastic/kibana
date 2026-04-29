@@ -40,7 +40,7 @@ export async function createRequestHandlerContext({
   analytics,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const [, startPlugins] = await coreSetup.getStartServices();
+  const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
@@ -107,6 +107,8 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       namespace,
       analytics,
+      coreStart,
+      licensing: startPlugins.licensing,
     }),
     crudClient,
     resolutionClient: new ResolutionClient({

@@ -52,7 +52,6 @@ export { FailedToLoadResponse } from './components/message_panel/failed_to_load_
 
 export { MessageText } from './components/message_panel/message_text';
 
-export { ElasticLlmTourCallout } from './components/tour_callout/elastic_llm_tour_callout';
 export { EisKnowledgeBaseCallout } from './components/tour_callout/eis_knowledge_base_callout';
 
 export {
@@ -123,8 +122,8 @@ export const plugin: PluginInitializer<
   new ObservabilityAIAssistantPlugin(pluginInitializerContext);
 
 export {
-  getConnectorsManagementHref,
-  navigateToConnectorsManagementApp,
+  getModelManagementHref,
+  navigateToModelManagementApp,
 } from './utils/navigate_to_connectors';
 
 export { navigateToSettingsManagementApp } from './utils/navigate_to_settings';
@@ -145,12 +144,3 @@ export {
 } from './context/observability_ai_assistant_flyout_state_context';
 
 export { useIsAgentBuilderEnabled } from './hooks/use_is_agent_builder_enabled';
-export {
-  useAgentBuilderOptIn,
-  type UseAgentBuilderOptInParams,
-  type UseAgentBuilderOptInResult,
-} from './hooks/use_agent_builder_opt_in';
-export {
-  useDefaultExperienceCalloutDismissed,
-  DefaultExperienceCalloutKey,
-} from './hooks/use_default_experience_callout_dismissed';

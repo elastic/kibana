@@ -6,12 +6,16 @@
  */
 
 import expect from 'expect';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import { ENTITY_STORE_ROUTES, API_VERSIONS } from '@kbn/entity-store/common';
 import { ENTITY_RESOLUTION_CSV_UPLOAD_URL } from '@kbn/security-solution-plugin/common/entity_analytics/entity_store/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
+import { entityMaintainerRouteHelpersFactory } from '../../utils/entity_maintainers';
+
+/** Same value as `MAINTAINER_ID` in entity_store `server/maintainers/automated_resolution`. */
+const AUTOMATED_RESOLUTION_MAINTAINER_ID = 'automated-resolution';
 
 const TEST_PREFIX = 'csv-test:';
 
@@ -72,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const seedEntities = async () => {
-    const index = getLatestEntitiesIndexName('default');
+    const index = getEntitiesAlias(ENTITY_LATEST, 'default');
     const operations = testEntities.flatMap((entity) => [
       { index: { _index: index, _id: hashEuid(entity.id) } },
       {
@@ -89,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const waitForEntities = async () => {
-    const index = getLatestEntitiesIndexName('default');
+    const index = getEntitiesAlias(ENTITY_LATEST, 'default');
     await retry.waitForWithTimeout('seeded entities to be searchable', 30_000, async () => {
       const { count } = await es.count({
         index,
@@ -101,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const cleanEntities = async () => {
-    const index = getLatestEntitiesIndexName('default');
+    const index = getEntitiesAlias(ENTITY_LATEST, 'default');
     try {
       await es.deleteByQuery({
         index,
@@ -116,11 +120,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
-      // Use enableEntityStoreV2 (without maintainer init) to prevent the
-      // automated resolution maintainer from racing with CSV upload tests.
+      // Use enableEntityStoreV2 and explicitly stop
+      // the automated-resolution maintainer so it cannot race with CSV upload tests.
       // The maintainer would link entities sharing the same user.email,
       // interfering with the test's own resolution assertions.
       await entityStoreUtils.enableEntityStoreV2();
+      await entityMaintainerRouteHelpersFactory(supertest).stopMaintainer(
+        AUTOMATED_RESOLUTION_MAINTAINER_ID
+      );
       await cleanEntities();
       await seedEntities();
       await waitForEntities();
@@ -163,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
       await uploadCsv(csv);
 
       // Ensure the resolved_to updates from linkEntities are visible
-      await es.indices.refresh({ index: getLatestEntitiesIndexName('default') });
+      await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
 
       // Second upload — same CSV, entities should be skipped
       const { body } = await uploadCsv(csv);

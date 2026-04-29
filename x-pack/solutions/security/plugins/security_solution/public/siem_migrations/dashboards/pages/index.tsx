@@ -116,7 +116,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} isBeta={true} />} border>
+        <HeaderPage title={<PageTitle title={i18n.PAGE_TITLE} />} border>
           <HeaderButtons
             migrationType="dashboard"
             migrationsStats={dashboardMigrationsStats}

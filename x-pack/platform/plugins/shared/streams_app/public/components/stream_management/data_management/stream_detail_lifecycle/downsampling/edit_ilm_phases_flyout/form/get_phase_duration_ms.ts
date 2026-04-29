@@ -8,9 +8,7 @@
 import type { PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
-interface FormWithFields {
-  getFields: () => Record<string, { value: unknown } | undefined>;
-}
+type GetValues = (name: string) => unknown;
 
 export interface GetPhaseDurationMsConfig {
   /**
@@ -36,26 +34,22 @@ export interface GetPhaseDurationMsConfig {
 }
 
 export const getPhaseDurationMs = <Phase extends string>(
-  form: FormWithFields,
+  getValues: GetValues,
   phase: Phase,
   { valuePathSuffix, unitPathSuffix, extraEnabledPathSuffix }: GetPhaseDurationMsConfig
 ): number | null => {
-  const fields = form.getFields();
-
-  const enabled = Boolean(fields[`_meta.${phase}.enabled`]?.value);
+  const enabled = Boolean(getValues(`_meta.${phase}.enabled`));
   if (!enabled) return null;
 
   if (extraEnabledPathSuffix) {
-    const extraEnabled = Boolean(fields[`_meta.${phase}.${extraEnabledPathSuffix}`]?.value);
+    const extraEnabled = Boolean(getValues(`_meta.${phase}.${extraEnabledPathSuffix}`));
     if (!extraEnabled) return null;
   }
 
-  const value = String(fields[`_meta.${phase}.${valuePathSuffix}`]?.value ?? '').trim();
+  const value = String(getValues(`_meta.${phase}.${valuePathSuffix}`) ?? '').trim();
   if (!value) return null;
 
-  const unit = String(
-    fields[`_meta.${phase}.${unitPathSuffix}`]?.value ?? 'd'
-  ) as PreservedTimeUnit;
+  const unit = String(getValues(`_meta.${phase}.${unitPathSuffix}`) ?? 'd') as PreservedTimeUnit;
   const ms = toMilliseconds(value, unit);
   return Number.isFinite(ms) && ms >= 0 ? ms : null;
 };

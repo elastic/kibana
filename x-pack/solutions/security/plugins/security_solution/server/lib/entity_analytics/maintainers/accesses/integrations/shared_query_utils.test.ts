@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildCompositeAggQueryBase,
   buildBucketUserFilter,
@@ -12,6 +13,7 @@ import {
 } from './shared_query_utils';
 import { COMPOSITE_PAGE_SIZE, LOOKBACK_WINDOW } from '../constants';
 import type { CompositeAfterKey, CompositeBucket } from '../types';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 
 describe('buildCompositeAggQueryBase', () => {
   const sampleFilters = [{ term: { 'event.action': 'test' } }];
@@ -44,12 +46,11 @@ describe('buildCompositeAggQueryBase', () => {
       const query = buildCompositeAggQueryBase(sampleFilters);
       const filters = query.query.bool.filter;
       const rangeFilter = filters.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (f: any) => f.range?.['@timestamp']
+        (f: QueryDslQueryContainer | undefined): f is QueryDslQueryContainer =>
+          f !== undefined && f.range?.['@timestamp'] !== undefined
       );
       expect(rangeFilter).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((rangeFilter as any).range['@timestamp'].gte).toBe(LOOKBACK_WINDOW);
+      expect(rangeFilter?.range?.['@timestamp']?.gte).toBe(LOOKBACK_WINDOW);
     });
 
     it('sets size to 0 (no hits, aggregations only)', () => {
@@ -180,11 +181,10 @@ describe('buildAccessEsqlQuery', () => {
     expect(query).toContain('EVAL actorUserId =');
   });
 
-  it('computes targetEntityId with COALESCE fallback to host.ip and host.mac', () => {
+  it('computes targetEntityId using the host EUID evaluation', () => {
     const query = buildAccessEsqlQuery(indexPattern, whereClause);
-    expect(query).toContain('COALESCE(');
-    expect(query).toContain('TO_STRING(host.ip)');
-    expect(query).toContain('TO_STRING(host.mac)');
+    const expectedHostEval = euid.esql.getEuidEvaluation('host', { withTypeId: true });
+    expect(query).toContain(`EVAL targetEntityId = ${expectedHostEval}`);
   });
 
   it('uses MV_EXPAND on targetEntityId', () => {

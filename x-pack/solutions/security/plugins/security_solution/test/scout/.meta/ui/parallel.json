@@ -1,5 +1,5 @@
 {
-  "sha1": "591467697e5b80c8d9e4b425a878a5259344170d",
+  "sha1": "9b9ab0ca7c09fcc254ba73d72d770aaa49e76cc7",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -299,7 +299,7 @@
     {
       "id": "fe3e133d0c0af03-3916e4686fbd655",
       "title": "Expandable flyout state sync should test flyout url sync",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -308,49 +308,49 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout/alert_details_url_sync.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 14
       }
     },
     {
       "id": "a1e93b8abddca76-5a5001b848eec67",
       "title": "Run workflow alert action should show success toast with workflow link and open workflows app in new tab after executing",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 80,
+        "line": 81,
         "column": 12
       }
     },
     {
       "id": "a1e93b8abddca76-8915aaa7eb7bfbc",
       "title": "Run workflow alert action should open the workflow selection panel when Run workflow is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 12
       }
     },
     {
       "id": "a1e93b8abddca76-29e66346f3c0670",
       "title": "Run workflow alert action should show Run workflow action in bulk actions and open the bulk panel",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 170,
+        "line": 171,
         "column": 12
       }
     },

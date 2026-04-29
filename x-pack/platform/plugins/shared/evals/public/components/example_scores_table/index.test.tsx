@@ -110,7 +110,7 @@ describe('ExampleScoresTable', () => {
       />
     );
 
-    expect(screen.getByText('3: example-id-00...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
 
     const pagination = screen.getByRole('navigation', {
       name: 'Select repetition for example example-id-0000000000000001',
@@ -175,7 +175,7 @@ describe('ExampleScoresTable', () => {
         name: 'Select repetition for example example-id-single-repetition',
       })
     ).not.toBeInTheDocument();
-    expect(screen.getByText('1: example-id-si...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
   });
 
   it('renders evaluator label as a badge when present', () => {

@@ -6,17 +6,26 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ModelSettings } from './model_settings';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
+import { useConnectors } from '../../hooks/use_connectors';
+import { useKibana } from '../../hooks/use_kibana';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('./use_model_settings_form');
 jest.mock('../../hooks/use_default_model_settings');
+jest.mock('../../hooks/use_connectors');
+jest.mock('../../hooks/use_kibana');
+jest.mock('./no_models_empty_prompt', () => ({
+  NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
+}));
 jest.mock('./feature_section', () => ({
   FeatureSection: ({ parentName, onReset }: { parentName: string; onReset: () => void }) => (
     <div data-test-subj={`featureSection-${parentName}`}>
@@ -32,6 +41,11 @@ jest.mock('./default_model_section', () => ({
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
 const mockUseDefaultModelSettings = useDefaultModelSettings as jest.Mock;
+const mockUseConnectors = useConnectors as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
+
+const mockNavigateToUrl = jest.fn();
+const mockBasePath = { prepend: jest.fn((path: string) => path) };
 
 const childFeature: InferenceFeatureConfig = {
   featureId: 'child_1',
@@ -57,6 +71,9 @@ const defaultFormState = {
       children: [childFeature],
     },
   ],
+  invalidEndpointIds: new Set<string>(),
+  hasSavedObject: { child_1: false },
+  dirtyFeatureIds: new Set<string>(),
   updateEndpoints: jest.fn(),
   save: jest.fn(),
   resetSection: jest.fn(),
@@ -85,6 +102,16 @@ describe('ModelSettings', () => {
     jest.clearAllMocks();
     mockUseModelSettingsForm.mockReturnValue(defaultFormState);
     mockUseDefaultModelSettings.mockReturnValue(defaultModelSettingsState);
+    mockUseConnectors.mockReturnValue({
+      data: [{ connectorId: 'test-connector', name: 'Test', isPreconfigured: true }],
+      isLoading: false,
+    });
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: { navigateToUrl: mockNavigateToUrl },
+        http: { basePath: mockBasePath },
+      },
+    });
   });
 
   it('renders loading spinner when loading', () => {
@@ -305,8 +332,35 @@ describe('ModelSettings', () => {
     expect(saveFeatures).not.toHaveBeenCalled();
   });
 
-  it('calls defaultModelSettings.reset when discarding unsaved changes', async () => {
+  it('renders no-models empty prompt when connectors are empty', () => {
+    mockUseConnectors.mockReturnValue({ data: [], isLoading: false });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('settings-no-models')).toBeInTheDocument();
+    expect(screen.queryByTestId('defaultModelSection')).not.toBeInTheDocument();
+  });
+
+  it('renders loading spinner when connectors are loading', () => {
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-no-models')).not.toBeInTheDocument();
+  });
+
+  it('shows unsaved changes modal and navigates away when discard is confirmed', async () => {
     const resetDefaultModel = jest.fn();
+    const history = createMemoryHistory();
 
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
     mockUseDefaultModelSettings.mockReturnValue({
@@ -316,17 +370,63 @@ describe('ModelSettings', () => {
     });
 
     render(
-      <Wrapper>
-        <ModelSettings />
-      </Wrapper>
+      <Router history={history}>
+        <EuiThemeProvider>
+          <I18nProvider>
+            <ModelSettings />
+          </I18nProvider>
+        </EuiThemeProvider>
+      </Router>
     );
 
-    // Trigger navigation block by using history - the unsaved changes modal
-    // appears when pendingLocation is set, which happens via history.block
-    // We need to wait for the block to be set up, then trigger navigation
+    act(() => {
+      history.push('/some-other-page');
+    });
+
     await waitFor(() => {
-      // The component should have registered a history block since isDirty is true
-      expect(screen.getByTestId('modelSettingsPageHeader')).toBeInTheDocument();
+      expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Discard changes'));
+
+    expect(resetDefaultModel).toHaveBeenCalledTimes(1);
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/some-other-page', expect.any(Object));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('closes unsaved changes modal without navigating when cancel is clicked', async () => {
+    const history = createMemoryHistory();
+
+    mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
+
+    render(
+      <Router history={history}>
+        <EuiThemeProvider>
+          <I18nProvider>
+            <ModelSettings />
+          </I18nProvider>
+        </EuiThemeProvider>
+      </Router>
+    );
+
+    act(() => {
+      history.push('/some-other-page');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Cancel'));
+
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
     });
   });
 });

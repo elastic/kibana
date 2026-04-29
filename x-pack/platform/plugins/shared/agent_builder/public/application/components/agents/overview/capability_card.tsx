@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiSkeletonText,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface CapabilityCardProps {
@@ -17,6 +24,8 @@ export interface CapabilityCardProps {
   image?: string;
   href?: string;
   onClick?: () => void;
+  isCountLoading?: boolean;
+  dataTestSubj?: string;
 }
 
 const TEXT_SIZE = '64px';
@@ -30,17 +39,50 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
   image,
   href,
   onClick,
+  isCountLoading = false,
+  dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  if (isCountLoading) {
+    return (
+      <EuiCard
+        data-test-subj={dataTestSubj}
+        hasBorder
+        display="plain"
+        paddingSize="m"
+        title={title}
+        titleElement="h4"
+        titleSize="xs"
+        textAlign="left"
+        footer={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexGroup>
+        }
+        css={css`
+          height: 100%;
+          .euiCard__content p {
+            color: ${euiTheme.colors.textSubdued};
+          }
+        `}
+        aria-busy={true}
+      >
+        <EuiSkeletonText lines={2} size="s" />
+      </EuiCard>
+    );
+  }
 
   if (count === 0) {
     return (
       <EuiCard
+        data-test-subj={dataTestSubj}
         hasBorder
         display="plain"
         paddingSize="none"
         title={title}
         titleElement="h4"
+        titleSize="xs"
         description={emptyDescription}
         textAlign="left"
         href={href}
@@ -74,11 +116,13 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
 
   return (
     <EuiCard
+      data-test-subj={dataTestSubj}
       hasBorder
       display="plain"
       paddingSize="m"
       title={title}
       titleElement="h4"
+      titleSize="xs"
       description={description}
       textAlign="left"
       footer={

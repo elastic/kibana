@@ -47,6 +47,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudDefendPage",
             "trackAdoption": false,
             "isRequired": true
           }

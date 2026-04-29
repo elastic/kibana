@@ -35,7 +35,7 @@ apiTest.describe(
     apiTest(
       'GET /data_streams/{id}/results: returns 403 for no-access user',
       async ({ apiClient, apiServices }) => {
-        const dsId = 'scout-results-noaccess-ds';
+        const dsId = 'scout_results_noaccess_ds';
         await apiServices.autoImport.createIntegrationWithDataStream(
           DATA_STREAMS_INTEGRATION_ID,
           'Scout DS Test Integration',

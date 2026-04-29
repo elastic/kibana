@@ -12,7 +12,7 @@
 var Fs = require('fs');
 var Path = require('path');
 
-var METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+var METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 function hasFlag(args, flag) {
   if (args.includes(flag)) {
@@ -343,6 +343,7 @@ function runFastHelp() {
   logInfo('Commands:');
   logInfo('  init                          Set up config + connectors for local evals');
   logInfo('  init config                   Only create/update vault config.json');
+  logInfo('    --profile <name>            Write config.<name>.json (e.g. --profile local)');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');

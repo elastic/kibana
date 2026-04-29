@@ -10,12 +10,12 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity } from './types';
 
+const MAX_CANDIDATE_ENTITIES = 500;
+
 /** Row shape returned by {@link EntityStoreCRUDClient.listEntities}. */
 type EntityStoreEntity = Awaited<
   ReturnType<EntityStoreCRUDClient['listEntities']>
 >['entities'][number];
-
-const ENTITY_PAGE_SIZE = 1000;
 
 /**
  * Convert an Entity Store V2 record into a LeadEntity, extracting the
@@ -35,29 +35,31 @@ export const entityRecordToLeadEntity = (record: EntityStoreEntity): LeadEntity 
 };
 
 /**
- * Paginate through all entities in the V2 unified index via
- * `CRUDClient.listEntities()`, accumulating results across pages.
+ * Fetch the top candidate entities from the V2 unified index, sorted by
+ * risk score descending and capped at {@link MAX_CANDIDATE_ENTITIES}.
+ *
+ * Sorting and limiting are pushed to Elasticsearch via the CRUD client's
+ * page-mode query so we avoid fetching all entities into Kibana memory.
+ * Entities without a risk score sort last (ES `missing` default for desc).
  */
-export const fetchAllLeadEntities = async (
+export const fetchCandidateEntities = async (
   crudClient: EntityStoreCRUDClient,
   logger?: Logger
 ): Promise<LeadEntity[]> => {
-  const allEntities: LeadEntity[] = [];
-  let searchAfter: Array<string | number> | undefined;
+  const { entities, total } = await crudClient.listEntities({
+    sortField: 'entity.risk.calculated_score_norm',
+    sortOrder: 'desc',
+    perPage: MAX_CANDIDATE_ENTITIES,
+    page: 1,
+  });
 
-  do {
-    const { entities, nextSearchAfter } = await crudClient.listEntities({
-      size: ENTITY_PAGE_SIZE,
-      ...(searchAfter !== undefined ? { searchAfter } : {}),
-    });
+  const leadEntities = entities.map(entityRecordToLeadEntity);
 
-    for (const entity of entities) {
-      allEntities.push(entityRecordToLeadEntity(entity));
-    }
+  logger?.debug(
+    `[LeadGeneration] Entity selection: ${total ?? leadEntities.length} total -> ${
+      leadEntities.length
+    } candidates (cap ${MAX_CANDIDATE_ENTITIES})`
+  );
 
-    searchAfter = nextSearchAfter;
-  } while (searchAfter !== undefined);
-
-  logger?.debug(`[LeadGeneration] Fetched ${allEntities.length} entities from V2 index`);
-  return allEntities;
+  return leadEntities;
 };

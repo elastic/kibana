@@ -11,8 +11,9 @@ import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 test('Kubernetes EA', async ({
