@@ -83,7 +83,14 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
             schedule: { interval: '1d' },
             throttle: null,
             notify_when: null,
-            params: { pattern },
+            // `setRecoveryPayload: false` keeps `cleanedPayload` empty on the
+            // run that recovers the alert. Otherwise the rule type's default
+            // recovery hook would write `{ patternIndex: -1 }` into
+            // `reportedAlerts['instance']`, which would then win the deep
+            // merge over the trackedDelayed predecessor and mask the
+            // assertion that proves the predecessor's payload survives the
+            // graduation.
+            params: { pattern, setRecoveryPayload: false },
             alert_delay: { active: 2 },
             flapping: {
               look_back_window: 20,
