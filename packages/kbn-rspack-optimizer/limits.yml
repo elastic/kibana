@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 7691
   customIntegrations: 636
   dashboard: 452
-  dashboardAgent: 919
+  dashboardAgent: 3074
   dashboardMarkdown: 2058
   data: 11799
   dataQuality: 5836
@@ -85,7 +85,8 @@ pageLoadAssetSize:
   grokdebugger: 1333
   home: 9251
   imageEmbeddable: 1732
-  indexLifecycleManagement: 29230
+  inbox: 935
+  indexLifecycleManagement: 29229
   indexManagement: 316
   inference: 5751
   infra: 45673
@@ -115,7 +116,7 @@ pageLoadAssetSize:
   maps: 932
   mapsEms: 3256
   metricsDataAccess: 1557
-  ml: 700
+  ml: 663
   mockIdpPlugin: 4203
   monitoring: 22416
   navigation: 8671
@@ -166,7 +167,7 @@ pageLoadAssetSize:
   securitySolutionEss: 19938
   securitySolutionServerless: 33422
   serverless: 1272
-  serverlessObservability: 14430
+  serverlessObservability: 14424
   serverlessSearch: 18261
   serverlessWorkplaceAI: 3338
   sessionView: 379
@@ -217,5 +218,5 @@ pageLoadAssetSize:
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
-  workflowsManagement: 28359
-  workplaceAIApp: 8756
+  workflowsManagement: 28317
+  workplaceAIApp: 1505
