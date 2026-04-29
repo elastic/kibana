@@ -16,11 +16,7 @@ import type {
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import {
-  ALERTING_RULE_DATASET,
-  ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
-  ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
-} from './constants';
+import { ALERTING_RULE_DATASET, ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS } from './constants';
 import type { IChangeTrackingService, RuleChange } from '.';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
@@ -88,12 +84,12 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
-      const { objectId, objectType, before, after, module } = change;
+      const { objectId, objectType, snapshot, module } = change;
       let objects = result.get(module);
       if (!objects) {
         result.set(module, (objects = []));
       }
-      objects.push({ objectType, objectId, before, after });
+      objects.push({ objectType, objectId, snapshot });
       return result;
     }, new Map<RuleTypeSolution, ObjectChange[]>());
 
@@ -115,7 +111,6 @@ export class ChangeTrackingService implements IChangeTrackingService {
           await client.logBulk(groupedChanges, {
             ...opts,
             correlationId,
-            fieldsToIgnore: ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
             fieldsToHash: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
           });
           this.logger.trace(

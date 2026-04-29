@@ -95,7 +95,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           const { name, displayName } = field;
           const formatter = dataView.getFormatterForField(field);
           const value = get(currentDocument?.fields, name);
-          const formattedValue = formatter.convert(value, 'html');
+          const formattedValue = formatter.reactConvert(value);
 
           return {
             key: displayName,
