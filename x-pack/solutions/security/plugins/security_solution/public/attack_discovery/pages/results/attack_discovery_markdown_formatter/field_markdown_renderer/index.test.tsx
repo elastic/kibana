@@ -15,6 +15,17 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 
 jest.mock('@kbn/expandable-flyout');
 
+const mockDraggableBadge = jest.fn(
+  ({ children, value }: { children?: React.ReactNode; value?: string }) => (
+    <div data-test-subj="draggableBadge">{children ?? value}</div>
+  )
+);
+
+jest.mock('../../../../../common/components/draggables', () => ({
+  DraggableBadge: (props: { children?: React.ReactNode; value?: string }) =>
+    mockDraggableBadge(props),
+}));
+
 describe('getFieldMarkdownRenderer', () => {
   const mockOpenRightPanel = jest.fn();
   const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
@@ -98,5 +109,26 @@ describe('getFieldMarkdownRenderer', () => {
     const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
 
     expect(disabledActionsBadge).toBeInTheDocument();
+  });
+
+  it('hides filter actions on field badges', () => {
+    const FieldMarkdownRenderer = getFieldMarkdownRenderer(false);
+    const icon = 'user';
+    const name = 'user.name';
+    const value = 'some.user';
+
+    render(
+      <TestProviders>
+        <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+      </TestProviders>
+    );
+
+    expect(mockDraggableBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        field: name,
+        hideFilters: true,
+        value,
+      })
+    );
   });
 });

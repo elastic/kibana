@@ -218,6 +218,19 @@ describe('cell actions renderer', () => {
       });
     });
 
+    describe('when hideFilters is true', () => {
+      it('should set the disabledActionTypes to the SecurityCellActions component', () => {
+        render(
+          <CellActionsRenderer field={field} value={value} hideFilters>
+            {'test children'}
+          </CellActionsRenderer>
+        );
+        expect(MockSecurityCellActions).toHaveBeenCalledWith(
+          expect.objectContaining({ disabledActionTypes: ['security-cellAction-type-filter'] })
+        );
+      });
+    });
+
     scopeIdsWithHoverActions.forEach((scopeId) => {
       test(`it renders hover actions (by default) when scopeId is '${scopeId}'`, async () => {
         const { getByTestId } = render(

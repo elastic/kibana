@@ -35,6 +35,7 @@ export const ProviderContentWrapper = styled.span`
 
 export interface CellActionsRendererProps {
   hideTopN?: boolean;
+  hideFilters?: boolean;
   field: string;
   value?: string | number | null;
   queryValue?: string | null;
@@ -81,12 +82,14 @@ Content.displayName = 'Content';
  * @param tooltipPosition - defaults to eui's default tooltip position
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  * @param hideTopN - defaults to `false`, when true, the option to aggregate this field will be hidden
+ * @param hideFilters - defaults to `false`, when true, the options to filter for or filter out this field will be hidden
  * @param scopeId - the id of the scope, e.g. `timelineId` or `tableId`
  * @param truncate - defaults to `false`, when true, the content will be truncated
  */
 export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
   ({
     hideTopN = false,
+    hideFilters = false,
     field,
     value,
     children,
@@ -111,10 +114,19 @@ export const CellActionsRenderer = React.memo<CellActionsRendererProps>(
       return { value: value || [], field };
     }, [value, field, queryValue]);
 
-    const disabledActionTypes = useMemo(
-      () => (hideTopN ? [SecurityCellActionType.SHOW_TOP_N] : []),
-      [hideTopN]
-    );
+    const disabledActionTypes = useMemo(() => {
+      const actionTypes: SecurityCellActionType[] = [];
+
+      if (hideTopN) {
+        actionTypes.push(SecurityCellActionType.SHOW_TOP_N);
+      }
+
+      if (hideFilters) {
+        actionTypes.push(SecurityCellActionType.FILTER);
+      }
+
+      return actionTypes;
+    }, [hideFilters, hideTopN]);
 
     const content = useMemo(
       () => (

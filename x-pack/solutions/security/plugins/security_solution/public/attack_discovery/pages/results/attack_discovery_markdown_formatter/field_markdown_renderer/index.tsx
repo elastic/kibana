@@ -62,6 +62,7 @@ export const getFieldMarkdownRenderer = (disableActions: boolean, scopeId?: stri
             contextId="fieldMarkdownRenderer"
             scopeId={scopeId}
             eventId=""
+            hideFilters
             iconType={icon}
             isAggregatable={false}
             field={name}

@@ -51,6 +51,7 @@ const DraggableBadgeComponent: React.FC<BadgeType> = ({
   scopeId,
   tooltipContent,
   queryValue,
+  hideFilters,
 }) =>
   value != null ? (
     <CellActionsRenderer
@@ -59,6 +60,7 @@ const DraggableBadgeComponent: React.FC<BadgeType> = ({
       scopeId={scopeId}
       tooltipContent={tooltipContent}
       queryValue={queryValue}
+      hideFilters={hideFilters}
     >
       <Badge iconType={iconType} color="hollow" title="">
         {children ? children : value !== '' ? value : getEmptyStringTag()}
