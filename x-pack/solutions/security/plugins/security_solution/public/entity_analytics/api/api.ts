@@ -662,14 +662,6 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
-    // TODO: switch to WATCHLISTS privileges API when backend route lands; https://github.com/elastic/security-team/issues/16102
-    // Keeping this separate from privmon to allow safe removal of privmon later.
-    const fetchWatchlistPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-      });
-
     /**
      * Fetches risk engine settings
      */
@@ -933,7 +925,6 @@ export const useEntityAnalyticsRoutes = () => {
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
-      fetchWatchlistPrivileges,
       createWatchlist,
       getWatchlist,
       updateWatchlist,
