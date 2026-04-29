@@ -201,7 +201,9 @@ export function Detail() {
 
   const isOlderThanInstalledVersion =
     isInstalled &&
-    packageInfo?.installationInfo?.version &&
+    packageInfo &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
     semverLt(packageInfo.version, packageInfo.installationInfo.version);
 
   const isViewingOlderVersion = Boolean(
