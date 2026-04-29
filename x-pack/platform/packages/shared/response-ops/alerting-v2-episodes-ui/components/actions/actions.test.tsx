@@ -71,6 +71,8 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -91,6 +93,8 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -133,6 +137,8 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -170,6 +176,8 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
