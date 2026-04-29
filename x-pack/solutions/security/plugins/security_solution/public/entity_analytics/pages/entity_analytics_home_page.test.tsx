@@ -435,6 +435,24 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.queryByTestId('dynamic-risk-level-panel')).not.toBeInTheDocument();
   });
 
+  it('does not render NoPrivileges when entity engine privileges query errors', () => {
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      isError: true,
+      data: undefined,
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+    expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
+  });
+
   it('renders Priviles Callout when user lacks risk engine read permissions', () => {
     mockUseMissingRiskEnginePrivileges.mockReturnValue({
       isLoading: false,

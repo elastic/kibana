@@ -216,7 +216,10 @@ export const EntityAnalyticsHomePage = () => {
     return <EntityStoreDisabledEmptyPrompt />;
   }
 
-  if (!entityEnginePrivilegesQuery.data?.has_read_permissions) {
+  if (
+    !entityEnginePrivilegesQuery.isError &&
+    !entityEnginePrivilegesQuery.data?.has_read_permissions
+  ) {
     return (
       <>
         <EntityAnalyticsReadPrivilegesCallout
