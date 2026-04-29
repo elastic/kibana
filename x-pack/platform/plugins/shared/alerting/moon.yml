@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/safer-lodash-set'
   - '@kbn/alerting-types'
+  - '@kbn/change-history'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/rrule'

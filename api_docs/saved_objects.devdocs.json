@@ -106,6 +106,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -155,6 +156,7 @@
             "lineNumber": 36,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "OriginSaveModalProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -255,6 +257,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -383,6 +386,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FC",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -813,6 +817,7 @@
                 "lineNumber": 21,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "EsResponse",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -864,6 +869,7 @@
                 "lineNumber": 23,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectCreationOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1166,6 +1172,7 @@
                 "lineNumber": 37,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectSaveOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1336,6 +1343,7 @@
                 "lineNumber": 66,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObject",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1392,6 +1400,7 @@
                 "lineNumber": 68,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectAttributesAndRefs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1440,6 +1449,7 @@
                 "lineNumber": 69,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
