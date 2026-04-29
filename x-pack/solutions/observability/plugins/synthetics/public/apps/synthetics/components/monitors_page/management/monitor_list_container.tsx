@@ -30,7 +30,6 @@ export const MonitorListContainer = ({
     error,
     loading: monitorsLoading,
     syntheticsMonitors,
-    remoteMonitors,
     total,
     absoluteTotal,
     loadPage,
@@ -66,7 +65,6 @@ export const MonitorListContainer = ({
       <EuiSpacer />
       <MonitorList
         syntheticsMonitors={syntheticsMonitors}
-        remoteMonitors={remoteMonitors}
         total={total}
         pageState={pageState}
         error={error}

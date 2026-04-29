@@ -40,7 +40,6 @@ describe('useMonitorList', () => {
       absoluteTotal: state.monitorList.data.absoluteTotal ?? 0,
       pageState: state.monitorList.pageState,
       syntheticsMonitors: selectEncryptedSyntheticsSavedMonitors.resultFunc(state.monitorList),
-      remoteMonitors: [],
       handleFilterChange: jest.fn(),
     };
 

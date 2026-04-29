@@ -15,7 +15,6 @@ import {
   quietFetchMonitorListAction,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
-  selectRemoteMonitors,
   updateManagementPageStateAction,
 } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -26,7 +25,6 @@ export function useMonitorList() {
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
-  const remoteMonitors = useSelector(selectRemoteMonitors);
 
   const { handleFilterChange } = useMonitorFiltersState();
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -84,7 +82,6 @@ export function useMonitorList() {
     error,
     pageState,
     syntheticsMonitors,
-    remoteMonitors,
     total: data?.total ?? 0,
     loadPage,
     reloadPage,

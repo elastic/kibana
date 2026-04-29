@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -30,7 +30,6 @@ import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
 import type {
-  EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
@@ -38,16 +37,11 @@ import type {
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
-import { SyntheticsRemoteBadge } from '../../../common/components/synthetics_remote_badge';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { UnhealthyTooltip } from './unhealthy_tooltip';
 import type { MonitorListItem } from './monitor_list';
-
-const DASH = '\u2014';
-
-const isRemoteMonitor = (item: MonitorListItem): boolean => Boolean(item._isRemote);
 
 export function useMonitorListColumns({
   loading,
@@ -82,7 +76,6 @@ export function useMonitorListColumns({
     useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
 
   const isPublicLocationsAllowed = (fields: MonitorListItem) => {
-    if (isRemoteMonitor(fields)) return false;
     const publicLocations = fields.locations?.some((loc: any) => loc.isServiceManaged);
     return publicLocations ? Boolean(canUsePublicLocations) : true;
   };
@@ -97,20 +90,11 @@ export function useMonitorListColumns({
       }),
       sortable: true,
       render: (_: string, monitor: MonitorListItem) => {
-        if (isRemoteMonitor(monitor)) {
-          return (
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{monitor[ConfigKey.NAME]}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }
         const configId = monitor[ConfigKey.CONFIG_ID];
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <MonitorDetailsLink monitor={monitor as EncryptedSyntheticsSavedMonitor} />
+              <MonitorDetailsLink monitor={monitor} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <UnhealthyTooltip configId={configId} />
@@ -129,8 +113,7 @@ export function useMonitorListColumns({
               defaultMessage: 'Project ID',
             }),
             sortable: true,
-            render: (val: string, monitor: MonitorListItem) =>
-              isRemoteMonitor(monitor) ? DASH : val,
+            render: (val: string) => val,
           },
         ]
       : []),
@@ -142,30 +125,17 @@ export function useMonitorListColumns({
       }),
       sortable: true,
       render: (_: string, monitor: MonitorListItem) => (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <MonitorTypeBadge
-              monitorType={monitor[ConfigKey.MONITOR_TYPE]}
-              ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
-              onClick={
-                isRemoteMonitor(monitor)
-                  ? undefined
-                  : () => {
-                      history.push({
-                        search: `monitorTypes=${encodeURIComponent(
-                          JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
-                        )}`,
-                      });
-                    }
-              }
-            />
-          </EuiFlexItem>
-          {monitor._remote && (
-            <EuiFlexItem grow={false}>
-              <SyntheticsRemoteBadge remote={monitor._remote} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <MonitorTypeBadge
+          monitorType={monitor[ConfigKey.MONITOR_TYPE]}
+          ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
+          onClick={() => {
+            history.push({
+              search: `monitorTypes=${encodeURIComponent(
+                JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
+              )}`,
+            });
+          }}
+        />
       ),
     },
     {
@@ -176,8 +146,7 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.frequency', {
         defaultMessage: 'Frequency',
       }),
-      render: (schedule: SyntheticsMonitorSchedule, monitor: MonitorListItem) =>
-        isRemoteMonitor(monitor) ? DASH : getFrequencyLabel(schedule),
+      render: (schedule: SyntheticsMonitorSchedule) => getFrequencyLabel(schedule),
     },
     {
       align: 'left' as const,
@@ -186,33 +155,14 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.locations', {
         defaultMessage: 'Locations',
       }),
-      render: (locations: ServiceLocations | string[], monitor: MonitorListItem) => {
-        if (isRemoteMonitor(monitor)) {
-          // Build ServiceLocations-compatible objects from location ID strings
-          // so remote monitors use the same styled badges as local monitors
-          const remoteLocations: ServiceLocations = (monitor._remoteLocations ?? []).map(
-            (locId) => ({
-              id: locId,
-              label: locId,
-              isServiceManaged: false,
-              url: '',
-              geo: { lat: 0, lon: 0 },
-            })
-          );
-          return remoteLocations.length > 0 ? (
-            <MonitorLocations configId={monitor[ConfigKey.CONFIG_ID]} locations={remoteLocations} />
-          ) : (
-            <EuiText size="s">{DASH}</EuiText>
-          );
-        }
-        return locations ? (
+      render: (locations: ServiceLocations | string[], monitor: MonitorListItem) =>
+        locations ? (
           <MonitorLocations
             configId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations as ServiceLocations}
             spaces={monitor.spaces}
           />
-        ) : null;
-      },
+        ) : null,
     },
     {
       align: 'left' as const,
@@ -220,16 +170,12 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.tags', {
         defaultMessage: 'Tags',
       }),
-      render: (tags: string[], monitor: MonitorListItem) => (
+      render: (tags: string[]) => (
         <TagsList
           tags={tags ?? []}
-          onClick={
-            isRemoteMonitor(monitor)
-              ? undefined
-              : (tag) => {
-                  history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
-                }
-          }
+          onClick={(tag) => {
+            history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
+          }}
         />
       ),
     },
@@ -240,19 +186,14 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
-      render: (_enabled: boolean, monitor: MonitorListItem) => {
-        if (isRemoteMonitor(monitor)) {
-          return <EuiText size="s">{DASH}</EuiText>;
-        }
-        return (
-          <MonitorEnabled
-            configId={monitor[ConfigKey.CONFIG_ID]}
-            monitor={monitor as EncryptedSyntheticsSavedMonitor}
-            reloadPage={() => {}}
-            isSwitchable={!loading}
-          />
-        );
-      },
+      render: (_enabled: boolean, monitor: MonitorListItem) => (
+        <MonitorEnabled
+          configId={monitor[ConfigKey.CONFIG_ID]}
+          monitor={monitor}
+          reloadPage={() => {}}
+          isSwitchable={!loading}
+        />
+      ),
     },
     {
       name: i18n.translate('xpack.synthetics.management.monitorList.spacesColumnTitle', {
@@ -260,10 +201,7 @@ export function useMonitorListColumns({
       }),
       field: 'spaces',
       sortable: false,
-      render: (monSpaces: string[], monitor: MonitorListItem) => {
-        if (isRemoteMonitor(monitor)) {
-          return <EuiText size="s">{DASH}</EuiText>;
-        }
+      render: (monSpaces: string[]) => {
         return (
           <LazySpaceList
             namespaces={monSpaces ?? (space ? [space?.id] : [])}
@@ -301,7 +239,6 @@ export function useMonitorListColumns({
           description: labels.EDIT_LABEL,
           icon: 'pencil' as const,
           type: 'icon' as const,
-          available: (fields) => !isRemoteMonitor(fields),
           enabled: (fields) =>
             canEditSynthetics &&
             !isActionLoading(fields) &&
@@ -340,7 +277,6 @@ export function useMonitorListColumns({
           description: labels.CLONE_LABEL,
           icon: 'copy' as const,
           type: 'icon' as const,
-          available: (fields) => !isRemoteMonitor(fields),
           enabled: (fields) =>
             canEditSynthetics &&
             !isActionLoading(fields) &&
@@ -374,7 +310,6 @@ export function useMonitorListColumns({
           icon: 'trash' as const,
           type: 'icon' as const,
           color: 'danger' as const,
-          available: (fields) => !isRemoteMonitor(fields),
           enabled: (fields) =>
             canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
@@ -403,8 +338,7 @@ export function useMonitorListColumns({
           icon: 'refresh' as const,
           type: 'icon' as const,
           color: 'warning' as const,
-          available: (fields) =>
-            !isRemoteMonitor(fields) && isFixableByReset(fields[ConfigKey.CONFIG_ID]),
+          available: (fields) => isFixableByReset(fields[ConfigKey.CONFIG_ID]),
           enabled: (fields) =>
             canEditSynthetics &&
             !isActionLoading(fields) &&
@@ -442,7 +376,6 @@ export function useMonitorListColumns({
             isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
           type: 'icon' as const,
           color: 'danger' as const,
-          available: (fields) => !isRemoteMonitor(fields),
           enabled: (fields) =>
             canEditSynthetics &&
             !isActionLoading(fields) &&
@@ -469,21 +402,16 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (monitor: MonitorListItem) => {
-        if (isRemoteMonitor(monitor)) {
-          return <EuiText size="s">{DASH}</EuiText>;
-        }
-        return (
-          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
-            <EuiButtonIcon
-              data-test-subj="syntheticsUseMonitorListColumnsButton"
-              iconType="boxesVertical"
-              isDisabled={true}
-              aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
-            />
-          </NoPermissionsTooltip>
-        );
-      },
+      render: () => (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          <EuiButtonIcon
+            data-test-subj="syntheticsUseMonitorListColumnsButton"
+            iconType="boxesVertical"
+            isDisabled={true}
+            aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
+          />
+        </NoPermissionsTooltip>
+      ),
     };
   }
 

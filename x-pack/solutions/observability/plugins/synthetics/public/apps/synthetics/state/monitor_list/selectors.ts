@@ -7,10 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import type {
-  EncryptedSyntheticsSavedMonitor,
-  RemoteMonitorListItem,
-} from '../../../../../common/runtime_types';
+import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import type { SyntheticsAppState } from '../root_reducer';
 import type { MonitorFilterState } from './models';
 
@@ -23,11 +20,6 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
       updated_at: monitor.updated_at,
       created_at: monitor.created_at,
     })) as EncryptedSyntheticsSavedMonitor[]
-);
-
-export const selectRemoteMonitors = createSelector(
-  selectMonitorListState,
-  (state) => (state?.data.remoteMonitors ?? []) as RemoteMonitorListItem[]
 );
 
 export const selectMonitorFiltersAndQueryState = createSelector(selectMonitorListState, (state) => {
