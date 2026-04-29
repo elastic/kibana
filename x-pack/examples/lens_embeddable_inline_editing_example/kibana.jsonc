@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/lens-inline-editing-example-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "inlineEditingLensExample",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "lens_embeddable_inline_editing_example"
+    ],
+    "requiredPlugins": [
+      "uiActions",
+      "lens",
+      "dataViews",
+      "embeddable",
+      "developerExamples",
+      "kibanaReact",
+      "data"
+    ]
+  }
+}

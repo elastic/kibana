@@ -1,0 +1,149 @@
+---
+id: kibDevDocsOpsEslintPluginI18N
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-i18n
+title: '@kbn/eslint-plugin-i18n'
+description: Custom ESLint rules to support translations in the Kibana repository
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'i18n']
+---
+
+# Summary
+
+`@kbn/eslint-plugin-i18n` is an ESLint plugin providing custom ESLint rules to help validating code in the Kibana repo in the area of translations.
+
+The aim of this package is to help engineers type less and have a nicer experience.
+
+If a rule does not behave as you expect or you have an idea of how these rules can be improved, please reach out to the Observability Knowledge Team or the Kibana Operations team.
+
+# Rules
+
+## `@kbn/i18n/strings_should_be_translated_with_i18n`
+
+This rule warns engineers to translate their strings by using `i18n.translate` from the `@kbn/i18n` package.
+
+It provides an autofix that takes into account the context of the translatable string in the JSX tree to generate a translation ID.
+
+This rule kicks in on:
+
+- JSXText elements;
+- specific JSXAttributes (`label` and `aria-label`) which expect a translated value.
+
+### Example
+
+This code:
+
+```
+// Filename: /x-pack/plugins/observability_solution/observability/public/my_component.tsx
+
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+
+function MyComponent() {
+    return (
+        <EuiText>You know, for search</EuiText>
+    )
+}
+```
+
+will be autofixed with:
+
+```
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
+
+function MyComponent() {
+    return (
+        <EuiText>
+            {i18n.translate('xpack.observability.myComponent.textLabel', { defaultMessage: 'You know, for search' } )}
+        </EuiText>
+    )
+}
+```
+
+If `i18n` has not been imported yet, the autofix will automatically add the import statement as well.
+
+### Exemptions and exceptions
+
+A JSXText element or JSXAttribute `label` or `aria-label` of which the value is:
+
+- wrapped in a `EuiCode` or `EuiBetaBadge` component,
+- made up of non alpha characters such as `!@#$%^&*(){}` or numbers,
+- wrapped in three backticks,
+
+are exempt from this rule.
+
+If this rule kicks in on a string value that you don't like, you can escape it by wrapping the string inside a JSXExpression: `{'my escaped value'}`.
+
+---
+
+## `@kbn/i18n/strings_should_be_translated_with_formatted_message`
+
+This rule warns engineers to translate their strings by using `<FormattedMessage>` from the `@kbn/i18n-react` package.
+
+It provides an autofix that takes into account the context of the translatable string in the JSX tree and to generate a translation ID.
+
+This rule kicks in on:
+
+- JSXText elements;
+- specific JSXAttributes (`label` and `aria-label`) which expect a translated value.
+
+### Exemptions and exceptions
+
+A JSXText element or JSXAttribute `label` or `aria-label` of which the value is:
+
+- wrapped in a `EuiCode` or `EuiBetaBadge` component,
+- made up of non alpha characters such as `!@#$%^&*(){}` or numbers,
+- wrapped in three backticks,
+
+are exempt from this rule.
+
+If this rule kicks in on a string value that you don't like, you can escape it by wrapping the string inside a JSXExpression: `{'my escaped value'}`.
+
+---
+
+## `@kbn/i18n/i18n_translate_should_start_with_the_right_id`
+
+This rule checks every instance of `i18n.translate()` if the first parameter passed:
+
+1. has a string value,
+2. if the parameter starts with the correct i18n app identifier for the file.
+
+It checks the repo for the `i18nrc.json` and `/x-pack/i18nrc.json` files and determines what the right i18n identifier should be.
+
+If the parameter is missing or does not start with the right i18n identifier, it can autofix the parameter.
+
+This rule is useful when defining translated values in plain functions (non-JSX), but it works in JSX as well.
+
+### Example
+
+This code:
+
+```
+// Filename: /x-pack/plugins/observability_solution/observability/public/my_function.ts
+
+function myFunction() {
+    const translations = [
+        {
+            id: 'copy';
+            label: i18n.translate()
+        }
+    ]
+}
+```
+
+will be autofixed with:
+
+```
+import { i18n } from '@kbn/i18n';
+
+function myFunction() {
+    const translations = [
+        {
+            id: 'copy';
+            label: i18n.translate('xpack.observability.myFunction.', { defaultMessage: '' })
+        }
+    ]
+}
+```
+
+If `i18n` has not been imported yet, the autofix will automatically add the import statement as well.

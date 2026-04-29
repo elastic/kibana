@@ -1,0 +1,10 @@
+{
+  "name": "Query with a note",
+  "description": "Query with a note",
+  "rule_id": "query-with-note",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "query": "user.name: root or user.name: admin",
+  "note": "# Changes only note to this new value on update"
+}

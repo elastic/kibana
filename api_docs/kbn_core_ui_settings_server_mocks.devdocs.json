@@ -1,0 +1,142 @@
+{
+  "id": "@kbn/core-ui-settings-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-server-mocks",
+        "id": "def-server.uiSettingsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "uiSettingsServiceMock",
+        "description": [],
+        "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server-mocks",
+            "id": "def-server.uiSettingsServiceMock.createPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createPrebootContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalUiSettingsServicePreboot",
+              ">"
+            ],
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server-mocks",
+            "id": "def-server.uiSettingsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UiSettingsServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server-mocks",
+            "id": "def-server.uiSettingsServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UiSettingsServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server-mocks",
+            "id": "def-server.uiSettingsServiceMock.createClient",
+            "type": "Function",
+            "tags": [],
+            "label": "createClient",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "IUiSettingsClient",
+              ">"
+            ],
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server-mocks",
+            "id": "def-server.uiSettingsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<UiSettingsServiceContract>"
+            ],
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

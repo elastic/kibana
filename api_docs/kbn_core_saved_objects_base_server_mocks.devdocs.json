@@ -1,0 +1,122 @@
+{
+  "id": "@kbn/core-saved-objects-base-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+        "id": "def-server.createDocumentMigratorMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createDocumentMigratorMock",
+        "description": [],
+        "signature": [
+          "() => jest.Mocked<",
+          "IDocumentMigrator",
+          ">"
+        ],
+        "path": "src/core/packages/saved-objects/base-server-mocks/src/document_migrator.mock.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+        "id": "def-server.serializerMock",
+        "type": "Object",
+        "tags": [],
+        "label": "serializerMock",
+        "description": [],
+        "path": "src/core/packages/saved-objects/base-server-mocks/src/serializer.mock.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+            "id": "def-server.serializerMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectsSerializer",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/base-server-mocks/src/serializer.mock.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+        "id": "def-server.typeRegistryMock",
+        "type": "Object",
+        "tags": [],
+        "label": "typeRegistryMock",
+        "description": [],
+        "path": "src/core/packages/saved-objects/base-server-mocks/src/saved_objects_type_registry.mock.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+            "id": "def-server.typeRegistryMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectTypeRegistryInternal",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/base-server-mocks/src/saved_objects_type_registry.mock.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".siem-signals-default": {
+        "is_write_index": false
+      }
+    },
+    "index": "index_alias_clash",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

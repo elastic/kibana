@@ -1,0 +1,270 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "task:be7e1250-3322-11eb-94c1-db6995e84f6a",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.16.0",
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "idle",
+        "taskType": "alerting:0359d7fcc04da9878ee9aadbda38ba55"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:be7e1250-3322-11eb-94c1-db6995e8389f",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.16.0",
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"actionTaskParamsId\":\"6e96ac5e648f57523879661ea72525b7\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "idle",
+        "taskType": "actions:6e96ac5e648f57523879661ea72525b7"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:d33d7590-8377-11ec-8c11-2dfe94229b95",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.6.0",
+      "task": {
+        "taskType": "alerting:xpack.uptime.alerts.monitorStatus",
+        "retryAt": null,
+        "runAt": "2222-02-01T15:59:42.908Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "params": "{\"alertId\":\"c9a10a61-7dcc-4297-991a-6c52c10eb7d2\",\"spaceId\":\"default\"}",
+        "ownerId": null,
+        "scheduledAt": "2022-02-01T15:58:41.000Z",
+        "attempts": 3,
+        "status": "failed"
+      },
+      "references": [],
+      "updated_at": "2022-02-01T15:58:44.109Z",
+      "type": "task"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:ce7e1250-3322-11eb-94c1-db6995e84f6d",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.16.0",
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "unrecognized",
+        "taskType": "alerting:0359d7fcc04da9878ee9aadbda38ba55"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:fe7e1250-3322-11eb-94c1-db6395e84f6e",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.16.0",
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "unrecognized",
+        "taskType": "sampleTaskRemovedType"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:ge7e1250-3322-11eb-94c1-db6395e84f6g",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.16.0",
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\",\"waitForParams\":false}",
+        "retryAt": null,
+        "runAt": "2020-11-30T16:00:00.000Z",
+        "scheduledAt": "2020-11-30T15:00:00.000Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "idle",
+        "taskType": "sampleTask"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:ie7e1250-3322-11eb-94c1-db6395e84f6i",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "7.16.0",
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\",\"waitForParams\":false}",
+        "retryAt": "2020-11-30T17:00:00.000Z",
+        "runAt": "2020-11-30T16:00:00.000Z",
+        "scheduledAt": "2020-11-30T15:00:00.000Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "running",
+        "taskType": "sampleTask"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:d0487a50-c7f1-11ed-aefe-691acd8d4e25",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "8.5.0",
+      "task": {
+          "retryAt": null,
+          "runAt": "2023-03-21T14:08:29.777Z",
+          "startedAt": null,
+          "params": "{\"alertId\":\"d0487a50-c7f1-11ed-aefe-691acd8d4e25\",\"spaceId\":\"default\",\"consumer\":\"alerts\"}",
+          "ownerId": null,
+          "enabled": true,
+          "schedule": {
+              "interval": "3s"
+          },
+          "taskType": "alerting:.index-threshold",
+          "scope": [
+              "alerting"
+          ],
+          "traceparent": "",
+          "state": "{\"alertTypeState\":{},\"alertInstances\":{\"host-C\":{\"state\":{\"start\":\"2023-03-21T14:08:20.886Z\",\"duration\":\"6010000000\"},\"meta\":{\"flappingHistory\":[true,false],\"flapping\":false,\"pendingRecoveredCount\":0,\"lastScheduledActions\":{\"group\":\"threshold met\",\"date\":\"2023-03-21T14:08:26.903Z\"}}}},\"alertRecoveredInstances\":{\"host-A\":{\"meta\":{\"flappingHistory\":[true,false,true],\"flapping\":false}},\"host-B\":{\"meta\":{\"flappingHistory\":[true,false,true],\"flapping\":false}}},\"summaryActions\":{},\"previousStartedAt\":\"2023-03-21T14:08:26.777Z\"}",
+          "scheduledAt": "2023-03-21T14:08:23.770Z",
+          "attempts": 0,
+          "status": "idle"
+      },
+      "references": [],
+      "updated_at": "2023-03-21T14:08:27.022Z",
+      "type": "task"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:cf0ced10-c7f1-11ed-aefe-691acd8d4e25",
+    "index": ".kibana_task_manager",
+    "source": {
+      "typeMigrationVersion": "8.5.0",
+      "task": {
+          "retryAt": null,
+          "runAt": "2023-03-21T14:08:29.777Z",
+          "startedAt": null,
+          "params": "{\"alertId\":\"cf0ced10-c7f1-11ed-aefe-691acd8d4e25\",\"spaceId\":\"default\",\"consumer\":\"infrastructure\"}",
+          "ownerId": null,
+          "enabled": true,
+          "schedule": {
+              "interval": "3s"
+          },
+          "taskType": "alerting:metrics.alert.threshold",
+          "scope": [
+              "alerting"
+          ],
+          "traceparent": "",
+          "state": "{\"alertTypeState\":{\"wrapped\":{\"lastRunTimestamp\":1679407706777,\"missingGroups\":[],\"groupBy\":[\"network.name\"]},\"trackedAlerts\":{\"host-C\":{\"alertId\":\"host-C\",\"alertUuid\":\"34f86489-cf44-4760-a9df-d1a2166230d9\",\"started\":\"2023-03-21T14:08:20.770Z\",\"flappingHistory\":[true,false],\"flapping\":false,\"pendingRecoveredCount\":0}},\"trackedAlertsRecovered\":{\"host-A\":{\"alertId\":\"host-A\",\"alertUuid\":\"d3a6a7d0-71d3-475d-a8db-5ea7a03462d5\",\"started\":\"2023-03-21T14:08:11.767Z\",\"flappingHistory\":[true,false,false,true],\"flapping\":false,\"pendingRecoveredCount\":0},\"host-B\":{\"alertId\":\"host-B\",\"alertUuid\":\"41d17c71-12b6-4bbc-8fd7-1eee8498c17f\",\"started\":\"2023-03-21T14:08:11.767Z\",\"flappingHistory\":[true,false,false,true],\"flapping\":false,\"pendingRecoveredCount\":0}}},\"alertInstances\":{\"host-C\":{\"state\":{\"start\":\"2023-03-21T14:08:21.701Z\",\"duration\":\"6049000000\"},\"meta\":{\"flappingHistory\":[true,false],\"flapping\":false,\"pendingRecoveredCount\":0,\"lastScheduledActions\":{\"group\":\"metrics.threshold.fired\",\"date\":\"2023-03-21T14:08:27.755Z\"}}}},\"alertRecoveredInstances\":{\"host-A\":{\"meta\":{\"flappingHistory\":[true,false,false,true],\"flapping\":false}},\"host-B\":{\"meta\":{\"flappingHistory\":[true,false,false,true],\"flapping\":false}}},\"summaryActions\":{},\"previousStartedAt\":\"2023-03-21T14:08:26.777Z\"}",
+          "scheduledAt": "2023-03-21T14:08:23.770Z",
+          "attempts": 0,
+          "status": "idle"
+      },
+      "references": [],
+      "updated_at": "2023-03-21T14:08:27.877Z",
+      "type": "task"
+    }
+  }
+}

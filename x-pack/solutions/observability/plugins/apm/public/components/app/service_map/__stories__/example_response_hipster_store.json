@@ -1,0 +1,355 @@
+{
+  "elements": [
+    {
+      "data": {
+        "source": "advertService",
+        "target": ">elasticsearch",
+        "id": "advertService~>elasticsearch",
+        "sourceData": {
+          "id": "advertService",
+          "service.name": "advertService",
+          "agent.name": "java"
+        },
+        "targetData": {
+          "span.subtype": "elasticsearch",
+          "span.destination.service.resource": "elasticsearch",
+          "span.type": "db",
+          "id": ">elasticsearch",
+          "label": "elasticsearch"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "checkoutService",
+        "target": "cartService",
+        "id": "checkoutService~cartService",
+        "sourceData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        },
+        "targetData": {
+          "id": "cartService",
+          "service.name": "cartService",
+          "agent.name": "dotnet"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "checkoutService",
+        "target": "currencyService",
+        "id": "checkoutService~currencyService",
+        "sourceData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        },
+        "targetData": {
+          "id": "currencyService",
+          "service.name": "currencyService",
+          "agent.name": "nodejs"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "checkoutService",
+        "target": "emailService",
+        "id": "checkoutService~emailService",
+        "sourceData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        },
+        "targetData": {
+          "id": "emailService",
+          "service.name": "emailService",
+          "agent.name": "python"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "checkoutService",
+        "target": "paymentService",
+        "id": "checkoutService~paymentService",
+        "sourceData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        },
+        "targetData": {
+          "id": "paymentService",
+          "service.name": "paymentService",
+          "agent.name": "nodejs"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "checkoutService",
+        "target": "productCatalogService",
+        "id": "checkoutService~productCatalogService",
+        "sourceData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        },
+        "targetData": {
+          "id": "productCatalogService",
+          "service.name": "productCatalogService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "checkoutService",
+        "target": "shippingService",
+        "id": "checkoutService~shippingService",
+        "sourceData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        },
+        "targetData": {
+          "id": "shippingService",
+          "service.name": "shippingService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "advertService",
+        "id": "frontend~advertService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "advertService",
+          "service.name": "advertService",
+          "agent.name": "java"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "cartService",
+        "id": "frontend~cartService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "cartService",
+          "service.name": "cartService",
+          "agent.name": "dotnet"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "checkoutService",
+        "id": "frontend~checkoutService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "checkoutService",
+          "service.name": "checkoutService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "currencyService",
+        "id": "frontend~currencyService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "currencyService",
+          "service.name": "currencyService",
+          "agent.name": "nodejs"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "productCatalogService",
+        "id": "frontend~productCatalogService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "productCatalogService",
+          "service.name": "productCatalogService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "recommendationService",
+        "id": "frontend~recommendationService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "recommendationService",
+          "service.name": "recommendationService",
+          "agent.name": "python"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "frontend",
+        "target": "shippingService",
+        "id": "frontend~shippingService",
+        "sourceData": {
+          "id": "frontend",
+          "service.name": "frontend",
+          "agent.name": "go"
+        },
+        "targetData": {
+          "id": "shippingService",
+          "service.name": "shippingService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "recommendationService",
+        "target": "productCatalogService",
+        "id": "recommendationService~productCatalogService",
+        "sourceData": {
+          "id": "recommendationService",
+          "service.name": "recommendationService",
+          "agent.name": "python"
+        },
+        "targetData": {
+          "id": "productCatalogService",
+          "service.name": "productCatalogService",
+          "agent.name": "go",
+          "service.framework.name": "grpc"
+        }
+      }
+    },
+    {
+      "data": {
+        "id": "frontend",
+        "service.name": "frontend",
+        "agent.name": "go"
+      }
+    },
+    {
+      "data": {
+        "id": "checkoutService",
+        "service.name": "checkoutService",
+        "agent.name": "go",
+        "service.framework.name": "grpc"
+      }
+    },
+    {
+      "data": {
+        "id": "cartService",
+        "service.name": "cartService",
+        "agent.name": "dotnet"
+      }
+    },
+    {
+      "data": {
+        "id": "currencyService",
+        "service.name": "currencyService",
+        "agent.name": "nodejs"
+      }
+    },
+    {
+      "data": {
+        "id": "productCatalogService",
+        "service.name": "productCatalogService",
+        "agent.name": "go",
+        "service.framework.name": "grpc"
+      }
+    },
+    {
+      "data": {
+        "id": "advertService",
+        "service.name": "advertService",
+        "agent.name": "java"
+      }
+    },
+    {
+      "data": {
+        "span.subtype": "elasticsearch",
+        "span.destination.service.resource": "elasticsearch",
+        "span.type": "db",
+        "id": ">elasticsearch",
+        "label": "elasticsearch"
+      }
+    },
+    {
+      "data": {
+        "id": "paymentService",
+        "service.name": "paymentService",
+        "agent.name": "nodejs"
+      }
+    },
+    {
+      "data": {
+        "id": "shippingService",
+        "service.name": "shippingService",
+        "agent.name": "go",
+        "service.framework.name": "grpc"
+      }
+    },
+    {
+      "data": {
+        "id": "emailService",
+        "service.name": "emailService",
+        "agent.name": "python"
+      }
+    },
+    {
+      "data": {
+        "id": "recommendationService",
+        "service.name": "recommendationService",
+        "agent.name": "python"
+      }
+    }
+  ]
+}

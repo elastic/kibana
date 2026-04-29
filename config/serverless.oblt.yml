@@ -1,0 +1,111 @@
+# Observability Project config
+
+## Core pricing tier for observability project
+pricing.tiers.enabled: true
+pricing.tiers.products:
+  - name: observability
+    tier: complete # Accepted values for this tier are: complete, logs_essentials
+
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'observability']
+
+# Disabled Observability plugins
+xpack.ux.enabled: false
+xpack.legacy_uptime.enabled: false
+
+## Cloud settings
+xpack.cloud.serverless.project_type: observability
+
+## Enable the Serverless Observability plugin
+xpack.serverless.observability.enabled: true
+
+xpack.features.overrides:
+  ### Dashboards feature should be moved from Analytics category to the Observability one.
+  dashboard_v2.category: 'observability'
+  ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
+  ### fine-tuned to grant access to Observability app.
+  discover_v2.category: 'observability'
+  ### Agent Builder should be moved from Analytics category to the Observability one.
+  agentBuilder.category: 'observability'
+
+# Customize empty page state for analytics apps
+no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
+
+## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
+xpack.fleet.agentIdVerificationEnabled: false
+
+## Enable event.ingested separately because agentIdVerification is disabled
+xpack.fleet.eventIngestedEnabled: true
+
+## APM Serverless Onboarding flow
+xpack.apm.serverlessOnboarding: true
+
+# Synthetics mTLS cert locations
+xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
+xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+
+# Fleet specific configuration
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
+xpack.fleet.internal.registry.excludePackages: [
+    # Security integrations
+    'endpoint',
+    'beaconing',
+    'cloud_security_posture',
+    'cloud_defend',
+    'security_detection_engine',
+
+    # Deprecated security integrations
+    'bluecoat',
+    'cisco',
+    'cyberark',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'microsoft',
+    'netscout',
+    'radware',
+    'symantec',
+    'tomcat',
+
+    # ML integrations
+    'dga',
+
+    # Profiling integrations
+    'profiler_agent',
+  ]
+
+## Required for force installation of integration packages
+xpack.fleet.packages:
+  # fleet_server package installed to publish agent metrics
+  - name: fleet_server
+    version: latest
+## Disable APM UI components and API calls
+xpack.apm.featureFlags.agentConfigurationAvailable: false
+xpack.apm.featureFlags.configurableIndicesAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: true
+xpack.apm.featureFlags.infraUiAvailable: true
+xpack.apm.featureFlags.migrationToFleetAvailable: false
+xpack.apm.featureFlags.sourcemapApiAvailable: false
+xpack.apm.featureFlags.storageExplorerAvailable: false
+
+## Set the AI Assistant type
+aiAssistantManagementSelection.preferredAIAssistantType: 'observability'
+xpack.observabilityAIAssistant.scope: 'observability'
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: observability
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    vCPURange:
+      high:
+        max: 128
+xpack.ml.compatibleModuleType: 'observability'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

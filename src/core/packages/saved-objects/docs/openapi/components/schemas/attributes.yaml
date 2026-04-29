@@ -1,0 +1,4 @@
+type: object
+description: >
+  The data that you want to create.
+  WARNING: Attributes may be validated depending on the saved object type. Supplying malformed data can cause errors or break Kibana. When creating or persisting raw saved objects outside of Kibana, preserve `coreMigrationVersion` and `typeMigrationVersion` (and related migration metadata) to retain forward compatibility across Kibana versions.

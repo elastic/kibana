@@ -1,0 +1,35 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  dataset: "fake_hosts"
+  scenario: "scenario1"
+  eventsPerCycle: 1
+  interval: 10000
+
+schedule:
+  # Start events at 100 rate
+  - template: "good"
+    start: "now-30m"
+    end: "now+2m"
+    eventsPerCycle: 50
+    randomness: 0.1
+  # Step change to events at 20 rate
+  - template: "good"
+    start: "now+2m"
+    end: "now+3m"
+    eventsPerCycle:
+      start: 50
+      end: 200
+      method: "linear"
+    randomness: 0.1
+  - template: "good"
+    start: "now+3m"
+    end: "now+15m"
+    eventsPerCycle: 200
+    randomness: 0.1
+

@@ -1,0 +1,189 @@
+{
+  "id": "@kbn/core-http-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.IExternalUrlPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExternalUrlPolicy",
+        "description": [
+          "\nA policy describing whether access to an external destination is allowed."
+        ],
+        "path": "src/core/packages/http/common/src/external_url_policy.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-common",
+            "id": "def-common.IExternalUrlPolicy.allow",
+            "type": "boolean",
+            "tags": [],
+            "label": "allow",
+            "description": [
+              "\nIndicates if this policy allows or denies access to the described destination."
+            ],
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-common",
+            "id": "def-common.IExternalUrlPolicy.host",
+            "type": "string",
+            "tags": [],
+            "label": "host",
+            "description": [
+              "\nOptional host describing the external destination.\nMay be combined with `protocol`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-common",
+            "id": "def-common.IExternalUrlPolicy.protocol",
+            "type": "string",
+            "tags": [],
+            "label": "protocol",
+            "description": [
+              "\nOptional protocol describing the external destination.\nMay be combined with `host`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ApiVersion",
+        "type": "Type",
+        "tags": [
+          "note",
+          "note",
+          "experimental"
+        ],
+        "label": "ApiVersion",
+        "description": [
+          "\nA Kibana HTTP API version\n"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "src/core/packages/http/common/src/versioning.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ELASTIC_HTTP_VERSION_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_HTTP_VERSION_HEADER",
+        "description": [],
+        "signature": [
+          "\"elastic-api-version\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ELASTIC_HTTP_VERSION_QUERY_PARAM",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_HTTP_VERSION_QUERY_PARAM",
+        "description": [],
+        "signature": [
+          "\"apiVersion\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM",
+        "description": [],
+        "signature": [
+          "\"elasticInternalOrigin\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "type": "string",
+        "tags": [],
+        "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "description": [],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

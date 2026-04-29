@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "kbn_references": [
+    "@kbn/core-custom-branding-server-internal",
+    "@kbn/lazy-object",
+  ],
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

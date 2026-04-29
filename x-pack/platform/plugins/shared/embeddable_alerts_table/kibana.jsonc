@@ -1,0 +1,32 @@
+{
+  "type": "plugin",
+  "id": "@kbn/embeddable-alerts-table-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "embeddableAlertsTable",
+    "browser": true,
+    "server": false,
+    "configPath": [
+      "xpack",
+      "embeddable_alerts_table"
+    ],
+    "description": "Embeddable wrapper for the alerts table",
+    "requiredPlugins": [
+      "embeddable",
+      "navigation",
+      "uiActions",
+      "data",
+      "fieldFormats",
+      "licensing",
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "optionalPlugins": []
+  }
+}

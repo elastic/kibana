@@ -1,0 +1,29 @@
+{
+  "indices.data_streams_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_stream/_stats",
+      "_data_stream/{name}/_stats"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-data-streams-stats-1",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

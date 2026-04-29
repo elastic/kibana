@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-endpoint-exceptions-common",
+  "owner": [
+    "@elastic/security-detection-engine"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

@@ -1,0 +1,6 @@
+@mixin mapOverlayIsTextOnly {
+  background-color: $euiPageBackgroundColor;
+
+  padding-left: $euiSizeXS;
+  padding-right: $euiSizeXS;
+}

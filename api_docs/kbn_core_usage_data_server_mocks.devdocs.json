@@ -1,0 +1,204 @@
+{
+  "id": "@kbn/core-usage-data-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-usage-data-server-mocks",
+        "id": "def-server.coreUsageDataServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreUsageDataServiceMock",
+        "description": [],
+        "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+        "lineNumber": 179,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-mocks",
+            "id": "def-server.coreUsageDataServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "CoreUsageDataService",
+              ">>"
+            ],
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-mocks",
+            "id": "def-server.coreUsageDataServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "(usageStatsClient?: jest.Mocked<",
+              "ICoreUsageStatsClient",
+              ">) => jest.Mocked<",
+              "InternalCoreUsageDataSetup",
+              ">"
+            ],
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-mocks",
+                "id": "def-server.coreUsageDataServiceMock.createSetupContract.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "usageStatsClient",
+                "description": [],
+                "signature": [
+                  "{ getUsageStats: jest.MockInstance<Promise<",
+                  "CoreUsageStats",
+                  ">, [], unknown>; getDeprecatedApiUsageStats: jest.MockInstance<Promise<",
+                  "CoreDeprecatedApiUsageStats",
+                  "[]>, [], unknown>; incrementDeprecatedApi: jest.MockInstance<Promise<void>, [counterName: string, options: { resolved?: boolean | undefined; incrementBy?: number | undefined; }], unknown>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsBulkGet: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsBulkResolve: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsBulkUpdate: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsBulkDelete: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsCreate: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsDelete: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsFind: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsGet: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsResolve: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsUpdate: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementSavedObjectsImport: jest.MockInstance<Promise<void>, [options: ",
+                  "IncrementSavedObjectsImportOptions",
+                  "], unknown>; incrementSavedObjectsResolveImportErrors: jest.MockInstance<Promise<void>, [options: ",
+                  "IncrementSavedObjectsResolveImportErrorsOptions",
+                  "], unknown>; incrementSavedObjectsExport: jest.MockInstance<Promise<void>, [options: ",
+                  "IncrementSavedObjectsExportOptions",
+                  "], unknown>; incrementLegacyDashboardsImport: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; incrementLegacyDashboardsExport: jest.MockInstance<Promise<void>, [options: ",
+                  "BaseIncrementOptions",
+                  "], unknown>; } & ",
+                  "ICoreUsageStatsClient"
+                ],
+                "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+                "lineNumber": 18,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-mocks",
+            "id": "def-server.coreUsageDataServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "CoreUsageDataStart",
+              ">"
+            ],
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server-mocks",
+        "id": "def-server.coreUsageStatsClientMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreUsageStatsClientMock",
+        "description": [],
+        "path": "src/core/packages/usage-data/server-mocks/src/core_usage_stats_client.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-mocks",
+            "id": "def-server.coreUsageStatsClientMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ICoreUsageStatsClient",
+              ">"
+            ],
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_stats_client.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

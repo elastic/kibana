@@ -1,0 +1,60 @@
+{
+  "id": "@kbn/core-integrations-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-internal",
+        "id": "def-public.IntegrationsServiceSetupDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationsServiceSetupDeps",
+        "description": [],
+        "path": "src/core/packages/integrations/browser-internal/src/integrations_service.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-integrations-browser-internal",
+            "id": "def-public.IntegrationsServiceSetupDeps.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "src/core/packages/integrations/browser-internal/src/integrations_service.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "attributes": {
+    "@created": "2020-10-28T17:58:54.801Z",
+    "@timestamp": "2020-10-28T17:59:56.747Z",
+    "assets": {},
+    "colors": [
+      "#37988d",
+      "#c19628",
+      "#b83c6f",
+      "#3f9939",
+      "#1785b0",
+      "#ca5f35",
+      "#45bdb0",
+      "#f2bc33",
+      "#e74b8b",
+      "#4fbf48",
+      "#1ea6dc",
+      "#fd7643",
+      "#72cec3",
+      "#f5cc5d",
+      "#ec77a8",
+      "#7acf74",
+      "#4cbce4",
+      "#fd986f",
+      "#a1ded7",
+      "#f8dd91",
+      "#f2a4c5",
+      "#a6dfa2",
+      "#86d2ed",
+      "#fdba9f",
+      "#000000",
+      "#444444",
+      "#777777",
+      "#BBBBBB",
+      "#FFFFFF",
+      "rgba(255,255,255,0)"
+    ],
+    "css": ".canvasPage {\n\n}",
+    "height": 720,
+    "isWriteable": true,
+    "name": "Filter Debug Workpad",
+    "page": 0,
+    "pages": [
+      {
+        "elements": [
+          {
+            "expression": "timefilterControl compact=true column=@timestamp\n| render",
+            "filter": "timefilter from=\"2020-10-18T17:59:51.260Z\" to=2020-10-24T17:59:54.412Z column=@timestamp",
+            "id": "element-1a9e6a1e-3231-4752-acdd-20fff6afd9ee",
+            "position": {
+              "angle": 0,
+              "height": 50,
+              "left": 20,
+              "parent": null,
+              "top": 20,
+              "width": 500
+            }
+          },
+          {
+            "expression": "kibana\n| selectFilter\n| render as=debug",
+            "id": "element-d5687399-fd3e-4923-9280-ba1e8af578d1",
+            "position": {
+              "angle": 0,
+              "height": 526,
+              "left": 559,
+              "parent": null,
+              "top": 21,
+              "width": 500
+            }
+          },
+          {
+            "expression": "demodata\n| dropdownControl valueColumn=project filterColumn=project | render",
+            "filter": "exactly value=\"apm\" column=\"project\"",
+            "id": "element-61165541-a4cb-4638-b911-cf7eacc31c44",
+            "position": {
+              "angle": 0,
+              "height": 50,
+              "left": 20,
+              "parent": null,
+              "top": 128,
+              "width": 500
+            }
+          }
+        ],
+        "groups": [],
+        "id": "page-2276b5d0-9b3d-4a95-9e57-ea6c040c447d",
+        "style": {
+          "background": "#FFF"
+        },
+        "transition": {}
+      }
+    ],
+    "variables": [],
+    "width": 1080
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "workpad-b5618217-56d2-47fa-b756-1be2306cda68",
+  "migrationVersion": {
+    "canvas-workpad": "7.0.0"
+  },
+  "references": [],
+  "type": "canvas-workpad",
+  "updated_at": "2020-10-28T17:59:56.753Z",
+  "version": "WzEsMl0="
+}

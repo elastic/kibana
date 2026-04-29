@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/hapi-mocks",
+    "@kbn/config-schema",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-utils",
+    "@kbn/lazy-object",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

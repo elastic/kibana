@@ -1,0 +1,16 @@
+{
+    "attributes": {
+        "fields": "[]",
+        "timeFieldName": "@timestamp",
+        "title": "nonExistingDataView"
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "nonExistingDataView",
+    "migrationVersion": {
+        "index-pattern": "7.11.0"
+    },
+    "references": [],
+    "type": "index-pattern",
+    "updated_at": "2021-10-19T12:28:18.765Z",
+    "version": "WzU0ODUsMl0="
+}

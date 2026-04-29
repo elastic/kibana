@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Get script schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/scripts_library/{script_id}:
+    get:
+      summary: Get script
+      operationId: EndpointScriptLibraryGetOneScript
+      description: Get a script
+      x-codegen-enabled: false
+      x-labels: []
+      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+      #      x-labels: [ ess, serverless ]
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          description: The ID of the script entry.
+          example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+          schema:
+            type: string
+            description: The ID of the script entry.
+            example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+
+      responses:
+        '200':
+          description: Get script response
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/ScriptsApiResponse'

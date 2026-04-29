@@ -1,0 +1,21 @@
+{
+  "ssl.certificates": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ssl/certificates"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ssl-certificates",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

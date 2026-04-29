@@ -1,0 +1,98 @@
+{
+  "id": "@kbn/alerting-comparators",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerting-comparators",
+        "id": "def-common.Comparator",
+        "type": "Interface",
+        "tags": [],
+        "label": "Comparator",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-comparators",
+            "id": "def-common.Comparator.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-comparators",
+            "id": "def-common.Comparator.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-comparators",
+            "id": "def-common.Comparator.requiredValues",
+            "type": "number",
+            "tags": [],
+            "label": "requiredValues",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/alerting-comparators",
+        "id": "def-common.COMPARATORS",
+        "type": "Enum",
+        "tags": [],
+        "label": "COMPARATORS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

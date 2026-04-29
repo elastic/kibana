@@ -1,148 +1,172 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { relative, basename } from 'path';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { basename, join } from 'path';
+import { minimatch } from 'minimatch';
 
-import { dim } from 'chalk';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { uniq } from 'lodash';
+import { File } from '../file';
 
-import { createFailError } from '@kbn/dev-utils';
-import { matchesAnyGlob } from '../globs';
-
-import {
-  IGNORE_DIRECTORY_GLOBS,
-  IGNORE_FILE_GLOBS,
-  TEMPORARILY_IGNORED_PATHS,
-  KEBAB_CASE_DIRECTORY_GLOBS,
-} from './casing_check_config';
-
+const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
+const CODEOWNERS_PATH = join(REPO_ROOT, '.github/CODEOWNERS');
+const NO_OWNER_KEY = '_no_owner';
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
+function normalizePath(p) {
+  return p.replace(/\\/g, '/');
+}
+
+function parseCodeowners() {
+  const rules = [];
+  if (!existsSync(CODEOWNERS_PATH)) return rules;
+  const content = readFileSync(CODEOWNERS_PATH, 'utf8');
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const parts = trimmed.split(/\s+/);
+    if (parts.length < 2) continue;
+    const pathPattern = parts[0].replace(/^\/+/, '');
+    const owners = parts.slice(1).filter((p) => p.startsWith('@'));
+    if (owners.length) rules.push({ path: pathPattern, owners });
+  }
+  rules.sort((a, b) => b.path.length - a.path.length);
+  return rules;
+}
+
+function findOwnersForPath(filePath, rules) {
+  const norm = normalizePath(filePath);
+  const match = rules.find((r) => norm === r.path || norm.startsWith(r.path + '/'));
+  return match ? match.owners : [];
+}
+
 function listPaths(paths) {
-  return paths
-    .map(path => ` - ${path}`)
-    .join('\n');
+  return paths.map((path) => ` - ${path}`).join('\n');
 }
 
-/**
- * IGNORE_DIRECTORY_GLOBS patterns match directories which should
- * be ignored from casing validation. When one of the parent directories
- * of a file matches these rules this function strips it from the
- * path that is validated.
- *
- * if `file = new File('foo/bar/BAZ/index.js')` and `/foo/bar/BAZ`
- * is matched by an `IGNORE_DIRECTORY_GLOBS` pattern then this
- * function will return 'index.js' and only that part of the path
- * will be validated.
- *
- * @param  {File} file
- * @return {string} pathToCheck
- */
-function getPathWithoutIgnoredParents(file) {
-  for (const parent of file.getRelativeParentDirs()) {
-    if (matchesAnyGlob(parent, IGNORE_DIRECTORY_GLOBS)) {
-      return relative(parent, file.getRelativePath());
-    }
+function getSegmentPaths(relativePath) {
+  const normalized = normalizePath(relativePath);
+  const parts = normalized.split('/').filter(Boolean);
+  const segmentPaths = [];
+  for (let i = 0; i < parts.length; i++) {
+    segmentPaths.push(parts.slice(0, i + 1).join('/'));
+  }
+  return segmentPaths;
+}
+
+function toSnakeCase(resourceName) {
+  return resourceName.toLowerCase().replace(/[ \-]+/g, '_');
+}
+
+function toKebabCase(resourceName) {
+  return resourceName.toLowerCase().replace(/[ \_]+/g, '-');
+}
+
+function getSuggestedResourceName(resourceName, expectedCasing) {
+  if (expectedCasing === 'snake_case') {
+    return toSnakeCase(resourceName);
   }
 
-  return file.getRelativePath();
+  return toKebabCase(resourceName);
 }
 
-/**
- * Check for directories in the passed File objects which match the
- * KEBAB_CASE_DIRECTORY_GLOBS and ensure that those directories use
- * keban case
- *
- * @param  {ToolingLog} log
- * @param  {Array<File>} files
- * @return {Promise<undefined>}
- */
-async function checkForKebabCase(log, files) {
-  const errorPaths = files
-    .reduce((acc, file) => {
-      const parents = file.getRelativeParentDirs();
+function formatViolation(violation) {
+  const { path, resourceName, expectedCasing } = violation;
+  const suggestedResourceName = getSuggestedResourceName(resourceName, expectedCasing);
+  const suggestionText =
+    suggestedResourceName !== resourceName ? `, e.g. '${suggestedResourceName}'` : '';
 
-      return acc.concat(parents.filter(parent => (
-        matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) && NON_KEBAB_CASE_RE.test(basename(parent))
-      )));
-    }, [])
-    .reduce((acc, path) => (
-      acc.includes(path) ? acc : acc.concat(path)
-    ), []);
-
-  if (errorPaths.length) {
-    throw createFailError(`These directories MUST use kebab-case.\n${listPaths(errorPaths)}`);
-  }
+  return `${path} (segment '${resourceName}' must use ${expectedCasing}${suggestionText})`;
 }
 
-/**
- * Check that all passed File objects are using valid casing. Every
- * file SHOULD be using snake_case but some files are allowed to stray:
- *
- *  - grunt config: the file name needs to match the module name
- *  - eslint/babel packages: the directory name matches the module
- *    name, which uses kebab-case to mimic other babel/eslint plugins,
- *    configs, and presets
- *  - docs: unsure why, but all docs use kebab-case and that's fine
- *
- * @param {ToolingLog} log
- * @param {Array<File>} files
- * @return {Promise<undefined>}
- */
-async function checkForSnakeCase(log, files) {
-  const errorPaths = [];
-  const warningPaths = [];
+export async function checkFileCasing(log, paths, getExpectedCasing, options = {}) {
+  const {
+    exceptions = [],
+    generateExceptions = false,
+    packageRootDirs,
+    ignorePatterns = [],
+  } = options;
 
-  files.forEach(file => {
-    const path = file.getRelativePath();
+  const violations = [];
+  const isIgnoredPath = (path) => ignorePatterns.some((pattern) => minimatch(path, pattern));
 
-    if (TEMPORARILY_IGNORED_PATHS.includes(path)) {
-      warningPaths.push(file.getRelativePath());
-      return;
-    }
+  const pathsToValidate = uniq(
+    paths
+      .map((path) => (path instanceof File ? path : new File(path)))
+      .map((file) => normalizePath(file.getRelativePath()))
+      .flatMap((path) => getSegmentPaths(path))
+      .filter((path) => !isIgnoredPath(path))
+      .filter((path) => generateExceptions || !exceptions.includes(path))
+  );
 
-    const ignored = matchesAnyGlob(path, IGNORE_FILE_GLOBS);
-    if (ignored) {
-      log.debug('[casing] %j ignored', file);
-      return;
-    }
+  pathsToValidate.forEach((path) => {
+    const resourceName = basename(path);
+    const expectedCasing = getExpectedCasing(path, packageRootDirs);
 
-    const pathToValidate = getPathWithoutIgnoredParents(file);
-    const invalid = NON_SNAKE_CASE_RE.test(pathToValidate);
-    if (!invalid) {
-      log.debug('[casing] %j uses valid casing', file);
-    } else {
-      const ignoredParent = file.getRelativePath().slice(0, -pathToValidate.length);
-      errorPaths.push(`${dim(ignoredParent)}${pathToValidate}`);
+    switch (expectedCasing) {
+      case 'kebab-case':
+        if (NON_KEBAB_CASE_RE.test(resourceName)) {
+          violations.push({
+            path,
+            resourceName,
+            expectedCasing: 'kebab-case',
+            expected: `'${resourceName}' should be kebab-case`,
+          });
+        }
+        break;
+      case 'snake_case':
+        if (NON_SNAKE_CASE_RE.test(resourceName)) {
+          violations.push({
+            path,
+            resourceName,
+            expectedCasing: 'snake_case',
+            expected: `'${resourceName}' should be snake_case`,
+          });
+        }
+        break;
+      default:
+        throw new Error(`Unable to verify '${expectedCasing}' casing`);
     }
   });
 
-  if (warningPaths.length) {
-    log.warning(`Filenames SHOULD be snake_case.\n${listPaths(warningPaths)}`);
+  if (generateExceptions) {
+    const codeownersRules = parseCodeowners();
+    const byOwner = {};
+    violations.forEach(({ path, expected }) => {
+      const owners = findOwnersForPath(path, codeownersRules);
+      const key = owners.length ? owners[0] : NO_OWNER_KEY;
+      if (!byOwner[key]) byOwner[key] = {};
+      byOwner[key][path] = expected;
+    });
+
+    const sortedOwnerKeys = Object.keys(byOwner).sort((a, b) => a.localeCompare(b));
+    const output = {};
+    sortedOwnerKeys.forEach((k) => {
+      const pathMap = byOwner[k];
+      const sortedPaths = Object.keys(pathMap).sort((a, b) => a.localeCompare(b));
+      output[k] = {};
+      for (const p of sortedPaths) output[k][p] = pathMap[p];
+    });
+
+    writeFileSync(EXCEPTIONS_JSON_PATH, JSON.stringify(output, null, 2) + '\n', 'utf8');
+    log.info(`Wrote ${violations.length} exception(s) to ${EXCEPTIONS_JSON_PATH}`);
+    return;
   }
 
-  if (errorPaths.length) {
-    throw createFailError(`Filenames MUST use snake_case.\n${listPaths(errorPaths)}`);
+  if (violations.length > 0) {
+    const message =
+      violations.length === 1
+        ? `Casing violation: ${formatViolation(violations[0])}`
+        : `Casing violations:\n${listPaths(violations.map(formatViolation))}`;
+    throw createFailError(message);
   }
-}
-
-export async function checkFileCasing(log, files) {
-  await checkForKebabCase(log, files);
-  await checkForSnakeCase(log, files);
 }

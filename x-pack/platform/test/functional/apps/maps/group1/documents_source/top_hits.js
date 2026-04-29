@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+
+const VECTOR_SOURCE_ID = 'z52lq';
+
+export default function ({ getPageObjects, getService }) {
+  const { maps } = getPageObjects(['maps']);
+  const inspector = getService('inspector');
+  const find = getService('find');
+  const security = getService('security');
+  const retry = getService('retry');
+
+  describe('geo top hits', () => {
+    describe('split on string field', () => {
+      before(async () => {
+        await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
+          skipBrowserRefresh: true,
+        });
+        await maps.loadSavedMap('document example top hits');
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('should not fetch any search hits', async () => {
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
+        const requestStats = await inspector.getTableData();
+        const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
+        expect(hits).to.equal('0'); // aggregation requests do not return any documents
+      });
+
+      it('should display top hits per entity', async () => {
+        const mapboxStyle = await maps.getMapboxStyle();
+        expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(10);
+      });
+
+      describe('configuration', () => {
+        before(async () => {
+          await maps.openLayerPanel('logstash');
+
+          await retry.try(async () => {
+            // Can not use testSubjects because data-test-subj is placed range input and number input
+            const sizeInput = await find.byCssSelector(
+              `input[data-test-subj="layerPanelTopHitsSize"][type='number']`
+            );
+            await sizeInput.click();
+            await sizeInput.clearValue();
+            await sizeInput.type('3');
+
+            const sizeValue = await sizeInput.getAttribute('value');
+            if (sizeValue !== '3') {
+              throw new Error('layerPanelTopHitsSize not set to 3');
+            }
+          });
+
+          await maps.waitForLayersToLoad();
+        });
+
+        after(async () => {
+          await maps.closeLayerPanel();
+        });
+
+        it('should update top hits when configation changes', async () => {
+          const mapboxStyle = await maps.getMapboxStyle();
+          expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(15);
+        });
+      });
+
+      describe('query', () => {
+        before(async () => {
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+        });
+
+        after(async () => {
+          await maps.setAndSubmitQuery('');
+        });
+
+        it('should apply query to top hits request', async () => {
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          const mapboxStyle = await maps.getMapboxStyle();
+          expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(2);
+        });
+      });
+    });
+
+    describe('split on scripted field', () => {
+      before(async () => {
+        await maps.loadSavedMap('document example top hits split with scripted field');
+      });
+
+      it('should display top hits per entity', async () => {
+        const mapboxStyle = await maps.getMapboxStyle();
+        expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(24);
+      });
+    });
+  });
+}

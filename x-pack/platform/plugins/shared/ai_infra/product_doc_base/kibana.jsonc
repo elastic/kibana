@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/product-doc-base-plugin",
+  "owner": "@elastic/appex-ai-infra",
+  // all packages under 'ai_infra' will be used across solutions
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "productDocBase",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "productDocBase"],
+    "requiredPlugins": ["licensing", "taskManager"],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

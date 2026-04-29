@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#get operation of "" 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of "{}" 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of "1" 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of "null" 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of "true" 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of "undefined" 1`] = `"operation is required and must be a string"`;
+
+exports[`#get owner of "" 1`] = `"owner is required and must be a string"`;
+
+exports[`#get owner of "{}" 1`] = `"owner is required and must be a string"`;
+
+exports[`#get owner of "1" 1`] = `"owner is required and must be a string"`;
+
+exports[`#get owner of "null" 1`] = `"owner is required and must be a string"`;
+
+exports[`#get owner of "true" 1`] = `"owner is required and must be a string"`;
+
+exports[`#get owner of "undefined" 1`] = `"owner is required and must be a string"`;

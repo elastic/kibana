@@ -1,0 +1,17 @@
+---
+id: kibDevDocsOpsAmbientCommonTypes
+slug: /kibana-dev-docs/ops/ambient-common-types
+title: "@kbn/ambient-common-types"
+description: A package holding ambient type definitions for files that are expected to run on the server and the browser
+date: 2022-05-18
+tags: ['kibana', 'dev', 'contributor', 'operations', 'ambient', 'ui', 'common', 'server', 'types']
+---
+
+This package holds ambient typescript definitions which should be included in projects which are expected to run on the server and the browser.
+
+## Plugins
+These types will automatically be included for plugins.
+
+## Packages
+
+To include these types in a package add `"@kbn/ambient-ui-types"` to the `types` portion of the `tsconfig.json` file.

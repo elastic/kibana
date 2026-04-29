@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DefaultFormatEditor should render nothing 1`] = `<Fragment />`;

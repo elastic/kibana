@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/relocate",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

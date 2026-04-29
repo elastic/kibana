@@ -1,0 +1,25 @@
+format_version: 2.9.0
+name: routing_rules
+title: Package with routing rules
+description: This integration package has routing rules.
+version: 1.0.0
+categories: []
+# Options are experimental, beta, ga
+release: beta
+# The package type. The options for now are [integration, solution], more type might be added in the future.
+# The default type is integration and will be set if empty.
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

@@ -1,0 +1,79 @@
+{
+  "cat.segments": {
+    "url_params": {
+      "format": [
+        "text"
+      ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "h": [
+        "index",
+        "shard",
+        "prirep",
+        "ip",
+        "segment",
+        "generation",
+        "docs.count",
+        "docs.deleted",
+        "size",
+        "size.memory",
+        "committed",
+        "searchable",
+        "version",
+        "compound",
+        "id"
+      ],
+      "s": [],
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "allow_no_indices": "__flag__",
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_closed": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/segments",
+      "_cat/segments/{index}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-segments",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

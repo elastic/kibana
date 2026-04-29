@@ -1,0 +1,31 @@
+{
+  "indices.put_index_template": {
+    "data_autocomplete_rules": {
+      "composed_of":  [],
+      "index_patterns":  [],
+      "data_stream":  {
+        "__template": {
+          "allow_custom_routing": false,
+          "hidden": false,
+          "index_mode": ""
+        }
+      },
+      "template": {
+        "settings": {
+          "__scope_link": "put_settings"
+        },
+        "aliases": {
+          "__template": {
+            "NAME": {}
+          }
+        },
+        "mappings": {
+          "__scope_link": "put_mapping"
+        }
+      },
+      "_meta": {},
+      "priority": 0,
+      "version": 0
+    }
+  }
+}

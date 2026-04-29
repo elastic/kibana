@@ -1,0 +1,47 @@
+{
+  "id": "@kbn/core-execution-context-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-common",
+        "id": "def-common.KibanaExecutionContext",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaExecutionContext",
+        "description": [],
+        "signature": [
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly space?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
+          "KibanaExecutionContext",
+          " | undefined; }"
+        ],
+        "path": "src/core/packages/execution-context/common/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

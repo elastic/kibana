@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`styleSvg Should add fill style property to svg element 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\" standalone=\\"yes\\"?>
+<svg version=\\"1.1\\" width=\\"11px\\" height=\\"11px\\" viewBox=\\"0 0 11 11\\">
+  <path/>
+  <style>
+    svg * {
+      fill: red !important;
+      #000 !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  </style>
+</svg>"
+`;
+
+exports[`styleSvg Should add stroke and stroke-wdth style properties to svg element 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\" standalone=\\"yes\\"?>
+<svg version=\\"1.1\\" width=\\"11px\\" height=\\"11px\\" viewBox=\\"0 0 11 11\\">
+  <path/>
+  <style>
+    svg * {
+      fill: red !important;
+      stroke: white !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  </style>
+</svg>"
+`;
+
+exports[`styleSvg Should not add style property when style not provided 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\" standalone=\\"yes\\"?>
+<svg version=\\"1.1\\" width=\\"11px\\" height=\\"11px\\" viewBox=\\"0 0 11 11\\">
+  <path/>
+  <style>
+    svg * {
+      #000 !important;
+      #000 !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  </style>
+</svg>"
+`;
+
+exports[`styleSvg Should override any inherent fill and stroke styles in SVGs 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\" standalone=\\"yes\\"?>
+<svg version=\\"1.1\\" id=\\"square-11\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"11px\\" height=\\"11px\\" viewBox=\\"0 0 11 11\\">
+  <g>
+    <path style=\\"fill: #54B399; stroke: #C57127\\" d=\\"M9,10H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h7c0.5523,0,1,0.4477,1,1v7C10,9.5523,9.5523,10,9,10z\\"/>
+  </g>
+  <style>
+    svg * {
+      fill: blue !important;
+      stroke: black !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  </style>
+</svg>"
+`;

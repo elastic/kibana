@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "Total accesses and kbytes [Metrics Apache] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"id\":\"1\",\"params\":{\"customLabel\":\"Total kbytes\",\"field\":\"apache.status.total_kbytes\"},\"schema\":\"metric\",\"type\":\"max\"},{\"id\":\"2\",\"params\":{\"customLabel\":\"Total accesses\",\"field\":\"apache.status.total_accesses\"},\"schema\":\"metric\",\"type\":\"max\"}],\"listeners\":{},\"params\":{\"fontSize\":60,\"handleNoResults\":true},\"title\":\"Apache HTTPD - Total accesses and kbytes ECS\",\"type\":\"metric\"}"
+  },
+  "id": "Apache-HTTPD-Total-accesses-and-kbytes-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [
+    {
+      "id": "Apache-HTTPD-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

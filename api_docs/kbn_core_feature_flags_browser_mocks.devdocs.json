@@ -1,0 +1,120 @@
+{
+  "id": "@kbn/core-feature-flags-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+        "id": "def-public.coreFeatureFlagsMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreFeatureFlagsMock",
+        "description": [
+          "\nMocks for the Feature Flags service (browser-side)"
+        ],
+        "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+            "id": "def-public.coreFeatureFlagsMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "/**\n   * Mocks the entire feature flags service\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "FeatureFlagsService",
+              ">>"
+            ],
+            "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+            "id": "def-public.coreFeatureFlagsMock.createSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetup",
+            "description": [
+              "/**\n   * Mocks the setup contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              "FeatureFlagsSetup",
+              ">"
+            ],
+            "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+            "id": "def-public.coreFeatureFlagsMock.createStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createStart",
+            "description": [
+              "/**\n   * Mocks the start contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              "FeatureFlagsStart",
+              ">"
+            ],
+            "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

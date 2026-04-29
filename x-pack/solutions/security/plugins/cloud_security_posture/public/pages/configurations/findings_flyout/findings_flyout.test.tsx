@@ -1,0 +1,197 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import {
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
+} from '@kbn/cloud-security-posture-common';
+import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
+import { TestProvider } from '../../../test/test_provider';
+import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
+import type { FindingMisconfigurationFlyoutContentProps } from '@kbn/cloud-security-posture';
+import FindingsMisconfigurationFlyoutContent from './findings_right/content';
+import FindingsMisconfigurationFlyoutFooter from './findings_right/footer';
+import FindingsMisconfigurationFlyoutHeader from './findings_right/header';
+import FindingsRuleFlyout from './findings_flyout';
+
+const TestComponent = () => (
+  <TestProvider>
+    <FindingsRuleFlyout ruleId={'rule_id_test'} resourceId={'resource_id_test'}>
+      {({ finding, createRuleFn }: FindingMisconfigurationFlyoutContentProps) => {
+        return (
+          <>
+            <FindingsMisconfigurationFlyoutHeader finding={finding} />
+            <FindingsMisconfigurationFlyoutContent finding={finding} />
+            <FindingsMisconfigurationFlyoutFooter createRuleFn={createRuleFn} />
+          </>
+        );
+      }}
+    </FindingsRuleFlyout>
+  </TestProvider>
+);
+
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => ({
+  useMisconfigurationFinding: jest.fn(),
+}));
+
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_data_view', () => ({
+  useDataView: jest.fn(),
+}));
+
+describe('<FindingsFlyout/>', () => {
+  beforeEach(() => {
+    (useDataView as jest.Mock).mockReturnValue({ data: undefined });
+  });
+
+  describe('Overview Tab', () => {
+    it('should render the flyout with available data', async () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+
+      const { getAllByText, getByText } = render(<TestComponent />);
+
+      getAllByText(mockFindingsHit.resource.name);
+      getByText(mockFindingsHit.resource.id);
+      getAllByText(mockFindingsHit.rule.section);
+      getByText(CDR_MISCONFIGURATIONS_DATA_VIEW_NAME);
+      mockFindingsHit.rule.tags.forEach((tag) => {
+        getAllByText(tag);
+      });
+    });
+
+    it('should display the data view pretty name when available', () => {
+      const customName = 'Latest Cloud Security Misconfigurations - default';
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+      (useDataView as jest.Mock).mockReturnValue({
+        data: createStubDataView({
+          spec: {
+            id: CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+            name: customName,
+          },
+        }),
+      });
+
+      const { getByText } = render(<TestComponent />);
+      getByText(customName);
+    });
+
+    it('does not display missing info callout when data source is CSP', () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
+    });
+
+    it('does not display evidence field when result.evidence and resource.raw are missing', () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: {
+          result: {
+            hits: [
+              {
+                _source: {
+                  ...mockFindingsHit,
+                  result: { ...mockFindingsHit.result, evidence: undefined },
+                  rule: {
+                    ...mockFindingsHit.rule,
+                    // resource.raw is only shown for CIS GCP rules
+                    benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+                  },
+                  resource: {
+                    ...mockFindingsHit.resource,
+                    raw: undefined,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const { queryByText } = render(<TestComponent />);
+      const missingEvidenceTitle = queryByText('Evidence');
+      expect(missingEvidenceTitle).toBeNull();
+    });
+
+    it('displays evidence field when it exists', () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+      const { getByText } = render(<TestComponent />);
+      const evidenceTitle = getByText('Evidence');
+      expect(evidenceTitle).toBeInTheDocument();
+    });
+
+    it('displays evidence as resource.raw for CIS_GCP when evidence field does not exists', () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: {
+          result: {
+            hits: [
+              {
+                _source: {
+                  ...mockFindingsHit,
+                  result: { ...mockFindingsHit.result, evidence: undefined },
+                  rule: {
+                    ...mockFindingsHit.rule,
+                    benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const { getByText } = render(<TestComponent />);
+      const evidenceTitle = getByText('Evidence');
+      expect(evidenceTitle).toBeInTheDocument();
+    });
+  });
+
+  describe('Table Tab', () => {
+    it('displays resource name and id', async () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+      const { getAllByText } = render(<TestComponent />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
+
+      getAllByText(mockFindingsHit.resource.name);
+      getAllByText(mockFindingsHit.resource.id);
+    });
+
+    it('does not display missing info callout for 3Ps', async () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockWizFinding }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
+
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
+    });
+  });
+
+  describe('JSON Tab', () => {
+    it('does not display missing info callout for 3Ps', async () => {
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockWizFinding }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
+
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
+    });
+  });
+});

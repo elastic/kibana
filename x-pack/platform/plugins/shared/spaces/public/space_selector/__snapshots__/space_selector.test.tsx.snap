@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders with custom logo 1`] = `
+<div
+  class="euiPageTemplate kbnPageTemplate emotion-euiPageOuter-row-grow-pageTemplateStyles"
+  data-test-subj="kibanaSpaceSelector"
+  style="min-block-size: max(0, 100vh); padding-block-start: 0;"
+>
+  <main
+    class="emotion-euiPageInner"
+    id="EuiPageTemplateInner_generated-id"
+  >
+    <section
+      class="emotion-euiPageSection-grow-xl-top-transparent"
+    >
+      <div
+        class="emotion-euiPageSection__content-xl-restrictWidth"
+        style="max-width: 1200px;"
+      >
+        <div
+          class="euiText emotion-euiText-s-euiTextAlign-center"
+        >
+          <div
+            class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
+          />
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper"
+          >
+            <img
+              alt="Custom logo"
+              class="euiImage emotion-euiImage-customSize"
+              src="img.jpg"
+              style="max-width: 64px; max-height: 64px;"
+            />
+          </figure>
+          <div
+            class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
+          />
+          <span
+            class="emotion-euiTextColor-subdued"
+          >
+            <h1
+              class="css-aruir-headerStyles"
+              tabindex="-1"
+            >
+              Select your space
+            </h1>
+            <p>
+              You can change your space at anytime.
+            </p>
+          </span>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
+        />
+        <div
+          class="css-9yumq1-spacesLoadingSpinnerStyles"
+          data-test-subj="spacesLoadingSpinner"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+            role="progressbar"
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+`;

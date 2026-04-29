@@ -1,0 +1,36 @@
+{
+  "type": "saved_query",
+  "index": ["auditbeat-*", "endgame-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "alias": null,
+        "negate": false,
+        "disabled": false,
+        "type": "phrase",
+        "key": "source.ip",
+        "params": { "query": "127.0.0.1" }
+      },
+      "query": {
+        "match": { "source.ip": { "query": "127.0.0.1", "type": "phrase" } }
+      },
+      "$state": { "store": "appState" }
+    }
+  ],
+  "output_index": ".siem-signals-default",
+  "query": "",
+  "saved_id": "User's IP",
+  "false_positives": [],
+  "references": [],
+  "risk_score": 21,
+  "name": "Signal Maker 5000",
+  "description": "It's the Garrett",
+  "severity": "low",
+  "tags": ["Spong"],
+  "interval": "5m",
+  "from": "now-300s",
+  "enabled": true,
+  "to": "now",
+  "meta": { "from": "now-300s" }
+}

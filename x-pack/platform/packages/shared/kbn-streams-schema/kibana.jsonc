@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/streams-schema",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
+  "group": "platform",
+  "visibility": "shared"
+}
+

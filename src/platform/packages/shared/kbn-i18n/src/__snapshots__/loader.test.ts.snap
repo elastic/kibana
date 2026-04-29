@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`I18n loader registerTranslationFile should throw error if path to translation file is not an absolute 1`] = `"Paths to translation files must be absolute. Got relative path: \\"./en.json\\""`;
+
+exports[`I18n loader registerTranslationFile should throw error if path to translation file is not specified 1`] = `"The \\"path\\" argument must be of type string. Received undefined"`;

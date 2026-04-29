@@ -1,0 +1,12 @@
+{
+  "type": <%- json(
+    pkg.packageType === 'browser' ? 'shared-browser' :
+    pkg.packageType === 'server' ? 'shared-server' :
+    'shared-common'
+  ) %>,
+  "id": <%- json(pkg.id) %>,
+  "owner": <%- json(pkg.owner) %>,<% if (!pkg.dev) { %>
+  "group": <%- json(pkg.group) %>,
+  "visibility": <%- json(pkg.visibility) %><% } else { %>
+  "devOnly": true<% } %>
+}

@@ -1,0 +1,48 @@
+format_version: 1.0.0
+name: apache
+version: 0.1.4
+license: basic
+description: Apache Integration
+type: integration
+categories:
+  - web
+release: experimental
+removable: true
+conditions:
+  kibana.version: '^7.9.0'
+screenshots:
+  - src: /img/kibana-apache.png
+    title: Apache Integration
+    size: 1215x1199
+    type: image/png
+  - src: /img/apache_httpd_server_status.png
+    title: Apache HTTPD Server Status
+    size: 1919x1079
+    type: image/png
+icons:
+  - src: /img/logo_apache.svg
+    title: Apache Logo
+    size: 32x32
+    type: image/svg+xml
+config_templates:
+  - name: apache
+    title: Apache logs and metrics
+    description: Collect logs and metrics from Apache instances
+    inputs:
+      - type: logfile
+        title: Collect logs from Apache instances
+        description: Collecting Apache access and error logs
+      - type: apache/metrics
+        title: Collect metrics from Apache instances
+        description: Collecting Apache status metrics
+        vars:
+          - name: hosts
+            type: text
+            title: Hosts
+            multi: true
+            required: true
+            show_user: true
+            default:
+              - http://127.0.0.1
+owner:
+  github: elastic/integrations-services

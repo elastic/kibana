@@ -1,0 +1,137 @@
+{
+  "id": "@kbn/core-preboot-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-preboot-server-mocks",
+        "id": "def-server.InternalPrebootServicePrebootMock",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalPrebootServicePrebootMock",
+        "description": [],
+        "signature": [
+          "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [pluginName: string, reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; readonly waitUntilCanSetup: jest.MockInstance<Promise<{ shouldReloadConfig: boolean; }>, [], unknown>; } & ",
+          "InternalPrebootServicePreboot"
+        ],
+        "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-preboot-server-mocks",
+        "id": "def-server.PrebootServicePrebootMock",
+        "type": "Type",
+        "tags": [],
+        "label": "PrebootServicePrebootMock",
+        "description": [],
+        "signature": [
+          "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; } & ",
+          "PrebootServicePreboot"
+        ],
+        "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-preboot-server-mocks",
+        "id": "def-server.prebootServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "prebootServiceMock",
+        "description": [],
+        "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-preboot-server-mocks",
+            "id": "def-server.prebootServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<PrebootServiceContract>"
+            ],
+            "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-preboot-server-mocks",
+            "id": "def-server.prebootServiceMock.createInternalPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPrebootContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalPrebootServicePrebootMock"
+            ],
+            "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-preboot-server-mocks",
+            "id": "def-server.prebootServiceMock.createPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createPrebootContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PrebootServicePrebootMock"
+            ],
+            "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

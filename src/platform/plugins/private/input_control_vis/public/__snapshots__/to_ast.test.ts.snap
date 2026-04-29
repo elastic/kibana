@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`input_control_vis toExpressionAst should build an expression based on vis.params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "visConfig": Array [
+          "{\\"controls\\":[{\\"id\\":\\"1536977437774\\",\\"fieldName\\":\\"manufacturer.keyword\\",\\"parent\\":\\"\\",\\"label\\":\\"Manufacturer\\",\\"type\\":\\"list\\",\\"options\\":{\\"type\\":\\"terms\\",\\"multiselect\\":true,\\"dynamicOptions\\":true,\\"size\\":5,\\"order\\":\\"desc\\"},\\"indexPattern\\":\\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\\"}],\\"updateFiltersOnChange\\":false,\\"useTimeFilter\\":true,\\"pinFilters\\":false}",
+        ],
+      },
+      "function": "input_control_vis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

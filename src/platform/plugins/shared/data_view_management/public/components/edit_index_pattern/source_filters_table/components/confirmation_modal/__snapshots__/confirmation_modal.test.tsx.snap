@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<EuiConfirmModal
+  aria-labelledby="generated-id"
+  buttonColor="danger"
+  cancelButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Cancel"
+      id="indexPatternManagement.editIndexPattern.source.deleteFilter.cancelButtonLabel"
+    />
+  }
+  confirmButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete"
+      id="indexPatternManagement.editIndexPattern.source.deleteFilter.deleteButtonLabel"
+    />
+  }
+  defaultFocusedButton="confirm"
+  onCancel={[Function]}
+  onConfirm={[Function]}
+  title={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete field filter ''{value}''?"
+      id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
+      values={
+        Object {
+          "value": "test",
+        }
+      }
+    />
+  }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
+/>
+`;

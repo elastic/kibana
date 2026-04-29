@@ -1,0 +1,6 @@
+metricsets: ["cpu"]
+cpu.metrics:
+{{#each cpu.metrics}}
+- {{this}}
+{{/each}}
+period: {{period}}

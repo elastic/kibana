@@ -1,0 +1,33 @@
+{
+  "type": "plugin",
+  "id": "@kbn/remote-clusters-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "remoteClusters",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "remote_clusters"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "indexManagement",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

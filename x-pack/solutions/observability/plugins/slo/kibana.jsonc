@@ -1,0 +1,62 @@
+{
+  "type": "plugin",
+  "id": "@kbn/slo-plugin",
+  "owner": ["@elastic/actionable-obs-team"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "slo",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "slo"],
+    "requiredPlugins": [
+      "aiops",
+      "alerting",
+      "charts",
+      "contentManagement",
+      "dashboard",
+      "data",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "dataViews",
+      "discoverShared",
+      "embeddable",
+      "features",
+      "fieldFormats",
+      "lens",
+      "licensing",
+      "observability",
+      "observabilityShared",
+      "presentationUtil",
+      "ruleRegistry",
+      "share",
+      "sloShared",
+      "taskManager",
+      "triggersActionsUi",
+      "uiActions",
+      "unifiedSearch",
+      "usageCollection",
+      "fieldsMetadata",
+      "apmSourcesAccess"
+    ],
+    "optionalPlugins": [
+      "cases",
+      "cloud",
+      "discover",
+      "observabilityAIAssistant",
+      "security",
+      "serverless",
+      "spaces",
+      "agentBuilder",
+      "observabilityAgentBuilder"
+    ],
+    "requiredBundles": [
+      "embeddable",
+      "ingestPipelines",
+      "kibanaReact",
+      "kibanaUtils",
+      "unifiedSearch",
+      "observabilityAgentBuilder"
+    ]
+  }
+}

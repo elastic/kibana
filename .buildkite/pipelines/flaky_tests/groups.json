@@ -1,0 +1,132 @@
+{
+  "groups": [
+    {
+      "key": "cypress/security_solution_entity_analytics",
+      "name": "Security Solution Entity Analytics - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_entity_analytics",
+      "name": "[Serverless] Security Solution Entity Analytics - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_investigations",
+      "name": "Security Solution Investigations - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_investigations",
+      "name": "[Serverless] Security Solution Investigations - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_explore",
+      "name": "Security Solution Explore - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_explore",
+      "name": "[Serverless] Security Solution Explore - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management",
+      "name": "Security Solution Rule Management - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management",
+      "name": "[Serverless] Security Solution Rule Management - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_customization",
+      "name": "Security Solution Rule Management - Prebuilt Rules Customization - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_customization",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Customization - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_installation",
+      "name": "Security Solution Rule Management - Prebuilt Rules Installation - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_installation",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Installation - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_management",
+      "name": "Security Solution Rule Management - Prebuilt Rules Management - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_management",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Management - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_rule_management_prebuilt_rules_upgrade",
+      "name": "Security Solution Rule Management - Prebuilt Rules Upgrade - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_rule_management_prebuilt_rules_upgrade",
+      "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules Upgrade - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_detection_engine",
+      "name": "Security Solution Detection Engine - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_detection_engine",
+      "name": "[Serverless] Security Solution Detection Engine - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_detection_engine_exceptions",
+      "name": "Security Solution Detection Engine - Exceptions - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_detection_engine_exceptions",
+      "name": "[Serverless] Security Solution Detection Engine - Exceptions - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_ai_assistant",
+      "name": "Security Solution AI Assistant - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_ai_assistant",
+      "name": "[Serverless] Security Solution AI Assistant - Cypress"
+    },
+    {
+      "key": "cypress/defend_workflows",
+      "name": "Security Solution Defend Workflows - Cypress"
+    },
+    {
+      "key": "cypress/defend_workflows_serverless",
+      "name": "[Serverless] Security Solution Defend Workflows - Cypress"
+    },
+    {
+      "key": "cypress/osquery_cypress",
+      "name": "Osquery - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_osquery",
+      "name": "[Serverless] Osquery - Cypress"
+    },
+    {
+      "key": "cypress/fleet_cypress",
+      "name": "Fleet - Cypress"
+    },
+    {
+      "key": "cypress/apm_cypress",
+      "name": "APM - Cypress"
+    },
+    {
+      "key": "cypress/cloud_security_posture",
+      "name": "Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "cypress/cloud_security_posture_serverless",
+      "name": "[Serverless] Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "cypress/asset_inventory",
+      "name": "Asset Inventory - Cypress"
+    },
+    {
+      "key": "cypress/asset_inventory_serverless",
+      "name": "[Serverless] Asset Inventory - Cypress"
+    }
+  ]
+}

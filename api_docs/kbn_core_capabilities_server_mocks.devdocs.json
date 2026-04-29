@@ -1,0 +1,145 @@
+{
+  "id": "@kbn/core-capabilities-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-capabilities-server-mocks",
+        "id": "def-server.CapabilitiesServiceContract",
+        "type": "Type",
+        "tags": [],
+        "label": "CapabilitiesServiceContract",
+        "description": [],
+        "signature": [
+          "{ start: () => ",
+          "CapabilitiesStart",
+          "; setup: (setupDeps: SetupDeps) => ",
+          "CapabilitiesSetup",
+          "; preboot: (prebootDeps: PrebootSetupDeps) => void; }"
+        ],
+        "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-capabilities-server-mocks",
+        "id": "def-server.capabilitiesServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "capabilitiesServiceMock",
+        "description": [],
+        "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-server-mocks",
+            "id": "def-server.capabilitiesServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "CapabilitiesServiceContract",
+              ">"
+            ],
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server-mocks",
+            "id": "def-server.capabilitiesServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "CapabilitiesSetup",
+              ">"
+            ],
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server-mocks",
+            "id": "def-server.capabilitiesServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "CapabilitiesStart",
+              ">"
+            ],
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server-mocks",
+            "id": "def-server.capabilitiesServiceMock.createCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "createCapabilities",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Capabilities"
+            ],
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

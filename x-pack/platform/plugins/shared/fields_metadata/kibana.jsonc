@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/fields-metadata-plugin",
+  "owner": "@elastic/obs-onboarding-team",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Exposes services for async usage and search of fields metadata.",
+  "plugin": {
+    "id": "fieldsMetadata",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "fields_metadata"],
+    "requiredPlugins": [],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
+  }
+}

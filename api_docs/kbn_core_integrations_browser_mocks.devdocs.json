@@ -1,0 +1,103 @@
+{
+  "id": "@kbn/core-integrations-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-mocks",
+        "id": "def-public.IntegrationsServiceContract",
+        "type": "Type",
+        "tags": [],
+        "label": "IntegrationsServiceContract",
+        "description": [],
+        "signature": [
+          "{ start: ({ uiSettings }: ",
+          "IntegrationsServiceSetupDeps",
+          ") => Promise<void>; setup: () => Promise<void>; stop: () => Promise<void>; }"
+        ],
+        "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-mocks",
+        "id": "def-public.IntegrationsServiceMock",
+        "type": "Type",
+        "tags": [],
+        "label": "IntegrationsServiceMock",
+        "description": [],
+        "signature": [
+          "{ start: jest.MockInstance<Promise<void>, [",
+          "IntegrationsServiceSetupDeps",
+          "], unknown>; setup: jest.MockInstance<Promise<void>, [], unknown>; stop: jest.MockInstance<Promise<void>, [], unknown>; } & ",
+          "IntegrationsServiceContract"
+        ],
+        "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-mocks",
+        "id": "def-public.integrationsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "integrationsServiceMock",
+        "description": [],
+        "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-integrations-browser-mocks",
+            "id": "def-public.integrationsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              "IntegrationsServiceMock"
+            ],
+            "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

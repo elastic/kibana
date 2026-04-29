@@ -1,0 +1,232 @@
+{
+  "id": "@kbn/deeplinks-analytics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.AI_VALUE_REPORT_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "AI_VALUE_REPORT_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"AI_VALUE_REPORT_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.CANVAS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "CANVAS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"CANVAS_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DASHBOARD_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_APP_ID",
+        "description": [],
+        "signature": [
+          "\"dashboards\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DASHBOARD_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DISCOVER_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_APP_ID",
+        "description": [],
+        "signature": [
+          "\"discover\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DISCOVER_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DISCOVER_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DISCOVER_ESQL_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_ESQL_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DISCOVER_ESQL_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.LENS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"LENS_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.VISUALIZE_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_APP_ID",
+        "description": [],
+        "signature": [
+          "\"visualize\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.VISUALIZE_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"VISUALIZE_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

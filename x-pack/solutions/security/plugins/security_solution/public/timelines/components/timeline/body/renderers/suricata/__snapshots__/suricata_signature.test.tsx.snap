@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SuricataSignature rendering it renders the default SuricataSignature 1`] = `
+<EuiFlexGroup
+  gutterSize="none"
+  justifyContent="center"
+  wrap={true}
+>
+  <SignatureId
+    scopeId="test"
+    signatureId={123}
+  />
+  <Tokens
+    tokens={
+      Array [
+        "ET",
+        "SCAN",
+        "ATTACK",
+      ]
+    }
+  />
+  <LinkFlexItem
+    grow={false}
+  >
+    <CellActionsRenderer
+      data-test-subj="signature-link"
+      field="suricata.eve.alert.signature"
+      scopeId="test"
+      tooltipPosition="bottom"
+      value="ET SCAN ATTACK Hello"
+    >
+      <div>
+        <GoogleLink
+          link="ET SCAN ATTACK Hello"
+        >
+          Hello
+        </GoogleLink>
+      </div>
+    </CellActionsRenderer>
+  </LinkFlexItem>
+</EuiFlexGroup>
+`;

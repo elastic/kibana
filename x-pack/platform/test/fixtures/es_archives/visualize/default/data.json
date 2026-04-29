@@ -1,0 +1,78 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "metricbeat-7",
+    "id": "asdf",
+    "source": {
+      "@timestamp" : "2015-09-20T21:43:43.104Z",
+      "event" : {
+        "dataset" : "system.cpu",
+        "module" : "system",
+        "duration" : 34818
+      },
+      "metricset" : {
+        "name" : "cpu"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "system" : {
+        "cpu" : {
+          "system" : {
+            "pct" : 0.16
+          },
+          "idle" : {
+            "pct" : 10.5088
+          },
+          "irq" : {
+            "pct" : 0
+          },
+          "cores" : 12,
+          "total" : {
+            "pct" : 1.4912
+          },
+          "iowait" : {
+            "pct" : 0
+          },
+          "softirq" : {
+            "pct" : 0
+          },
+          "user" : {
+            "pct" : 1.3312
+          },
+          "nice" : {
+            "pct" : 0
+          },
+          "steal" : {
+            "pct" : 0
+          }
+        }
+      },
+      "ecs" : {
+        "version" : "1.0.1"
+      },
+      "host" : {
+        "name" : "my-host-name.local",
+        "os" : {
+          "name" : "Mac OS X",
+          "kernel" : "",
+          "build" : "",
+          "platform" : "darwin",
+          "version" : "",
+          "family" : "darwin"
+        },
+        "id" : "",
+        "hostname" : "my-host-name.local",
+        "architecture" : "x86_64"
+      },
+      "agent" : {
+        "id" : "aaaaa",
+        "version" : "7.6.0",
+        "type" : "metricbeat",
+        "ephemeral_id" : "bbbbb",
+        "hostname" : "my-host-name.local"
+      }
+    }
+  }
+}
+

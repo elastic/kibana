@@ -1,0 +1,142 @@
+{
+  "id": "@kbn/core-deprecations-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-server-mocks",
+        "id": "def-server.deprecationsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "deprecationsServiceMock",
+        "description": [],
+        "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<DeprecationsServiceContract>"
+            ],
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DeprecationRegistryProvider",
+              ">"
+            ],
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DeprecationsServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalDeprecationsServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createClient",
+            "type": "Function",
+            "tags": [],
+            "label": "createClient",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DeprecationsClient",
+              ">"
+            ],
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

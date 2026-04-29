@@ -1,0 +1,19 @@
+---
+id: kibDevDocsOpsSomeDevLog
+slug: /kibana-dev-docs/ops/kbn-some-dev-log
+title: "@kbn/some-dev-log"
+description: 'LCD types for several dev-focused loggers'
+date: 2022-07-14
+tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts', 'logging']
+---
+
+`@kbn/some-dev-log` implements lowest-common denominator types for several loggers that we use in development tooling. In order for commonly used tools to accept either log instance we need a common interface for them to implement which gives enough functionality to get the job done but doesn't require implementing a bunch of fancy features in all loggers.
+
+The interface mostly follows the `console.log()` interface, allowing you to pass a string as the first argument and then anything afterwards. The arguments are converted to a string by all loggers using [`util.format()`](https://nodejs.org/api/util.html#utilformatformat-args) from the standard library.
+
+Currently, the loggers implementing this type are:
+
+ - <DocLink id="kibDevDocsToolingLog" />: The majority of dev tasks should use this log and it is automatically provided by the common dev-task wrapper provided by <DocLink id="kibDevDocsOpsDevCliRunner" />.
+ - <DocLink id="kibDevDocsOpsKbnPm"/> `Log` class: `@kbn/pm` runs before the repository is bootstrapped and needs a logger to use before other packages are available, so we have a separate and simple log implementation that code which implements the `SomeDevLog` class. Other code in the repository should rarely need to use this class or even know of it's existance.
+
+Unless your package needs to be used by `@kbn/pm` there is little reason you should need to use this type, but it might be a good idea to use this type if there's a chance we might need to use your package in the future.

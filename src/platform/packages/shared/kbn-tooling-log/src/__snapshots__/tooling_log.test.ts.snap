@@ -1,0 +1,264 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#debug() sends a msg of type "debug" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "debug",
+    },
+  ],
+]
+`;
+
+exports[`#error() sends a msg of type "error" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        [Error: error message],
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "error",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "string message",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "error",
+    },
+  ],
+]
+`;
+
+exports[`#getWritten$() does not emit msg if all writers return false 1`] = `Array []`;
+
+exports[`#getWritten$() does not emit msg when no writers 1`] = `Array []`;
+
+exports[`#getWritten$() emits msg if all writers return true 1`] = `
+Array [
+  Object {
+    "args": Array [
+      "foo",
+    ],
+    "context": undefined,
+    "indent": 0,
+    "source": undefined,
+    "type": "debug",
+  },
+  Object {
+    "args": Array [
+      "bar",
+    ],
+    "context": undefined,
+    "indent": 0,
+    "source": undefined,
+    "type": "info",
+  },
+  Object {
+    "args": Array [
+      "baz",
+    ],
+    "context": undefined,
+    "indent": 0,
+    "source": undefined,
+    "type": "verbose",
+  },
+]
+`;
+
+exports[`#getWritten$() emits msg if some writers return true 1`] = `
+Array [
+  Object {
+    "args": Array [
+      "foo",
+    ],
+    "context": undefined,
+    "indent": 0,
+    "source": undefined,
+    "type": "debug",
+  },
+  Object {
+    "args": Array [
+      "bar",
+    ],
+    "context": undefined,
+    "indent": 0,
+    "source": undefined,
+    "type": "info",
+  },
+  Object {
+    "args": Array [
+      "baz",
+    ],
+    "context": undefined,
+    "indent": 0,
+    "source": undefined,
+    "type": "verbose",
+  },
+]
+`;
+
+exports[`#indent() changes the indent on each written msg 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+      ],
+      "context": undefined,
+      "indent": 1,
+      "source": undefined,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "bar",
+      ],
+      "context": undefined,
+      "indent": 3,
+      "source": undefined,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 6,
+      "source": undefined,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "box",
+      ],
+      "context": undefined,
+      "indent": 4,
+      "source": undefined,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "debug",
+    },
+  ],
+]
+`;
+
+exports[`#info() sends a msg of type "info" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "info",
+    },
+  ],
+]
+`;
+
+exports[`#success() sends a msg of type "success" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "success",
+    },
+  ],
+]
+`;
+
+exports[`#verbose() sends a msg of type "verbose" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "verbose",
+    },
+  ],
+]
+`;
+
+exports[`#warning() sends a msg of type "warning" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "warning",
+    },
+  ],
+]
+`;
+
+exports[`#write() sends a msg of type "write" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "context": undefined,
+      "indent": 0,
+      "source": undefined,
+      "type": "write",
+    },
+  ],
+]
+`;

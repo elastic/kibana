@@ -1,0 +1,9 @@
+openapi: 3.0.0
+info:
+  title: Assets Status Schema
+  version: '1'
+paths: {}
+components:
+  schemas:
+    AssetsRequestQuery:
+      type: object

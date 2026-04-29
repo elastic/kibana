@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
+import { SloSelector } from '../alerts/slo_selector';
+
+interface SloConfigurationProps {
+  onCreate: (props: ErrorBudgetCustomState) => void;
+  onCancel: () => void;
+}
+
+export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
+  const [selectedSlo, setSelectedSlo] = useState<ErrorBudgetCustomState>();
+  const [hasError, setHasError] = useState(false);
+
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'configurationFlyout',
+  });
+
+  const onConfirmClick = () => {
+    if (selectedSlo) {
+      onCreate({
+        slo_id: selectedSlo.slo_id,
+        slo_instance_id: selectedSlo.slo_instance_id,
+      });
+    }
+  };
+
+  return (
+    <EuiFlyout onClose={onCancel} css={{ minWidth: 550 }} aria-labelledby={flyoutTitleId}>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2 id={flyoutTitleId}>
+            {i18n.translate('xpack.slo.errorBudgetEmbeddable.config.sloSelector.headerTitle', {
+              defaultMessage: 'Error budget burn down configuration',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiFlexGroup>
+          <EuiFlexItem grow>
+            <SloSelector
+              singleSelection={true}
+              hasError={hasError}
+              onSelected={(slos) => {
+                setHasError(slos === undefined);
+                if (slos?.[0]) {
+                  setSelectedSlo(slos[0]);
+                }
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+            <FormattedMessage
+              id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+
+          <EuiButton
+            data-test-subj="sloConfirmButton"
+            isDisabled={!selectedSlo || hasError}
+            onClick={onConfirmClick}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+              defaultMessage="Confirm configurations"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+}

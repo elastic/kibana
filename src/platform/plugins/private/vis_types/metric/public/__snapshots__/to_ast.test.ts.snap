@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric vis toExpressionAst function with percentage mode should have percentage format 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "colorMode": Array [
+          "None",
+        ],
+        "font": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "family": Array [
+                    "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  ],
+                  "sizeUnit": Array [
+                    "pt",
+                  ],
+                  "weight": Array [
+                    "bold",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "percentageMode": Array [
+          true,
+        ],
+        "showLabels": Array [
+          false,
+        ],
+      },
+      "function": "legacyMetricVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`metric vis toExpressionAst function without params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "colorMode": Array [
+          "None",
+        ],
+        "font": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "family": Array [
+                    "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  ],
+                  "sizeUnit": Array [
+                    "pt",
+                  ],
+                  "weight": Array [
+                    "bold",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "showLabels": Array [
+          false,
+        ],
+      },
+      "function": "legacyMetricVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

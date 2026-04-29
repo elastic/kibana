@@ -1,0 +1,190 @@
+{
+  "id": "@kbn/shared-ux-error-boundary",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.KibanaErrorBoundary",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaErrorBoundary",
+        "description": [
+          "\nImplementation of Kibana Error Boundary"
+        ],
+        "signature": [
+          "(props: { children?: React.ReactNode; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+        "lineNumber": 84,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.KibanaErrorBoundary.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- ErrorBoundaryProps"
+            ],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+            "lineNumber": 84,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.KibanaErrorBoundaryProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaErrorBoundaryProvider",
+        "description": [
+          "\nProvider that uses dependencies to give context to the KibanaErrorBoundary component\nThis provider is aware if services were already created from a higher level of the component tree"
+        ],
+        "signature": [
+          "({ children, analytics }: React.PropsWithChildren<",
+          "KibanaErrorBoundaryProviderDeps",
+          ">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_provider.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.KibanaErrorBoundaryProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, analytics }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "KibanaErrorBoundaryProviderDeps",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_provider.tsx",
+            "lineNumber": 35,
+            "columnNumber": 6,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.KibanaSectionErrorBoundary",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaSectionErrorBoundary",
+        "description": [
+          "\n`KibanaSectionErrorBoundary` is designed to capture errors at a granular level.\n\nIn general, it's best to use `KibanaErrorBoundary` and block the whole page.\nUsers will see an error state on the page and think that there are instabilities in the system.\nThey will be / should be wary about making any changes in a UI showing an error, since it risks\nfurther instability.\n\nIf it is acceptable to assume the risk of allowing users to interact with a UI that\nhas an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative,\nbut this must be judged on a case-by-case basis.\n"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<SectionErrorBoundaryProps>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.KibanaSectionErrorBoundary.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<SectionErrorBoundaryProps>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.ThrowIfError",
+        "type": "Function",
+        "tags": [],
+        "label": "ThrowIfError",
+        "description": [
+          "\nThis component allows errors to be caught outside of a render tree, and re-thrown within a render tree\nwrapped by KibanaErrorBoundary. The purpose is to let KibanaErrorBoundary control the user experience when\nReact can not render due to an error.\n"
+        ],
+        "signature": [
+          "({ error }: { error: Error | null; }) => null"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.ThrowIfError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ error }",
+            "description": [],
+            "signature": [
+              "{ error: Error | null; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 59,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/snapshot-restore-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "snapshotRestore",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "snapshot_restore"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "security",
+      "cloud",
+      "home"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact"
+    ]
+  }
+}

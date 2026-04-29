@@ -1,0 +1,325 @@
+    {
+      "type": "doc",
+      "value": {
+        "index": ".kibana-siem-rule-migrations-rules-default",
+        "id": "RHOWpJYBkBGfeIGVMlcL",
+        "source": {
+          "migration_id": "0e5effd1-f355-469e-8614-74e82ca23f42",
+          "original_rule": {
+            "id": "https://127.0.0.1:8089/servicesNS/splunk-admin/Splunk_Security_Essentials/saved/searches/Alert%20with%20IP%20Method%20and%20URI%20Filters%20with%20Default%20Severity",
+            "vendor": "splunk",
+            "title": "Alert with IP Method and URI Filters with minimum Sev - 1",
+            "description": "",
+            "query": "source=\"tutorialdata.zip:*\" clientip=\"198.35.1.75\" method=POST uri_path=\"/cart/error.do\"",
+            "query_language": "spl",
+            "severity": "1"
+          },
+          "@timestamp": "2025-05-06T07:53:48.805Z",
+          "status": "failed",
+          "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_at": "2025-05-06T07:57:24.929Z",
+          "comments": [
+            {
+              "created_at": "2025-05-06T07:57:24.929Z",
+              "message": "Error migrating rule: Tool call arguments for structuredOutput (toolu_bdrk_01RNRCCUgR7CjWqSFW8EUztm) were invalid",
+              "created_by": "assistant"
+            }
+          ]
+        }
+      }
+    }
+
+{
+      "type": "doc",
+      "value": {
+        "index": ".kibana-siem-rule-migrations-rules-default",
+        "id": "RnOWpJYBkBGfeIGVMlcL",
+        "source": {
+          "migration_id": "0e5effd1-f355-469e-8614-74e82ca23f42",
+          "original_rule": {
+            "id": "https://127.0.0.1:8089/servicesNS/nobody/Splunk_Security_Essentials/saved/searches/Sample%20Alert%20in%20Essentials",
+            "vendor": "splunk",
+            "title": "Custom Rule Alert in Essentials Not Prebuild and Severity - 3",
+            "description": "",
+            "query": "source=\"tutorialdata.zip:*\"",
+            "query_language": "spl",
+            "severity": "3"
+          },
+          "@timestamp": "2025-05-06T07:53:48.805Z",
+          "status": "completed",
+          "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_at": "2025-05-06T07:57:27.998Z",
+          "comments": [
+            {
+              "created_at": "2025-05-06T07:56:39.882Z",
+              "message": "## Prebuilt Rule Matching Summary\nAfter analyzing the provided Splunk rule and the list of Elastic Prebuilt Rules, no suitable match was found. The Splunk rule titled \"Custom Rule Alert in Essentials Not Prebuild and Severity - 3\" appears to be a custom rule with a generic query that doesn't align with any of the specific use cases covered by the provided Elastic Prebuilt Rules. The Splunk rule's query is simply looking at a specific source, which could be used for various purposes and doesn't provide enough context to match it confidently with any of the Elastic rules. Therefore, no match is suggested.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:56:49.689Z",
+              "message": "## Integration Matching Summary.\nNone of the provided Elastic Integrations match the given Splunk rule. The rule titled \"Custom Rule Alert in Essentials Not Prebuild and Severity - 3\" does not provide enough context about its data source or functionality to confidently match it with any of the available integrations. The Splunk integration could potentially be used to ingest this custom rule, but without more specific information about the rule's purpose or data source, it's not possible to make a definitive match.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:04.311Z",
+              "message": "## Translation Summary\n\nThe original Splunk SPL query was:\n\n```splunk-spl\nsource=\"tutorialdata.zip:*\"\n```\n\nHere's a breakdown of the translation process:\n\n1. The SPL query uses a simple source filter. In ES|QL, we start with the `FROM` command to specify the data source.\n\n2. We use `logs-*` as the index pattern in the `FROM` command. This is a common pattern for log data in Elasticsearch, but you may need to adjust this based on your specific index naming convention.\n\n3. The source filter in SPL is translated to a `WHERE` clause in ES|QL. We use the equality operator `==` to match the `source` field exactly.\n\n4. The wildcard `*` at the end of the source value is kept as-is, as both SPL and ES|QL support wildcards in string matching.\n\n5. No additional processing or aggregation is performed in the original SPL query, so we don't need to add any further commands to the ES|QL query.\n\nThis translation maintains the original intent of the Splunk rule, which is to filter events based on the source field. The resulting ES|QL query will return all documents from the specified index pattern where the `source` field matches the pattern \"tutorialdata.zip:*\".",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:27.394Z",
+              "message": "## Field Mapping Summary\n\n1. Field Mapping:\n   - Original field: `source`\n   - Target ECS field: `source.original`\n   - Reason: In the Elastic Common Schema (ECS), `source.original` is used to represent the original source of the event, which aligns with the Splunk CIM field `source`.\n\n2. Unchanged fields:\n   - `id`, `_version`, and `index` were left unchanged as they are already metadata fields in Elasticsearch and do not require mapping to ECS fields.\n\nThe query structure remains the same, with only the `source` field being mapped to its ECS equivalent. The `FROM` command and the `WHERE` clause structure were not modified, as they are already in the correct ES|QL syntax.\n\nNote that the original Splunk query didn't specify a particular datamodel, so we focused on mapping the `source` field, which is a common field used in both Splunk and Elasticsearch for identifying the origin of log data.",
+              "created_by": "assistant"
+            }
+          ],
+          "translation_result": "partial",
+          "elastic_rule": {
+            "severity": "medium",
+            "risk_score": 47,
+            "query": "FROM [indexPattern] METADATA id,_version,index\n| WHERE source.original == \"tutorialdata.zip:*\"",
+            "description": "Custom Rule Alert in Essentials Not Prebuild and Severity - 3",
+            "query_language": "esql",
+            "title": "Custom Rule Alert in Essentials Not Prebuild and Severity - 3",
+            "integrationids": [
+              ""
+            ]
+          }
+        }
+      }
+    }
+
+{
+      "type": "doc",
+      "value": {
+        "index": ".kibana-siem-rule-migrations-rules-default",
+        "id": "R3OWpJYBkBGfeIGVMlcL",
+        "source": {
+          "migration_id": "0e5effd1-f355-469e-8614-74e82ca23f42",
+          "original_rule": {
+            "id": "https://127.0.0.1:8089/servicesNS/nobody/Splunk_Security_Essentials/saved/searches/Sample%20Alert%20in%20Essentials",
+            "vendor": "splunk",
+            "title": "Custom Rule Alert in Essentials Not Prebuild and Severity - 4",
+            "description": "",
+            "query": "source=\"tutorialdata.zip:*\"",
+            "query_language": "spl",
+            "severity": "4"
+          },
+          "@timestamp": "2025-05-06T07:53:48.805Z",
+          "status": "completed",
+          "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_at": "2025-05-06T07:57:32.348Z",
+          "comments": [
+            {
+              "created_at": "2025-05-06T07:56:40.766Z",
+              "message": "## Prebuilt Rule Matching Summary\nAfter analyzing the provided Splunk rule and the list of Elastic Prebuilt Rules, no suitable match was found. The Splunk rule titled \"Custom Rule Alert in Essentials Not Prebuild and Severity - 4\" appears to be a custom rule with a very generic query (\"source=\"tutorialdata.zip:*\"\") that doesn't align with any of the specific use cases covered by the provided Elastic Prebuilt Rules. The Splunk rule's purpose is not clear from its title or query, making it difficult to match with any of the more specific and well-defined Elastic rules. Therefore, no confident match could be made.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:56:49.911Z",
+              "message": "## Integration Matching Summary\nNone of the provided Elastic Integrations match the given Splunk rule. The rule titled \"Custom Rule Alert in Essentials Not Prebuild and Severity - 4\" does not provide enough specific information about its data source or functionality to confidently match it with any of the available integrations. The Splunk integration could potentially be used to ingest this custom rule, but without more details about the rule's purpose or data source, it's not possible to make a definitive match.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:03.064Z",
+              "message": "## Translation Summary\n\nThe original SPL query was:\n\n```splunk-spl\nsource=\"tutorialdata.zip:*\"\n```\n\nThe translation process was straightforward:\n\n1. We started the ES|QL query with the `FROM` command, using the `logs-*` index pattern as a general starting point for log data.\n\n2. We then used the `WHERE` command to filter the data based on the `source` field, which is equivalent to the SPL query's source specification.\n\n3. The field name `source` and its value `tutorialdata.zip:*` were kept exactly the same as in the original SPL query.\n\n4. No additional processing or aggregation was required, as the original SPL query was a simple source filter.\n\nThis translation maintains the core functionality of the original SPL query, filtering logs based on the specified source. The main difference is the explicit use of the `FROM` command in ES|QL to specify the index pattern, which is implicit in Splunk's SPL.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:31.806Z",
+              "message": "## Field Mapping Summary\n\n1. Field: `source`\n   - Original (Splunk CIM): `source`\n   - Target (ECS): `source.address`\n   - Reason: In the CIM to ECS map, `source` is mapped to `source.address` in the Network_Traffic datamodel. This seems to be the most appropriate mapping for the `source` field in this context.\n\n2. Fields: `id`, `_version`, `index`\n   - These fields are metadata fields and are not part of the CIM to ECS mapping. They are left unchanged as they are specific to Elasticsearch and not related to the Splunk CIM fields.\n\nThe structure of the query remains the same, with only the `source` field being translated to its ECS equivalent. The `metadata` fields are kept as is since they are Elasticsearch-specific and not part of the CIM to ECS mapping.\n\nNote: The original Splunk query didn't provide much context about the specific datamodel or fields being used, so the mapping is based on the best match found in the CIM to ECS map. If there's additional context about the data or the intent of the query, a more precise mapping might be possible.",
+              "created_by": "assistant"
+            }
+          ],
+          "translation_result": "partial",
+          "elastic_rule": {
+            "severity": "high",
+            "risk_score": 73,
+            "query": "FROM [indexPattern] metadata id,_version,index\n| WHERE source.address == \"tutorialdata.zip:*\"",
+            "description": "Custom Rule Alert in Essentials Not Prebuild and Severity - 4",
+            "query_language": "esql",
+            "title": "Custom Rule Alert in Essentials Not Prebuild and Severity - 4",
+            "integrationids": [
+              ""
+            ]
+          }
+        }
+      }
+    }
+
+{
+      "type": "doc",
+      "value": {
+        "index": ".kibana-siem-rule-migrations-rules-default",
+        "id": "SHOWpJYBkBGfeIGVMlcL",
+        "source": {
+          "migration_id": "0e5effd1-f355-469e-8614-74e82ca23f42",
+          "original_rule": {
+            "id": "https://127.0.0.1:8089/servicesNS/splunk-admin/Splunk_Security_Essentials/saved/searches/Tutorial%20data%20based%20on%20host%20name",
+            "vendor": "splunk",
+            "title": "Custom Rule but not prebuilt Tutorial data based on host name and Severity - 5",
+            "description": "Tutorial data based on host name",
+            "query": "source=\"tutorialdata.zip:*\" | search host=vendor_sales",
+            "query_language": "spl",
+            "severity": "5"
+          },
+          "@timestamp": "2025-05-06T07:53:48.805Z",
+          "status": "completed",
+          "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_at": "2025-05-06T07:57:33.042Z",
+          "comments": [
+            {
+              "created_at": "2025-05-06T07:56:42.514Z",
+              "message": "## Prebuilt Rule Matching Summary \n After analyzing the provided Splunk rule and the list of Elastic Prebuilt Rules, no suitable match was found. The Splunk rule appears to be a custom rule specifically designed for tutorial data, filtering events based on a specific host name ('vendor_sales'). This rule is highly specific to a particular data source and host, which is not comparable to any of the more general-purpose security rules provided in the Elastic Prebuilt Rules list. The Elastic rules focus on detecting specific security-related behaviors or potential threats, while this Splunk rule seems to be a basic filter for tutorial purposes.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:56:49.465Z",
+              "message": "## Integration Matching Summary\nNone of the provided Elastic Integrations match the given Splunk rule. The rule appears to be a custom rule based on tutorial data, and there is no specific integration in the provided list that corresponds to this type of generic or tutorial-based data source. The Splunk integration listed is for collecting logs from Splunk itself, not for matching specific rule types or data sources within Splunk.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:06.039Z",
+              "message": "## Translation Summary\n\nThe original SPL query was:\n\n```splunk-spl\nsource=\"tutorialdata.zip:*\"\n| search host=vendor_sales\n```\n\nHere's a breakdown of the translation process:\n\n1. The SPL query starts with a source specification. In ES|QL, we start with the `FROM` command to specify the data source. Since we don't have specific index information, we use a generic `logs-*` pattern.\n\n2. The `source=\"tutorialdata.zip:*\"` condition in SPL is translated to a `WHERE` clause in ES|QL. We use the equality operator `==` instead of the single `=` used in SPL.\n\n3. The `search host=vendor_sales` part in SPL is also translated into the `WHERE` clause. In ES|QL, we combine multiple conditions using the `AND` operator.\n\n4. We don't need to use the `SEARCH` command in ES|QL as it doesn't exist. Instead, we use the `WHERE` command to filter the data.\n\n5. The field names (`source` and `host`) are kept the same as in the original SPL query, as per the instructions.\n\nThe resulting ES|QL query achieves the same filtering as the original SPL query, selecting data from the source \"tutorialdata.zip:*\" and where the host is \"vendor_sales\".",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:32.519Z",
+              "message": "## Field Mapping Summary\n\n1. `source` field:\n   - Original field: `source`\n   - Target ECS field: No change (kept as `source`)\n   - Reason: The `source` field is already a common field in both Splunk CIM and ECS, so it doesn't need to be changed.\n\n2. `host` field:\n   - Original field: `host`\n   - Target ECS field: `host.name`\n   - Reason: In the ECS, the `host` field is an object that contains various host-related fields. The `name` subfield is used to represent the hostname, which is equivalent to the Splunk CIM `host` field.\n\nThe other parts of the query, including the `FROM` command and the `metadata` fields, remain unchanged as they are not related to Splunk CIM fields.\n\nNote: The datamodel used in this query is not explicitly mentioned, so we relied on the general mapping between Splunk CIM and ECS fields. If there's a specific datamodel that should be considered, please provide that information for a more accurate mapping.",
+              "created_by": "assistant"
+            }
+          ],
+          "translation_result": "partial",
+          "elastic_rule": {
+            "severity": "critical",
+            "risk_score": 99,
+            "query": "FROM [indexPattern] metadata id,_version,index\n| WHERE source == \"tutorialdata.zip:*\" AND host.name == \"vendor_sales\"",
+            "description": "Tutorial data based on host name",
+            "query_language": "esql",
+            "title": "Custom Rule but not prebuilt Tutorial data based on host name and Severity - 5",
+            "integrationids": [
+              ""
+            ]
+          }
+        }
+      }
+    }
+
+{
+      "type": "doc",
+      "value": {
+        "index": ".kibana-siem-rule-migrations-rules-default",
+        "id": "RXOWpJYBkBGfeIGVMlcL",
+        "source": {
+          "migration_id": "0e5effd1-f355-469e-8614-74e82ca23f42",
+          "original_rule": {
+            "id": "https://127.0.0.1:8089/servicesns/splunk-admin/splunk_security_essentials/saved/searches/new%20alert%20with%20index%20filter",
+            "vendor": "splunk",
+            "title": "new alert with index filter and severity- 2 ",
+            "description": "tutorial data based on host name",
+            "query": "source=\"tutorialdata.zip:*\"  | search splunk_server=\"macbookpro.fritz.box\" index=main",
+            "query_language": "spl",
+            "severity": "2"
+          },
+          "@timestamp": "2025-05-06T07:53:48.805Z",
+          "status": "completed",
+          "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_at": "2025-05-06T07:57:33.676Z",
+          "comments": [
+            {
+              "created_at": "2025-05-06T07:56:38.968Z",
+              "message": "## Prebuilt Rule Matching Summary\nAfter analyzing the provided Splunk rule and the list of Elastic Prebuilt Rules, no suitable match was found. The Splunk rule appears to be a custom query focused on filtering data from a specific source, server, and index. It doesn't align with any of the more specific security-focused rules in the provided Elastic Prebuilt Rules list. The Splunk rule seems to be a general data filtering query rather than a targeted security detection, which is why it doesn't correspond to any of the given Elastic rules.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:56:49.238Z",
+              "message": "## Integration Matching Summary\nThe Splunk rule \"New Alert with Index filter and Severity- 2\" is matched with the \"Splunk\" integration. This integration is designed to collect logs from Splunk, which aligns with the source of the provided Splunk rule. While the rule itself doesn't provide specific details about the data source, the fact that it's a Splunk rule suggests that using the Splunk integration would be the most appropriate choice for migrating this rule to Elastic Security.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:05.654Z",
+              "message": "## Translation Summary\n\nLet's break down the translation process:\n\n1. The original SPL query:\n```splunk-spl\nsource=\"tutorialdata.zip:*\"\n| search splunk_server=\"MacBookPro.fritz.box\" index=main\n```\n\n2. Translation steps:\n\n   a. We start the ES|QL query with the `FROM` command, using the index pattern `logs-splunk.alert-*` as requested in the guidelines.\n\n   b. The `source=\"tutorialdata.zip:*\"` part in SPL is translated to a `WHERE` condition in ES|QL.\n\n   c. The `search` command in SPL is essentially a filter, which is equivalent to the `WHERE` command in ES|QL. We combine all the conditions from the original SPL query into a single `WHERE` clause.\n\n   d. We use the `AND` operator to combine multiple conditions in the `WHERE` clause.\n\n   e. We keep the field names exactly as they are in the original SPL query, as instructed.\n\n3. The resulting ES|QL query combines all these elements into a single pipeline, using the `|` character to separate commands.\n\nThis translation maintains the intent of the original Splunk rule, which is to filter data based on specific source, splunk_server, and index values. The ES|QL query will retrieve data from the specified index pattern and apply the same filtering conditions as the original SPL query.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:33.046Z",
+              "message": "## Field Mapping Summary\n\n1. `splunk_server` to `observer.hostname`:\n   - Reason: In the Splunk CIM to ECS map, there isn't a direct mapping for `splunk_server`. However, in ECS, `observer.hostname` is used to represent the hostname of the system doing the observation, which aligns with the purpose of `splunk_server` in Splunk.\n\n2. `index` to `event.dataset`:\n   - Reason: In Splunk, the `index` field is often used to categorize different types of data. In ECS, `event.dataset` serves a similar purpose, representing a high-level classification of the type of data.\n\n3. `source` field:\n   - The `source` field was left as is because there isn't a clear one-to-one mapping in the provided CIM to ECS map, and its usage here seems to be specific to the data source rather than a standard field.\n\nThese mappings aim to preserve the intent of the original Splunk query while adapting it to the Elastic Common Schema. The `source` field was left unchanged due to lack of a clear ECS equivalent in this context.",
+              "created_by": "assistant"
+            }
+          ],
+          "translation_result": "full",
+          "elastic_rule": {
+            "severity": "low",
+            "risk_score": 21,
+            "query": "FROM logs-splunk.alert-* metadata id,_version,index\n| WHERE source == \"tutorialdata.zip:*\" AND observer.hostname == \"MacBookPro.fritz.box\" AND event.dataset == \"main\"",
+            "description": "Tutorial data based on host name",
+            "query_language": "esql",
+            "title": "New Alert with Index filter and Severity- 2 ",
+            "integrationids": [
+              "splunk"
+            ]
+          }
+        }
+      }
+    }
+
+{
+      "type": "doc",
+      "value": {
+        "index": ".kibana-siem-rule-migrations-rules-default",
+        "id": "SXOWpJYBkBGfeIGVMlcL",
+        "source": {
+          "migration_id": "0e5effd1-f355-469e-8614-74e82ca23f42",
+          "original_rule": {
+            "id": "https://127.0.0.1:8089/servicesNS/splunk-admin/Splunk_Security_Essentials/saved/searches/Tutorial%20data%20based%20on%20host%20name",
+            "vendor": "splunk",
+            "title": "Alert with no Severity. Should low in Elastic",
+            "description": "Tutorial data based on host name",
+            "query": "source=\"tutorialdata.zip:*\"\n| search host=vendor_sales",
+            "query_language": "spl"
+          },
+          "@timestamp": "2025-05-06T07:53:48.805Z",
+          "status": "completed",
+          "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+          "updated_at": "2025-05-06T07:57:42.895Z",
+          "comments": [
+            {
+              "created_at": "2025-05-06T07:56:41.646Z",
+              "message": "## Prebuilt Rule Matching Summary\nAfter analyzing the provided Splunk rule and the list of Elastic Prebuilt Rules, no suitable match was found. The Splunk rule appears to be a simple tutorial-based alert focusing on a specific host name (vendor_sales) from a tutorial dataset. This rule is too specific and doesn't align with any of the more general security-focused rules in the provided Elastic Prebuilt Rules list. The Elastic rules cover more complex security use cases such as traffic anomalies, encoding/decoding activities, and authentication issues, which are not related to the simple host-based filtering in the Splunk rule.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:56:50.140Z",
+              "message": "## Integration Matching Summary\nNone of the provided Elastic Integrations directly match the Splunk rule \"Alert with no Severity. Should low in Elastic\". The rule description mentions \"Tutorial data based on host name\", which doesn't align specifically with any of the given integrations. The Splunk integration could potentially be used to ingest this data, but without more specific information about the data source or type, it's not possible to confidently match it to any of the provided integrations.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:06.805Z",
+              "message": "## Translation Summary\n\nThe original Splunk SPL query was:\n\n```splunk-spl\nsource=\"tutorialdata.zip:*\"\n| search host=vendor_sales\n```\n\nHere's a breakdown of the translation process:\n\n1. The `FROM` command:\n   - In ES|QL, we always start with a `FROM` command to specify the index pattern. Since the original query doesn't specify an index, we use the generic `logs-*` pattern.\n\n2. The `source` filter:\n   - In Splunk, the `source` field is often used at the beginning of the query without an explicit `search` command.\n   - In ES|QL, we include this condition in the `WHERE` clause.\n\n3. The `host` filter:\n   - In the Splunk query, this is specified using the `search` command.\n   - In ES|QL, we combine this condition with the `source` condition in the `WHERE` clause using the `AND` operator.\n\n4. Field names:\n   - As per the instructions, we kept the field names the same as in the original SPL query.\n\n5. Operator translation:\n   - Splunk uses `=` for equality, while ES|QL uses `==`. We made this adjustment in the translation.\n\nThe resulting ES|QL query filters the data to include only events where the `source` field matches \"tutorialdata.zip:*\" and the `host` field is exactly \"vendor_sales\", which is equivalent to the original Splunk query.",
+              "created_by": "assistant"
+            },
+            {
+              "created_at": "2025-05-06T07:57:42.383Z",
+              "message": "## Field Mapping Summary\n\n1. `source` field:\n   - Original field: `source`\n   - Target ECS field: `source.keyword`\n   - Reason: The `source` field is commonly used in Elastic Common Schema to represent the source of the event. However, since we're doing an exact match, we're using the `.keyword` subfield to ensure we're matching on the full string value.\n\n2. `host` field:\n   - Original field: `host`\n   - Target ECS field: `host.hostname`\n   - Reason: In ECS, `host.hostname` is used to represent the hostname of the host where the event originated. This is the most appropriate mapping for the Splunk CIM `host` field in this context.\n\n3. Metadata fields:\n   - The metadata fields `id`, `_version`, and `index` were left unchanged as they are already in the correct format for Elasticsearch.\n\n4. Index pattern:\n   - The index pattern `logs-*` was left unchanged as it's already in a format compatible with Elasticsearch.\n\nNote: The structure of the query remains the same, with only the field names being updated to their ECS equivalents. The `FROM` and `WHERE` commands were kept as they are valid ES|QL commands according to the provided documentation.",
+              "created_by": "assistant"
+            }
+          ],
+          "translation_result": "partial",
+          "elastic_rule": {
+            "severity": "low",
+            "risk_score": 21,
+            "query": "FROM [indexPattern] metadata id,_version,index\n| WHERE source.keyword == \"tutorialdata.zip:*\" AND host.hostname == \"vendor_sales\"",
+            "description": "Tutorial data based on host name",
+            "query_language": "esql",
+            "title": "Alert with no Severity. Should low in Elastic",
+            "integrationids": [
+              ""
+            ]
+          }
+        }
+      }
+    }

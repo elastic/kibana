@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/functional-with-es-ssl-cases-test-plugin",
+  "owner": "@elastic/kibana-cases",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "functionalWithEsSslCasesTestPlugin",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "cases",
+      "embeddable",
+      "lens",
+      "kibanaReact",
+      "esUiShared",
+      "security",
+      "licensing"
+    ]
+  }
+}

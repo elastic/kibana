@@ -1,125 +1,74 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { applicationServiceMock } from './application/application_service.mock';
-import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
-import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { notificationServiceMock } from './notifications/notifications_service.mock';
-import { overlayServiceMock } from './overlays/overlay_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { savedObjectsMock } from './saved_objects/saved_objects_service.mock';
-import { contextServiceMock } from './context/context_service.mock';
-import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 
-export { chromeServiceMock } from './chrome/chrome_service.mock';
-export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
-export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-export { httpServiceMock } from './http/http_service.mock';
-export { i18nServiceMock } from './i18n/i18n_service.mock';
-export { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
-export { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
-export { notificationServiceMock } from './notifications/notifications_service.mock';
-export { overlayServiceMock } from './overlays/overlay_service.mock';
-export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { createMemoryHistory } from 'history';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
+import type { AppMountParameters } from '@kbn/core-application-browser';
+import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
+import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 
-function createCoreSetupMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreSetup> & { notifications: MockedKeys<NotificationsSetup> } = {
-    application: applicationServiceMock.createSetupContract(),
-    context: contextServiceMock.createSetupContract(),
-    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract({ basePath }),
-    notifications: notificationServiceMock.createSetupContract(),
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
-    injectedMetadata: {
-      getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
-    },
-  };
+export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+export { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+export { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+export { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+export { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+export { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+export { httpServiceMock } from '@kbn/core-http-browser-mocks';
+export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+export { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+export { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+export { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+export { applicationServiceMock, scopedHistoryMock } from '@kbn/core-application-browser-mocks';
+export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
+export { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
+export { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
-  return mock;
+function createStorageMock() {
+  const storageMock: jest.Mocked<Storage> = lazyObject({
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+    key: jest.fn(),
+    length: 10,
+  });
+  return storageMock;
 }
 
-function createCoreStartMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreStart> & { notifications: MockedKeys<NotificationsSetup> } = {
-    application: applicationServiceMock.createStartContract(),
-    chrome: chromeServiceMock.createStartContract(),
-    docLinks: docLinksServiceMock.createStartContract(),
-    http: httpServiceMock.createStartContract({ basePath }),
-    i18n: i18nServiceMock.createStartContract(),
-    notifications: notificationServiceMock.createStartContract(),
-    overlays: overlayServiceMock.createStartContract(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    savedObjects: savedObjectsMock.createStartContract(),
-    injectedMetadata: {
-      getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
-    },
-  };
+function createAppMountParametersMock(appBasePath = '') {
+  // Assemble an in-memory history mock using the provided basePath
+  const rawHistory = createMemoryHistory();
+  rawHistory.push(appBasePath);
+  const history = new CoreScopedHistory(rawHistory, appBasePath);
 
-  return mock;
-}
-function pluginInitializerContextMock() {
-  const mock: PluginInitializerContext = {
-    opaqueId: Symbol(),
-    env: {
-      mode: {
-        dev: true,
-        name: 'development',
-        prod: false,
-      },
-      packageInfo: {
-        version: 'version',
-        branch: 'branch',
-        buildNum: 100,
-        buildSha: 'buildSha',
-        dist: false,
-      },
-    },
-  };
+  const params: jest.Mocked<AppMountParameters> = lazyObject({
+    appBasePath,
+    element: document.createElement('div'),
+    history,
+    theme$: themeServiceMock.createTheme$(),
+    onAppLeave: jest.fn(),
+    setHeaderActionMenu: jest.fn(),
+  });
 
-  return mock;
-}
-
-function createCoreContext(): CoreContext {
-  return {
-    coreId: Symbol('core context mock'),
-    env: {
-      mode: {
-        dev: true,
-        name: 'development',
-        prod: false,
-      },
-      packageInfo: {
-        version: 'version',
-        branch: 'branch',
-        buildNum: 100,
-        buildSha: 'buildSha',
-        dist: false,
-      },
-    },
-  };
+  return params;
 }
 
 export const coreMock = {
-  createCoreContext,
-  createSetup: createCoreSetupMock,
-  createStart: createCoreStartMock,
-  createPluginInitializerContext: pluginInitializerContextMock,
+  createCoreContext: coreContextMock.create,
+  createSetup: coreLifecycleMock.createCoreSetup,
+  createStart: coreLifecycleMock.createCoreStart,
+  createPluginInitializerContext: pluginsServiceMock.createPluginInitializerContext,
+  createStorage: createStorageMock,
+  createAppMountParameters: createAppMountParametersMock,
 };

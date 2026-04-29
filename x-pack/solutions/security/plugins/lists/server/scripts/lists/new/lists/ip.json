@@ -1,0 +1,6 @@
+{
+  "id": "ip_list",
+  "name": "Simple list with an ip",
+  "description": "This list describes bad internet ip",
+  "type": "ip"
+}

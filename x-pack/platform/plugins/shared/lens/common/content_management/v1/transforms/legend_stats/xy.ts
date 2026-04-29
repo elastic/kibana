@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { LegendValue } from '@elastic/charts';
+
+import type { XYVisualizationState } from '../../../../../public/visualizations/xy/types';
+
+/**
+ * Old color mapping state meant for type safety during runtime migrations of old configurations
+ *
+ * @deprecated
+ */
+export interface DeprecatedLegendValueXYState extends XYVisualizationState {
+  valuesInLegend?: boolean;
+}
+
+export function convertXYToLegendStats(
+  state: DeprecatedLegendValueXYState | XYVisualizationState
+): XYVisualizationState {
+  if ('valuesInLegend' in state) {
+    const valuesInLegend = state.valuesInLegend;
+    delete state.valuesInLegend;
+
+    const result: XYVisualizationState = {
+      ...state,
+      legend: {
+        ...state.legend,
+        legendStats: [
+          ...new Set([
+            ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
+            ...(state.legend.legendStats ?? []),
+          ]),
+        ],
+      },
+    };
+
+    return result;
+  }
+  return state;
+}

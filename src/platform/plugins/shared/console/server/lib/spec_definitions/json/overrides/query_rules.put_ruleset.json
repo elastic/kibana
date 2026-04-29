@@ -1,0 +1,22 @@
+{
+  "query_rules.put_ruleset": {
+    "data_autocomplete_rules": {
+      "rules": [{
+        "rule_id": "",
+        "type": "pinned",
+        "criteria": [{
+          "type": { "__one_of": [ "exact", "fuzzy", "prefix", "suffix", "contains", "lt", "lte", "gt", "gte", "always" ]},
+          "metadata": "",
+          "values": [""]
+        }],
+        "actions": {
+          "docs":[{
+            "_id": "",
+            "_index": ""
+          }],
+          "ids":[""]
+        }
+      }]
+    }
+  }
+}

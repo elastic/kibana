@@ -1,33 +1,28 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { getConfig } from '../../legacy/server/path';
-import { bootstrap } from '../../core/server';
-import { readKeystore } from './read_keystore';
+import { isKibanaDistributable } from '@kbn/repo-info';
+import { readKeystore } from '../keystore/lib/read_keystore';
+import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
 
-import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+const DEV_UTILS_PATH = '@kbn/dev-utils';
+const DEV_UTILS_SUPPORTED = canRequire(DEV_UTILS_PATH);
+const MOCK_IDP_PLUGIN_PATH = '@kbn/mock-idp-plugin/common';
+const MOCK_IDP_PLUGIN_SUPPORTED = canRequire(MOCK_IDP_PLUGIN_PATH);
 
 function canRequire(path) {
   try {
@@ -42,115 +37,175 @@ function canRequire(path) {
   }
 }
 
-const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
+const getBootstrapScript = (isDev) => {
+  if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
+    // need dynamic require to exclude it from production build
+    // eslint-disable-next-line import/no-dynamic-require
+    const { bootstrapDevMode } = require(DEV_MODE_PATH);
+    return bootstrapDevMode;
+  } else {
+    const { bootstrap } = require('@kbn/core/server');
+    return bootstrap;
+  }
+};
 
-const REPL_PATH = resolve(__dirname, '../repl');
-const CAN_REPL = canRequire(REPL_PATH);
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
 
-// xpack is installed in both dev and the distributable, it's optional if
-// install is a link to the source, not an actual install
-const XPACK_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_DIR);
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
 
-const pathCollector = function () {
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+};
+
+function pathCollector() {
   const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
-};
+}
 
 const configPathCollector = pathCollector();
-const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
-  const set = _.partial(_.set, rawConfig);
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreConfig) {
+  const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
-  const merge = _.partial(_.merge, rawConfig);
+
+  function ensureNotDefined(path, command = '--ssl') {
+    if (has(path)) {
+      throw new Error(`Can't use ${command} when "${path}" configuration is already defined.`);
+    }
+  }
 
   if (opts.oss) {
     delete rawConfig.xpack;
   }
 
+  // only used to set cliArgs.envName, we don't want to inject that into the config
+  delete extraCliOptions.env;
+
+  let isServerlessSamlSupported = false;
   if (opts.dev) {
-    set('env', 'development');
-    set('optimize.watch', true);
-
-    if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana');
+    if (opts.serverless) {
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+      isServerlessSamlSupported = tryConfigureServerlessSamlProvider(
+        rawConfig,
+        opts,
+        extraCliOptions
+      );
     }
 
-    if (!has('elasticsearch.password')) {
-      set('elasticsearch.password', 'changeme');
-    }
-
-    if (opts.ssl) {
-      // @kbn/dev-utils is part of devDependencies
-      const { CA_CERT_PATH } = require('@kbn/dev-utils');
-      const customElasticsearchHosts = opts.elasticsearch
-        ? opts.elasticsearch.split(',')
-        : [].concat(get('elasticsearch.hosts') || []);
-
-      function ensureNotDefined(path) {
-        if (has(path)) {
-          throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
-        }
+    if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
+      if (!has('elasticsearch.username')) {
+        set('elasticsearch.username', 'kibana_system');
       }
+
+      if (!has('elasticsearch.password')) {
+        set('elasticsearch.password', 'changeme');
+      }
+    }
+
+    if (opts.http2) {
+      set('server.protocol', 'http2');
+    }
+
+    // HTTP TLS configuration
+    if (opts.ssl || opts.http2) {
+      // @kbn/dev-utils is part of devDependencies
+      // eslint-disable-next-line import/no-extraneous-dependencies
+      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
+
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
-      ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
-      const elasticsearchHosts = (
-        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) ||
-        ['https://localhost:9200']
-      ).map(hostUrl => {
-        const parsedUrl = url.parse(hostUrl);
-        if (parsedUrl.hostname !== 'localhost') {
-          throw new Error(`Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`);
-        }
-        return `https://localhost:${parsedUrl.port}`;
-      });
+      ensureNotDefined('server.ssl.keystore.path');
+      ensureNotDefined('server.ssl.truststore.path');
+      ensureNotDefined('server.ssl.certificateAuthorities');
 
       set('server.ssl.enabled', true);
-      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
-      set('server.ssl.key', DEV_SSL_KEY_PATH);
-      set('elasticsearch.hosts', elasticsearchHosts);
-      set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
+      set('server.ssl.certificate', KBN_CERT_PATH);
+      set('server.ssl.key', KBN_KEY_PATH);
+      set('server.ssl.certificateAuthorities', CA_CERT_PATH);
     }
+  }
+
+  // Kib/ES encryption
+  if (opts.ssl || isServerlessSamlSupported) {
+    // @kbn/dev-utils is part of devDependencies
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { CA_CERT_PATH } = require('@kbn/dev-utils');
+
+    const customElasticsearchHosts = opts.elasticsearch
+      ? opts.elasticsearch.split(',')
+      : [].concat(get('elasticsearch.hosts') || []);
+
+    ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
+
+    const elasticsearchHosts = (
+      (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
+        'https://localhost:9200',
+      ]
+    ).map((hostUrl) => {
+      const parsedUrl = url.parse(hostUrl);
+      if (parsedUrl.hostname !== 'localhost') {
+        throw new Error(
+          `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
+        );
+      }
+      return `https://localhost:${parsedUrl.port}`;
+    });
+
+    set('elasticsearch.hosts', elasticsearchHosts);
+    set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
   }
 
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
-  if (opts.quiet) set('logging.quiet', true);
-  if (opts.silent) set('logging.silent', true);
-  if (opts.verbose) set('logging.verbose', true);
-  if (opts.logFile) set('logging.dest', opts.logFile);
 
-  if (opts.optimize) {
-    set('server.autoListen', false);
-    set('plugins.initialize', false);
+  if (opts.silent) {
+    set('logging.root.level', 'off');
+  }
+  if (opts.verbose) {
+    set('logging.root.level', 'all');
   }
 
-  set('plugins.scanDirs', _.compact([].concat(
-    get('plugins.scanDirs'),
-    opts.pluginDir
-  )));
+  set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
-  set('plugins.paths', _.compact([].concat(
-    get('plugins.paths'),
-    opts.pluginPath,
-
-    XPACK_INSTALLED && !opts.oss
-      ? [XPACK_DIR]
-      : [],
-  )));
-
-  merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
+  _.merge(rawConfig, keystoreConfig);
 
   return rawConfig;
 }
@@ -166,87 +221,273 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [ getConfig() ]
+      []
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
-    .option('-q, --quiet', 'Prevent all logging except errors')
-    .option('-Q, --silent', 'Prevent all logging')
-    .option('--verbose', 'Turns on verbose logging')
+    .option('-Q, --silent', 'Set the root logger level to off')
+    .option('--verbose', 'Set the root logger level to all')
     .option('-H, --host <host>', 'The host to bind to')
-    .option('-l, --log-file <path>', 'The file to log to')
     .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-      'times to specify multiple directories',
-      pluginDirCollector,
-      [
-        fromRoot('plugins'),
-        fromRoot('src/legacy/core_plugins')
-      ]
+      '-l, --log-file <path>',
+      'Deprecated, set logging file destination in your configuration'
     )
     .option(
       '--plugin-path <path>',
       'A path to a plugin which should be included by the server, ' +
-    'this can be specified multiple times to specify multiple paths',
+        'this can be specified multiple times to specify multiple paths',
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Optimize and then stop the server');
+    .option('--allow-root', 'Required if Kibana is ran as root')
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (CAN_REPL) {
-    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
-  }
-
-  if (!IS_KIBANA_DISTRIBUTABLE) {
+  if (!isKibanaDistributable()) {
     command
-      .option('--oss', 'Start Kibana without X-Pack');
+      .option('--oss', 'Start Kibana without X-Pack')
+      .option(
+        '--run-examples',
+        'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+      )
+      .option(
+        '--serverless [oblt|security|es|workplaceai]',
+        'Start Kibana in a specific serverless project mode. ' +
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
+      );
   }
 
-  if (CAN_CLUSTER) {
+  if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
-      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
-      .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
+      .option('--no-ssl', 'Run the server without HTTPS')
+      .option('--http2', 'Run the dev server using HTTP2 with TLS')
+      .option('--dist', 'Use production assets from kbn/optimizer')
+      .option(
+        '--no-base-path',
+        "Don't put a proxy in front of the dev server, which adds a random basePath"
+      )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
+      .option('--no-optimizer', 'Disable the kbn/optimizer completely')
+      .option('--no-cache', 'Disable the kbn/optimizer cache')
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
+      .option(
+        '--no-dev-credentials',
+        'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
+      )
+      .option(
+        '--extended-stack-trace',
+        'Collect more complete stack traces. See src/cli/dev.js for explanation.'
+      )
+      .option(
+        '--no-uiam',
+        'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
+      );
   }
 
-  command
-    .action(async function (opts) {
-      if (opts.dev && opts.devConfig !== false) {
-        try {
-          const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-          if (statSync(kbnDevConfig).isFile()) {
-            opts.config.push(kbnDevConfig);
-          }
-        } catch (err) {
-          // ignore, kibana.dev.yml does not exist
-        }
-      }
-
-      const unknownOptions = this.getUnknownOptions();
-      await bootstrap({
-        configs: [].concat(opts.config || []),
-        cliArgs: {
-          dev: !!opts.dev,
-          open: !!opts.open,
-          envName: unknownOptions.env ? unknownOptions.env.name : undefined,
-          quiet: !!opts.quiet,
-          silent: !!opts.silent,
-          watch: !!opts.watch,
-          repl: !!opts.repl,
-          basePath: !!opts.basePath,
-          optimize: !!opts.optimize,
-          oss: !!opts.oss
-        },
-        features: {
-          isClusterModeSupported: CAN_CLUSTER,
-          isReplModeSupported: CAN_REPL,
-        },
-        applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
-      });
+  command.action(async function (opts) {
+    const unknownOptions = this.getUnknownOptions();
+    const configs = compileConfigStack({
+      configOverrides: opts.config,
+      devConfig: opts.devConfig,
+      dev: opts.dev,
+      serverless: opts.serverless || unknownOptions.serverless,
+      unknownOptions,
     });
 
+    const configsEvaluated = getConfigFromFiles(configs);
+    const isServerlessMode = !!(
+      configsEvaluated.serverless ||
+      opts.serverless ||
+      unknownOptions.serverless
+    );
+
+    const isServerlessSamlSupported = isServerlessMode && opts.ssl !== false;
+    const cliArgs = {
+      dev: !!opts.dev,
+      envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+      silent: !!opts.silent,
+      verbose: !!opts.verbose,
+      watch: !!opts.watch,
+      runExamples: !!opts.runExamples,
+      // We want to run without base path when the `--run-examples` flag is given so that we can use local
+      // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // local links to work.  Similar to what we do for "View in Console" links in our
+      // elastic.co links.
+      // We also want to run without base path when running in serverless mode so that Elasticsearch can
+      // connect to Kibana's mock identity provider.
+      basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
+      optimize: !!opts.optimize,
+      disableOptimizer: !opts.optimizer,
+      oss: !!opts.oss,
+      cache: !!opts.cache,
+      dist: !!opts.dist,
+      serverless: isServerlessMode,
+      uiam: isServerlessSamlSupported && opts.uiam !== false,
+    };
+
+    // In development mode, the main process uses the @kbn/dev-cli-mode
+    // bootstrap script instead of core's. The DevCliMode instance
+    // is in charge of starting up the optimizer, and spawning another
+    // `/script/kibana` process with the `isDevCliChild` varenv set to true.
+    // This variable is then used to identify that we're the 'real'
+    // Kibana server process, and will be using core's bootstrap script
+    // to effectively start Kibana.
+    const bootstrapScript = getBootstrapScript(cliArgs.dev);
+    const keystoreConfig = await readKeystore();
+    await bootstrapScript({
+      configs,
+      cliArgs,
+      applyConfigOverrides: (rawConfig) =>
+        applyConfigOverrides(rawConfig, opts, unknownOptions, keystoreConfig),
+    });
+  });
+}
+
+function mergeAndReplaceArrays(objValue, srcValue) {
+  if (typeof srcValue === 'undefined') {
+    return objValue;
+  } else if (Array.isArray(srcValue)) {
+    // do not merge arrays, use new value instead
+    return srcValue;
+  } else {
+    // default to default merging
+    return undefined;
+  }
+}
+
+/**
+ * Tries to configure SAML provider in serverless mode and applies the necessary configuration.
+ * @param rawConfig Full configuration object.
+ * @param opts CLI options.
+ * @param extraCliOptions Extra CLI options.
+ * @returns {boolean} True if SAML provider was successfully configured.
+ */
+function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
+  if (!MOCK_IDP_PLUGIN_SUPPORTED || opts.ssl === false) {
+    return false;
+  }
+
+  // Ensure the plugin is loaded in dynamically to exclude from production build
+  const {
+    MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_SERVICE_URL,
+    MOCK_IDP_UIAM_SHARED_SECRET,
+    MOCK_IDP_UIAM_ORGANIZATION_ID,
+    MOCK_IDP_UIAM_PROJECT_ID, // eslint-disable-next-line import/no-dynamic-require
+  } = require(MOCK_IDP_PLUGIN_PATH);
+
+  // Check if there are any custom authentication providers already configured with the order `0` reserved for the
+  // Serverless SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
+  // both rawConfig and extraCliOptions because the latter can be used to override the former.
+  let hasBasicOrTokenProviderConfigured = false;
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
+    for (const [providerType, providers] of Object.entries(providersConfig)) {
+      if (providerType === 'basic' || providerType === 'token') {
+        hasBasicOrTokenProviderConfigured = true;
+      }
+
+      for (const [providerName, provider] of Object.entries(providers)) {
+        if (provider.order === 0) {
+          console.warn(
+            `The serverless SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
+              `Please update the custom provider to use a different order or remove it to allow the serverless SAML provider to be configured.`
+          );
+          return false;
+        }
+
+        if (providerType === 'saml' && providerName === MOCK_IDP_REALM_NAME) {
+          console.warn(
+            `The serverless SAML authentication provider won't be configured because the SAML provider with "${MOCK_IDP_REALM_NAME}" name is already configured".`
+          );
+          return false;
+        }
+      }
+    }
+  }
+
+  if (_.has(rawConfig, 'server.basePath')) {
+    console.warn(
+      `Custom base path is not supported when running in Serverless, it will be removed.`
+    );
+    _.unset(rawConfig, 'server.basePath');
+  }
+
+  if (opts.ssl) {
+    console.info(
+      'Kibana is being served over HTTPS. Make sure to adjust the `--kibanaUrl` parameter while running the local Serverless ES cluster.'
+    );
+  }
+
+  // Make SAML provider the first in the provider chain
+  lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+    order: 0,
+    realm: MOCK_IDP_REALM_NAME,
+    icon: 'user',
+    description: 'Continue as Test User',
+    hint: 'Allows testing serverless user roles',
+  });
+
+  // Disable login selector to automatically trigger SAML authentication, unless it's explicitly enabled.
+  if (!_.has(rawConfig, 'xpack.security.authc.selector.enabled')) {
+    lodashSet(rawConfig, 'xpack.security.authc.selector.enabled', false);
+  }
+
+  // Since we explicitly configured SAML authentication provider, default Basic provider won't be automatically
+  // configured, and we have to do it manually instead unless other Basic or Token provider was already configured.
+  if (!hasBasicOrTokenProviderConfigured) {
+    lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
+      order: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  if (opts.uiam !== false && DEV_UTILS_SUPPORTED) {
+    // Ensure the key/cert pair is loaded dynamically to exclude it from the production build.
+    // eslint-disable-next-line import/no-dynamic-require
+    const { KBN_CERT_PATH, KBN_KEY_PATH } = require(DEV_UTILS_PATH);
+
+    console.info('Kibana will be configured to support UIAM.');
+    lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
+    lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
+
+    if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
+      lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);
+    }
+
+    if (!_.has(rawConfig, 'xpack.security.uiam.sharedSecret')) {
+      lodashSet(rawConfig, 'xpack.security.uiam.sharedSecret', MOCK_IDP_UIAM_SHARED_SECRET);
+    }
+
+    if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
+      lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+    }
+
+    if (!_.has(rawConfig, 'xpack.cloud.serverless.project_id')) {
+      lodashSet(rawConfig, 'xpack.cloud.serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
+    }
+
+    // By default, projects URL is used as the logout destination, but for local development it's inconvenient.
+    if (!_.has(rawConfig, 'xpack.cloud.projects_url')) {
+      lodashSet(rawConfig, 'xpack.cloud.projects_url', '');
+    }
+
+    // The UIAM service needs a network-accessible ES URL to validate API keys during conversion.
+    // The security plugin decodes cloud.id to obtain this URL. In the local Docker setup,
+    // the UIAM container reaches ES via host.docker.internal on the host network.
+    if (!_.has(rawConfig, 'xpack.cloud.id')) {
+      lodashSet(
+        rawConfig,
+        'xpack.cloud.id',
+        // Decodes to: docker.internal:9200$host:9200$kibana:9200
+        // Producing ES URL: https://host.docker.internal:9200
+        'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw'
+      );
+    }
+  }
+
+  return true;
 }

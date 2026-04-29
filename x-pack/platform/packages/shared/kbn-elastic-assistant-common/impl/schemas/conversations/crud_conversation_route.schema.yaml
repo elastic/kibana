@@ -1,0 +1,431 @@
+openapi: 3.0.0
+info:
+  title: Create Conversation API endpoint
+  version: '2023-10-31'
+paths:
+  /api/security_ai_assistant/current_user/conversations:
+    post:
+      x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/current_user/conversations' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"title":"Security Discussion","category":"assistant","messages":[{"content":"Hello","role":"system","timestamp":"2023-10-31T12:00:00Z"}],"apiConfig":{"connectorId":"12345","actionTypeId":"67890"},"replacements":{},"excludeFromLastConversationStorage":false}'
+      x-labels: [ess, serverless]
+      operationId: CreateConversation
+      description: Create a new Security AI Assistant conversation. This endpoint allows the user to initiate a conversation with the Security AI Assistant by providing the required parameters.
+      summary: Create a conversation
+      tags:
+        - Conversation API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationCreateProps'
+            examples:
+              CreateConversationRequest:
+                value:
+                  title: "Security Discussion"
+                  category: "assistant"
+                  messages:
+                    - content: "Hello, how can I assist you today?"
+                      role: "system"
+                      timestamp: "2023-10-31T12:00:00Z"
+                  apiConfig:
+                    connectorId: "12345"
+                    actionTypeId: "67890"
+                  replacements: {}
+                  excludeFromLastConversationStorage: false
+      responses:
+        200:
+          description: Indicates a successful call. The conversation was created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              examples:
+                CreateConversationResponse200Example:
+                  value:
+                    id: "abc123"
+                    title: "Security Discussion"
+                    category: "assistant"
+                    createdAt: "2023-10-31T12:01:00Z"
+                    updatedAt: "2023-10-31T12:01:00Z"
+                    createdBy:
+                      id: "user1"
+                      name: "John Doe"
+                    users:
+                      - id: "user1"
+                        name: "John Doe"
+                    namespace: "default"
+                    messages:
+                      - content: "Hello, how can I assist you today?"
+                        role: "system"
+                        timestamp: "2023-10-31T12:00:00Z"
+                    apiConfig:
+                      connectorId: "12345"
+                      actionTypeId: "67890"
+                    replacements: {}
+                    excludeFromLastConversationStorage: false
+        400:
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Missing required parameter: title"
+              examples:
+                CreateConversationResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Missing required parameter: title"
+    delete:
+      x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/security_ai_assistant/current_user/conversations' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"excludedIds":["abc123"]}'
+      x-labels: [ess, serverless]
+      operationId: DeleteAllConversations
+      description: This endpoint allows users to permanently delete all conversations.
+      summary: Delete conversations
+      tags:
+        - Conversation API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional list of conversation IDs to delete.
+                  example: ["abc123", "def456"]
+            examples:
+              DeleteAllConversationsRequest:
+                value:
+                  excludedIds:
+                    - "abc123"
+                    - "def456"
+      responses:
+        200:
+          description: Indicates a successful call. The conversations were deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  totalDeleted:
+                    type: number
+                    example: 10
+                  failures:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                DeleteAllConversationsResponse200Example:
+                  value:
+                    success: true
+                    totalDeleted: 10
+                    failures: []
+        400:
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Invalid conversation ID"
+              examples:
+                DeleteAllConversationsResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid conversation ID"
+  /api/security_ai_assistant/current_user/conversations/{id}:
+    get:
+      x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
+             --header "Authorization: $API_KEY"
+      x-labels: [ess, serverless]
+      operationId: ReadConversation
+      description: Get the details of an existing conversation using the conversation ID. This allows users to fetch the specific conversation data by its unique ID.
+      summary: Get a conversation
+      tags:
+        - Conversations API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value, a unique identifier for the conversation.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
+      responses:
+        200:
+          description: Indicates a successful call. The conversation details are returned.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              examples:
+                ReadConversationResponse200Example:
+                  value:
+                    id: "abc123"
+                    title: "Security Discussion"
+                    category: "assistant"
+                    createdAt: "2023-10-31T12:01:00Z"
+                    updatedAt: "2023-10-31T12:01:00Z"
+                    createdBy:
+                      id: "user1"
+                      name: "John Doe"
+                    users:
+                      - id: "user1"
+                        name: "John Doe"
+                    namespace: "default"
+                    messages:
+                      - content: "Hello, how can I assist you today?"
+                        role: "system"
+                        timestamp: "2023-10-31T12:00:00Z"
+                    apiConfig:
+                      connectorId: "12345"
+                      actionTypeId: "67890"
+                    replacements: {}
+                    excludeFromLastConversationStorage: false
+        400:
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Invalid conversation ID"
+              examples:
+                ReadConversationResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid conversation ID"
+
+    put:
+      x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"title":"Updated Security Discussion","category":"insights","messages":[{"content":"Resolved.","role":"assistant","timestamp":"2023-10-31T12:30:00Z"}],"apiConfig":{"connectorId":"54321","actionTypeId":"09876"},"replacements":{},"excludeFromLastConversationStorage":true}'
+      x-labels: [ess, serverless]
+      operationId: UpdateConversation
+      description: Update an existing conversation using the conversation ID. This endpoint allows users to modify the details of an existing conversation.
+      summary: Update a conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
+            examples:
+              UpdateConversationRequest:
+                value:
+                  title: "Updated Security Discussion"
+                  category: "insights"
+                  messages:
+                    - content: "The issue was resolved."
+                      role: "assistant"
+                      timestamp: "2023-10-31T12:30:00Z"
+                  apiConfig:
+                    connectorId: "54321"
+                    actionTypeId: "09876"
+                  replacements: {}
+                  excludeFromLastConversationStorage: true
+      responses:
+        200:
+          description: Indicates a successful call. The conversation was updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              examples:
+                UpdateConversationResponse200Example:
+                  value:
+                    id: "abc123"
+                    title: "Updated Security Discussion"
+                    category: "insights"
+                    createdAt: "2023-10-31T12:01:00Z"
+                    updatedAt: "2023-10-31T12:31:00Z"
+                    createdBy:
+                      id: "user1"
+                      name: "John Doe"
+                    users:
+                      - id: "user1"
+                        name: "John Doe"
+                    namespace: "default"
+                    messages:
+                      - content: "The issue was resolved."
+                        role: "assistant"
+                        timestamp: "2023-10-31T12:30:00Z"
+                    apiConfig:
+                      connectorId: "54321"
+                      actionTypeId: "09876"
+                    replacements: {}
+                    excludeFromLastConversationStorage: true
+        400:
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Missing required field: title"
+              examples:
+                UpdateConversationResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Missing required field: title"
+
+    delete:
+      x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
+             --header "Authorization: $API_KEY"
+      x-labels: [ess, serverless]
+      operationId: DeleteConversation
+      description: Delete an existing conversation using the conversation ID. This endpoint allows users to permanently delete a conversation.
+      summary: Delete a conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
+      responses:
+        200:
+          description: Indicates a successful call. The conversation was deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              examples:
+                DeleteConversationResponse200Example:
+                  value:
+                    id: "abc123"
+                    title: "Deleted Security Discussion"
+                    category: "assistant"
+                    createdAt: "2023-10-31T12:01:00Z"
+                    updatedAt: "2023-10-31T12:01:00Z"
+                    createdBy:
+                      id: "user1"
+                      name: "John Doe"
+                    users:
+                      - id: "user1"
+                        name: "John Doe"
+                    namespace: "default"
+                    messages:
+                      - content: "The conversation has been deleted."
+                        role: "system"
+                        timestamp: "2023-10-31T12:35:00Z"
+                    apiConfig:
+                      connectorId: "12345"
+                      actionTypeId: "67890"
+                    replacements: {}
+                    excludeFromLastConversationStorage: false
+        400:
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Invalid conversation ID"
+              examples:
+                DeleteConversationResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid conversation ID"

@@ -1,0 +1,570 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DataViewsContract, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { TextBasedPersistedState } from '@kbn/lens-common';
+import type { HttpStart } from '@kbn/core/public';
+import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import {
+  ensureIndexPattern,
+  ensureESQLTimeFieldOnAdHocDataViews,
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  buildIndexPatternField,
+} from './loader';
+import { sampleIndexPatterns, mockDataViewsService } from './mocks';
+import { documentField } from '../datasources/form_based/document_field';
+
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLTimeFieldFromQuery: jest.fn(),
+}));
+
+const mockGetESQLTimeFieldFromQuery = getESQLTimeFieldFromQuery as jest.MockedFunction<
+  typeof getESQLTimeFieldFromQuery
+>;
+
+describe('loader', () => {
+  describe('loadIndexPatternRefs', () => {
+    it('should return a list of sorted indexpattern refs', async () => {
+      const refs = await loadIndexPatternRefs(mockDataViewsService());
+      expect(refs[0].title < refs[1].title).toBeTruthy();
+    });
+  });
+
+  describe('loadIndexPatterns', () => {
+    it('should not load index patterns that are already loaded', async () => {
+      const dataViewsService = mockDataViewsService();
+      dataViewsService.get = jest.fn(() =>
+        Promise.reject('mockIndexPatternService.get should not have been called')
+      );
+
+      const cache = await loadIndexPatterns({
+        cache: sampleIndexPatterns,
+        patterns: ['1', '2'],
+        dataViews: dataViewsService,
+      });
+
+      expect(cache).toEqual(sampleIndexPatterns);
+    });
+
+    it('should load index patterns that are not loaded', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {
+          '2': sampleIndexPatterns['2'],
+        },
+        patterns: ['1', '2'],
+        dataViews: mockDataViewsService(),
+      });
+
+      expect(Object.keys(cache)).toEqual(['1', '2']);
+    });
+
+    it('should apply field restrictions from typeMeta', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['foo'],
+        dataViews: {
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            metaFields: [],
+            isPersisted: () => true,
+            toSpec: () => ({}),
+            typeMeta: {
+              aggs: {
+                date_histogram: {
+                  timestamp: {
+                    agg: 'date_histogram',
+                    fixed_interval: 'm',
+                  },
+                },
+                sum: {
+                  bytes: {
+                    agg: 'sum',
+                  },
+                },
+              },
+            },
+            fields: [
+              {
+                name: 'timestamp',
+                displayName: 'timestampLabel',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          })),
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+          create: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+      });
+
+      expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
+        sum: { agg: 'sum' },
+      });
+      expect(cache.foo.getFieldByName('timestamp')!.aggregationRestrictions).toEqual({
+        date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
+      });
+    });
+
+    it('should map meta flag', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['foo'],
+        dataViews: {
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            metaFields: ['timestamp'],
+            isPersisted: () => true,
+            toSpec: () => ({}),
+            typeMeta: {
+              aggs: {
+                date_histogram: {
+                  timestamp: {
+                    agg: 'date_histogram',
+                    fixed_interval: 'm',
+                  },
+                },
+                sum: {
+                  bytes: {
+                    agg: 'sum',
+                  },
+                },
+              },
+            },
+            fields: [
+              {
+                name: 'timestamp',
+                displayName: 'timestampLabel',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          })),
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+          create: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+      });
+
+      expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
+    });
+
+    it('should move over any time series meta data', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['foo'],
+        dataViews: {
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            metaFields: ['timestamp'],
+            isPersisted: () => true,
+            toSpec: () => ({}),
+            typeMeta: {},
+            fields: [
+              {
+                name: 'timestamp',
+                displayName: 'timestampLabel',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes_counter',
+                displayName: 'bytes_counter',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesMetric: 'counter',
+              },
+              {
+                name: 'bytes_gauge',
+                displayName: 'bytes_gauge',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesMetric: 'gauge',
+              },
+              {
+                name: 'dimension',
+                displayName: 'dimension',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesDimension: true,
+              },
+            ],
+          })),
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+          create: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+      });
+
+      expect(cache.foo.getFieldByName('bytes_counter')!.timeSeriesMetric).toEqual('counter');
+      expect(cache.foo.getFieldByName('bytes_gauge')!.timeSeriesMetric).toEqual('gauge');
+      expect(cache.foo.getFieldByName('dimension')!.timeSeriesDimension).toEqual(true);
+    });
+
+    it('should call the refresh callback when loading new indexpatterns', async () => {
+      const onIndexPatternRefresh = jest.fn();
+      await loadIndexPatterns({
+        cache: {
+          '2': sampleIndexPatterns['2'],
+        },
+        patterns: ['1', '2'],
+        dataViews: mockDataViewsService(),
+        onIndexPatternRefresh,
+      });
+
+      expect(onIndexPatternRefresh).toHaveBeenCalled();
+    });
+
+    it('should not call the refresh callback when using the cache', async () => {
+      const onIndexPatternRefresh = jest.fn();
+      await loadIndexPatterns({
+        cache: sampleIndexPatterns,
+        patterns: ['1', '2'],
+        dataViews: mockDataViewsService(),
+        onIndexPatternRefresh,
+      });
+
+      expect(onIndexPatternRefresh).not.toHaveBeenCalled();
+    });
+
+    it('should load one of the not used indexpatterns if all used ones are not available', async () => {
+      const dataViewsService = {
+        get: jest.fn(async (id: string) => {
+          if (id === '3') {
+            return {
+              id: '3',
+              title: 'my-fake-index-pattern',
+              timeFieldName: 'timestamp',
+              hasRestrictions: false,
+              fields: [],
+              isPersisted: () => true,
+              toSpec: () => ({}),
+            };
+          }
+          return Promise.reject();
+        }),
+        getIdsWithTitle: jest.fn(),
+      } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['1', '2'],
+        notUsedPatterns: ['11', '3', '4', '5', '6', '7', '8', '9', '10'],
+        dataViews: dataViewsService,
+      });
+
+      expect(cache).toEqual({
+        3: expect.objectContaining({
+          id: '3',
+          title: 'my-fake-index-pattern',
+          timeFieldName: 'timestamp',
+          hasRestrictions: false,
+          fields: [documentField],
+        }),
+      });
+      // trying to load the used patterns 1 and 2, then trying the not used pattern 11 and succeeding with the pattern 3 - 4 loads
+      expect(dataViewsService.get).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('ensureIndexPattern', () => {
+    it('should throw if the requested indexPattern cannot be loaded', async () => {
+      const err = Error('NOPE!');
+      const onError = jest.fn();
+      const cache = await ensureIndexPattern({
+        id: '3',
+        dataViews: {
+          get: jest.fn(async () => {
+            throw err;
+          }),
+          getIdsWithTitle: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+        onError,
+      });
+
+      expect(cache).toBeUndefined();
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
+    });
+
+    it('should ensure the requested indexpattern is loaded into the cache', async () => {
+      const onError = jest.fn();
+      const cache = await ensureIndexPattern({
+        id: '2',
+        dataViews: mockDataViewsService(),
+        onError,
+      });
+      expect(cache).toEqual({ 2: expect.anything() });
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('buildIndexPatternField', () => {
+    it('should return a field with the correct name and derived parameters', async () => {
+      const field = buildIndexPatternField({
+        name: 'foo',
+        displayName: 'Foo',
+        type: 'string',
+        aggregatable: true,
+        searchable: true,
+      } as DataViewField);
+      expect(field.name).toEqual('foo');
+      expect(field.meta).toEqual(false);
+      expect(field.runtime).toEqual(false);
+    });
+    it('should return return the right meta field value', async () => {
+      const field = buildIndexPatternField(
+        {
+          name: 'meta',
+          displayName: 'Meta',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        } as DataViewField,
+        new Set(['meta'])
+      );
+      expect(field.meta).toEqual(true);
+    });
+  });
+
+  describe('ensureESQLTimeFieldOnAdHocDataViews', () => {
+    const mockHttp = {} as HttpStart;
+    const mockDataViews = mockDataViewsService() as unknown as DataViewsContract;
+
+    beforeEach(() => {
+      mockGetESQLTimeFieldFromQuery.mockReset();
+      (mockDataViews.clearInstanceCache as jest.Mock).mockClear();
+    });
+
+    it('should return adHocDataViews unchanged when textBasedState is undefined', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState: undefined,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toBe(adHocDataViews);
+      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+    });
+
+    it('should return adHocDataViews unchanged when layers is empty', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState: { layers: {} } as TextBasedPersistedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual(adHocDataViews);
+      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+    });
+
+    it('should skip layers without an ES|QL query', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {};
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1' },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual({});
+      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+    });
+
+    it('should skip enrichment when the existing spec already has a timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual(adHocDataViews);
+      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockDataViews.clearInstanceCache).not.toHaveBeenCalled();
+    });
+
+    it('should patch existing spec with timeFieldName and evict stale cache', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+        query: 'FROM logs-*',
+        http: mockHttp,
+      });
+      expect(result.dv1).toEqual({ id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' });
+      expect(mockDataViews.clearInstanceCache).toHaveBeenCalledWith('dv1');
+    });
+
+    it('should not patch spec when layer.index has no matching entry', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {};
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'missing-id', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).toEqual({});
+      expect(mockDataViews.clearInstanceCache).not.toHaveBeenCalled();
+    });
+
+    it('should handle mixed layers: only enrich specs missing timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' },
+        dv2: { id: 'dv2', title: 'metrics-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+          layer2: { columns: [], index: 'dv2', query: { esql: 'FROM metrics-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledTimes(1);
+      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+        query: 'FROM metrics-*',
+        http: mockHttp,
+      });
+      expect(result.dv1).toEqual(adHocDataViews.dv1);
+      expect(result.dv2.timeFieldName).toBe('@timestamp');
+      expect(mockDataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+      expect(mockDataViews.clearInstanceCache).toHaveBeenCalledWith('dv2');
+    });
+
+    it('should not mutate the original adHocDataViews object', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result).not.toBe(adHocDataViews);
+      expect(adHocDataViews.dv1.timeFieldName).toBeUndefined();
+    });
+
+    it('should leave spec unchanged when time field resolves to undefined', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLTimeFieldFromQuery.mockResolvedValue(undefined);
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+      });
+
+      expect(result.dv1).toEqual({ id: 'dv1', title: 'logs-*' });
+      expect(mockDataViews.clearInstanceCache).not.toHaveBeenCalled();
+    });
+  });
+});

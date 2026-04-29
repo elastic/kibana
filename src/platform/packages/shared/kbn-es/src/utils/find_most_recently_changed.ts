@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import path from 'path';
+import fs from 'fs';
+import globby from 'globby';
+
+/**
+ *  Find the most recently modified file that matches the pattern pattern
+ */
+export function findMostRecentlyChanged(pattern: string) {
+  if (!path.isAbsolute(pattern)) {
+    throw new TypeError(`Pattern must be absolute, got ${pattern}`);
+  }
+
+  const ctime = (p: string) => fs.statSync(p).ctime.getTime();
+
+  return globby
+    .sync(pattern, { onlyFiles: false })
+    .sort((a, b) => ctime(a) - ctime(b))
+    .pop();
+}

@@ -1,0 +1,44 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "ecs_fields_duplicated_for_alerts",
+    "source": {
+      "@timestamp": "2025-05-07T14:33:06.000Z",
+      "event": {
+        "category": "process"
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "ecs_fields_duplicated_for_alerts",
+    "source": {
+      "@timestamp": "2025-05-07T14:33:11.000Z",
+      "event": {
+        "category": "process"
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "ecs_fields_duplicated_for_alerts",
+    "source": {
+      "@timestamp": "2025-05-07T14:34:11.000Z",
+      "event": {
+        "category": "network"
+      }
+    },
+    "type": "_doc"
+  }
+}

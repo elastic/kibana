@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "version": "1.6.0"
+  },
+  "date_detection": false,
+  "dynamic_templates": [
+    {
+      "strings_as_keyword": {
+        "mapping": {
+          "type": "keyword",
+          "ignore_above": 1024,
+          "fields": {
+            "text": { "type": "text", "norms" : false }
+          }
+        },
+        "match_mapping_type": "string"
+      }
+    }
+  ]
+}
+

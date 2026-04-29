@@ -1,0 +1,155 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { validatePlaywrightConfig } from './config_validator';
+import * as configLoader from './config_loader';
+import Fs from 'fs';
+import { VALID_CONFIG_MARKER } from '../types';
+
+jest.mock('fs');
+
+const existsSyncMock = jest.spyOn(Fs, 'existsSync');
+const loadConfigModuleMock = jest.spyOn(configLoader, 'loadConfigModule');
+
+describe('validatePlaywrightConfig', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should pass validation for a valid config file', async () => {
+    const configPath = 'valid/path/config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
+
+  it('should throw an error if the config file does not have the valid marker', async () => {
+    const configPath = 'valid/path/config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: {},
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `The config file at "${configPath}" must be created with "createPlaywrightConfig" from '@kbn/scout' package:`
+    );
+  });
+
+  it(`should throw an error if the config file does not have a 'testDir'`, async () => {
+    const configPath = 'valid/path/config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true },
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `The config file at "${configPath}" must export a valid Playwright configuration with "testDir" property.`
+    );
+  });
+
+  it('should throw an error if the config file does not have a default export', async () => {
+    const configPath = 'valid/path/config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      test: {
+        use: {},
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `The config file at "${configPath}" must export default function`
+    );
+  });
+
+  it('should throw an error if the path does not exist', async () => {
+    const configPath = 'invalid/path/to/config.ts';
+    existsSyncMock.mockReturnValue(false);
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `Path to a valid TypeScript config file is required: --config <relative path to .ts file>`
+    );
+  });
+
+  it('should throw an error if the file does not have a .ts extension', async () => {
+    const configPath = 'config.js';
+    existsSyncMock.mockReturnValue(true);
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `Path to a valid TypeScript config file is required: --config <relative path to .ts file>`
+    );
+  });
+
+  it('should throw an error if runGlobalSetup is true but global.setup.ts does not exist', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock
+      .mockReturnValueOnce(true) // config file exists
+      .mockReturnValueOnce(false); // global.setup.ts does not exist
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true, runGlobalSetup: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `The config file at "${configPath}" has 'runGlobalSetup: true' but no global.setup.ts file found.`
+    );
+  });
+
+  it('should pass validation if runGlobalSetup is true and global.setup.ts exists', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock.mockReturnValue(true); // both config and global.setup.ts exist
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true, runGlobalSetup: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
+
+  it('should pass validation if runGlobalSetup is false', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true, runGlobalSetup: false },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
+
+  it('should pass validation if runGlobalSetup is undefined', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
+});

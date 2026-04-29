@@ -1,0 +1,13 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": []
+  },
+  "include": [
+    "*.d.ts"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

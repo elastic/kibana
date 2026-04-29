@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Draft Timeline API
+  version: '2023-10-31'
+paths:
+  /api/timeline/_draft:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: CleanDraftTimelines
+      summary: Create a clean draft Timeline or Timeline template
+      description: |
+        Create a clean draft Timeline or Timeline template for the current user.
+        > info
+        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The type of Timeline to create. Valid values are `default` and `template`.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timelineType]
+              properties:
+                timelineType:
+                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+            examples:
+              defaultDraft:
+                summary: Create a default draft timeline
+                value:
+                  timelineType: default
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
+              examples:
+                draftResponse:
+                  summary: Draft after reset or creation
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE0LDFd
+                    title: ''
+                    timelineType: default
+                    status: draft
+                    templateTimelineId: null
+                    templateTimelineVersion: null
+        '403':
+          description: Indicates that the user does not have the required permissions to create a draft Timeline.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
+        '409':
+          description: Indicates that there is already a draft Timeline with the given `timelineId`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409

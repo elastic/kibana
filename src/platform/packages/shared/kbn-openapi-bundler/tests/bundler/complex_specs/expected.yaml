@@ -1,0 +1,172 @@
+openapi: 3.0.3
+info:
+  title: Bundled OpenAPI specs
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+security:
+  - BasicAuth: []
+
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fieldA:
+                    type: string
+                  fieldRef:
+                    type: object
+                    properties:
+                      fieldX:
+                        type: string
+                      fieldY:
+                        type: integer
+                    required:
+                      - fieldX
+                      - fieldY
+                  fieldB:
+                    type: boolean
+    post:
+      operationId: TestEndpointPost
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      localField1:
+                        type: string
+                      localField2:
+                        type: string
+                    required:
+                      - localField1
+                  - type: object
+                    properties:
+                      schemaAField1:
+                        type: string
+                        enum:
+                          - value1
+                          - value2
+                      schemaAField2:
+                        type: integer
+                  - type: object
+                    properties:
+                      fieldA:
+                        type: string
+                      fieldRef:
+                        type: object
+                        properties:
+                          fieldX:
+                            type: string
+                          fieldY:
+                            type: integer
+                        required:
+                          - fieldX
+                          - fieldY
+                      fieldB:
+                        type: boolean
+    put:
+      operationId: TestEndpointPut
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SchemaWithOptionalFields'
+                  - $ref: '#/components/schemas/SchemaB'
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    SchemaWithOptionalFields:
+      type: object
+      properties:
+        fieldA:
+          type: boolean
+        fieldB:
+          type: object
+          properties:
+            fieldA:
+              type: string
+            fieldRef:
+              type: object
+              properties:
+                fieldX:
+                  type: string
+                fieldY:
+                  type: integer
+              required:
+                - fieldX
+                - fieldY
+            fieldB:
+              type: boolean
+        sharedSchemaFieldX:
+          type: string
+        sharedSchemaFieldY:
+          type: string
+        commonField:
+          type: string
+        sharedSchemaField1:
+          type: string
+        sharedSchemaField2:
+          type: string
+        localSchemaFieldA:
+          type: number
+        localSchemaFieldB:
+          type: string
+      required:
+        - commonField
+    SchemaA:
+      type: object
+      properties:
+        schemaAField1:
+          type: string
+          enum:
+            - value1
+            - value2
+        schemaAField2:
+          type: integer
+      required:
+        - schemaAField1
+        - schemaAField2
+    SchemaB:
+      allOf:
+        - type: object
+          properties:
+            fieldA:
+              type: string
+            fieldRef:
+              type: object
+              properties:
+                fieldX:
+                  type: string
+                fieldY:
+                  type: integer
+              required:
+                - fieldX
+                - fieldY
+            fieldB:
+              type: boolean
+            schemaBField:
+              type: boolean
+        - $ref: '#/components/schemas/SchemaA'

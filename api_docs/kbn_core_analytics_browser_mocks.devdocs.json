@@ -1,0 +1,102 @@
+{
+  "id": "@kbn/core-analytics-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-analytics-browser-mocks",
+        "id": "def-public.analyticsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "analyticsServiceMock",
+        "description": [],
+        "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-mocks",
+            "id": "def-public.analyticsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<AnalyticsServiceContract>"
+            ],
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-mocks",
+            "id": "def-public.analyticsServiceMock.createAnalyticsServiceSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createAnalyticsServiceSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "AnalyticsServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-mocks",
+            "id": "def-public.analyticsServiceMock.createAnalyticsServiceStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createAnalyticsServiceStart",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "AnalyticsServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

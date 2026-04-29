@@ -1,0 +1,14 @@
+.mapTimeslider {
+  position: absolute;
+  left: calc(50% - 400px);
+  bottom: $euiSize;
+  z-index: 99999;
+
+  .controlFrame__formControlLayout {
+    @include euiBottomShadowLarge;
+  }
+}
+
+.mapTimeslider--animation {
+  animation: mapAnimationPulse .6s ease-in-out;
+}

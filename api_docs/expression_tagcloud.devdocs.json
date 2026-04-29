@@ -1,0 +1,158 @@
+{
+  "id": "expressionTagcloud",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionTagcloud",
+      "id": "def-public.ExpressionTagcloudPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionTagcloudPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/public/plugin.ts",
+      "lineNumber": 39,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.EXPRESSION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "EXPRESSION_NAME",
+        "description": [],
+        "signature": [
+          "\"tagcloud\""
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.ExpressionTagcloudFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionTagcloudFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"tagcloud\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          "TagCloudVisConfig",
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          "TagcloudRendererConfig",
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ">>"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/types/expression_functions.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.Orientation",
+        "type": "Object",
+        "tags": [],
+        "label": "Orientation",
+        "description": [],
+        "signature": [
+          "{ readonly SINGLE: \"single\"; readonly RIGHT_ANGLED: \"right angled\"; readonly MULTIPLE: \"multiple\"; }"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.ScaleOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "ScaleOptions",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"linear\"; readonly LOG: \"log\"; readonly SQUARE_ROOT: \"square root\"; }"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

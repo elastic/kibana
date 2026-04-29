@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/core-rendering-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-rendering-server-internal",
+        "id": "def-server.Fonts",
+        "type": "Function",
+        "tags": [],
+        "label": "Fonts",
+        "description": [],
+        "signature": [
+          "({ url }: Props) => React.JSX.Element"
+        ],
+        "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
+        "lineNumber": 222,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-server-internal",
+            "id": "def-server.Fonts.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ url }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
+            "lineNumber": 222,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

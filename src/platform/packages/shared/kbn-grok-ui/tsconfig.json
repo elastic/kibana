@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "@kbn/ambient-ui-types",
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/monaco",
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-info",
+    "@kbn/code-editor",
+    "@kbn/i18n",
+    "@kbn/object-utils",
+    "@kbn/react-hooks"
+  ]
+}

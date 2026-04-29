@@ -1,0 +1,127 @@
+{
+  "id": "@kbn/core-node-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-node-server",
+        "id": "def-server.NodeInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeInfo",
+        "description": [
+          "\nContains information about how this Kibana process has been configured.\n"
+        ],
+        "path": "src/core/packages/node/server/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server",
+            "id": "def-server.NodeInfo.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "A list of roles this node has been configured with."
+            ],
+            "signature": [
+              "NodeRoles"
+            ],
+            "path": "src/core/packages/node/server/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-node-server",
+        "id": "def-server.NodeRoles",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeRoles",
+        "description": [
+          "\nThe Kibana process can be run in dedicated \"modes\" via `node.roles`.\nThis configuration is then exposed to plugins via `NodeRoles`,\nwhich is available on the `PluginInitializerContext`.\n\nThe node roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured.\n"
+        ],
+        "path": "src/core/packages/node/server/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server",
+            "id": "def-server.NodeRoles.backgroundTasks",
+            "type": "boolean",
+            "tags": [],
+            "label": "backgroundTasks",
+            "description": [
+              "\nThe backgroundTasks role includes operations which don't involve\nresponding to incoming http traffic from the UI."
+            ],
+            "path": "src/core/packages/node/server/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server",
+            "id": "def-server.NodeRoles.ui",
+            "type": "boolean",
+            "tags": [],
+            "label": "ui",
+            "description": [
+              "\nThe ui role covers any operations that need to occur in order\nto handle http traffic from the browser."
+            ],
+            "path": "src/core/packages/node/server/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server",
+            "id": "def-server.NodeRoles.migrator",
+            "type": "boolean",
+            "tags": [],
+            "label": "migrator",
+            "description": [
+              "\nStart Kibana with the specific purpose of completing the migrations phase then shutting down."
+            ],
+            "path": "src/core/packages/node/server/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { RULE_SAVED_OBJECT_TYPE } from '.';
+import { transformRulesForExport } from './transform_rule_for_export';
+jest.mock('../lib/rule_execution_status', () => ({
+  getRuleExecutionStatusPendingAttributes: () => ({
+    status: 'pending',
+    lastExecutionDate: '2020-08-20T19:23:38Z',
+    error: null,
+  }),
+}));
+describe('transform rule for export', () => {
+  const date = new Date().toISOString();
+  const mockRules = [
+    {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        name: 'rule-name',
+        tags: ['tag-1', 'tag-2'],
+        alertTypeId: '123',
+        consumer: 'alert-consumer',
+        schedule: { interval: '1m' },
+        actions: [],
+        params: {},
+        createdBy: 'me',
+        updatedBy: 'me',
+        createdAt: date,
+        updatedAt: date,
+        apiKey: '4tndskbuhewotw4klrhgjewrt9u',
+        apiKeyOwner: 'me',
+        apiKeyCreatedByUser: true,
+        throttle: null,
+        legacyId: '1',
+        notifyWhen: 'onActionGroupChange',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'active',
+          lastExecutionDate: '2020-08-20T19:23:38Z',
+          error: null,
+        },
+        scheduledTaskId: '2q5tjbf3q45twer',
+      },
+      references: [],
+    },
+    {
+      id: '2',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: false,
+        name: 'disabled-rule',
+        tags: ['tag-1'],
+        alertTypeId: '456',
+        consumer: 'alert-consumer',
+        schedule: { interval: '1h' },
+        actions: [],
+        params: {},
+        createdBy: 'you',
+        updatedBy: 'you',
+        createdAt: date,
+        updatedAt: date,
+        apiKey: null,
+        apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
+        throttle: null,
+        legacyId: '2',
+        notifyWhen: 'onActionGroupChange',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2020-08-20T19:23:38Z',
+          error: null,
+        },
+        scheduledTaskId: null,
+      },
+      references: [],
+    },
+  ];
+
+  it('should disable rule and clear sensitive values', () => {
+    expect(transformRulesForExport(mockRules)).toEqual(
+      mockRules.map((rule) => ({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          enabled: false,
+          apiKey: null,
+          apiKeyOwner: null,
+          apiKeyCreatedByUser: null,
+          uiamApiKey: null,
+          scheduledTaskId: null,
+          legacyId: null,
+          executionStatus: {
+            status: 'pending',
+            lastExecutionDate: '2020-08-20T19:23:38Z',
+            error: null,
+          },
+        },
+      }))
+    );
+  });
+
+  it('should clear uiamApiKey when present on the rule', () => {
+    const ruleWithUiamKey = [
+      {
+        id: '3',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          name: 'rule-with-uiam',
+          tags: [],
+          alertTypeId: '789',
+          consumer: 'alert-consumer',
+          schedule: { interval: '5m' },
+          actions: [],
+          params: {},
+          createdBy: 'me',
+          updatedBy: 'me',
+          createdAt: date,
+          updatedAt: date,
+          apiKey: 'some-es-key',
+          apiKeyOwner: 'me',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: 'some-uiam-key',
+          throttle: null,
+          legacyId: null,
+          notifyWhen: 'onActionGroupChange',
+          muteAll: false,
+          mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: '2020-08-20T19:23:38Z',
+            error: null,
+          },
+          scheduledTaskId: 'task-1',
+        },
+        references: [],
+      },
+    ];
+
+    const exported = transformRulesForExport(ruleWithUiamKey);
+    expect(exported[0].attributes.uiamApiKey).toBeNull();
+    expect(exported[0].attributes.apiKey).toBeNull();
+  });
+});

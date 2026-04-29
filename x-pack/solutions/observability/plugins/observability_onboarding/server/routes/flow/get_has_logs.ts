@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { AGENT_ID } from '../../../common/es_fields';
+
+export async function getHasLogs(esClient: ElasticsearchClient, agentId: string) {
+  try {
+    const result = await esClient.search({
+      index: ['logs-*', 'metrics-*', 'logs.*'],
+      ignore_unavailable: true,
+      size: 0,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: termQuery(AGENT_ID, agentId),
+        },
+      },
+    });
+    const { value } = result.hits.total as estypes.SearchTotalHits;
+    return value > 0;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return false;
+    }
+
+    const errorType = error?.meta?.body?.error?.type;
+    const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
+
+    if (
+      errorType === 'search_phase_execution_exception' &&
+      rootCauseType === 'no_shard_available_action_exception'
+    ) {
+      return false;
+    }
+
+    throw error;
+  }
+}

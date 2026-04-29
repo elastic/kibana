@@ -1,0 +1,253 @@
+{
+  "properties": {
+    "monitoringTelemetry": {
+      "properties": {
+        "stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "timestamp": {
+                "type": "date"
+              },
+              "cluster_uuid": {
+                "type": "keyword"
+              },
+              "cluster_name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "cluster_stats": {
+                "properties": {}
+              },
+              "stack_stats": {
+                "properties": {
+                  "logstash": {
+                    "properties": {
+                      "versions": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "version": {
+                              "type": "keyword"
+                            },
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      },
+                      "count": {
+                        "type": "long"
+                      },
+                      "cluster_stats": {
+                        "properties": {
+                          "monitoringClusterUuid": {
+                            "type": "keyword"
+                          },
+                          "collection_types": {
+                            "properties": {
+                              "DYNAMIC_KEY": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "queues": {
+                            "properties": {
+                              "DYNAMIC_KEY": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "plugins": {
+                            "type": "array",
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          },
+                          "pipelines": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "batch_size_max": {
+                                "type": "long"
+                              },
+                              "batch_size_avg": {
+                                "type": "long"
+                              },
+                              "batch_size_min": {
+                                "type": "long"
+                              },
+                              "batch_size_total": {
+                                "type": "long"
+                              },
+                              "workers_max": {
+                                "type": "long"
+                              },
+                              "workers_avg": {
+                                "type": "long"
+                              },
+                              "workers_min": {
+                                "type": "long"
+                              },
+                              "workers_total": {
+                                "type": "long"
+                              },
+                              "sources": {
+                                "properties": {
+                                  "DYNAMIC_KEY": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "beats": {
+                    "properties": {
+                      "versions": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "types": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "outputs": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "queue": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "count": {
+                        "type": "long"
+                      },
+                      "eventsPublished": {
+                        "type": "long"
+                      },
+                      "hosts": {
+                        "type": "long"
+                      },
+                      "input": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          },
+                          "names": {
+                            "type": "array",
+                            "items": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      },
+                      "module": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          },
+                          "names": {
+                            "type": "array",
+                            "items": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      },
+                      "architecture": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          },
+                          "architectures": {
+                            "type": "array",
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "architecture": {
+                                  "type": "keyword"
+                                },
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "heartbeat": {
+                        "properties": {
+                          "monitors": {
+                            "type": "long"
+                          },
+                          "endpoints": {
+                            "type": "long"
+                          },
+                          "DYNAMIC_KEY": {
+                            "properties": {
+                              "monitors": {
+                                "type": "long"
+                              },
+                              "endpoints": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "functionbeat": {
+                        "properties": {
+                          "functions": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "collection": {
+                "type": "keyword"
+              },
+              "collectionSource": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

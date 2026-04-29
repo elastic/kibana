@@ -1,0 +1,20 @@
+title: Test Dataset
+type: logs
+elasticsearch:
+  dynamic_dataset: true
+  dynamic_namespace: true
+
+streams:
+- input: logfile
+  title: Test logs
+  template_path: log.yml.hbs
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+      - /var/log/auth.log*
+      - /var/log/secure*

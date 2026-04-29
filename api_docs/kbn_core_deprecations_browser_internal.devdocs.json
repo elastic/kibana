@@ -1,0 +1,145 @@
+{
+  "id": "@kbn/core-deprecations-browser-internal",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-browser-internal",
+        "id": "def-public.DeprecationsService",
+        "type": "Class",
+        "tags": [],
+        "label": "DeprecationsService",
+        "description": [],
+        "signature": [
+          "DeprecationsService",
+          " implements ",
+          "CoreService",
+          "<void, ",
+          "DeprecationsServiceStart",
+          ">"
+        ],
+        "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser-internal",
+            "id": "def-public.DeprecationsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser-internal",
+            "id": "def-public.DeprecationsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ http }: { http: ",
+              "InternalHttpStart",
+              "; }) => ",
+              "DeprecationsServiceStart"
+            ],
+            "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-browser-internal",
+                "id": "def-public.DeprecationsService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http }",
+                "description": [],
+                "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+                "lineNumber": 18,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-deprecations-browser-internal",
+                    "id": "def-public.DeprecationsService.start.$1.http",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "http",
+                    "description": [],
+                    "signature": [
+                      "Omit<",
+                      "HttpSetup",
+                      ", \"staticAssets\"> & { staticAssets: ",
+                      "InternalStaticAssets",
+                      "; }"
+                    ],
+                    "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+                    "lineNumber": 18,
+                    "columnNumber": 28,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser-internal",
+            "id": "def-public.DeprecationsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

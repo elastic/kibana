@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { GaugePublicConfig } from '../server/config';
+import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
+import type { VisTypeGaugePluginSetup } from './types';
+import { gaugeVisType, goalVisType } from './vis_type';
+import { setDataViewsStart } from './services';
+
+/** @internal */
+export interface VisTypeGaugeSetupDependencies {
+  visualizations: VisualizationsSetup;
+}
+
+/** @internal */
+export interface VisTypeGaugePluginStartDependencies {
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+}
+
+export class VisTypeGaugePlugin {
+  private readonly initializerContext: PluginInitializerContext<GaugePublicConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<GaugePublicConfig>) {
+    this.initializerContext = initializerContext;
+  }
+
+  public setup(
+    core: CoreSetup<VisTypeGaugeSetupDependencies>,
+    { visualizations }: VisTypeGaugeSetupDependencies
+  ): VisTypeGaugePluginSetup {
+    if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
+      const { readOnly } = this.initializerContext.config.get<GaugePublicConfig>();
+      const visTypeProps = { showElasticChartsOptions: true };
+      visualizations.createBaseVisualization({
+        ...gaugeVisType(visTypeProps),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
+      visualizations.createBaseVisualization({
+        ...goalVisType(visTypeProps),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
+    }
+
+    return {};
+  }
+
+  public start(core: CoreStart, { dataViews }: VisTypeGaugePluginStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
+}

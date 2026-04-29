@@ -1,47 +1,44 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import getopts from 'getopts';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
-interface ParsedArgs {
-  showHelp: boolean;
-  unknownFlags: string[];
-  log?: ToolingLog;
-  buildArgs?: {
-    [key: string]: any;
-  };
-}
+import type { BuildOptions } from './build_distributables';
 
-export function readCliArgs(argv: string[]): ParsedArgs {
+export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
-      'oss',
-      'no-oss',
       'skip-archives',
+      'skip-cdn-assets',
+      'skip-initialize',
+      'skip-generic-folders',
+      'skip-platform-folders',
       'skip-os-packages',
       'rpm',
       'deb',
-      'docker',
+      'docker-context-use-local-artifact',
+      'docker-cross-compile',
+      'docker-images',
+      'docker-push',
+      'skip-docker-contexts',
+      'skip-docker-ubi',
+      'skip-docker-wolfi',
+      'skip-docker-cloud',
+      'skip-docker-cloud-fips',
+      'skip-docker-serverless',
+      'skip-docker-fips',
+      'skip-serverless',
       'release',
       'skip-node-download',
+      'skip-cloud-dependencies-download',
       'verbose',
       'debug',
       'all-platforms',
@@ -50,7 +47,12 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       'silent',
       'debug',
       'help',
+      'with-test-plugins',
+      'with-example-plugins',
+      'serverless',
+      'tar-zstd',
     ],
+    string: ['docker-namespace', 'epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
@@ -59,28 +61,21 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       debug: true,
       rpm: null,
       deb: null,
-      docker: null,
-      oss: null,
+      'docker-images': null,
+      'docker-context-use-local-artifact': null,
+      'docker-cross-compile': false,
+      'docker-push': false,
+      'docker-tag': null,
+      'docker-tag-qualifier': null,
+      'docker-namespace': null,
       'version-qualifier': '',
+      'epr-registry': 'snapshot',
     },
-    unknown: flag => {
+    unknown: (flag) => {
       unknownFlags.push(flag);
       return false;
     },
   });
-
-  if (unknownFlags.length || flags.help) {
-    return {
-      showHelp: true,
-      unknownFlags,
-    };
-  }
-
-  // In order to build a docker image we always need
-  // to generate all the platforms
-  if (flags.docker) {
-    flags['all-platforms'] = true;
-  }
 
   const log = new ToolingLog({
     level: pickLevelFromFlags(flags, {
@@ -89,34 +84,87 @@ export function readCliArgs(argv: string[]): ParsedArgs {
     writeTo: process.stdout,
   });
 
+  if (unknownFlags.length || flags.help) {
+    return {
+      log,
+      showHelp: true,
+      unknownFlags,
+    };
+  }
+
+  // In order to build a docker image we always need
+  // to generate all the platforms
+  if (flags['docker-images']) {
+    flags['all-platforms'] = true;
+  }
+
   function isOsPackageDesired(name: string) {
     if (flags['skip-os-packages'] || !flags['all-platforms']) {
       return false;
     }
 
     // build all if no flags specified
-    if (flags.rpm === null && flags.deb === null && flags.docker === null) {
+    if (flags.rpm === null && flags.deb === null && flags['docker-images'] === null) {
       return true;
     }
 
     return Boolean(flags[name]);
   }
 
+  const eprRegistry = flags['epr-registry'];
+  if (eprRegistry !== 'snapshot' && eprRegistry !== 'production') {
+    log.error(
+      `Invalid value for --epr-registry, must be 'production' or 'snapshot', got ${eprRegistry}`
+    );
+    return {
+      log,
+      showHelp: true,
+      unknownFlags: [],
+    };
+  }
+
+  const buildOptions: BuildOptions = {
+    isRelease: Boolean(flags.release),
+    versionQualifier: flags['version-qualifier'],
+    dockerContextUseLocalArtifact: flags['docker-context-use-local-artifact'],
+    dockerCrossCompile: Boolean(flags['docker-cross-compile']),
+    dockerNamespace: flags['docker-namespace'],
+    dockerPush: Boolean(flags['docker-push']),
+    dockerTag: flags['docker-tag'],
+    dockerTagQualifier: flags['docker-tag-qualifier'],
+    initialize: !Boolean(flags['skip-initialize']),
+    downloadFreshNode: !Boolean(flags['skip-node-download']),
+    downloadCloudDependencies: !Boolean(flags['skip-cloud-dependencies-download']),
+    createGenericFolders: !Boolean(flags['skip-generic-folders']),
+    createPlatformFolders: !Boolean(flags['skip-platform-folders']),
+    createArchives: !Boolean(flags['skip-archives']),
+    createCdnAssets: !Boolean(flags['skip-cdn-assets']),
+    createRpmPackage: isOsPackageDesired('rpm'),
+    createDebPackage: isOsPackageDesired('deb'),
+    createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
+    createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloudFIPS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
+    createDockerServerless:
+      !Boolean(flags['skip-serverless']) &&
+      ((isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
+        Boolean(flags.serverless)),
+    createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
+    createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
+    targetAllPlatforms: Boolean(flags['all-platforms']),
+    targetServerlessPlatforms: Boolean(flags.serverless),
+    skipServerless: Boolean(flags['skip-serverless']),
+    eprRegistry: flags['epr-registry'],
+    tarZstd: Boolean(flags['tar-zstd']),
+    withExamplePlugins: Boolean(flags['with-example-plugins']),
+    withTestPlugins: Boolean(flags['with-test-plugins']),
+  };
+
   return {
+    log,
     showHelp: false,
     unknownFlags: [],
-    log,
-    buildArgs: {
-      isRelease: Boolean(flags.release),
-      versionQualifier: flags['version-qualifier'],
-      buildOssDist: flags.oss !== false,
-      buildDefaultDist: !flags.oss,
-      downloadFreshNode: !Boolean(flags['skip-node-download']),
-      createArchives: !Boolean(flags['skip-archives']),
-      createRpmPackage: isOsPackageDesired('rpm'),
-      createDebPackage: isOsPackageDesired('deb'),
-      createDockerPackage: isOsPackageDesired('docker'),
-      targetAllPlatforms: Boolean(flags['all-platforms']),
-    },
+    buildOptions,
   };
 }

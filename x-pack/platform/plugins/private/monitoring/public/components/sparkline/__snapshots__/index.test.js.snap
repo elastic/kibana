@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sparkline component does not show tooltip initially 1`] = `
+<div>
+  <div
+    className="css-9ufo15-Sparkline"
+  />
+</div>
+`;
+
+exports[`Sparkline component with EuiProvider shows tooltip on hover 1`] = `
+<div>
+  <div
+    css="unknown styles"
+  />
+  <div
+    className="monSparklineTooltip__container"
+    style={
+      Object {
+        "left": 210,
+        "top": 17,
+      }
+    }
+  >
+    <i
+      className="fa fa-caret-left"
+      style={
+        Object {
+          "display": "block",
+          "width": 6,
+        }
+      }
+    />
+    <div
+      css="unknown styles"
+      style={
+        Object {
+          "height": 56,
+          "width": 220,
+        }
+      }
+    >
+      <div
+        css="unknown styles"
+      >
+        1513814914
+      </div>
+      <div
+        css="unknown styles"
+      >
+        25
+      </div>
+    </div>
+    <i
+      className="fa fa-caret-right"
+      style={
+        Object {
+          "width": 6,
+        }
+      }
+    />
+  </div>
+</div>
+`;

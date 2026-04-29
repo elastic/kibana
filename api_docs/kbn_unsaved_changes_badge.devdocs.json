@@ -1,0 +1,297 @@
+{
+  "id": "@kbn/unsaved-changes-badge",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/unsaved-changes-badge",
+        "id": "def-common.getTopNavUnsavedChangesBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "getTopNavUnsavedChangesBadge",
+        "description": [
+          "\nReturns a badge object suitable for the top nav `badges` prop"
+        ],
+        "signature": [
+          "({ onRevert, onSave, onSaveAs, }: ",
+          {
+            "pluginId": "@kbn/unsaved-changes-badge",
+            "scope": "common",
+            "docId": "kibKbnUnsavedChangesBadgePluginApi",
+            "section": "def-common.TopNavUnsavedChangesBadgeParams",
+            "text": "TopNavUnsavedChangesBadgeParams"
+          },
+          ") => ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuBadgeProps",
+            "text": "TopNavMenuBadgeProps"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.getTopNavUnsavedChangesBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onRevert,\n  onSave,\n  onSaveAs,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unsaved-changes-badge",
+                "scope": "common",
+                "docId": "kibKbnUnsavedChangesBadgePluginApi",
+                "section": "def-common.TopNavUnsavedChangesBadgeParams",
+                "text": "TopNavUnsavedChangesBadgeParams"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 33,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unsaved-changes-badge",
+        "id": "def-common.UnsavedChangesBadge",
+        "type": "Function",
+        "tags": [
+          "constructor"
+        ],
+        "label": "UnsavedChangesBadge",
+        "description": [
+          "\nBadge component. It opens a menu panel with actions once pressed."
+        ],
+        "signature": [
+          "({ badgeText, onRevert, onSave, onSaveAs, }: ",
+          {
+            "pluginId": "@kbn/unsaved-changes-badge",
+            "scope": "common",
+            "docId": "kibKbnUnsavedChangesBadgePluginApi",
+            "section": "def-common.UnsavedChangesBadgeProps",
+            "text": "UnsavedChangesBadgeProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.UnsavedChangesBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  badgeText,\n  onRevert,\n  onSave,\n  onSaveAs,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unsaved-changes-badge",
+                "scope": "common",
+                "docId": "kibKbnUnsavedChangesBadgePluginApi",
+                "section": "def-common.UnsavedChangesBadgeProps",
+                "text": "UnsavedChangesBadgeProps"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 45,
+            "columnNumber": 73,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/unsaved-changes-badge",
+        "id": "def-common.TopNavUnsavedChangesBadgeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopNavUnsavedChangesBadgeParams",
+        "description": [
+          "\nParams for getTopNavUnsavedChangesBadge"
+        ],
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.TopNavUnsavedChangesBadgeParams.onRevert",
+            "type": "Function",
+            "tags": [],
+            "label": "onRevert",
+            "description": [],
+            "signature": [
+              "() => Promise<unknown>"
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.TopNavUnsavedChangesBadgeParams.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [],
+            "signature": [
+              "(() => Promise<unknown>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.TopNavUnsavedChangesBadgeParams.onSaveAs",
+            "type": "Function",
+            "tags": [],
+            "label": "onSaveAs",
+            "description": [],
+            "signature": [
+              "(() => Promise<unknown>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unsaved-changes-badge",
+        "id": "def-common.UnsavedChangesBadgeProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnsavedChangesBadgeProps",
+        "description": [
+          "\nProps for UnsavedChangesBadge"
+        ],
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.UnsavedChangesBadgeProps.onRevert",
+            "type": "Function",
+            "tags": [],
+            "label": "onRevert",
+            "description": [],
+            "signature": [
+              "() => Promise<unknown>"
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.UnsavedChangesBadgeProps.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [],
+            "signature": [
+              "(() => Promise<unknown>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.UnsavedChangesBadgeProps.onSaveAs",
+            "type": "Function",
+            "tags": [],
+            "label": "onSaveAs",
+            "description": [],
+            "signature": [
+              "(() => Promise<unknown>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unsaved-changes-badge",
+            "id": "def-common.UnsavedChangesBadgeProps.badgeText",
+            "type": "string",
+            "tags": [],
+            "label": "badgeText",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

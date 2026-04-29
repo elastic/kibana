@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  VariableDeclaration,
+  PropertyAssignment,
+  PropertyDeclaration,
+  PropertySignature,
+  ShorthandPropertyAssignment,
+} from 'ts-morph';
+import { Node } from 'ts-morph';
+import { isInternal } from '../utils';
+import type { ApiDeclaration } from '../types';
+import { TypeKind } from '../types';
+import { getArrowFunctionDec } from './build_arrow_fn_dec';
+import { buildApiDeclaration } from './build_api_declaration';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { buildCallSignatureDec } from './build_call_signature_dec';
+import { buildMultipleCallSignaturesDec } from './build_multiple_call_signatures_dec';
+import type { BuildApiDecOpts } from './types';
+import { getOptsForChild } from './utils';
+
+/**
+ * Special handling for objects and arrow functions which are variable or property node types.
+ * Objects and arrow functions need their children extracted recursively. This uses the name from the
+ * node, but checks for an initializer to get inline arrow functions and objects defined recursively.
+ */
+export function buildVariableDec(
+  node:
+    | VariableDeclaration
+    | PropertyAssignment
+    | PropertyDeclaration
+    | PropertySignature
+    | ShorthandPropertyAssignment,
+  opts: BuildApiDecOpts
+): ApiDeclaration {
+  const initializer = node.getInitializer();
+  if (initializer && Node.isObjectLiteralExpression(initializer)) {
+    // Recursively list object properties as children.
+    return {
+      ...buildBasicApiDeclaration(node, opts),
+      type: TypeKind.ObjectKind,
+      children: initializer.getProperties().reduce((acc, prop) => {
+        const child = buildApiDeclaration(prop, getOptsForChild(prop, opts));
+        if (!isInternal(child)) {
+          acc.push(child);
+        }
+        return acc;
+      }, [] as ApiDeclaration[]),
+      // Clear out the signature, we don't want it for objects, relying on the children properties will be enough.
+      signature: undefined,
+    };
+  } else if (initializer && Node.isArrowFunction(initializer)) {
+    return getArrowFunctionDec(node, initializer, opts);
+  }
+
+  // Without this the test "Property on interface pointing to generic function type exported with link" will fail.
+  const callSignatures = node.getType().getCallSignatures();
+  if (callSignatures.length === 1) {
+    return buildCallSignatureDec(node, callSignatures[0], opts);
+  } else if (callSignatures.length > 1) {
+    return buildMultipleCallSignaturesDec(node, callSignatures, opts);
+  }
+
+  return buildBasicApiDeclaration(node, opts);
+}

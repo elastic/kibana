@@ -1,0 +1,76 @@
+{
+  "id": "@kbn/formatters",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/formatters",
+        "id": "def-common.formatBytes",
+        "type": "Function",
+        "tags": [],
+        "label": "formatBytes",
+        "description": [],
+        "signature": [
+          "(bytes: number, decimals?: number) => string"
+        ],
+        "path": "packages/kbn-formatters/src/bytes_formatter/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/formatters",
+            "id": "def-common.formatBytes.$1",
+            "type": "number",
+            "tags": [],
+            "label": "bytes",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-formatters/src/bytes_formatter/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/formatters",
+            "id": "def-common.formatBytes.$2",
+            "type": "number",
+            "tags": [],
+            "label": "decimals",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-formatters/src/bytes_formatter/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

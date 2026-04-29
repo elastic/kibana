@@ -1,0 +1,45 @@
+{
+  "id": "visTypeVislib",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "visTypeVislib",
+        "id": "def-common.HEATMAP_MAX_BUCKETS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "HEATMAP_MAX_BUCKETS_SETTING",
+        "description": [],
+        "signature": [
+          "\"visualization:heatmap:maxBuckets\""
+        ],
+        "path": "src/platform/plugins/private/vis_types/vislib/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -1,0 +1,168 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionalToolTip renders correctly with node data 1`] = `
+<div
+  aria-label="host-01"
+  data-test-subj="conditionalTooltipContent-host-01"
+  style="min-width: 220px;"
+>
+  <div
+    style="border-bottom: 1px solid #E3E8F2; border-bottom-color: #8E9FBC; padding-bottom: 4px; margin-bottom: 4px;"
+  >
+    host-01
+  </div>
+  <div
+    aria-label="CPU usage : 10%"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      CPU usage
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      10%
+    </div>
+  </div>
+  <div
+    aria-label="CPU usage (Legacy) : 10%"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      CPU usage (Legacy)
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      10%
+    </div>
+  </div>
+  <div
+    aria-label="Memory usage : 80%"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Memory usage
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      80%
+    </div>
+  </div>
+  <div
+    aria-label="Inbound traffic : 8 Mbit/s"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Inbound traffic
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    aria-label="Outbound traffic : 8 Mbit/s"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Outbound traffic
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    aria-label="Inbound traffic (Legacy) : 8 Mbit/s"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Inbound traffic (Legacy)
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    aria-label="Outbound traffic (Legacy) : 8 Mbit/s"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Outbound traffic (Legacy)
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    aria-label="My Custom Label : 34.1%"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      My Custom Label
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      34.1%
+    </div>
+  </div>
+  <div
+    aria-label="Avg of host.network.out.packets : 4,392.2"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Avg of host.network.out.packets
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      4,392.2
+    </div>
+  </div>
+</div>
+`;

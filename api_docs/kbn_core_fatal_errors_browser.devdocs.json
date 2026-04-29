@@ -1,0 +1,327 @@
+{
+  "id": "@kbn/core-fatal-errors-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser",
+        "id": "def-public.FatalError",
+        "type": "Interface",
+        "tags": [],
+        "label": "FatalError",
+        "description": [
+          "\nThe fatal error info.\n"
+        ],
+        "signature": [
+          "FatalError",
+          "<T>"
+        ],
+        "path": "src/core/packages/fatal-errors/browser/src/fatal_error.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-public.FatalError.error",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nThe error to display."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/core/packages/fatal-errors/browser/src/fatal_error.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-public.FatalError.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\nA prefix to the error message."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/fatal-errors/browser/src/fatal_error.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser",
+        "id": "def-public.FatalErrorsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "FatalErrorsSetup",
+        "description": [
+          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+        ],
+        "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-public.FatalErrorsSetup.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [
+              "\nAdd a new fatal error. This will stop the Kibana Public Core and display\na fatal error screen with details about the Kibana build and the error.\n"
+            ],
+            "signature": [
+              "(error: string | Error, source?: string | undefined) => never"
+            ],
+            "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-public.FatalErrorsSetup.add.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [
+                  "- The error to display"
+                ],
+                "signature": [
+                  "string | Error"
+                ],
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+                "lineNumber": 27,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-public.FatalErrorsSetup.add.$2",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [
+                  "- Adds a prefix of the form `${source}: ` to the error message"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+                "lineNumber": 27,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-public.FatalErrorsSetup.catch",
+            "type": "Function",
+            "tags": [],
+            "label": "catch",
+            "description": [
+              "\nRegister custom error handler for specific error type."
+            ],
+            "signature": [
+              "{ <T extends string | Error>(condition: (error: ",
+              "FatalError",
+              "<string | Error>) => error is ",
+              "FatalError",
+              "<T>, handler: (errors: ",
+              "FatalError",
+              "<T>[]) => React.ReactNode): void; (condition: (error: ",
+              "FatalError",
+              "<string | Error>) => boolean, handler: (errors: ",
+              "FatalError",
+              "<string | Error>[]) => React.ReactNode): void; }"
+            ],
+            "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-public.FatalErrorsSetup.catch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "condition",
+                "description": [
+                  "- A function that checks if the error is of a specific type."
+                ],
+                "signature": [
+                  "(error: ",
+                  "FatalError",
+                  "<string | Error>) => error is ",
+                  "FatalError",
+                  "<T>"
+                ],
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-public.FatalErrorsSetup.catch.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "(errors: ",
+                  "FatalError",
+                  "<T>[]) => React.ReactNode"
+                ],
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-public.FatalErrorsSetup.catch",
+            "type": "Function",
+            "tags": [],
+            "label": "catch",
+            "description": [
+              "\nRegister custom error handler for specific error type."
+            ],
+            "signature": [
+              "{ <T extends string | Error>(condition: (error: ",
+              "FatalError",
+              "<string | Error>) => error is ",
+              "FatalError",
+              "<T>, handler: (errors: ",
+              "FatalError",
+              "<T>[]) => React.ReactNode): void; (condition: (error: ",
+              "FatalError",
+              "<string | Error>) => boolean, handler: (errors: ",
+              "FatalError",
+              "<string | Error>[]) => React.ReactNode): void; }"
+            ],
+            "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-public.FatalErrorsSetup.catch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "condition",
+                "description": [
+                  "- A function that checks if the error is of a specific type."
+                ],
+                "signature": [
+                  "(error: ",
+                  "FatalError",
+                  "<string | Error>) => boolean"
+                ],
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-public.FatalErrorsSetup.catch.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "(errors: ",
+                  "FatalError",
+                  "<string | Error>[]) => React.ReactNode"
+                ],
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser",
+        "id": "def-public.FatalErrorsStart",
+        "type": "Type",
+        "tags": [],
+        "label": "FatalErrorsStart",
+        "description": [
+          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+        ],
+        "signature": [
+          "FatalErrorsSetup"
+        ],
+        "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,66 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  eventsPerCycle: 100
+  dataset: "fake_stack"
+
+schedule:
+  # Start with good events
+  - template: "good"
+    start: "now-90m"
+    end: "now-45m"
+    eventsPerCycle: 100
+    randomness: 0.1
+  # Transition from good to bad by setting up two schedules witht he same
+  # time frames but different templates to transition between 0 to 100 and vice
+  # versa
+  - template: "good"
+    start: "now-45m"
+    end: "now-35m"
+    eventsPerCycle:
+      start: 100
+      end: 1
+      method: "linear"
+    randomness: 0.1
+  - template: "bad"
+    start: "now-45m"
+    end: "now-35m"
+    eventsPerCycle:
+      start: 1
+      end: 100
+      method: "linear"
+    randomness: 0.1
+  # Bad for 10 minutes
+  - template: "bad"
+    start: "now-35m"
+    end: "now-25m"
+    eventsPerCycle: 100
+    randomness: 0.1
+  # Transition back from bad to good
+  - template: "good"
+    start: "now-25m"
+    end: "now-15m"
+    eventsPerCycle:
+      start: 1
+      end: 100
+      method: "linear"
+    randomness: 0.1
+  - template: "bad"
+    start: "now-25m"
+    end: "now-15m"
+    eventsPerCycle:
+      start: 100
+      end: 1
+      method: "linear"
+    randomness: 0.1
+  # continue with good
+  - template: "good"
+    start: "now-15m"
+    end: false
+    eventsPerCycle: 100
+    randomness: 0.1

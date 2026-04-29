@@ -1,0 +1,11 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "test-*"
+  },
+  "id": "test-*",
+  "references": [],
+  "type": "index-pattern"
+}

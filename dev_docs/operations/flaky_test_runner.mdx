@@ -1,0 +1,21 @@
+---
+id: kibDevDocsOpsFlakyTestRunner
+slug: /kibana-dev-docs/ops/flaky-test-runner
+title: "Flaky Test Runner"
+description: A tool which runs specific tests many times to spot flakiness
+tags: ['kibana', 'dev', 'contributor', 'operations', 'ci', 'tests', 'flaky']
+---
+
+The Flaky Test Runner is a tool that can be used to gauge the flakiness of a test. It is triggered using the form at https://ci-stats.kibana.dev/trigger_flaky_test_runner. Follow the instructions in the wizard to pick a PR, then a test which will run and the number of executions for that test, and finally start that job at Buildkite.
+
+After starting the job you will be sent to buildkite to view the progress of the job.
+
+## How many successful runs do I need to know if my test is flaky?
+
+Most of the time flakiness should be resolved by starting with the error that's occurring in CI, then applying the suggestions in <DocLink id="kibDevDocsOpsFlakyTests" section="how-do-i-write-tests-that-arent-flaky" text="Flaky tests: How do I write functional tests that aren't flaky?"/> to find places where flakiness is likely being introduced. When working this way the flaky test runner can be used to debug a failure by running it many times to trigger the flakiness, or used to verify at the end that flakiness isn't increased by the changes.
+
+If you did want to prove that your test wasn't flaky anymore, the number of runs that you would need is based on the flakiness of the test you are dealing with. We execute tests about 300 times a day, on average, so if your test is only failing a few times a week then you might need over 1000 successful test runs to prove that it's no longer flaky. If a test is failing several times a day, then you would need way fewer.
+
+Ultimately, running the flaky test runner enough times to validate that a test isn't flaky just isn't an economically responsible way to fix flakiness so should be a last resort strategy.
+
+If there is reason to believe that a test which was previously flaky is no longer flaky, then the test can just be unskipped. If the test is still flaky then that will be proven shortly enough in CI and Operations will skip the test again.

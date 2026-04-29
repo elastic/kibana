@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-plugin/common';
+import { getESQLAdHocDataview, getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import type { ESQLColumn } from '@kbn/es-types';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { getData, getHttp, getIndexPatternService } from '../../../kibana_services';
+
+// ESQL_GEO_POINT_TYPE !== ES_GEO_FIELD_TYPE.GEO_POINT
+// ES_GEO_FIELD_TYPE.GEO_POINT is a field type from an Elasticsearch index mapping
+// ESQL_GEO_POINT_TYPE is a column type from an ESQL response
+export const ESQL_GEO_POINT_TYPE = 'geo_point';
+
+// ESQL_GEO_SHAPE_TYPE !== ES_GEO_FIELD_TYPE.GEO_SHAPE
+// ES_GEO_FIELD_TYPE.GEO_SHAPE is a field type from an Elasticsearch index mapping
+// ESQL_GEO_SHAPE_TYPE is a column type from an ESQL response
+export const ESQL_GEO_SHAPE_TYPE = 'geo_shape';
+
+export function isGeometryColumn(column: ESQLColumn) {
+  return [ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE].includes(column.type);
+}
+
+export function verifyGeometryColumn(columns: ESQLColumn[]) {
+  const geometryColumns = columns.filter(isGeometryColumn);
+  if (geometryColumns.length === 0) {
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.noGeometryColumnErrorMsg', {
+        defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
+      })
+    );
+  }
+
+  if (geometryColumns.length > 1) {
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.multipleGeometryColumnErrorMsg', {
+        defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'DROP' or 'KEEP' to narrow columns.`,
+        values: {
+          count: geometryColumns.length,
+        },
+      })
+    );
+  }
+}
+
+export async function getESQLMeta(esql: string) {
+  const adhocDataView = await getESQLAdHocDataview({
+    dataViewsService: getIndexPatternService(),
+    query: esql,
+    http: getHttp(),
+  });
+  return {
+    columns: await getESQLQueryColumnsRaw({
+      esqlQuery: esql,
+      search: getData().search.search,
+      timeRange: getData().query.timefilter.timefilter.getAbsoluteTime(),
+    }),
+    adhocDataViewId: adhocDataView.id!,
+    ...getFields(adhocDataView),
+  };
+}
+
+export function getFields(dataView: DataView) {
+  const dateFields: string[] = [];
+  const geoFields: string[] = [];
+  dataView.fields.forEach((field) => {
+    if (field.type === 'date') {
+      dateFields.push(field.name);
+    } else if (
+      field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
+      field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+    ) {
+      geoFields.push(field.name);
+    }
+  });
+
+  return {
+    dateFields,
+    geoFields,
+  };
+}

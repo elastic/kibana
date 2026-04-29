@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Export Timelines API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
+  description: Documentation
+paths:
+  /api/timeline/_export:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ExportTimelines
+      summary: Export Timelines
+      description: Export Timelines as an NDJSON file.
+      tags:
+        - access:securitySolution
+      parameters:
+        - in: query
+          name: file_name
+          required: true
+          schema:
+            type: string
+          description: The name of the file to export
+      requestBody:
+        description: The IDs of the Timelines to export.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  nullable: true
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    type: string
+            examples:
+              exportIds:
+                summary: Export by timeline ids
+                value:
+                  ids:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/ndjson:
+              schema:
+                type: string
+                description: NDJSON of the exported Timelines
+              examples:
+                ndjsonLine:
+                  summary: Single NDJSON line
+                  value: '{"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd","title":"Investigation","timelineType":"default"}'
+        '400':
+          description: Bad Request response.
+          content:
+            application/ndjson:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+              examples:
+                badRequest:
+                  summary: Export error
+                  value:
+                    body: Export limit exceeded
+                    statusCode: 400

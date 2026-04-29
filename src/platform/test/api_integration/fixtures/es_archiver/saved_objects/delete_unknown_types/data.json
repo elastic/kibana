@@ -1,0 +1,178 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:8963ca30-3224-11e8-a572-ffca06da1357",
+    "index": ".kibana_analytics",
+    "source": {
+      "coreMigrationVersion": "8.8.0",
+      "index-pattern": {
+        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "title": "saved_objects*"
+      },
+      "references": [],
+      "type": "index-pattern",
+      "updated_at": "2018-03-28T01:08:34.290Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "search:960372e0-3224-11e8-a572-ffca06da1357",
+    "index": ".kibana_analytics",
+    "source": {
+      "coreMigrationVersion": "8.8.0",
+      "references": [
+        {
+          "id": "8963ca30-3224-11e8-a572-ffca06da1357",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "search": {
+        "columns": [
+          "_source"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"id:3\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "_score",
+            "desc"
+          ]
+        ],
+        "title": "OneRecord",
+        "version": 1
+      },
+      "type": "search",
+      "updated_at": "2018-03-28T01:08:55.182Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "visualization:a42c0580-3224-11e8-a572-ffca06da1357",
+    "index": ".kibana_analytics",
+    "source": {
+      "coreMigrationVersion": "8.8.0",
+      "references": [
+        {
+          "id": "960372e0-3224-11e8-a572-ffca06da1357",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2018-03-28T01:09:18.936Z",
+      "visualization": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VisualizationFromSavedSearch",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"VisualizationFromSavedSearch\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showToolbar\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357",
+    "index": ".kibana_analytics",
+    "source": {
+      "coreMigrationVersion": "8.8.0",
+      "dashboard": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        },
+        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+        "panelsJSON": "[{\"version\":\"7.0.0-alpha1\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_0\"},{\"version\":\"7.0.0-alpha1\",\"gridData\":{\"w\":24,\"h\":15,\"x\":24,\"y\":0,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+        "timeRestore": false,
+        "title": "Dashboard",
+        "version": 1
+      },
+      "references": [
+        {
+          "id": "add810b0-3224-11e8-a572-ffca06da1357",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "a42c0580-3224-11e8-a572-ffca06da1357",
+          "name": "panel_1",
+          "type": "visualization"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2018-03-28T01:09:50.606Z",
+      "namespaces": [
+        "default"
+      ],
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unknown-type:unknown-doc",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "unknown-type": {
+        "foo": "bar"
+      },
+      "migrationVersion": {},
+      "references": [],
+      "type": "unknown-type",
+      "updated_at": "2018-03-28T01:08:34.290Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unknown-shareable-doc",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "unknown-shareable-type": {
+        "foo": "bar"
+      },
+      "migrationVersion": {},
+      "references": [],
+      "type": "unknown-shareable-type",
+      "updated_at": "2018-03-28T01:08:34.290Z"
+    },
+    "type": "_doc"
+  }
+}
+

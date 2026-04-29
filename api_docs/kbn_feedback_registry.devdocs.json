@@ -1,0 +1,171 @@
+{
+  "id": "@kbn/feedback-registry",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/feedback-registry",
+        "id": "def-common.getFeedbackQuestionsForApp",
+        "type": "Function",
+        "tags": [],
+        "label": "getFeedbackQuestionsForApp",
+        "description": [],
+        "signature": [
+          "(appId?: string | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/feedback-components",
+            "scope": "public",
+            "docId": "kibKbnFeedbackComponentsPluginApi",
+            "section": "def-public.FeedbackRegistryEntry",
+            "text": "FeedbackRegistryEntry"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/platform/packages/private/feedback-registry/src/registry.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/feedback-registry",
+            "id": "def-common.getFeedbackQuestionsForApp.$1",
+            "type": "string",
+            "tags": [],
+            "label": "appId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/feedback-registry/src/registry.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/feedback-registry",
+        "id": "def-common.DEFAULT_EXPERIENCE_QUESTION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_EXPERIENCE_QUESTION_ID",
+        "description": [],
+        "signature": [
+          "\"default_experience\""
+        ],
+        "path": "x-pack/platform/packages/private/feedback-registry/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/feedback-registry",
+        "id": "def-common.DEFAULT_GENERAL_QUESTION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_GENERAL_QUESTION_ID",
+        "description": [],
+        "signature": [
+          "\"general_feedback\""
+        ],
+        "path": "x-pack/platform/packages/private/feedback-registry/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/feedback-registry",
+        "id": "def-common.DEFAULT_REGISTRY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_REGISTRY_ID",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "x-pack/platform/packages/private/feedback-registry/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/feedback-registry",
+        "id": "def-common.FeedbackRegistry",
+        "type": "Type",
+        "tags": [],
+        "label": "FeedbackRegistry",
+        "description": [
+          "\nList of feedback plugin questions for a given application.\nEach entry is a lazy loader that returns the questions for a specific app,\nensuring only the relevant questions are loaded at runtime."
+        ],
+        "signature": [
+          "Map<string, () => Promise<",
+          {
+            "pluginId": "@kbn/feedback-components",
+            "scope": "public",
+            "docId": "kibKbnFeedbackComponentsPluginApi",
+            "section": "def-public.FeedbackRegistryEntry",
+            "text": "FeedbackRegistryEntry"
+          },
+          "[]>>"
+        ],
+        "path": "x-pack/platform/packages/private/feedback-registry/src/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/feedback-registry",
+        "id": "def-common.FeedbackRegistryEntryId",
+        "type": "Type",
+        "tags": [],
+        "label": "FeedbackRegistryEntryId",
+        "description": [
+          "\nThe id of the application associated with this feedback entry, e.g. 'dashboard', 'discover'\nor in case of deep links, the deep link id e.g. 'ml:dataVisualizer'."
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/platform/packages/private/feedback-registry/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

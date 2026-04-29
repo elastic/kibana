@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fetch from 'node-fetch';
 import { resolve } from 'path';
-import abab from 'abab';
 import pkg from '../../package.json';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 
 function getRequestParams(argv) {
   // use `--host=https://somedomain.com:5601` or else http://localhost:5601 is defaulted
@@ -15,7 +16,7 @@ function getRequestParams(argv) {
   // use `--auth=myuser:mypassword` or else elastic:changeme is defaulted
   // passing `--auth` with no value effectively sends no auth
   const auth = argv.auth || 'elastic:changeme';
-  const authStr = abab.btoa(auth);
+  const authStr = Buffer.from(auth).toString('base64');
   // auto-add a leading slash to basePath
   const basePath = argv.basePath ? '/' + argv.basePath : '';
 
@@ -30,7 +31,8 @@ function getRequestHeaders(auth) {
   return {
     'kbn-version': pkg.version,
     'Content-Type': 'application/json',
-    'Authorization': auth,
+    Authorization: auth,
+    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
   };
 }
 
@@ -43,7 +45,7 @@ function logHeaders(res) {
   // use `--headers` to print the response headers
   const headers = res.headers.raw();
   for (const key in headers) {
-    if (headers.hasOwnProperty(key)) {
+    if (Object.hasOwn(headers, key)) {
       console.log(`${key}: ${headers[key]}`);
     }
   }

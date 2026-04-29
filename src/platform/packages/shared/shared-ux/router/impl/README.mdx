@@ -1,0 +1,53 @@
+---
+id: sharedUX/Router
+slug: /shared-ux/router
+title: Router
+description: A router component
+tags: ['shared-ux', 'component', 'router', 'route']
+date: 2022-08-12
+---
+
+## Summary
+This is a wrapper around the `react-router-dom` Route component that inserts MatchPropagator in every application route. It helps track all route changes and send them to the execution context, later used to enrich APM 'route-change' transactions.
+The component does not require any props and accepts props from the RouteProps interface such as a `path`, or a component like `AppContainer`. 
+
+
+```jsx 
+<Route path="/url" />
+```
+
+### Explanation of RouteProps
+
+```jsx
+export interface RouteProps {
+    location?: H.Location; 
+    component?: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>; 
+    render?: (props: RouteComponentProps<any>) => React.ReactNode; 
+    children?: ((props: RouteChildrenProps<any>) => React.ReactNode) | React.ReactNode; 
+    path?: string | string[]; 
+    exact?: boolean; 
+    sensitive?: boolean; 
+    strict?: boolean; 
+}
+```
+
+All props are optional 
+
+| Prop Name | Prop Type | Description |
+|---|---|---|
+| `location` | `H.Location` | the location of one instance of history |
+| `component` | `React.ComponentType<RouteComponentProps<any>>` or `React.ComponentType<any>;` | a react component |
+| `render` | `(props: RouteComponentProps<any>) => React.ReactNode;` | render props to a react node|
+| `children` | `((props: RouteChildrenProps<any>) => React.ReactNode)` or `React.ReactNode;` | pass children to a react node |
+| `path` | `string` or `string[];` | a url path or array of paths |
+| `exact` | `boolean` | exact match for a route (see: https://stackoverflow.com/questions/52275146/usage-of-exact-and-strict-props) |
+| `sensitive` | `boolean` | case senstive route |
+| `strict` | `boolean` | strict entry of the requested path in the path name |
+
+
+
+This component removes the need for manual calls to `useExecutionContext` and they should be removed. 
+
+## EUI Promotion Status
+
+This component is not currently considered for promotion to EUI.

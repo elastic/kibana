@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/scout-info",
+  "owner": [
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

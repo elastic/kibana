@@ -1,0 +1,10 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "timestamp_in_seconds",
+    "source": {
+      "@timestamp": 1622676795
+    },
+    "type": "_doc"
+  }
+}

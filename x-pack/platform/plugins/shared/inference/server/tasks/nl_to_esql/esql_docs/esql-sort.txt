@@ -1,0 +1,47 @@
+# SORT
+
+The SORT command arranges the rows of a table based on one or more columns. By default, sorting is in ascending order, but you can specify ascending (ASC) or descending (DESC) order. Additional sort expressions can be used as tie breakers. When sorting multivalued columns, the lowest value is used for ascending order and the highest for descending. Null values are treated as larger than any other value by default, appearing last in ascending order and first in descending order. You can override this behavior with NULLS FIRST or NULLS LAST.
+
+## Syntax
+
+`SORT column1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., columnN [ASC/DESC][NULLS FIRST/NULLS LAST]]`
+
+### Parameters
+
+#### columnX
+
+The column to sort on.
+
+## Examples
+
+Sorts the employees by their height in ascending order.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height
+```
+
+Sorts the employees by their height in descending order.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height DESC
+```
+
+Sorts the employees by height in descending order, and uses first name in ascending order to break ties.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height DESC, first_name ASC
+```
+
+Sorts the employees by first name in ascending order, placing any null values at the top of the list.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT first_name ASC NULLS FIRST
+```

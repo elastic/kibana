@@ -1,0 +1,68 @@
+{
+  "id": "url_to_8_14_dashboard",
+  "type": "url",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-02T21:07:10.533Z",
+  "created_at": "2025-06-02T21:07:10.533Z",
+  "created_by": "u_2113432222_cloud",
+  "version": "WzMxMTEsMV0=",
+  "attributes": {
+    "accessCount": 0,
+    "accessDate": 1748898430533,
+    "createDate": 1748898430533,
+    "slug": "nlpkp",
+    "locatorJSON": "{\"id\":\"LEGACY_SHORT_URL_LOCATOR\",\"version\":\"8.14.3\",\"state\":{\"url\":\"/app/dashboards#/create?_g=(refreshInterval:(pause:!t,value:60000),time:(from:now-24h%2Fh,to:now))&_a=(controlGroupInput:(chainingSystem:HIERARCHICAL,controlStyle:oneLine,id:control_group_0bfa1e05-fb6a-45b6-be34-a4c21dd70c43,ignoreParentSettings:(ignoreFilters:!f,ignoreQuery:!f,ignoreTimerange:!f,ignoreValidations:!f),panels:(c86a8845-49b3-453a-bc94-ef345c1cd65a:(explicitInput:(dataViewId:%2790943e30-9a47-11e8-b64d-95841ca0b247%27,fieldName:machine.os.keyword,grow:!t,id:c86a8845-49b3-453a-bc94-ef345c1cd65a,searchTechnique:prefix,selectedOptions:!(%27win%207%27),title:machine.os.keyword,width:medium),grow:!t,order:0,type:optionsListControl,width:medium)),showApplySelections:!f),panels:!((embeddableConfig:(description:%27%27,hiddenLayers:!(),isLayerTOCOpen:!t,mapBuffer:(maxLat:55.77657,maxLon:-45,minLat:21.94305,minLon:-135),mapCenter:(lat:42.16337,lon:-88.92107,zoom:3.64),openTOCDetails:!()),gridData:(h:15,i:d894350c-9f04-4ebf-a8c4-ed5c83ae08bf,w:24,x:0,y:0),id:de71f4f0-1902-11e9-919b-ffe5949a18d2,panelIndex:d894350c-9f04-4ebf-a8c4-ed5c83ae08bf,title:%27Custom%20map%27,type:map)))\"}}",
+    "url": ""
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}
+
+{
+  "id": "url_to_8_18_dashboard",
+  "type": "url",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-02T21:05:35.714Z",
+  "created_at": "2025-06-02T21:05:35.714Z",
+  "created_by": "u_2113432222_cloud",
+  "updated_by": "u_2113432222_cloud",
+  "version": "WzE0OCwxXQ==",
+  "attributes": {
+    "accessCount": 0,
+    "accessDate": 1748898335714,
+    "createDate": 1748898335714,
+    "slug": "DmzZk",
+    "locatorJSON": "{\"id\":\"LEGACY_SHORT_URL_LOCATOR\",\"version\":\"8.18.2-SNAPSHOT\",\"state\":{\"url\":\"/app/dashboards#/create?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-24h%2Fh,to:now))&_a=(controlGroupState:(initialChildControlState:(%271ad147ca-fb8e-4c56-9172-2bdb2916222e%27:(dataViewId:%2790943e30-9a47-11e8-b64d-95841ca0b247%27,exclude:!n,existsSelected:!n,fieldName:machine.os.keyword,grow:!f,hideActionBar:!n,hideExclude:!n,hideExists:!n,hideSort:!n,order:0,placeholder:!n,runPastTimeout:!n,searchTechnique:prefix,selectedOptions:!(%27win%207%27),singleSelect:!n,sort:(by:_count,direction:desc),title:!n,type:optionsListControl,width:medium))),panels:!((gridData:(h:15,i:%279593d985-352b-45a3-873b-28001453427a%27,w:24,x:0,y:0),id:de71f4f0-1902-11e9-919b-ffe5949a18d2,panelConfig:(description:%27%27,hiddenLayers:!(),isLayerTOCOpen:!t,mapCenter:(lat:42.16337,lon:-88.92107,zoom:3.64),openTOCDetails:!()),panelIndex:%279593d985-352b-45a3-873b-28001453427a%27,title:%27Custom%20map%27,type:map)))\"}}",
+    "url": ""
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}
+
+{
+  "id": "url_to_8_19_dashboard",
+  "type": "url",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-02T21:22:52.723Z",
+  "created_at": "2025-06-02T21:22:52.723Z",
+  "version": "WzEyNTcsMV0=",
+  "attributes": {
+    "accessCount": 0,
+    "accessDate": 1748899372723,
+    "createDate": 1748899372723,
+    "slug": "8mVkz",
+    "locatorJSON": "{\"id\":\"DASHBOARD_APP_LOCATOR\",\"version\":\"9.1.0\",\"state\":{\"preserveSavedFilters\":true,\"viewMode\":\"edit\",\"useHash\":false,\"timeRange\":{\"from\":\"2025-06-01T21:00:00.000Z\",\"to\":\"2025-06-02T21:22:52.704Z\"},\"references\":[{\"name\":\"controlGroup_eae4dc4e-63b0-4506-9566-5745d5bd50af:optionsListDataView\",\"type\":\"index-pattern\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\"}],\"controlGroupInput\":{\"autoApplySelections\":true,\"chainingSystem\":\"HIERARCHICAL\",\"ignoreParentSettings\":{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false},\"labelPosition\":\"oneLine\",\"controls\":[{\"id\":\"eae4dc4e-63b0-4506-9566-5745d5bd50af\",\"grow\":false,\"order\":0,\"type\":\"optionsListControl\",\"width\":\"medium\",\"controlConfig\":{\"dataViewId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"fieldName\":\"machine.os.keyword\",\"exclude\":false,\"existsSelected\":false,\"selectedOptions\":[\"win 7\"],\"searchTechnique\":\"prefix\",\"sort\":{\"by\":\"_count\",\"direction\":\"desc\"}}}]},\"panels\":[{\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"7696a9aa-a648-4474-97fb-a6b3326636f2\"},\"panelIndex\":\"7696a9aa-a648-4474-97fb-a6b3326636f2\",\"panelConfig\":{\"description\":\"\",\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"hiddenLayers\":[],\"isLayerTOCOpen\":true,\"mapBuffer\":{\"minLon\":-112.5,\"minLat\":21.94305,\"maxLon\":-67.5,\"maxLat\":55.77657},\"mapCenter\":{\"lon\":-88.92107,\"lat\":42.16337,\"zoom\":3.64},\"openTOCDetails\":[]},\"title\":\"Custom map\",\"id\":\"de71f4f0-1902-11e9-919b-ffe5949a18d2\"}]}}",
+    "url": ""
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}

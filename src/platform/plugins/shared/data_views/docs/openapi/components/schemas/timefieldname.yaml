@@ -1,0 +1,2 @@
+type: string
+description: The timestamp field name, which you use for time-based data views.

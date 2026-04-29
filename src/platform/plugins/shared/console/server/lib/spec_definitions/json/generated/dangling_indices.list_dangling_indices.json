@@ -1,0 +1,21 @@
+{
+  "dangling_indices.list_dangling_indices": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_dangling"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-list-dangling-indices",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

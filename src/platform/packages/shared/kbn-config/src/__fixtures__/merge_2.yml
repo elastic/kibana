@@ -1,0 +1,8 @@
+foo: 2
+arr1: [4, 5]
+arr2: []
+nested:
+  str1: "bar"
+  str3: "dolly"
+obj_array:
+  - id: 3

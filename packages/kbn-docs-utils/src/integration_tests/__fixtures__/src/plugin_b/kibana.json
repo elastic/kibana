@@ -1,0 +1,6 @@
+{
+  "id": "pluginB",
+  "owner": { "name": "Kibana Tech Leads" },
+  "summary": "This an example plugin for testing the api documentation system",
+  "version": "kibana"
+}

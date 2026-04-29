@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ExportApp /> renders as expected 1`] = `
+<div>
+  <div
+    class="canvasExport"
+    data-shared-page="1"
+  >
+    <div
+      class="canvasExport__stage"
+    >
+      <div
+        class="canvasLayout__stageHeader"
+      >
+        <div>
+          Link
+        </div>
+      </div>
+      <div
+        class="canvasExport__stageContent css-17hzfsv-ExportApp"
+        data-shared-items-count="3"
+      >
+        <div>
+          Page
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`<ExportApp /> renders as expected 2`] = `
+<div>
+  <div
+    class="canvasExport"
+    data-shared-page="2"
+  >
+    <div
+      class="canvasExport__stage"
+    >
+      <div
+        class="canvasLayout__stageHeader"
+      >
+        <div>
+          Link
+        </div>
+      </div>
+      <div
+        class="canvasExport__stageContent css-17hzfsv-ExportApp"
+        data-shared-items-count="4"
+      >
+        <div>
+          Page
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,20 +1,10 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -22,10 +12,11 @@ import { resolve } from 'path';
 import * as Rx from 'rxjs';
 import execa from 'execa';
 import chalk from 'chalk';
-import { first, tap } from 'rxjs/operators';
+import { first, tap } from 'rxjs';
 import dedent from 'dedent';
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { getLine$ } from './helpers';
 import { Pr } from './pr';
 import { GithubApi } from './github_api';
@@ -48,7 +39,7 @@ run(
       throw createFlagError('invalid --repo-dir, expected a single string');
     }
 
-    const prNumbers = flags._.map(arg => Pr.parseInput(arg));
+    const prNumbers = flags._.map((arg) => Pr.parseInput(arg));
 
     /**
      * Call the Gitub API once for each PR to get the targetRef so we know which branch to pull
@@ -56,7 +47,7 @@ run(
      */
     const api = new GithubApi(accessToken);
     const prs = await Promise.all(
-      prNumbers.map(async prNumber => {
+      prNumbers.map(async (prNumber) => {
         const { targetRef, owner, sourceBranch } = await api.getPrInfo(prNumber);
         return new Pr(prNumber, targetRef, owner, sourceBranch);
       })
@@ -72,8 +63,11 @@ run(
 
       await Promise.all([
         proc.then(() => log.debug(` - ${cmd} exited with 0`)),
-        Rx.merge(getLine$(proc.stdout), getLine$(proc.stderr))
-          .pipe(tap(line => log.debug(line)))
+        Rx.merge(
+          getLine$(proc.stdout!), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+          getLine$(proc.stderr!) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+        )
+          .pipe(tap((line) => log.debug(line)))
           .toPromise(),
       ]);
     };
@@ -130,9 +124,7 @@ run(
             `) + '\n'
           );
 
-          await getLine$(process.stdin)
-            .pipe(first())
-            .toPromise();
+          await getLine$(process.stdin).pipe(first()).toPromise();
 
           try {
             await execInDir('git', ['diff-index', '--quiet', 'HEAD', '--']);
@@ -158,12 +150,9 @@ run(
     await init();
     for (const pr of prs) {
       log.info('pr #%s', pr.number);
-      log.indent(4);
-      try {
+      await log.indent(4, async () => {
         await updatePr(pr);
-      } finally {
-        log.indent(-4);
-      }
+      });
     }
   },
   {

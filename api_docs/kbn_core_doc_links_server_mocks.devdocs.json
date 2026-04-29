@@ -1,0 +1,100 @@
+{
+  "id": "@kbn/core-doc-links-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-doc-links-server-mocks",
+        "id": "def-server.docLinksServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "docLinksServiceMock",
+        "description": [],
+        "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-doc-links-server-mocks",
+            "id": "def-server.docLinksServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<DocLinksServiceContract>"
+            ],
+            "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-server-mocks",
+            "id": "def-server.docLinksServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DocLinksServiceSetup"
+            ],
+            "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-server-mocks",
+            "id": "def-server.docLinksServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DocLinksServiceSetup"
+            ],
+            "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

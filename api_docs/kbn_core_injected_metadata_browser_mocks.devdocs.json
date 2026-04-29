@@ -1,0 +1,102 @@
+{
+  "id": "@kbn/core-injected-metadata-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
+        "id": "def-public.injectedMetadataServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "injectedMetadataServiceMock",
+        "description": [],
+        "path": "src/core/packages/injected-metadata/browser-mocks/src/injected_metadata_service.mock.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
+            "id": "def-public.injectedMetadataServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<InjectedMetadataServiceContract>"
+            ],
+            "path": "src/core/packages/injected-metadata/browser-mocks/src/injected_metadata_service.mock.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
+            "id": "def-public.injectedMetadataServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalInjectedMetadataSetup",
+              ">"
+            ],
+            "path": "src/core/packages/injected-metadata/browser-mocks/src/injected_metadata_service.mock.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
+            "id": "def-public.injectedMetadataServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalInjectedMetadataSetup",
+              ">"
+            ],
+            "path": "src/core/packages/injected-metadata/browser-mocks/src/injected_metadata_service.mock.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

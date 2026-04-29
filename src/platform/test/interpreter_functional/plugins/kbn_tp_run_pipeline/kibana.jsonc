@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kbn-tp-run-pipeline-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "kbnTpRunPipeline",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "savedObjects",
+      "kibanaUtils",
+      "expressions"
+    ]
+  }
+}

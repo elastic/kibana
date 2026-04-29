@@ -1,51 +1,98 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { of } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
-import { loggingServiceMock } from './logging/logging_service.mock';
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
-import { contextServiceMock } from './context/context_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
-export { httpServerMock } from './http/http_server.mocks';
-export { sessionStorageMock } from './http/cookie_session_storage.mocks';
-export { configServiceMock } from './config/config_service.mock';
-export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-export { httpServiceMock } from './http/http_service.mock';
-export { loggingServiceMock } from './logging/logging_service.mock';
-export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
-export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { of } from 'rxjs';
+import { duration } from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { isPromise } from '@kbn/std';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+
+export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
+export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+export { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+export { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+export { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+export { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+export {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
+export { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
+export { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+export { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
+export { statusServiceMock } from '@kbn/core-status-server-mocks';
+export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+export { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
+export { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+export { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
+export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
+export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+export { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+export { securityServiceMock } from '@kbn/core-security-server-mocks';
+export { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+
+export type {
+  ElasticsearchClientMock,
+  ClusterClientMock,
+  ScopedClusterClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
+
+type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
-  const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
+  const globalConfig: SharedGlobalConfig = {
+    elasticsearch: {
+      shardTimeout: duration('30s'),
+      requestTimeout: duration('30s'),
+    },
+    path: { data: '/tmp' },
+    savedObjects: {
+      maxImportPayloadBytes: new ByteSizeValue(26214400),
+    },
+  };
+
+  const mock: MockedPluginInitializerConfig<T> = {
+    legacy: {
+      globalConfig$: of(globalConfig),
+      get: () => globalConfig,
+    },
     create: jest.fn().mockReturnValue(of(config)),
-    createIfExists: jest.fn().mockReturnValue(of(config)),
+    get: jest.fn().mockReturnValue(config),
   };
 
   return mock;
 }
 
+export type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
+  config: MockedPluginInitializerConfig<T>;
+};
+
 function pluginInitializerContextMock<T>(config: T = {} as T) {
-  const mock: PluginInitializerContext<T> = {
+  const mock: PluginInitializerContextMock<T> = {
     opaqueId: Symbol(),
-    logger: loggingServiceMock.create(),
+    logger: loggingSystemMock.create(),
     env: {
       mode: {
         dev: true,
@@ -57,61 +104,91 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         branch: 'branch',
         buildNum: 100,
         buildSha: 'buildSha',
+        buildShaShort: 'buildShaShort',
         dist: false,
+        buildDate: new Date('2023-05-15T23:12:09.000Z'),
+        buildFlavor: 'traditional',
       },
+      instanceUuid: 'instance-uuid',
+      configs: ['/some/path/to/config/kibana.yml'],
+      airgapped: false,
     },
     config: pluginInitializerContextConfigMock<T>(config),
+    node: nodeServiceMock.createInternalPrebootContract(),
   };
 
   return mock;
 }
 
-function createCoreSetupMock() {
-  const httpService = httpServiceMock.createSetupContract();
-  const httpMock: jest.Mocked<CoreSetup['http']> = {
-    createCookieSessionStorageFactory: httpService.createCookieSessionStorageFactory,
-    registerOnPreAuth: httpService.registerOnPreAuth,
-    registerAuth: httpService.registerAuth,
-    registerOnPostAuth: httpService.registerOnPostAuth,
-    basePath: httpService.basePath,
-    isTlsEnabled: httpService.isTlsEnabled,
-    createRouter: jest.fn(),
-    registerRouteHandlerContext: jest.fn(),
+function createCoreRequestHandlerContextMock() {
+  return {
+    featureFlags: coreFeatureFlagsMock.createRequestHandlerContext(),
+    savedObjects: {
+      client: savedObjectsClientMock.create(),
+      typeRegistry: savedObjectsTypeRegistryMock.create(),
+      getClient: savedObjectsClientMock.create,
+      getExporter: savedObjectsServiceMock.createExporter,
+      getImporter: savedObjectsServiceMock.createImporter,
+    },
+    elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+    uiSettings: {
+      client: uiSettingsServiceMock.createClient(),
+      globalClient: uiSettingsServiceMock.createClient(),
+    },
+    deprecations: {
+      client: deprecationsServiceMock.createClient(),
+    },
+    security: securityServiceMock.createRequestHandlerContext(),
+    userProfile: userProfileServiceMock.createRequestHandlerContext(),
   };
-  httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
+}
 
-  const uiSettingsMock = {
-    register: uiSettingsServiceMock.createSetupContract().register,
-  };
-  const mock: MockedKeys<CoreSetup> = {
-    context: contextServiceMock.createSetupContract(),
-    elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    http: httpMock,
-    uiSettings: uiSettingsMock,
-  };
+export type CustomRequestHandlerMock<T> = {
+  core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
+  resolve: jest.MockedFunction<any>;
+} & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
+const createCustomRequestHandlerContextMock = <T extends Record<string, unknown>>(
+  contextParts: T
+): CustomRequestHandlerMock<T> => {
+  const mock = Object.entries(contextParts).reduce(
+    (context, [key, value]) => {
+      // @ts-expect-error type matching from inferred types is hard
+      context[key] = isPromise(value) ? value : Promise.resolve(value);
+      return context;
+    },
+    {
+      core: Promise.resolve(createCoreRequestHandlerContextMock()),
+    } as CustomRequestHandlerMock<T>
+  );
+
+  mock.resolve = jest.fn().mockImplementation(async () => {
+    const resolved = {};
+    for (const propName of Object.keys(mock)) {
+      if (propName === 'resolve') {
+        continue;
+      }
+      // @ts-expect-error type matching from inferred types is hard
+      resolved[propName] = await mock[propName];
+    }
+    return resolved;
+  });
 
   return mock;
-}
-
-function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {};
-
-  return mock;
-}
-
-function createInternalCoreSetupMock() {
-  const setupDeps = {
-    context: contextServiceMock.createSetupContract(),
-    elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
-  };
-  return setupDeps;
-}
+};
 
 export const coreMock = {
-  createSetup: createCoreSetupMock,
-  createStart: createCoreStartMock,
-  createInternalSetup: createInternalCoreSetupMock,
+  createPreboot: coreLifecycleMock.createPreboot,
+  createSetup: coreLifecycleMock.createCoreSetup,
+  createStart: coreLifecycleMock.createCoreStart,
+  createInternalPreboot: coreInternalLifecycleMock.createInternalPreboot,
+  createInternalSetup: coreInternalLifecycleMock.createInternalSetup,
+  createInternalStart: coreInternalLifecycleMock.createInternalStart,
   createPluginInitializerContext: pluginInitializerContextMock,
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+  createCustomRequestHandlerContext: createCustomRequestHandlerContextMock,
 };

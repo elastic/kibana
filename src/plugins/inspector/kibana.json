@@ -1,6 +1,0 @@
-{
-  "id": "inspector",
-  "version": "kibana",
-  "server": false,
-  "ui": true
-}

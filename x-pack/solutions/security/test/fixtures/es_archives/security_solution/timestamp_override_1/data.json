@@ -1,0 +1,10 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "myfakeindex-1",
+    "source": {
+      "message": "hello world 1"
+    },
+    "type": "_doc"
+  }
+}

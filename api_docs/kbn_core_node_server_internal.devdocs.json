@@ -1,0 +1,94 @@
+{
+  "id": "@kbn/core-node-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-node-server-internal",
+        "id": "def-server.InternalNodeServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalNodeServiceStart",
+        "description": [],
+        "path": "src/core/packages/node/server-internal/src/node_service.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-server.InternalNodeServiceStart.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nThe Kibana process can take on specialised roles via the `node.roles` config.\n\nThe roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured."
+            ],
+            "signature": [
+              "NodeRoles"
+            ],
+            "path": "src/core/packages/node/server-internal/src/node_service.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-node-server-internal",
+        "id": "def-server.PrebootDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootDeps",
+        "description": [],
+        "path": "src/core/packages/node/server-internal/src/node_service.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-server.PrebootDeps.loggingSystem",
+            "type": "Object",
+            "tags": [],
+            "label": "loggingSystem",
+            "description": [],
+            "signature": [
+              "ILoggingSystem"
+            ],
+            "path": "src/core/packages/node/server-internal/src/node_service.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

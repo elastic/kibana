@@ -1,0 +1,244 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`stream handler findChangedStatusJobs finds changed status jobs 1`] = `
+Object {
+  "completed": Array [
+    Object {
+      "csvContainsFormulas": false,
+      "errorCode": undefined,
+      "id": "job-source-mock1",
+      "jobtype": undefined,
+      "maxSizeReached": false,
+      "status": "completed",
+      "title": "specimen",
+    },
+    Object {
+      "csvContainsFormulas": true,
+      "errorCode": undefined,
+      "id": "job-source-mock4",
+      "jobtype": undefined,
+      "maxSizeReached": false,
+      "status": "completed",
+      "title": "specimen",
+    },
+  ],
+  "failed": Array [
+    Object {
+      "csvContainsFormulas": false,
+      "errorCode": undefined,
+      "id": "job-source-mock2",
+      "jobtype": undefined,
+      "maxSizeReached": false,
+      "status": "failed",
+      "title": "specimen",
+    },
+  ],
+}
+`;
+
+exports[`stream handler showNotifications show csv formulas warning 1`] = `
+Array [
+  Array [
+    Object {
+      "data-test-subj": "completeReportCsvFormulasWarning",
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <p>
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="The report ''{reportObjectTitle}'' contains characters which spreadsheet applications can interpret as formulas."
+              id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
+              values={
+                Object {
+                  "reportObjectTitle": "Yas",
+                }
+              }
+            />
+          </p>
+          <p>
+            <ReportLink
+              getUrl={[Function]}
+            />
+          </p>
+          <DownloadButton
+            getUrl={[Function]}
+            job={
+              Object {
+                "csvContainsFormulas": true,
+                "id": "yas3",
+                "jobtype": "yas",
+                "status": "completed",
+                "title": "Yas",
+              }
+            }
+          />
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="{reportType} may contain formulas"
+          id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
+          values={
+            Object {
+              "reportType": "yas",
+            }
+          }
+        />,
+      },
+    },
+    Object {
+      "toastLifeTimeMs": 86400000,
+    },
+  ],
+]
+`;
+
+exports[`stream handler showNotifications show failed job toast 1`] = `
+Array [
+  Array [
+    Object {
+      "data-test-subj": "completeReportFailure",
+      "iconType": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <EuiCallOut
+            color="danger"
+            data-test-errorText="this is the failed report error"
+            size="m"
+          >
+            this is the failed report error
+          </EuiCallOut>
+          <EuiSpacer />
+          <p>
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Go to {path} for details."
+              id="xpack.reporting.publicNotifier.error.checkManagement"
+              values={
+                Object {
+                  "path": <a
+                    href="/#management"
+                  >
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="Stack Management > Kibana > Reporting"
+                      id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
+                    />
+                  </a>,
+                }
+              }
+            />
+          </p>
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="Cannot create {reportType} report for ''{reportObjectTitle}''."
+          id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
+          values={
+            Object {
+              "reportObjectTitle": "Yas 7",
+              "reportType": "yas",
+            }
+          }
+        />,
+      },
+    },
+  ],
+]
+`;
+
+exports[`stream handler showNotifications show max length warning 1`] = `
+Array [
+  Array [
+    Object {
+      "data-test-subj": "completeReportMaxSizeWarning",
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <p>
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="The report reached the max size and contains partial data."
+              id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
+            />
+          </p>
+          <p>
+            <ReportLink
+              getUrl={[Function]}
+            />
+          </p>
+          <DownloadButton
+            getUrl={[Function]}
+            job={
+              Object {
+                "id": "yas2",
+                "jobtype": "yas",
+                "maxSizeReached": true,
+                "status": "completed",
+                "title": "Yas",
+              }
+            }
+          />
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="Created partial {reportType} for ''{reportObjectTitle}''"
+          id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
+          values={
+            Object {
+              "reportObjectTitle": "Yas",
+              "reportType": "yas",
+            }
+          }
+        />,
+      },
+    },
+    Object {
+      "toastLifeTimeMs": 86400000,
+    },
+  ],
+]
+`;
+
+exports[`stream handler showNotifications show success 1`] = `
+Array [
+  Array [
+    Object {
+      "color": "success",
+      "data-test-subj": "completeReportSuccess",
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <p>
+            <ReportLink
+              getUrl={[Function]}
+            />
+          </p>
+          <DownloadButton
+            getUrl={[Function]}
+            job={
+              Object {
+                "id": "yas1",
+                "jobtype": "yas",
+                "status": "completed",
+                "title": "Yas",
+              }
+            }
+          />
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="{reportType} created for ''{reportObjectTitle}''"
+          id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
+          values={
+            Object {
+              "reportObjectTitle": "Yas",
+              "reportType": "yas",
+            }
+          }
+        />,
+      },
+    },
+    Object {
+      "toastLifeTimeMs": 86400000,
+    },
+  ],
+]
+`;

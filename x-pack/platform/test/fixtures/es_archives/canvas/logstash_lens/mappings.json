@@ -1,0 +1,25 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "logstash-lens",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "bytes": {
+          "type": "float"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

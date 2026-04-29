@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccessAgreementPage renders as expected when state is available 1`] = `
+<Markdown>
+  <p
+    key="p-0"
+  >
+    This is 
+    <a
+      href="../link"
+      key="a-0"
+    >
+      link
+    </a>
+  </p>
+</Markdown>
+`;

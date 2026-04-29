@@ -1,0 +1,44 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: false
+
+indexing:
+  dataset: "fake_hosts"
+  scenario: "custom_threshold_metric_avg"
+  eventsPerCycle: 50
+
+# Conditions: avg. system.cpu.user.pct > 80 in the last minute
+schedule:
+  # Start with avg. system.cpu.user.pct = 2.5
+  - template: "good"
+    start: "now-30m"
+    end: "now-3m"
+    randomness: 0.1
+  # Transition to avg. system.cpu.user.pct = 90
+  - template: "good"
+    start: "now-3m"
+    end: "now-2m"
+    metrics:
+      - name: "system.cpu.user.pct"
+        method: "linear"
+        start: 2.5
+        end: 90
+        randomness: 0.1
+  - template: "good"
+    start: "now-2m"
+    end: "now+13m"
+    metrics:
+      - name: "system.cpu.user.pct"
+        method: "linear"
+        start: 90
+        end: 90
+        randomness: 0.05
+  # Go back to avg. system.cpu.user.pct = 2.5
+  - template: "good"
+    start: "now+13m"
+    end: "now+25m"
+    randomness: 0.1
+

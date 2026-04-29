@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "include": [
+    "**/*",
+    "../../../../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "cypress",
+      "node",
+      "cypress-real-events"
+    ],
+    "resolveJsonModule": true,
+  },
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/axe-config",
+    "@kbn/rison",
+    "@kbn/actions-plugin",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/fleet-plugin",
+    "@kbn/cypress-config",
+  ]
+}

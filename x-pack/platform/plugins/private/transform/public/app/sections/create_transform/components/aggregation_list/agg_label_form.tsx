@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
+
+import type { AggName } from '../../../../../../common/types/aggregations';
+
+import type { PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
+import { isPivotAggsConfigWithUiBase } from '../../../../common';
+
+import { PopoverForm } from './popover_form';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
+import { SubAggsSection } from './sub_aggs_section';
+import { transformLabelStyles, useIntervalButtonStyles } from '../../styles';
+
+const useStyles = () => {
+  return {
+    transformAggHelperText: css`
+      line-height: 20px;
+    `,
+  };
+};
+
+interface Props {
+  item: PivotAggsConfig;
+  otherAggNames: AggName[];
+  options: PivotAggsConfigWithUiSupportDict;
+  deleteHandler(l: AggName): void;
+  onChange(item: PivotAggsConfig): void;
+}
+
+export const AggLabelForm: React.FC<Props> = ({
+  deleteHandler,
+  item,
+  otherAggNames,
+  onChange,
+  options,
+}) => {
+  const intervalButtonStyles = useIntervalButtonStyles();
+  const styles = useStyles();
+  const [isPopoverVisible, setPopoverVisibility] = useState(
+    isPivotAggsWithExtendedForm(item) && !item.isValid()
+  );
+
+  function update(updateItem: PivotAggsConfig) {
+    onChange({ ...updateItem });
+    setPopoverVisibility(false);
+  }
+
+  const helperText = isPivotAggsWithExtendedForm(item) && item.helperText && item.helperText();
+
+  const isSubAggSupported =
+    isPivotAggsConfigWithUiBase(item) &&
+    item.isSubAggsSupported &&
+    (isPivotAggsWithExtendedForm(item) ? item.isValid() : true);
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem css={transformLabelStyles}>
+          <span className="eui-textTruncate" data-test-subj="transformAggregationEntryLabel">
+            {item.aggName}
+          </span>
+        </EuiFlexItem>
+        {helperText && (
+          <EuiFlexItem grow={false}>
+            <EuiTextColor
+              color="subdued"
+              css={styles.transformAggHelperText}
+              className="eui-textTruncate"
+              data-test-subj="transformAggHelperText"
+            >
+              {helperText}
+            </EuiTextColor>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false} css={intervalButtonStyles}>
+          <EuiPopover
+            id="transformFormPopover"
+            ownFocus
+            button={
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.transform.aggLabelForm.editAggAriaLabel', {
+                  defaultMessage: 'Edit aggregation',
+                })}
+                size="s"
+                iconType="pencil"
+                onClick={() => setPopoverVisibility(!isPopoverVisible)}
+                data-test-subj={`transformAggregationEntryEditButton_${item.aggName}`}
+              />
+            }
+            isOpen={isPopoverVisible}
+            closePopover={() => setPopoverVisibility(false)}
+          >
+            <PopoverForm
+              defaultData={item}
+              onChange={update}
+              otherAggNames={otherAggNames}
+              options={options}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={intervalButtonStyles}>
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
+              defaultMessage: 'Delete item',
+            })}
+            size="s"
+            iconType="cross"
+            onClick={() => deleteHandler(item.aggName)}
+            data-test-subj="transformAggregationEntryDeleteButton"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isSubAggSupported && <SubAggsSection item={item} />}
+    </>
+  );
+};

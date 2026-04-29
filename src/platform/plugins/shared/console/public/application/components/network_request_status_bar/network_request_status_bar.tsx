@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
+import { useRequestReadContext } from '../../contexts';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+
+const mapStatusCodeToBadgeColor = (statusCode: number) => {
+  if (statusCode <= 199) {
+    return 'default';
+  }
+
+  if (statusCode <= 299) {
+    return 'success';
+  }
+
+  if (statusCode <= 399) {
+    return 'primary';
+  }
+
+  if (statusCode <= 499) {
+    return 'warning';
+  }
+
+  return 'danger';
+};
+
+export const NetworkRequestStatusBar: FunctionComponent = () => {
+  let content: React.ReactNode = null;
+
+  const {
+    requestInFlight,
+    lastResult: { data: requestData, error: requestError },
+  } = useRequestReadContext();
+  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
+  const requestResult = data
+    ? {
+        method: data.request.method.toUpperCase(),
+        endpoint: data.request.path,
+        statusCode: data.response.statusCode,
+        statusText: data.response.statusText,
+        timeElapsedMs: data.response.timeMs,
+      }
+    : undefined;
+
+  if (requestInFlight) {
+    content = (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">
+          {i18n.translate('console.requestInProgressBadgeText', {
+            defaultMessage: 'Request in progress',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    );
+  } else if (requestResult) {
+    const { endpoint, method, statusCode, statusText, timeElapsedMs } = requestResult;
+
+    content = (
+      <>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={
+              <EuiText size="s">{`${method} ${
+                endpoint.startsWith('/') ? endpoint : '/' + endpoint
+              }`}</EuiText>
+            }
+          >
+            <EuiBadge
+              data-test-subj="consoleResponseStatusBadge"
+              color={mapStatusCodeToBadgeColor(statusCode)}
+              tabIndex={0}
+            >
+              {/*  Use &nbsp; to ensure that no matter the width we don't allow line breaks */}
+              {statusCode}&nbsp;-&nbsp;{statusText}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={
+              <EuiText size="s">
+                {i18n.translate('console.requestTimeElapasedBadgeTooltipContent', {
+                  defaultMessage: 'Time Elapsed',
+                })}
+              </EuiText>
+            }
+          >
+            <EuiText size="s" tabIndex={0}>
+              <EuiBadge color="default">
+                {timeElapsedMs}&nbsp;{'ms'}
+              </EuiBadge>
+            </EuiText>
+          </EuiToolTip>
+        </EuiFlexItem>
+      </>
+    );
+  }
+
+  return (
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+      alignItems="center"
+      direction="row"
+      gutterSize="s"
+      responsive={false}
+    >
+      {content}
+    </EuiFlexGroup>
+  );
+};

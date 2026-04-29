@@ -1,0 +1,334 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsSection renders with no actions selected 1`] = `
+<div>
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      Choose the actions to take when the job rule matches an anomaly.
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
+          />
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_result_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_result_cb"
+        >
+          Skip result (recommended)
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
+          />
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_model_update_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_model_update_cb"
+        >
+          Skip model update
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
+<div>
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      Choose the actions to take when the job rule matches an anomaly.
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+          />
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_result_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_result_cb"
+        >
+          Skip result (recommended)
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+          />
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_model_update_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_model_update_cb"
+        >
+          Skip model update
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ActionsSection renders with skip_result selected 1`] = `
+<div>
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      Choose the actions to take when the job rule matches an anomaly.
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+          />
+          <input
+            checked=""
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_result_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_result_cb"
+        >
+          Skip result (recommended)
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiCheckbox emotion-euiCheckbox"
+      >
+        <div
+          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
+          />
+          <input
+            class="euiCheckbox__input emotion-euiCheckbox__input"
+            id="skip_model_update_cb"
+            type="checkbox"
+          />
+        </div>
+        <label
+          class="euiCheckbox__label emotion-euiCheckbox__label"
+          for="skip_model_update_cb"
+        >
+          Skip model update
+        </label>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <span
+          data-euiicon-type="question"
+          tabindex="0"
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;

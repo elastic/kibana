@@ -1,0 +1,875 @@
+{
+  "id": "resourceGroup{elastic-co-frontend}",
+  "span.type": "external",
+  "label": "124 resources",
+  "groupedConnections": [
+    {
+      "label": "813-mam-392.mktoresp.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "813-mam-392.mktoresp.com:443",
+      "span.type": "external",
+      "id": ">813-mam-392.mktoresp.com:443"
+    },
+    {
+      "label": "813-mam-392.mktoutil.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "813-mam-392.mktoutil.com:443",
+      "span.type": "external",
+      "id": ">813-mam-392.mktoutil.com:443"
+    },
+    {
+      "label": "8d1f.com:443",
+      "span.subtype": "link",
+      "span.destination.service.resource": "8d1f.com:443",
+      "span.type": "resource",
+      "id": ">8d1f.com:443"
+    },
+    {
+      "label": "a.ssl-checking.com:443",
+      "span.subtype": "xmlhttprequest",
+      "span.destination.service.resource": "a.ssl-checking.com:443",
+      "span.type": "resource",
+      "id": ">a.ssl-checking.com:443"
+    },
+    {
+      "label": "a18132920325.cdn.optimizely.com:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "a18132920325.cdn.optimizely.com:443",
+      "span.type": "resource",
+      "id": ">a18132920325.cdn.optimizely.com:443"
+    },
+    {
+      "label": "api.contentstack.io:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "api.contentstack.io:443",
+      "span.type": "resource",
+      "id": ">api.contentstack.io:443"
+    },
+    {
+      "label": "assets.website-files.com:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "assets.website-files.com:443",
+      "span.type": "resource",
+      "id": ">assets.website-files.com:443"
+    },
+    {
+      "label": "bat.bing.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "bat.bing.com:443",
+      "span.type": "resource",
+      "id": ">bat.bing.com:443"
+    },
+    {
+      "label": "bid.g.doubleclick.net:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "bid.g.doubleclick.net:443",
+      "span.type": "resource",
+      "id": ">bid.g.doubleclick.net:443"
+    },
+    {
+      "label": "cdn.iubenda.com:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "cdn.iubenda.com:443",
+      "span.type": "resource",
+      "id": ">cdn.iubenda.com:443"
+    },
+    {
+      "label": "cdn.loom.com:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "cdn.loom.com:443",
+      "span.type": "resource",
+      "id": ">cdn.loom.com:443"
+    },
+    {
+      "label": "cdn.optimizely.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "cdn.optimizely.com:443",
+      "span.type": "resource",
+      "id": ">cdn.optimizely.com:443"
+    },
+    {
+      "label": "cdncache-a.akamaihd.net:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "cdncache-a.akamaihd.net:443",
+      "span.type": "external",
+      "id": ">cdncache-a.akamaihd.net:443"
+    },
+    {
+      "label": "cloud.githubusercontent.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "cloud.githubusercontent.com:443",
+      "span.type": "resource",
+      "id": ">cloud.githubusercontent.com:443"
+    },
+    {
+      "label": "config.privoxy.org:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "config.privoxy.org:443",
+      "span.type": "resource",
+      "id": ">config.privoxy.org:443"
+    },
+    {
+      "label": "connect.facebook.net:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "connect.facebook.net:443",
+      "span.type": "resource",
+      "id": ">connect.facebook.net:443"
+    },
+    {
+      "label": "dpx.airpr.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "dpx.airpr.com:443",
+      "span.type": "resource",
+      "id": ">dpx.airpr.com:443"
+    },
+    {
+      "label": "errors.client.optimizely.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "errors.client.optimizely.com:443",
+      "span.type": "external",
+      "id": ">errors.client.optimizely.com:443"
+    },
+    {
+      "label": "fonts.googleapis.com:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "fonts.googleapis.com:443",
+      "span.type": "resource",
+      "id": ">fonts.googleapis.com:443"
+    },
+    {
+      "label": "fonts.gstatic.com:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "fonts.gstatic.com:443",
+      "span.type": "resource",
+      "id": ">fonts.gstatic.com:443"
+    },
+    {
+      "label": "ga.clearbit.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "ga.clearbit.com:443",
+      "span.type": "resource",
+      "id": ">ga.clearbit.com:443"
+    },
+    {
+      "label": "gc.kis.v2.scr.kaspersky-labs.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "gc.kis.v2.scr.kaspersky-labs.com:443",
+      "span.type": "resource",
+      "id": ">gc.kis.v2.scr.kaspersky-labs.com:443"
+    },
+    {
+      "label": "googleads.g.doubleclick.net:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "googleads.g.doubleclick.net:443",
+      "span.type": "resource",
+      "id": ">googleads.g.doubleclick.net:443"
+    },
+    {
+      "label": "hits-i.iubenda.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "hits-i.iubenda.com:443",
+      "span.type": "external",
+      "id": ">hits-i.iubenda.com:443"
+    },
+    {
+      "label": "host-1r8dhi.api.swiftype.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "host-1r8dhi.api.swiftype.com:443",
+      "span.type": "external",
+      "id": ">host-1r8dhi.api.swiftype.com:443"
+    },
+    {
+      "label": "host-nm1h2z.api.swiftype.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "host-nm1h2z.api.swiftype.com:443",
+      "span.type": "external",
+      "id": ">host-nm1h2z.api.swiftype.com:443"
+    },
+    {
+      "label": "images.contentstack.io:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "images.contentstack.io:443",
+      "span.type": "resource",
+      "id": ">images.contentstack.io:443"
+    },
+    {
+      "label": "info.elastic.co:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "info.elastic.co:443",
+      "span.type": "resource",
+      "id": ">info.elastic.co:443"
+    },
+    {
+      "label": "info.elastic.co:80",
+      "span.subtype": "img",
+      "span.destination.service.resource": "info.elastic.co:80",
+      "span.type": "resource",
+      "id": ">info.elastic.co:80"
+    },
+    {
+      "label": "js.clearbit.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "js.clearbit.com:443",
+      "span.type": "resource",
+      "id": ">js.clearbit.com:443"
+    },
+    {
+      "label": "lh4.googleusercontent.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "lh4.googleusercontent.com:443",
+      "span.type": "resource",
+      "id": ">lh4.googleusercontent.com:443"
+    },
+    {
+      "label": "lh6.googleusercontent.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "lh6.googleusercontent.com:443",
+      "span.type": "resource",
+      "id": ">lh6.googleusercontent.com:443"
+    },
+    {
+      "label": "logx.optimizely.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "logx.optimizely.com:443",
+      "span.type": "external",
+      "id": ">logx.optimizely.com:443"
+    },
+    {
+      "label": "m98.prod2016.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "m98.prod2016.com:443",
+      "span.type": "external",
+      "id": ">m98.prod2016.com:443"
+    },
+    {
+      "label": "maps.googleapis.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "maps.googleapis.com:443",
+      "span.type": "resource",
+      "id": ">maps.googleapis.com:443"
+    },
+    {
+      "label": "maps.gstatic.com:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "maps.gstatic.com:443",
+      "span.type": "resource",
+      "id": ">maps.gstatic.com:443"
+    },
+    {
+      "label": "munchkin.marketo.net:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "munchkin.marketo.net:443",
+      "span.type": "resource",
+      "id": ">munchkin.marketo.net:443"
+    },
+    {
+      "label": "negbar.ad-blocker.org:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "negbar.ad-blocker.org:443",
+      "span.type": "resource",
+      "id": ">negbar.ad-blocker.org:443"
+    },
+    {
+      "label": "p.typekit.net:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "p.typekit.net:443",
+      "span.type": "resource",
+      "id": ">p.typekit.net:443"
+    },
+    {
+      "label": "platform.twitter.com:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "platform.twitter.com:443",
+      "span.type": "resource",
+      "id": ">platform.twitter.com:443"
+    },
+    {
+      "label": "play.vidyard.com:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "play.vidyard.com:443",
+      "span.type": "resource",
+      "id": ">play.vidyard.com:443"
+    },
+    {
+      "label": "px.ads.linkedin.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "px.ads.linkedin.com:443",
+      "span.type": "resource",
+      "id": ">px.ads.linkedin.com:443"
+    },
+    {
+      "label": "px.airpr.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "px.airpr.com:443",
+      "span.type": "resource",
+      "id": ">px.airpr.com:443"
+    },
+    {
+      "label": "q.quora.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "q.quora.com:443",
+      "span.type": "resource",
+      "id": ">q.quora.com:443"
+    },
+    {
+      "label": "risk.clearbit.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "risk.clearbit.com:443",
+      "span.type": "external",
+      "id": ">risk.clearbit.com:443"
+    },
+    {
+      "label": "rtp-static.marketo.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "rtp-static.marketo.com:443",
+      "span.type": "external",
+      "id": ">rtp-static.marketo.com:443"
+    },
+    {
+      "label": "rum.optimizely.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "rum.optimizely.com:443",
+      "span.type": "external",
+      "id": ">rum.optimizely.com:443"
+    },
+    {
+      "label": "s3-us-west-1.amazonaws.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "s3-us-west-1.amazonaws.com:443",
+      "span.type": "resource",
+      "id": ">s3-us-west-1.amazonaws.com:443"
+    },
+    {
+      "label": "sjrtp2-cdn.marketo.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "sjrtp2-cdn.marketo.com:443",
+      "span.type": "resource",
+      "id": ">sjrtp2-cdn.marketo.com:443"
+    },
+    {
+      "label": "sjrtp2.marketo.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "sjrtp2.marketo.com:443",
+      "span.type": "external",
+      "id": ">sjrtp2.marketo.com:443"
+    },
+    {
+      "label": "snap.licdn.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "snap.licdn.com:443",
+      "span.type": "resource",
+      "id": ">snap.licdn.com:443"
+    },
+    {
+      "label": "speakerdeck.com:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "speakerdeck.com:443",
+      "span.type": "resource",
+      "id": ">speakerdeck.com:443"
+    },
+    {
+      "label": "stag-static-www.elastic.co:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "stag-static-www.elastic.co:443",
+      "span.type": "resource",
+      "id": ">stag-static-www.elastic.co:443"
+    },
+    {
+      "label": "static-www.elastic.co:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "static-www.elastic.co:443",
+      "span.type": "resource",
+      "id": ">static-www.elastic.co:443"
+    },
+    {
+      "label": "stats.g.doubleclick.net:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "stats.g.doubleclick.net:443",
+      "span.type": "external",
+      "id": ">stats.g.doubleclick.net:443"
+    },
+    {
+      "label": "translate.google.com:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "translate.google.com:443",
+      "span.type": "resource",
+      "id": ">translate.google.com:443"
+    },
+    {
+      "label": "translate.googleapis.com:443",
+      "span.subtype": "link",
+      "span.destination.service.resource": "translate.googleapis.com:443",
+      "span.type": "resource",
+      "id": ">translate.googleapis.com:443"
+    },
+    {
+      "label": "use.typekit.net:443",
+      "span.subtype": "link",
+      "span.destination.service.resource": "use.typekit.net:443",
+      "span.type": "resource",
+      "id": ">use.typekit.net:443"
+    },
+    {
+      "label": "www.elastic.co:443",
+      "span.subtype": "browser-timing",
+      "span.destination.service.resource": "www.elastic.co:443",
+      "span.type": "external",
+      "id": ">www.elastic.co:443"
+    },
+    {
+      "label": "www.facebook.com:443",
+      "span.subtype": "beacon",
+      "span.destination.service.resource": "www.facebook.com:443",
+      "span.type": "resource",
+      "id": ">www.facebook.com:443"
+    },
+    {
+      "label": "www.google-analytics.com:443",
+      "span.subtype": "beacon",
+      "span.destination.service.resource": "www.google-analytics.com:443",
+      "span.type": "external",
+      "id": ">www.google-analytics.com:443"
+    },
+    {
+      "label": "www.google.ae:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.ae:443",
+      "span.type": "resource",
+      "id": ">www.google.ae:443"
+    },
+    {
+      "label": "www.google.al:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.al:443",
+      "span.type": "resource",
+      "id": ">www.google.al:443"
+    },
+    {
+      "label": "www.google.at:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.at:443",
+      "span.type": "resource",
+      "id": ">www.google.at:443"
+    },
+    {
+      "label": "www.google.ba:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.ba:443",
+      "span.type": "resource",
+      "id": ">www.google.ba:443"
+    },
+    {
+      "label": "www.google.be:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.be:443",
+      "span.type": "resource",
+      "id": ">www.google.be:443"
+    },
+    {
+      "label": "www.google.bg:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.bg:443",
+      "span.type": "resource",
+      "id": ">www.google.bg:443"
+    },
+    {
+      "label": "www.google.by:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.by:443",
+      "span.type": "resource",
+      "id": ">www.google.by:443"
+    },
+    {
+      "label": "www.google.ca:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.ca:443",
+      "span.type": "resource",
+      "id": ">www.google.ca:443"
+    },
+    {
+      "label": "www.google.ch:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.ch:443",
+      "span.type": "resource",
+      "id": ">www.google.ch:443"
+    },
+    {
+      "label": "www.google.cl:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.cl:443",
+      "span.type": "resource",
+      "id": ">www.google.cl:443"
+    },
+    {
+      "label": "www.google.co.cr:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.cr:443",
+      "span.type": "resource",
+      "id": ">www.google.co.cr:443"
+    },
+    {
+      "label": "www.google.co.id:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.id:443",
+      "span.type": "resource",
+      "id": ">www.google.co.id:443"
+    },
+    {
+      "label": "www.google.co.il:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.il:443",
+      "span.type": "resource",
+      "id": ">www.google.co.il:443"
+    },
+    {
+      "label": "www.google.co.in:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.in:443",
+      "span.type": "resource",
+      "id": ">www.google.co.in:443"
+    },
+    {
+      "label": "www.google.co.jp:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.jp:443",
+      "span.type": "resource",
+      "id": ">www.google.co.jp:443"
+    },
+    {
+      "label": "www.google.co.kr:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.kr:443",
+      "span.type": "resource",
+      "id": ">www.google.co.kr:443"
+    },
+    {
+      "label": "www.google.co.ma:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.ma:443",
+      "span.type": "resource",
+      "id": ">www.google.co.ma:443"
+    },
+    {
+      "label": "www.google.co.uk:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.uk:443",
+      "span.type": "resource",
+      "id": ">www.google.co.uk:443"
+    },
+    {
+      "label": "www.google.co.za:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.co.za:443",
+      "span.type": "resource",
+      "id": ">www.google.co.za:443"
+    },
+    {
+      "label": "www.google.com.ar:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.ar:443",
+      "span.type": "resource",
+      "id": ">www.google.com.ar:443"
+    },
+    {
+      "label": "www.google.com.au:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.au:443",
+      "span.type": "resource",
+      "id": ">www.google.com.au:443"
+    },
+    {
+      "label": "www.google.com.bo:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.bo:443",
+      "span.type": "resource",
+      "id": ">www.google.com.bo:443"
+    },
+    {
+      "label": "www.google.com.br:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.br:443",
+      "span.type": "resource",
+      "id": ">www.google.com.br:443"
+    },
+    {
+      "label": "www.google.com.co:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.co:443",
+      "span.type": "resource",
+      "id": ">www.google.com.co:443"
+    },
+    {
+      "label": "www.google.com.eg:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.eg:443",
+      "span.type": "resource",
+      "id": ">www.google.com.eg:443"
+    },
+    {
+      "label": "www.google.com.mm:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.mm:443",
+      "span.type": "resource",
+      "id": ">www.google.com.mm:443"
+    },
+    {
+      "label": "www.google.com.mx:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.mx:443",
+      "span.type": "resource",
+      "id": ">www.google.com.mx:443"
+    },
+    {
+      "label": "www.google.com.my:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.my:443",
+      "span.type": "resource",
+      "id": ">www.google.com.my:443"
+    },
+    {
+      "label": "www.google.com.pe:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.pe:443",
+      "span.type": "resource",
+      "id": ">www.google.com.pe:443"
+    },
+    {
+      "label": "www.google.com.sa:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.sa:443",
+      "span.type": "resource",
+      "id": ">www.google.com.sa:443"
+    },
+    {
+      "label": "www.google.com.sg:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.sg:443",
+      "span.type": "resource",
+      "id": ">www.google.com.sg:443"
+    },
+    {
+      "label": "www.google.com.tr:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.tr:443",
+      "span.type": "resource",
+      "id": ">www.google.com.tr:443"
+    },
+    {
+      "label": "www.google.com.ua:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.ua:443",
+      "span.type": "resource",
+      "id": ">www.google.com.ua:443"
+    },
+    {
+      "label": "www.google.com.uy:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.com.uy:443",
+      "span.type": "resource",
+      "id": ">www.google.com.uy:443"
+    },
+    {
+      "label": "www.google.com:443",
+      "span.subtype": "beacon",
+      "span.destination.service.resource": "www.google.com:443",
+      "span.type": "resource",
+      "id": ">www.google.com:443"
+    },
+    {
+      "label": "www.google.cz:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.cz:443",
+      "span.type": "resource",
+      "id": ">www.google.cz:443"
+    },
+    {
+      "label": "www.google.de:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.de:443",
+      "span.type": "resource",
+      "id": ">www.google.de:443"
+    },
+    {
+      "label": "www.google.dk:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.dk:443",
+      "span.type": "resource",
+      "id": ">www.google.dk:443"
+    },
+    {
+      "label": "www.google.es:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.es:443",
+      "span.type": "resource",
+      "id": ">www.google.es:443"
+    },
+    {
+      "label": "www.google.fr:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.fr:443",
+      "span.type": "resource",
+      "id": ">www.google.fr:443"
+    },
+    {
+      "label": "www.google.gr:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.gr:443",
+      "span.type": "resource",
+      "id": ">www.google.gr:443"
+    },
+    {
+      "label": "www.google.hu:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.hu:443",
+      "span.type": "resource",
+      "id": ">www.google.hu:443"
+    },
+    {
+      "label": "www.google.is:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.is:443",
+      "span.type": "resource",
+      "id": ">www.google.is:443"
+    },
+    {
+      "label": "www.google.it:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.it:443",
+      "span.type": "resource",
+      "id": ">www.google.it:443"
+    },
+    {
+      "label": "www.google.lk:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.lk:443",
+      "span.type": "resource",
+      "id": ">www.google.lk:443"
+    },
+    {
+      "label": "www.google.md:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.md:443",
+      "span.type": "resource",
+      "id": ">www.google.md:443"
+    },
+    {
+      "label": "www.google.mk:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.mk:443",
+      "span.type": "resource",
+      "id": ">www.google.mk:443"
+    },
+    {
+      "label": "www.google.nl:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.nl:443",
+      "span.type": "resource",
+      "id": ">www.google.nl:443"
+    },
+    {
+      "label": "www.google.no:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.no:443",
+      "span.type": "resource",
+      "id": ">www.google.no:443"
+    },
+    {
+      "label": "www.google.pl:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.pl:443",
+      "span.type": "resource",
+      "id": ">www.google.pl:443"
+    },
+    {
+      "label": "www.google.pt:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.pt:443",
+      "span.type": "resource",
+      "id": ">www.google.pt:443"
+    },
+    {
+      "label": "www.google.ro:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.ro:443",
+      "span.type": "resource",
+      "id": ">www.google.ro:443"
+    },
+    {
+      "label": "www.google.rs:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.rs:443",
+      "span.type": "resource",
+      "id": ">www.google.rs:443"
+    },
+    {
+      "label": "www.google.ru:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.ru:443",
+      "span.type": "resource",
+      "id": ">www.google.ru:443"
+    },
+    {
+      "label": "www.google.se:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.se:443",
+      "span.type": "resource",
+      "id": ">www.google.se:443"
+    },
+    {
+      "label": "www.google.tn:443",
+      "span.subtype": "img",
+      "span.destination.service.resource": "www.google.tn:443",
+      "span.type": "resource",
+      "id": ">www.google.tn:443"
+    },
+    {
+      "label": "www.googleadservices.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "www.googleadservices.com:443",
+      "span.type": "resource",
+      "id": ">www.googleadservices.com:443"
+    },
+    {
+      "label": "www.googletagmanager.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "www.googletagmanager.com:443",
+      "span.type": "resource",
+      "id": ">www.googletagmanager.com:443"
+    },
+    {
+      "label": "www.gstatic.com:443",
+      "span.subtype": "css",
+      "span.destination.service.resource": "www.gstatic.com:443",
+      "span.type": "resource",
+      "id": ">www.gstatic.com:443"
+    },
+    {
+      "label": "www.iubenda.com:443",
+      "span.subtype": "script",
+      "span.destination.service.resource": "www.iubenda.com:443",
+      "span.type": "resource",
+      "id": ">www.iubenda.com:443"
+    },
+    {
+      "label": "www.slideshare.net:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "www.slideshare.net:443",
+      "span.type": "resource",
+      "id": ">www.slideshare.net:443"
+    },
+    {
+      "label": "www.youtube.com:443",
+      "span.subtype": "iframe",
+      "span.destination.service.resource": "www.youtube.com:443",
+      "span.type": "resource",
+      "id": ">www.youtube.com:443"
+    },
+    {
+      "label": "x.clearbit.com:443",
+      "span.subtype": "http",
+      "span.destination.service.resource": "x.clearbit.com:443",
+      "span.type": "external",
+      "id": ">x.clearbit.com:443"
+    }
+  ]
+}

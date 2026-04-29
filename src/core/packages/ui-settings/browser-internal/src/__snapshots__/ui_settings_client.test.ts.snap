@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#get after a get for an unknown property, the property is not persisted 1`] = `
+"Unexpected \`IUiSettingsClient.get(\\"obscureProperty2\\")\` call on unrecognized configuration setting \\"obscureProperty2\\".
+Setting an initial value via \`IUiSettingsClient.set(\\"obscureProperty2\\", value)\` before attempting to retrieve
+any custom setting value for \\"obscureProperty2\\" may fix this issue.
+You can use \`IUiSettingsClient.get(\\"obscureProperty2\\", defaultValue)\`, which will just return
+\`defaultValue\` when the key is unrecognized."
+`;
+
+exports[`#get gives access to uiSettings values 1`] = `"Browser"`;
+
+exports[`#get supports the default value overload 1`] = `"default"`;
+
+exports[`#get throws on unknown properties that don't have a value yet. 1`] = `
+"Unexpected \`IUiSettingsClient.get(\\"throwableProperty\\")\` call on unrecognized configuration setting \\"throwableProperty\\".
+Setting an initial value via \`IUiSettingsClient.set(\\"throwableProperty\\", value)\` before attempting to retrieve
+any custom setting value for \\"throwableProperty\\" may fix this issue.
+You can use \`IUiSettingsClient.get(\\"throwableProperty\\", defaultValue)\`, which will just return
+\`defaultValue\` when the key is unrecognized."
+`;
+
+exports[`#getUpdate$ sends { key, newValue, oldValue } notifications when client changes 1`] = `
+Array [
+  Array [
+    Object {
+      "key": "foo",
+      "newValue": "bar",
+      "oldValue": undefined,
+    },
+  ],
+]
+`;
+
+exports[`#getUpdate$ sends { key, newValue, oldValue } notifications when client changes 2`] = `
+Array [
+  Array [
+    Object {
+      "key": "foo",
+      "newValue": "baz",
+      "oldValue": "bar",
+    },
+  ],
+]
+`;
+
+exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is overridden by the Kibana server"`;
+
+exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the Kibana server"`;

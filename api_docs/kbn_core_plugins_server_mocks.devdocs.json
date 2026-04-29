@@ -1,0 +1,158 @@
+{
+  "id": "@kbn/core-plugins-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-plugins-server-mocks",
+        "id": "def-server.pluginServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "pluginServiceMock",
+        "description": [],
+        "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-server.pluginServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => PluginsServiceMock"
+            ],
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-server.pluginServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PluginsServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-server.pluginServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PluginsServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-server.pluginServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalPluginsServiceSetup"
+            ],
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-server.pluginServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalPluginsServiceStart"
+            ],
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-server.pluginServiceMock.createUiPlugins",
+            "type": "Function",
+            "tags": [],
+            "label": "createUiPlugins",
+            "description": [],
+            "signature": [
+              "() => { browserConfigs: Map<any, any>; internal: Map<any, any>; public: Map<any, any>; }"
+            ],
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

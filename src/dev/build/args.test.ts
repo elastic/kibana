@@ -1,148 +1,380 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { readCliArgs } from './args';
 
-const fn = (...subArgs: string[]) => {
-  const result = readCliArgs(['node', 'scripts/build', ...subArgs]);
-  (result as any).log = result.log instanceof ToolingLog ? '<ToolingLog>' : String(result.log);
-  return result;
-};
+expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
 it('renders help if `--help` passed', () => {
-  expect(fn('--help')).toMatchInlineSnapshot(`
-Object {
-  "log": "undefined",
-  "showHelp": true,
-  "unknownFlags": Array [],
-}
-`);
+  expect(readCliArgs(['node', 'scripts/build', '--help'])).toMatchInlineSnapshot(`
+    Object {
+      "log": <ToolingLog>,
+      "showHelp": true,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('build default and oss dist for current platform, without packages, by default', () => {
-  expect(fn()).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": false,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": false,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+  expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": false,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
+        "createDockerUBI": false,
+        "createDockerWolfi": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": false,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('builds packages if --all-platforms is passed', () => {
-  expect(fn('--all-platforms')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": true,
-    "createDockerPackage": true,
-    "createRpmPackage": true,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": true,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
+        "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('limits packages if --rpm passed with --all-platforms', () => {
-  expect(fn('--all-platforms', '--rpm')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": false,
-    "createRpmPackage": true,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": false,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
+        "createDockerUBI": false,
+        "createDockerWolfi": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('limits packages if --deb passed with --all-platforms', () => {
-  expect(fn('--all-platforms', '--deb')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": true,
-    "createDockerPackage": false,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": true,
+        "createDockerCloud": false,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
+        "createDockerUBI": false,
+        "createDockerWolfi": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('limits packages if --docker passed with --all-platforms', () => {
-  expect(fn('--all-platforms', '--docker')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": true,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker-images']))
+    .toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
+        "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('limits packages if --docker passed with --skip-docker-ubi and --all-platforms', () => {
+  expect(
+    readCliArgs([
+      'node',
+      'scripts/build',
+      '--all-platforms',
+      '--docker-images',
+      '--skip-docker-ubi',
+    ])
+  ).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
+        "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
+        "createDockerUBI": false,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-fips']))
+    .toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": true,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
+        "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-cloud-fips']))
+    .toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": true,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });

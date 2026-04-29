@@ -1,0 +1,6 @@
+{
+  "id": "binary_list",
+  "name": "Simple list with binary",
+  "description": "This list has binary",
+  "type": "binary"
+}

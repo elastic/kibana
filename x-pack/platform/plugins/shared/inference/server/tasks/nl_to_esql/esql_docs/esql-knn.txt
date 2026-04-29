@@ -1,0 +1,61 @@
+# KNN
+
+The KNN function finds the k nearest vectors to a query vector using a similarity metric. It performs approximate search on indexed dense_vector or semantic_text fields to identify the closest matches.
+
+## Syntax
+
+`KNN(field, query, options, boost, k, visit_percentage, min_candidates, rescore_oversample, similarity)`
+
+### Parameters
+
+#### field
+
+The field to target for the query. The function works with dense_vector or semantic_text fields. Other text fields are not allowed.
+
+#### query
+
+The vector value for which to find the top nearest neighbors.
+
+#### options
+
+(Optional) Additional kNN options as function named parameters. Refer to the knn query documentation for more details.
+
+#### boost
+
+(Optional) A floating point number that adjusts the relevance scores of the query. Defaults to 1.0.
+
+#### k
+
+(Optional) The number of nearest neighbors to return from each shard. This value must be less than or equal to num_candidates and is automatically set if a LIMIT is applied.
+
+#### visit_percentage
+
+(Optional) The percentage of vectors to explore per shard during knn search with bbq_disk. Must be between 0 and 100. Defaults to approximately 1% per shard for every 1 million vectors. Increasing this value can improve accuracy.
+
+#### min_candidates
+
+(Optional) The minimum number of nearest neighbor candidates to consider per shard. Cannot exceed 10,000. Defaults to 1.5 times k (or LIMIT) used for the query. Increasing this value can improve accuracy.
+
+#### rescore_oversample
+
+(Optional) A double value that applies oversampling for rescoring quantized vectors.
+
+#### similarity
+
+(Optional) The minimum similarity required for a document to be considered a match. This value relates to the raw similarity used, not the document score.
+
+## Examples
+
+Find the nearest colors to a given RGB vector and sort the results by score and color name:
+
+```esql
+from colors metadata _score
+| where knn(rgb_vector, [0, 120, 0])
+| sort _score desc, color asc
+```
+
+Limitations
+
+- The KNN function can only be used with dense_vector or semantic_text fields. Other text fields are not supported.
+- The min_candidates parameter cannot exceed 10,000.
+- The k parameter must be less than or equal to num_candidates.

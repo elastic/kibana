@@ -1,0 +1,22 @@
+{
+  "ml.revert_model_snapshot": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "delete_intervening_results": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-revert-model-snapshot",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

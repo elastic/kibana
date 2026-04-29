@@ -1,146 +1,255 @@
 # Chromium build
 
-We ship our own headless build of Chromium which is significantly smaller than the standard binaries shipped by Google. The scripts in this folder can be used to initialize the build environments and run the build on Mac, Windows, and Linux.
+We ship our own headless build of Chromium which is significantly smaller than
+the standard binaries shipped by Google. The scripts in this folder can be used
+to accept a commit hash from the Chromium repository, and initialize the build
+on Ubuntu Linux.
 
-The official Chromium build process is poorly documented, and seems to have breaking changes fairly regularly. The build pre-requisites, and the build flags change over time, so it is likely that the scripts in this directory will be out of date by the time we have to do another Chromium build.
+## Why do we do this
 
-This document is an attempt to note all of the gotchas we've come across while building, so that the next time we have to tinker here, we'll have a good starting point.
+By default, Puppeteer will download a zip file containing the Chromium browser for any
+OS. This creates problems on Linux, because Chromium has a dependency on X11, which
+is often not installed for a server environment. We don't want to make a requirement
+for Linux that you need X11 to run Kibana. To work around this, we create our own Chromium
+build, using the
+[`headless_shell`](https://chromium.googlesource.com/chromium/src/+/5cf4b8b13ed518472038170f8de9db2f6c258fe4/headless)
+build target. There are no (trustworthy) sources of these builds available elsewhere.
 
-# Before you begin
-You'll need access to our GCP account, which is where we have two machines provisioned for the Linux and Windows builds. Mac builds can be achieved locally, and are a great place to start to gain familiarity.
+Fortunately, creating the custom builds is only necessary for Linux. When you have a build
+of Kibana for Linux, or if you use a Linux desktop to develop Kibana, you have a copy of
+`headless_shell` bundled inside. When you have a Windows or Mac build of Kibana, or use
+either of those for development, you have a copy of the full build of Chromium, which
+was downloaded from the main [Chromium download
+location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html).
 
-1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/).
-2. Click the "Compute Engine" tab.
-3. Ensure that `chromium-build-linux` and `chromium-build-windows-12-beefy` are there.
-4. If #3 fails, you'll have to spin up new instances. Generally, these need `n1-standard-8` types or 8 vCPUs/30 GB memory.
-5. Ensure that there's enough room left on the disk. `ncdu` is a good linux util to verify what's claming space.
+## Build Script Usage
+
+Note that a git commit hash for Chromium is required for the build.  This is obtained
+by running the following, which
+will print various info, including the git commit hash. 
+
+```sh
+$ node scripts/chromium_version.js <puppeteer version>
+```
+
+The system OS requires a few setup steps:
+1. Required packages: `bzip2`, `git`, `lsb_release`, `python3`
+2. Use `python3` vs `python` (v2)
+3. Recommended: `tmux`, as your ssh session may get interrupted
+
+These commands show how to set up an environment to build:
+
+```sh
+# Install pre-req tools
+sudo apt update
+sudo apt-get install -y bzip2 git lsb_release python3 binutils pkg-config gperf
+
+# Allow our scripts to use depot_tools commands
+export PATH=$HOME/chromium/depot_tools:$PATH
+
+# Create a dedicated working directory for this directory of Python scripts.
+mkdir ~/chromium && cd ~/chromium
+
+# Copy the scripts from the Kibana team's GCS bucket
+gsutil cp -r gs://headless_shell_staging/build_chromium .
+
+# Install the OS packages, configure the environment, download the chromium source (25GB)
+python3 ./build_chromium/init.py
+
+# Run the build script with the Chromium git commit hash and architecture
+# Takes about 30 minutes.
+python3 ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
+
+# The build often fails at the last step when copying files to the staging
+# bucket, and if so, you need to copy them manually (see Artifacts below)
+# before doing another build, which will erase the files.
+
+# Then you can build for ARM
+python3 ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 arm64
+```
+
+**NOTE:** The `init.py` script updates git config to make it more possible for
+the Chromium repo to be cloned successfully. If checking out the Chromium fails
+with "early EOF" errors, the instance could be low on memory or disk space.
+
+When bumping the Puppeteer version, make sure you also update the `ChromiumArchivePaths.revision` variable in
+`x-pack/platform/plugins/private/reporting/server/browsers/chromium/paths.ts`.
+
+In some cases the revision number might not be available for the darwin or windows builds in `https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html`. For example, 1181205 was not available for darwin arm64 or windows. In that case, the next available revision numbers 1181286 and 1181280 were used. 
 
 ## Build args
 
-Chromium is built via a build tool called "ninja". The build can be configured by specifying build flags either in an "args.gn" file or via commandline args. We have an "args.gn" file per platform:
+A good how-to on building Chromium from source is
+[here](https://chromium.googlesource.com/chromium/src/+/master/docs/get_the_code.md).
 
-- mac: darwin/args.gn
-- linux: linux/args.gn
-- windows: windows/args.gn
+We have an `linux/args.gn` file that is automatically copied to the build target directory.
 
-The various build flags are not well documented. Some are documented [here](https://www.chromium.org/developers/gn-build-configuration). Some, such as `enable_basic_printing = false`, I only found by poking through 3rd party build scripts.
-
-As of this writing, there is an officially supported headless Chromium build args file for Linux: `build/args/headless.gn`. This does not work on Windows or Mac, so we have taken that as our starting point, and modified it until the Windows / Mac builds succeeded.
+To get a list of the build arguments that are enabled, install `depot_tools` and run
+`gn args out/headless --list` from the `chromium/src` directory. It prints out all of the flags and their
+settings, including the defaults. Some build flags are documented
+[here](https://www.chromium.org/developers/gn-build-configuration).
 
 **NOTE:** Please, make sure you consult @elastic/kibana-security before you change, remove or add any of the build flags.
 
-## VMs
-
-I ran Linux and Windows VMs in GCP with the following specs:
-
-- 8 core vCPU
-- 30GB RAM
-- 128GB hard drive
-- Ubuntu 18.04 LTS (not minimal)
-- Windows Server 2016 (full, with desktop)
-
-The more cores the better, as the build makes effective use of each. For Linux, Ubuntu is the only officially supported build target.
-
-- Linux:
-  - SSH in using [gcloud](https://cloud.google.com/sdk/)
-  - Get the ssh command in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> SSH -> gcloud
-  - Their in-browser UI is kinda sluggish, so use the commandline tool
-
-- Windows:
-  - Install Microsoft's Remote Desktop tools
-  - Get the RDP file in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> RDP -> Download the RDP file
-  - Edit it in Microsoft Remote Desktop:
-    - Display -> Resolution (1280 x 960 or something reasonable)
-    - Local Resources -> Folders, then select the folder(s) you want to share, this is at least `build_chromium` folder
-    - Save
-
-## Initializing each VM / environment
-
-You only need to initialize each environment once. NOTE: on Mac OS you'll need to install XCode and accept the license agreement.
-
-Create the build folder:
-
-- Mac / Linux: `mkdir -p ~/chromium`
-- Windows: `mkdir c:\chromium`
-
-Copy the `x-pack/build-chromium` folder to each. Replace `you@your-machine` with the correct username and VM name:
-
-- Mac: `cp -r ~/dev/elastic/kibana/x-pack/build_chromium ~/chromium/build_chromium`
-- Linux: `gcloud compute scp --recurse ~/dev/elastic/kibana/x-pack/build_chromium you@your-machine:~/chromium/build_chromium --zone=us-east1-b`
-- Windows: Copy the `build_chromium` folder via the RDP GUI into `c:\chromium\build_chromium`
-
-There is an init script for each platform. This downloads and installs the necessary prerequisites, sets environment variables, etc.
-
-- Mac: `~/chromium/build_chromium/darwin/init.sh`
-- Linux: `~/chromium/build_chromium/linux/init.sh`
-- Windows `c:\chromium\build_chromium\windows\init.bat`
-
-In windows, at least, you will need to do a number of extra steps:
-
-- Follow the prompts in the Visual Studio installation process, click "Install" and wait a while
-- Once it's installed, open Control Panel and turn on Debugging Tools for Windows:
-  - Control Panel → Programs → Programs and Features → Select the “Windows Software Development Kit” → Change → Change → Check “Debugging Tools For Windows” → Change
-- Press enter in the terminal to continue running the init
-
-## Building
-
-Find the sha of the Chromium commit you wish to build. Most likely, you want to build the Chromium revision that is tied to the version of puppeteer that we're using.
-
-Find the Chromium revision (run in kibana's working directory):
-
-- `cat node_modules/puppeteer-core/package.json | grep chromium_revision`
-- Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example, puppeteer@1.19.0 has rev (674921): https://crrev.com/674921)
-- Grab the SHA from there
-  - (For example, rev 674921 has sha 312d84c8ce62810976feda0d3457108a6dfff9e6)
-
-Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
-
-- SSH into the server
-- Run `tmux list-sessions`
-- Run `tmux switch -t {session_id}`, replacing {session_id} with the value from the list-sessions output
-
-To run the build, replace the sha in the following commands with the sha that you wish to build:
-
-- Mac: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
-- Linux: `python ~/chromium/build_chromium/build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
-- Windows: `python c:\chromium\build_chromium\build.py 312d84c8ce62810976feda0d3457108a6dfff9e6`
-
 ## Artifacts
 
-After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}`, for example: `chromium-4747cc2-linux`.
+After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
+The zip files and md5 files are copied to a **staging** bucket in GCP storage.
 
-The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/legacy/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `binaryChecksum` and `baseUrl`. Below is a list of what the archive's are:
+Note these files are "cleaned" after you start another build, so you should ensure the 
+artifacts get copied to the cloud staging folder before starting another build.
 
-- `archiveChecksum`: The contents of the `.md5` file, which is the `md5` checksum of the zip file.
-- `binaryChecksum`: The `md5` checksum of the `headless_shell` binary itself.
+The build often fails with a permission error at the last step of the build where
+it copies these files.  Instead, you can copy the files to your local machine,
+then copy them to the staging directory, all from your local machine.
 
-*If you're building in the cloud, don't forget to turn off your VM after retrieving the build artifacts!*
+```sh
+$ export VM_NAME=pmuellr-rd-build-chromium-linux-20250918-203527
+$ export VM_PATH=/home/pmuellr/chromium/chromium/src/out/headless
+$ gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" $VM_NAME:$VM_PATH/chromium-"*" .
+...
+$ gsutil cp chromium-* gs://headless_shell_staging
+...
+```
 
-## Diagnosing runtime failures
+When all the artifacts are in the staging bucket, you copy them all to the `headless_shell` bucket.
 
-After getting the build to pass, the resulting binaries often failed to run or would hang.
+```sh
+gsutil cp gs://headless_shell_staging/chromium-67649b1-* gs://headless_shell/
+```
 
-You can run the headless browser manually to see what errors it is generating (replace the `c:\dev\data` with the path to a dummy folder you've created on your system):
+IMPORTANT: Do not replace builds in the `headless_shell` bucket that are referenced in an active Kibana branch. CI tests on that branch will fail since the archive checksum no longer matches the original version.
 
-**Mac**
-`headless_shell --disable-translate --disable-extensions --disable-background-networking --safebrowsing-disable-auto-update --disable-sync --metrics-recording-only --disable-default-apps --mute-audio --no-first-run --disable-gpu --no-sandbox --headless --hide-scrollbars --window-size=400,400 --remote-debugging-port=9221 https://example.com/`
+## Testing
+Search the Puppeteer Github repo for known issues that could affect our use case, and make sure to test anywhere that is affected.
 
-**Linux**
-`headless_shell --disable-translate --disable-extensions --disable-background-networking --safebrowsing-disable-auto-update --disable-sync --metrics-recording-only --disable-default-apps --mute-audio --no-first-run --disable-gpu --no-sandbox --headless --hide-scrollbars --window-size=400,400 --remote-debugging-port=9221 https://example.com/`
+Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Windows, Linux x64 and Linux arm64:
 
-**Windows**
-`headless_shell.exe --disable-translate --disable-extensions --disable-background-networking --safebrowsing-disable-auto-update --disable-sync --metrics-recording-only --disable-default-apps --mute-audio --no-first-run --disable-gpu --no-sandbox --headless --hide-scrollbars --window-size=400,400 --remote-debugging-port=9221 https://example.com/`
+- Make sure the Reporting plugin is fetching the correct version of the browser
+  at start-up time, and that it can successfully unzip it and copy the files to
+  `x-pack/platform/plugins/private/reporting/chromium`
+- Make sure there are no errors when using the **Reporting diagnostic tool**
+- All functional and API tests that generate PDF and PNG files should pass.
+- Use a VM to run Kibana in a low-memory environment and try to generate a PNG of a dashboard that outputs as a 4MB file. Document the minimum requirements in the PR.
 
-In the case of Windows, you can use IE to open `http://localhost:9221` and see if the page loads. In mac/linux you can just curl the JSON endpoints: `curl http://localhost:9221/json/list`.
+## Testing Chromium upgrades on a Windows Machine
+
+Create a Windows Server VM at GCloud.  There is an an instance template instance-template-20250130-215334-pmuellr-windows you can create a VM from, here: 
+https://console.cloud.google.com/compute/instanceTemplates/list?inv=1&invt=Aboq_Q&project=elastic-kibana-184716 
+
+Instead of using SSH to connect, you’ll use Remote Desktop (RDP) to open a terminal.  You’ll end up downloading an `.rdp` file, which you can open with the Windows App app (yes, the name of the Mac app is “Windows App”).  When you create the VM, you’ll need to reset the password, which you will need when you connect with RDP.  In addition, the ip address will change each time you restart, so you will need to “edit” the “Device” (the `.RDP` file) from the Windows App to set the ip address.  You should also go in Windows App settings, to set the Credentials from the newly reset password (and the userid you selected).  You can then select this credential in the “Device” settings.  The Device settings also let you set the Redirect folder (under Folders).
+
+Install nvm via https://github.com/coreybutler/nvm-windows/releases - download the `nvm-setup.exe` program.
+
+Get the version of node this branch on your local laptop is using, via:
+
+```sh
+$ cat .nvmrc
+20.18.2
+```
+
+Now install that version of node on Windows:
+
+```sh
+$ nvm install 20.18.2
+$ nvm use 20.18.2
+```
+
+From the branch on your local laptop, find the relevant ES build via  yarn es snapshot
+
+```sh
+$ yarn es snapshot 
+yarn run v1.22.22
+_ node scripts/es snapshot --license trial
+ info Installing from snapshot
+ info version: 9.1.0
+ info install path: /Users/pmuellr/Projects/elastic/kibana-puppeteer-24.1.1/.es/9.1.0
+ info license: trial
+ info Downloading snapshot manifest from  https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.1.0/manifest-latest-verified.json
+ info downloading artifact from https://storage.googleapis.com/kibana-ci-es-snapshots-daily/...
+```
+
+The URL at the bottom is what we want.  Copy that and open the Edge browser in Windows and paste it in the URL bar.  From there, select the URL for the windows build, and download to Windows, then unpack.
+
+Do a build on your Mac:
+
+```sh
+$ node scripts/build \
+  --all-platforms \
+  --skip-os-packages \
+  --skip-canvas-shareable-runtime \
+  --skip-docker-contexts \
+  --skip-cdn-assets \
+  --skip-docker-ubi \
+  --skip-docker-wolfi \
+  --skip-docker-fips \
+  --release
+```
+
+The output we want will be in build/default/kibana-x.y.z-windows-x86_64, but we’ll want a tar.gz of that:
+
+```sh
+cd build/default
+tar -zcvf kibana-9.1.0-windows-x86_64.tar.gz kibana-9.1.0-windows-x86_64
+```
+
+Set your RDP session up with a “redirect folder”, and place the .tar.gz in that folder.  You will need to quit and relaunch RDP after adding the “redirect folder”.  You will eventually be able to see the folder in “My Computer” or such in Windows explorer.  Copy the .tar.gz to a “local” disk, and then unpack with 
+
+```sh
+$ tar -zxvf kibana-9.1.0-windows-x86_64.tar.gz 
+```
+
+Edit `elastichsearch.yml` as follows:
+
+```yaml
+discovery.type: "single-node"
+xpack.ml.enabled: false
+xpack.security.authc.api_key.enabled: true
+```
+
+Change `xpack.security.http.ssl.enabled` from true to false (to run in http instead of https)
+
+Start elasticsearch
+
+```sh
+$ cd ${es dir}
+$ bin/elasticsearch.bat
+...
+```
+
+Reset passwords for elastic and kibana_system
+
+```sh
+bin/elasticsearch-reset-password.bat -u elastic       # login to Kibana with this, so remember it!
+bin/elasticsearch-reset-password.bat -u kibana_system # set in kibana.yml
+```
+
+Edit kibana.yml
+
+```yaml
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "" - get from password reset (see above)
+xpack.security.encryptionKey:              "01234567012345670123456701234567"
+xpack.encryptedSavedObjects.encryptionKey: "01234567012345670123456701234567"
+xpack.reporting.encryptionKey:             "01234567012345670123456701234567"
+```
+
+Start kibana
+
+```sh
+$ cd ${kibana dir}
+$ bin/kibana.bat
+...
+```
+
+Start a trial, ("Stack Management" > "License Management" > "Start a trial") so that reporting is enabled.  Load a sample dataset, to load a dashboard, view the dashboard, then generate a PDF (with and without printing selected) and PNG
 
 ## Resources
 
 The following links provide helpful context about how the Chromium build works, and its prerequisites:
 
+- Tools for Chromium version information: https://omahaproxy.appspot.com/
 - https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
-- https://chromium.googlesource.com/chromium/src/+/master/docs/windows_build_instructions.md
-- https://chromium.googlesource.com/chromium/src/+/master/docs/mac_build_instructions.md
-- https://chromium.googlesource.com/chromium/src/+/master/docs/linux_build_instructions.md
+- https://chromium.googlesource.com/chromium/src/+/HEAD/docs/linux/build_instructions.md
 - Some build-flag descriptions: https://www.chromium.org/developers/gn-build-configuration
 - The serverless Chromium project was indispensable: https://github.com/adieuadieu/serverless-chrome/blob/b29445aa5a96d031be2edd5d1fc8651683bf262c/packages/lambda/builds/chromium/build/build.sh

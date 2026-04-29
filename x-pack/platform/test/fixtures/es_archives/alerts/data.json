@@ -1,0 +1,1497 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+        ],
+        "alertTypeId": "example.always-firing",
+        "apiKey": "QIUT8u0/kbOakEHSj50jDpVR90MrqOxanEscboYOoa8PxQvcA5jfHash+fqH3b+KNjJ1LpnBcisGuPkufY9j1e32gKzwGZV5Bfys87imHvygJvIM8uKiFF8bQ8Y4NTaxOJO9fAmZPrFy07ZcQMCAQz+DUTgBFqs=",
+        "apiKeyOwner": "elastic",
+        "consumer": "alerting",
+        "createdAt": "2020-06-17T15:35:38.497Z",
+        "createdBy": "elastic",
+        "enabled": true,
+        "muteAll": true,
+        "mutedInstanceIds": [
+        ],
+        "name": "always-firing-alert",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedAt": "2020-06-17T15:35:38.497Z",
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.8.0"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:99f3e6d7-b7bb-477d-ac28-92ee22726969",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [{
+          "actionRef": "action_0",
+          "actionTypeId": ".servicenow",
+          "group": "threshold met",
+          "params": {
+            "subAction": "pushToService",
+            "subActionParams": {
+                "severity":"2",
+                "impact":"2",
+                "urgency":"2",
+                "savedObjectId":"{{alertId}}",
+                "title":"SN short desc",
+                "description":"SN desc",
+                "comment":"sn comment"
+            }
+          }
+        },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".jira",
+            "group": "threshold met",
+            "params": {
+              "subAction": "pushToService",
+              "subActionParams": {
+                "title":"Jira summary",
+                "issueType":"10001",
+                "comments":[
+                  {
+                    "commentId":"1",
+                    "comment":"jira comment"
+                  }
+                ],
+                "description":"Jira description",
+                "savedObjectId":"{{alertId}}",
+                "priority":"Highest",
+                "parent":"CASES-78",
+                "labels":[
+                  "test"
+                ]
+              }
+            }
+          },
+          {
+            "actionRef": "action_2",
+            "actionTypeId": ".resilient",
+            "group": "threshold met",
+            "params": {
+              "subAction": "pushToService",
+              "subActionParams": {
+                "savedObjectId":"{{alertId}}",
+                "incidentTypes":[
+                  "17",
+                  "21"
+                ],
+                "severityCode":"5",
+                "title":"IBM name",
+                "description":"IBM description",
+                "comments":[
+                  {
+                    "commentId":"alert-comment",
+                    "comment":"IBM comment"
+                  }
+                ]
+              }
+            }
+          }],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "rbg",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedAt": "2020-09-22T15:16:07.451Z",
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.11.0"
+      },
+      "references": [{
+        "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+        "name": "action_0",
+        "type": "action"
+      },
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_1",
+          "type": "action"
+        },
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_2",
+          "type": "action"
+        }],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:66a8ab7a-35cf-445e-ade3-215a029c6969",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".servicenow",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/servicenow"
+        },
+        "name": "A servicenow action",
+        "secrets": "kvjaTWYKGmCqptyv4giaN+nQGgsZrKXmlULcbAP8KK3JmR8Ei9ADqh5mB+uVC+x+Q7/vTQ5SKZCj3dHv3pmNzZ5WGyZYQFBaaa63Mkp3kIcnpE1OdSAv+3Z/Y+XihHAM19zUm3JRpojnIpYegoS5/vMx1sOzcf/+miYUuZw2lgo0lNE="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-22T15:16:06.924Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+        ],
+        "alertTypeId": "example.always-firing",
+        "apiKey": "XHcE1hfSJJCvu2oJrKErgbIbR7iu3XAX+c1kki8jESzWZNyBlD4+6yHhCDEx7rNLlP/Hvbut/V8N1BaQkaSpVpiNsW/UxshiCouqJ+cmQ9LbaYnca9eTTVUuPhbHwwsDjfYkakDPqW3gB8sonwZl6rpzZVacfp4=",
+        "apiKeyOwner": "elastic",
+        "consumer": "metrics",
+        "createdAt": "2020-06-17T15:35:38.497Z",
+        "createdBy": "elastic",
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "always-firing-alert",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedAt": "2020-06-17T15:35:38.497Z",
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.8.0"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".pagerduty",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/pagerduty"
+        },
+        "name": "A pagerduty action",
+        "secrets": "kvjaTWYKGmCqptyv4giaN+nQGgsZrKXmlULcbAP8KK3JmR8Ei9ADqh5mB+uVC+x+Q7/vTQ5SKZCj3dHv3pmNzZ5WGyZYQFBaaa63Mkp3kIcnpE1OdSAv+3Z/Y+XihHAM19zUm3JRpojnIpYegoS5/vMx1sOzcf/+miYUuZw2lgo0lNE="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-22T15:16:06.924Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:b6087f72-994f-46fb-8120-c6e5c50d0f8f",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+          {
+            "actionRef": "action_0",
+            "actionTypeId": ".pagerduty",
+            "group": "default",
+            "params": {
+              "component": "",
+              "eventAction": "trigger",
+              "summary": "fired {{alertInstanceId}}"
+            }
+          },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".pagerduty",
+            "group": "default",
+            "params": {
+              "component": "",
+              "eventAction": "resolve",
+              "summary": "fired {{alertInstanceId}}"
+            }
+          },
+          {
+            "actionRef": "action_2",
+            "actionTypeId": ".pagerduty",
+            "group": "default",
+            "params": {
+              "component": "",
+              "dedupKey": "{{alertInstanceId}}",
+              "eventAction": "resolve",
+              "summary": "fired {{alertInstanceId}}"
+            }
+          }
+        ],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "abc",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "8a7c6ff0-fce6-11ea-a888-9337d77a2c25",
+        "tags": [
+          "foo"
+        ],
+        "throttle": "1m",
+        "updatedAt": "2020-09-22T15:16:07.451Z",
+        "updatedBy": null
+      },
+      "migrationVersion": {
+        "alert": "7.9.0"
+      },
+      "references": [
+        {
+          "id": "a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+          "name": "action_0",
+          "type": "action"
+        },
+        {
+          "id": "a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+          "name": "action_1",
+          "type": "action"
+        },
+        {
+          "id": "a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+          "name": "action_2",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-09-22T15:16:08.456Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:38482620-ef1b-11eb-ad71-7de7959be71c",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test upgrade of exceptionsList",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+          "ruleId" : "4ec223b9-77fa-4895-8539-6b3e586a2858",
+          "type": "query",
+          "exceptionsList" : [
+            {
+              "id" : "endpoint_list",
+              "list_id" : "endpoint_list",
+              "namespace_type" : "agnostic",
+              "type" : "endpoint"
+            },
+            {
+              "list_id" : "cd152d0d-3590-4a45-a478-eed04da7936b",
+              "namespace_type" : "single",
+              "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
+              "type" : "detection"
+            }
+          ]
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:9c003b00-00ee-11ec-b067-2524946ba327",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [{
+          "actionRef": "action_0",
+          "actionTypeId": "test.noop",
+          "group": "default",
+          "params": {
+          }
+        },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".slack",
+            "group": "default",
+            "params": {
+              "message": "something happened!"
+            }
+          }],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "test migration of preconfigured connector",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedAt": "2020-09-22T15:16:07.451Z",
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.15.0"
+      },
+      "references": [
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_0",
+          "type": "action"
+        },
+        {
+          "id": "my-slack1",
+          "name": "action_1",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:d7a8c6a1-9394-48df-a634-d5457c35d747",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test upgrade of ruleAlertId",
+        "alertTypeId" : "siem.notifications",
+        "consumer" : "alertsFixture",
+        "params" : {
+          "ruleAlertId" : "1a4ed6ae-3c89-44b2-999d-db554144504c"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:ece1ece2-9394-48df-a634-d5457c351ece",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test addition of default threat_indicator_path",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "threat_match"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:fce1ece2-9394-48df-a634-d5457c351fce",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test addition of default threat_indicator_path",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "threat_match",
+            "threatIndicatorPath": "custom.indicator.path"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:1ce1ece2-9394-48df-a634-d5457c3511ce",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test addition of default threat_indicator_path",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "eql"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:92237b30-4e03-11ec-9ab9-d980518a2d28",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "alertTypeId" : "metrics.alert.inventory.threshold",
+        "consumer" : "infrastructure",
+        "params" : {
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [
+          {
+            "actionTypeId" : ".server-log",
+            "params" : {
+              "level" : "info",
+              "message" : "Alert message"
+            },
+            "actionRef" : "action_0",
+            "group" : "metrics.invenotry_threshold.fired"
+          }
+        ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:1efdfa40-8ec7-11ec-a700-5524407a7653",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"enabled 7.16.1 query rule",
+           "tags":[],
+           "alertTypeId":"siem.signals",
+           "consumer":"siem",
+           "params":{
+              "author":[
+                 
+              ],
+              "description":"enabled 7.16.1 query rule",
+              "ruleId":"064e3fed-6328-416b-bb85-c08265088f41",
+              "falsePositives":[
+                 
+              ],
+              "from":"now-36000060s",
+              "immutable":false,
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[
+                 
+              ],
+              "severity":"low",
+              "severityMapping":[
+                 
+              ],
+              "threat":[
+                 
+              ],
+              "to":"now",
+              "references":[
+                 
+              ],
+              "version":4,
+              "exceptionsList":[
+              ],
+              "type":"query",
+              "language":"kuery",
+              "index":[
+                 "apm-*-transaction*",
+                 "traces-apm*",
+                 "auditbeat-*",
+                 "endgame-*",
+                 "filebeat-*",
+                 "logs-*",
+                 "packetbeat-*",
+                 "winlogbeat-*",
+                 "test-index-3"
+              ],
+              "query":"*:*",
+              "filters":[
+                 
+              ]
+           },
+           "schedule":{
+              "interval":"1m"
+           },
+           "enabled":true,
+           "actions":[
+              
+           ],
+           "throttle":null,
+           "apiKeyOwner":"3270256467",
+           "apiKey":"UnFCyd4CthfIw6Mv5SRRbhYC7NPD2Jn8L+aCT/JfPQ5/poIsrwkh0plDAllpBYjFYhGXTQPtSPgu9yAwsuuaUhXxtFcnFHPleQeLvmu8VICueSxgMnK25Oqku8hfSQw9ETf9WZ3yXQOwvD9i8fkIUx84zt5q2LMuZv826fY9433/seVoCWspTj5qm2DchMDgTWzMKQaR2zbvRA==",
+           "createdBy":"3270256467",
+           "updatedBy":"3270256467",
+           "createdAt":"2022-02-16T01:24:02.121Z",
+           "updatedAt":"2021-07-27T20:42:55.896Z",
+           "muteAll":true,
+           "mutedInstanceIds":[
+              
+           ],
+           "scheduledTaskId":"2030ade0-8ec7-11ec-a700-5524407a7653"
+        },
+        "type":"alert",
+        "references":[],
+        "migrationVersion":{
+           "alert":"7.16.0"
+        },
+        "updated_at":"2022-02-16T16:20:19.375Z"
+     }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:13fdfa40-8ec7-11ec-a700-5524407a7667",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"disabled 7.16.1 query rule",
+           "tags":[],
+           "alertTypeId":"siem.signals",
+           "consumer":"siem",
+           "params":{
+              "author":[
+                 
+              ],
+              "description":"disabled 7.16.1 query rule",
+              "ruleId":"364e3fed-6328-416b-bb85-c08265088f41",
+              "falsePositives":[
+                 
+              ],
+              "from":"now-36000060s",
+              "immutable":false,
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[
+                 
+              ],
+              "severity":"low",
+              "severityMapping":[
+                 
+              ],
+              "threat":[
+                 
+              ],
+              "to":"now",
+              "references":[
+                 
+              ],
+              "version":4,
+              "exceptionsList":[
+              ],
+              "type":"query",
+              "language":"kuery",
+              "index":[
+                 "apm-*-transaction*",
+                 "traces-apm*",
+                 "auditbeat-*",
+                 "endgame-*",
+                 "filebeat-*",
+                 "logs-*",
+                 "packetbeat-*",
+                 "winlogbeat-*",
+                 "test-index-3"
+              ],
+              "query":"*:*",
+              "filters":[
+                 
+              ]
+           },
+           "schedule":{
+              "interval":"1m"
+           },
+           "enabled":true,
+           "actions":[
+              
+           ],
+           "throttle":null,
+           "apiKeyOwner":"3270256467",
+           "apiKey":"UnFCyd4CthfIw6Mv5SRRbhYC7NPD2Jn8L+aCT/JfPQ5/poIsrwkh0plDAllpBYjFYhGXTQPtSPgu9yAwsuuaUhXxtFcnFHPleQeLvmu8VICueSxgMnK25Oqku8hfSQw9ETf9WZ3yXQOwvD9i8fkIUx84zt5q2LMuZv826fY9433/seVoCWspTj5qm2DchMDgTWzMKQaR2zbvRA==",
+           "createdBy":"3270256467",
+           "updatedBy":"3270256467",
+           "createdAt":"2022-02-16T01:25:02.121Z",
+           "updatedAt":"2022-02-16T01:25:02.121Z",
+           "muteAll":true,
+           "mutedInstanceIds":[
+              
+           ],
+           "scheduledTaskId":null
+        },
+        "type":"alert",
+        "references":[],
+        "migrationVersion":{
+           "alert":"7.16.0"
+        },
+        "updated_at":"2022-02-16T16:21:19.375Z"
+     }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:66560b6f-5ca4-41e2-a1a1-dcfd7117e124",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "Test mapped params migration",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "eql",
+            "risk_score": 90,
+            "severity": "critical"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt": "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "123",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:8990af61-c09a-11ec-9164-4bfd6fc32c43",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test remove internal tags",
+           "alertTypeId":"siem.queryRule",
+           "consumer":"siem",
+           "params":{
+              "immutable":true,
+              "ruleId":"bf9638eb-7d3c-4f40-83d7-8c40a7c80f2e",
+              "author":[
+                 
+              ],
+              "description":"remove interns tags mock rule",
+              "falsePositives":[
+                 
+              ],
+              "from":"now-36000060s",
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[
+                 
+              ],
+              "severity":"low",
+              "severityMapping":[
+                 
+              ],
+              "threat":[
+                 
+              ],
+              "to":"now",
+              "references":[
+                 
+              ],
+              "version":4,
+              "exceptionsList":[
+              ],
+              "type":"query",
+              "language":"kuery",
+              "index":[
+                 "apm-*-transaction*",
+                 "traces-apm*",
+                 "auditbeat-*",
+                 "endgame-*",
+                 "filebeat-*",
+                 "logs-*",
+                 "packetbeat-*",
+                 "winlogbeat-*",
+                 "test-index-3"
+              ],
+              "query":"*:*",
+              "filters":[
+                 
+              ]
+           },
+           "schedule":{
+              "interval":"1m"
+           },
+           "enabled":true,
+           "actions": [{
+              "actionRef": "action_1",
+              "actionTypeId": ".slack",
+              "group": "default",
+              "params": {
+                "message": "something happened!"
+              }
+            }],
+           "throttle":"1h",
+           "apiKeyOwner":null,
+           "apiKey":null,
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2021-07-27T20:42:55.896Z",
+           "updatedAt":"2021-07-27T20:42:55.896Z",
+           "muteAll":true,
+           "mutedInstanceIds":[
+              
+           ],
+           "scheduledTaskId":null,
+           "tags":[
+              "__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41",
+              "__internal_immutable:false",
+              "test-tag-1",
+              "foo-tag"
+           ]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"8.2.0"
+        },
+        "updated_at":"2021-08-13T23:00:11.985Z",
+        "references":[
+           
+        ]
+     }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:c8b39c29-d860-43b6-8817-b8058d80ddbc",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old ESQuery with Runtimefield",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n    \"runtime_mappings\": {\n      \"kebabAsSnake\": {\n        \"type\": \"keyword\",\n        \"script\": {\n          \"source\": \"\\\"\\\"\\\"\\\"\"\n        }\n      }\n    },\n    \"fields\": [\"kebabAsSnake\"],\n  \"query\":{\n    \"match_all\" : {}\n  }}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt":"2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "c8b39c29-d860-43b6-8817-b8058d80ddbc",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:62c62b7f-8bf3-4104-a064-6247b7bda44f",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old ESQuery without a Runtimefield but custom formatting",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n\t\"query\":\n{\n\t\"match_all\":\n\t{}\n}\n}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "62c62b7f-8bf3-4104-a064-6247b7bda44f",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:f0d13f4d-35ae-4554-897a-6392e97bb84c",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old ESQuery with unparsable query",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\"query\":}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "f0d13f4d-35ae-4554-897a-6392e97bb84c",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+          "alertTypeId": "example.always-firing",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "alerts",
+          "createdAt": "2022-08-24T19:02:30.889Z",
+          "createdBy": "elastic",
+          "enabled": false,
+          "muteAll": false,
+          "mutedInstanceIds": [],
+          "name": "remove snoozed",
+          "params": {},
+          "schedule": {
+              "interval": "1m"
+          },
+          "scheduledTaskId": null,
+          "tags": [],
+          "throttle": null,
+          "updatedBy": "elastic",
+          "updatedAt": "2022-08-24T19:02:30.889Z",
+          "isSnoozedUntil": "2022-08-24T19:05:49.817Z"
+      },
+      "migrationVersion": {
+          "alert": "8.3.0"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2022-08-24T19:05:50.159Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:8370ffd2-f2db-49dc-9741-92c657189b9b",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+          "alertTypeId": "example.always-firing",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "alerts",
+          "createdAt": "2022-08-24T19:02:30.889Z",
+          "createdBy": "elastic",
+          "enabled": false,
+          "muteAll": false,
+          "mutedInstanceIds": [],
+          "name": "Test rule migration with successful execution status and monitoring",
+          "params": {},
+          "schedule": {
+              "interval": "1m"
+          },
+          "scheduledTaskId": null,
+          "tags": [],
+          "throttle": null,
+          "updatedBy": "elastic",
+          "updatedAt": "2022-08-24T19:02:30.889Z",
+          "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
+          "executionStatus": {
+            "status": "ok",
+            "lastExecutionDate": "2022-08-24T19:05:49.817Z",
+            "lastDuration": 60000
+          },
+          "monitoring": {
+            "execution": {
+              "history": [{
+                "duration": 60000,
+                "success": true,
+                "timestamp": "2022-08-24T19:05:49.817Z"
+              }],
+              "calculated_metrics": {
+                "success_ratio": 1,
+                "p50": 0,
+                "p95": 60000,
+                "p99": 60000
+              }
+            }
+          }
+      },
+      "migrationVersion": {
+          "alert": "8.0.1"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2022-11-01T19:05:50.159Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:c87707ac-7328-47f7-b212-2cb40a4fc9b9",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+          "alertTypeId": "example.always-firing",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "alerts",
+          "createdAt": "2022-08-24T19:02:30.889Z",
+          "createdBy": "elastic",
+          "enabled": false,
+          "muteAll": false,
+          "mutedInstanceIds": [],
+          "name": "Test rule migration with warning execution status",
+          "params": {},
+          "schedule": {
+              "interval": "1m"
+          },
+          "scheduledTaskId": null,
+          "tags": [],
+          "throttle": null,
+          "updatedBy": "elastic",
+          "updatedAt": "2022-08-24T19:02:30.889Z",
+          "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
+          "executionStatus": {
+            "status": "warning",
+            "lastExecutionDate": "2022-08-24T19:05:49.817Z",
+            "lastDuration": 60000,
+            "warning": {
+              "reason": "warning reason",
+              "message": "warning message"
+            }
+          },
+          "monitoring": {
+            "execution": {
+              "history": [{
+                "duration": 60000,
+                "success": true,
+                "timestamp": "2022-08-24T19:05:49.817Z"
+              }],
+              "calculated_metrics": {
+                "success_ratio": 1,
+                "p50": 0,
+                "p95": 60000,
+                "p99": 60000
+              }
+            }
+          }
+      },
+      "migrationVersion": {
+          "alert": "8.0.1"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2022-11-01T19:05:50.159Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:8bd01ff0-9d84-11ed-994d-f1971f849da5",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old Log threshold rule",
+        "alertTypeId": "logs.alert.document.count",
+        "consumer": "logs",
+        "params": {
+          "timeSize": 5,
+          "timeUnit": "m",
+          "count": {
+            "value": 75,
+            "comparator": "more than"
+          },
+          "criteria": [
+            {
+              "field": "log.level",
+              "comparator": "equals",
+              "value": "error"
+            }
+          ]
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2023-01-26T14:20:13.449Z",
+        "updatedAt": "2023-01-26T14:20:13.449Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "8bd01ff0-9d84-11ed-994d-f1971f849da5",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "references": [],
+      "migrationVersion": {
+        "alert": "8.0.1"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:88bc8c21-07ba-42eb-ad9c-06820275ac10",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test unmuting of a custom security rule",
+           "alertTypeId":"siem.queryRule",
+           "consumer":"siem",
+           "params":{
+              "immutable":false,
+              "ruleId":"bf9638eb-8d3c-4f40-83d7-8c40a7c80f2e",
+              "author":[],
+              "description":"Test unmuting of a custom security rule",
+              "falsePositives":[],
+              "from":"now-36000060s",
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[],
+              "severity":"low",
+              "severityMapping":[],
+              "threat":[],
+              "to":"now",
+              "references":[],
+              "version":0,
+              "exceptionsList":[],
+              "type":"query",
+              "language":"kuery",
+              "index":["test-index"],
+              "query":"*:*",
+              "filters":[]
+           },
+           "schedule":{
+              "interval":"5m"
+           },
+           "enabled":false,
+           "actions": [],
+           "apiKeyOwner":null,
+           "apiKey":null,
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2023-03-27T20:42:55.896Z",
+           "updatedAt":"2023-03-27T20:42:55.896Z",
+           "muteAll":true,
+           "mutedInstanceIds":[],
+           "scheduledTaskId":null,
+           "tags":[]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"8.7.0"
+        },
+        "updated_at":"2023-03-27T20:42:55.896Z",
+        "references":[]
+     }
+  }
+}

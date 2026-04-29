@@ -1,0 +1,231 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { ARTIFACT_FLYOUT_LABELS } from './components/artifact_flyout';
+import { ARTIFACT_DELETE_LABELS } from './components/artifact_delete_modal';
+import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_with_artifact_delete_item';
+
+export const artifactListPageLabels = Object.freeze({
+  // ------------------------------
+  // PAGE labels
+  // ------------------------------
+  pageTitle: i18n.translate('xpack.securitySolution.artifactListPage.pageTitle', {
+    defaultMessage: 'Artifact',
+  }),
+  pageAboutInfo: i18n.translate('xpack.securitySolution.artifactListPage.aboutInfo', {
+    defaultMessage: 'A list of artifacts for endpoint',
+  }),
+  pageAddButtonTitle: i18n.translate('xpack.securitySolution.artifactListPage.addButtonTitle', {
+    defaultMessage: 'Add artifact',
+  }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importButtonTitle',
+    {
+      defaultMessage: 'Import artifacts',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportButtonTitle',
+    {
+      defaultMessage: 'Export artifact list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Artifact list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportErrorToastTitle',
+    {
+      defaultMessage: 'Artifact list export failed',
+    }
+  ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastTitle',
+    {
+      defaultMessage: 'Artifacts imported',
+    }
+  ),
+  pageImportSuccessToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastText',
+    {
+      defaultMessage: 'All artifacts were imported successfully.',
+    }
+  ),
+  pageImportCompletedWithErrorsToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastTitle',
+    {
+      defaultMessage: 'Import completed with errors',
+    }
+  ),
+  getPageImportCompletedWithErrorsToastText: (
+    importedCount: number,
+    failedCount: number
+  ): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastText',
+      {
+        defaultMessage:
+          '{importedCount} imported, {failedCount} failed. Review the errors for details.',
+        values: { importedCount, failedCount },
+      }
+    );
+  },
+  pageImportAllItemsFailedToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importAllItemsFailedToastText',
+    {
+      defaultMessage: "The artifacts couldn't be imported. Review the errors and try again.",
+    }
+  ),
+  pageImportViewErrorsButton: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importViewErrorsButton',
+    {
+      defaultMessage: 'View errors',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importErrorToastTitle',
+    {
+      defaultMessage: "Artifacts weren't imported",
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importOnlyCurrentArtifactCanBeImportedToastMessage',
+    {
+      defaultMessage: 'You can only import the current artifact type here.',
+    }
+  ),
+  importFlyoutDetails: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutDetails',
+    {
+      defaultMessage: 'Import artifacts to your artifact list.',
+    }
+  ),
+  importFlyoutImportSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
+    {
+      defaultMessage: 'Import artifacts',
+    }
+  ),
+
+  // ------------------------------
+  // EMPTY state labels
+  // ------------------------------
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no entries to display.',
+    }
+  ),
+  emptyStateTitle: i18n.translate('xpack.securitySolution.artifactListPage.emptyStateTitle', {
+    defaultMessage: 'Add your first artifact',
+  }),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.artifactListPage.emptyStateInfo', {
+    defaultMessage: 'Add an artifact',
+  }),
+  emptyStatePrimaryButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStatePrimaryButtonLabel',
+    { defaultMessage: 'Add' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import artifacts' }
+  ),
+
+  // ------------------------------
+  // SEARCH BAR labels
+  // ------------------------------
+  searchPlaceholderInfo: i18n.translate(
+    'xpack.securitySolution.artifactListPage.searchPlaceholderInfo',
+    {
+      defaultMessage: 'Search on the fields below: name, description, comments, value',
+    }
+  ),
+  /**
+   * Return the label to show under the search bar with the total number of items that match the current filter (or all)
+   * @param total
+   *
+   * @example:
+   *  (total) => i18n.translate('xpack.securitySolution.somepage.showingTotal', {
+   *    defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',
+   *    values: { total },
+   *  })
+   */
+  getShowingCountLabel: (total: number): string => {
+    return i18n.translate('xpack.securitySolution.artifactListPage.showingTotal', {
+      defaultMessage: 'Showing {total, plural, one {# artifact} other {# artifacts}}',
+      values: { total },
+    });
+  },
+
+  // ------------------------------
+  // CARD ACTIONS labels
+  // ------------------------------
+  cardActionEditLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.cardActionEditLabel',
+    {
+      defaultMessage: 'Edit artifact',
+    }
+  ),
+  cardActionDeleteLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
+    {
+      defaultMessage: 'Delete artifact',
+    }
+  ),
+
+  // ------------------------------
+  // ARTIFACT FLYOUT
+  // ------------------------------
+  ...ARTIFACT_FLYOUT_LABELS,
+
+  // ------------------------------
+  // ARTIFACT DELETE MODAL
+  // ------------------------------
+  ...ARTIFACT_DELETE_LABELS,
+  ...ARTIFACT_DELETE_ACTION_LABELS,
+});
+
+type IAllLabels = typeof artifactListPageLabels;
+
+/**
+ * The set of labels that normally have the artifact specific name in it, thus must be set for every page
+ */
+export type ArtifactListPageRequiredLabels = Pick<
+  IAllLabels,
+  | 'pageTitle'
+  | 'pageAboutInfo'
+  | 'pageAddButtonTitle'
+  | 'pageImportButtonTitle'
+  | 'pageExportButtonTitle'
+  | 'pageExportSuccessToastTitle'
+  | 'pageExportErrorToastTitle'
+  | 'pageImportOnlyCurrentArtifactCanBeImportedError'
+  | 'getShowingCountLabel'
+  | 'cardActionEditLabel'
+  | 'cardActionDeleteLabel'
+  | 'flyoutCreateTitle'
+  | 'flyoutEditTitle'
+  | 'flyoutCreateSubmitButtonLabel'
+  | 'flyoutCreateSubmitSuccess'
+  | 'flyoutEditSubmitSuccess'
+  | 'flyoutDowngradedLicenseDocsInfo'
+  | 'deleteActionSuccess'
+  | 'emptyStateTitleNoEntries'
+  | 'emptyStateTitle'
+  | 'emptyStateInfo'
+  | 'emptyStatePrimaryButtonLabel'
+  | 'emptyStateImportButtonLabel'
+>;
+
+export type ArtifactListPageOptionalLabels = Omit<IAllLabels, keyof ArtifactListPageRequiredLabels>;
+
+export type ArtifactListPageLabels = ArtifactListPageRequiredLabels &
+  Partial<ArtifactListPageOptionalLabels>;

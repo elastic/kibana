@@ -1,0 +1,153 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no6QjiSJ",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "5",
+      "@timestamp": "2019-09-22T23:50:13.253123345Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no6Qjisd",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "0",
+      "@timestamp": "2019-09-18T06:50:13.000000101Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no6Qji102Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "1",
+      "@timestamp": "2019-09-18T06:50:13.000000102Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no6Qjis104Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "4",
+      "@timestamp": "2019-09-18T06:50:13.000000104Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "BU_x3-TaGFA8no6Qjis103Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "2",
+      "@timestamp": "2019-09-18T06:50:13.000000103Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "id": "CU_x3-TaGFA8no6QjiSX000Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "-2",
+      "@timestamp": "2019-09-18T06:50:13.000Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no6Qj999Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "-3",
+      "@timestamp": "2019-09-18T06:50:12.999999999Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no6Qsd001Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "-1",
+      "@timestamp": "2019-09-18T06:50:13.000000001Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x3-TaGFA8no000100001Z",
+    "index": "date-nanos",
+    "source": {
+      "@message" : "1",
+      "@timestamp": "2015-09-19T06:50:13.000100001Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}

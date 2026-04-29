@@ -1,0 +1,67 @@
+{
+  "id": "@kbn/test-subj-selector",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-subj-selector",
+        "id": "def-common.subj",
+        "type": "Function",
+        "tags": [],
+        "label": "subj",
+        "description": [
+          "\nConverts a testSubject selector into a CSS selector.\n\ntestSubject selector syntax rules:\n\n  - `data-test-subj` values can include spaces\n\n  - prefixing a value with `*` will allow matching a `data-test-subj` attribute containing at least one occurrence of value within the string.\n    - example: `*foo`\n    - css equivalent: `[data-test-subj*=\"foo\"]`\n    - DOM match example: <div data-test-subj=\"bar-foo\"> </div>\n\n  - prefixing a value with `^` will allow matching a `data-test-subj` attribute beginning with the specified value.\n    - example: `^foo`\n    - css equivalent: `[data-test-subj^=\"foo\"]`\n    - DOM match example: <div data-test-subj=\"foo_bar\"> </div>\n\n  - prefixing a value with `~` will allow matching a `data-test-subj` attribute represented as a whitespace-separated list of words, one of which is exactly value\n    - example: `~foo`\n    - css equivalent: `[data-test-subj~=\"foo\"]`\n    - DOM match example: <div data-test-subj=\"foo bar\"> </div>\n\n  - the `>` character is used between two values to indicate that the value on the right must match an element inside an element matched by the value on the left\n    - example: `foo > bar`\n    - css equivalent: `[data-test-subj=foo] [data-test-subj=bar]`\n    - DOM match example:\n      <div data-test-subj=\"foo\">\n         <div data-test-subj=\"bar\"> </div>\n     </div>\n\n  - the `&` character is used between two values to indicate that the value on both sides must both match the element\n    - example: `foo & bar`\n    - css equivalent: `[data-test-subj=foo][data-test-subj=bar]`\n     - DOM match example: <div data-test-subj=\"foo bar\"> </div>"
+        ],
+        "signature": [
+          "(selector: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-subj-selector/test_subj_selector.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-subj-selector",
+            "id": "def-common.subj.$1",
+            "type": "string",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-subj-selector/test_subj_selector.ts",
+            "lineNumber": 70,
+            "columnNumber": 22,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

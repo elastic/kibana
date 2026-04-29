@@ -1,42 +1,39 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios from 'axios';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { downloadToString } from '../../lib/download';
 
-export async function getNodeShasums(nodeVersion: string) {
-  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${nodeVersion}/SHASUMS256.txt`;
+const cache: Record<string, Record<string, string>> = {};
 
-  const { status, data } = await axios.get(url);
+export async function getNodeShasums(log: ToolingLog, nodeVersion: string, variant: string | null) {
+  let variantPath = '';
+  if (variant === 'pointer-compression') variantPath = 'node-pointer-compression/';
+  if (variant === 'glibc-217') variantPath = 'node-glibc-217/';
+  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${variantPath}dist/v${nodeVersion}/SHASUMS256.txt`;
 
-  if (status !== 200) {
-    throw new Error(`${url} failed with a ${status} response`);
+  if (cache[url]) {
+    log.debug('Returning cached shasum values for node version', nodeVersion, 'from', url);
+    return cache[url];
   }
 
-  return data
-    .toString('utf8')
-    .split('\n')
-    .reduce((acc: Record<string, string>, line: string) => {
-      const [sha, platform] = line.split('  ');
+  log.debug('Downloading shasum values for node version', nodeVersion, 'from', url);
 
-      return {
-        ...acc,
-        [platform]: sha,
-      };
-    }, {});
+  const checksum = await downloadToString({ log, url, expectStatus: 200 });
+  const result = checksum.split('\n').reduce((acc: Record<string, string>, line: string) => {
+    const [sha, platform] = line.split('  ');
+
+    return {
+      ...acc,
+      [platform]: sha,
+    };
+  }, {});
+  cache[url] = result;
+  return result;
 }

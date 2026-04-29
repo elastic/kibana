@@ -1,0 +1,47 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/data-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/content-management-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/presentation-util-plugin",
+    "@kbn/unified-field-list",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/discover-utils",
+    "@kbn/cell-actions",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/unified-data-table",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/presentation-util",
+    "@kbn/content-management-plugin",
+    "@kbn/object-versioning",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema"
+  ]
+}

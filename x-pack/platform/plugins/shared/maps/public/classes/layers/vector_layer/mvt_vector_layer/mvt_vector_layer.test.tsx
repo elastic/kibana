@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+jest.mock('../../../../kibana_services', () => {
+  return {
+    getIsDarkMode() {
+      return false;
+    },
+  };
+});
+
+import { shallow } from 'enzyme';
+
+import type { Feature } from 'geojson';
+import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
+import type { IVectorSource } from '../../../sources/vector_source';
+import type { InnerJoin } from '../../../joins/inner_join';
+import type {
+  TiledSingleLayerVectorSourceDescriptor,
+  VectorLayerDescriptor,
+} from '../../../../../common/descriptor_types';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import { MvtVectorLayer } from './mvt_vector_layer';
+import type { IJoinSource } from '../../../sources/join_sources';
+
+const defaultConfig = {
+  urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
+  layerName: 'foobar',
+  minSourceZoom: 4,
+  maxSourceZoom: 14,
+};
+
+function createLayer(
+  layerOptions: Partial<VectorLayerDescriptor> = {},
+  sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {},
+  isTimeAware: boolean = false
+): MvtVectorLayer {
+  const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
+    type: SOURCE_TYPES.MVT_SINGLE_LAYER,
+    ...defaultConfig,
+    fields: [],
+    tooltipProperties: [],
+    ...sourceOptions,
+  };
+  const mvtSource = new MVTSingleLayerVectorSource(sourceDescriptor);
+  if (isTimeAware) {
+    mvtSource.isTimeAware = async () => {
+      return true;
+    };
+    mvtSource.getApplyGlobalTime = () => {
+      return true;
+    };
+  }
+
+  const defaultLayerOptions = {
+    ...layerOptions,
+    sourceDescriptor,
+  };
+  const layerDescriptor = MvtVectorLayer.createDescriptor(defaultLayerOptions);
+  return new MvtVectorLayer({ layerDescriptor, source: mvtSource, customIcons: [] });
+}
+
+test('should have type MVT_VECTOR_LAYER', () => {
+  const layer: MvtVectorLayer = createLayer({}, {});
+  expect(layer.getType()).toEqual(LAYER_TYPE.MVT_VECTOR);
+});
+
+describe('visiblity', () => {
+  it('should get minzoom from source', async () => {
+    const layer: MvtVectorLayer = createLayer({}, {});
+    expect(layer.getMinZoom()).toEqual(4);
+  });
+  it('should get maxzoom from default', async () => {
+    const layer: MvtVectorLayer = createLayer({}, {});
+    expect(layer.getMaxZoom()).toEqual(24);
+  });
+  it('should get maxzoom from layer options', async () => {
+    const layer: MvtVectorLayer = createLayer({ maxZoom: 10 }, {});
+    expect(layer.getMaxZoom()).toEqual(10);
+  });
+});
+
+describe('getLayerIcon', () => {
+  it('Layers with non-elasticsearch sources should display icon', async () => {
+    const layer: MvtVectorLayer = createLayer({}, {});
+
+    const iconAndTooltipContent = layer.getLayerIcon(false);
+    const component = shallow(iconAndTooltipContent.icon);
+    expect(component).toMatchSnapshot();
+  });
+});
+
+describe('getFeatureById', () => {
+  it('should return null feature', async () => {
+    const layer: MvtVectorLayer = createLayer({}, {});
+    const feature = layer.getFeatureById('foobar') as Feature;
+    expect(feature).toEqual(null);
+  });
+});
+
+describe('isLayerLoading', () => {
+  const sourceDataRequestDescriptor = {
+    data: {},
+    dataId: 'source',
+    dataRequestMeta: {},
+    dataRequestMetaAtStart: undefined,
+    dataRequestToken: undefined,
+  };
+  const mockSource = {
+    getMaxZoom: () => {
+      return 24;
+    },
+    getMinZoom: () => {
+      return 0;
+    },
+  } as unknown as IVectorSource;
+
+  describe('no joins', () => {
+    test('should be true when tile loading has not started', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        layerDescriptor: {
+          __dataRequests: [sourceDataRequestDescriptor],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(true);
+    });
+
+    test('should be true when tiles are loading', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        layerDescriptor: {
+          __areTilesLoaded: false,
+          __dataRequests: [sourceDataRequestDescriptor],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(true);
+    });
+
+    test('should be false when tiles are loaded', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        layerDescriptor: {
+          __areTilesLoaded: true,
+          __dataRequests: [sourceDataRequestDescriptor],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
+    });
+  });
+
+  describe('joins', () => {
+    const joinDataRequestId = 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
+    const mockJoin = {
+      hasCompleteConfig: () => {
+        return true;
+      },
+      getSourceDataRequestId: () => {
+        return joinDataRequestId;
+      },
+      getRightJoinSource: () => {
+        return {} as unknown as IJoinSource;
+      },
+    } as unknown as InnerJoin;
+
+    test('should be false when layer is not visible', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          visible: false,
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
+    });
+
+    test('should be true when tiles are loaded but join is loading', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          __areTilesLoaded: true,
+          __dataRequests: [
+            sourceDataRequestDescriptor,
+            {
+              dataId: joinDataRequestId,
+              dataRequestMetaAtStart: {},
+              dataRequestToken: Symbol('join request'),
+            },
+          ],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(true);
+    });
+
+    test('should be false when tiles are loaded and joins are loaded', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          __areTilesLoaded: true,
+          __dataRequests: [
+            sourceDataRequestDescriptor,
+            {
+              data: {},
+              dataId: joinDataRequestId,
+              dataRequestMeta: {},
+              dataRequestMetaAtStart: undefined,
+              dataRequestToken: undefined,
+            },
+          ],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
+    });
+  });
+});

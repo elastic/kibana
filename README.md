@@ -1,6 +1,6 @@
 # Kibana
 
-Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
+Kibana is the open source interface to query, analyze, visualize, and manage your data stored in Elasticsearch.
 
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
@@ -13,7 +13,7 @@ Kibana is your window into the [Elastic Stack](https://www.elastic.co/products).
 
 If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
 
-If you're interested in diving a bit deeper and getting a taste of Kibana's capabilities, head over to the [Kibana Getting Started Page](https://www.elastic.co/guide/en/kibana/current/getting-started.html).
+If you're interested in diving a bit deeper and getting a taste of Kibana's capabilities, head over to the [Kibana Getting Started Page](https://www.elastic.co/guide/en/kibana/current/get-started.html).
 
 ### Using a Kibana Release
 
@@ -21,7 +21,7 @@ If you want to use a Kibana release in production, give it a test run, or just p
 
 - Download the latest version on the [Kibana Download Page](https://www.elastic.co/downloads/kibana).
 - Learn more about Kibana's features and capabilities on the
-[Kibana Product Page](https://www.elastic.co/products/kibana).
+[Kibana Product Page](https://www.elastic.co/kibana).
 - We also offer a hosted version of Kibana on our
 [Cloud Service](https://www.elastic.co/cloud/as-a-service).
 
@@ -31,10 +31,8 @@ You might want to build Kibana locally to contribute some code, test out the lat
 out an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
-- If you would like to contribute code, please follow our [STYLEGUIDE.md](STYLEGUIDE.md).
-- Learn more about our UI code with [UI_SYSTEMS.md](src/legacy/ui/public/UI_SYSTEMS.md).
-- For all other questions, check out the [FAQ.md](FAQ.md) and
-[wiki](https://github.com/elastic/kibana/wiki).
+- If you would like to contribute code, please follow our [STYLEGUIDE.mdx](STYLEGUIDE.mdx).
+- For all other questions, check out the [FAQ.md](FAQ.md).
 
 ## Documentation
 
@@ -50,13 +48,13 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 
 | Situation                 | Example Kibana version     | Example ES version | Outcome |
 | ------------------------- | -------------------------- |------------------- | ------- |
-| Versions are the same.    | 5.1.2                      | 5.1.2              | 💚 OK      |
-| ES patch number is newer. | 5.1.__2__                  | 5.1.__5__          | ⚠️ Logged warning      |
-| ES minor number is newer. | 5.__1__.2                  | 5.__5__.0          | ⚠️ Logged warning      |
-| ES major number is newer. | __5__.1.2                  | __6__.0.0          | 🚫 Fatal error      |
-| ES patch number is older. | 5.1.__2__                  | 5.1.__0__          | ⚠️ Logged warning      |
-| ES minor number is older. | 5.__1__.2                  | 5.__0__.0          | 🚫 Fatal error      |
-| ES major number is older. | __5__.1.2                  | __4__.0.0          | 🚫 Fatal error      |
+| Versions are the same.    | 7.15.1                     | 7.15.1             | 💚 OK      |
+| ES patch number is newer. | 7.15.__0__                 | 7.15.__1__         | ⚠️ Logged warning      |
+| ES minor number is newer. | 7.__14__.2                 | 7.__15__.0         | ⚠️ Logged warning      |
+| ES major number is newer. | __7__.15.1                 | __8__.0.0          | 🚫 Fatal error      |
+| ES patch number is older. | 7.15.__1__                 | 7.15.__0__         | ⚠️ Logged warning      |
+| ES minor number is older. | 7.__15__.1                 | 7.__14__.2         | 🚫 Fatal error      |
+| ES major number is older. | __8__.0.0                  | __7__.15.1         | 🚫 Fatal error      |
 
 ## Questions? Problems? Suggestions?
 

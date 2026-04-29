@@ -1,0 +1,407 @@
+{
+  "id": "remoteClusters",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "remoteClusters",
+        "id": "def-public.Cluster",
+        "type": "Interface",
+        "tags": [],
+        "label": "Cluster",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.seeds",
+            "type": "Array",
+            "tags": [],
+            "label": "seeds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.skipUnavailable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipUnavailable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.nodeConnections",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nodeConnections",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.proxyAddress",
+            "type": "string",
+            "tags": [],
+            "label": "proxyAddress",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.proxySocketConnections",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "proxySocketConnections",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.serverName",
+            "type": "string",
+            "tags": [],
+            "label": "serverName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"proxy\" | \"sniff\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.isConnected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isConnected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.transportPingSchedule",
+            "type": "string",
+            "tags": [],
+            "label": "transportPingSchedule",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.transportCompress",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "transportCompress",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.connectedNodesCount",
+            "type": "number",
+            "tags": [],
+            "label": "connectedNodesCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.maxConnectionsPerCluster",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "maxConnectionsPerCluster",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.maxProxySocketConnections",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "maxProxySocketConnections",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.initialConnectTimeout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialConnectTimeout",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.connectedSocketsCount",
+            "type": "number",
+            "tags": [],
+            "label": "connectedSocketsCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.hasDeprecatedProxySetting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasDeprecatedProxySetting",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.securityModel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "securityModel",
+            "description": [],
+            "signature": [
+              "\"certificate\" | \"api_key\""
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "remoteClusters",
+        "id": "def-public.API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/remote_clusters\""
+        ],
+        "path": "x-pack/platform/plugins/private/remote_clusters/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "remoteClusters",
+      "id": "def-public.RemoteClustersPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "RemoteClustersPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/remote_clusters/public/plugin.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "remoteClusters",
+          "id": "def-public.RemoteClustersPluginSetup.isUiEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isUiEnabled",
+          "description": [],
+          "path": "x-pack/platform/plugins/private/remote_clusters/public/plugin.ts",
+          "lineNumber": 23,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "remoteClusters",
+      "id": "def-server.RemoteClustersPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "RemoteClustersPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "remoteClusters",
+          "id": "def-server.RemoteClustersPluginSetup.isUiEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isUiEnabled",
+          "description": [],
+          "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts",
+          "lineNumber": 25,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

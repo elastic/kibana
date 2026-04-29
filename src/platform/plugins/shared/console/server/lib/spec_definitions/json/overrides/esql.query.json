@@ -1,0 +1,14 @@
+{
+  "esql.query": {
+    "data_autocomplete_rules": {
+      "columnar": false,
+      "locale": "",
+      "params": [],
+      "query": "",
+      "profile": true,
+      "filter":  {
+        "__scope_link": "GLOBAL.query"
+      }
+    }
+  }
+}

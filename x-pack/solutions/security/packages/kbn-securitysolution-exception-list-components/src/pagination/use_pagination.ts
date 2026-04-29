@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback, useMemo } from 'react';
+import type { PaginationProps } from '../types';
+
+export const usePagination = ({ pagination, onPaginationChange }: PaginationProps) => {
+  const { pageIndex, totalItemCount, pageSize, pageSizeOptions } = pagination;
+
+  const pageCount = useMemo(
+    () => (isFinite(totalItemCount / pageSize) ? Math.ceil(totalItemCount / pageSize) : 0),
+    [pageSize, totalItemCount]
+  );
+
+  const handleItemsPerPageChange = useCallback(
+    (nextPageSize: number) => {
+      onPaginationChange({
+        pagination: {
+          pageIndex,
+          pageSize: nextPageSize,
+          totalItemCount,
+        },
+      });
+    },
+    [pageIndex, totalItemCount, onPaginationChange]
+  );
+
+  const handlePageIndexChange = useCallback(
+    (nextPageIndex: number) => {
+      onPaginationChange({
+        pagination: {
+          pageIndex: nextPageIndex,
+          pageSize,
+          totalItemCount,
+        },
+      });
+    },
+    [pageSize, totalItemCount, onPaginationChange]
+  );
+
+  return {
+    pageCount,
+    pageIndex,
+    pageSize,
+    pageSizeOptions,
+
+    handleItemsPerPageChange,
+    handlePageIndexChange,
+  };
+};

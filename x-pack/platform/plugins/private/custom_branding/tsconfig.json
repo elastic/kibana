@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true,
+  },
+  "include": [
+    "public/**/*",
+    "server/**/*",
+    "common/**/*",
+    "test/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-custom-branding-common",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-ui-settings-common",
+    "@kbn/config-schema",
+    "@kbn/licensing-types",
+    "@kbn/scout"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderLegendDetailRow Should render marker size legend for icon size property 1`] = `
+<div>
+  mockMarkerSizeLegend
+</div>
+`;
+
+exports[`renderLegendDetailRow Should render ordinal legend for line width style property 1`] = `
+<div>
+  mockMarkerSizeLegend
+</div>
+`;

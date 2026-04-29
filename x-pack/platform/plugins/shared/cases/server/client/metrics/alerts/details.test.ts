@@ -1,0 +1,251 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CasesClientMock } from '../../mocks';
+import { createCasesClientMock } from '../../mocks';
+import type { CasesClientArgs } from '../../types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
+import { AlertDetails } from './details';
+import { mockAlertsService } from '../test_utils/alerts';
+import type { SingleCaseBaseHandlerCommonOptions } from '../types';
+import { CaseMetricsFeature } from '../../../../common/types/api';
+
+describe('AlertDetails', () => {
+  let client: CasesClientMock;
+  let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
+  let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
+  let constructorOptions: SingleCaseBaseHandlerCommonOptions;
+
+  beforeEach(() => {
+    client = createMockClient();
+    ({ mockServices, clientArgs } = createMockClientArgs());
+    constructorOptions = { caseId: '', casesClient: client, clientArgs };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls getAllDocumentsAttachedToCase with alerts attachments filter', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    await handler.compute();
+
+    expect(jest.mocked(client.attachments.getAllDocumentsAttachedToCase)).toHaveBeenCalledWith({
+      attachmentTypes: ['alert'],
+      caseId: '',
+    });
+  });
+
+  it('returns empty alert details metrics when there are no alerts', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    expect(await handler.compute()).toEqual({});
+  });
+
+  it('returns the default zero values when there are no alerts but features are requested', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for hosts when the count aggregation returns undefined', async () => {
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for users when the count aggregation returns undefined', async () => {
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        users: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for hosts when the top hits aggregation returns undefined', async () => {
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for users when the top hits aggregation returns undefined', async () => {
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        users: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns empty alert details metrics when no features were setup', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [{ id: '1', index: '2', attached_at: '3' }];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    expect(await handler.compute()).toEqual({});
+  });
+
+  it('returns empty alert details metrics when no features were setup when called twice', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [{ id: '1', index: '2', attached_at: '3' }];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    expect(await handler.compute()).toEqual({});
+    expect(await handler.compute()).toEqual({});
+  });
+
+  it('returns host details when the host feature is setup', async () => {
+    const handler = new AlertDetails(constructorOptions);
+
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 2,
+          values: [{ id: '1', name: 'host1', count: 1 }],
+        },
+      },
+    });
+  });
+
+  it('returns user details when the user feature is setup', async () => {
+    const handler = new AlertDetails(constructorOptions);
+
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        users: {
+          total: 2,
+          values: [{ name: 'user1', count: 1 }],
+        },
+      },
+    });
+  });
+
+  it('returns user and host details when the user and host features are setup', async () => {
+    const handler = new AlertDetails(constructorOptions);
+
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 2,
+          values: [{ id: '1', name: 'host1', count: 1 }],
+        },
+        users: {
+          total: 2,
+          values: [{ name: 'user1', count: 1 }],
+        },
+      },
+    });
+  });
+});
+
+function createMockClient() {
+  const client = createCasesClientMock();
+  client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+    return [{ id: '1', index: '2', attached_at: '3' }];
+  });
+
+  return client;
+}
+
+function createMockClientArgs() {
+  const alertsService = mockAlertsService();
+
+  const logger = loggingSystemMock.createLogger();
+
+  const clientArgs = {
+    logger,
+    services: {
+      alertsService,
+    },
+  };
+
+  return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };
+}

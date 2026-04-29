@@ -1,0 +1,134 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { ClusterAddressForm } from './cluster_address_form';
+import type { ClusterConfigurationFormProps } from './cluster_configuration_form';
+import { ClusterConfigurationForm } from './cluster_configuration_form';
+import { EnrollmentTokenForm } from './enrollment_token_form';
+import { ProgressIndicator } from './progress_indicator';
+import { useKibana } from './use_kibana';
+import type { StatusResult } from '../common';
+
+export interface AppProps {
+  onSuccess?(): void;
+}
+
+export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
+  const [page, setPage] = useState<'token' | 'manual' | 'success'>('token');
+  const [cluster, setCluster] =
+    useState<Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>>();
+  const { http } = useKibana();
+  const state = useAsync(
+    () => http.get<StatusResult>('/internal/interactive_setup/status'),
+    [http]
+  );
+
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+  const theme = useEuiTheme();
+  const { euiTheme } = theme;
+  const euiShadowM = useEuiShadow('m');
+
+  if (state.loading) {
+    return null;
+  }
+
+  if (!state.value || state.value.connectionStatus === 'configured' || !state.value.isSetupOnHold) {
+    return (
+      <pre>
+        <FormattedMessage
+          id="interactiveSetup.app.notReady"
+          defaultMessage="The Kibana server is not ready yet. Check the logs for more information."
+        />
+      </pre>
+    );
+  }
+
+  return (
+    <div css={kbnFullScreenBgCss}>
+      <header
+        css={css`
+          position: relative;
+          z-index: 10;
+          padding: ${euiTheme.size.xl};
+          text-align: center;
+        `}
+      >
+        <EuiSpacer size="xxl" />
+        <span
+          css={css`
+            margin-bottom: ${euiTheme.size.xl};
+            display: inline-block;
+            ${euiShadowM};
+          `}
+        >
+          <EuiIcon type="logoElastic" size="xxl" />
+        </span>
+        <EuiTitle size="m">
+          <h1>
+            <FormattedMessage
+              id="interactiveSetup.app.pageTitle"
+              defaultMessage="Configure Elastic to get started"
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer size="xl" />
+      </header>
+      <div
+        css={css`
+          position: relative;
+          z-index: 10;
+          margin: auto;
+          margin-bottom: ${euiTheme.size.xl};
+          max-width: calc(${euiTheme.breakpoint.s}px - ${euiTheme.size.xl});
+          padding-left: ${euiTheme.size.xl};
+          padding-right: ${euiTheme.size.xl};
+        `}
+      >
+        <EuiPanel paddingSize="l">
+          <div hidden={page !== 'token'}>
+            <EnrollmentTokenForm
+              onCancel={() => setPage('manual')}
+              onSuccess={() => setPage('success')}
+            />
+          </div>
+          <div hidden={page !== 'manual'}>
+            {cluster ? (
+              <ClusterConfigurationForm
+                onCancel={() => setCluster(undefined)}
+                onSuccess={() => setPage('success')}
+                {...cluster}
+              />
+            ) : (
+              <ClusterAddressForm
+                onCancel={() => setPage('token')}
+                onSuccess={(result, values) =>
+                  setCluster({
+                    host: values.host,
+                    authRequired: result.authRequired,
+                    certificateChain: result.certificateChain,
+                  })
+                }
+              />
+            )}
+          </div>
+          {page === 'success' && <ProgressIndicator onSuccess={onSuccess} />}
+        </EuiPanel>
+      </div>
+    </div>
+  );
+};

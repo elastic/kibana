@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/generate-csv",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

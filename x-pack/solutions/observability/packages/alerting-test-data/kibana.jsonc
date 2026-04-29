@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/observability-alerting-test-data",
+  "owner": "@elastic/actionable-obs-team",
+  "group": "observability",
+  "visibility": "private"
+}

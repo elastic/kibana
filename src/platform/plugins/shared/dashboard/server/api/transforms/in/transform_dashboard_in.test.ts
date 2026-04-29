@@ -1,0 +1,143 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { PinnedControlState } from '@kbn/controls-schemas';
+import { transformDashboardIn } from './transform_dashboard_in';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
+
+describe('transformDashboardIn', () => {
+  test('should transform dashboard state to saved object', () => {
+    const dashboardState = {
+      pinned_panels: [
+        {
+          config: { anyKey: 'some value' },
+          grow: false,
+          id: 'foo',
+          type: 'type1',
+          width: 'small',
+        } as unknown as PinnedControlState,
+      ],
+      description: 'description',
+      query: { expression: 'test', language: 'kql' as const },
+      options: {
+        ...DEFAULT_DASHBOARD_OPTIONS,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
+        auto_apply_filters: true,
+      },
+      panels: [
+        {
+          grid: { x: 0, y: 0, w: 10, h: 10 },
+          config: {
+            enhancements: {},
+            savedObjectId: '1',
+          },
+          id: '1',
+          title: 'title1',
+          type: 'type1',
+        },
+      ],
+      tags: [],
+      title: 'title',
+      refresh_interval: { pause: true, value: 1000 },
+      time_range: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "description": "description",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"kuery\\"}}",
+          },
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"hidePanelBorders\\":false,\\"useMargins\\":false,\\"autoApplyFilters\\":true,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}",
+          "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "pinned_panels": Object {
+            "panels": Object {
+              "foo": Object {
+                "config": Object {
+                  "anyKey": "some value",
+                },
+                "grow": false,
+                "order": 0,
+                "type": "type1",
+                "width": "small",
+              },
+            },
+          },
+          "refreshInterval": Object {
+            "pause": true,
+            "value": 1000,
+          },
+          "timeFrom": "now-15m",
+          "timeRestore": true,
+          "timeTo": "now",
+          "title": "title",
+        },
+        "references": Array [],
+      }
+    `);
+  });
+
+  it('should not provide default values for optional properties', () => {
+    const dashboardState = {
+      title: 'title',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "description": "",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{}",
+          },
+          "optionsJSON": "{}",
+          "panelsJSON": "",
+          "timeRestore": false,
+          "title": "title",
+        },
+        "references": Array [],
+      }
+    `);
+  });
+
+  it('should transform project_routing to attributes', () => {
+    const dashboardState = {
+      title: 'title',
+      project_routing: '_alias:_origin',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.attributes?.projectRouting).toBe('_alias:_origin');
+  });
+
+  it('should not include projectRouting in attributes when it is undefined', () => {
+    const dashboardState = {
+      title: 'title',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.attributes).not.toHaveProperty('projectRouting');
+  });
+});

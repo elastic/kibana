@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Get File Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/get_file:
+    post:
+      summary: Get a file
+      operationId: EndpointGetFileAction
+      description: Get a file from an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetFileRouteRequestBody'
+            examples:
+              getFile:
+                summary: Get a specific file from an endpoint
+                value:
+                  endpoint_ids:
+                    - "ed518850-681a-4d60-bb98-e22640cae2a8"
+                  parameters:
+                    path: "/usr/my-file.txt"
+                  comment: "Get my file"
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/ResponseActionCreateSuccessResponse'
+              examples:
+                GetFileSuccess:
+                  summary: Get file action successfully created
+                  value:
+                    data:
+                      id: "27ba1b42-7cc6-4e53-86ce-675c876092b2"
+                      agents:
+                        - "ed518850-681a-4d60-bb98-e22640cae2a8"
+                      command: "get-file"
+                      agentType: "endpoint"
+                      isExpired: false
+                      isCompleted: false
+                      wasSuccessful: false
+                      status: "pending"
+                      startedAt: "2023-07-28T19:00:03.911Z"
+                      createdBy: "elastic"
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: "gke-node-1235412"
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      parameters:
+                        path: "/usr/my-file.txt"
+                      outputs: {}
+
+components:
+  schemas:
+    GetFileRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              required:
+                - path
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: The full file path to retrieve from the endpoint.

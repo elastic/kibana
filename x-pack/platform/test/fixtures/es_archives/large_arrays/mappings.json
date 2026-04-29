@@ -1,0 +1,23 @@
+{
+  "type": "index",
+  "value": {
+    "index": "large_arrays",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "items": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

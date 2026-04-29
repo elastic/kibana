@@ -1,0 +1,164 @@
+{
+  "id": "@kbn/core-custom-branding-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-browser",
+        "id": "def-public.CustomBrandingSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomBrandingSetup",
+        "description": [],
+        "path": "src/core/packages/custom-branding/browser/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser",
+            "id": "def-public.CustomBrandingSetup.customBranding$",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "CustomBranding",
+              ">"
+            ],
+            "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser",
+            "id": "def-public.CustomBrandingSetup.hasCustomBranding$",
+            "type": "Object",
+            "tags": [],
+            "label": "hasCustomBranding$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-custom-branding-browser",
+        "id": "def-public.CustomBrandingSetupDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomBrandingSetupDeps",
+        "description": [],
+        "path": "src/core/packages/custom-branding/browser/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser",
+            "id": "def-public.CustomBrandingSetupDeps.injectedMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "injectedMetadata",
+            "description": [],
+            "signature": [
+              "InternalInjectedMetadataSetup"
+            ],
+            "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-custom-branding-browser",
+        "id": "def-public.CustomBrandingStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomBrandingStart",
+        "description": [],
+        "path": "src/core/packages/custom-branding/browser/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser",
+            "id": "def-public.CustomBrandingStart.customBranding$",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "CustomBranding",
+              ">"
+            ],
+            "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser",
+            "id": "def-public.CustomBrandingStart.hasCustomBranding$",
+            "type": "Object",
+            "tags": [],
+            "label": "hasCustomBranding$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

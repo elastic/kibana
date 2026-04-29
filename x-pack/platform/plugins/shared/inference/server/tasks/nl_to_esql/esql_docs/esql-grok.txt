@@ -1,0 +1,48 @@
+# GROK
+
+The GROK command is used to extract structured data from a string by matching it against patterns based on regular expressions. It extracts the specified patterns as columns.
+
+## Syntax
+
+`GROK input "pattern"`
+
+### Parameters
+
+#### input
+
+The column containing the string you want to structure. If the column has multiple values, GROK will process each value.
+
+#### pattern
+
+A grok pattern. If a field name conflicts with an existing column, the existing column is discarded. If a field name is used more than once, a multi-valued column will be created with one value per each occurrence of the field name.
+
+## Examples
+
+Extracts the date, IP address, email address, and number from a string and keeps only those fields.
+```esql
+ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+| GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num}"""
+| KEEP date, ip, email, num
+```
+
+Extracts the date, IP address, email address, and converts the extracted number to an integer type.
+```esql
+ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+| GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"""
+| KEEP date, ip, email, num
+```
+
+Extracts the date, IP address, email address, converts the number to integer, and then converts the date to a datetime type.
+```esql
+ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+| GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"""
+| KEEP date, ip, email, num
+| EVAL date = TO_DATETIME(date)
+```
+
+Splits a zip code into two parts by extracting two words into a multi-valued column named `zip_parts`.
+```esql
+FROM addresses
+| KEEP city.name, zip_code
+| GROK zip_code """%{WORD:zip_parts} %{WORD:zip_parts}"""
+```

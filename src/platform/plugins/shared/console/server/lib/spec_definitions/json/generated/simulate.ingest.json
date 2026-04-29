@@ -1,0 +1,28 @@
+{
+  "simulate.ingest": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "pipeline": "",
+      "merge_type": [
+        "index",
+        "template"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ingest/_simulate",
+      "_ingest/{index}/_simulate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-simulate-ingest",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

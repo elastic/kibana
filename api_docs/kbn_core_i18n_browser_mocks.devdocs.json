@@ -1,0 +1,82 @@
+{
+  "id": "@kbn/core-i18n-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-i18n-browser-mocks",
+        "id": "def-public.i18nServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "i18nServiceMock",
+        "description": [],
+        "path": "src/core/packages/i18n/browser-mocks/src/i18n_service.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-browser-mocks",
+            "id": "def-public.i18nServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<I18nServiceContract>"
+            ],
+            "path": "src/core/packages/i18n/browser-mocks/src/i18n_service.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-browser-mocks",
+            "id": "def-public.i18nServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "I18nStart",
+              ">"
+            ],
+            "path": "src/core/packages/i18n/browser-mocks/src/i18n_service.mock.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

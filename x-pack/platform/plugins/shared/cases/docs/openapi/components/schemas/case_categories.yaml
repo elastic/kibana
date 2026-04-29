@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './case_category.yaml'
+maxItems: 100

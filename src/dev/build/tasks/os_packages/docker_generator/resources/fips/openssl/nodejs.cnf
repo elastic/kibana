@@ -1,0 +1,20 @@
+#######################################################################
+##                                                                   ##
+## This config is referenced by ENV variables in the Docker images.  ##
+## It is required to start Kibana in FIPS mode.                      ##
+## It must be a separate cnf file.                                   ##
+##                                                                   ##
+## See:                                                              ##
+## https://nodejs.org/docs/latest-v20.x/api/crypto.html#fips-mode    ##
+##                                                                   ##
+#######################################################################
+
+nodejs_conf = nodejs_init
+
+# Default location on Wolfi image.
+# This file will load the FIPS configuration
+.include /etc/ssl/openssl.cnf
+
+[nodejs_init]
+providers = provider_sect
+alg_section = algorithm_sect

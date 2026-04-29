@@ -1,0 +1,43 @@
+{
+  "id": "observabilityLogsExplorer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "observabilityLogsExplorer",
+        "id": "def-common.ObservabilityLogsExplorerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityLogsExplorerConfig",
+        "description": [],
+        "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

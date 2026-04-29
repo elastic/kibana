@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-vega-plugin",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Registers the vega visualization. Is the elastic version of vega and vega-lite libraries.",
+  "plugin": {
+    "id": "visTypeVega",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "embeddable",
+      "visualizations",
+      "mapsEms",
+      "expressions",
+      "inspector",
+      "dataViews",
+      "uiActions",
+      "usageCollection"
+    ],
+    "optionalPlugins": [
+      "home"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "visDefaultEditor"
+    ]
+  }
+}

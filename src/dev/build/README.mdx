@@ -1,0 +1,52 @@
+---
+id: kibDevDocsOpsBuildSystem
+slug: /kibana-dev-docs/ops/build-system
+title: "Build System"
+description: Build the Kibana distributable
+tags: ['kibana', 'dev', 'contributor', 'operations', 'build']
+---
+
+## Quick Start
+
+```shell
+# checkout the help for this script
+node scripts/build --help
+
+# build a release version
+node scripts/build --release
+
+# reuse already downloaded node executables, turn on debug logging
+node scripts/build --skip-node-download --debug
+```
+
+## Fixing out of memory issues
+
+Building Kibana and its distributables can take a lot of memory to finish successfully. Builds do make use of child processes, which means you can increase the amount of memory available by specifying `NODE_OPTIONS="--max-old-space-size=VALUE-IN-MEGABYTES"`.
+
+```shell
+# Use 4GB instead of the standard 1GB for building
+NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
+```
+
+## Structure
+
+The majority of this logic is extracted from the legacy grunt build, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.ts] file defines which tasks are run.
+
+**Task**: [tasks/\*] define individual parts of the build. Each task is an object with a `run()` method, a `description` property, and optionally a `global` property. They are executed with the runner either once (if they are global) or once for each build. Non-global/local tasks are called once for each build and receive a build object as the third argument to `run()` which can be used to determine paths and properties for that build.
+
+**Config**: [lib/config.ts] defines the config used to execute tasks. It is mostly used to determine absolute paths to specific locations, and to get access to the Platforms.
+
+**Platform**: [lib/platform.ts] defines the Platform objects, which define the different platforms we build for. Use `config.getTargetPlatforms()` to get the list of platforms we are targeting in this build, `config.getNodePlatforms()` to get the list of platform we will download node for, or `config.getPlatform` to get a specific platform and architecture.
+
+**Log**: We use the `ToolingLog` defined in <DocLink id="kibDevDocsToolingLog" />
+
+**Runner**: [lib/runner.ts] defines the runner used to execute tasks. It calls tasks with specific arguments based on whether they are global or not.
+
+**Build**:  [lib/build.ts], created by the runner and passed to tasks so they can resolve paths and get information about the build they are operating on.
+
+[tasks/\*]: https://github.com/elastic/kibana/tree/main/src/dev/build/tasks
+[lib/config.ts]: https://github.com/elastic/kibana/blob/main/src/dev/build/lib/config.ts
+[lib/platform.ts]: https://github.com/elastic/kibana/blob/main/src/dev/build/lib/platform.ts
+[lib/runner.ts]: https://github.com/elastic/kibana/blob/main/src/dev/build/lib/runner.ts
+[lib/build.ts]: https://github.com/elastic/kibana/blob/main/src/dev/build/lib/build.ts
+[build_distributables.ts]: https://github.com/elastic/kibana/blob/main/src/dev/build/build_distributables.ts

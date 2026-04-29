@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`#constructor throws if number of bytes is negative 1`] = `"Value in bytes is expected to be a safe positive integer, but provided [-1024]"`;
-
-exports[`#constructor throws if number of bytes is not safe 1`] = `"Value in bytes is expected to be a safe positive integer, but provided [NaN]"`;
-
-exports[`#constructor throws if number of bytes is not safe 2`] = `"Value in bytes is expected to be a safe positive integer, but provided [Infinity]"`;
-
-exports[`#constructor throws if number of bytes is not safe 3`] = `"Value in bytes is expected to be a safe positive integer, but provided [9007199254740992]"`;

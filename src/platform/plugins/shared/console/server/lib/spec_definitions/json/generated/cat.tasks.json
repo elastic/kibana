@@ -1,0 +1,71 @@
+{
+  "cat.tasks": {
+    "url_params": {
+      "format": [
+        "text"
+      ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "actions": "",
+      "detailed": "__flag__",
+      "nodes": "",
+      "parent_task_id": "",
+      "h": [
+        "id",
+        "action",
+        "task_id",
+        "parent_task_id",
+        "type",
+        "start_time",
+        "timestamp",
+        "running_time_ns",
+        "running_time",
+        "node_id",
+        "ip",
+        "port",
+        "node",
+        "version",
+        "x_opaque_id"
+      ],
+      "s": [],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "wait_for_completion": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/tasks"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-tasks",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

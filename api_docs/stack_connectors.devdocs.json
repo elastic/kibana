@@ -1,0 +1,60 @@
+{
+  "id": "stackConnectors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "stackConnectors",
+        "id": "def-common.AdditionalEmailServices",
+        "type": "Enum",
+        "tags": [],
+        "label": "AdditionalEmailServices",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "stackConnectors",
+        "id": "def-common.INTERNAL_BASE_STACK_CONNECTORS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_BASE_STACK_CONNECTORS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/stack_connectors\""
+        ],
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

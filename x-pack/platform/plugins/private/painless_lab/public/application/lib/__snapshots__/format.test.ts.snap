@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formatRequestPayload pretty formats a complex multi-line script 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"// Here's a comment and a variable, then a loop.
+    double halfWidth = Math.floor(width * 0.5);
+    for (int y = 0; y < height; y++) {
+      return \\"results here\\\\\\\\n\\";
+    }
+    
+    return result;\\"\\"\\"
+  }
+}"
+`;
+
+exports[`formatRequestPayload pretty formats a single-line script 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\"
+  }
+}"
+`;
+
+exports[`formatRequestPayload pretty formats code and parameters 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\",
+    \\"params\\": {
+      \\"a\\": {
+        \\"b\\": \\"c\\",
+        \\"d\\": \\"e\\"
+      }
+    }
+  }
+}"
+`;
+
+exports[`formatRequestPayload pretty formats code, context, index, and document 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\"
+  },
+  \\"context\\": \\"filter\\",
+  \\"context_setup\\": {
+    \\"index\\": \\"index\\",
+    \\"document\\": {
+      \\"a\\": {
+        \\"b\\": \\"c\\",
+        \\"d\\": \\"e\\"
+      }
+    }
+  }
+}"
+`;
+
+exports[`formatRequestPayload pretty formats code, parameters, and context 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\",
+    \\"params\\": {
+      \\"a\\": {
+        \\"b\\": \\"c\\",
+        \\"d\\": \\"e\\"
+      }
+    }
+  },
+  \\"context\\": \\"filter\\",
+  \\"context_setup\\": {
+    \\"index\\": \\"\\",
+    \\"document\\": 
+  }
+}"
+`;
+
+exports[`formatRequestPayload pretty formats code, parameters, context, index, and document 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\",
+    \\"params\\": {
+      \\"a\\": {
+        \\"b\\": \\"c\\",
+        \\"d\\": \\"e\\"
+      }
+    }
+  },
+  \\"context\\": \\"filter\\",
+  \\"context_setup\\": {
+    \\"index\\": \\"index\\",
+    \\"document\\": {
+      \\"a\\": {
+        \\"b\\": \\"c\\",
+        \\"d\\": \\"e\\"
+      }
+    }
+  }
+}"
+`;
+
+exports[`formatRequestPayload pretty formats no script 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"\\"\\"\\"\\"\\"
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats a complex multi-line script 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"// Here's a comment and a variable, then a loop.\\\\ndouble halfWidth = Math.floor(width * 0.5);\\\\nfor (int y = 0; y < height; y++) {\\\\n  return \\\\\\"results here\\\\\\\\\\\\\\\\n\\\\\\";\\\\n}\\\\n\\\\nreturn result;\\"
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats a single-line script 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"return \\\\\\"ok\\\\\\";\\"
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats code and parameters 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"return \\\\\\"ok\\\\\\";\\",
+    \\"params\\": {
+  \\"a\\": {
+    \\"b\\": \\"c\\",
+    \\"d\\": \\"e\\"
+  }
+}
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats code, context, index, and document 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"return \\\\\\"ok\\\\\\";\\"
+  },
+  \\"context\\": \\"filter\\",
+  \\"context_setup\\": {
+    \\"index\\": \\"index\\",
+    \\"document\\": {
+  \\"a\\": {
+    \\"b\\": \\"c\\",
+    \\"d\\": \\"e\\"
+  }
+}
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats code, parameters, and context 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"return \\\\\\"ok\\\\\\";\\",
+    \\"params\\": {
+  \\"a\\": {
+    \\"b\\": \\"c\\",
+    \\"d\\": \\"e\\"
+  }
+}
+  },
+  \\"context\\": \\"filter\\",
+  \\"context_setup\\": {
+    \\"index\\": \\"undefined\\",
+    \\"document\\": undefined
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats code, parameters, context, index, and document 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": \\"return \\\\\\"ok\\\\\\";\\",
+    \\"params\\": {
+  \\"a\\": {
+    \\"b\\": \\"c\\",
+    \\"d\\": \\"e\\"
+  }
+}
+  },
+  \\"context\\": \\"filter\\",
+  \\"context_setup\\": {
+    \\"index\\": \\"index\\",
+    \\"document\\": {
+  \\"a\\": {
+    \\"b\\": \\"c\\",
+    \\"d\\": \\"e\\"
+  }
+}
+  }
+}"
+`;
+
+exports[`formatRequestPayload ugly formats no script 1`] = `
+"{
+  \\"script\\": {
+    \\"source\\": undefined
+  }
+}"
+`;

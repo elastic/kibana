@@ -1,0 +1,152 @@
+{
+  "id": "@kbn/core-theme-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-theme-browser",
+        "id": "def-public.CoreTheme",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreTheme",
+        "description": [
+          "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
+        ],
+        "path": "src/core/packages/theme/browser/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.CoreTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [
+              "is dark mode enabled or not"
+            ],
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.CoreTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
+            ],
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-theme-browser",
+        "id": "def-public.ThemeServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThemeServiceSetup",
+        "description": [],
+        "path": "src/core/packages/theme/browser/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.ThemeServiceSetup.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [
+              "\nAn observable of the currently active theme.\nNote that the observable has a replay effect, so it will emit once during subscriptions."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "CoreTheme",
+              ">"
+            ],
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.ThemeServiceSetup.getTheme",
+            "type": "Function",
+            "tags": [],
+            "label": "getTheme",
+            "description": [
+              "\nReturns the theme currently in use.\nNote that when possible, using the `theme$` observable instead is strongly encouraged, as\nit will allow to react to dynamic theme switch (even if those are not implemented at the moment)"
+            ],
+            "signature": [
+              "() => ",
+              "CoreTheme"
+            ],
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-theme-browser",
+        "id": "def-public.ThemeServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ThemeServiceStart",
+        "description": [],
+        "signature": [
+          "ThemeServiceSetup"
+        ],
+        "path": "src/core/packages/theme/browser/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

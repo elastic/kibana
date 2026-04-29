@@ -1,0 +1,37 @@
+# ROW
+
+The ROW command generates a single row with one or more columns, each assigned a value you specify. This is useful for testing or creating sample data.
+
+## Syntax
+
+`ROW column1 = value1[, ..., columnN = valueN]`
+
+### Parameters
+
+#### columnX
+
+The column name. If duplicate column names are provided, only the rightmost duplicate creates a column.
+
+#### valueX
+
+The value assigned to the column. This can be a literal, an expression, or a function.
+
+## Examples
+
+Creates a single row with three columns: 'a' set to 1, 'b' set to the string "two", and 'c' set to null.
+
+```esql
+ROW a = 1, b = "two", c = null
+```
+
+Creates a single row with a column 'a' containing a multi-value array [2, 1].
+
+```esql
+ROW a = [2, 1]
+```
+
+Creates a single row with column 'a' set to the rounded value of 1.23 to zero decimal places.
+
+```esql
+ROW a = ROUND(1.23, 0)
+```

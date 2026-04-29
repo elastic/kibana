@@ -1,0 +1,86 @@
+---
+description: Pipeline for parsing apache error logs
+processors:
+- grok:
+    field: message
+    patterns:
+    - \[%{APACHE_TIME:apache.error.timestamp}\] \[%{LOGLEVEL:log.level}\]( \[client
+      %{IPORHOST:source.address}(:%{POSINT:source.port})?\])? %{GREEDYDATA:message}
+    - \[%{APACHE_TIME:apache.error.timestamp}\] \[%{DATA:apache.error.module}:%{LOGLEVEL:log.level}\]
+      \[pid %{NUMBER:process.pid:long}(:tid %{NUMBER:process.thread.id:long})?\](
+      \[client %{IPORHOST:source.address}(:%{POSINT:source.port})?\])? %{GREEDYDATA:message}
+    pattern_definitions:
+      APACHE_TIME: '%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR}'
+    ignore_missing: true
+- date:
+    if: ctx.event.timezone == null
+    field: apache.error.timestamp
+    target_field: '@timestamp'
+    formats:
+    - EEE MMM dd H:m:s yyyy
+    - EEE MMM dd H:m:s.SSSSSS yyyy
+    on_failure:
+    - append:
+        field: error.message
+        value: '{{ _ingest.on_failure_message }}'
+- date:
+    if: ctx.event.timezone != null
+    field: apache.error.timestamp
+    target_field: '@timestamp'
+    formats:
+    - EEE MMM dd H:m:s yyyy
+    - EEE MMM dd H:m:s.SSSSSS yyyy
+    timezone: '{{ event.timezone }}'
+    on_failure:
+    - append:
+        field: error.message
+        value: '{{ _ingest.on_failure_message }}'
+- remove:
+    field: apache.error.timestamp
+    ignore_failure: true
+- set:
+    field: event.kind
+    value: event
+- set:
+    field: event.category
+    value: web
+- script:
+    if: "ctx?.log?.level != null"
+    lang: painless
+    source: >-
+      def err_levels = ["emerg", "alert", "crit", "error", "warn"];
+      if (err_levels.contains(ctx.log.level)) {
+        ctx.event.type = "error";
+      } else {
+        ctx.event.type = "info";
+      }
+
+- grok:
+    field: source.address
+    ignore_missing: true
+    patterns:
+    - ^(%{IP:source.ip}|%{HOSTNAME:source.domain})$
+- geoip:
+    field: source.ip
+    target_field: source.geo
+    ignore_missing: true
+- geoip:
+    database_file: GeoLite2-ASN.mmdb
+    field: source.ip
+    target_field: source.as
+    properties:
+    - asn
+    - organization_name
+    ignore_missing: true
+- rename:
+    field: source.as.asn
+    target_field: source.as.number
+    ignore_missing: true
+- rename:
+    field: source.as.organization_name
+    target_field: source.as.organization.name
+    ignore_missing: true
+on_failure:
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'

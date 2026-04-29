@@ -1,24 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import vfs from 'vinyl-fs';
-import { ToolingLog } from '@kbn/dev-utils';
+import { readFile } from 'fs/promises';
+import { relative } from 'path';
+import globby from 'globby';
+
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
 const NEWLINE_RE = /\r?\n/g;
@@ -41,42 +34,41 @@ interface Options {
  * into the repository.
  */
 export async function generateNoticeFromSource({ productName, directory, log }: Options) {
-  const globs = ['**/*.{js,less,css,ts}'];
+  const select = [
+    '**/*.{js,mjs,scss,css,ts,tsx}',
+    '!{node_modules,build,dist,data,built_assets,shared_built_assets}/**',
+    '!packages/**/{node_modules,build,dist}/**',
+    '!src/plugins/*/{node_modules,build,dist}/**',
+    '!src/core/packages/**/{node_modules,build,dist}/**',
+    '!src/platform/**/{node_modules,build,dist}/**',
+    '!x-pack/{node_modules,build,dist,data}/**',
+    '!x-pack/packages/**/{node_modules,build,dist}/**',
+    '!x-pack/platform/**/{node_modules,build,dist}/**',
+    '!x-pack/solutions/**/{node_modules,build,dist}/**',
+    '!x-pack/plugins/**/{node_modules,build,dist}/**',
+    '!**/target/**',
+  ];
 
-  const options = {
-    cwd: directory,
-    nodir: true,
-    ignore: [
-      '{node_modules,build,target,dist,data,built_assets}/**',
-      'packages/*/{node_modules,build,target,dist}/**',
-      'x-pack/{node_modules,build,target,dist,data}/**',
-      'x-pack/packages/*/{node_modules,build,target,dist}/**',
-    ],
-  };
-
-  log.debug('vfs.src globs', globs);
-  log.debug('vfs.src options', options);
   log.info(`Searching ${directory} for multi-line comments starting with @notice`);
 
-  const files = vfs.src(globs, options);
-  const noticeComments: string[] = [];
-  await new Promise((resolve, reject) => {
-    files
-      .on('data', file => {
-        log.verbose(`Checking for @notice comments in ${file.relative}`);
-
-        const source = file.contents.toString('utf8');
-        let match;
-        while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
-          log.info(`Found @notice comment in ${file.relative}`);
-          if (!noticeComments.includes(match[1])) {
-            noticeComments.push(match[1]);
-          }
-        }
-      })
-      .on('error', reject)
-      .on('end', resolve);
+  const files = globby.stream(select, {
+    cwd: directory,
+    followSymbolicLinks: false,
+    absolute: true,
   });
+  const noticeComments: string[] = [];
+  for await (const file of files) {
+    const source = await readFile(file, 'utf-8');
+    const relativeFile = relative(directory, file.toString());
+    log.verbose(`Checking for @notice comments in ${relativeFile}`);
+    let match;
+    while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
+      log.info(`Found @notice comment in ${relativeFile}`);
+      if (!noticeComments.includes(match[1])) {
+        noticeComments.push(match[1]);
+      }
+    }
+  }
 
   let noticeText = '';
   noticeText += `${productName}\n`;
@@ -86,7 +78,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     noticeText += '\n---\n';
     noticeText += comment
       .split(NEWLINE_RE)
-      .map(line =>
+      .map((line) =>
         line
           // trim whitespace
           .trim()

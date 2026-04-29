@@ -1,0 +1,433 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  AggregationsAggregationContainer,
+  AggregationsDateRangeAggregate,
+  AggregationsSumAggregate,
+  AggregationsValueCountAggregate,
+  SearchSearchRequestBody,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ALL_VALUE,
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import type { DateRange, Duration, SLODefinition } from '../domain/models';
+import { computeBurnRate, computeSLI } from '../domain/services';
+import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
+import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';
+import { InternalQueryError } from '../errors';
+import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
+
+type WindowName = string;
+
+interface LookbackWindow {
+  name: WindowName;
+  duration: Duration;
+}
+
+interface BurnRateResult {
+  burnRate: number;
+  sli: number;
+  name: WindowName;
+}
+
+interface CalculateBatchParams {
+  slo: SLODefinition;
+  instanceId: string;
+  lookbackWindows: LookbackWindow[];
+  remoteName?: string;
+}
+
+export interface BurnRatesClient {
+  calculate(
+    slo: SLODefinition,
+    instanceId: string,
+    lookbackWindows: LookbackWindow[],
+    remoteName?: string
+  ): Promise<BurnRateResult[]>;
+  calculateBatch(params: CalculateBatchParams[]): Promise<BurnRateResult[][]>;
+}
+
+type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
+
+interface BatchItemMeta {
+  index: string;
+  slo: SLODefinition;
+  instanceId: string;
+  lookbackWindows: LookbackWindow[];
+  sortedLookbackWindows: LookbackWindow[];
+  longestDateRange: DateRange;
+  delayInSeconds: number;
+}
+
+export class DefaultBurnRatesClient implements BurnRatesClient {
+  constructor(private esClient: ElasticsearchClient) {}
+
+  async calculate(
+    slo: SLODefinition,
+    instanceId: string,
+    lookbackWindows: LookbackWindow[],
+    remoteName?: string
+  ): Promise<Array<{ burnRate: number; sli: number; name: WindowName }>> {
+    const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
+      a.duration.isShorterThan(b.duration) ? 1 : -1
+    );
+    const longestLookbackWindow = sortedLookbackWindows[0];
+    const delayInSeconds = getDelayInSecondsFromSLO(slo);
+    const longestDateRange = getLookbackDateRange(
+      new Date(),
+      longestLookbackWindow.duration,
+      delayInSeconds
+    );
+
+    const index = remoteName
+      ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+      : SLI_DESTINATION_INDEX_PATTERN;
+
+    const result = await this.esClient.search<unknown, EsAggregations>({
+      ...commonQuery(slo, instanceId, longestDateRange),
+      index,
+      aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+        ? toLookbackWindowsAggregationsQuery(
+            longestDateRange.to,
+            sortedLookbackWindows,
+            delayInSeconds
+          )
+        : toLookbackWindowsSlicedAggregationsQuery(
+            longestDateRange.to,
+            sortedLookbackWindows,
+            delayInSeconds
+          ),
+    });
+
+    return handleWindowedResult(result.aggregations, lookbackWindows, slo);
+  }
+
+  async calculateBatch(params: CalculateBatchParams[]): Promise<BurnRateResult[][]> {
+    if (params.length === 0) {
+      return [];
+    }
+
+    const perItemMeta: BatchItemMeta[] = params.map(
+      ({ slo, instanceId, lookbackWindows, remoteName }) => {
+        if (lookbackWindows.length === 0) {
+          throw new Error(`lookbackWindows must not be empty for SLO [${slo.id}]`);
+        }
+        const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
+          a.duration.isShorterThan(b.duration) ? 1 : -1
+        );
+        const longestLookbackWindow = sortedLookbackWindows[0];
+        const delayInSeconds = getDelayInSecondsFromSLO(slo);
+        const longestDateRange = getLookbackDateRange(
+          new Date(),
+          longestLookbackWindow.duration,
+          delayInSeconds
+        );
+        const index = remoteName
+          ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+          : SLI_DESTINATION_INDEX_PATTERN;
+
+        return {
+          index,
+          slo,
+          instanceId,
+          lookbackWindows,
+          sortedLookbackWindows,
+          longestDateRange,
+          delayInSeconds,
+        };
+      }
+    );
+
+    const canUseNamedFilters =
+      perItemMeta.length > 1 && perItemMeta.every((m) => m.index === perItemMeta[0].index);
+
+    if (canUseNamedFilters) {
+      return this.calculateBatchWithNamedFilters(perItemMeta);
+    }
+    return this.calculateBatchWithMsearch(perItemMeta);
+  }
+
+  private async calculateBatchWithNamedFilters(
+    perItemMeta: BatchItemMeta[]
+  ): Promise<BurnRateResult[][]> {
+    const { index } = perItemMeta[0];
+
+    let widestFrom: Date = perItemMeta[0].longestDateRange.from;
+    let widestTo: Date = perItemMeta[0].longestDateRange.to;
+    for (const { longestDateRange } of perItemMeta) {
+      if (longestDateRange.from < widestFrom) widestFrom = longestDateRange.from;
+      if (longestDateRange.to > widestTo) widestTo = longestDateRange.to;
+    }
+
+    const uniqueSloIds = [...new Set(perItemMeta.map((m) => m.slo.id))];
+
+    const memberAggs: Record<string, AggregationsAggregationContainer> = {};
+    for (let i = 0; i < perItemMeta.length; i++) {
+      const { slo, instanceId, sortedLookbackWindows, longestDateRange, delayInSeconds } =
+        perItemMeta[i];
+
+      const filterClauses: QueryDslQueryContainer[] = [
+        { term: { 'slo.id': slo.id } },
+        { term: { 'slo.revision': slo.revision } },
+        {
+          range: {
+            '@timestamp': {
+              gte: longestDateRange.from.toISOString(),
+              lt: longestDateRange.to.toISOString(),
+            },
+          },
+        },
+      ];
+
+      if (instanceId !== ALL_VALUE) {
+        filterClauses.push({ term: { 'slo.instanceId': instanceId } });
+      }
+
+      memberAggs[`member_${i}`] = {
+        filter: { bool: { filter: filterClauses } },
+        aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+          ? toLookbackWindowsAggregationsQuery(
+              longestDateRange.to,
+              sortedLookbackWindows,
+              delayInSeconds
+            )
+          : toLookbackWindowsSlicedAggregationsQuery(
+              longestDateRange.to,
+              sortedLookbackWindows,
+              delayInSeconds
+            ),
+      };
+    }
+
+    const result = await this.esClient.search({
+      index,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { 'slo.id': uniqueSloIds } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: widestFrom.toISOString(),
+                  lt: widestTo.toISOString(),
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: memberAggs,
+    });
+
+    const aggregations = result.aggregations as Record<string, any> | undefined;
+
+    return perItemMeta.map(({ lookbackWindows, slo }, i) => {
+      const bucket = aggregations?.[`member_${i}`];
+      if (!bucket) {
+        throw new InternalQueryError('Invalid aggregation response');
+      }
+      return handleWindowedResult(bucket as EsAggregations, lookbackWindows, slo);
+    });
+  }
+
+  private async calculateBatchWithMsearch(
+    perItemMeta: BatchItemMeta[]
+  ): Promise<BurnRateResult[][]> {
+    const searches = perItemMeta.flatMap(
+      ({ index, slo, instanceId, sortedLookbackWindows, longestDateRange, delayInSeconds }) => [
+        { index },
+        {
+          ...commonQuery(slo, instanceId, longestDateRange),
+          aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+            ? toLookbackWindowsAggregationsQuery(
+                longestDateRange.to,
+                sortedLookbackWindows,
+                delayInSeconds
+              )
+            : toLookbackWindowsSlicedAggregationsQuery(
+                longestDateRange.to,
+                sortedLookbackWindows,
+                delayInSeconds
+              ),
+        },
+      ]
+    );
+
+    const result = await this.esClient.msearch<unknown, EsAggregations>({ searches });
+
+    return perItemMeta.map(({ lookbackWindows, slo }, i) => {
+      const response = result.responses[i];
+      if ('error' in response) {
+        throw new InternalQueryError('Burn rate batch query failed');
+      }
+      return handleWindowedResult(
+        response.aggregations as EsAggregations | undefined,
+        lookbackWindows,
+        slo
+      );
+    });
+  }
+}
+
+function commonQuery(
+  slo: SLODefinition,
+  instanceId: string,
+  dateRange: DateRange
+): Pick<SearchSearchRequestBody, 'size' | 'query'> {
+  const filter: QueryDslQueryContainer[] = [
+    { term: { 'slo.id': slo.id } },
+    { term: { 'slo.revision': slo.revision } },
+    {
+      range: {
+        '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+      },
+    },
+  ];
+
+  if (instanceId !== ALL_VALUE) {
+    filter.push({ term: { 'slo.instanceId': instanceId } });
+  }
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter,
+      },
+    },
+  };
+}
+
+function toLookbackWindowsAggregationsQuery(
+  startedAt: Date,
+  sortedLookbackWindow: LookbackWindow[],
+  delayInSeconds = 0
+) {
+  return sortedLookbackWindow.reduce<Record<string, AggregationsAggregationContainer>>(
+    (acc, lookbackWindow) => {
+      const lookbackDateRange = getLookbackDateRange(
+        startedAt,
+        lookbackWindow.duration,
+        delayInSeconds
+      );
+
+      return {
+        ...acc,
+        [lookbackWindow.name]: {
+          date_range: {
+            field: '@timestamp',
+            ranges: [
+              {
+                from: lookbackDateRange.from.toISOString(),
+                to: lookbackDateRange.to.toISOString(),
+              },
+            ],
+          },
+          aggs: {
+            good: { sum: { field: 'slo.numerator' } },
+            total: { sum: { field: 'slo.denominator' } },
+          },
+        },
+      };
+    },
+    {}
+  );
+}
+
+function toLookbackWindowsSlicedAggregationsQuery(
+  startedAt: Date,
+  lookbackWindows: LookbackWindow[],
+  delayInSeconds = 0
+) {
+  return lookbackWindows.reduce<Record<string, AggregationsAggregationContainer>>(
+    (acc, lookbackWindow) => {
+      const lookbackDateRange = getLookbackDateRange(
+        startedAt,
+        lookbackWindow.duration,
+        delayInSeconds
+      );
+
+      return {
+        ...acc,
+        [lookbackWindow.name]: {
+          date_range: {
+            field: '@timestamp',
+            ranges: [
+              {
+                from: lookbackDateRange.from.toISOString(),
+                to: lookbackDateRange.to.toISOString(),
+              },
+            ],
+          },
+          aggs: {
+            good: {
+              sum: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+            total: {
+              value_count: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+          },
+        },
+      };
+    },
+    {}
+  );
+}
+
+function handleWindowedResult(
+  aggregations: Record<WindowName, AggregationsDateRangeAggregate> | undefined,
+  lookbackWindows: LookbackWindow[],
+  slo: SLODefinition
+): Array<{ burnRate: number; sli: number; name: WindowName }> {
+  if (aggregations === undefined) {
+    throw new InternalQueryError('Invalid aggregation response');
+  }
+
+  return lookbackWindows.map((lookbackWindow) => {
+    const windowAggBuckets = aggregations[lookbackWindow.name]?.buckets ?? [];
+    if (!Array.isArray(windowAggBuckets) || windowAggBuckets.length === 0) {
+      throw new InternalQueryError('Invalid aggregation bucket response');
+    }
+    const bucket = windowAggBuckets[0];
+    const good = (bucket.good as AggregationsSumAggregate).value;
+    const total = (bucket.total as AggregationsValueCountAggregate).value;
+    if (good === null || total === null) {
+      throw new InternalQueryError('Invalid aggregation sum bucket response');
+    }
+
+    let sliValue;
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      const dateRange = {
+        from: new Date(bucket.from_as_string!),
+        to: new Date(bucket.to_as_string!),
+      };
+
+      const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
+
+      sliValue = computeSLI(good, total, totalSlices);
+    } else {
+      sliValue = computeSLI(good, total);
+    }
+
+    return {
+      name: lookbackWindow.name,
+      burnRate: computeBurnRate(slo, sliValue),
+      sli: sliValue,
+    };
+  });
+}

@@ -1,0 +1,16 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          softDeleteAttachmentResponseExample:
+            description: "Example response for soft delete (can be restored)"
+            value:
+              success: true
+              permanent: false
+          permanentDeleteAttachmentResponseExample:
+            description: "Example response for permanent delete (cannot be restored)"
+            value:
+              success: true
+              permanent: true

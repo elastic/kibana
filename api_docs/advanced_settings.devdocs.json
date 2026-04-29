@@ -1,0 +1,79 @@
+{
+  "id": "advancedSettings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "advancedSettings",
+      "id": "def-public.AdvancedSettingsSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "AdvancedSettingsSetup",
+      "description": [],
+      "signature": [
+        "{ addSpaceSection: (Component: RegistryComponent, queryMatch: QueryMatchFn) => void; addGlobalSection: (Component: RegistryComponent, queryMatch: QueryMatchFn) => void; }"
+      ],
+      "path": "src/platform/plugins/private/advanced_settings/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "advancedSettings",
+      "id": "def-public.AdvancedSettingsStart",
+      "type": "Type",
+      "tags": [],
+      "label": "AdvancedSettingsStart",
+      "description": [],
+      "signature": [
+        "{ getGlobalSections: () => ",
+        {
+          "pluginId": "@kbn/management-settings-section-registry",
+          "scope": "public",
+          "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
+          "section": "def-public.RegistryEntry",
+          "text": "RegistryEntry"
+        },
+        "[]; getSpacesSections: () => ",
+        {
+          "pluginId": "@kbn/management-settings-section-registry",
+          "scope": "public",
+          "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
+          "section": "def-public.RegistryEntry",
+          "text": "RegistryEntry"
+        },
+        "[]; }"
+      ],
+      "path": "src/platform/plugins/private/advanced_settings/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

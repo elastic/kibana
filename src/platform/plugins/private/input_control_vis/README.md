@@ -1,0 +1,1 @@
+Contains the input control visualization allowing to place custom filter controls on a dashboard.

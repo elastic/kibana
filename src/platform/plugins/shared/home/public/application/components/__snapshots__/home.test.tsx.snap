@@ -1,0 +1,447 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;
+
+exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;
+
+exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={
+      Array [
+        Object {
+          "category": "admin",
+          "description": "Manage the index patterns that help retrieve your data from Elasticsearch.",
+          "icon": "indexPatternApp",
+          "id": "index_patterns",
+          "path": "index_management_landing_page",
+          "showOnHomePage": true,
+          "title": "Index Patterns",
+        },
+      ]
+    }
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;
+
+exports[`home directories should render solutions in the "solution section" 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={
+      Array [
+        Object {
+          "description": "description",
+          "icon": "logoKibana",
+          "id": "kibana",
+          "order": 1,
+          "path": "kibana_landing_page",
+          "title": "Kibana",
+        },
+        Object {
+          "description": "description",
+          "icon": "empty",
+          "id": "solution-2",
+          "order": 2,
+          "path": "path-to-solution-two",
+          "title": "Solution two",
+        },
+        Object {
+          "description": "description",
+          "icon": "empty",
+          "id": "solution-3",
+          "order": 3,
+          "path": "path-to-solution-three",
+          "title": "Solution three",
+        },
+        Object {
+          "description": "description",
+          "icon": "empty",
+          "id": "solution-4",
+          "order": 4,
+          "path": "path-to-solution-four",
+          "title": "Solution four",
+        },
+      ]
+    }
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;
+
+exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;
+
+exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;
+
+exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
+<Welcome
+  onSkip={[Function]}
+  urlBasePath="goober"
+/>
+`;
+
+exports[`home should render home component 1`] = `
+<_KibanaPageTemplate
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <Memo(MemoizedFormattedMessage)
+        defaultMessage="Welcome home"
+        id="home.header.title"
+      />,
+    }
+  }
+  panelled={false}
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</_KibanaPageTemplate>
+`;

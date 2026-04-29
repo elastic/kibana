@@ -1,0 +1,62 @@
+{
+  "cat.health": {
+    "url_params": {
+      "format": [
+        "text"
+      ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ts": "__flag__",
+      "h": [
+        "epoch",
+        "timestamp",
+        "cluster",
+        "status",
+        "node.total",
+        "node.data",
+        "shards",
+        "pri",
+        "relo",
+        "init",
+        "unassign",
+        "unassign.pri",
+        "pending_tasks",
+        "max_task_wait_time",
+        "active_shards_percent"
+      ],
+      "s": []
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/health"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-health",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

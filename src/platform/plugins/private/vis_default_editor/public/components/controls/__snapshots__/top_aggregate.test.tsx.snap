@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopAggregateParamEditor should init with the default set of props 1`] = `
+<EuiFormRow
+  display="rowCompressed"
+  fullWidth={true}
+  isInvalid={false}
+  label={
+    <React.Fragment>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Aggregate with"
+        id="visDefaultEditor.controls.aggregateWithLabel"
+      />
+       
+      <EuiIconTip
+        content="Choose a strategy for combining multiple hits or a multi-valued field into a single metric."
+        position="right"
+        type="question"
+      />
+    </React.Fragment>
+  }
+>
+  <EuiSelect
+    compressed={true}
+    data-test-subj="visDefaultEditorAggregateWith"
+    disabled={false}
+    fullWidth={true}
+    isInvalid={false}
+    onBlur={[MockFunction]}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "disabled": true,
+          "hidden": true,
+          "text": "",
+          "value": "EMPTY_VALUE",
+        },
+        Object {
+          "text": "Max",
+          "value": "max",
+        },
+        Object {
+          "text": "Min",
+          "value": "min",
+        },
+      ]
+    }
+    value="EMPTY_VALUE"
+  />
+</EuiFormRow>
+`;

@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AuthenticationProvider } from '@kbn/security-plugin-types-common';
+
+export enum LogoutReason {
+  'SESSION_EXPIRED' = 'SESSION_EXPIRED',
+  'SESSION_IDLE_TIMEOUT' = 'SESSION_IDLE_TIMEOUT',
+  'SESSION_LIFESPAN_TIMEOUT' = 'SESSION_LIFESPAN_TIMEOUT',
+  'CONCURRENCY_LIMIT' = 'CONCURRENCY_LIMIT',
+  'AUTHENTICATION_ERROR' = 'AUTHENTICATION_ERROR',
+  'LOGGED_OUT' = 'LOGGED_OUT',
+  'UNAUTHENTICATED' = 'UNAUTHENTICATED',
+}
+
+export interface SessionInfo {
+  expiresInMs: number | null;
+  canBeExtended: boolean;
+  provider: AuthenticationProvider;
+  expirationReason?: LogoutReason.SESSION_IDLE_TIMEOUT | LogoutReason.SESSION_LIFESPAN_TIMEOUT;
+}
+
+export interface SecurityCheckupState {
+  displayAlert: boolean;
+}

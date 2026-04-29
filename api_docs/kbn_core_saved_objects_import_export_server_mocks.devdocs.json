@@ -1,0 +1,100 @@
+{
+  "id": "@kbn/core-saved-objects-import-export-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
+        "id": "def-server.savedObjectsExporterMock",
+        "type": "Object",
+        "tags": [],
+        "label": "savedObjectsExporterMock",
+        "description": [],
+        "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
+            "id": "def-server.savedObjectsExporterMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectsExporter",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
+        "id": "def-server.savedObjectsImporterMock",
+        "type": "Object",
+        "tags": [],
+        "label": "savedObjectsImporterMock",
+        "description": [],
+        "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
+            "id": "def-server.savedObjectsImporterMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectsImporter",
+              ">"
+            ],
+            "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
