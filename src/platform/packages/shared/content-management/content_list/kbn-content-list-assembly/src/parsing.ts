@@ -168,14 +168,26 @@ const walkChildren = (children: ReactNode, assembly: string): ParsedItem[] => {
     const preset = getPresetId(child, assembly);
     // Empty strings are treated as "no explicit id" (falsy check below).
     const propsId = typeof props.id === 'string' ? props.id : undefined;
-    // `child.type` is a declarative component function at this point
-    // (string HTML tags were filtered by `getPartType` above), but
-    // TypeScript's React types don't model `displayName` on
-    // `JSXElementConstructor`, so a cast through `unknown` is needed.
-    const componentFn =
-      typeof child.type === 'function'
-        ? (child.type as unknown as (...args: unknown[]) => unknown)
-        : undefined;
+    // `child.type` is a declarative component function at this point (string
+    // HTML tags were filtered by `getPartType` above), but consumers may wrap
+    // their component in `React.memo(...)` or `React.forwardRef(...)`, which
+    // produce an object with `$$typeof` rather than a bare function. Unwrap
+    // those wrappers so the resolver WeakMap lookup works regardless of how the
+    // component was decorated.
+    const rawType = child.type as unknown;
+    let componentFn: ((...args: unknown[]) => unknown) | undefined;
+
+    if (typeof rawType === 'function') {
+      componentFn = rawType as (...args: unknown[]) => unknown;
+    } else if (rawType !== null && typeof rawType === 'object') {
+      // React.memo wraps as { $$typeof: REACT_MEMO_TYPE, type: <inner> }
+      // React.forwardRef wraps as { $$typeof: REACT_FORWARD_REF_TYPE, render: <inner> }
+      const wrapped = rawType as Record<string, unknown>;
+      const inner = wrapped.type ?? wrapped.render;
+      if (typeof inner === 'function') {
+        componentFn = inner as (...args: unknown[]) => unknown;
+      }
+    }
     const displayName =
       componentFn !== undefined
         ? (componentFn as unknown as { displayName?: string }).displayName

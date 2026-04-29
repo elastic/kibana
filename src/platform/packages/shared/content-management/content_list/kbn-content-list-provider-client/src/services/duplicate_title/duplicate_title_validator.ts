@@ -63,7 +63,8 @@ const defaultDuplicateTitleWarning = (value: string): string =>
  * Bails when `findCurrentTitle` returns `undefined` (item not found / in
  * error state — leave validation to the save handler). Otherwise calls
  * `checkForDuplicate` and converts a `false` resolution or thrown error into
- * the warning string returned by `getDuplicateTitleWarning`.
+ * the warning string returned by `getDuplicateTitleWarning`. Unexpected errors
+ * are logged to the console (dev only) and treated the same as a duplicate.
  *
  * @example
  * ```ts
@@ -111,9 +112,15 @@ export const createDuplicateTitleValidator = ({
       }
       return undefined;
     } catch (e) {
-      // Some upstream check functions throw on duplicate rather than
-      // returning `false`. Either way, surface the formatted warning.
-      return e?.message ?? getDuplicateTitleWarning(value);
+      // Some upstream check functions throw on duplicate rather than returning
+      // `false`. Always return the formatted warning so non-duplicate errors
+      // don't leak raw technical messages into the UI. Log unexpected errors
+      // in development so they don't silently disappear.
+      if (process.env.NODE_ENV !== 'production' && e?.message) {
+        // eslint-disable-next-line no-console
+        console.warn('[createDuplicateTitleValidator] unexpected error during title check:', e);
+      }
+      return getDuplicateTitleWarning(value);
     }
   },
 });
