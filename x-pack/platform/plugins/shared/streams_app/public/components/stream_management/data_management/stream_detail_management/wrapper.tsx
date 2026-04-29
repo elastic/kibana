@@ -108,6 +108,8 @@ export function Wrapper({
     })
   );
 
+  const canMonitor = Streams.ingest.all.GetResponse.is(definition) && definition.privileges.monitor;
+
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
     getCanReadFailureStore: () =>
@@ -116,11 +118,21 @@ export function Wrapper({
         : false,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
-  const docCountsFetch = getStreamDocCounts(streamId);
 
-  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
-  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
-  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
+  const docCountsFetch = canMonitor ? getStreamDocCounts(streamId) : null;
+
+  const countResult = useAsync(
+    () => docCountsFetch?.docCount ?? Promise.resolve([]),
+    [docCountsFetch]
+  );
+  const failedDocsResult = useAsync(
+    () => docCountsFetch?.failedDocCount ?? Promise.resolve([]),
+    [docCountsFetch]
+  );
+  const degradedDocsResult = useAsync(
+    () => docCountsFetch?.degradedDocCount ?? Promise.resolve([]),
+    [docCountsFetch]
+  );
 
   const docCount = countResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
   const degradedDocCount =
@@ -177,17 +189,19 @@ export function Wrapper({
       ),
     });
   }
-  streamBadges.push({
-    key: 'quality',
-    node: (
-      <DatasetQualityIndicator
-        quality={quality}
-        isLoading={isQualityLoading}
-        verbose={true}
-        showTooltip={true}
-      />
-    ),
-  });
+  if (canMonitor) {
+    streamBadges.push({
+      key: 'quality',
+      node: (
+        <DatasetQualityIndicator
+          quality={quality}
+          isLoading={isQualityLoading}
+          verbose={true}
+          showTooltip={true}
+        />
+      ),
+    });
+  }
 
   return (
     <>

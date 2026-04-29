@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../../redirect_to';
@@ -75,6 +75,42 @@ export function ClassicStreamDetailManagement({
     definition,
     refreshDefinition,
   });
+
+  if (!definition.privileges.view_index_metadata) {
+    return (
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                <ClassicStreamBadge />
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.classicStreamOverview.noPrivileges.title', {
+              defaultMessage: "Data stream couldn't be loaded",
+            })}
+            color="danger"
+            iconType="error"
+          >
+            <p>
+              {i18n.translate('xpack.streams.classicStreamOverview.noPrivileges.description', {
+                defaultMessage:
+                  "You don't have the required privileges to view this stream. Make sure you have sufficient view_index_metadata privileges.",
+              })}
+            </p>
+          </EuiCallOut>
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
 
   if (!definition.data_stream_exists) {
     return (
