@@ -23,9 +23,7 @@ engine:
   model: llm-gateway/gpt-5.4
   args:
     - -c
-    - model_context_window=1000000
-    - -c
-    - model_auto_compact_token_limit=900000
+    - model_context_window=1050000
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
