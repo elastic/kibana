@@ -79,6 +79,7 @@
             "lineNumber": 31,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -155,6 +156,7 @@
                 "lineNumber": 23,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestBody",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -179,6 +181,7 @@
                 "lineNumber": 24,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ISearchOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
