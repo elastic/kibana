@@ -13,5 +13,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
     loadTestFile(require.resolve('./event_log_2'));
+    loadTestFile(require.resolve('./change_tracking/disabled'));
   });
 }

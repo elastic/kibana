@@ -1042,7 +1042,7 @@ Object {
             },
             Object {
               "additionalProperties": false,
-              "description": "Discard the entire document from the pipeline",
+              "description": "Discard the entire document so it is not indexed at all.",
               "properties": Object {
                 "action": Object {
                   "const": "drop_document",
@@ -1325,7 +1325,7 @@ Object {
             },
             Object {
               "additionalProperties": false,
-              "description": "Delete a specific field from the document",
+              "description": "Delete a specific field from the document while keeping the document itself.",
               "properties": Object {
                 "action": Object {
                   "const": "remove",
@@ -2563,7 +2563,7 @@ Object {
               },
               Object {
                 "additionalProperties": false,
-                "description": "Discard the entire document from the pipeline",
+                "description": "Discard the entire document so it is not indexed at all.",
                 "properties": Object {
                   "action": Object {
                     "const": "drop_document",
@@ -2846,7 +2846,7 @@ Object {
               },
               Object {
                 "additionalProperties": false,
-                "description": "Delete a specific field from the document",
+                "description": "Delete a specific field from the document while keeping the document itself.",
                 "properties": Object {
                   "action": Object {
                     "const": "remove",
