@@ -66,7 +66,7 @@ const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadManualRunAll];
 // As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
 
-describe.only('Rules table - privileges', { tags: ['@ess'] }, () => {
+describe('Rules table - privileges', { tags: ['@ess'] }, () => {
   const testRuleName = 'My rule';
   const createRule = (ruleName: string) => {
     const rule = getCustomQueryRuleParams({ name: ruleName });
