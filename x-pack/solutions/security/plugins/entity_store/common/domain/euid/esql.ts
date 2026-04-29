@@ -115,6 +115,10 @@ export function getEuidEsqlFilterBasedOnDocument(
     for (const evaluation of fieldEvaluations) {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
       const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      // Pure-literal evaluations carry no document constraint — there is nothing to filter on.
+      if (sourceFields.length === 0) {
+        continue;
+      }
       const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
       if (hasEvaluatedSource) {
         continue;
@@ -130,6 +134,9 @@ export function getEuidEsqlFilterBasedOnDocument(
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
   if ('field' in source) {
     return `MV_FIRST(${source.field})`;
+  }
+  if ('literal' in source) {
+    return `"${escapeEsqlString(source.literal)}"`;
   }
   return `MV_FIRST(SPLIT(MV_FIRST(${source.firstChunkOfField}), "${escapeEsqlString(
     source.splitBy

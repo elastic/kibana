@@ -253,9 +253,10 @@ export function getSourceFieldNames(sources: FieldEvaluationSource[]): {
   for (const source of sources) {
     if ('field' in source) {
       exactMatchFields.push(source.field);
-    } else {
+    } else if ('firstChunkOfField' in source) {
       prefixMatchFields.push(source.firstChunkOfField);
     }
+    // Literal sources contribute no document field name; intentionally skipped.
   }
   return { exactMatchFields, prefixMatchFields };
 }

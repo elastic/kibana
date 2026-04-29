@@ -328,6 +328,8 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
         stmts.push(
           `if (_src == null && doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != "") { _src = doc['${srcEsc}'].value; }`
         );
+      } else if ('literal' in source) {
+        stmts.push(`if (_src == null) { _src = "${escapePainlessString(source.literal)}"; }`);
       } else {
         const fieldEsc = escapePainlessField(source.firstChunkOfField);
         const delimInString = escapePainlessString(source.splitBy);
