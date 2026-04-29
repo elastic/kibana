@@ -83,14 +83,8 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       ...restOfPackage
     } = pkg;
 
-    const pkgDeploymentInfo = policyTemplates.map(({ name, deployment_modes }) => ({
-      name,
-      deployment_modes,
-    }));
-
     const topPackage = {
       ...restOfPackage,
-      pkgDeploymentInfo,
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
@@ -105,7 +99,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
           const allCategories = [...topCategories, ...categories];
           return {
             ...restOfPackage,
-            pkgDeploymentInfo,
             id: `${restOfPackage.id}-${name}`,
             integration: name,
             title,

@@ -23,7 +23,7 @@ import type {
 } from '@kbn/custom-integrations-plugin/common';
 
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
-import { resolveEffectiveRelease } from '../../../../../../../common/services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {
@@ -142,30 +142,8 @@ export const mapToCard = ({
   }
 
   const integration = 'integration' in item ? item.integration || '' : '';
-  const installationInfo = 'installationInfo' in item ? item.installationInfo : undefined;
 
-  // When an update is available, use the installed version's SO data so the badge reflects
-  // installed maturity. Otherwise use the tile's pkgDeploymentInfo.
-  const packageName = 'name' in item ? item.name : undefined;
-  const packageItemForRelease =
-    isUpdateAvailable && installationInfo?.policy_templates_deployment_info
-      ? {
-          policy_templates: installationInfo.policy_templates_deployment_info,
-          version: installationInfo.version,
-          name: packageName,
-        }
-      : {
-          policy_templates: 'pkgDeploymentInfo' in item ? item.pkgDeploymentInfo : undefined,
-          version,
-          name: packageName,
-        };
-
-  // Resolve the effective release: agentless override when relevant, semver otherwise.
-  const release: IntegrationCardReleaseLabel = resolveEffectiveRelease(
-    packageItemForRelease,
-    integration,
-    { isAgentlessContext: filterState?.onlyAgentless }
-  );
+  const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
   let extraLabelsBadges: React.ReactNode[] | undefined;
   if (item.type === 'integration' || item.type === 'content') {
     extraLabelsBadges = getIntegrationLabels(item);

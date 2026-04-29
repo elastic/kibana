@@ -688,8 +688,6 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
   packagePoliciesInfo?: { count: number };
-  /** Policy template deployment info for release evaluation */
-  pkgDeploymentInfo?: InstallationPolicyTemplateDeploymentInfo[];
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -774,11 +772,6 @@ export type PackageDependencies = { name: string; version: string }[];
 /** Packages (name, version) that have this package as a dependency */
 export type IsDependencyOf = PackageDependencies;
 
-export interface InstallationPolicyTemplateDeploymentInfo {
-  name: string;
-  deployment_modes?: DeploymentsModes;
-}
-
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
@@ -818,7 +811,6 @@ export interface Installation {
   is_dependency_of?: IsDependencyOf | null;
   /** Whether the package was installed as a dependency (not manually by a user) */
   installed_as_dependency?: boolean;
-  policy_templates_deployment_info?: InstallationPolicyTemplateDeploymentInfo[];
 }
 
 export interface PackageUsageStats {
