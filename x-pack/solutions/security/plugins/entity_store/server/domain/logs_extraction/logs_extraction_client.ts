@@ -191,7 +191,6 @@ export class LogsExtractionClient {
       const indexPatterns = await this.getLocalIndexPatterns(config.additionalIndexPatterns);
       const { fromDateISO } = this.getExtractionWindow(config, engineState, delayMs);
       const toDateISO = moment().utc().toISOString();
-      const recoveryId = engineState.paginationId ?? undefined;
       const logsPageCursorStart = paginationFromOptionalFields(
         engineState.logsPageCursorStartTimestamp,
         engineState.logsPageCursorStartId
@@ -201,7 +200,6 @@ export class LogsExtractionClient {
         type,
         fromDateISO,
         toDateISO,
-        recoveryId,
         logsPageCursorStart,
       });
       const esqlResponse = await executeEsqlQuery({
@@ -323,7 +321,7 @@ export class LogsExtractionClient {
     const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
-    /** One-shot `recoveryId` for corrupt state: consumed by the probe or the first bounded extraction batch. */
+    /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
     let recoveryId = initialEngineState.paginationId ?? undefined;
     if (recoveryId) {
       this.logger.warn(
@@ -357,7 +355,6 @@ export class LogsExtractionClient {
           toDateISO,
           logsPageCursorStart,
           maxLogsPerPage,
-          recoveryId,
           opts,
         });
         const probeOutcome = await probePromise;
@@ -422,7 +419,6 @@ export class LogsExtractionClient {
     toDateISO,
     logsPageCursorStart,
     maxLogsPerPage,
-    recoveryId,
     opts,
   }: {
     indexPatterns: string[];
@@ -431,7 +427,6 @@ export class LogsExtractionClient {
     toDateISO: string;
     logsPageCursorStart: PaginationParams | undefined;
     maxLogsPerPage: number;
-    recoveryId: string | undefined;
     opts?: LogsExtractionOptions;
   }): Promise<LogPaginationCursor> {
     const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
@@ -439,7 +434,6 @@ export class LogsExtractionClient {
       type,
       fromDateISO,
       toDateISO,
-      recoveryId,
       logsPageCursorStart,
       maxLogsPerPage,
     });
@@ -706,10 +700,16 @@ export class LogsExtractionClient {
       const secSolIndices = secSolDataView.getIndexPattern().split(',');
       indexPatterns.push(...secSolIndices);
     } catch (error) {
-      this.logger.warn(
-        'Problems finding security solution data view indices, defaulting to logs-*'
-      );
-      this.logger.warn(error);
+      // Not found is a acceptable state in tests and fresh environments
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        this.logger.warn('Security solution data view not found, defaulting to logs-*');
+      } else {
+        this.logger.warn(
+          'Problems finding security solution data view indices, defaulting to logs-*'
+        );
+        this.logger.warn(error);
+      }
+
       indexPatterns.push('logs-*');
     }
 

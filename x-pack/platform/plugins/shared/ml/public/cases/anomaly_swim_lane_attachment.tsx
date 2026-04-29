@@ -15,10 +15,8 @@ import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables/anomaly_swimlane/types';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
