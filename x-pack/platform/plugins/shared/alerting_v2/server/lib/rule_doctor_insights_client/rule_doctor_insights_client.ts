@@ -19,7 +19,6 @@ import {
 import type {
   ListInsightsParams,
   ListInsightsResult,
-  CountInsightsParams,
   BulkIndexInsightsResult,
 } from './types';
 
@@ -119,7 +118,7 @@ export class RuleDoctorInsightsClient {
     }
 
     const operations = insights.flatMap((insight) => [
-      { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: insight.insight_id } },
+      { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: `${insight.space_id}:${insight.insight_id}` } },
       insight,
     ]);
 
@@ -146,18 +145,8 @@ export class RuleDoctorInsightsClient {
     return { indexed, failed };
   }
 
-  public async countInsights(params: CountInsightsParams): Promise<number> {
-    const response = await this.esClient.count({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
-      ignore_unavailable: true,
-      query: this.buildFilterQuery(params),
-    });
-
-    return response.count;
-  }
-
   private buildFilterQuery(
-    params: ListInsightsParams | CountInsightsParams
+    params: ListInsightsParams
   ): QueryDslQueryContainer {
     const filters: QueryDslQueryContainer[] = [{ term: { space_id: params.spaceId } }];
 

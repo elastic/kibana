@@ -44,6 +44,11 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
       [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
     });
 
+    await esClient.indices.delete({
+      index: RULE_DOCTOR_INSIGHTS_INDEX,
+      ignore_unavailable: true,
+    });
+
     await esClient.indices.create({
       index: RULE_DOCTOR_INSIGHTS_INDEX,
       mappings: {

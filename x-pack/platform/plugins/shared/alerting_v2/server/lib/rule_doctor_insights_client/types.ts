@@ -25,12 +25,6 @@ export interface ListInsightsResult {
   total: number;
 }
 
-export interface CountInsightsParams {
-  spaceId: string;
-  status?: RuleDoctorInsightStatus;
-  type?: string;
-}
-
 export interface BulkIndexInsightsResult {
   indexed: number;
   failed: number;

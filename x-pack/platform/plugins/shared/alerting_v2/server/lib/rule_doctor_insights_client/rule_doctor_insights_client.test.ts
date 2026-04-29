@@ -13,6 +13,8 @@ import {
   RULE_DOCTOR_INSIGHTS_INDEX,
   type RuleDoctorInsightDoc,
 } from '../../resources/indices/rule_doctor_insights';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import { RuleDoctorInsightsClient } from './rule_doctor_insights_client';
 
 const mockLoggerService: jest.Mocked<LoggerServiceContract> = {
   debug: jest.fn(),
@@ -219,18 +221,18 @@ describe('RuleDoctorInsightsClient', () => {
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('builds bulk operations with insight_id as _id', async () => {
+    it('builds bulk operations with space_id:insight_id as _id', async () => {
       const insight = makeInsight();
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'insight-1', status: 201 } }],
+        items: [{ index: { _id: 'default:insight-1', status: 201 } }],
       } as never);
 
       const result = await client.bulkIndexInsights([insight]);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: 'insight-1' } },
+          { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: 'default:insight-1' } },
           insight,
         ],
         refresh: false,
@@ -265,38 +267,4 @@ describe('RuleDoctorInsightsClient', () => {
     });
   });
 
-  describe('countInsights', () => {
-    it('builds query with space_id and optional filters', async () => {
-      esClient.count.mockResolvedValue({ count: 42 } as never);
-
-      const result = await client.countInsights({
-        spaceId: 'default',
-        status: 'open',
-        type: 'stale_rule',
-      });
-
-      expect(esClient.count).toHaveBeenCalledWith({
-        index: RULE_DOCTOR_INSIGHTS_INDEX,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            filter: [
-              { term: { space_id: 'default' } },
-              { term: { status: 'open' } },
-              { term: { type: 'stale_rule' } },
-            ],
-          },
-        },
-      });
-      expect(result).toBe(42);
-    });
-
-    it('returns 0 when index does not exist', async () => {
-      esClient.count.mockResolvedValue({ count: 0 } as never);
-
-      const result = await client.countInsights({ spaceId: 'default' });
-
-      expect(result).toBe(0);
-    });
-  });
 });
