@@ -47,7 +47,7 @@ export const getDatabaseText = (databaseValue: string, type?: DatabaseType): str
 };
 
 /**
- * Returns the normalized filename of the database, if it exists.
+ * Returns the normalized filename of the database.
  * @param name The name of the database
  * @returns The normalized filename of the database
  */
