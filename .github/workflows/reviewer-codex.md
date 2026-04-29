@@ -19,7 +19,7 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: codex
-  version: "0.125.0"
+  version: "0.118.0"
   model: llm-gateway/gpt-5.4
   args:
     - -c
