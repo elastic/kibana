@@ -25,7 +25,7 @@ const dashboardScenarios = [
   { title: 'classic_apm-otel_other-nodejs', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NODEJS },
   { title: 'classic_apm-otel_other-dotnet', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_DOTNET },
   { title: 'classic_apm-otel_other-go', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_GO },
-  // { title: 'otel_native-edot-java', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_JAVA },
+  { title: 'otel_native-edot-java', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_JAVA },
   {
     title: 'otel_native-edot-nodejs',
     serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_NODEJS,
@@ -34,10 +34,10 @@ const dashboardScenarios = [
     title: 'otel_native-edot-python',
     serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_PYTHON,
   },
-  // {
-  //   title: 'otel_native-otel_other-java',
-  //   serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_JAVA,
-  // },
+  {
+    title: 'otel_native-otel_other-java',
+    serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_JAVA,
+  },
   {
     title: 'otel_native-otel_other-nodejs',
     serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_NODEJS,

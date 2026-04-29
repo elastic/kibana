@@ -19,7 +19,10 @@ import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
-import { metricsServices } from '../fixtures/synthtrace/metrics_services';
+import {
+  metricsServices,
+  setupOtelNativeJavaMetrics,
+} from '../fixtures/synthtrace/metrics_services';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
@@ -110,6 +113,13 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(metricsData);
     log.info('Metrics services data indexed');
+
+    await setupOtelNativeJavaMetrics(
+      esClient,
+      new Date(testData.START_DATE).getTime(),
+      new Date(testData.END_DATE).getTime()
+    );
+    log.info('OTel-native Java metrics bulk-indexed into .otel-* indices');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();
