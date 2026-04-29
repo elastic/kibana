@@ -10,7 +10,7 @@ import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
 } from '../../../rule_management/api/rules/search_rules/request_schema_validation';
-import { PrebuiltRuleAssetsFacetCategory } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { PrebuiltRuleAssetsFacetCategory } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 describe('validateReviewRuleInstallationRequestBody', () => {
   const defaultInput = {
