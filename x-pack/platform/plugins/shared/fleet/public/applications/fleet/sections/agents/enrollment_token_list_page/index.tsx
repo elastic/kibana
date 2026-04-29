@@ -17,14 +17,11 @@ import {
   EuiLink,
   EuiFilterGroup,
   EuiFilterButton,
-  EuiIcon,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-
-import { ApiKeyField } from '../../../../../components/api_key_field';
 
 import {
   ENROLLMENT_API_KEYS_INDEX,
@@ -37,171 +34,25 @@ import {
   usePagination,
   useGetEnrollmentAPIKeysQuery,
   useGetAgentPolicies,
-  getOneEnrollmentAPIKeyToken,
-  useStartServices,
-  sendDeleteOneEnrollmentAPIKey,
-  sendBulkDeleteEnrollmentAPIKeys,
 } from '../../../hooks';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 import { DefaultLayout } from '../../../layouts';
 import { AgentPolicyFilter } from '../agent_list_page/components/filter_bar/agent_policy_filter';
-
 import { HierarchicalActionsMenu } from '../components';
-import type { MenuItem } from '../components';
 
 import { ConfirmRevokeModal, ConfirmDeleteModal } from './components/confirm_bulk_action_modal';
+import { Divider, getTokenActionItems } from './components/token_actions';
+import { getColumns } from './components/columns';
+import { useBulkActions } from './hooks/use_bulk_actions';
+import { buildKuery } from './utils/build_kuery';
+
+import type { ActiveFilter } from './utils/build_kuery';
 
 type SelectionMode = 'manual' | 'query';
-type BulkAction = 'delete' | 'revoke';
-type ActiveFilter = 'active' | 'inactive' | 'all';
-
-const Divider: React.FunctionComponent = () => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      style={{
-        width: 0,
-        height: euiTheme.size.l,
-        borderLeft: euiTheme.border.thin,
-      }}
-    />
-  );
-};
-
-const TokenActions: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh: () => void }> = ({
-  apiKey,
-  refresh,
-}) => {
-  const { notifications } = useStartServices();
-  const [pendingAction, setPendingAction] = useState<BulkAction | null>(null);
-
-  const onCancelAction = () => setPendingAction(null);
-
-  const onConfirmRevoke = async () => {
-    try {
-      const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id);
-      if (res.error) throw res.error;
-    } catch (err) {
-      notifications.toasts.addError(err as Error, { title: 'Error' });
-    }
-    setPendingAction(null);
-    refresh();
-  };
-
-  const onConfirmDelete = async () => {
-    try {
-      const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id, { forceDelete: true });
-      if (res.error) throw res.error;
-    } catch (err) {
-      notifications.toasts.addError(err as Error, { title: 'Error' });
-    }
-    setPendingAction(null);
-    refresh();
-  };
-
-  return (
-    <>
-      {pendingAction === 'revoke' && (
-        <ConfirmRevokeModal count={1} onCancel={onCancelAction} onConfirm={onConfirmRevoke} />
-      )}
-      {pendingAction === 'delete' && (
-        <ConfirmDeleteModal count={1} onCancel={onCancelAction} onConfirm={onConfirmDelete} />
-      )}
-      <HierarchicalActionsMenu
-        items={getTokenActionItems({
-          onRevoke: () => setPendingAction('revoke'),
-          onDelete: () => setPendingAction('delete'),
-          revokeDisabled: !apiKey.active,
-        })}
-        data-test-subj="enrollmentTokenTable.actionsMenu"
-      />
-    </>
-  );
-};
-
-const getTokenActionItems = ({
-  onRevoke,
-  onDelete,
-  plural,
-  revokeDisabled,
-}: {
-  onRevoke: () => void;
-  onDelete: () => void;
-  plural?: boolean;
-  revokeDisabled?: boolean;
-}): MenuItem[] => [
-  {
-    id: 'revoke',
-    name: plural
-      ? i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokensAction', {
-          defaultMessage: 'Revoke tokens',
-        })
-      : i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenAction', {
-          defaultMessage: 'Revoke token',
-        }),
-    icon: 'minusInCircle',
-    disabled: revokeDisabled,
-    'data-test-subj': plural
-      ? 'enrollmentTokensList.bulkRevokeButton'
-      : 'enrollmentTokenTable.revokeBtn',
-    onClick: onRevoke,
-  },
-  {
-    id: 'delete',
-    name: plural
-      ? i18n.translate('xpack.fleet.enrollmentTokensList.deleteTokensAction', {
-          defaultMessage: 'Delete tokens',
-        })
-      : i18n.translate('xpack.fleet.enrollmentTokensList.deleteTokenAction', {
-          defaultMessage: 'Delete token',
-        }),
-    icon: 'trash',
-    'data-test-subj': plural
-      ? 'enrollmentTokensList.bulkDeleteButton'
-      : 'enrollmentTokenTable.deleteBtn',
-    onClick: onDelete,
-  },
-];
-
-const NOT_HIDDEN_KUERY = 'not hidden:true';
-
-function buildKuery(
-  search: string,
-  selectedPolicyIds: string[],
-  activeFilter: ActiveFilter,
-  excludedPolicyIds: string[]
-): string {
-  const parts: string[] = [];
-
-  if (search.trim() !== '') {
-    parts.push(`(${search.trim()})`);
-  }
-
-  if (selectedPolicyIds.length > 0) {
-    const policyFilter = selectedPolicyIds.map((id) => `policy_id:"${id}"`).join(' or ');
-    parts.push(`(${policyFilter})`);
-  }
-
-  if (activeFilter === 'active') {
-    parts.push('(active:true)');
-  } else if (activeFilter === 'inactive') {
-    parts.push('(active:false)');
-  }
-
-  if (excludedPolicyIds.length > 0) {
-    const exclusion = excludedPolicyIds.map((id) => `policy_id:"${id}"`).join(' or ');
-    parts.push(`(not (${exclusion}))`);
-  }
-
-  parts.push(`(${NOT_HIDDEN_KUERY})`);
-
-  return parts.join(' and ');
-}
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('enrollment_tokens');
-  const { notifications } = useStartServices();
   const { euiTheme } = useEuiTheme();
   const [isModalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -211,11 +62,14 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
 
   const [selectedTokens, setSelectedTokens] = useState<EnrollmentAPIKey[]>([]);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
-  const [bulkActionPending, setBulkActionPending] = useState<BulkAction | null>(null);
-  const [isBulkActionInProgress, setIsBulkActionInProgress] = useState(false);
 
   const hasNonDefaultFilters =
     search !== '' || selectedPolicyIds.length > 0 || activeFilter !== 'active';
+
+  const clearSelection = () => {
+    setSelectedTokens([]);
+    setSelectionMode('manual');
+  };
 
   const resetFilters = () => {
     setSearch('');
@@ -255,6 +109,19 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
   const rowItems = enrollmentAPIKeysRequest?.data?.items ?? [];
 
+  const refresh = () => {
+    clearSelection();
+    enrollmentAPIKeysRequest.refetch();
+  };
+
+  const { bulkActionPending, setBulkActionPending, isBulkActionInProgress, onBulkActionConfirm } =
+    useBulkActions({
+      kuery,
+      selectedTokens,
+      selectionMode,
+      refresh,
+    });
+
   const selectedCount = selectionMode === 'query' ? total : selectedTokens.length;
   const showSelectionInfo =
     isBulkActionInProgress ||
@@ -265,144 +132,11 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     selectedTokens.length === rowItems.length &&
     rowItems.length < total;
 
-  const clearSelection = () => {
-    setSelectedTokens([]);
-    setSelectionMode('manual');
-  };
-
-  const refresh = () => {
-    clearSelection();
-    enrollmentAPIKeysRequest.refetch();
-  };
-
-  const onBulkActionConfirm = async () => {
-    const action = bulkActionPending!;
-    setBulkActionPending(null);
-    setIsBulkActionInProgress(true);
-
-    // forceDelete=false (revoke): invalidate API key, mark token inactive.
-    // forceDelete=true (delete): invalidate API key, remove token document.
-    const body =
-      selectionMode === 'query'
-        ? { kuery, forceDelete: action === 'delete' }
-        : { tokenIds: selectedTokens.map((t) => t.id), forceDelete: action === 'delete' };
-
-    try {
-      const res = await sendBulkDeleteEnrollmentAPIKeys(body);
-      if (res.error) throw res.error;
-
-      const count = res.data?.count ?? 0;
-      const successCount = res.data?.successCount ?? 0;
-      const errorCount = res.data?.errorCount ?? 0;
-      const actionLabel = action === 'delete' ? 'deleted' : 'revoked';
-
-      if (count === successCount) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionSuccess', {
-            defaultMessage:
-              '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} {actionLabel}',
-            values: { successCount, actionLabel },
-          })
-        );
-      } else if (count === errorCount) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionAllErrors', {
-            defaultMessage:
-              'Failed to {actionLabel} {errorCount, plural, one {# enrollment token} other {# enrollment tokens}}',
-            values: { errorCount, actionLabel },
-          })
-        );
-      } else {
-        notifications.toasts.addWarning(
-          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionPartialErrors', {
-            defaultMessage:
-              '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} {actionLabel}, {errorCount, plural, one {# token} other {# tokens}} failed',
-            values: { successCount, errorCount, actionLabel },
-          })
-        );
-      }
-    } catch (err) {
-      notifications.toasts.addError(err as Error, { title: 'Error' });
-    }
-
-    setIsBulkActionInProgress(false);
-    refresh();
-  };
-
-  const columns = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.nameTitle', {
-        defaultMessage: 'Name',
-      }),
-      render: (value: string) => value,
-    },
-    {
-      field: 'policy_id',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.policyTitle', {
-        defaultMessage: 'Agent policy',
-      }),
-      render: (policyId: string) => {
-        const agentPolicy = agentPoliciesById[policyId];
-        const value = agentPolicy ? agentPolicy.name : policyId;
-        return (
-          <span className="eui-textTruncate" title={value}>
-            {value}
-          </span>
-        );
-      },
-    },
-    {
-      field: 'id',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.secretTitle', {
-        defaultMessage: 'Secret',
-      }),
-      render: (apiKeyId: string) => {
-        return <ApiKeyField apiKeyId={apiKeyId} getToken={getOneEnrollmentAPIKeyToken} />;
-      },
-    },
-    {
-      field: 'created_at',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.createdAtTitle', {
-        defaultMessage: 'Created on',
-      }),
-      width: '150px',
-      render: (createdAt: string) => {
-        return createdAt ? (
-          <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
-        ) : null;
-      },
-    },
-    {
-      field: 'active',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.activeTitle', {
-        defaultMessage: 'Active',
-      }),
-      width: '80px',
-      render: (active: boolean) =>
-        active ? (
-          <EuiIcon
-            type="dot"
-            color="success"
-            aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.activeValue', {
-              defaultMessage: 'Active',
-            })}
-          />
-        ) : null,
-    },
-    {
-      field: 'actions',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.actionsTitle', {
-        defaultMessage: 'Actions',
-      }),
-      width: '70px',
-      render: (_: unknown, apiKey: EnrollmentAPIKey) => {
-        const agentPolicy = agentPolicies.find((c) => c.id === apiKey.policy_id);
-        if (agentPolicy?.is_managed) return null;
-        return <TokenActions apiKey={apiKey} refresh={() => enrollmentAPIKeysRequest.refetch()} />;
-      },
-    },
-  ];
+  const columns = getColumns({
+    agentPoliciesById,
+    agentPolicies,
+    refresh: () => enrollmentAPIKeysRequest.refetch(),
+  });
 
   const isInitialLoading =
     enrollmentAPIKeysRequest.isInitialLoading ||
