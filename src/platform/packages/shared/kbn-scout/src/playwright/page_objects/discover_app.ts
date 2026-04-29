@@ -28,7 +28,7 @@ export class DiscoverApp {
   private async waitForDiscoverPage() {
     // Discover initialization in serverless CI environments regularly exceeds the default 10s,
     // likely due to additional plugin overhead and root profile resolution.
-    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 45_000 });
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 35_000 });
   }
 
   private async getVisibleDataViewSwitch() {
