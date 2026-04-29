@@ -26,6 +26,7 @@ import {
   type EventDrivenExecutionSuppressedParams,
   type OutputSizeStats,
   type OutputSizeTelemetryFields,
+  type TriggerEventDispatchedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
@@ -37,6 +38,12 @@ import {
   type WorkflowExecutionTelemetryMetadata,
 } from './utils/extract_execution_metadata';
 import { extractWorkflowMetadata } from './utils/extract_workflow_metadata';
+import type { EventTriggersConfig } from '../../config';
+import type { EventChainContext } from '../../trigger_events/event_context/event_chain_context';
+import type {
+  TriggerEventScheduleStats,
+  TriggerResolutionStats,
+} from '../../trigger_events/trigger_event_stats';
 
 /** Picks the output-size telemetry fields from execution metadata, omitting undefined entries. */
 const pickOutputSizeFields = (
@@ -449,5 +456,34 @@ export class WorkflowExecutionTelemetryClient {
       WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed,
       eventData
     );
+  }
+
+  reportTriggerEventDispatched(params: {
+    triggerId: string;
+    config: EventTriggersConfig;
+    eventChainContext?: EventChainContext;
+    eventId: string;
+    subscriberResolutionMs: number;
+    resolutionStats: TriggerResolutionStats;
+    scheduleStats: TriggerEventScheduleStats;
+  }): void {
+    const eventData: TriggerEventDispatchedParams = {
+      eventName:
+        workflowExecutionEventNames[WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched],
+      triggerId: params.triggerId,
+      eventId: params.eventId,
+      executionEnabled: params.config.enabled,
+      logEventsEnabled: params.config.logEvents,
+      auditOnly: !params.config.enabled && params.config.logEvents,
+      eventChainDepth: params.eventChainContext?.depth ?? 0,
+      subscriberResolutionMs: params.subscriberResolutionMs,
+      ...(params.eventChainContext?.sourceExecutionId && {
+        sourceExecutionId: params.eventChainContext.sourceExecutionId,
+      }),
+      ...params.resolutionStats,
+      ...params.scheduleStats,
+    };
+
+    this.reportEvent(WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched, eventData);
   }
 }

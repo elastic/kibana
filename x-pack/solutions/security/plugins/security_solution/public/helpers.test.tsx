@@ -9,13 +9,13 @@ import { shallow } from 'enzyme';
 import type { Capabilities } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID, CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
-import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import {
-  parseRoute,
-  isSubPluginAvailable,
-  getSubPluginRoutesByCapabilities,
   getField,
+  getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isSubPluginAvailable,
+  parseRoute,
 } from './helpers';
 import type { StartedSubPlugins } from './types';
 import {
@@ -248,7 +248,7 @@ describe('public helpers getField', () => {
         risk_score: '21',
         severity: 'low',
         timeline_id: '1234-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Untitled timeline',
+        timeline_title: 'Untitled Timeline',
         meta: {
           from: '1000m',
           kibana_siem_app_url: 'https://localhost:5601/app/security',

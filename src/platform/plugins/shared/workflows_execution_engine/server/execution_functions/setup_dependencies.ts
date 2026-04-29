@@ -11,7 +11,6 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
@@ -20,6 +19,7 @@ import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_exec
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import { setWorkflowEventChainContext } from '../trigger_events/event_context/event_chain_context';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -74,7 +74,6 @@ export async function setupDependencies(
   }
 
   const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
-
   if (eventChainDepth !== undefined) {
     setWorkflowEventChainContext(fakeRequest, {
       depth: eventChainDepth,

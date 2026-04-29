@@ -67,6 +67,7 @@
                 "lineNumber": 20,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivilegesAPIClientGetAllArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -628,6 +629,7 @@
                 "lineNumber": 28,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "RolePutPayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -686,6 +688,7 @@
                 "lineNumber": 29,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkUpdatePayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1199,6 +1202,7 @@
                 "lineNumber": 18,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "MouseEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }

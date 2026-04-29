@@ -78,12 +78,12 @@ export async function bootstrap({ dir, log }: CheckoutAndBootstrapOptions) {
   await writeVersionFile(log, Path.join(dir, '.nvmrc'), currentNodeVersion, false);
 
   // set ignore-engines to true to prevent validation errors from other spawned processes
-  await exec(`yarn config set ignore-engines true`, {
+  await exec('yarn', ['config', 'set', 'ignore-engines', 'true'], {
     cwd: dir,
     log,
   });
 
-  await exec(`yarn kbn bootstrap --force-install`, {
+  await exec('yarn', ['kbn', 'bootstrap', '--force-install'], {
     log,
     cwd: dir,
     env: {

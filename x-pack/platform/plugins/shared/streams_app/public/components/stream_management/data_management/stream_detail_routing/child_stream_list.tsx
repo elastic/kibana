@@ -26,7 +26,7 @@ import { css } from '@emotion/css';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { MAX_NESTING_LEVEL, getSegments, Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
+import { useScrollToActive } from '@kbn/ui-side-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';

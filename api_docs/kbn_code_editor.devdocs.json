@@ -67,6 +67,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConsoleWorkerProxyService",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -373,6 +374,7 @@
                 "lineNumber": 28,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "PainlessContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -555,6 +557,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EditorStateService",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -806,6 +809,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1660,7 +1664,15 @@
             "tags": [],
             "label": "customContextMenuActions",
             "description": [
-              "\nIf the custom context menu is enable through {@link enableCustomContextMenu},\nthis prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions."
+              "\nIf the custom context menu is enable through ",
+              {
+                "pluginId": "@kbn/code-editor",
+                "scope": "common",
+                "docId": "kibKbnCodeEditorPluginApi",
+                "section": "def-common.enableCustomContextMenu",
+                "text": "enableCustomContextMenu"
+              },
+              ",\nthis prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions."
             ],
             "signature": [
               "ContextMenuAction",
@@ -1955,6 +1967,7 @@
                 "lineNumber": 47,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConsoleParserReviver",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2321,6 +2334,7 @@
                 "lineNumber": 21,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3140,6 +3154,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UndoRedoElement",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3265,7 +3280,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-        "lineNumber": 40,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3345,20 +3360,36 @@
             "section": "def-common.ESQLTelemetryCallbacks",
             "text": "ESQLTelemetryCallbacks"
           },
-          "; getModelDependencies: (model: ",
+          "; getEditorMessages?: (() => { errors: ",
+          {
+            "pluginId": "@kbn/monaco",
+            "scope": "common",
+            "docId": "kibKbnMonacoPluginApi",
+            "section": "def-common.MonacoMessage",
+            "text": "MonacoMessage"
+          },
+          "[]; warnings: ",
+          {
+            "pluginId": "@kbn/monaco",
+            "scope": "common",
+            "docId": "kibKbnMonacoPluginApi",
+            "section": "def-common.MonacoMessage",
+            "text": "MonacoMessage"
+          },
+          "[]; }) | undefined; getModelDependencies: (model: ",
           "editor",
           ".ITextModel) => ",
           {
-            "pluginId": "@kbn/esql-types",
+            "pluginId": "@kbn/monaco",
             "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLCallbacks",
-            "text": "ESQLCallbacks"
+            "docId": "kibKbnMonacoPluginApi",
+            "section": "def-common.ESQLDependencies",
+            "text": "ESQLDependencies"
           },
           " | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-        "lineNumber": 49,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3529,7 +3560,7 @@
           ".IMarkerData & { code: string; underlinedWarning?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-        "lineNumber": 42,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3679,7 +3710,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.ID",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "ID",
             "description": [],
             "signature": [
@@ -3746,7 +3779,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.onLanguage",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "onLanguage",
             "description": [],
             "signature": [
@@ -3764,7 +3799,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.languageThemeResolver",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "languageThemeResolver",
             "description": [],
             "signature": [
@@ -3788,7 +3825,7 @@
                 "id": "def-common.ConsoleLang.languageThemeResolver.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ colorMode, euiTheme, ...rest }",
                 "description": [],
                 "signature": [
                   "UseEuiTheme",
@@ -3798,6 +3835,7 @@
                 "lineNumber": 30,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               }
             ]
@@ -3806,7 +3844,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleLang.getSuggestionProvider",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "getSuggestionProvider",
             "description": [],
             "signature": [
@@ -3891,6 +3931,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MutableRefObject",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3919,7 +3960,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleOutputLang.ID",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "ID",
             "description": [],
             "signature": [
@@ -3935,7 +3978,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleOutputLang.lexerRules",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "lexerRules",
             "description": [],
             "signature": [
@@ -3952,7 +3997,9 @@
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.ConsoleOutputLang.languageConfiguration",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "description"
+            ],
             "label": "languageConfiguration",
             "description": [],
             "signature": [
@@ -4088,7 +4135,7 @@
                 "id": "def-common.defaultThemesResolvers.CODE_EDITOR_DEFAULT_THEME_ID.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ euiTheme }",
                 "description": [],
                 "signature": [
                   "UseEuiTheme",
@@ -4098,6 +4145,7 @@
                 "lineNumber": 14,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               },
               {
@@ -4154,6 +4202,7 @@
                 "lineNumber": 113,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               }
             ]
@@ -4169,7 +4218,7 @@
         "label": "ESQLLang",
         "description": [],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-        "lineNumber": 62,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4185,7 +4234,7 @@
               "\"esql\""
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 63,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4201,7 +4250,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 64,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4223,7 +4272,7 @@
               ".IStandaloneThemeData"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 76,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4234,7 +4283,7 @@
                 "id": "def-common.ESQLLang.languageThemeResolver.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  euiTheme,\n  colorMode,\n}",
                 "description": [],
                 "signature": [
                   "UseEuiTheme",
@@ -4244,6 +4293,7 @@
                 "lineNumber": 13,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false
               }
             ]
@@ -4256,7 +4306,7 @@
             "label": "languageConfiguration",
             "description": [],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 77,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4272,7 +4322,7 @@
                   "[string, string][]"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 78,
+                "lineNumber": 86,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4288,7 +4338,7 @@
                   "{ open: string; close: string; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 82,
+                "lineNumber": 90,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4304,7 +4354,7 @@
                   "{ open: string; close: string; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 89,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4348,7 +4398,7 @@
               "[]; }>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 96,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4365,7 +4415,7 @@
                   ".ITextModel"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 97,
+                "lineNumber": 105,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4382,7 +4432,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 98,
+                "lineNumber": 106,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4406,9 +4456,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 99,
+                "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLCallbacks",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -4420,7 +4471,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 100,
+                "lineNumber": 108,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4436,12 +4487,66 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                    "lineNumber": 100,
+                    "lineNumber": 108,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.ESQLLang.getCodeActionProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getCodeActionProvider",
+            "description": [],
+            "signature": [
+              "(deps?: ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.ESQLDependencies",
+                "text": "ESQLDependencies"
+              },
+              " | undefined) => ",
+              "languages",
+              ".CodeActionProvider"
+            ],
+            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/code-editor",
+                "id": "def-common.ESQLLang.getCodeActionProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/monaco",
+                    "scope": "common",
+                    "docId": "kibKbnMonacoPluginApi",
+                    "section": "def-common.ESQLDependencies",
+                    "text": "ESQLDependencies"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+                "lineNumber": 116,
+                "columnNumber": 27,
+                "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4467,7 +4572,7 @@
               ".HoverProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 108,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4490,9 +4595,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 108,
+                "lineNumber": 147,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4524,7 +4630,7 @@
               ".InlineCompletion>>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 140,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4547,9 +4653,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 141,
+                "lineNumber": 180,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLCallbacks",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4577,7 +4684,7 @@
               ".CompletionItemProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 168,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4600,9 +4707,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 168,
+                "lineNumber": 207,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4630,7 +4738,7 @@
               ".SignatureHelpProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 295,
+            "lineNumber": 334,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4653,9 +4761,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 295,
+                "lineNumber": 334,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ESQLDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4675,7 +4784,7 @@
               ".DocumentHighlightProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 333,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5030,6 +5139,7 @@
                 "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "PainlessContext",
                 "trackAdoption": false
               },
               {

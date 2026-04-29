@@ -42,14 +42,28 @@ export function useFetchMetricsData({
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
-  const selectedDimensions = useMemo(
-    () => selectedDimensionNames?.map((dimension) => dimension.name),
-    [selectedDimensionNames]
+  // Pre-fetch defense against dimensions the active stream does not map.
+  // Pushing a field name that is not in the dataView into the
+  // `WHERE TO_STRING(field) IS NOT NULL` clause breaks the query and surfaces
+  // "Unable to load visualization". The post-fetch state wipe (against
+  // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
+  const appliedDimensions = useMemo(() => {
+    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+      return selectedDimensionNames;
+    }
+    return selectedDimensionNames.filter(
+      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
+    );
+  }, [selectedDimensionNames, fetchParams.dataView]);
+
+  const appliedDimensionNames = useMemo(
+    () => appliedDimensions?.map((dimension) => dimension.name),
+    [appliedDimensions]
   );
 
   const metricsInfoQuery = useMemo(
-    () => buildMetricsInfoQuery(esql, selectedDimensions),
-    [esql, selectedDimensions]
+    () => buildMetricsInfoQuery(esql, appliedDimensionNames),
+    [esql, appliedDimensionNames]
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
@@ -103,7 +117,7 @@ export function useFetchMetricsData({
 
       return {
         ...sortedMetrics,
-        activeDimensions: selectedDimensionNames ?? [],
+        activeDimensions: appliedDimensions ?? [],
       };
     },
     [
@@ -116,7 +130,7 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
-      selectedDimensionNames,
+      appliedDimensions,
     ]
   );
 
@@ -131,7 +145,6 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    selectedDimensionNames,
     fetchParams.dataView,
     fetchParams.timeRange,
     fetchParams.abortController,

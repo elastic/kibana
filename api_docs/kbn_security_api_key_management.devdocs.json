@@ -45,6 +45,7 @@
                 "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -104,6 +105,7 @@
                 "lineNumber": 52,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "QueryApiKeyParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -220,6 +222,7 @@
                 "lineNumber": 64,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -260,6 +263,7 @@
                 "lineNumber": 70,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -565,6 +569,7 @@
             "lineNumber": 1021,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiKeyFormValues",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -654,6 +659,7 @@
             "lineNumber": 1047,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiKeyFormValues",
             "trackAdoption": false,
             "isRequired": true
           }
