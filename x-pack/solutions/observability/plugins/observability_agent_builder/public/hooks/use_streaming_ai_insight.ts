@@ -54,7 +54,7 @@ const handleStreamError = (
     return;
   }
   if (isSSEError(err) && err.meta) {
-    setErrorRetryable(err.meta.retryable === true);
+    setIsErrorRetryable(err.meta.retryable === true);
   }
   setError(err instanceof Error ? err.message : 'Failed to load AI insight');
 };
@@ -64,7 +64,7 @@ export function useStreamingAiInsight(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [errorRetryable, setErrorRetryable] = useState(true);
+  const [isErrorRetryable, setIsErrorRetryable] = useState(true);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
   const [connectorInfo, setConnectorInfo] = useState<ConnectorInfo | undefined>(undefined);
@@ -84,7 +84,7 @@ export function useStreamingAiInsight(
 
     setIsLoading(true);
     setError(undefined);
-    setErrorRetryable(true);
+    setIsErrorRetryable(true);
     setWasStopped(false);
     setSummary('');
     setContext('');
@@ -141,7 +141,7 @@ export function useStreamingAiInsight(
             setConnectorInfo(state.connectorInfo);
           }
         },
-        error: (streamErr: unknown) => handleStreamError(streamErr, setError, setErrorRetryable),
+        error: (streamErr: unknown) => handleStreamError(streamErr, setError, setIsErrorRetryable),
       });
 
       cleanupRef.current = () => {
@@ -149,7 +149,7 @@ export function useStreamingAiInsight(
         subscription.unsubscribe();
       };
     } catch (e) {
-      handleStreamError(e, setError, setErrorRetryable);
+      handleStreamError(e, setError, setIsErrorRetryable);
       setIsLoading(false);
     }
   }, [createStream]);
@@ -159,7 +159,7 @@ export function useStreamingAiInsight(
   return {
     isLoading,
     error,
-    errorRetryable,
+    isErrorRetryable,
     summary,
     context,
     connectorInfo,

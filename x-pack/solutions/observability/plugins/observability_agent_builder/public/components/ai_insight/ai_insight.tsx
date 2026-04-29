@@ -198,7 +198,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         <EuiSpacer size="m" />
         <EuiPanel color="subdued">
           {error ? (
-            <AiInsightErrorBanner error={error} onRetry={errorRetryable ? fetch : undefined} />
+            <AiInsightErrorBanner error={error} onRetry={isErrorRetryable ? fetch : undefined} />
           ) : (
             <EuiText size="s">
               <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
