@@ -35,6 +35,8 @@ import {
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
+import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
@@ -85,7 +87,19 @@ export function useYamlValidation(
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
   const workflows = useSelector(selectWorkflows);
-  const { application } = useKibana().services;
+  const kibanaServices = useKibana().services;
+  const { application } = kibanaServices;
+  const esqlCallbacks = useWorkflowEsqlCallbacks({
+    http: kibanaServices.http,
+    application: kibanaServices.application,
+    data: kibanaServices.data,
+    licensing: kibanaServices.licensing,
+  });
+  // Held in a ref so the effect below doesn't re-fire just because the
+  // memo identity rebuilt (it does on every render in tests where the kibana
+  // mock returns fresh service objects).
+  const esqlCallbacksRef = useRef(esqlCallbacks);
+  esqlCallbacksRef.current = esqlCallbacks;
 
   useEffect(() => {
     async function validateYaml() {
@@ -153,6 +167,24 @@ export function useYamlValidation(
             ]
           : []),
       ];
+
+      // ES|QL validation runs against `with.query` of every
+      // `elasticsearch.esql.query` step. Errors flow through the same
+      // results array so they show up in the bottom-bar accordion. The cheap
+      // text-search guard avoids the async pipeline entirely when no ES|QL
+      // step is present — keeps the common case microtask-free.
+      if (model.getValue().includes('elasticsearch.esql.query')) {
+        try {
+          const esqlResults = await validateEsqlSteps(
+            yamlDocument,
+            model,
+            esqlCallbacksRef.current
+          );
+          results.push(...esqlResults);
+        } catch {
+          // never let ES|QL validation break the rest of the pipeline
+        }
+      }
 
       // Variable and JSON-schema-default validations require a fully parsed
       // workflowGraph and workflowDefinition. When those are unavailable
