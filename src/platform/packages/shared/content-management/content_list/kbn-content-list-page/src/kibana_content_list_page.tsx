@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useContext, useMemo, type ReactNode } from 'react';
+import React, { createContext, useContext, useId, useMemo, type ReactNode } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-const DEFAULT_HEADING_ID = 'contentListPageHeading';
 const DEFAULT_DATA_TEST_SUBJ = 'kibana-content-list-page';
 
 // ---------------------------------------------------------------------------
@@ -19,7 +18,13 @@ const DEFAULT_DATA_TEST_SUBJ = 'kibana-content-list-page';
 // ---------------------------------------------------------------------------
 
 interface KibanaContentListPageContextValue {
-  /** DOM `id` of the page heading; consumed by `Section` for `aria-labelledby`. */
+  /**
+   * DOM `id` set on the heading element rendered by `Header`. `Section` uses
+   * this value as its default `aria-labelledby` when explicitly overridden,
+   * but does not default to it — callers that omit `Header` should provide an
+   * explicit `aria-labelledby` on `Section` to avoid referencing a missing
+   * element.
+   */
   readonly headingId: string;
   /** Root `data-test-subj`; consumed by child components to derive their subjects. */
   readonly dataTestSubj: string;
@@ -74,7 +79,7 @@ const KibanaContentListPageHeader = ({
 
   const dataTestSubj = dataTestSubjProp ?? `${pageDataTestSubj}-header`;
   const rightSideItems =
-    actions === undefined ? undefined : Array.isArray(actions) ? actions : [actions];
+    actions == null ? undefined : Array.isArray(actions) ? actions : [actions];
 
   return (
     <KibanaPageTemplate.Header
@@ -84,7 +89,7 @@ const KibanaContentListPageHeader = ({
         </span>
       }
       description={
-        description === undefined ? undefined : (
+        description == null ? undefined : (
           <span data-test-subj={`${pageDataTestSubj}-description`}>{description}</span>
         )
       }
@@ -102,8 +107,12 @@ const KibanaContentListPageHeader = ({
 export interface KibanaContentListPageSectionProps {
   children: ReactNode;
   /**
-   * Override the default `aria-labelledby` (which points at the page heading).
-   * Pass an explicit value when the section labels itself with a sub-heading.
+   * Override the default `aria-labelledby` (which points at the page heading
+   * rendered by {@link KibanaContentListPage.Header}).
+   *
+   * Always provide an explicit value when using `Section` without a `Header`
+   * sibling — omitting it will cause `aria-labelledby` to reference a missing
+   * element, which is invalid for accessibility.
    */
   'aria-labelledby'?: string;
   /** Override the default `data-test-subj`. Defaults to `<page data-test-subj>-section`. */
@@ -118,6 +127,11 @@ const KibanaContentListPageSection = ({
   const { headingId, dataTestSubj: pageDataTestSubj } = useKibanaContentListPageContext(
     'KibanaContentListPage.Section'
   );
+
+  // Apply aria-labelledby only when an explicit prop is provided. When the
+  // default from context is used, it relies on <Header> being rendered in the
+  // same page; callers that render <Section> without <Header> must pass an
+  // explicit aria-labelledby to avoid referencing a missing element.
   return (
     <KibanaPageTemplate.Section
       aria-labelledby={ariaLabelledBy ?? headingId}
@@ -151,9 +165,14 @@ export interface KibanaContentListPageProps {
 
 const KibanaContentListPageRoot = ({
   children,
-  headingId = DEFAULT_HEADING_ID,
+  headingId: headingIdProp,
   'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: KibanaContentListPageProps) => {
+  // Generate a unique id per instance so two `KibanaContentListPage` trees
+  // on the same screen never share the same heading element ID.
+  const generatedHeadingId = useId();
+  const headingId = headingIdProp ?? generatedHeadingId;
+
   const contextValue = useMemo<KibanaContentListPageContextValue>(
     () => ({ headingId, dataTestSubj }),
     [headingId, dataTestSubj]
