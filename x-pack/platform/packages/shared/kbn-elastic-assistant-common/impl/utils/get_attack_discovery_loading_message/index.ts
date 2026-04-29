@@ -8,6 +8,8 @@
 import { DEFAULT_END, DEFAULT_START } from '../../alerts/get_open_and_acknowledged_alerts_query';
 import * as i18n from './translations';
 
+const THIS_WEEK_START = 'now/w';
+
 export const getAttackDiscoveryLoadingMessage = ({
   alertsCount,
   end,
@@ -19,6 +21,10 @@ export const getAttackDiscoveryLoadingMessage = ({
 }): string => {
   if (start === DEFAULT_START && end === DEFAULT_END) {
     return i18n.AI_IS_CURRENTLY_ANALYZING(alertsCount);
+  }
+
+  if (start === THIS_WEEK_START && end === DEFAULT_END) {
+    return i18n.AI_IS_CURRENTLY_ANALYZING_THIS_WEEK(alertsCount);
   }
 
   if (end != null && start != null) {

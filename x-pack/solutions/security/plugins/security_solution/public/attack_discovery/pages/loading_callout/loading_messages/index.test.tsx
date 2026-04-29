@@ -52,6 +52,24 @@ describe('LoadingMessages', () => {
     );
   });
 
+  it('renders a friendly loading message for the current week relative date range', () => {
+    render(
+      <TestProviders>
+        <LoadingMessages
+          alertsContextCount={20}
+          localStorageAttackDiscoveryMaxAlerts={'30'}
+          start={'now/w'}
+          end={'now'}
+        />
+      </TestProviders>
+    );
+    const aiCurrentlyAnalyzing = screen.getByTestId('aisCurrentlyAnalyzing');
+
+    expect(aiCurrentlyAnalyzing).toHaveTextContent(
+      'AI is analyzing up to 20 alerts from the start of the week to now to generate discoveries.'
+    );
+  });
+
   it('renders the expected loading message for an absolute date range', () => {
     render(
       <TestProviders>

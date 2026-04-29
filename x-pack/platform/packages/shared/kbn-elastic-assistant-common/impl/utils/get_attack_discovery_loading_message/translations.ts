@@ -31,6 +31,15 @@ export const AI_IS_CURRENTLY_ANALYZING_FROM = ({
     }
   );
 
+export const AI_IS_CURRENTLY_ANALYZING_THIS_WEEK = (alertsCount: number) =>
+  i18n.translate(
+    'xpack.elasticAssistantCommon.attackDiscovery.getLoadingMessage.aiIsCurrentlyAnalyzingThisWeek',
+    {
+      defaultMessage: `AI is analyzing up to {alertsCount} {alertsCount, plural, =1 {alert} other {alerts}} from the start of the week to now to generate discoveries.`,
+      values: { alertsCount },
+    }
+  );
+
 export const AI_IS_CURRENTLY_ANALYZING_RANGE = ({
   alertsCount,
   end,
