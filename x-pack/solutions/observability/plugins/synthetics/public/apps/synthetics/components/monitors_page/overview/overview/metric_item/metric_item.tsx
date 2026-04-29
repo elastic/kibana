@@ -246,6 +246,18 @@ export const MetricItem = ({
                     <div
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (!target.closest('a, button, [role="button"], .euiBadge')) {
+                          onClick({
+                            locationId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locationName ?? '',
+                            spaces: monitor.spaces,
+                          });
+                        }
+                      }}
                     >
                       <MetricItemBody
                         monitor={monitor}

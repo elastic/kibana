@@ -113,7 +113,7 @@ describe('Monitor Detail Flyout', () => {
   });
 
   it('renders loading state while fetching', () => {
-    const { getAllByRole } = render(
+    const { getByRole, getByText } = render(
       <MonitorDetailFlyout
         configId="123456"
         id="test-id"
@@ -133,7 +133,10 @@ describe('Monitor Detail Flyout', () => {
       }
     );
 
-    expect(getAllByRole('progressbar').length).toBeGreaterThan(0);
+    expect(getByRole('dialog')).toBeInTheDocument();
+    expect(getByText('Overview')).toBeInTheDocument();
+    expect(getByText('Performance')).toBeInTheDocument();
+    expect(getByText('Details')).toBeInTheDocument();
   });
 
   it('renders details for fetch success', () => {
@@ -141,7 +144,7 @@ describe('Monitor Detail Flyout', () => {
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
 
-    const { getByRole, getByText, getAllByRole } = render(
+    const { getByRole, getByText } = render(
       <MonitorDetailFlyout
         configId="123456"
         id="test-id"
@@ -170,18 +173,19 @@ describe('Monitor Detail Flyout', () => {
       }
     );
 
-    expect(getByText('Every 1 minute'));
-    expect(getByText('test-id'));
-    expect(getByText('Last 24 hours'));
     expect(
       getByRole('heading', {
         level: 2,
       })
     ).toHaveTextContent('test-monitor');
-    const links = getAllByRole('link');
-    expect(links).toHaveLength(2);
-    expect(links[0]).toHaveAttribute('href', 'https://www.elastic.co');
-    expect(links[1]).toHaveAttribute('href', detailLink);
+    expect(getByText('Last 24 hours'));
+    expect(getByText('Overview'));
+    expect(getByText('Performance'));
+    expect(getByText('Details'));
+
+    fireEvent.click(getByText('Details'));
+    expect(getByText('Every 1 minute'));
+    expect(getByText('test-id'));
   });
 
   describe('agent builder attachment', () => {
