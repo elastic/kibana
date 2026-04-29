@@ -123,35 +123,5 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
-
-    it('should persist policy_templates_deployment_info when installing a package with agentless deployment modes', async function () {
-      await supertest
-        .post('/api/fleet/epm/packages/test_agentless/1.0.0')
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-      try {
-        const res = await kibanaServer.savedObjects.get({
-          type: PACKAGES_SAVED_OBJECT_TYPE,
-          id: 'test_agentless',
-        });
-        expect(res.attributes.policy_templates_deployment_info).eql([
-          {
-            name: 'sample',
-            deployment_modes: {
-              default: { enabled: true },
-              agentless: {
-                enabled: true,
-                organization: 'security',
-                division: 'engineering',
-                team: 'security-service-integrations',
-              },
-            },
-          },
-        ]);
-      } finally {
-        await deletePackage('test_agentless', '1.0.0');
-      }
-    });
   });
 }
