@@ -133,6 +133,42 @@ export const LABEL_ASSIGNEE = i18n.translate('xpack.alertingV2.episodeDetails.as
   defaultMessage: 'Assignee',
 });
 
+export const ACTIONS_OVERVIEW_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.actionsOverviewTitle',
+  {
+    defaultMessage: 'Actions overview',
+  }
+);
+
+export const ACTIONS_OVERVIEW_EMPTY = i18n.translate(
+  'xpack.alertingV2.episodeDetails.actionsOverviewEmpty',
+  {
+    defaultMessage: 'No actions have been taken on this episode.',
+  }
+);
+
+export const LABEL_ACKNOWLEDGED_BY = i18n.translate(
+  'xpack.alertingV2.episodeDetails.acknowledgedByLabel',
+  {
+    defaultMessage: 'Acknowledged by',
+  }
+);
+
+export const LABEL_SNOOZED_BY = i18n.translate('xpack.alertingV2.episodeDetails.snoozedByLabel', {
+  defaultMessage: 'Snoozed by',
+});
+
+export const LABEL_SNOOZED_UNTIL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedUntilLabel',
+  {
+    defaultMessage: 'Snoozed until',
+  }
+);
+
+export const LABEL_RESOLVED_BY = i18n.translate('xpack.alertingV2.episodeDetails.resolvedByLabel', {
+  defaultMessage: 'Resolved by',
+});
+
 export const RULE_OVERVIEW_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleOverviewTitle',
   {
