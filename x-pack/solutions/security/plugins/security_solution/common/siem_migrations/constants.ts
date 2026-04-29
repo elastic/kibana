@@ -25,6 +25,8 @@ export const SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH =
   `${SIEM_RULE_MIGRATION_RULES_PATH}/enhance` as const;
 export const SIEM_RULE_MIGRATION_QRADAR_RULES_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/qradar/rules` as const;
+export const SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH =
+  `${SIEM_RULE_MIGRATION_PATH}/sentinel/rules` as const;
 export const SIEM_RULE_MIGRATION_START_PATH = `${SIEM_RULE_MIGRATION_PATH}/start` as const;
 export const SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/update_index_pattern` as const;
