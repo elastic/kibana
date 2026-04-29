@@ -430,6 +430,7 @@
     "name",
     "type"
   ],
+  "entity-ccs-log-extraction-state": [],
   "entity-definition": [
     "description",
     "filter",

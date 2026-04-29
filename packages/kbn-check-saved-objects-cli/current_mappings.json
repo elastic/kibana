@@ -1476,6 +1476,10 @@
       }
     }
   },
+  "entity-ccs-log-extraction-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
