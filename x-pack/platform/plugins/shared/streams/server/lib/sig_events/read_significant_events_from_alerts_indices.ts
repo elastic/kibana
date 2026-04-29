@@ -145,11 +145,7 @@ export async function readSignificantEventsFromAlertsIndices(
         ...toStreamQuery(queryLink),
         stream_name: queryLink.stream_name,
         occurrences: [],
-        change_points: {
-          type: {
-            stationary: { p_value: 0, change_point: 0 },
-          },
-        },
+        change_points: { type: {} },
         rule_backed: queryLink.rule_backed,
       })),
       aggregated_occurrences: [],
@@ -188,11 +184,7 @@ export async function readSignificantEventsFromAlertsIndices(
       ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
       occurrences: [],
-      change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
-        },
-      },
+      change_points: { type: {} },
       rule_backed: queryLink.rule_backed,
     }));
 
