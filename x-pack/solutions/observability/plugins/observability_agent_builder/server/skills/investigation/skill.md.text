@@ -32,6 +32,16 @@ Call `get_service_topology` for the affected service with `direction: "both"` to
 - **Blast radius**: which other services are affected
 - **Connectivity issues**: a dependency missing from the topology entirely suggests it's unreachable
 
+**Asynchronous messaging:** Producers and consumers are decoupled — upstream topology on a consumer shows the broker, not the producer. To find the producer, query topology on the broker resource name (e.g., `kafka/orders`) with `direction: "upstream"`.
+
+### Step 3b: Messaging Pipeline Investigation (required when a broker appears)
+
+When topology reveals a messaging resource (`span.type: "messaging"`, e.g., `kafka/<topic>`), investigate both sides before concluding:
+
+1. **Find the producer.** Call `get_service_topology` on the broker resource with `direction: "upstream"`.
+2. **Compare throughput.** Producer→broker is ingest rate; consumer→broker is consumption rate. If ingest exceeds consumption, a backlog is growing.
+3. **Check logs on both sides.** Call `get_log_groups` for the producer (look for excessive sending, overload patterns) and the consumer (look for slow processing, delays).
+
 ### Step 4: Drill Into the Strongest Signal
 
 Based on what Steps 2-3 revealed, choose the most relevant deep-dive:
@@ -81,3 +91,5 @@ Once you have enough evidence:
 4. **Use the time range from screen context** when available. Pass `start` and `end` consistently to all tool calls.
 5. **Don't stop too early.** A service having errors is a symptom, not a root cause. Investigate WHY it has errors — check dependencies, traces, and logs.
 6. **Contrast healthy vs unhealthy.** When topology shows multiple dependencies, note which are healthy and which aren't. The contrast isolates the problem.
+7. **For messaging, always investigate both producer and consumer.** When topology shows a messaging resource (Kafka topic, queue), you must: (a) call `get_service_topology` on the broker resource with `direction: "upstream"` to find the producer, (b) check `get_log_groups` for the producer service to find evidence of excessive message sending, and (c) check `get_log_groups` for the consumer. Throughput metrics alone can miss bursts and overloads — producer logs are essential. Never conclude a messaging investigation without reporting findings from both sides.
+8. **Round-number latencies signal artificial delays.** Latency values close to exact multiples of 1000ms (e.g., ~1000ms, ~2000ms, ~5000ms) on any connection — especially messaging consumers — indicate a deliberate `sleep` or throttle in the application code, not network or infrastructure problems. Check the service's logs and code for evidence of intentional delays.
