@@ -19,7 +19,7 @@ import {
   DispatcherEnabledProviderToken,
   DispatcherServiceInternalToken,
 } from '../lib/dispatcher/tokens';
-import { DISPATCHER_ENABLED_SETTING_ID } from '../lib/dispatcher/ui_settings';
+import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced_settings';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
@@ -235,7 +235,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return async () => {
         const soClient = savedObjects.createInternalRepository();
         const client = uiSettings.globalAsScopedToClient(soClient);
-        return client.get<boolean>(DISPATCHER_ENABLED_SETTING_ID);
+        return client.get<boolean>(ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID);
       };
     })
     .inSingletonScope();
