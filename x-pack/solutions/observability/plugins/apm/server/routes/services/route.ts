@@ -501,8 +501,8 @@ const serviceThroughputRoute = createApmServerRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string, filters: filtersRt }),
+      t.type({ bucketSizeInSeconds: toNumberRt }),
+      t.partial({ transactionType: t.string, transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),

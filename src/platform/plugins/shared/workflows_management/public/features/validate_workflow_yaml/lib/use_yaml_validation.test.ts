@@ -12,6 +12,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
+import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
 import { createWorkflowsStore } from '../../../entities/workflows/store/store';
 import {
@@ -86,7 +87,11 @@ const renderHookWithProviders = (
   store.dispatch(setActiveTab('workflow'));
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
-    return React.createElement(Provider, { store }, children);
+    return React.createElement(
+      WorkflowsContextProvider,
+      null,
+      React.createElement(Provider, { store }, children)
+    );
   };
 
   return {

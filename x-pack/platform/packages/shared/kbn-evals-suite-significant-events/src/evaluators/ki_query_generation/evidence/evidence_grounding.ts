@@ -213,10 +213,14 @@ export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
   kind: 'CODE' as const,
   evaluate: async ({ input, output }) => {
     const queries = getQueriesFromOutput(output);
-    const { sample_logs: sampleLogs, sample_docs: sampleDocs } = input;
+    const taskOutput = output != null && !Array.isArray(output) ? output : undefined;
+    const sampleLogs: string[] = taskOutput?.sample_logs ?? input.sample_logs ?? [];
+    const sampleDocs = taskOutput?.sample_docs ?? input.sample_docs;
 
     const flatDocs = sampleDocs?.map((doc) => getFlattenedObject(doc));
-    const featureCorpus = buildFeatureCorpus(input.features);
+    const featureCorpus = buildFeatureCorpus(
+      (taskOutput as Record<string, unknown> | undefined)?.features ?? input.features
+    );
 
     let totalEvidence = 0;
     let groundedEvidence = 0;

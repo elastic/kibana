@@ -1,0 +1,395 @@
+{
+  "id": "@kbn/inbox-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.DEFAULT_INBOX_ACTIONS_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_INBOX_ACTIONS_PER_PAGE",
+        "description": [],
+        "signature": [
+          "25"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.INBOX_ACTIONS_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INBOX_ACTIONS_URL",
+        "description": [],
+        "signature": [
+          "\"/internal/inbox/actions\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.INBOX_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INBOX_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"inbox\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.INBOX_INTERNAL_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INBOX_INTERNAL_URL",
+        "description": [],
+        "signature": [
+          "\"/internal/inbox\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.INBOX_PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "INBOX_PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Inbox\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.InboxAction",
+        "type": "Type",
+        "tags": [],
+        "label": "InboxAction",
+        "description": [],
+        "signature": [
+          "{ id: string; title: string; status: any; source_app: string; source_id: string; created_at: string; description?: string | null | undefined; requested_by?: string | null | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.InboxActionStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "InboxActionStatus",
+        "description": [],
+        "signature": [
+          "\"pending\" | \"rejected\" | \"approved\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.INTERNAL_API_ACCESS",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_API_ACCESS",
+        "description": [],
+        "signature": [
+          "\"internal\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.ListInboxActionsRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "ListInboxActionsRequestQuery",
+        "description": [],
+        "signature": [
+          "{ status: any; page: number; per_page: number; source_app?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.ListInboxActionsRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "ListInboxActionsRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ status: any; source_app?: string | undefined; page?: unknown; per_page?: unknown; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.ListInboxActionsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "ListInboxActionsResponse",
+        "description": [],
+        "signature": [
+          "{ actions: { id: string; title: string; status: any; source_app: string; source_id: string; created_at: string; description?: string | null | undefined; requested_by?: string | null | undefined; }[]; total: number; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.MAX_INBOX_ACTIONS_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_INBOX_ACTIONS_PER_PAGE",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.API_VERSIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "API_VERSIONS",
+        "description": [],
+        "signature": [
+          "{ readonly internal: { readonly v1: \"1\"; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.INBOX_ACTION_STATUSES",
+        "type": "Object",
+        "tags": [],
+        "label": "INBOX_ACTION_STATUSES",
+        "description": [],
+        "signature": [
+          "readonly [\"pending\", \"approved\", \"rejected\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.InboxAction",
+        "type": "Object",
+        "tags": [],
+        "label": "InboxAction",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodOptional",
+          "<",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">>; status: any; source_app: ",
+          "ZodString",
+          "; source_id: ",
+          "ZodString",
+          "; requested_by: ",
+          "ZodOptional",
+          "<",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">>; created_at: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.ListInboxActionsRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "ListInboxActionsRequestQuery",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ status: any; source_app: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; page: ",
+          "ZodDefault",
+          "<",
+          "ZodOptional",
+          "<",
+          "ZodCoercedNumber",
+          "<unknown>>>; per_page: ",
+          "ZodDefault",
+          "<",
+          "ZodOptional",
+          "<",
+          "ZodCoercedNumber",
+          "<unknown>>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inbox-common",
+        "id": "def-common.ListInboxActionsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "ListInboxActionsResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ actions: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodOptional",
+          "<",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">>; status: any; source_app: ",
+          "ZodString",
+          "; source_id: ",
+          "ZodString",
+          "; requested_by: ",
+          "ZodOptional",
+          "<",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">>; created_at: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; total: ",
+          "ZodNumber",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inbox-common/impl/schemas/actions/list_actions_route.gen.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -15,9 +15,10 @@ import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
+import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
+import { ML_OVERVIEW_PANELS, ML_OVERVIEW_PANELS_EXTENDED } from '@kbn/ml-common-types/storage';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
-import type { MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
-import { ML_OVERVIEW_PANELS, ML_OVERVIEW_PANELS_EXTENDED } from '../../../common/types/storage';
 import { CollapsiblePanel } from '../components/collapsible_panel';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
@@ -37,7 +38,6 @@ import { MemoryPage } from '../memory_usage/memory_tree_map/memory_page';
 import { NotificationsList } from '../notifications/components/notifications_list';
 import { useMemoryUsage } from '../memory_usage/use_memory_usage';
 import { useFieldFormatter } from '../contexts/kibana';
-import type { MlSavedObjectType } from '../../../common/types/saved_objects';
 import { type StatEntry } from '../components/collapsible_panel/collapsible_panel';
 
 export const overviewPanelDefaultState = Object.freeze({
