@@ -6,10 +6,10 @@
  */
 
 import type { RulesClientContext } from '../../../../rules_client';
-import { muteInstance } from './mute_instance';
+import { snoozeAlertInstance } from './snooze_instance';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-describe('mute alert instance', () => {
+describe('snooze alert instance', () => {
   const loggerErrorMock = jest.fn();
   const savedObjectsMock = savedObjectsRepositoryMock.create();
   const unsecuredSavedObjectsClient = savedObjectsMock;
@@ -20,12 +20,14 @@ describe('mute alert instance', () => {
   const getAlertIndicesAliasMock = jest.fn();
   const alertsServiceMock = {
     isExistingAlert: jest.fn(),
+    getAlertSnoozeSnapshot: jest.fn(),
     muteAlertInstance: jest.fn(),
   };
 
   beforeEach(() => {
     getAlertIndicesAliasMock.mockReturnValue(['alert-index-1']);
     alertsServiceMock.isExistingAlert.mockResolvedValue(true);
+    alertsServiceMock.getAlertSnoozeSnapshot.mockResolvedValue({ 'host.name': 'web-01' });
     alertsServiceMock.muteAlertInstance.mockResolvedValue(undefined);
   });
 
@@ -45,7 +47,7 @@ describe('mute alert instance', () => {
     alertsService: alertsServiceMock,
   } as unknown as RulesClientContext;
 
-  it('mutes an alert', async () => {
+  it('writes a conditional snooze entry', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'test-rule-type',
@@ -61,6 +63,14 @@ describe('mute alert instance', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        mutedInstanceIds: ['still-muted'],
+        snoozedInstances: [
+          {
+            instanceId: 'other-instance',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
         actions: [
           {
             group: 'default',
@@ -82,140 +92,142 @@ describe('mute alert instance', () => {
       version: 'v1',
     });
 
-    await muteInstance(context, {
+    await snoozeAlertInstance(context, {
       params: { alertId: '1', alertInstanceId: 'instance1' },
-      query: {},
+      query: { validateAlertsExistence: false },
+      body: {
+        expiresAt: '2099-12-31T23:59:59.000Z',
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'all',
+      },
     });
 
-    expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
-    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
-    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
+    expect(alertsServiceMock.getAlertSnoozeSnapshot).toHaveBeenCalledWith({
+      indices: ['alert-index-1'],
+      alertId: 'instance1',
+      ruleId: '1',
+      fields: ['host.name'],
+    });
     expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
-    expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-
+    expect(alertsServiceMock.muteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
-        mutedInstanceIds: ['instance1'],
+        snoozedInstances: [
+          {
+            instanceId: 'other-instance',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+          {
+            instanceId: 'instance1',
+            expiresAt: '2099-12-31T23:59:59.000Z',
+            conditions: [{ type: 'field_change', field: 'host.name' }],
+            conditionOperator: 'all',
+            snoozeSnapshot: { 'host.name': 'web-01' },
+            snoozedAt: expect.any(String),
+            snoozedBy: '',
+          },
+        ],
         updatedAt: expect.any(String),
       },
       { version: 'v1' }
     );
   });
 
-  it('validates alerts existence', async () => {
+  it('validates alerts existence when validateAlertsExistence is true and no snapshot fields', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'test-rule-type',
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        executionStatus: {
-          status: 'unknown',
-          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        },
+        params: { bar: true },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-            },
-          },
-        ],
+        actions: [],
         notifyWhen: 'onActiveAlert',
       },
-      references: [
-        {
-          name: 'action_0',
-          type: 'action',
-          id: '1',
-        },
-      ],
+      references: [],
       version: 'v1',
     });
 
     alertsServiceMock.isExistingAlert.mockResolvedValueOnce(true);
 
-    await muteInstance(context, {
+    await snoozeAlertInstance(context, {
       params: { alertId: '1', alertInstanceId: 'instance1' },
       query: { validateAlertsExistence: true },
+      body: {
+        expiresAt: '2099-12-31T23:59:59.000Z',
+      },
     });
 
-    expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
-    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
-    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
-    expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
-      '1',
-      {
-        mutedInstanceIds: ['instance1'],
-        updatedAt: expect.any(String),
-      },
-      { version: 'v1' }
-    );
   });
 
-  it('validates alerts existence and throws an error if the alert does not exist', async () => {
+  it('rejects an invalid conditional snooze body', async () => {
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          conditionOperator: 'all',
+        } as never,
+      })
+    ).rejects.toThrow('Failed to validate body: [conditionOperator] requires [conditions]');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects expiresAt that is in the past', async () => {
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2020-01-01T00:00:00.000Z',
+        },
+      })
+    ).rejects.toThrow('Failed to validate body: [expiresAt] must be in the future');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 500 when alertsService is null and snapshot fields are required', async () => {
+    const contextWithoutAlertsService = {
+      ...context,
+      alertsService: null,
+    } as unknown as RulesClientContext;
+
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'test-rule-type',
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        executionStatus: {
-          status: 'unknown',
-          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        },
+        params: { bar: true },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-            },
-          },
-        ],
+        actions: [],
         notifyWhen: 'onActiveAlert',
       },
-      references: [
-        {
-          name: 'action_0',
-          type: 'action',
-          id: '1',
-        },
-      ],
+      references: [],
       version: 'v1',
     });
 
-    alertsServiceMock.isExistingAlert.mockResolvedValueOnce(false);
-
     await expect(() =>
-      muteInstance(context, {
+      snoozeAlertInstance(contextWithoutAlertsService, {
         params: { alertId: '1', alertInstanceId: 'instance1' },
-        query: { validateAlertsExistence: true },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2026-05-01T00:00:00.000Z',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+        },
       })
-    ).rejects.toThrow('Alert instance with id "instance1" does not exist for rule with id "1"');
+    ).rejects.toThrow('Alerts service is unavailable');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
   it('throws 500 when alertsService is null and validateAlertsExistence is true', async () => {
@@ -241,11 +253,44 @@ describe('mute alert instance', () => {
     });
 
     await expect(() =>
-      muteInstance(contextWithoutAlertsService, {
+      snoozeAlertInstance(contextWithoutAlertsService, {
         params: { alertId: '1', alertInstanceId: 'instance1' },
         query: { validateAlertsExistence: true },
+        body: {
+          expiresAt: '2026-05-01T00:00:00.000Z',
+        },
       })
     ).rejects.toThrow('Alerts service is unavailable');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects expiresAt that is not a full ISO 8601 date-time string', async () => {
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2026-04-14',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+        },
+      })
+    ).rejects.toThrow('Failed to validate body');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects expiresAt that is missing milliseconds (not YYYY-MM-DDTHH:mm:ss.sssZ)', async () => {
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2026-04-14T12:00:00Z',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+        },
+      })
+    ).rejects.toThrow('Failed to validate body');
 
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });

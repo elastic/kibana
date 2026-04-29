@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { MuteAlertParams } from './mute_alert_params';
-export type { MuteAlertQuery } from './mute_alert_query';
+import type { TypeOf } from '@kbn/config-schema';
+import type { snoozeAlertInstanceBodySchema } from '../schemas';
+
+export type SnoozeAlertInstanceBody = TypeOf<typeof snoozeAlertInstanceBodySchema>;

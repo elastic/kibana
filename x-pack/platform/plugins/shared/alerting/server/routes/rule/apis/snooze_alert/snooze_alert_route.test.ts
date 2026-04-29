@@ -34,7 +34,7 @@ describe('snoozeAlertRoute', () => {
       `"/api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze"`
     );
 
-    rulesClient.muteInstance.mockResolvedValueOnce(undefined);
+    rulesClient.snoozeAlertInstance.mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -50,7 +50,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.muteInstance).toHaveBeenCalledWith({
+    expect(rulesClient.snoozeAlertInstance).toHaveBeenCalledWith({
       params: { alertId: 'rule-1', alertInstanceId: 'alert-1' },
       query: { validateAlertsExistence: undefined },
       body: {
@@ -70,7 +70,7 @@ describe('snoozeAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.muteInstance.mockResolvedValueOnce(undefined);
+    rulesClient.snoozeAlertInstance.mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -88,7 +88,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.muteInstance).toHaveBeenCalledWith({
+    expect(rulesClient.snoozeAlertInstance).toHaveBeenCalledWith({
       params: { alertId: 'rule-1', alertInstanceId: 'alert-1' },
       query: { validateAlertsExistence: true },
       body: {
@@ -108,7 +108,7 @@ describe('snoozeAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.muteInstance.mockRejectedValue(
+    rulesClient.snoozeAlertInstance.mockRejectedValue(
       new RuleTypeDisabledError('Disabled for license reasons', 'license_invalid')
     );
 

@@ -130,6 +130,10 @@ export const snoozeAlertBodySchema = schema.object(
       if (value.conditions !== undefined && value.conditions.length === 0) {
         return '[conditions] must contain at least one condition';
       }
+
+      if (value.expires_at !== undefined && new Date(value.expires_at) <= new Date()) {
+        return '[expires_at] must be in the future';
+      }
     },
   }
 );

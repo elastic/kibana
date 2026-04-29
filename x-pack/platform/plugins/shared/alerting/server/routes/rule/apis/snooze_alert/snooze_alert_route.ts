@@ -72,7 +72,7 @@ export const snoozeAlertRoute = (
         const body: SnoozeAlertRequestBodyV1 = req.body;
 
         try {
-          await rulesClient.muteInstance({
+          await rulesClient.snoozeAlertInstance({
             params: transformRequestParamsToApplicationV1(params),
             query: transformRequestQueryToApplicationV1(query),
             body: transformRequestBodyToApplicationV1(body),

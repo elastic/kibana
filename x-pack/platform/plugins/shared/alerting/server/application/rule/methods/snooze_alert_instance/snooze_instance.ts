@@ -8,43 +8,71 @@
 import Boom from '@hapi/boom';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
-import { muteAlertQuerySchema, muteAlertParamsSchema } from './schemas';
-import type { MuteAlertQuery, MuteAlertParams } from './types';
+import {
+  snoozeAlertInstanceBodySchema,
+  snoozeAlertInstanceQuerySchema,
+  snoozeAlertInstanceParamsSchema,
+} from './schemas';
+import type {
+  SnoozeAlertInstanceBody,
+  SnoozeAlertInstanceQuery,
+  SnoozeAlertInstanceParams,
+} from './types';
 import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { updateMeta } from '../../../../rules_client/lib';
+import {
+  buildPerAlertSnoozeEntry,
+  getPerAlertSnoozeSnapshotFields,
+  upsertPerAlertSnoozeEntry,
+} from '../../../../rules_client/common/per_alert_snooze_utils';
 
-export async function muteInstance(
+export async function snoozeAlertInstance(
   context: RulesClientContext,
-  { params, query }: { params: MuteAlertParams; query: MuteAlertQuery }
+  {
+    params,
+    query,
+    body,
+  }: {
+    params: SnoozeAlertInstanceParams;
+    query: SnoozeAlertInstanceQuery;
+    body: SnoozeAlertInstanceBody;
+  }
 ): Promise<void> {
   const ruleId = params.alertId;
   try {
-    muteAlertParamsSchema.validate(params);
+    snoozeAlertInstanceParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
   try {
-    muteAlertQuerySchema.validate(query);
+    snoozeAlertInstanceQuerySchema.validate(query);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate query: ${error.message}`);
   }
 
+  try {
+    snoozeAlertInstanceBodySchema.validate(body);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate body: ${error.message}`);
+  }
+
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.muteInstance('${ruleId}')`,
-    async () => await muteInstanceWithOCC(context, params, query)
+    `rulesClient.snoozeAlertInstance('${ruleId}')`,
+    async () => await snoozeAlertInstanceWithOCC(context, params, query, body)
   );
 }
 
-async function muteInstanceWithOCC(
+async function snoozeAlertInstanceWithOCC(
   context: RulesClientContext,
-  { alertId: ruleId, alertInstanceId }: MuteAlertParams,
-  { validateAlertsExistence }: MuteAlertQuery
+  { alertId: ruleId, alertInstanceId }: SnoozeAlertInstanceParams,
+  { validateAlertsExistence }: SnoozeAlertInstanceQuery,
+  body: SnoozeAlertInstanceBody
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
     RULE_SAVED_OBJECT_TYPE,
@@ -87,7 +115,28 @@ async function muteInstanceWithOCC(
   const updatedAt = new Date().toISOString();
   const updatedBy = await context.getUserName();
 
-  if (validateAlertsExistence) {
+  const snapshotFields = getPerAlertSnoozeSnapshotFields(body);
+  let snoozeSnapshot: Record<string, unknown> | undefined;
+
+  if (snapshotFields.length > 0) {
+    if (!context.alertsService) {
+      throw Boom.internal('Alerts service is unavailable');
+    }
+
+    snoozeSnapshot =
+      (await context.alertsService.getAlertSnoozeSnapshot({
+        indices,
+        alertId: alertInstanceId,
+        ruleId,
+        fields: snapshotFields,
+      })) ?? undefined;
+
+    if (!snoozeSnapshot) {
+      throw Boom.notFound(
+        `Alert instance with id "${alertInstanceId}" does not exist for rule with id "${ruleId}"`
+      );
+    }
+  } else if (validateAlertsExistence) {
     if (!context.alertsService) {
       throw Boom.internal('Alerts service is unavailable');
     }
@@ -105,28 +154,25 @@ async function muteInstanceWithOCC(
     }
   }
 
-  const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
-    mutedInstanceIds.push(alertInstanceId);
+  const snoozedInstance = buildPerAlertSnoozeEntry({
+    alertInstanceId,
+    body,
+    snoozedAt: updatedAt,
+    snoozedBy: updatedBy,
+    snoozeSnapshot,
+  });
 
-    await updateRuleSo({
-      savedObjectsClient: context.unsecuredSavedObjectsClient,
-      savedObjectsUpdateOptions: { version },
-      id: ruleId,
-      updateRuleAttributes: updateMeta(context, {
-        mutedInstanceIds,
-        updatedBy,
-        updatedAt,
+  await updateRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsUpdateOptions: { version },
+    id: ruleId,
+    updateRuleAttributes: updateMeta(context, {
+      snoozedInstances: upsertPerAlertSnoozeEntry({
+        snoozedInstances: attributes.snoozedInstances,
+        snoozedInstance,
       }),
-    });
-
-    if (indices && indices.length > 0) {
-      await context.alertsService?.muteAlertInstance({
-        ruleId,
-        alertInstanceId,
-        indices,
-        logger: context.logger,
-      });
-    }
-  }
+      updatedBy,
+      updatedAt,
+    }),
+  });
 }

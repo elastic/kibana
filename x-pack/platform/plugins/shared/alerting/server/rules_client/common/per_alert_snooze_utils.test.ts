@@ -12,9 +12,9 @@ import {
   removePerAlertSnoozeEntry,
   upsertPerAlertSnoozeEntry,
 } from './per_alert_snooze_utils';
-import type { MuteAlertBody } from '../../application/rule/methods/mute_alert/types';
+import type { SnoozeAlertInstanceBody } from '../../application/rule/methods/snooze_alert_instance/types';
 
-const BASE_BODY: MuteAlertBody = {
+const BASE_BODY: SnoozeAlertInstanceBody = {
   expiresAt: '2099-12-31T23:59:59.000Z',
 };
 
@@ -29,7 +29,7 @@ describe('per_alert_snooze_utils', () => {
     });
 
     it('returns the field name for a field_change condition', () => {
-      const body: MuteAlertBody = {
+      const body: SnoozeAlertInstanceBody = {
         ...BASE_BODY,
         conditions: [{ type: 'field_change', field: 'host.name' }],
       };
@@ -37,7 +37,7 @@ describe('per_alert_snooze_utils', () => {
     });
 
     it('returns ALERT_SEVERITY for a severity_change condition', () => {
-      const body: MuteAlertBody = {
+      const body: SnoozeAlertInstanceBody = {
         ...BASE_BODY,
         conditions: [{ type: 'severity_change' }],
       };
@@ -45,7 +45,7 @@ describe('per_alert_snooze_utils', () => {
     });
 
     it('collects fields from multiple conditions of different types', () => {
-      const body: MuteAlertBody = {
+      const body: SnoozeAlertInstanceBody = {
         ...BASE_BODY,
         conditions: [
           { type: 'field_change', field: 'host.name' },
@@ -59,7 +59,7 @@ describe('per_alert_snooze_utils', () => {
     });
 
     it('deduplicates repeated fields', () => {
-      const body: MuteAlertBody = {
+      const body: SnoozeAlertInstanceBody = {
         ...BASE_BODY,
         conditions: [
           { type: 'field_change', field: 'host.name' },
@@ -114,7 +114,7 @@ describe('per_alert_snooze_utils', () => {
     });
 
     it('includes conditions and conditionOperator when provided', () => {
-      const body: MuteAlertBody = {
+      const body: SnoozeAlertInstanceBody = {
         expiresAt: '2099-12-31T23:59:59.000Z',
         conditions: [{ type: 'severity_change' }],
         conditionOperator: 'any',

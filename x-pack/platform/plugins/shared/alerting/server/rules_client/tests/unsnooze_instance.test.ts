@@ -74,7 +74,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-describe('unsnoozeInstance()', () => {
+describe('unsnoozeAlertInstance()', () => {
   test('removes only the targeted conditional snooze entry', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -104,7 +104,7 @@ describe('unsnoozeInstance()', () => {
       references: [],
     });
 
-    await rulesClient.unsnoozeInstance({ alertId: '1', alertInstanceId: '2' });
+    await rulesClient.unsnoozeAlertInstance({ alertId: '1', alertInstanceId: '2' });
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,

@@ -34,7 +34,7 @@ describe('unsnoozeAlertRoute', () => {
       `"/api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze"`
     );
 
-    rulesClient.unsnoozeInstance.mockResolvedValueOnce();
+    rulesClient.unsnoozeAlertInstance.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -49,7 +49,7 @@ describe('unsnoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.unsnoozeInstance).toHaveBeenCalledWith({
+    expect(rulesClient.unsnoozeAlertInstance).toHaveBeenCalledWith({
       alertId: '1',
       alertInstanceId: '2',
     });
@@ -64,7 +64,7 @@ describe('unsnoozeAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.unsnoozeInstance.mockRejectedValue(
+    rulesClient.unsnoozeAlertInstance.mockRejectedValue(
       new RuleTypeDisabledError('Fail', 'license_invalid')
     );
 

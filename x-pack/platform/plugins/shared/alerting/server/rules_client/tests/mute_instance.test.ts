@@ -187,7 +187,7 @@ describe('muteInstance()', () => {
     expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
   });
 
-  test('writes a conditional snooze entry when a body is provided', async () => {
+  test('writes a conditional snooze entry via snoozeAlertInstance', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -211,11 +211,11 @@ describe('muteInstance()', () => {
       references: [],
     });
 
-    await rulesClient.muteInstance({
+    await rulesClient.snoozeAlertInstance({
       params: { alertId: '1', alertInstanceId: '2' },
       query: { validateAlertsExistence: false },
       body: {
-        expiresAt: '2026-04-14T12:00:00.000Z',
+        expiresAt: '2099-12-31T23:59:59.000Z',
         conditions: [{ type: 'field_change', field: 'host.name' }],
         conditionOperator: 'all',
       },
@@ -240,7 +240,7 @@ describe('muteInstance()', () => {
           },
           {
             instanceId: '2',
-            expiresAt: '2026-04-14T12:00:00.000Z',
+            expiresAt: '2099-12-31T23:59:59.000Z',
             conditions: [{ type: 'field_change', field: 'host.name' }],
             conditionOperator: 'all',
             snoozeSnapshot: { 'host.name': 'web-01' },

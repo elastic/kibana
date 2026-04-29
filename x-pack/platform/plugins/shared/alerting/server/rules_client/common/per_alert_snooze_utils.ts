@@ -6,10 +6,10 @@
  */
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { MuteAlertBody } from '../../application/rule/methods/mute_alert/types';
+import type { SnoozeAlertInstanceBody } from '../../application/rule/methods/snooze_alert_instance/types';
 import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 
-export const getPerAlertSnoozeSnapshotFields = (body: MuteAlertBody): string[] => {
+export const getPerAlertSnoozeSnapshotFields = (body: SnoozeAlertInstanceBody): string[] => {
   const fields = new Set<string>();
 
   body.conditions?.forEach((condition) => {
@@ -33,7 +33,7 @@ export const buildPerAlertSnoozeEntry = ({
   snoozeSnapshot,
 }: {
   alertInstanceId: string;
-  body: MuteAlertBody;
+  body: SnoozeAlertInstanceBody;
   snoozedAt: string;
   snoozedBy: string | null;
   snoozeSnapshot?: Record<string, unknown>;

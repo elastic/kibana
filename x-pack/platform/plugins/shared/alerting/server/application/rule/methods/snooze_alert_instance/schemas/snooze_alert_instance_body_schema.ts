@@ -10,7 +10,7 @@ import { MAX_SNOOZED_INSTANCE_CONDITIONS } from '../../../../../../common/max_al
 import { isoDateSchema } from '../../../schemas/date_schema';
 import { snoozedInstanceConditionSchema } from '../../../schemas/rule_schemas';
 
-const validateMuteAlertBody = (value: {
+const validateSnoozeAlertInstanceBody = (value: {
   expiresAt?: string;
   conditions?: Array<unknown>;
   conditionOperator?: 'any' | 'all';
@@ -26,9 +26,13 @@ const validateMuteAlertBody = (value: {
   if (value.conditions !== undefined && value.conditions.length === 0) {
     return '[conditions] must contain at least one condition';
   }
+
+  if (value.expiresAt !== undefined && new Date(value.expiresAt) <= new Date()) {
+    return '[expiresAt] must be in the future';
+  }
 };
 
-export const muteAlertBodySchema = schema.object(
+export const snoozeAlertInstanceBodySchema = schema.object(
   {
     expiresAt: schema.maybe(isoDateSchema),
     conditions: schema.maybe(
@@ -37,6 +41,6 @@ export const muteAlertBodySchema = schema.object(
     conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
   },
   {
-    validate: validateMuteAlertBody,
+    validate: validateSnoozeAlertInstanceBody,
   }
 );

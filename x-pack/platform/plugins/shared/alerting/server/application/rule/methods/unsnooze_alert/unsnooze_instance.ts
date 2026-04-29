@@ -18,7 +18,7 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import { unsnoozeAlertParamsSchema } from './schemas';
 import type { UnsnoozeAlertParams } from './types';
 
-export async function unsnoozeInstance(
+export async function unsnoozeAlertInstance(
   context: RulesClientContext,
   params: UnsnoozeAlertParams
 ): Promise<void> {
@@ -31,7 +31,7 @@ export async function unsnoozeInstance(
 
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.unsnoozeInstance('${ruleId}')`,
+    `rulesClient.unsnoozeAlertInstance('${ruleId}')`,
     async () => await unsnoozeInstanceWithOCC(context, params)
   );
 }

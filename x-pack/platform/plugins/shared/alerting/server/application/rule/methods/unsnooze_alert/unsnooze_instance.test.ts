@@ -7,7 +7,7 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { RulesClientContext } from '../../../../rules_client';
-import { unsnoozeInstance } from './unsnooze_instance';
+import { unsnoozeAlertInstance } from './unsnooze_instance';
 
 describe('unsnooze alert instance', () => {
   const savedObjectsMock = savedObjectsRepositoryMock.create();
@@ -62,7 +62,7 @@ describe('unsnooze alert instance', () => {
       version: 'v1',
     });
 
-    await unsnoozeInstance(context, { alertId: '1', alertInstanceId: 'instance1' });
+    await unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'instance1' });
 
     expect(savedObjectsMock.update).toHaveBeenCalledWith(
       'alert',
@@ -107,7 +107,7 @@ describe('unsnooze alert instance', () => {
       references: [],
     });
 
-    await unsnoozeInstance(context, { alertId: '1', alertInstanceId: 'missing-instance' });
+    await unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'missing-instance' });
 
     expect(savedObjectsMock.update).not.toHaveBeenCalled();
   });

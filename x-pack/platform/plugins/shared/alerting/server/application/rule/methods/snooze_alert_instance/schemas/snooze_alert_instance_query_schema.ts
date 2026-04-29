@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export type { MuteAlertParams } from './mute_alert_params';
-export type { MuteAlertQuery } from './mute_alert_query';
+import { schema } from '@kbn/config-schema';
+
+export const snoozeAlertInstanceQuerySchema = schema.object({
+  validateAlertsExistence: schema.maybe(schema.boolean({ defaultValue: true })),
+});

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { muteAlertBodySchema } from '../schemas';
+import { schema } from '@kbn/config-schema';
 
-export type MuteAlertBody = TypeOf<typeof muteAlertBodySchema>;
+export const snoozeAlertInstanceParamsSchema = schema.object({
+  alertId: schema.string(),
+  alertInstanceId: schema.string(),
+});

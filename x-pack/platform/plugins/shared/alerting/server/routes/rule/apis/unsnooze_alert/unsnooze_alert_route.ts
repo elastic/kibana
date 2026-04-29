@@ -55,7 +55,7 @@ export const unsnoozeAlertRoute = (
         const params: UnsnoozeAlertRequestParamsV1 = req.params;
 
         try {
-          await rulesClient.unsnoozeInstance(transformRequestParamsToApplicationV1(params));
+          await rulesClient.unsnoozeAlertInstance(transformRequestParamsToApplicationV1(params));
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
