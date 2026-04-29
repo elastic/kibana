@@ -44,6 +44,7 @@ export class TagManagementPage {
     }
     if (submit) {
       await this.page.testSubj.click('createModalConfirmButton');
+      await this.getTagModalForm().waitFor({ state: 'hidden' });
       await this.waitForTableLoaded();
     }
   }
