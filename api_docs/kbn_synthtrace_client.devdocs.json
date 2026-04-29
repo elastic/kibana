@@ -236,6 +236,7 @@
                         "lineNumber": 34,
                         "columnNumber": 17,
                         "deprecated": false,
+                        "docsReferencedTypeName": "DistributedTrace",
                         "trackAdoption": false,
                         "isRequired": true
                       }
@@ -454,6 +455,7 @@
                         "lineNumber": 74,
                         "columnNumber": 17,
                         "deprecated": false,
+                        "docsReferencedTypeName": "DistributedTrace",
                         "trackAdoption": false,
                         "isRequired": true
                       }
@@ -753,6 +755,7 @@
                 "lineNumber": 17,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -789,6 +792,7 @@
                 "lineNumber": 21,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -825,6 +829,7 @@
                 "lineNumber": 33,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1306,6 +1311,7 @@
                 "lineNumber": 126,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmApplicationMetricFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1412,6 +1418,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1584,6 +1591,7 @@
                 "lineNumber": 128,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "NetworkConnectionInfo",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1634,6 +1642,7 @@
                 "lineNumber": 133,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "GeoInfo",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1814,6 +1823,7 @@
                 "lineNumber": 251,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmApplicationMetricFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2356,6 +2366,7 @@
                 "lineNumber": 115,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApmApplicationMetricFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2630,6 +2641,7 @@
                 "lineNumber": 14,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFields",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2736,6 +2748,7 @@
                 "lineNumber": 19,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2753,6 +2766,7 @@
                 "lineNumber": 20,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2777,6 +2791,7 @@
                 "lineNumber": 21,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2929,6 +2944,7 @@
                 "lineNumber": 36,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3120,6 +3136,7 @@
             "lineNumber": 12,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3137,6 +3154,7 @@
             "lineNumber": 12,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3212,6 +3230,7 @@
             "lineNumber": 12,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3229,6 +3248,7 @@
             "lineNumber": 12,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3424,6 +3444,7 @@
             "lineNumber": 167,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "ServiceMapOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3461,6 +3482,7 @@
             "lineNumber": 72,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "IdGeneratorStrategyType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3513,6 +3535,7 @@
             "lineNumber": 73,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "DateLike",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3530,6 +3553,7 @@
             "lineNumber": 73,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "DateLike",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3554,6 +3578,7 @@
             "lineNumber": 73,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -4638,6 +4663,7 @@
                 "lineNumber": 68,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "OtelServiceParams",
                 "trackAdoption": false
               }
             ]
@@ -4703,6 +4729,7 @@
                 "lineNumber": 28,
                 "columnNumber": 62,
                 "deprecated": false,
+                "docsReferencedTypeName": "MobileAgentName",
                 "trackAdoption": false
               }
             ]
@@ -4730,7 +4757,7 @@
                 "id": "def-common.apm.browser.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  serviceName,\n  environment,\n  userAgent,\n}",
                 "description": [],
                 "signature": [
                   "{ serviceName: string; environment: string; userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>; }"
@@ -4784,7 +4811,7 @@
                 "id": "def-common.apm.serverlessFunction.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  functionName,\n  serviceName,\n  environment,\n  agentName,\n  architecture = 'arm',\n  serverlessType = 'aws.lambda',\n}",
                 "description": [],
                 "signature": [
                   "{ functionName: string; environment: string; agentName: string; serviceName?: string | undefined; architecture?: string | undefined; serverlessType?: \"aws.lambda\" | \"azure.functions\" | undefined; }"
@@ -4847,6 +4874,7 @@
                 "lineNumber": 68,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "OtelServiceParams",
                 "trackAdoption": false
               }
             ]
@@ -5243,6 +5271,7 @@
                 "lineNumber": 217,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsOptions",
                 "trackAdoption": false
               }
             ]
@@ -5301,7 +5330,7 @@
                 "id": "def-common.log.createMinimal.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  dataset = 'synth',\n  namespace = 'default',\n}",
                 "description": [],
                 "signature": [
                   "{ dataset?: string | undefined; namespace?: string | undefined; }"

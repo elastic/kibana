@@ -92,12 +92,17 @@ export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
   defaultMessage: 'Severity',
 });
 
+export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseTable.extendedFields', {
+  defaultMessage: 'Extended fields',
+});
+
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
   defaultMessage: 'Incident management system',
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPlaceholder', {
-  defaultMessage: 'Search cases',
+  defaultMessage:
+    'Search cases or filter by field, e.g. "Effort estimate":3, "Start Date":01/01/2024',
 });
 
 export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {

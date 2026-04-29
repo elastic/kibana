@@ -162,7 +162,15 @@
         "tags": [],
         "label": "setDiagLogger",
         "description": [
-          "\nHelper to make it easier to configure OTel's {@link DiagLogger}."
+          "\nHelper to make it easier to configure OTel's ",
+          {
+            "pluginId": "@kbn/telemetry",
+            "scope": "server",
+            "docId": "kibKbnTelemetryPluginApi",
+            "section": "def-server.DiagLogger",
+            "text": "DiagLogger"
+          },
+          "."
         ],
         "signature": [
           "(logger: ",
@@ -205,6 +213,7 @@
             "lineNumber": 20,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -225,6 +234,7 @@
             "lineNumber": 20,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevelId",
             "trackAdoption": false,
             "isRequired": false
           }

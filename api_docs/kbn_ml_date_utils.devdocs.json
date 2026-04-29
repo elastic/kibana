@@ -230,6 +230,7 @@
             "lineNumber": 53,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": false
           }
