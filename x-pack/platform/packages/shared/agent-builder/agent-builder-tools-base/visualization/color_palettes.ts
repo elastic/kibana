@@ -14,10 +14,13 @@ import { chartTypeRegistry } from './chart_type_registry';
  */
 const CATEGORICAL_PALETTE_PREVIEW_STEPS = 5;
 
+/**
+ * getAll() excludes the only light/dark palette color difference, so light palettes are enough here.
+ */
 const lightKbnPalettes = getPalettes(false);
 
 /**
- * Mirrors the Lens dynamic color picker: non-standalone gradient palettes.
+ * Mirrors the Lens dynamic color picker: gradient palettes.
  */
 const lensDynamicColorPalettes = lightKbnPalettes
   .getAll()
