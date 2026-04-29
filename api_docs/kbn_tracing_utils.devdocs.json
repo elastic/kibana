@@ -26,7 +26,15 @@
         "tags": [],
         "label": "createWithActiveSpan",
         "description": [
-          "\nFactory function that creates a version of {@link WithActiveSpan} with\ndefault options."
+          "\nFactory function that creates a version of ",
+          {
+            "pluginId": "@kbn/tracing-utils",
+            "scope": "common",
+            "docId": "kibKbnTracingUtilsPluginApi",
+            "section": "def-common.WithActiveSpan",
+            "text": "WithActiveSpan"
+          },
+          " with\ndefault options."
         ],
         "signature": [
           "(defaultOptions: ",
@@ -68,6 +76,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WithActiveSpanOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -86,6 +95,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WithActiveSpanWithContext",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -127,6 +137,7 @@
             "lineNumber": 17,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ReadableSpan",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -255,6 +266,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WithActiveSpanOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -346,6 +358,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WithActiveSpanOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -363,6 +376,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Context",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -421,6 +435,7 @@
             "lineNumber": 58,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -4,7 +4,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:metrics-*
     METADATA _index, _id
-  | WHERE 
+  | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
@@ -173,7 +173,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
     METADATA _index, _id
-  | WHERE 
+  | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
@@ -330,7 +330,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query for generic entity type
 "SET unmapped_fields=\\"nullify\\";
 FROM remote_cluster:logs-*
     METADATA _index, _id
-  | WHERE 
+  | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))

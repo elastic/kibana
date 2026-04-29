@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from './workflow_id_resolver';
-import { WorkflowValidationError } from '../../common/lib/errors';
 import { generateWorkflowId } from '../../common/lib/import';
 
 describe('generateWorkflowId', () => {

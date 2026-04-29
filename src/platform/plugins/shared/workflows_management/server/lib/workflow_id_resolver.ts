@@ -10,7 +10,7 @@
 import { v4 as generateUuid } from 'uuid';
 import { buildCandidateIds } from '@kbn/human-readable-id';
 
-import { WorkflowValidationError } from '../../common/lib/errors';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { isValidWorkflowId } from '../../common/lib/import';
 
 const ES_MAX_IDS_PER_QUERY = 10_000;
