@@ -21,7 +21,9 @@ export const redTeamCmd: Command<void> = {
   description: `
   Run red-team adversarial testing against an evaluation suite.
 
-  Requires the suite to have a red-team spec file (evals/red_team/*.spec.ts).
+  Requires the suite to expose a dedicated red-team Playwright config registered as
+  "<suite>-red-team" in .buildkite/pipelines/evals/evals.suites.json (e.g.
+  agent-builder-red-team -> red_team.playwright.config.ts with testDir ./red_team).
   The spec file uses the RedTeamOrchestrator with the suite's task function.
 
   Examples:
@@ -62,13 +64,18 @@ export const redTeamCmd: Command<void> = {
       throw createFlagError('Missing required --suite flag.');
     }
 
-    // Resolve suite
+    // Resolve suite. Prefer a dedicated red-team config registered as
+    // "<suiteId>-red-team"; fall back to the standard suite config (with
+    // --grep) for suites that haven't migrated yet.
     const suites = resolveEvalSuites(repoRoot, log);
-    const suite = suites.find((s) => s.id === suiteId);
+    const redTeamSuite = suites.find((s) => s.id === `${suiteId}-red-team`);
+    const fallbackSuite = suites.find((s) => s.id === suiteId);
+    const suite = redTeamSuite ?? fallbackSuite;
     if (!suite) {
       const available = suites.map((s) => s.id).join(', ');
       throw createFlagError(`Unknown suite "${suiteId}". Available: ${available || 'none found'}`);
     }
+    const useDedicatedConfig = Boolean(redTeamSuite);
 
     // Parse red-team specific flags
     const moduleName = flagsReader.string('module');
@@ -153,15 +160,13 @@ export const redTeamCmd: Command<void> = {
       projects = await promptForProject(repoRoot, log);
     }
 
-    // Spawn Playwright targeting the suite's red-team spec files
-    const args = [
-      'scripts/playwright',
-      'test',
-      '--config',
-      suite.absoluteConfigPath,
-      '--grep',
-      'Red Team',
-    ];
+    // Spawn Playwright targeting the suite's red-team spec files. With a
+    // dedicated config the testDir already points at the red-team specs;
+    // otherwise scope the run with --grep against the shared config.
+    const args = ['scripts/playwright', 'test', '--config', suite.absoluteConfigPath];
+    if (!useDedicatedConfig) {
+      args.push('--grep', 'Red Team');
+    }
 
     for (const p of projects) {
       args.push('--project', p);

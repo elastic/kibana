@@ -13,7 +13,7 @@ import {
   type Severity,
 } from '@kbn/evals';
 import { tags } from '@kbn/scout';
-import { evaluate } from '../../src/evaluate';
+import { evaluate } from '../src/evaluate';
 
 const readRedTeamConfig = (): RedTeamConfig => {
   const modules = process.env.RED_TEAM_MODULES?.split(',').filter(Boolean);
