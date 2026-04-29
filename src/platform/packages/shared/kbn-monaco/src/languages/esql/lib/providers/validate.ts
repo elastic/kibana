@@ -15,7 +15,7 @@ import { wrapAsMonacoMessages } from '../converters/positions';
 
 export async function esqlValidate(
   model: monaco.editor.ITextModel,
-  code: string,
+  code?: string,
   callbacks?: ESQLCallbacks,
   options?: { invalidateColumnsCache?: boolean }
 ) {

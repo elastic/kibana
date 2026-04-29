@@ -9,6 +9,7 @@
 
 import { getDocumentHighlightItems } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
+import { createMonacoProvider } from './providers_factory';
 import { offsetToRowColumn } from '../converters/positions';
 import { monacoPositionToOffset } from '../shared/utils';
 
@@ -16,24 +17,31 @@ export function getDocumentHighlightProvider(): monaco.languages.DocumentHighlig
   return {
     provideDocumentHighlights(
       model: monaco.editor.ITextModel,
-      position: monaco.Position
-    ): monaco.languages.DocumentHighlight[] {
-      const fullText = model.getValue();
-      const offset = monacoPositionToOffset(fullText, position);
-      const items = getDocumentHighlightItems(fullText, offset);
+      position: monaco.Position,
+      _token: monaco.CancellationToken
+    ) {
+      return createMonacoProvider({
+        model,
+        run: (safeModel) => {
+          const fullText = safeModel.getValue();
+          const offset = monacoPositionToOffset(fullText, position);
+          const items = getDocumentHighlightItems(fullText, offset);
 
-      return items.map((item) => {
-        const startPosition = offsetToRowColumn(fullText, item.start);
-        const endPosition = offsetToRowColumn(fullText, item.end);
-        return {
-          range: new monaco.Range(
-            startPosition.lineNumber,
-            startPosition.column,
-            endPosition.lineNumber,
-            endPosition.column + 1
-          ),
-          kind: monaco.languages.DocumentHighlightKind.Read,
-        };
+          return items.map((item) => {
+            const startPosition = offsetToRowColumn(fullText, item.start);
+            const endPosition = offsetToRowColumn(fullText, item.end);
+            return {
+              range: new monaco.Range(
+                startPosition.lineNumber,
+                startPosition.column,
+                endPosition.lineNumber,
+                endPosition.column + 1
+              ),
+              kind: monaco.languages.DocumentHighlightKind.Read,
+            };
+          });
+        },
+        emptyResult: [],
       });
     },
   };
