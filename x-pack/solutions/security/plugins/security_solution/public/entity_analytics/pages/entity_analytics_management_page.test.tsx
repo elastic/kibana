@@ -20,7 +20,6 @@ import {
   ASSET_CRITICALITY_TAB_TEST_ID,
   WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
-  ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
 
 const mockAddSuccess = jest.fn();
@@ -133,10 +132,6 @@ jest.mock('../components/entity_store/components/clear_entity_data_button', () =
   ClearEntityDataButton: () => (
     <span data-test-subj="clear-entity-data-button">{'Clear Entity Data'}</span>
   ),
-}));
-
-jest.mock('../hooks/use_enabled_entity_types', () => ({
-  useEntityStoreTypes: () => ['host', 'user'],
 }));
 
 const mockToggleSelectedClosedAlertsSetting = jest.fn();
@@ -347,12 +342,6 @@ describe('EntityAnalyticsManagementPage', () => {
   it('does not show Engine Status tab when entity store is not installed', () => {
     render(pageComponent());
     expect(screen.queryByTestId(ENGINE_STATUS_TAB_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('shows feature flag callout when entity store is disabled by feature flag', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    render(pageComponent());
-    expect(screen.getByTestId(ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows entity store missing privileges callout when privileges are insufficient', () => {
