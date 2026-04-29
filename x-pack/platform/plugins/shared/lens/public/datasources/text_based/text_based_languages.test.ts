@@ -86,7 +86,7 @@ const dateRange = {
   toDate: '2022-04-17T08:25:00.000Z',
 };
 
-const queryBaseState = {
+const queryBaseState: TextBasedPrivateState = {
   layers: {
     a: {
       columns: [
@@ -114,7 +114,7 @@ const queryBaseState = {
     { id: '2', title: 'my-fake-restricted-pattern' },
     { id: '3', title: 'my-compatible-pattern' },
   ],
-} as unknown as TextBasedPrivateState;
+};
 
 describe('Textbased Data Source', () => {
   let baseState: TextBasedPrivateState;
