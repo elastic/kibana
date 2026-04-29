@@ -22,6 +22,7 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
+import { toFieldNames } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
@@ -73,8 +74,10 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some((fieldName) =>
-            fieldName.toLowerCase().includes(searchLower)
+          (so.attributes.fieldNames ?? []).some(
+            (field) =>
+              field.label.toLowerCase().includes(searchLower) ||
+              field.name.toLowerCase().includes(searchLower)
           ),
       })),
       page,
@@ -90,10 +93,54 @@ export class TemplatesService {
     return this._getTemplate(templateId, version);
   }
 
+  /**
+   * Fetches ALL template versions (not just isLatest) for extended field filtering in case search.
+   *
+   * This is critical for extended field filtering because cases may reference
+   * older template versions where field definitions have changed. We need to
+   * resolve filters against ALL versions to correctly match cases created with
+   * historical template versions.
+   *
+   * Example: If template v1 has "effort estimate" field and v2 renames it to
+   * "some estimate", searching for "effort estimate" should only match cases
+   * created with v1, not v2. By fetching ALL versions, the filter resolution
+   * correctly identifies which template versions have which fields.
+   *
+   * @param params - Find parameters (owner, isDeleted)
+   * @returns Promise resolving to array of all template versions matching the criteria
+   *
+   * @example
+   * // Get all versions of Security Solution templates for extended field search
+   * const allVersions = await service.getTemplateVersionsForExtendedFieldSearch({
+   *   owner: ['securitySolution'],
+   * });
+   */
+  async getTemplateVersionsForExtendedFieldSearch(params: {
+    owner?: string[];
+  }): Promise<Array<SavedObject<Template>>> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      owner: params.owner,
+      // CRITICAL: Do NOT set isLatest - we want ALL versions
+    });
+
+    return templates;
+  }
+
   private async _getTemplate(
     templateId: string,
     version?: string
   ): Promise<SavedObject<Template> | undefined> {
+    if (version !== undefined) {
+      const parsedVersion = parseInt(version, 10);
+      if (isNaN(parsedVersion) || version === '') {
+        return undefined;
+      }
+    }
+
     const { templates } = await this.searchTemplates({
       page: 1,
       perPage: 1,
@@ -199,8 +246,28 @@ export class TemplatesService {
                   },
                 },
                 {
-                  wildcard: {
-                    [`${SO}.fieldNames`]: { value: `*${search}*`, case_insensitive: true },
+                  nested: {
+                    path: `${SO}.fieldNames`,
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            wildcard: {
+                              [`${SO}.fieldNames.name`]: {
+                                value: `*${search}*`,
+                                case_insensitive: true,
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              [`${SO}.fieldNames.label`]: search,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   },
                 },
               ],
@@ -273,7 +340,7 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: toFieldNames(parsedDefinition.fields),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
@@ -308,7 +375,7 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: toFieldNames(parsedDefinition.fields),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,

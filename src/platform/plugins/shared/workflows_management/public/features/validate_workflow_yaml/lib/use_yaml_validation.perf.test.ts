@@ -12,6 +12,7 @@ import fs from 'fs';
 // eslint-disable-next-line import/no-nodejs-modules
 import path from 'path';
 import YAML, { LineCounter } from 'yaml';
+import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
 import { collectAllVariables } from './collect_all_variables';
@@ -25,7 +26,6 @@ import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getPropertyHandler } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 

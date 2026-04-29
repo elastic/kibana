@@ -59,6 +59,7 @@
                 "lineNumber": 32,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "EsqlServiceOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -359,7 +360,15 @@
         "tags": [],
         "label": "buildServerESQLCallbacks",
         "description": [
-          "\nBuilds the ESQLCallbacks required by the ES|QL validation API\n({@link validateQuery} from @kbn/esql-language) for server-side usage.\n\nUses the Elasticsearch client directly instead of going through\nKibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils."
+          "\nBuilds the ESQLCallbacks required by the ES|QL validation API\n(",
+          {
+            "pluginId": "@kbn/esql-server-utils",
+            "scope": "server",
+            "docId": "kibKbnEsqlServerUtilsPluginApi",
+            "section": "def-server.validateQuery",
+            "text": "validateQuery"
+          },
+          " from @kbn/esql-language) for server-side usage.\n\nUses the Elasticsearch client directly instead of going through\nKibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils."
         ],
         "signature": [
           "({ client, }: ",
@@ -405,6 +414,7 @@
             "lineNumber": 25,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "BuildServerESQLCallbacksOptions",
             "trackAdoption": false,
             "isRequired": true
           }

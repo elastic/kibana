@@ -49,6 +49,7 @@
                 "lineNumber": 45,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "KubernetesSecurityDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
