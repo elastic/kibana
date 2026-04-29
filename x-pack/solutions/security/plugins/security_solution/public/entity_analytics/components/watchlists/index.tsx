@@ -12,7 +12,6 @@ import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_an
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { WatchlistsManagementTable } from './components/watchlists_management_table';
-import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 interface WatchlistsProps {
   privileges?: EntityAnalyticsPrivileges;
   error?: { message: string } | null;
