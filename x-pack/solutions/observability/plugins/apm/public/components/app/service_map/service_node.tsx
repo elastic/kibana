@@ -41,25 +41,21 @@ export const ServiceNode = memo(
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
 
-    const circleEmphasized = selected || contextHighlight;
-
     const borderColor = useMemo(() => {
       if (data.serviceAnomalyStats?.healthStatus) {
         return getServiceHealthStatusColor(euiTheme, data.serviceAnomalyStats.healthStatus);
       }
-      if (circleEmphasized) {
+      if (selected) {
         return euiTheme.colors.primary;
       }
       return euiTheme.colors.mediumShade;
-    }, [data.serviceAnomalyStats?.healthStatus, circleEmphasized, euiTheme]);
+    }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme]);
 
     const borderWidth = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
       if (status === ServiceHealthStatus.critical) return `${NODE_BORDER_WIDTH_SELECTED}px`;
-      return circleEmphasized
-        ? `${NODE_BORDER_WIDTH_SELECTED}px`
-        : `${NODE_BORDER_WIDTH_DEFAULT}px`;
-    }, [data.serviceAnomalyStats?.healthStatus, circleEmphasized]);
+      return selected ? `${NODE_BORDER_WIDTH_SELECTED}px` : `${NODE_BORDER_WIDTH_DEFAULT}px`;
+    }, [data.serviceAnomalyStats?.healthStatus, selected]);
 
     const borderStyle = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
