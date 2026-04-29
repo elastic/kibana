@@ -45,7 +45,8 @@ export interface PartitioningEvaluationDataset {
 export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
     name: 'Multi-System',
-    description: 'Diverse log systems (Hadoop, Proxifier, Android, OpenStack). The LLM must identify distinct partitions.',
+    description:
+      'Diverse log systems (Hadoop, Proxifier, Android, OpenStack). The LLM must identify distinct partitions.',
     examples: [
       {
         input: {
