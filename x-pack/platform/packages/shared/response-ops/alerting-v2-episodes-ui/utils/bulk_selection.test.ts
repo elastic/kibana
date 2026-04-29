@@ -14,16 +14,20 @@ const ep = (id: string, groupHash: string): AlertEpisode =>
 describe('getEpisodesFromDocIds', () => {
   const data = [ep('ep1', 'gh1'), ep('ep2', 'gh2'), ep('ep3', 'gh1')];
 
-  it('maps string indices to episodes', () => {
-    expect(getEpisodesFromDocIds(['0', '2'], data)).toEqual([data[0], data[2]]);
+  it('returns the episodes whose episode.id matches the selection', () => {
+    expect(getEpisodesFromDocIds(['ep1', 'ep3'], data)).toEqual([data[0], data[2]]);
   });
 
-  it('returns all episodes when all indices selected', () => {
-    expect(getEpisodesFromDocIds(['0', '1', '2'], data)).toEqual(data);
+  it('returns all episodes when every episode.id is selected', () => {
+    expect(getEpisodesFromDocIds(['ep1', 'ep2', 'ep3'], data)).toEqual(data);
   });
 
-  it('filters out out-of-range indices', () => {
-    expect(getEpisodesFromDocIds(['99'], data)).toEqual([]);
+  it('preserves the data order regardless of the order of selectedDocIds', () => {
+    expect(getEpisodesFromDocIds(['ep3', 'ep1'], data)).toEqual([data[0], data[2]]);
+  });
+
+  it('filters out unknown ids', () => {
+    expect(getEpisodesFromDocIds(['nope'], data)).toEqual([]);
   });
 
   it('returns empty array for empty selection', () => {

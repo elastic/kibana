@@ -16,16 +16,16 @@ describe('alertEpisodeToDataTableRecord', () => {
     '@timestamp': '2026-04-13T00:00:00.000Z',
   } as AlertEpisode;
 
-  it('uses the row index as the record id', () => {
-    expect(alertEpisodeToDataTableRecord(mockEpisode, 3).id).toBe('3');
+  it("uses the episode's id as the record id", () => {
+    expect(alertEpisodeToDataTableRecord(mockEpisode).id).toBe('ep1');
   });
 
   it('sets raw to an empty object', () => {
-    expect(alertEpisodeToDataTableRecord(mockEpisode, 0).raw).toEqual({});
+    expect(alertEpisodeToDataTableRecord(mockEpisode).raw).toEqual({});
   });
 
   it('flattens all episode fields into the flattened map', () => {
-    const record = alertEpisodeToDataTableRecord(mockEpisode, 0);
+    const record = alertEpisodeToDataTableRecord(mockEpisode);
     expect(record.flattened['episode.id']).toBe('ep1');
     expect(record.flattened['rule.id']).toBe('rule1');
     expect(record.flattened.group_hash).toBe('gh1');

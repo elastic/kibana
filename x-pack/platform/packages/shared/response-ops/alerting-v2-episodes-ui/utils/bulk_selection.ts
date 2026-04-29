@@ -10,7 +10,10 @@ import type { AlertEpisode } from '../queries/episodes_query';
 export const getEpisodesFromDocIds = (
   selectedDocIds: string[],
   episodesData: AlertEpisode[]
-): AlertEpisode[] => selectedDocIds.map((id) => episodesData[parseInt(id, 10)]).filter(Boolean);
+): AlertEpisode[] => {
+  const selected = new Set(selectedDocIds);
+  return episodesData.filter((ep) => selected.has(ep['episode.id']));
+};
 
 export const uniqueGroupEpisodes = (episodes: AlertEpisode[]): AlertEpisode[] => {
   const seen = new Set<string>();
