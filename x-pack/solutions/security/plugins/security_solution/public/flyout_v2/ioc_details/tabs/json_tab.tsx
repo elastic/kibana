@@ -24,7 +24,7 @@ export interface JsonTabProps {
  * using the {@link EuiCodeBlock} from the @elastic/eui library.
  */
 export const JsonTab = memo(({ indicator }: JsonTabProps) => {
-  return Object.keys(indicator).length === 0 ? (
+  return Object.keys(indicator.fields).length === 0 ? (
     <FlyoutError />
   ) : (
     <SharedJsonTab
