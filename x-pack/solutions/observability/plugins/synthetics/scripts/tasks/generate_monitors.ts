@@ -59,8 +59,7 @@ const buildEsClient = () => {
     const node = config.elasticsearch?.hosts;
     if (node) {
       const rawUser = config.elasticsearch?.username;
-      const username =
-        rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser;
+      const username = rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser;
       const password = config.elasticsearch?.password;
       const verificationMode = config.elasticsearch?.ssl?.verificationMode;
       return new Client({
@@ -97,10 +96,7 @@ const fetchAllMonitors = async (): Promise<MonitorInfo[]> => {
   }));
 };
 
-const indexSummaryDoc = async (
-  index: string,
-  document: Record<string, any>
-) => {
+const indexSummaryDoc = async (index: string, document: Record<string, any>) => {
   await esClient.index({ index, document, refresh: false });
 };
 
@@ -124,9 +120,7 @@ const ingestSummaryData = async (monitors: MonitorInfo[]) => {
       for (let i = 0; i < numDocs; i++) {
         const minutesAgo = i * 3 + randomInt(0, 2);
         const ts = now.clone().subtract(minutesAgo, 'minutes');
-        const durationUs = isDown
-          ? randomInt(50000, 200000)
-          : randomInt(80000, 500000);
+        const durationUs = isDown ? randomInt(50000, 200000) : randomInt(80000, 500000);
 
         const overrides = {
           name: monitor.name,
@@ -175,8 +169,7 @@ const ingestSummaryData = async (monitors: MonitorInfo[]) => {
   return { upCount, downCount };
 };
 
-const randomInt = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 const createMonitor = async (monitor: Record<string, any>) => {
   try {
@@ -197,7 +190,9 @@ const createMonitor = async (monitor: Record<string, any>) => {
 const ensureAgentPolicy = async (name: string) => {
   const existing = await request(
     'get',
-    `/api/fleet/agent_policies?kuery=ingest-agent-policies.name:"${encodeURIComponent(name)}"&perPage=1`
+    `/api/fleet/agent_policies?kuery=ingest-agent-policies.name:"${encodeURIComponent(
+      name
+    )}"&perPage=1`
   );
   if (existing?.items?.length > 0) {
     // eslint-disable-next-line no-console
@@ -407,9 +402,7 @@ export const generateMonitors = async () => {
   const fourLocations = [privateLocUS, privateLocEU, privateLocAP, privateLocSA];
 
   // eslint-disable-next-line no-console
-  console.log(
-    `  ✓ Private locations: ${allLocations.map((l) => `"${l.label}"`).join(', ')}`
-  );
+  console.log(`  ✓ Private locations: ${allLocations.map((l) => `"${l.label}"`).join(', ')}`);
 
   // ---------------------------------------------------------------------------
   // HTTP monitors — various URLs, tags, schedules, locations
@@ -1001,7 +994,9 @@ step('Fill credentials', async () => {
   // eslint-disable-next-line no-console
   console.log('  Browser:   10 monitors');
   // eslint-disable-next-line no-console
-  console.log('  w/ Project: 7 monitors (3 projects: ecommerce-app, infra-monitoring, mobile-app-backend)');
+  console.log(
+    '  w/ Project: 7 monitors (3 projects: ecommerce-app, infra-monitoring, mobile-app-backend)'
+  );
   // eslint-disable-next-line no-console
   console.log('  Total:     ~40 monitors across 5 private locations');
   // eslint-disable-next-line no-console
