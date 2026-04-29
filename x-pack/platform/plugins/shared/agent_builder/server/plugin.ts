@@ -35,6 +35,7 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { registerSmlMemoryRecallHook } from './hooks/sml_memory/register_sml_memory_recall_hook';
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
@@ -195,6 +196,12 @@ export class AgentBuilderPlugin
 
     registerBeforeAgentWorkflowsHook(serviceSetups, {
       workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerSmlMemoryRecallHook(serviceSetups, {
+      coreSetup,
       logger: this.logger,
       getInternalServices,
     });

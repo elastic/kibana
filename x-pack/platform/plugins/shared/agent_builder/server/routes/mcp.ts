@@ -9,7 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
+import { createToolIdMappings, sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -47,6 +47,33 @@ export function filterToolsByNamespace(
     const toolNamespace = tool.id.substring(0, lastDotIndex);
     return namespaceSet.has(toolNamespace);
   });
+}
+
+/**
+ * Filter tools by their sanitized MCP name (dots replaced with underscores).
+ * Used with the `?tools=` query parameter so callers can expose only a specific
+ * subset of tools, e.g. `?tools=platform_core_sml_search,platform_core_sml_read`.
+ */
+export function filterToolsByNames(
+  tools: InternalToolDefinition[],
+  names?: string
+): InternalToolDefinition[] {
+  if (!names?.trim()) {
+    return tools;
+  }
+
+  const nameSet = new Set(
+    names
+      .split(',')
+      .map((n) => n.trim())
+      .filter(Boolean)
+  );
+
+  if (nameSet.size === 0) {
+    return tools;
+  }
+
+  return tools.filter((tool) => nameSet.has(sanitizeToolId(tool.id)));
 }
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
@@ -92,6 +119,14 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
                   },
                 })
               ),
+              tools: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Comma-separated list of sanitized tool names to expose (dots replaced with underscores, e.g. "platform_core_sml_search,platform_core_sml_read"). Takes precedence within the namespace filter.',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -116,7 +151,8 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
 
           const registry = await toolService.getRegistry({ request });
           const allTools = await registry.list({});
-          const tools = filterToolsByNamespace(allTools, request.query.namespace);
+          const namespaceFiltered = filterToolsByNamespace(allTools, request.query.namespace);
+          const tools = filterToolsByNames(namespaceFiltered, request.query.tools);
 
           const idMapping = createToolIdMappings(tools);
 

@@ -32,6 +32,44 @@ import { smlIndexName } from '../../services/sml/sml_storage';
 /** Max page size for SML HTTP search (separate from default UI size). */
 const SML_SEARCH_SIZE_MAX = 1000;
 
+const CONTENT_PREVIEW_LENGTH = 200;
+
+const MEMORY_INSTRUCTIONS = `\
+## MEMORY CONTEXT
+
+The following are memories from past conversations that may be relevant to the current question. \
+Treat them as things you remember from previous interactions — refer to them as memories \
+("I remember that..." / "In a previous conversation...") rather than as freshly retrieved data \
+("I found that..." / "According to the search results...").
+
+You can use \`sml_search\` to search for additional relevant memories, and \`sml_read\` with a \
+chunk_id to retrieve the full content of any memory where has_more is true.`;
+
+const buildMemoryPrompt = (
+  items: Array<{ id: string; type: string; origin_id: string; title: string; score: number; content?: string }>
+): string => {
+  const lines: string[] = ['<kibana_sml_memory>', MEMORY_INSTRUCTIONS, '---'];
+
+  for (const item of items) {
+    const content = item.content?.trim() ?? '';
+    const hasMore = content.length > CONTENT_PREVIEW_LENGTH;
+    const preview = hasMore ? content.slice(0, CONTENT_PREVIEW_LENGTH) + ' …' : content;
+
+    lines.push(
+      `### ${item.title}\n` +
+        `chunk_id: ${item.id} | type: ${item.type} | origin_id: ${item.origin_id} | ` +
+        `score: ${item.score.toFixed(3)} | has_more: ${hasMore}`
+    );
+    if (preview) {
+      lines.push(preview);
+    }
+    lines.push('---');
+  }
+
+  lines.push('</kibana_sml_memory>');
+  return lines.join('\n');
+};
+
 const mergeAttachmentsById = (
   latestAttachments: VersionedAttachment[],
   stateManagerAttachments: VersionedAttachment[]
@@ -65,6 +103,9 @@ export function registerInternalSmlRoutes({
           query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
           size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
           skip_content: schema.maybe(schema.boolean()),
+          type: schema.maybe(schema.string()),
+          min_score: schema.maybe(schema.number({ min: 0, max: 1 })),
+          include_prompt: schema.maybe(schema.boolean()),
         }),
       },
       options: { access: 'internal' },
@@ -73,29 +114,54 @@ export function registerInternalSmlRoutes({
     wrapHandler(
       async (ctx, request, response) => {
         const { sml } = getInternalServices();
-        const { query, size, skip_content: skipContent } = request.body;
+        const {
+          query,
+          size,
+          skip_content: skipContent,
+          type: typeFilter,
+          min_score: minScore,
+          include_prompt: includePrompt,
+        } = request.body;
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const { results, total } = await sml.search({
+        const { results: rawResults, total } = await sml.search({
           query,
           size,
           spaceId,
           esClient,
           request,
           skipContent,
+          type: typeFilter,
         });
 
+        const results =
+          minScore != null ? rawResults.filter((r) => r.score >= minScore) : rawResults;
+
+        const mappedResults = results.map(
+          ({ id, type, origin_id, title, score, content, created_at, attachable }) => {
+            const fullContent = content ?? '';
+            const hasMore = fullContent.length > CONTENT_PREVIEW_LENGTH;
+            return {
+              chunk_id: id,
+              id,
+              type,
+              item_id: origin_id,
+              origin_id,
+              title,
+              score,
+              has_more: hasMore,
+              created_at,
+              attachable,
+              ...(skipContent ? {} : { content }),
+            };
+          }
+        );
+
         const body: SmlSearchHttpResponse = {
-          total,
-          results: results.map(({ id, type, origin_id, title, score, content }) => ({
-            id,
-            type,
-            origin_id,
-            title,
-            score,
-            ...(skipContent ? {} : { content }),
-          })),
+          total: minScore != null ? mappedResults.length : total,
+          results: mappedResults,
+          ...(includePrompt ? { prompt: buildMemoryPrompt(results) } : {}),
         };
 
         return response.ok({ body });
