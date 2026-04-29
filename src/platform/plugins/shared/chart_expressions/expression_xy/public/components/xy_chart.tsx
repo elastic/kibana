@@ -92,8 +92,8 @@ import {
   getAxesConfiguration,
   getLinesCausedPaddings,
   validateExtent,
-  getDecimalsFromFormatParams,
   getOriginalAxisPosition,
+  getDecimalsFromFormat,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -363,7 +363,7 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
-  const xTickDecimals = getDecimalsFromFormatParams(xAxisFormatter.params());
+  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -969,7 +969,7 @@ export function XYChart({
             )}
             {yAxesConfiguration.map((axis) => {
               const tickDecimals = axis.formatter
-                ? getDecimalsFromFormatParams(axis.formatter.params())
+                ? getDecimalsFromFormat(axis.formatter)
                 : undefined;
 
               return (

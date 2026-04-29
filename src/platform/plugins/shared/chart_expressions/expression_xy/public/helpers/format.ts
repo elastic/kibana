@@ -10,7 +10,8 @@
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { isNumber, isUndefined } from 'lodash';
 
 export const getFormat = (
   columns: DatatableColumn[],
@@ -28,29 +29,31 @@ export const getFormat = (
   );
 };
 
-const MAX_UNWRAP_DEPTH = 3;
-
 /**
- * Reads the original `decimals` value that Lens writes onto the format params
- * (via `lens_format_column`), unwrapping decorator formats such as `suffix`
- * that nest the inner numeric format under `params.params`.
+ * Reads a single key from the field format's params, unwrapping decorator formats such as `suffix` by
+ * walking nested `params.params` until the key is found or `maxDepth` is reached.
  */
-export const getDecimalsFromFormatParams = (
-  params: FieldFormatParams,
-  depth = 0
-): number | undefined => {
-  if (!params || depth > MAX_UNWRAP_DEPTH) {
-    return undefined;
-  }
+export const getFormatParam = (format: FieldFormat, param: string, maxDepth = 3) => {
+  const getNested = (params: FieldFormatParams, depth: number) => {
+    if (depth > maxDepth) {
+      return undefined;
+    }
 
-  if (typeof params.decimals === 'number') {
-    return params.decimals;
-  }
+    if (!isUndefined(params[param])) {
+      return params[param];
+    }
 
-  const nestedParams = params.params;
-  if (nestedParams && typeof nestedParams === 'object' && !Array.isArray(nestedParams)) {
-    return getDecimalsFromFormatParams(nestedParams, depth + 1);
-  }
+    const nested = params?.params;
 
-  return undefined;
+    if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+      return getNested(nested, depth + 1);
+    }
+  };
+
+  return getNested(format.params(), 0);
+};
+
+export const getDecimalsFromFormat = (format: FieldFormat) => {
+  const value = getFormatParam(format, 'decimals');
+  return isNumber(value) ? value : undefined;
 };
