@@ -11,6 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams, isIlmLifecycle, isDslLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
 import {
@@ -72,7 +73,26 @@ export const createGetLifecycleStatsTool = ({
         };
       }
 
-      const dataStream = await streamsClient.getDataStream(name);
+      let dataStream;
+      try {
+        dataStream = await streamsClient.getDataStream(name);
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  stream: name,
+                  message:
+                    'Stream has no backing data stream yet (no data has been onboarded). Lifecycle stats are unavailable.',
+                },
+              },
+            ],
+          };
+        }
+        throw err;
+      }
       const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
 
       const retentionInfo = buildRetentionInfo(lifecycle);

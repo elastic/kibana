@@ -6,18 +6,44 @@
  */
 
 import type {
+  IndicesGetDataStreamResponse,
   IndicesStatsIndicesStats,
   SearchRequest,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamDocsStat } from '../../../../common';
 import {
   getDataStreamsMeteringStats,
   getLastBackingIndexByStream,
   processAsyncInChunks,
 } from './utils';
+
+/**
+ * Resolves data streams for an optional single-stream filter, treating a
+ * missing backing data stream as "no streams" rather than an error. Stream
+ * definitions can exist without a materialized data stream (e.g. wired root
+ * streams before any data is onboarded), and the rest of the plugin treats
+ * that as a normal, empty state.
+ */
+async function safeGetDataStreams(
+  esClient: ElasticsearchClient,
+  streamName?: string
+): Promise<IndicesGetDataStreamResponse['data_streams']> {
+  try {
+    const response = streamName
+      ? await esClient.indices.getDataStream({ name: streamName })
+      : await esClient.indices.getDataStream();
+    return response.data_streams;
+  } catch (err) {
+    if (isNotFoundError(err)) {
+      return [];
+    }
+    throw err;
+  }
+}
 
 /**
  * Fetches total document counts for one or all streams.
@@ -43,9 +69,7 @@ export async function getDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
-    : await esClient.indices.getDataStream();
+  const streams = await safeGetDataStreams(esClient, streamName);
   if (!streams.length) {
     return [];
   }
@@ -131,9 +155,7 @@ export async function getDegradedDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { esClient, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
-    : await esClient.indices.getDataStream();
+  const streams = await safeGetDataStreams(esClient, streamName);
 
   if (!streams.length) {
     return [];
@@ -234,9 +256,7 @@ export async function getFailedDocCountsForStreams(options: {
 }): Promise<StreamDocsStat[]> {
   const { esClient, start, end, streamName } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
-    : await esClient.indices.getDataStream();
+  const streams = await safeGetDataStreams(esClient, streamName);
 
   if (!streams.length) {
     return [];

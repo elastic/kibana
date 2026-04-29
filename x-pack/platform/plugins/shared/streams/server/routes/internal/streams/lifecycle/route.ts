@@ -10,6 +10,7 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -82,7 +83,19 @@ const lifecycleStatsRoute = createServerRoute({
       throw new StatusError('Lifecycle stats are only available for ingest streams', 400);
     }
 
-    const dataStream = await streamsClient.getDataStream(name);
+    // A stream definition can exist without a materialized backing data
+    // stream yet (e.g. wired root streams before any data is onboarded).
+    // Return empty stats in that case rather than leaking an ES error.
+    const dataStream = await streamsClient.getDataStream(name).catch((err) => {
+      if (isNotFoundError(err)) {
+        return null;
+      }
+      throw err;
+    });
+    if (!dataStream) {
+      return { phases: [] };
+    }
+
     const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
     if (!isIlmLifecycle(lifecycle)) {
       throw new StatusError('Lifecycle stats are only available for ILM policy', 400);
