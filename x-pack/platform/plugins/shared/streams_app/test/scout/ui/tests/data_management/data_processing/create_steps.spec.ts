@@ -17,12 +17,12 @@ test.describe(
   'Stream data processing - creating steps',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ browserAuth, logsSynthtraceEsClient }) => {
-      await browserAuth.loginAsAdmin();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 

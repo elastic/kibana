@@ -21,8 +21,7 @@ import {
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - updating failure store', () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     await esClient.indices.putDataStreamOptions(
       {
@@ -48,6 +47,10 @@ test.describe('Stream data retention - updating failure store', () => {
       },
       { meta: true }
     );
+  });
+
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
   });
 
   test.afterAll(async ({ logsSynthtraceEsClient, apiServices }) => {

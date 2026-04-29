@@ -14,11 +14,10 @@ test.describe(
   'Streams data processing permissions - editor role (no simulate, no manage)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, browserAuth, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
 
       // Set up state as admin once — not per test
-      await browserAuth.loginAsAdmin();
       await apiServices.streams.updateStreamProcessors('logs-generic-default', {
         steps: [
           {
@@ -46,13 +45,10 @@ test.describe(
           },
         ],
       });
-
-      // Login as the target role once — not per test
-      await browserAuth.loginAs('editor');
     });
 
-    test.beforeEach(async ({ pageObjects }) => {
-      // Only navigation remains per-test
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAs('editor');
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     });
 

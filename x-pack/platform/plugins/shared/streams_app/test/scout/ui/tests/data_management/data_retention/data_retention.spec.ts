@@ -88,8 +88,7 @@ test.describe(
   'Stream data retention - custom retention periods',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+    test.beforeAll(async ({ apiServices }) => {
       await apiServices.streams.clearStreamChildren('logs.otel');
       const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
       await apiServices.streams.updateStream('logs.otel', {

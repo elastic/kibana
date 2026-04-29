@@ -17,14 +17,14 @@ test.describe(
   'Stream data routing - previewing data',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ browserAuth, logsSynthtraceEsClient }) => {
-      await browserAuth.loginAsAdmin();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data only
       await logsSynthtraceEsClient.clean();
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
-    test.beforeEach(async ({ pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoPartitioningTab('logs.otel');
       await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
       await pageObjects.streams.switchToColumnsView();

@@ -17,8 +17,7 @@ test.describe(
   'Stream data quality',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, browserAuth, logsSynthtraceEsClient }) => {
-      await browserAuth.loginAsAdmin();
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       const currentTime = Date.now();
       const generateLogs = generateLogsData(logsSynthtraceEsClient);
 
@@ -68,7 +67,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoDataQualityTab(TEST_STREAM);
     });
 

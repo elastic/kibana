@@ -17,8 +17,7 @@ import {
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ apiServices, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+  test.beforeAll(async ({ apiServices }) => {
     await apiServices.streams.clearStreamChildren('logs.otel');
 
     // Reset parent 'logs.otel' stream to default indefinite retention (DSL with no data_retention)
