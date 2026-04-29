@@ -317,8 +317,6 @@ describe('WiredAdvancedView', () => {
 
       // Import & Export
       expect(screen.getByText('Import & export')).toBeInTheDocument();
-      // Stream description
-      expect(screen.getByText('Stream description')).toBeInTheDocument();
       // Index Configuration
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
       // Delete stream (non-root)

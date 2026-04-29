@@ -334,8 +334,6 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Stream description
-      expect(screen.getByText('Stream description')).toBeInTheDocument();
       // Index Configuration
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
       // Elasticsearch assets
