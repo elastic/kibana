@@ -18,13 +18,13 @@ type CacheGroups = NonNullable<OptimizationSplitChunksOptions['cacheGroups']>;
  * same source of truth.
  *
  * CACHE GROUP PRIORITY ORDER (highest wins):
+ *   45: vendorsHeavy     - specific heavy node_modules
+ *   40: vendors          - /node_modules/ (minChunks: 3)
  *   35: sharedPlugins    - /plugins/  (all cross-plugin shared code)
  *   32: corePackages     - /src/core/packages/
  *   31: sharedPackages   - /packages/(shared|private)/  (platform packages)
  *   30: solutionPackages - /solutions/* /packages/
  *   29: rootPackages     - /packages/kbn-/  (repo root + x-pack/packages)
- *   21: vendorsHeavy     - specific heavy node_modules
- *   20: vendors          - /node_modules/ (minChunks: 3)
  *  -20: default          - catch-all (minChunks: 3, name: 'shared-misc')
  *
  * All groups use category-level static names.  No maxSize — benchmarked
@@ -36,6 +36,30 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
   // chunks bypass our custom `vendors` group (minChunks: 3) and create
   // unnecessary small vendor chunks via the hidden default.
   defaultVendors: false,
+
+  // --- Vendor cache groups (highest priority) ---
+  // Vendors are evaluated first so that any module inside node_modules/
+  // is always routed to a vendor chunk, even if its path happens to
+  // contain segments like /plugins/ or /packages/ that match internal groups.
+  vendorsHeavy: {
+    test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
+    name: 'vendors-heavy',
+    chunks: 'async' as const,
+    priority: 45,
+    minChunks: 3,
+    minSize: 0,
+    reuseExistingChunk: true,
+  },
+
+  // Shared vendors -- all node_modules shared by 3+ chunks,
+  // consolidated into a single 'vendors' chunk.
+  vendors: {
+    test: /[\\/]node_modules[\\/]/,
+    name: 'vendors',
+    priority: 40,
+    minChunks: 3,
+    reuseExistingChunk: true,
+  },
 
   // --- Plugin cache group ---
   // All cross-plugin shared modules merged into a single 'shared-plugins'
@@ -106,30 +130,6 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
     priority: 29,
     minChunks: 3,
     minSize: 0,
-    reuseExistingChunk: true,
-  },
-
-  // Heavy vendors NOT in ui-shared-deps -- consolidated into a single
-  // 'vendors-heavy' chunk. These are eagerly loaded on every page via
-  // the bootstrap load() array, so per-package splitting provides no
-  // lazy-loading benefit. A single chunk reduces HTTP requests.
-  vendorsHeavy: {
-    test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
-    name: 'vendors-heavy',
-    chunks: 'async' as const,
-    priority: 21,
-    minChunks: 3,
-    minSize: 0,
-    reuseExistingChunk: true,
-  },
-
-  // Shared vendors -- all node_modules shared by 3+ chunks,
-  // consolidated into a single 'vendors' chunk.
-  vendors: {
-    test: /[\\/]node_modules[\\/]/,
-    name: 'vendors',
-    priority: 20,
-    minChunks: 3,
     reuseExistingChunk: true,
   },
 
