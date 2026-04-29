@@ -132,20 +132,9 @@ const RuleFormContent = ({
   const handleModeChange = useCallback(
     (newMode: EditMode) => {
       if (newMode === editMode) return;
-      // When leaving YAML mode, eagerly flush YAML→Form so the form view
-      // shows the user's YAML edits. Don't rely on the Monaco editor's blur
-      // event — it can race with the unmount triggered by setEditMode and
-      // get dropped along with the disposed listener. If the YAML is invalid
-      // we keep the lifted yamlText buffer and skip the form update; the user
-      // can fix the YAML and try again.
       if (editMode === 'yaml' && newMode === 'form') {
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          // Plain reset(values) — same pattern as handleYamlSubmit. Earlier
-          // attempts with { keepDirty, keepDefaultValues } caused RHF to skip
-          // the value update for clean fields, which manifested as the YAML
-          // editor briefly showing old values before the toggle completed
-          // (the watch subscription would re-serialize stale getValues()).
           reset(result.values);
         }
       }

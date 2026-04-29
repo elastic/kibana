@@ -86,11 +86,6 @@ export const YamlRuleForm = ({
     search: services.data.search.search,
   });
 
-  // Wraps react-hook-form's `reset(values)` — its name implies "throw away
-  // changes" but with a values argument it's RHF's bulk-update API. Same
-  // pattern as handleYamlSubmit. We tried { keepDirty, keepDefaultValues }
-  // here; in practice RHF would skip the value update for clean fields and
-  // the YAML editor would briefly flash to old values during the sync.
   const applyYamlValuesToForm = useCallback(
     (values: FormValues) => {
       reset(values);
@@ -129,15 +124,11 @@ export const YamlRuleForm = ({
     if (values) {
       applyYamlValuesToForm(values);
     }
-    // On parse failure: error is already set; YAML buffer is preserved (lifted);
-    // form state is left unchanged so the user can either fix YAML and re-blur,
-    // or toggle to Form to see the last valid state.
   }, [parseAndStoreError, applyYamlValuesToForm]);
 
   const handleYamlChange = useCallback(
     (newYaml: string) => {
       setYamlText(newYaml);
-      // Clear error when user starts editing
       setError(null);
     },
     [setYamlText]
