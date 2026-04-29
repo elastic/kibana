@@ -19,8 +19,6 @@ export const selectErrorPopoverState = createSelector(
   selectOverviewState,
   (state) => state.isErrorPopoverOpen
 );
-export const selectOverviewFlyoutConfig = (state: SyntheticsAppState) =>
-  state.overview.flyoutConfig;
 export const selectOverviewTrends = createSelector(
   selectOverviewState,
   ({ trendStats }) => trendStats
