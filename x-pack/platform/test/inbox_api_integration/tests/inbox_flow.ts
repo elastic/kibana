@@ -36,68 +36,73 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Inbox API contract', () => {
-    it('returns an empty list when no providers have registered actions', async () => {
-      const { body } = await supertest
-        .get(INBOX_ACTIONS_URL)
-        .set('elastic-api-version', API_VERSIONS.internal.v1)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+  // FTR's mocha decorator requires each test file to expose exactly ONE
+  // top-level describe — splitting the contract suite and the live-flow
+  // suite into siblings here would fail the loader at runtime.
+  describe('Inbox API integration', () => {
+    describe('contract', () => {
+      it('returns an empty list when no providers have registered actions', async () => {
+        const { body } = await supertest
+          .get(INBOX_ACTIONS_URL)
+          .set('elastic-api-version', API_VERSIONS.internal.v1)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
 
-      const response = body as ListInboxActionsResponse;
-      expect(response.total).to.be(0);
-      expect(response.actions).to.eql([]);
+        const response = body as ListInboxActionsResponse;
+        expect(response.total).to.be(0);
+        expect(response.actions).to.eql([]);
+      });
+
+      it('rejects invalid query params', async () => {
+        await supertest
+          .get(`${INBOX_ACTIONS_URL}?page=0`)
+          .set('elastic-api-version', API_VERSIONS.internal.v1)
+          .set('kbn-xsrf', 'foo')
+          .expect(400);
+        await supertest
+          .get(`${INBOX_ACTIONS_URL}?status=fake`)
+          .set('elastic-api-version', API_VERSIONS.internal.v1)
+          .set('kbn-xsrf', 'foo')
+          .expect(400);
+      });
+
+      it('returns 404 when responding against an unregistered source_app', async () => {
+        await supertest
+          .post(buildRespondToActionUrl('does-not-exist', 'whatever'))
+          .set('elastic-api-version', API_VERSIONS.internal.v1)
+          .set('kbn-xsrf', 'foo')
+          .send({ input: {} })
+          .expect(404);
+      });
+
+      it('returns 400 when the body is missing the required `input` key', async () => {
+        await supertest
+          .post(buildRespondToActionUrl('workflows', 'anything'))
+          .set('elastic-api-version', API_VERSIONS.internal.v1)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(400);
+      });
     });
 
-    it('rejects invalid query params', async () => {
-      await supertest
-        .get(`${INBOX_ACTIONS_URL}?page=0`)
-        .set('elastic-api-version', API_VERSIONS.internal.v1)
-        .set('kbn-xsrf', 'foo')
-        .expect(400);
-      await supertest
-        .get(`${INBOX_ACTIONS_URL}?status=fake`)
-        .set('elastic-api-version', API_VERSIONS.internal.v1)
-        .set('kbn-xsrf', 'foo')
-        .expect(400);
-    });
-
-    it('returns 404 when responding against an unregistered source_app', async () => {
-      await supertest
-        .post(buildRespondToActionUrl('does-not-exist', 'whatever'))
-        .set('elastic-api-version', API_VERSIONS.internal.v1)
-        .set('kbn-xsrf', 'foo')
-        .send({ input: {} })
-        .expect(404);
-    });
-
-    it('returns 400 when the body is missing the required `input` key', async () => {
-      await supertest
-        .post(buildRespondToActionUrl('workflows', 'anything'))
-        .set('elastic-api-version', API_VERSIONS.internal.v1)
-        .set('kbn-xsrf', 'foo')
-        .send({})
-        .expect(400);
-    });
-  });
-
-  /**
-   * Full live-workflow lifecycle. Skipped until this suite gets a harness
-   * that can boot the Workflows execution engine, poll for
-   * `waiting_for_input`, and assert the Inbox provider round-trip.
-   *
-   * When re-enabled, the body should:
-   *  1. POST `/api/workflows/workflow` with a YAML definition containing a
-   *     `waitForInput` step + schema.
-   *  2. POST `/api/workflows/workflow/{id}/run` and capture the execution id.
-   *  3. Poll `GET /internal/inbox/actions` until `source_app: 'workflows'`
-   *     surfaces with the composite `source_id`.
-   *  4. POST `/internal/inbox/actions/workflows/{source_id}/respond` with a
-   *     schema-valid body and assert the step completes with that input.
-   */
-  describe.skip('Inbox live-workflow flow', () => {
-    it('surfaces a paused waitForInput step and resumes it via respond', () => {
-      // See describe-level comment for the expected implementation.
+    /**
+     * Full live-workflow lifecycle. Skipped until this suite gets a harness
+     * that can boot the Workflows execution engine, poll for
+     * `waiting_for_input`, and assert the Inbox provider round-trip.
+     *
+     * When re-enabled, the body should:
+     *  1. POST `/api/workflows/workflow` with a YAML definition containing a
+     *     `waitForInput` step + schema.
+     *  2. POST `/api/workflows/workflow/{id}/run` and capture the execution id.
+     *  3. Poll `GET /internal/inbox/actions` until `source_app: 'workflows'`
+     *     surfaces with the composite `source_id`.
+     *  4. POST `/internal/inbox/actions/workflows/{source_id}/respond` with a
+     *     schema-valid body and assert the step completes with that input.
+     */
+    describe.skip('live-workflow flow', () => {
+      it('surfaces a paused waitForInput step and resumes it via respond', () => {
+        // See describe-level comment for the expected implementation.
+      });
     });
   });
 }
