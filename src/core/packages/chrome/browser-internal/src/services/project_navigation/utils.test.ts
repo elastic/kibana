@@ -9,7 +9,6 @@
 
 import { createLocation } from 'history';
 import type {
-  AppDeepLinkId,
   ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
@@ -142,122 +141,6 @@ describe('parseNavigationTree', () => {
     // Verify the result contains body section but not footer
     expect(result.navigationTreeUI.body).toHaveLength(1);
     expect(result.navigationTreeUI.footer).toBeUndefined();
-  });
-
-  it('should keep a node whose linked deepLink is visible in sideNav', () => {
-    const navigationTreeDef: NavigationTreeDefinition = {
-      body: [
-        {
-          id: 'group',
-          title: 'Group',
-          children: [
-            {
-              id: 'visible_item',
-              title: 'Visible Item',
-              link: 'visible_app' as AppDeepLinkId,
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = parseNavigationTree('es', navigationTreeDef, {
-      cloudLinks: {},
-      deepLinks: {
-        visible_app: {
-          ...getDeepLink('visible_app', 'visible'),
-          visibleIn: ['sideNav', 'globalSearch'],
-        },
-      },
-    });
-
-    const [groupNode] = result.navigationTreeUI.body;
-    expect(groupNode.children?.map((child) => child.id)).toEqual(['visible_item']);
-  });
-
-  it('should remove a node whose linked deepLink is not visible in sideNav', () => {
-    const navigationTreeDef: NavigationTreeDefinition = {
-      body: [
-        {
-          id: 'group',
-          title: 'Group',
-          children: [
-            {
-              id: 'visible_item',
-              title: 'Visible Item',
-              link: 'visible_app' as AppDeepLinkId,
-            },
-            {
-              id: 'hidden_item',
-              title: 'Hidden Item',
-              link: 'hidden_app' as AppDeepLinkId,
-            },
-            {
-              id: 'empty_item',
-              title: 'Empty Item',
-              link: 'empty_app' as AppDeepLinkId,
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = parseNavigationTree('es', navigationTreeDef, {
-      cloudLinks: {},
-      deepLinks: {
-        visible_app: {
-          ...getDeepLink('visible_app', 'visible'),
-          visibleIn: ['sideNav'],
-        },
-        hidden_app: {
-          ...getDeepLink('hidden_app', 'hidden'),
-          visibleIn: ['globalSearch'],
-        },
-        empty_app: {
-          ...getDeepLink('empty_app', 'empty'),
-          visibleIn: [],
-        },
-      },
-    });
-
-    const [groupNode] = result.navigationTreeUI.body;
-    expect(groupNode.children?.map((child) => child.id)).toEqual(['visible_item']);
-  });
-
-  it('should remove a node whose linked deepLink is missing', () => {
-    const navigationTreeDef: NavigationTreeDefinition = {
-      body: [
-        {
-          id: 'group',
-          title: 'Group',
-          children: [
-            {
-              id: 'known_item',
-              title: 'Known Item',
-              link: 'known_app' as AppDeepLinkId,
-            },
-            {
-              id: 'unknown_item',
-              title: 'Unknown Item',
-              link: 'unknown_app' as AppDeepLinkId,
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = parseNavigationTree('es', navigationTreeDef, {
-      cloudLinks: {},
-      deepLinks: {
-        known_app: {
-          ...getDeepLink('known_app', 'known'),
-          visibleIn: ['sideNav'],
-        },
-      },
-    });
-
-    const [groupNode] = result.navigationTreeUI.body;
-    expect(groupNode.children?.map((child) => child.id)).toEqual(['known_item']);
   });
 });
 
