@@ -1289,6 +1289,7 @@
     "@opentelemetry/exporter-trace-otlp-grpc": "0.213.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.213.0",
     "@opentelemetry/exporter-trace-otlp-proto": "0.213.0",
+    "@opentelemetry/otlp-transformer": "0.213.0",
     "@opentelemetry/instrumentation": "0.213.0",
     "@opentelemetry/instrumentation-http": "0.213.0",
     "@opentelemetry/instrumentation-undici": "0.23.0",

@@ -43,6 +43,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
+import { completeSendToSelfRegistration } from '@kbn/tracing';
 import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
@@ -265,6 +266,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     core: CoreStart,
     { telemetryCollectionManager, security }: TelemetryPluginsDepsStart
   ) {
+    completeSendToSelfRegistration(core.elasticsearch.client.asInternalUser);
+
     const { analytics, savedObjects } = core;
 
     this.isOptedIn$.subscribe((enabled) => analytics.optIn({ global: { enabled } }));

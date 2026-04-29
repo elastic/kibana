@@ -14,6 +14,11 @@ import { isInInferenceContext } from '../is_in_inference_context';
 
 const SHOULD_TRACK_ATTR = '_ab_should_track';
 
+interface AgentBuilderSpanProcessorOpts {
+  exporter: tracing.SpanExporter;
+  scheduledDelayMillis: number;
+}
+
 /**
  * Span processor that exports inference spans to Elasticsearch via OTLP.
  *
@@ -27,15 +32,27 @@ const SHOULD_TRACK_ATTR = '_ab_should_track';
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
 
-  constructor(config: InferenceTracingAgentBuilderExportConfig) {
-    const exporter = new OTLPTraceExporter({
-      url: config.url,
-      ...(config.headers ? { headers: config.headers } : {}),
-    });
-
-    this.batchProcessor = new tracing.BatchSpanProcessor(exporter, {
-      scheduledDelayMillis: config.scheduled_delay,
-    });
+  constructor(
+    optsOrConfig: AgentBuilderSpanProcessorOpts | InferenceTracingAgentBuilderExportConfig
+  ) {
+    if ('exporter' in optsOrConfig) {
+      this.batchProcessor = new tracing.BatchSpanProcessor(optsOrConfig.exporter, {
+        scheduledDelayMillis: optsOrConfig.scheduledDelayMillis,
+      });
+    } else {
+      if (!optsOrConfig.url) {
+        throw new Error(
+          'AgentBuilderSpanProcessor requires "url" when not using a custom exporter'
+        );
+      }
+      const exporter = new OTLPTraceExporter({
+        url: optsOrConfig.url,
+        ...(optsOrConfig.headers ? { headers: optsOrConfig.headers } : {}),
+      });
+      this.batchProcessor = new tracing.BatchSpanProcessor(exporter, {
+        scheduledDelayMillis: optsOrConfig.scheduled_delay,
+      });
+    }
   }
 
   onStart(span: tracing.Span, parentContext: api.Context): void {

@@ -13,5 +13,7 @@ export { EVAL_RUN_ID_BAGGAGE_KEY } from './src/baggage';
 
 export { InferencePreservingSampler } from './src/inference_preserving_sampler';
 export { AgentBuilderSpanProcessor } from './src/agent_builder/agent_builder_span_processor';
+export { ElasticsearchOtlpExporter } from './src/agent_builder/elasticsearch_otlp_exporter';
+export type { ElasticsearchTransport } from './src/agent_builder/elasticsearch_otlp_exporter';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';

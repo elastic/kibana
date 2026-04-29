@@ -8,13 +8,16 @@
  */
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
+import type { InferenceTracingAgentBuilderExportConfig } from '@kbn/inference-tracing-config';
 import {
   InferencePreservingSampler,
   AgentBuilderSpanProcessor,
+  ElasticsearchOtlpExporter,
   EVAL_RUN_ID_BAGGAGE_KEY,
   LangfuseSpanProcessor,
   PhoenixSpanProcessor,
 } from '@kbn/inference-tracing';
+import type { ElasticsearchTransport } from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
@@ -24,6 +27,34 @@ import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { EvalSpanProcessor } from './eval_span_processor';
 import { OTLPSpanProcessor } from './otlp_span_processor';
 import { LateBindingSpanProcessor } from '..';
+
+let pendingSendToSelfConfig: InferenceTracingAgentBuilderExportConfig | undefined;
+
+/**
+ * If a `send_to_self` agent_builder exporter was configured, this function
+ * completes the deferred registration by wiring the exporter to the
+ * provided Elasticsearch client. Safe to call multiple times — only the
+ * first call with a pending config takes effect.
+ *
+ * @returns A teardown function, or `undefined` if nothing was registered.
+ */
+export function completeSendToSelfRegistration(
+  esClient: ElasticsearchTransport
+): (() => Promise<void>) | undefined {
+  const config = pendingSendToSelfConfig;
+  if (!config) {
+    return undefined;
+  }
+  pendingSendToSelfConfig = undefined;
+
+  const exporter = new ElasticsearchOtlpExporter(esClient);
+  const processor = new AgentBuilderSpanProcessor({
+    exporter,
+    scheduledDelayMillis: config.scheduled_delay,
+  });
+
+  return LateBindingSpanProcessor.get().register(processor);
+}
 
 /**
  * Initialize the OpenTelemetry tracing provider
@@ -90,7 +121,11 @@ export function initTracing({
         break;
 
       case 'agent_builder':
-        LateBindingSpanProcessor.get().register(new AgentBuilderSpanProcessor(variant.value));
+        if (variant.value.send_to_self) {
+          pendingSendToSelfConfig = variant.value;
+        } else {
+          LateBindingSpanProcessor.get().register(new AgentBuilderSpanProcessor(variant.value));
+        }
         break;
     }
   });

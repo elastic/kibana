@@ -59,14 +59,26 @@ export interface InferenceTracingPhoenixExportConfig {
 /**
  * Configuration for the Agent Builder exporter that sends
  * inference spans to Elasticsearch via OTLP.
+ *
+ * When {@link send_to_self} is `true`, the exporter uses Kibana's own
+ * Elasticsearch client to POST spans to `/_otlp/v1/traces`, so
+ * `url` and `headers` must be omitted.
  */
 export interface InferenceTracingAgentBuilderExportConfig {
   /**
-   * The OTLP receiver URL for Elasticsearch.
+   * When true, spans are shipped to the same Elasticsearch cluster
+   * that Kibana is connected to, using Kibana's internal ES client.
+   * `url` and `headers` must not be set in this mode.
    */
-  url: string;
+  send_to_self: boolean;
+  /**
+   * The OTLP receiver URL for Elasticsearch.
+   * Required when `send_to_self` is false.
+   */
+  url?: string;
   /**
    * Optional headers for authentication or metadata.
+   * Must not be set when `send_to_self` is true.
    */
   headers?: Record<string, string>;
   /**

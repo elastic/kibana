@@ -36,11 +36,28 @@ const phoenixExportConfigSchema: Type<InferenceTracingPhoenixExportConfig> = sch
 });
 
 const agentBuilderExportConfigSchema: Type<InferenceTracingAgentBuilderExportConfig> =
-  schema.object({
-    url: schema.string(),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    scheduled_delay: scheduledDelay,
-  });
+  schema.object(
+    {
+      send_to_self: schema.boolean({ defaultValue: false }),
+      url: schema.maybe(schema.string()),
+      headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+      scheduled_delay: scheduledDelay,
+    },
+    {
+      validate: (value) => {
+        if (value.send_to_self) {
+          if (value.url) {
+            return '"url" must not be set when "send_to_self" is true';
+          }
+          if (value.headers) {
+            return '"headers" must not be set when "send_to_self" is true';
+          }
+        } else if (!value.url) {
+          return '"url" is required when "send_to_self" is false';
+        }
+      },
+    }
+  );
 
 export const inferenceTracingExportConfigSchema: Type<InferenceTracingExportConfig> = schema.oneOf([
   schema.object({
