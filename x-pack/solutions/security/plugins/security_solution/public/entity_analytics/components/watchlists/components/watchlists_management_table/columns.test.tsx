@@ -12,6 +12,11 @@ import { buildWatchlistsManagementTableColumns } from './columns';
 
 describe('buildWatchlistsManagementTableColumns', () => {
   const euiTheme = {} as unknown as EuiThemeComputed;
+  const mockRecord: WatchlistTableItemType = {
+    name: 'test-watchlist',
+    managed: false,
+    riskModifier: 1,
+  };
 
   const getColumns = () =>
     buildWatchlistsManagementTableColumns(
@@ -92,13 +97,13 @@ describe('buildWatchlistsManagementTableColumns', () => {
 
   it('renders risk score weighting value when provided', () => {
     const column = getRenderableColumnByField('riskModifier');
-    const rendered = column?.render?.(1.5, {});
+    const rendered = column?.render?.(1.5, mockRecord);
     expect(rendered).toBe(1.5);
   });
 
   it('renders last updated as a relative time element when provided', () => {
     const column = getRenderableColumnByField('updatedAt');
-    const rendered = column?.render?.('2026-02-23T11:00:00.000Z', {});
+    const rendered = column?.render?.('2026-02-23T11:00:00.000Z', mockRecord);
     expect(rendered).not.toEqual(getEmptyTagValue());
     expect(React.isValidElement(rendered)).toBe(true);
   });
