@@ -12,14 +12,9 @@ import { test } from '../fixtures';
 
 const TABLE_LOADED_CSS =
   '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
-
 const SUBMIT_BUTTON = 'create-submit';
 const TOAST_TITLE = 'euiToastHeader__title';
 const MULTIPLE_SOLUTIONS_WARNING = 'maintenanceWindowMultipleSolutionsRemovedWarning';
-
-// Frequency.DAILY == 3 in rrule. Match what the FTR createMaintenanceWindow
-// helper sent — keeping the existing MW on a daily cadence so the only
-// dropdown-driven change in test 1 is selecting the Daily option again.
 const FREQ_DAILY = 3;
 
 interface MaintenanceWindowResponse {
@@ -86,9 +81,6 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    // Find every MW and delete it. Keeping cleanup keyed off "whatever exists"
-    // (rather than tracking ids in-memory) means tests that fail mid-flow
-    // don't leak windows into the next test.
     const findRes = await kbnClient.request<{ data: Array<{ id: string }> }>({
       method: 'GET',
       path: '/internal/alerting/rules/maintenance_window/_find',
@@ -135,7 +127,6 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleRepeatSelect').selectOption(dailyValue);
 
     await page.testSubj.click(SUBMIT_BUTTON);
-    // Edits to a recurring schedule trigger a confirm modal before save.
     await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(

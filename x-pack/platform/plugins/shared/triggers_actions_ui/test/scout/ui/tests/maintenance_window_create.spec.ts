@@ -40,18 +40,11 @@ const selectNativeOptionByTestSubj = async (
 test.describe('Maintenance window create form', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    // Maintenance Windows is registered under Stack Management's
-    // `insightsAndAlerting` section, not as a standalone app — `gotoApp`
-    // resolves to /app/<id>, which doesn't exist for this page.
     await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/maintenanceWindows'));
     await page.testSubj.locator(CREATE_BUTTON).waitFor({ state: 'visible' });
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    // Find every maintenance window and delete it. We do not track ids
-    // in-memory because a half-completed test may have created a MW that
-    // never made it back to the test code (e.g. failure during the confirm
-    // modal). Find-and-delete is idempotent.
     const findRes = await kbnClient.request<{ data: Array<{ id: string }> }>({
       method: 'GET',
       path: '/internal/alerting/rules/maintenance_window/_find',

@@ -58,9 +58,7 @@ test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic
     page,
   }) => {
     await apiServices.spaces.create(SPACE_2);
-    // Role scoped to space-2 only; matches the ONLY_S2_USER setup from the FTR
-    // equivalent. ES index privileges mirror the original so the user's
-    // backing API key passes alerting's authorization check.
+
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
         cluster: [],

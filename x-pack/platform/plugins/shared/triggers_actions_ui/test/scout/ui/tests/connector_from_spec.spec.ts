@@ -7,13 +7,9 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, CONNECTORS_APP_PATH } from '../fixtures';
 
-// The connector spec registers its actionType id with a leading dot
-// (`.alienvault-otx`); the card's data-test-subj follows `${id}-card`.
 const CONNECTOR_TYPE_ID = '.alienvault-otx';
-// Unique-per-run name so retries / leaked connectors from earlier failed runs
-// don't collide.
 const CONNECTOR_NAME = `web-${Date.now()}`;
 
 test.describe('Create connector from connector spec', { tag: tags.stateful.classic }, () => {
@@ -21,9 +17,7 @@ test.describe('Create connector from connector spec', { tag: tags.stateful.class
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    // page.goto needs a fully-qualified URL on the first call; Scout's
-    // Playwright config does not set `baseURL`. Build it via kbnUrl.get().
-    await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/triggersActionsConnectors'));
+    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -49,15 +43,10 @@ test.describe('Create connector from connector spec', { tag: tags.stateful.class
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
 
-    // EUI Toast header title carries `data-test-subj="euiToastHeader__title"`
-    // (not a CSS class). Success toast carries `Created '<name>'`.
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created '${CONNECTOR_NAME}'`
     );
 
-    // Find the new connector via the API for cleanup. The toast confirms
-    // creation succeeded server-side, so the find is purely for getting an id
-    // that afterAll can delete.
     const allConnectors = (await apiServices.alerting.connectors.getAll()) as Array<{
       id: string;
       name: string;

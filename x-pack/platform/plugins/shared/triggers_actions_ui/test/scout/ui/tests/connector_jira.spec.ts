@@ -8,16 +8,12 @@
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../fixtures';
 
-const SEARCH_INPUT = '[data-test-subj="actionsList"] .euiFieldSearch';
-const ACTIONS_TABLE_LOADED =
-  '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)';
 const SUMMARY_INPUT = 'summaryInput';
 const EXECUTE_BUTTON = 'executeActionButton';
 const EXECUTION_FAILURE_RESULT = 'executionFailureResult';
 const FLYOUT_CLOSE_BUTTON = 'edit-connector-flyout-close-btn';
-
 const OTHER_FIELDS_PARSE_ERROR =
   '[subActionParams.incident.otherFields.0]: could not parse record value from json input';
 
@@ -72,8 +68,8 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/triggersActionsConnectors'));
-    await page.locator(ACTIONS_TABLE_LOADED).waitFor();
+    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -84,10 +80,10 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
   });
 
   test('shows the created connector in the list', async ({ page }) => {
-    const searchBox = page.locator(SEARCH_INPUT);
+    const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
     await searchBox.fill(jiraConnectorName);
     await searchBox.press('Enter');
-    await page.locator(ACTIONS_TABLE_LOADED).waitFor();
+    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 
     const rows = page.testSubj.locator('connectors-row');
     await expect(rows).toHaveCount(1);
@@ -99,7 +95,6 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
 
   test('does not throw a type error for other fields when its valid json', async ({ page }) => {
     await openTestConnectorFlyout(page, jiraConnectorId);
-
     await page.testSubj.locator(SUMMARY_INPUT).fill('Test summary');
     await setOtherFieldsValue(page, '{ "key": "value" }');
     await page.testSubj.click(EXECUTE_BUTTON);

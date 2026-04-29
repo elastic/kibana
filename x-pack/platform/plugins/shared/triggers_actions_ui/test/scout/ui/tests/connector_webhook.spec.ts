@@ -13,15 +13,9 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../fixtures';
 
-const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
 const WEBHOOK_CARD_SUBJ = '.webhook-card';
-
-const ACTIONS_TABLE_LOADED =
-  '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)';
-const SEARCH_INPUT = '[data-test-subj="actionsList"] .euiFieldSearch';
-
 const CREATE_CONNECTOR_BUTTON = 'createConnectorButton';
 const HEADER_KEY_INPUT = 'webhookHeadersKeyInput';
 const HEADER_VALUE_INPUT = 'webhookHeadersValueInput';
@@ -31,9 +25,6 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    // Don't wait for the actions table here — when there are no connectors,
-    // the page renders the empty-state instead and the table is absent.
-    // Tests that need the table wait for it after creating a connector.
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
   });
 
@@ -73,13 +64,7 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await headerKeys.nth(0).fill('config-key');
     await headerValues.nth(0).fill('config-value');
 
-    // Secret header (row 1) — switch the second row's type to "secret".
-    // EuiSuperSelectWrapper only accepts a CSS selector string, but the two
-    // selects share the same data-test-subj across rows, so we open the
-    // second one by index and click the `option-secret` listbox option
-    // directly. The popover dismisses on selection because the listbox is
-    // rendered in a portal at the document root rather than inside the
-    // focus-trapped flyout body.
+    // Secret header (row 1)
     await headerKeys.nth(1).fill('secret-key');
     await headerValues.nth(1).fill('secret-value');
 
@@ -142,12 +127,12 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     // Re-load the list now that a new connector exists. The table only
     // renders when there's at least one connector — wait for it explicitly.
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(ACTIONS_TABLE_LOADED).waitFor();
+    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 
-    const searchBox = page.locator(SEARCH_INPUT);
+    const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
     await searchBox.fill(connectorName);
     await searchBox.press('Enter');
-    await page.locator(ACTIONS_TABLE_LOADED).waitFor();
+    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 
     const rows = page.testSubj.locator('connectors-row');
     await expect(rows).toHaveCount(1);
