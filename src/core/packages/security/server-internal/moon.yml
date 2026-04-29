@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/config-mocks'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
