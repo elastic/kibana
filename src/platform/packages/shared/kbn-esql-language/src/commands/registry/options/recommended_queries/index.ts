@@ -177,8 +177,25 @@ export const getRecommendedQueriesTemplates = ({
               }
             ),
             queryString: timeField
-              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
-              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
+              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
+              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
+          },
+        ]
+      : []),
+    ...(fromCommand
+      ? [
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
+              defaultMessage: 'Load unmapped fields',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
+              {
+                defaultMessage:
+                  'Allows querying unmapped fields, loading their values from the _source if present.',
+              }
+            ),
+            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
           },
         ]
       : []),
@@ -190,6 +207,7 @@ export const getRecommendedQueriesTemplates = ({
     const formattedQuery = fromCommand
       ? prettifyQuery(query.queryString)
       : prettifyQueryTemplate(`FROM index ${query.queryString}`);
+
     query.queryString = formattedQuery;
   });
   return queries;

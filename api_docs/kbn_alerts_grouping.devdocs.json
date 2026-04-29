@@ -59,6 +59,7 @@
             "lineNumber": 310,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertsGroupingProps",
             "trackAdoption": false
           }
         ],
@@ -643,6 +644,7 @@
                 "lineNumber": 109,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "GroupModel",
                 "trackAdoption": false,
                 "isRequired": true
               }
