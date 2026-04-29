@@ -147,10 +147,7 @@ describe('RuleDoctorInsightsClient', () => {
         expect.objectContaining({
           query: {
             bool: {
-              filter: [
-                { term: { insight_id: 'insight-1' } },
-                { term: { space_id: 'default' } },
-              ],
+              filter: [{ term: { insight_id: 'insight-1' } }, { term: { space_id: 'default' } }],
             },
           },
           size: 1,
@@ -182,10 +179,7 @@ describe('RuleDoctorInsightsClient', () => {
         expect.objectContaining({
           query: {
             bool: {
-              filter: [
-                { term: { insight_id: 'insight-1' } },
-                { term: { space_id: 'default' } },
-              ],
+              filter: [{ term: { insight_id: 'insight-1' } }, { term: { space_id: 'default' } }],
             },
           },
           size: 1,
@@ -205,9 +199,9 @@ describe('RuleDoctorInsightsClient', () => {
         hits: { hits: [] },
       } as never);
 
-      await expect(
-        client.updateInsightStatus('missing', 'dismissed', 'default')
-      ).rejects.toThrow(/Insight missing not found/);
+      await expect(client.updateInsightStatus('missing', 'dismissed', 'default')).rejects.toThrow(
+        /Insight missing not found/
+      );
 
       expect(esClient.update).not.toHaveBeenCalled();
     });
@@ -266,5 +260,4 @@ describe('RuleDoctorInsightsClient', () => {
       );
     });
   });
-
 });

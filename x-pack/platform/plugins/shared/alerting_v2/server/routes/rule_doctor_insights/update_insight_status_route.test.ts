@@ -67,8 +67,6 @@ describe('UpdateInsightStatusRoute', () => {
     );
     await route.handle();
 
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 404 })
-    );
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 404 }));
   });
 });

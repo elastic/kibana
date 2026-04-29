@@ -92,8 +92,6 @@ describe('ListInsightsRoute', () => {
     );
     await route.handle();
 
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 500 })
-    );
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
   });
 });

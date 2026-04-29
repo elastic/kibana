@@ -9,7 +9,12 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import {
+  updateInsightStatusParamsSchema,
+  updateInsightStatusBodySchema,
+  type UpdateInsightStatusParams,
+  type UpdateInsightStatusBody,
+} from '@kbn/alerting-v2-schemas';
 import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { InsightsClientScopedToken } from '../../lib/rule_doctor_insights_client/tokens';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -17,14 +22,6 @@ import { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { SpaceContext } from './space_context';
-
-const updateInsightStatusParamsSchema = z.object({
-  insight_id: z.string().describe('The identifier for the insight.'),
-});
-
-const updateInsightStatusBodySchema = z.object({
-  status: z.enum(['open', 'dismissed', 'applied']).describe('The new status for the insight.'),
-});
 
 @injectable()
 export class UpdateInsightStatusRoute extends BaseAlertingRoute {
@@ -51,9 +48,9 @@ export class UpdateInsightStatusRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
-      z.infer<typeof updateInsightStatusParamsSchema>,
+      UpdateInsightStatusParams,
       unknown,
-      z.infer<typeof updateInsightStatusBodySchema>
+      UpdateInsightStatusBody
     >,
     @inject(InsightsClientScopedToken)
     private readonly insightsClient: RuleDoctorInsightsClient,
