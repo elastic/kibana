@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/kql'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
