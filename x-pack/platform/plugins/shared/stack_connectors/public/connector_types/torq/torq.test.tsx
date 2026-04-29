@@ -27,6 +27,7 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(CONNECTOR_ID);
+    expect(actionTypeModel.actionTypeTitle).toEqual('Torq');
   });
 });
 

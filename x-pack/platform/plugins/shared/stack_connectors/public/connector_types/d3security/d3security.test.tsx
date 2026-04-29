@@ -26,6 +26,7 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
+    expect(connectorTypeModel.actionTypeTitle).toEqual('D3 Security');
   });
 });
 

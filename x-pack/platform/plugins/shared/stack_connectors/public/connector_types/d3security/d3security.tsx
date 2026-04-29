@@ -8,7 +8,11 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SUB_ACTION,
+} from '@kbn/connector-schemas/d3security/constants';
 import type { D3SecurityActionParams, D3SecurityConnector } from './types';
 interface ValidationErrors {
   subAction: string[];
@@ -21,12 +25,7 @@ export function getConnectorType(): D3SecurityConnector {
     selectMessage: i18n.translate('xpack.stackConnectors.components.d3security.selectMessageText', {
       defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
     }),
-    actionTypeTitle: i18n.translate(
-      'xpack.stackConnectors.components.d3security.connectorTypeTitle',
-      {
-        defaultMessage: 'D3 data',
-      }
-    ),
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: D3SecurityActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {

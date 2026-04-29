@@ -12,7 +12,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/xmatters/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/xmatters/constants';
 import type { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
@@ -26,12 +26,7 @@ export function getConnectorType(): ConnectorTypeModel<
     selectMessage: i18n.translate('xpack.stackConnectors.components.xmatters.selectMessageText', {
       defaultMessage: 'Trigger an xMatters workflow.',
     }),
-    actionTypeTitle: i18n.translate(
-      'xpack.stackConnectors.components.xmatters.connectorTypeTitle',
-      {
-        defaultMessage: 'xMatters data',
-      }
-    ),
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: XmattersActionParams
     ): Promise<

@@ -12,7 +12,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index/constants';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/es_index/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/es_index/constants';
 import type { EsIndexConfig, IndexActionParams } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, IndexActionParams> {
@@ -22,9 +22,7 @@ export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, I
     selectMessage: i18n.translate('xpack.stackConnectors.components.index.selectMessageText', {
       defaultMessage: 'Index data into Elasticsearch.',
     }),
-    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.index.connectorTypeTitle', {
-      defaultMessage: 'Index data',
-    }),
+    actionTypeTitle: CONNECTOR_NAME,
     actionConnectorFields: lazy(() => import('./es_index_connector')),
     actionParamsFields: lazy(() => import('./es_index_params')),
     validateParams: async (

@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/server_log/constants';
 import type { ServerLogActionParams } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerLogActionParams> {
@@ -21,12 +21,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerL
     selectMessage: i18n.translate('xpack.stackConnectors.components.serverLog.selectMessageText', {
       defaultMessage: 'Add a message to a Kibana log.',
     }),
-    actionTypeTitle: i18n.translate(
-      'xpack.stackConnectors.components.serverLog.connectorTypeTitle',
-      {
-        defaultMessage: 'Send to Server log',
-      }
-    ),
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: (
       actionParams: ServerLogActionParams
     ): Promise<GenericValidationResult<Pick<ServerLogActionParams, 'message'>>> => {

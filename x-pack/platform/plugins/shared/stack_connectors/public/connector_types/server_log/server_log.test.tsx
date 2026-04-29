@@ -28,6 +28,7 @@ describe('connectorTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
     expect(connectorTypeModel.iconClass).toEqual('logsApp');
+    expect(connectorTypeModel.actionTypeTitle).toEqual('Server log');
   });
 });
 

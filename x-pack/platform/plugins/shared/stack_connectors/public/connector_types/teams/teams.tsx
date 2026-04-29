@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/teams/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/teams/constants';
 import type { TeamsActionParams, TeamsSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
@@ -21,9 +21,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, Te
     selectMessage: i18n.translate('xpack.stackConnectors.components.teams.selectMessageText', {
       defaultMessage: 'Send a message to a Microsoft Teams channel.',
     }),
-    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.teams.connectorTypeTitle', {
-      defaultMessage: 'Send a message to a Microsoft Teams channel.',
-    }),
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: TeamsActionParams
     ): Promise<GenericValidationResult<TeamsActionParams>> => {

@@ -29,6 +29,7 @@ describe('connectorTypeRegistry.get() works', () => {
   it('connector type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
     expect(connectorTypeModel.iconClass).toEqual('logoWebhook');
+    expect(connectorTypeModel.actionTypeTitle).toEqual('Webhook');
   });
 });
 

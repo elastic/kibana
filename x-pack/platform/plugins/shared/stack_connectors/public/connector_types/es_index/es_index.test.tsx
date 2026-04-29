@@ -28,6 +28,7 @@ describe('connectorTypeRegistry.get() works', () => {
   test('connector type .index is registered', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
     expect(connectorTypeModel.iconClass).toEqual('indexOpen');
+    expect(connectorTypeModel.actionTypeTitle).toEqual('Index');
   });
 });
 

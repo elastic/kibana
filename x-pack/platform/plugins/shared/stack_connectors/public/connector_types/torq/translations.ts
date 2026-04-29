@@ -62,13 +62,6 @@ export const TORQ_SELECT_MESSAGE = i18n.translate(
   }
 );
 
-export const TORQ_ACTION_TYPE_TITLE = i18n.translate(
-  'xpack.stackConnectors.torqAction.actionTypeTitle',
-  {
-    defaultMessage: 'Alert data',
-  }
-);
-
 export const TORQ_TOKEN_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.torqAction.tokenHelpText',
   {
