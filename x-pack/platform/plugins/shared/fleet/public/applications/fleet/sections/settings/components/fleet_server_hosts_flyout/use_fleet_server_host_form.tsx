@@ -391,7 +391,16 @@ export function useFleetServerHostsForm(
     isLoading ||
     !hasChanged ||
     hostUrlsInput.props.isInvalid ||
-    nameInput.props.isInvalid;
+    nameInput.props.isInvalid ||
+    sslCertificateAuthoritiesInput.props.isInvalid ||
+    sslCertificateInput.props.isInvalid ||
+    sslKeyInput.props.isInvalid ||
+    sslEsCertificateAuthoritiesInput.props.isInvalid ||
+    sslEsCertificateInput.props.isInvalid ||
+    sslESKeyInput.props.isInvalid ||
+    sslAgentCertificateAuthoritiesInput.props.isInvalid ||
+    sslAgentCertificateInput.props.isInvalid ||
+    sslAgentKeyInput.props.isInvalid;
 
   return {
     isLoading,

@@ -77,6 +77,7 @@ import {
   validateDynamicKafkaTopics,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateSslPathInput,
   validateSslPathsCombo,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
@@ -426,12 +427,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     output?.ssl?.certificate ?? '',
     output?.type === 'logstash' && logstashEnableSSLInput.value
       ? validateSSLCertificate
-      : undefined,
+      : validateSslPathInput,
     isSSLEditable
   );
   const sslKeyInput = useInput(
     output?.ssl?.key ?? '',
-    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKey : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value
+      ? validateSSLKey
+      : validateSslPathInput,
     isSSLEditable
   );
 
@@ -706,6 +709,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
     const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
     const kafkaClientIDValid = kafkaClientIdInput.validate();
+    const kafkaSslCertificateAuthoritiesValid = kafkaSslCertificateAuthoritiesInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
     const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
@@ -718,6 +722,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const kibanaAPIKeyValid = kibanaAPIKeyInput.validate();
     const kibanaURLInputValid = kibanaURLInput.validate();
+    const sslCertificateAuthoritiesValid = sslCertificateAuthoritiesInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -741,6 +746,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         logstashHostsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
+        sslCertificateAuthoritiesValid &&
         sslCertificateValid &&
         (sslKeyValid || sslKeySecretValid)
       );
@@ -750,6 +756,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         nameInputValid &&
         kafkaHostsValid &&
+        kafkaSslCertificateAuthoritiesValid &&
         kafkaSslCertificateValid &&
         kafkaSslKeyValid &&
         kafkaUsernameValid &&
@@ -768,6 +775,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         remoteElasticsearchUrlsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
+        sslCertificateAuthoritiesValid &&
+        sslCertificateValid &&
+        sslKeyValid &&
         ((serviceTokenInput.value && serviceTokenValid) ||
           (serviceTokenSecretInput.value && serviceTokenSecretValid)) &&
         ((!syncIntegrationsInput.value && kibanaURLInputValid) ||
@@ -784,7 +794,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         otelExporterConfigValid &&
         nameInputValid &&
         caTrustedFingerprintValid &&
-        diskQueuePathValid
+        diskQueuePathValid &&
+        sslCertificateAuthoritiesValid &&
+        sslCertificateValid &&
+        sslKeyValid
       );
     }
   }, [
@@ -796,6 +809,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
     kafkaClientIdInput,
+    kafkaSslCertificateAuthoritiesInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
@@ -809,6 +823,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kibanaAPIKeyInput,
     syncIntegrationsInput,
     kibanaURLInput,
+    sslCertificateAuthoritiesInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -1214,6 +1229,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     hasEncryptedSavedObjectConfigured,
     isShipperEnabled: !isShipperDisabled,
     isDisabled:
-      isLoading || (output && !hasChanged) || (isLogstash && !hasEncryptedSavedObjectConfigured),
+      isLoading ||
+      (output && !hasChanged) ||
+      (isLogstash && !hasEncryptedSavedObjectConfigured) ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      sslKeyInput.props.isInvalid ||
+      kafkaSslCertificateAuthoritiesInput.props.isInvalid ||
+      kafkaSslCertificateInput.props.isInvalid ||
+      kafkaSslKeyInput.props.isInvalid,
   };
 }

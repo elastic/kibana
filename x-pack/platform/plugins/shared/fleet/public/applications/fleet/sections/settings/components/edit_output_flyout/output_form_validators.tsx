@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { validateSslPathInput, validateSslPathsCombo } from './ssl_form_validators';
-export { validateSslPathsCombo };
+export { validateSslPathInput, validateSslPathsCombo };
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>

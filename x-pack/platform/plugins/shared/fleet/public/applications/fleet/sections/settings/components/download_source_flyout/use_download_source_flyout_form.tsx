@@ -163,6 +163,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const nameInputValid = nameInput.validate();
     const hostValid = hostInput.validate();
 
+    const sslCertificateAuthoritiesValid = sslCertificateAuthoritiesInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -217,6 +218,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     return (
       nameInputValid &&
       hostValid &&
+      sslCertificateAuthoritiesValid &&
       sslCertificateValid &&
       sslKeyValid &&
       sslKeySecretValid &&
@@ -231,6 +233,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   }, [
     nameInput,
     hostInput,
+    sslCertificateAuthoritiesInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -366,7 +369,13 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || (downloadSource && !hasChanged) || isEditDisabled,
+    isDisabled:
+      isLoading ||
+      (downloadSource && !hasChanged) ||
+      isEditDisabled ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      sslKeyInput.props.isInvalid,
   };
 }
 

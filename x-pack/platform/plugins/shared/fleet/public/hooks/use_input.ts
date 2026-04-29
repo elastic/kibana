@@ -34,8 +34,8 @@ export function useInput(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
-      if (errors && validate && validate(newValue) === undefined) {
-        setErrors(undefined);
+      if (errors && validate) {
+        setErrors(validate(newValue));
       }
     },
     [errors, validate]
@@ -98,8 +98,8 @@ export function useSecretInput(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
-      if (errors && validate && validate(newValue) === undefined) {
-        setErrors(undefined);
+      if (errors && validate) {
+        setErrors(validate(newValue));
       }
     },
     [errors, validate]
