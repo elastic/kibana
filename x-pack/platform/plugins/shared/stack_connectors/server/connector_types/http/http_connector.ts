@@ -6,7 +6,6 @@
  */
 
 import type { AxiosError, AxiosResponse } from 'axios';
-import FormData from 'form-data';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
@@ -264,32 +263,37 @@ export async function executor(
 
   const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
 
-  // Build the request body. For multipart/form-data we hand axios a FormData
-  // instance and let it set the Content-Type with the right boundary; for
-  // anything else, fall back to the existing JSON/string serialization.
+  // Build the request body. For multipart/form-data we hand axios a native
+  // FormData instance and let it serialize the parts and set the Content-Type
+  // with the right boundary itself; for anything else, fall back to the
+  // existing JSON/string serialization.
   let requestData: unknown;
-  let multipartHeaders: Record<string, string> | undefined;
   if (formData) {
     const form = new FormData();
     for (const [fieldName, spec] of Object.entries(formData)) {
       if (spec.filename !== undefined) {
-        form.append(fieldName, spec.content, {
-          filename: spec.filename,
-          contentType: spec.content_type,
+        const blob = new Blob([spec.content], {
+          type: spec.content_type ?? 'application/octet-stream',
         });
+        form.append(fieldName, blob, spec.filename);
       } else {
         form.append(fieldName, spec.content);
       }
     }
     requestData = form;
-    multipartHeaders = form.getHeaders();
   } else {
     requestData = serializeHttpRequestBody(body);
   }
 
-  // Merge headers: params headers take precedence over config headers; the
-  // multipart Content-Type (with boundary) must win over any user-supplied one.
-  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}), ...multipartHeaders };
+  // Merge headers: params headers take precedence over config headers. When
+  // sending multipart/form-data, strip any user-supplied Content-Type so axios
+  // can set the correct multipart Content-Type (with boundary) itself.
+  const mergedHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  const finalHeaders = formData
+    ? Object.fromEntries(
+        Object.entries(mergedHeaders).filter(([key]) => key.toLowerCase() !== 'content-type')
+      )
+    : mergedHeaders;
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({

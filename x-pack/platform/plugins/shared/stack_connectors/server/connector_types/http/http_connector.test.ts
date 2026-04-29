@@ -1001,7 +1001,7 @@ describe('execute()', () => {
   describe('form_data (multipart/form-data)', () => {
     const baseConfig: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
 
-    test('sends a FormData body with multipart Content-Type when form_data is set', async () => {
+    test('sends a native FormData body when form_data is set', async () => {
       await connectorType.executor?.({
         actionId: 'some-id',
         services,
@@ -1024,13 +1024,14 @@ describe('execute()', () => {
       });
 
       const call = requestMock.mock.calls[0][0];
-      expect(call.data).toBeDefined();
-      // form-data exposes getBoundary(); presence is enough to assert it's a FormData instance
-      expect(typeof call.data.getBoundary).toBe('function');
-      expect(call.headers['content-type']).toMatch(/^multipart\/form-data; boundary=/);
+      // Native FormData; axios will set the multipart Content-Type with the
+      // correct boundary itself, so we don't pass a Content-Type header.
+      expect(call.data).toBeInstanceOf(FormData);
+      expect(call.headers['content-type']).toBeUndefined();
+      expect(call.headers['Content-Type']).toBeUndefined();
     });
 
-    test('multipart Content-Type overrides any user-supplied Content-Type header', async () => {
+    test('strips user-supplied Content-Type so axios can set the multipart boundary', async () => {
       await connectorType.executor?.({
         actionId: 'some-id',
         services,
@@ -1049,9 +1050,11 @@ describe('execute()', () => {
         connectorUsageCollector,
       });
 
-      expect(requestMock.mock.calls[0][0].headers['content-type']).toMatch(
-        /^multipart\/form-data; boundary=/
-      );
+      const headers = requestMock.mock.calls[0][0].headers;
+      // Both casings of Content-Type are removed in form_data mode so axios
+      // can set its own multipart Content-Type with the correct boundary.
+      expect(headers['content-type']).toBeUndefined();
+      expect(headers['Content-Type']).toBeUndefined();
     });
 
     test('appends a file part when filename is provided and a plain field when it is not', async () => {
@@ -1073,24 +1076,22 @@ describe('execute()', () => {
         connectorUsageCollector,
       });
 
-      // Serialize the form to inspect the resulting multipart body.
-      const form = requestMock.mock.calls[0][0].data;
-      const buffer: Buffer = await new Promise((resolve, reject) => {
-        const chunks: Buffer[] = [];
-        form.on('data', (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
-        form.on('end', () => resolve(Buffer.concat(chunks)));
-        form.on('error', reject);
-        form.resume();
-      });
-      const body = buffer.toString('utf-8');
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entries = Array.from(form.entries());
 
-      // File field carries Content-Disposition with filename and the user's content_type.
-      expect(body).toContain('Content-Disposition: form-data; name="file"; filename="a.bin"');
-      expect(body).toContain('Content-Type: application/x-bin');
-      // Plain text field has no filename and no per-part Content-Type.
-      expect(body).toContain('Content-Disposition: form-data; name="description"');
-      expect(body).not.toContain('Content-Disposition: form-data; name="description"; filename=');
-      expect(body).toContain('monthly sync');
+      // File field is wrapped as a File (Blob with a name) carrying the
+      // user's content_type; the Blob content round-trips intact.
+      const fileEntry = entries.find(([key]) => key === 'file')?.[1];
+      expect(fileEntry).toBeInstanceOf(Blob);
+      const file = fileEntry as File;
+      expect(file.name).toBe('a.bin');
+      expect(file.type).toBe('application/x-bin');
+      expect(await file.text()).toBe('binary-ish');
+
+      // Plain field is stored as a string (no filename, no per-part content type).
+      const descEntry = entries.find(([key]) => key === 'description')?.[1];
+      expect(typeof descEntry).toBe('string');
+      expect(descEntry).toBe('monthly sync');
     });
 
     test('returns an error when both body and form_data are provided', async () => {
