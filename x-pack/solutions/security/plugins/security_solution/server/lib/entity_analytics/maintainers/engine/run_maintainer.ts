@@ -45,6 +45,150 @@ function errMsg(err: unknown): string {
   return err instanceof Error ? err.message : JSON.stringify(err);
 }
 
+/** Returns the actor page on success, null to stop iteration (index missing or aborted), throws on real error. */
+async function fetchActorPage(
+  config: RelationshipIntegrationConfig,
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  namespace: string,
+  afterKey: CompositeAfterKey | undefined,
+  transportOpts: { signal: AbortSignal } | undefined,
+  abortController: AbortController | undefined
+): Promise<{ buckets: CompositeBucket[]; newAfterKey: CompositeAfterKey | undefined } | null> {
+  try {
+    const result = await esClient.search(
+      { index: config.indexPattern(namespace), ...buildActorDiscoveryQuery(config, afterKey) },
+      transportOpts
+    );
+    const aggs = result.aggregations as CompositeAggregations | undefined;
+    return {
+      buckets: aggs?.users?.buckets ?? [],
+      newAfterKey: aggs?.users?.after_key,
+    };
+  } catch (err) {
+    if (isIndexNotFound(err)) {
+      logger.info(`[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`);
+      return null;
+    }
+    if (abortController?.signal.aborted) {
+      logger.info(`[${config.id}] Aborted during composite aggregation`);
+      return null;
+    }
+    logger.error(`[${config.id}] Composite aggregation failed: ${errMsg(err)}`);
+    throw err;
+  }
+}
+
+/** Returns the ES|QL result on success, null to stop iteration (aborted), throws on real error. */
+async function fetchTargetsForActors(
+  config: RelationshipIntegrationConfig,
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  namespace: string,
+  buckets: CompositeBucket[],
+  transportOpts: { signal: AbortSignal } | undefined,
+  abortController: AbortController | undefined
+): Promise<EsqlQueryResult | null> {
+  const esqlFilter = {
+    bool: {
+      filter: [
+        { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
+        buildActorPageFilter(config, buckets),
+      ],
+    },
+  };
+  try {
+    const result = await esClient.esql.query(
+      { query: buildTargetsPerActorQuery(config, namespace), filter: esqlFilter },
+      transportOpts
+    );
+    return result as unknown as EsqlQueryResult;
+  } catch (err) {
+    if (abortController?.signal.aborted) {
+      logger.info(`[${config.id}] Aborted during ES|QL query`);
+      return null;
+    }
+    logger.error(`[${config.id}] ES|QL query failed: ${errMsg(err)}`);
+    throw err;
+  }
+}
+
+async function runIntegration(
+  config: RelationshipIntegrationConfig,
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  namespace: string,
+  abortController: AbortController | undefined
+): Promise<{ buckets: number; records: ProcessedEngineRecord[] }> {
+  let afterKey: CompositeAfterKey | undefined;
+  let iterations = 0;
+  let totalBuckets = 0;
+  const records: ProcessedEngineRecord[] = [];
+  const transportOpts = abortController ? { signal: abortController.signal } : undefined;
+
+  do {
+    if (abortController?.signal.aborted) {
+      logger.info(`[${config.id}] Aborted during pagination`);
+      break;
+    }
+    iterations++;
+    if (iterations > MAX_ITERATIONS) {
+      logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+      break;
+    }
+
+    const actorPage = await fetchActorPage(
+      config,
+      esClient,
+      logger,
+      namespace,
+      afterKey,
+      transportOpts,
+      abortController
+    );
+    if (actorPage === null) break;
+
+    const { buckets, newAfterKey } = actorPage;
+    logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
+    totalBuckets += buckets.length;
+    if (buckets.length === 0) break;
+
+    const esqlResult = await fetchTargetsForActors(
+      config,
+      esClient,
+      logger,
+      namespace,
+      buckets,
+      transportOpts,
+      abortController
+    );
+    if (esqlResult === null) break;
+
+    const { columns, values } = esqlResult;
+    if (config.esqlQueryOverride) {
+      const colNames = new Set(columns.map((c) => c.name));
+      const expected = config.enableFrequencyClassification
+        ? ['actorUserId', 'accesses_frequently', 'accesses_infrequently']
+        : ['actorUserId', config.relationshipType];
+      const missing = expected.filter((n) => !colNames.has(n));
+      if (missing.length > 0) {
+        logger.warn(
+          `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(
+            ', '
+          )} — results will be empty`
+        );
+      }
+    }
+    const pageRecords = parseTargetsPerActorRows(columns, values, config);
+    records.push(...pageRecords);
+    logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+
+    afterKey = buckets.length < COMPOSITE_PAGE_SIZE ? undefined : newAfterKey;
+  } while (afterKey);
+
+  return { buckets: totalBuckets, records };
+}
+
 /**
  * Generic run loop for relationship maintainers.
  * Iterates over the provided integration configs and runs the composite agg +
@@ -83,96 +227,16 @@ export const runGenericMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
-
-    let afterKey: CompositeAfterKey | undefined;
-    let iterations = 0;
-
-    do {
-      if (abortController?.signal.aborted) {
-        logger.info(`[${config.id}] Aborted during pagination`);
-        break;
-      }
-      iterations++;
-      if (iterations > MAX_ITERATIONS) {
-        logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
-        break;
-      }
-
-      const transportOpts = abortController ? { signal: abortController.signal } : undefined;
-
-      let aggResult;
-      try {
-        aggResult = await esClient.search(
-          {
-            index: config.indexPattern(namespace),
-            ...buildActorDiscoveryQuery(config, afterKey),
-          },
-          transportOpts
-        );
-      } catch (err) {
-        if (isIndexNotFound(err)) {
-          logger.info(
-            `[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`
-          );
-          break;
-        }
-        logger.error(`[${config.id}] Composite aggregation failed: ${errMsg(err)}`);
-        throw err;
-      }
-
-      const aggs = aggResult.aggregations as CompositeAggregations | undefined;
-      const buckets: CompositeBucket[] = aggs?.users?.buckets ?? [];
-      const newAfterKey: CompositeAfterKey | undefined = aggs?.users?.after_key;
-
-      logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
-      totalBuckets += buckets.length;
-
-      if (buckets.length === 0) break;
-
-      const bucketFilter = buildActorPageFilter(config, buckets);
-      const esqlFilter = {
-        bool: {
-          filter: [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }, bucketFilter],
-        },
-      };
-
-      const esqlQuery = buildTargetsPerActorQuery(config, namespace);
-
-      let esqlResult;
-      try {
-        esqlResult = await esClient.esql.query(
-          { query: esqlQuery, filter: esqlFilter },
-          transportOpts
-        );
-      } catch (err) {
-        logger.error(`[${config.id}] ES|QL query failed: ${errMsg(err)}`);
-        break;
-      }
-
-      const { columns, values } = esqlResult as unknown as EsqlQueryResult;
-      if (columns && values) {
-        if (config.esqlQueryOverride) {
-          const colNames = new Set(columns.map((c) => c.name));
-          const expected = config.enableFrequencyClassification
-            ? ['actorUserId', 'accesses_frequently', 'accesses_infrequently']
-            : ['actorUserId', config.relationshipType];
-          const missing = expected.filter((n) => !colNames.has(n));
-          if (missing.length > 0) {
-            logger.warn(
-              `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(
-                ', '
-              )} — results will be empty`
-            );
-          }
-        }
-        const records = parseTargetsPerActorRows(columns, values, config);
-        totalRecords += records.length;
-        allRecords.push(...records);
-        logger.debug(`[${config.id}] Produced ${records.length} records`);
-      }
-
-      afterKey = buckets.length < COMPOSITE_PAGE_SIZE ? undefined : newAfterKey;
-    } while (afterKey);
+    const { buckets, records } = await runIntegration(
+      config,
+      esClient,
+      logger,
+      namespace,
+      abortController
+    );
+    totalBuckets += buckets;
+    totalRecords += records.length;
+    allRecords.push(...records);
   }
 
   if (!abortController?.signal.aborted) {
