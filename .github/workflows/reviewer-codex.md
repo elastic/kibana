@@ -31,6 +31,11 @@ engine:
     - features.plugins=false
     - -c
     - features.apps=false
+    # Azure-backed LiteLLM strictly validates tool response ordering.
+    - -c
+    - mcp_servers.github.supports_parallel_tool_calls=false
+    - -c
+    - mcp_servers.safeoutputs.supports_parallel_tool_calls=false
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
