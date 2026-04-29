@@ -49,20 +49,12 @@ type TermQueryFieldValue = string | boolean | number | null;
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
 
 /**
- * Minimum raw ELSER score threshold for semantic search results.
- *
- * We apply min_score directly on the raw ELSER scores rather than using
- * `minmax` normalization because minmax is relative to the current result set:
- * the top result always normalizes to 1.0, so irrelevant queries (e.g.,
- * "test-keyword" against security documents) still return hits. A raw score
- * threshold avoids this — ELSER produces very low scores (typically < 1.0)
- * for nonsensical or completely unrelated queries, while genuinely relevant
- * matches score much higher (5–30+).
+ * The default min_score is now normalized to 0-1 range, as different inference models could have different scales (ELSER, Jina,...).
  *
  * This threshold may need tuning as the dataset evolves. If legitimate
  * matches are being excluded, lower it; if noise creeps back in, raise it.
  */
-const SEMANTIC_MIN_SCORE = 10;
+const SEMANTIC_MIN_SCORE = 0.15;
 
 const SEARCH_SIZE_LIMIT = 10_000;
 

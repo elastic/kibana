@@ -42,10 +42,12 @@ import { searchWithKeywordFallback } from '../errors/search_with_keyword_fallbac
 import type { SearchMode } from '../../../../common/queries';
 
 /**
- * Minimum raw ELSER score threshold for semantic search results.
- * See query_client.ts for rationale — same threshold applies here.
+ * The default min_score is now normalized to 0-1 range, as different inference models could have different scales (ELSER, Jina,...).
+ *
+ * This threshold may need tuning as the dataset evolves. If legitimate
+ * matches are being excluded, lower it; if noise creeps back in, raise it.
  */
-const SEMANTIC_MIN_SCORE = 10;
+const SEMANTIC_MIN_SCORE = 0.15;
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
