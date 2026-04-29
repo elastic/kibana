@@ -6,3 +6,7 @@
  */
 
 export { RuleDetailsPage } from './rule_details_page';
+export { RulesListPage } from './rules_list_page';
+export { RulesSettingsPage } from './rules_settings_page';
+export { RuleCreatePage } from './rule_create_page';
+export { RuleEditPage } from './rule_edit_page';
