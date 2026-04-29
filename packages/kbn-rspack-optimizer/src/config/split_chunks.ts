@@ -20,10 +20,10 @@ type CacheGroups = NonNullable<OptimizationSplitChunksOptions['cacheGroups']>;
  * CACHE GROUP PRIORITY ORDER (highest wins):
  *   35: sharedPlugins    - /plugins/  (all cross-plugin shared code)
  *   32: corePackages     - /src/core/packages/
- *   30: sharedPackages   - /packages/(shared|private)/  (platform packages)
- *   30: vendorsHeavy     - specific heavy node_modules
- *   29: solutionPackages - /solutions/* /packages/
- *   28: rootPackages     - /packages/kbn-/  (repo root + x-pack/packages)
+ *   31: sharedPackages   - /packages/(shared|private)/  (platform packages)
+ *   30: solutionPackages - /solutions/* /packages/
+ *   29: rootPackages     - /packages/kbn-/  (repo root + x-pack/packages)
+ *   21: vendorsHeavy     - specific heavy node_modules
  *   20: vendors          - /node_modules/ (minChunks: 3)
  *  -20: default          - catch-all (minChunks: 3, name: 'shared-misc')
  *
@@ -76,7 +76,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
     test: /[\\/]packages[\\/](?:shared|private)[\\/]/,
     name: 'shared-packages',
     chunks: 'async' as const,
-    priority: 30,
+    priority: 31,
     minChunks: 3,
     minSize: 0,
     reuseExistingChunk: true,
@@ -89,7 +89,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
     test: /[\\/]solutions[\\/][^\\/]+[\\/]packages[\\/]/,
     name: 'shared-solution-packages',
     chunks: 'async' as const,
-    priority: 29,
+    priority: 30,
     minChunks: 3,
     minSize: 0,
     reuseExistingChunk: true,
@@ -103,7 +103,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
     test: /[\\/]packages[\\/]kbn-/,
     name: 'shared-root-packages',
     chunks: 'async' as const,
-    priority: 28,
+    priority: 29,
     minChunks: 3,
     minSize: 0,
     reuseExistingChunk: true,
@@ -117,7 +117,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
     test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
     name: 'vendors-heavy',
     chunks: 'async' as const,
-    priority: 30,
+    priority: 21,
     minChunks: 3,
     minSize: 0,
     reuseExistingChunk: true,
