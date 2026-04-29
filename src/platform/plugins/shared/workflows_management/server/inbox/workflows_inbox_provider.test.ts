@@ -176,6 +176,33 @@ describe('createWorkflowsInboxProvider', () => {
       expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
+    it('throws InboxActionConflictError when the step execution is zombie-settled (finishedAt + status=waiting_for_input)', async () => {
+      // Regression: a race between the workflow-level timeout monitor and the
+      // waitForInput step can leave a doc with `status: waiting_for_input` AND
+      // `finishedAt`/`error` set (the step is actually terminal). The
+      // status-only pre-check would let the response through to the engine,
+      // which would return a 500; this translates it to a clean 409 at the
+      // provider boundary so the client sees a refreshable conflict.
+      const api = fakeApi();
+      (api.getStepExecution as jest.Mock).mockResolvedValueOnce(
+        buildStep({
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          finishedAt: '2026-04-29T21:13:59.407Z',
+          error: { type: 'TimeoutError', message: 'Failed due to workflow timeout' },
+        })
+      );
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const err = await provider
+        .respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
+        .catch((e: unknown) => e);
+
+      expect(isInboxActionConflictError(err)).toBe(true);
+      expect((err as Error).message).toMatch(/already settled/);
+      expect((err as Error).message).toMatch(/TimeoutError/);
+      expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
     it('throws InvalidWorkflowSourceIdError when source_id is malformed', async () => {
       const provider = createWorkflowsInboxProvider({
         api: fakeApi(),

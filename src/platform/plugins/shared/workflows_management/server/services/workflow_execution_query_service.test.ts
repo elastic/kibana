@@ -383,7 +383,12 @@ describe('WorkflowExecutionQueryService', () => {
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         index: string;
-        query: { bool: { must: Array<Record<string, unknown>> } };
+        query: {
+          bool: {
+            must: Array<Record<string, unknown>>;
+            must_not?: Array<Record<string, unknown>>;
+          };
+        };
       };
       expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
 
@@ -403,6 +408,24 @@ describe('WorkflowExecutionQueryService', () => {
       expect(result.total).toBe(1);
       expect(result.results).toHaveLength(1);
       expect(result.results[0].stepType).toBe('waitForInput');
+    });
+
+    it('excludes step executions that already have finishedAt set', async () => {
+      // Regression: a race between the workflow-level timeout monitor and the
+      // waitForInput step could leave a doc with `status: waiting_for_input`
+      // AND `finishedAt` set (the step is actually terminal). Such docs must
+      // not resurface in the Inbox — responding to them is a no-op because the
+      // parent workflow execution is already finished.
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.listWaitingForInputSteps('default');
+
+      const searchArgs = mockEsClient.search.mock.calls[0][0] as {
+        query: { bool: { must_not?: Array<Record<string, unknown>> } };
+      };
+      expect(searchArgs.query.bool.must_not).toEqual([{ exists: { field: 'finishedAt' } }]);
     });
 
     it('paginates via from/size derived from page/perPage', async () => {

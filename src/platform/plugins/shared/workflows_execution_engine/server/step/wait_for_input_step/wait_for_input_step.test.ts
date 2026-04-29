@@ -43,6 +43,7 @@ describe('WaitForInputStepImpl', () => {
       setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
+      abortController: new AbortController(),
       contextManager: {
         renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
       },
@@ -219,6 +220,40 @@ describe('WaitForInputStepImpl', () => {
     it('should still navigate to the next node', async () => {
       await underTest.run();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
+    });
+  });
+
+  describe('aborted runtime — race with workflow-level timeout', () => {
+    // Regression: when the workflow-level timeout monitor fires in parallel
+    // with a resume iteration, it aborts the step runtime and calls
+    // `failStep(timeoutError)`. Without this guard the waitForInput step
+    // proceeded to re-enter its wait state, overwriting `status: FAILED` back
+    // to `status: WAITING_FOR_INPUT` (error/finishedAt survived because
+    // `updateStep` spreads). The zombie step then permanently reappeared in
+    // the Inbox because `listWaitingForInputSteps` filters only on status.
+    beforeEach(() => {
+      mockStepExecutionRuntime.abortController.abort();
+    });
+
+    it('should not call tryEnterWaitUntil when the runtime is already aborted', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('should not mutate step state when the runtime is already aborted', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+    });
+
+    it('should emit an observable hitl:aborted debug event', async () => {
+      await underTest.run();
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('run aborted before wait-entry'),
+        expect.objectContaining({ event: { action: 'hitl:aborted' } })
+      );
     });
   });
 

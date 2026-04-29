@@ -120,6 +120,22 @@ export const createWorkflowsInboxProvider = ({
         );
       }
 
+      // Defence-in-depth: a race between the workflow-level timeout monitor
+      // and the waitForInput step can leave a doc with
+      // `status: waiting_for_input` AND `finishedAt`/`error` set. The status
+      // check above then passes, but the step is actually terminal. Translate
+      // this to a clean 409 here so responders see a meaningful message
+      // instead of a 500 from the engine's freshness check.
+      if (stepExecution.finishedAt || stepExecution.error) {
+        throw createInboxActionConflictError(
+          WORKFLOWS_INBOX_SOURCE_APP,
+          buildWorkflowSourceId(stepExecution),
+          `step execution ${parsed.stepExecutionId} is already settled (finishedAt=${
+            stepExecution.finishedAt ?? 'unset'
+          }${stepExecution.error ? `, error=${stepExecution.error.type}` : ''})`
+        );
+      }
+
       logger.debug(
         `Workflows inbox provider resuming execution ${parsed.executionId} (workflow ${parsed.workflowId})`
       );

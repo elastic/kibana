@@ -234,6 +234,14 @@ export class WorkflowExecutionQueryService {
    * matched zero docs and made the Inbox UI appear empty even when workflows
    * were paused on `waitForInput`. The status filter is sufficient because
    * `waiting_for_input` is only ever produced by the `waitForInput` step type.
+   *
+   * Defence-in-depth `must_not` on `finishedAt`: if a race between the
+   * workflow-level timeout monitor and the waitForInput step leaves a doc with
+   * `status: waiting_for_input` AND `finishedAt` set (the step is actually
+   * settled), we must not resurface it in the Inbox — responding to it is a
+   * no-op because the execution doc is terminal. The underlying race is fixed
+   * in `WaitForInputStepImpl`, but this keeps the Inbox honest even for
+   * pre-existing zombie docs or any future regression.
    */
   async listWaitingForInputSteps(
     spaceId: string,
@@ -246,6 +254,7 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
+            must_not: [{ exists: { field: 'finishedAt' } }],
           },
         },
         sort: [{ startedAt: { order: 'desc' } }],
