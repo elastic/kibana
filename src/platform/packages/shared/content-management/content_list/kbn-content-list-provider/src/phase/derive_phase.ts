@@ -46,9 +46,12 @@ export interface DerivePhaseInput {
  * 4. `isFetching && hasActiveQuery` → `'filtering'`.
  * 5. Otherwise → `'populated'`.
  *
- * `hasNoItems` and `hasNoResults` are both `false` while a fetch is in
- * flight (to prevent flicker), so the `'filtering'` branch is reachable
- * when the user has applied a filter and data has not yet resolved.
+ * `hasNoItems` and `hasNoResults` are derived from the latest **settled**
+ * query data and held stable during background refetches (`keepPreviousData`),
+ * so they do not reset on every in-flight fetch. The `'filtering'` branch is
+ * therefore reachable when the user has applied a filter/search and the
+ * updated results have not yet resolved — the previous data is still showing
+ * and neither empty-state condition applies to it.
  */
 export const derivePhase = (input: DerivePhaseInput): ContentListPhase => {
   if (input.isLoading) {

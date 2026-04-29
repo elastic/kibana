@@ -101,8 +101,10 @@ export interface ContentListQueryData {
    * is active. Use this to render a full-page CTA prompt ("Create your first
    * {entity}"). Mutually exclusive with {@link hasNoResults}.
    *
-   * Both flags are `false` while a fetch is in flight so the UI never flickers
-   * to an empty state mid-keystroke.
+   * Derived from the latest **settled** query data and held stable during
+   * background refetches (`keepPreviousData`). It does not reset to `false`
+   * on every in-flight fetch — only when the newly resolved result contains
+   * items or an active query is detected.
    */
   hasNoItems: boolean;
   /**
@@ -110,8 +112,9 @@ export interface ContentListQueryData {
    * to render a "no matching results" message inside the table. Mutually
    * exclusive with {@link hasNoItems}.
    *
-   * Both flags are `false` while a fetch is in flight so the UI never flickers
-   * to an empty state mid-keystroke.
+   * Like {@link hasNoItems}, this is derived from settled data and held stable
+   * during background refetches. It transitions to `false` only when the
+   * resolved result contains hits or the query is cleared.
    */
   hasNoResults: boolean;
   /**

@@ -235,10 +235,10 @@ describe('ContentListClientProvider', () => {
       rerender();
       rerender();
 
-      // uiSettings.get should read each setting once at mount.
+      // uiSettings.get should read each setting once at mount, order-independent.
       expect(services.uiSettings.get).toHaveBeenCalledTimes(2);
-      expect(services.uiSettings.get).toHaveBeenNthCalledWith(1, 'savedObjects:listingLimit');
-      expect(services.uiSettings.get).toHaveBeenNthCalledWith(2, 'savedObjects:perPage');
+      expect(services.uiSettings.get).toHaveBeenCalledWith('savedObjects:listingLimit');
+      expect(services.uiSettings.get).toHaveBeenCalledWith('savedObjects:perPage');
     });
   });
 

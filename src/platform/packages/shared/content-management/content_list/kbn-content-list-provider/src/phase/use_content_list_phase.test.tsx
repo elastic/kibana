@@ -52,11 +52,11 @@ describe('useContentListPhase', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     // Belt-and-braces: cancel and drop any queries that haven't settled, so
     // a never-resolving promise from one test cannot leak state into the
     // shared module-level query client.
-    contentListQueryClient.cancelQueries();
+    await contentListQueryClient.cancelQueries();
     contentListQueryClient.clear();
   });
 
