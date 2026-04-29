@@ -1180,7 +1180,7 @@
     "deepmerge": "4.3.1",
     "del": "6.1.1",
     "diff": "8.0.3",
-    "dompurify": "3.3.2",
+    "dompurify": "3.4.1",
     "dotenv": "17.2.4",
     "elastic-apm-node": "4.13.0",
     "email-addresses": "5.0.0",
