@@ -28,6 +28,7 @@ export interface SaveModalDashboardProps<T = void> {
   objectType: string;
   /** Callback invoked when the modal is closed. */
   onClose: () => void;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
   /** Callback invoked when the save action is triggered. */
   onSave: (
     props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }

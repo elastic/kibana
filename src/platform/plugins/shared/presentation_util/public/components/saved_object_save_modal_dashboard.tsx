@@ -135,6 +135,7 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
   return (
     <SavedObjectSaveModal
       customModalTitle={customModalTitle}
+      hasLibraryItemWithTitle={props.hasLibraryItemWithTitle}
       onSave={onModalSave}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
