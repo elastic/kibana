@@ -62,7 +62,9 @@ describe('AddData', () => {
   });
 
   test('hides SetupCloudConnect when hideAnnouncements is true', () => {
-    jest.requireMock('@kbn/kibana-react-plugin/public').useGlobalUiSetting.mockReturnValueOnce(true);
+    jest
+      .requireMock('@kbn/kibana-react-plugin/public')
+      .useGlobalUiSetting.mockReturnValueOnce(true);
     const component = shallowWithIntl(
       <AddData
         addBasePath={addBasePathMock}
