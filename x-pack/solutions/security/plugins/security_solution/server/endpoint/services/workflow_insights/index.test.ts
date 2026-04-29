@@ -234,6 +234,59 @@ describe('SecurityWorkflowInsightsService', () => {
   });
 
   describe('createFromDefendInsights', () => {
+    it('should report insight_created telemetry event', async () => {
+      const reportEventMock = jest.fn();
+      mockEndpointAppContextService.getTelemetryService = jest.fn().mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      const insight: DefendInsight = {
+        group: 'TestAV',
+        events: [
+          {
+            id: 'event-1',
+            endpointId: 'endpoint-1',
+            value: '/path/to/process',
+          },
+        ],
+      };
+
+      const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+      (buildWorkflowInsights as jest.Mock).mockResolvedValueOnce(workflowInsights);
+
+      const esClientIndexResp = {
+        _index: DATA_STREAM_NAME,
+        _id: '1',
+        result: 'created' as const,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        _version: 1,
+      };
+      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        endpointContext: mockEndpointAppContextService,
+      });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
+
+      await securityWorkflowInsightsService.createFromDefendInsights(
+        [insight],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.incompatible_antivirus,
+        'connector-id',
+        'model-name'
+      );
+
+      expect(reportEventMock).toHaveBeenCalledWith('endpoint_workflow_insights_created_event', {
+        insightType: 'incompatible_antivirus',
+        count: 1,
+      });
+    });
+
     it('should create workflow insights from defend insights', async () => {
       const insight = {
         group: 'AVGAntivirus',
