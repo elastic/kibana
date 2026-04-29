@@ -221,11 +221,10 @@ const buildActionsColumnSkeleton = (
   const { children } = attributes;
   const actionParts = children !== undefined ? action.parseChildren(children) : [];
 
-  // Fallback to a sensible default count when no explicit children were
-  // provided. Two actions (e.g. edit + delete) is the most common shape; the
-  // real resolver may ultimately produce 0 (none configured) or 3 (edit,
-  // delete, inspect) — either way the skeleton is close enough that the
-  // swap is not jarring.
+  // Hard-coded fallback when no explicit children were provided. The real
+  // resolver may ultimately produce 0 (none configured), 2 (edit + delete),
+  // or 3 (edit, delete, inspect) depending on provider configuration — 2 is
+  // the most common shape and close enough that the swap is not jarring.
   const count = actionParts.length > 0 ? actionParts.length : 2;
 
   return {

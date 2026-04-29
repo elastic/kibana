@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   ContentListProvider,
   contentListQueryClient,
@@ -58,8 +58,8 @@ describe('ContentListTable', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    contentListQueryClient.cancelQueries();
+  afterEach(async () => {
+    await contentListQueryClient.cancelQueries();
     contentListQueryClient.clear();
   });
 
@@ -185,22 +185,21 @@ describe('ContentListTable', () => {
 
   describe('hasNoItems — returns null', () => {
     it('returns null when the provider has no items and no query is active', async () => {
-      const Wrapper = createWrapper({ findItems: createFindItems([]) });
+      const findItems = createFindItems([]);
+      const Wrapper = createWrapper({ findItems });
       const { container } = render(
         <Wrapper>
           <ContentListTable title="Dashboards" data-test-subj="my-table" />
         </Wrapper>
       );
 
-      // Wait for the initial load to settle.
-      await screen.findByRole('main', { hidden: true }).catch(() => {});
-      // Give the query time to resolve.
-      await new Promise((r) => setTimeout(r, 50));
+      // Wait until the query has resolved (findItems called) and the component
+      // has had a chance to re-render into the null/empty state.
+      await waitFor(() => expect(findItems).toHaveBeenCalled());
+      await waitFor(() => expect(container.firstChild).toBeNull());
 
       // The table returns null when hasNoItems — no EuiBasicTable rendered.
       expect(screen.queryByTestId('my-table')).not.toBeInTheDocument();
-      // Nothing is rendered in the container.
-      expect(container.firstChild).toBeNull();
     });
   });
 

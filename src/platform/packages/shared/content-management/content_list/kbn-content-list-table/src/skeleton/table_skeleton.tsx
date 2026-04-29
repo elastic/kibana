@@ -129,9 +129,13 @@ export const TableSkeleton = ({
           )}
           {columns.map((resolved, colIdx) => {
             const colWidth = 'width' in resolved.column ? resolved.column.width : undefined;
+            const colKey =
+              'field' in resolved.column && resolved.column.field
+                ? String(resolved.column.field)
+                : colIdx;
             return (
               <th
-                key={colIdx}
+                key={colKey}
                 css={headerCellCss}
                 style={colWidth ? { width: colWidth } : undefined}
               >
@@ -161,9 +165,13 @@ export const TableSkeleton = ({
             )}
             {columns.map((resolved, colIdx) => {
               const colWidth = 'width' in resolved.column ? resolved.column.width : undefined;
+              const colKey =
+                'field' in resolved.column && resolved.column.field
+                  ? String(resolved.column.field)
+                  : colIdx;
               return (
                 <td
-                  key={colIdx}
+                  key={colKey}
                   css={bodyCellCss}
                   style={colWidth ? { width: colWidth } : undefined}
                 >

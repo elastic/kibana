@@ -23,7 +23,7 @@ const DEFAULT_TEXT_WIDTH = '40%';
  * callback.
  *
  * Uses only the metadata the real resolver already produces — `actions`
- * (present for action columns), explicit `width`, and the column's `align`.
+ * (present for action columns) and explicit `width`.
  * No preset-specific knowledge is encoded here; preset authors can opt in
  * to higher fidelity by supplying a `skeleton` callback via
  * `column.createPreset({ skeleton })`.

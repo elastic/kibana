@@ -56,8 +56,8 @@ describe('ContentListFooter', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    contentListQueryClient.cancelQueries();
+  afterEach(async () => {
+    await contentListQueryClient.cancelQueries();
     contentListQueryClient.clear();
   });
 
