@@ -26,6 +26,7 @@ import type {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
@@ -50,6 +51,12 @@ export interface EntityStoreStartPlugins {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  /**
+   * Optional, declared in `kibana.jsonc` as `optionalPlugins.streams` so the
+   * entity store keeps working in deployments that don't have streams
+   * enabled. Consumers must guard against `undefined` at the call site.
+   */
+  streams?: StreamsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
