@@ -18,7 +18,10 @@ const COMM_COLUMNS = [
   { name: 'communicates_with', type: 'keyword' },
 ];
 
-const ACCESSES_CONFIG = { relationshipType: 'accesses' as const, enableFrequencyClassification: true };
+const ACCESSES_CONFIG = {
+  relationshipType: 'accesses' as const,
+  enableFrequencyClassification: true,
+};
 const COMM_CONFIG = { relationshipType: 'communicates_with' as const };
 
 describe('parseTargetsPerActorRows — accesses', () => {
@@ -83,11 +86,7 @@ describe('parseTargetsPerActorRows — communicates_with', () => {
   });
 
   it('uses actorUserId directly as entityId', () => {
-    const [rec] = parseTargetsPerActorRows(
-      COMM_COLUMNS,
-      [['user:alice@okta', null]],
-      COMM_CONFIG
-    );
+    const [rec] = parseTargetsPerActorRows(COMM_COLUMNS, [['user:alice@okta', null]], COMM_CONFIG);
     expect(rec.entityId).toBe('user:alice@okta');
   });
 });

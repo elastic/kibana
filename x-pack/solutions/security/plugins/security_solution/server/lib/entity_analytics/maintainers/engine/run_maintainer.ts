@@ -159,7 +159,9 @@ export const runGenericMaintainer = async ({
           const missing = expected.filter((n) => !colNames.has(n));
           if (missing.length > 0) {
             logger.warn(
-              `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(', ')} — results will be empty`
+              `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(
+                ', '
+              )} — results will be empty`
             );
           }
         }

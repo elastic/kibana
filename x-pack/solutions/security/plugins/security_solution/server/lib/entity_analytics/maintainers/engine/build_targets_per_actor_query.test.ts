@@ -54,11 +54,15 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     });
 
     it('includes the integration esqlWhereClause', () => {
-      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain('event.action == "log_on"');
+      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain(
+        'event.action == "log_on"'
+      );
     });
 
     it('adds event.outcome == "success" filter', () => {
-      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain('event.outcome == "success"');
+      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain(
+        'event.outcome == "success"'
+      );
     });
 
     it('produces accesses_frequently and accesses_infrequently STATS columns', () => {
@@ -72,20 +76,26 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     });
 
     it('uses a custom frequencyThreshold when provided', () => {
-      expect(buildTargetsPerActorQuery({ ...accessesConfig, frequencyThreshold: 10 }, 'default')).toContain(
-        '>= 10'
-      );
+      expect(
+        buildTargetsPerActorQuery({ ...accessesConfig, frequencyThreshold: 10 }, 'default')
+      ).toContain('>= 10');
     });
 
     it('uses actorEvalOverride when provided', () => {
       const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
-      const query = buildTargetsPerActorQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
+      const query = buildTargetsPerActorQuery(
+        { ...accessesConfig, actorEvalOverride: override },
+        'default'
+      );
       expect(query).toContain(override);
     });
 
     it('skips entity.namespace field evals when actorEvalOverride is set', () => {
       const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
-      const query = buildTargetsPerActorQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
+      const query = buildTargetsPerActorQuery(
+        { ...accessesConfig, actorEvalOverride: override },
+        'default'
+      );
       expect(query).not.toContain('entity.namespace');
       expect(query).not.toContain('_src_entity_namespace');
     });
@@ -98,7 +108,9 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
 
   describe('communicates_with template', () => {
     it('produces a communicates_with STATS column', () => {
-      expect(buildTargetsPerActorQuery(commWithHostConfig, 'default')).toContain('communicates_with');
+      expect(buildTargetsPerActorQuery(commWithHostConfig, 'default')).toContain(
+        'communicates_with'
+      );
     });
 
     it('does not have explicit event.outcome filter line like accesses does', () => {
