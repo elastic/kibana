@@ -10531,6 +10531,20 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.EffortLevels",
+        "type": "Enum",
+        "tags": [],
+        "label": "EffortLevels",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/model_provider.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.EsqlToolFieldType",
         "type": "Enum",
         "tags": [],
@@ -11972,6 +11986,23 @@
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
         "lineNumber": 91,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.EffortLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "EffortLevel",
+        "description": [],
+        "signature": [
+          "\"high\" | \"medium\" | \"low\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/model_provider.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -161,7 +161,7 @@ const emptyAsNullSchemaRawObject = {
    */
   empty_as_null: schema.boolean({
     meta: {
-      description: 'Whether to consider null values as null',
+      description: 'When `true`, treats empty buckets as null instead of zero.',
     },
     defaultValue: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
   }),
@@ -303,26 +303,40 @@ export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extend
   { meta: { id: 'counterRateOperation', title: METRIC_OP_TITLES.counterRate } }
 );
 
-export const metricOperationDefinitionSchema = schema.oneOf([
-  formulaOperationDefinitionSchema,
-  staticOperationDefinitionSchema,
-  fieldMetricOperationsSchema,
-  differencesOperationSchema,
-  movingAverageOperationSchema,
-  cumulativeSumOperationSchema,
-  counterRateOperationSchema,
-  countMetricOperationSchema,
-  uniqueCountMetricOperationSchema,
-  lastValueOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-]);
+export const metricOperationDefinitionSchema = schema.oneOf(
+  [
+    formulaOperationDefinitionSchema,
+    staticOperationDefinitionSchema,
+    fieldMetricOperationsSchema,
+    differencesOperationSchema,
+    movingAverageOperationSchema,
+    cumulativeSumOperationSchema,
+    counterRateOperationSchema,
+    countMetricOperationSchema,
+    uniqueCountMetricOperationSchema,
+    lastValueOperationSchema,
+    percentileOperationSchema,
+    percentileRanksOperationSchema,
+  ],
+  {
+    meta: {
+      title: 'Metric Operation',
+      description:
+        'Metric dimension configuration, supporting field-based aggregations (count, sum, average, median, standard deviation, unique count, last value), percentile operations, time-series operations (differences, moving average, cumulative sum, counter rate), and mathematical formulas.',
+    },
+  }
+);
 
 export type LensApiAllMetricOperations = TypeOf<typeof metricOperationDefinitionSchema>;
-export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf([
-  fieldMetricOperationsSchema,
-  formulaOperationDefinitionSchema,
-]);
+export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf(
+  [fieldMetricOperationsSchema, formulaOperationDefinitionSchema],
+  {
+    meta: {
+      title: 'Field Metric or Formula Operation',
+      description: 'Metric dimension using a field-based aggregation or a mathematical formula.',
+    },
+  }
+);
 
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation
