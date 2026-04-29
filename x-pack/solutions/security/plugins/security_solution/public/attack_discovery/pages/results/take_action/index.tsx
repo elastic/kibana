@@ -301,22 +301,22 @@ const TakeActionComponent: React.FC<Props> = ({
           ]
         : [];
 
-    const caseItems = [
-      {
-        'data-test-subj': 'addToCase',
-        disabled: addToCaseDisabled,
-        key: 'addToCase',
-        name: i18n.ADD_TO_NEW_CASE,
-        onClick: onClickAddToNewCase,
-      },
-      {
-        'data-test-subj': 'addToExistingCase',
-        disabled: addToCaseDisabled,
-        key: 'addToExistingCase',
-        name: i18n.ADD_TO_EXISTING_CASE,
-        onClick: onClickAddToExistingCase,
-      },
-    ];
+    const caseItems = !addToCaseDisabled
+      ? [
+          {
+            'data-test-subj': 'addToCase',
+            key: 'addToCase',
+            name: i18n.ADD_TO_NEW_CASE,
+            onClick: onClickAddToNewCase,
+          },
+          {
+            'data-test-subj': 'addToExistingCase',
+            key: 'addToExistingCase',
+            name: i18n.ADD_TO_EXISTING_CASE,
+            onClick: onClickAddToExistingCase,
+          },
+        ]
+      : [];
 
     const aiItems = isSingleAttackDiscovery
       ? isAgentChatExperienceEnabled
