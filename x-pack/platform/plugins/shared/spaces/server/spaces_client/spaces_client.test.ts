@@ -510,8 +510,7 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart,
-      undefined
+      featuresStart
     );
 
     await client.create({ ...spaceToCreate, name: '  foo-name  ' });
@@ -814,7 +813,7 @@ describe('#update', () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.get.mockResolvedValueOnce({
+    mockCallWithRequestRepository.get.mockResolvedValue({
       ...savedObject,
       attributes: { ...(savedObject.attributes as object), solution: 'es' },
     });
@@ -858,8 +857,7 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart,
-      undefined
+      featuresStart
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, name: '  foo-name  ' });
@@ -883,8 +881,7 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart,
-      undefined
+      featuresStart
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, name: '  new-name  ' });
