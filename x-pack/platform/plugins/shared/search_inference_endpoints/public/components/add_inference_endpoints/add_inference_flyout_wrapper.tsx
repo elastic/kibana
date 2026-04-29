@@ -10,6 +10,8 @@ import React, { useCallback } from 'react';
 import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 const EXCLUDED_PROVIDERS = [ServiceProviderKeys.elasticsearch, ServiceProviderKeys.elastic];
 
@@ -29,10 +31,12 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
       serverless,
     },
   } = useKibana();
+  const usageTracker = useUsageTracker();
 
   const onSubmitSuccess = useCallback(() => {
+    usageTracker.count(EventType.ENDPOINT_CREATED);
     reloadFn();
-  }, [reloadFn]);
+  }, [reloadFn, usageTracker]);
 
   return (
     <InferenceFlyoutWrapper

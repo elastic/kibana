@@ -2429,13 +2429,7 @@
               "<",
               "StartTrainedModelDeploymentResponse",
               ">; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
-              {
-                "pluginId": "@kbn/ml-error-utils",
-                "scope": "common",
-                "docId": "kibKbnMlErrorUtilsPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              },
+              "ErrorType",
               "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: ",
               "UpdateAllocationParams",
               "): Promise<",
