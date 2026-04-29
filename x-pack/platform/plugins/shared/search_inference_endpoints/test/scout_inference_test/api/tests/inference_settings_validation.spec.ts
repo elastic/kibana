@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, FEATURE_PRIVILEGED_ROLE, INFERENCE_SETTINGS_API_PATH } from '../constants';
 
-apiTest.describe('Inference settings validation', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Inference settings validation', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

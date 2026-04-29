@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, INFERENCE_SETTINGS_API_PATH, SAMPLE_FEATURES } from '../constants';
 
@@ -15,7 +15,7 @@ const SPACE_B = 'inference-settings-space-b';
 
 const spaceApiPath = (spaceId: string) => `s/${spaceId}/${INFERENCE_SETTINGS_API_PATH}`;
 
-apiTest.describe('Inference settings space isolation', { tag: tags.stateful.all }, () => {
+apiTest.describe('Inference settings space isolation', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
