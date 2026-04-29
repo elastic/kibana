@@ -9,7 +9,6 @@
 
 export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 
-/** PR label: force full Jest unit/integration runs (skip affected-package filtering). */
 export const PREVENT_SELECTIVE_TESTS_LABEL = 'ci:prevent-selective-testing';
 
 // Changes here skip affected-package filtering for Jest (full run).
