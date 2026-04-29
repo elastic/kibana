@@ -8,15 +8,13 @@
 import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, makeEsQueryRule } from '../fixtures';
 
 const RULES_APP = 'rules';
 const APP_TITLE_SUBJ = 'appTitle';
 const RULES_LIST_SUBJ = 'rulesList';
 const RULES_TAB_SUBJ = 'rulesTab';
 
-// Mirrors `alerts_and_actions_role` from the FTR config.base.ts the deleted
-// `home_page.ts` relied on — grants full access to alerting + connectors.
 const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
@@ -31,8 +29,6 @@ const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
   ],
 };
 
-// Mirrors `only_actions_role` — full connectors access but NO alerting. Used
-// to verify the app shows the no-permission prompt.
 const ONLY_ACTIONS_ROLE: KibanaRole = {
   elasticsearch: { cluster: [] },
   kibana: [
@@ -43,34 +39,6 @@ const ONLY_ACTIONS_ROLE: KibanaRole = {
     },
   ],
 };
-
-// `.es-query` is built-in in the base stateful config (the FTR version used
-// `test.noop` from a fixture plugin that Scout's stateful/classic does not
-// load). Minimal valid params suffice — the test only asserts the rule's
-// presence in the list, not its behavior.
-const makeEsQueryRule = () => ({
-  name: `scout-home-page-rule-${Date.now()}`,
-  ruleTypeId: '.es-query',
-  consumer: 'stackAlerts',
-  params: {
-    searchType: 'esQuery' as const,
-    timeWindowSize: 5,
-    timeWindowUnit: 'm',
-    threshold: [0],
-    thresholdComparator: '>',
-    size: 100,
-    esQuery: '{"query":{"match_all":{}}}',
-    aggType: 'count',
-    groupBy: 'all',
-    termSize: 5,
-    excludeHitsFromPreviousRun: false,
-    sourceFields: [],
-    index: ['.kibana'],
-    timeField: '@timestamp',
-  },
-  schedule: { interval: '1m' },
-  tags: ['scout-home-page'],
-});
 
 test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
   const createdRuleIds: string[] = [];
@@ -109,7 +77,9 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     browserAuth,
     page,
   }) => {
-    const ruleResponse = await apiServices.alerting.rules.create(makeEsQueryRule());
+    const ruleResponse = await apiServices.alerting.rules.create(
+      makeEsQueryRule('scout-home-page')
+    );
     const ruleId = ruleResponse.data.id;
     const ruleName = ruleResponse.data.name;
     createdRuleIds.push(ruleId);
@@ -130,7 +100,9 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     browserAuth,
     page,
   }) => {
-    const ruleResponse = await apiServices.alerting.rules.create(makeEsQueryRule());
+    const ruleResponse = await apiServices.alerting.rules.create(
+      makeEsQueryRule('scout-home-page')
+    );
     const ruleId = ruleResponse.data.id;
     const ruleName = ruleResponse.data.name;
     createdRuleIds.push(ruleId);

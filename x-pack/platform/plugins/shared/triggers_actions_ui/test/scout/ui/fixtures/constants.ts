@@ -21,6 +21,30 @@ export const CONNECTORS_LIST_SELECTORS = {
   TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
 } as const;
 
+export const makeEsQueryRule = (namePrefix: string) => ({
+  name: `${namePrefix}-rule-${Date.now()}`,
+  ruleTypeId: '.es-query',
+  consumer: 'stackAlerts',
+  params: {
+    searchType: 'esQuery' as const,
+    timeWindowSize: 5,
+    timeWindowUnit: 'm',
+    threshold: [0],
+    thresholdComparator: '>',
+    size: 100,
+    esQuery: '{"query":{"match_all":{}}}',
+    aggType: 'count',
+    groupBy: 'all',
+    termSize: 5,
+    excludeHitsFromPreviousRun: false,
+    sourceFields: [],
+    index: ['.kibana'],
+    timeField: '@timestamp',
+  },
+  schedule: { interval: '1m' },
+  tags: [namePrefix],
+});
+
 export const RULE_DETAILS_TEST_SUBJECTS = {
   RULE_DETAILS_TITLE: 'ruleDetailsTitle',
   RULE_NAME: 'ruleName',

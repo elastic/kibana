@@ -36,4 +36,4 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
 });
 
 export * as testData from './constants';
-export { CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from './constants';
+export { CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS, makeEsQueryRule } from './constants';

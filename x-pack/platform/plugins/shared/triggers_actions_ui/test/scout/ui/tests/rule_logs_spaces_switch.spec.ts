@@ -45,7 +45,8 @@ test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic
     const spacesSwitch = page.testSubj.locator(ALL_SPACES_SWITCH_SUBJ);
     await expect(spacesSwitch).toBeVisible();
 
-    const switchButton = spacesSwitch.getByRole('button');
+    // EuiSwitch renders <button role="switch" aria-checked="...">.
+    const switchButton = spacesSwitch.getByRole('switch');
     await expect(switchButton).toHaveAttribute('aria-checked', 'false');
     await switchButton.click();
     await expect(switchButton).toHaveAttribute('aria-checked', 'true');

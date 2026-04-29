@@ -7,42 +7,17 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, makeEsQueryRule } from '../fixtures';
 
 const RULES_LIST_SUBJ = 'rulesList';
-
-// `.es-query` is built-in (Scout's stateful/classic config does not register
-// the FTR-only `test.noop` rule type the deleted spec used). The rule itself
-// only needs to exist so the rules list has at least one row to render.
-const makeEsQueryRule = () => ({
-  name: `scout-page-nav-rule-${Date.now()}`,
-  ruleTypeId: '.es-query',
-  consumer: 'stackAlerts',
-  params: {
-    searchType: 'esQuery' as const,
-    timeWindowSize: 5,
-    timeWindowUnit: 'm',
-    threshold: [0],
-    thresholdComparator: '>',
-    size: 100,
-    esQuery: '{"query":{"match_all":{}}}',
-    aggType: 'count',
-    groupBy: 'all',
-    termSize: 5,
-    excludeHitsFromPreviousRun: false,
-    sourceFields: [],
-    index: ['.kibana'],
-    timeField: '@timestamp',
-  },
-  schedule: { interval: '1m' },
-  tags: ['scout-page-navigation'],
-});
 
 test.describe('Rules page navigation and loading', { tag: tags.stateful.classic }, () => {
   let createdRuleId: string | undefined;
 
   test.beforeAll(async ({ apiServices }) => {
-    const response = await apiServices.alerting.rules.create(makeEsQueryRule());
+    const response = await apiServices.alerting.rules.create(
+      makeEsQueryRule('scout-page-navigation')
+    );
     createdRuleId = response.data.id;
   });
 
@@ -66,15 +41,6 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
   });
 
   test('displays the rules list', async ({ page }) => {
-    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-  });
-
-  test('finishes loading and shows the rules list', async ({ page }) => {
-    // The original FTR test waited for the loading spinner to disappear by
-    // calling `header.waitUntilLoadingHasFinished()`, then asserted on the
-    // rules list. Playwright auto-waits on the locator below until the row
-    // is in a stable rendered state, which subsumes the "spinner gone"
-    // intent — the rules list is only rendered after loading completes.
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
   });
 });

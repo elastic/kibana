@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, makeEsQueryRule } from '../fixtures';
 
 const SETTINGS_LINK_SUBJ = 'rulesSettingsLink';
 const FLYOUT_SUBJ = 'rulesSettingsFlyout';
@@ -20,33 +20,6 @@ const SPINNER_SUBJ = 'centerJustifiedSpinner';
 const DEFAULT_LOOK_BACK = 10;
 const DEFAULT_STATUS_CHANGE_THRESHOLD = 10;
 const DEFAULT_QUERY_DELAY = 10;
-
-// `.es-query` is built-in (the FTR `getTestAlertData()` uses `test.noop`,
-// which Scout's stateful/classic does not register). The rule's only purpose
-// is to get the rules list to render — see FTR's `refreshAlertsList`.
-const makeEsQueryRule = () => ({
-  name: `scout-rules-settings-rule-${Date.now()}`,
-  ruleTypeId: '.es-query',
-  consumer: 'stackAlerts',
-  params: {
-    searchType: 'esQuery' as const,
-    timeWindowSize: 5,
-    timeWindowUnit: 'm',
-    threshold: [0],
-    thresholdComparator: '>',
-    size: 100,
-    esQuery: '{"query":{"match_all":{}}}',
-    aggType: 'count',
-    groupBy: 'all',
-    termSize: 5,
-    excludeHitsFromPreviousRun: false,
-    sourceFields: [],
-    index: ['.kibana'],
-    timeField: '@timestamp',
-  },
-  schedule: { interval: '1m' },
-  tags: ['scout-rules-settings'],
-});
 
 test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
   let createdRuleId: string | undefined;
@@ -73,7 +46,9 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
       body: { delay: DEFAULT_QUERY_DELAY },
     });
 
-    const response = await apiServices.alerting.rules.create(makeEsQueryRule());
+    const response = await apiServices.alerting.rules.create(
+      makeEsQueryRule('scout-rules-settings')
+    );
     createdRuleId = response.data.id;
 
     await browserAuth.loginAsAdmin();
@@ -122,8 +97,7 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     const lookBackInput = page.testSubj.locator(LOOK_BACK_INPUT_SUBJ);
     const statusChangeInput = page.testSubj.locator(STATUS_CHANGE_INPUT_SUBJ);
 
-    // EUI range inputs accept arrow keys to step the value. The original FTR
-    // spec drove this with `browser.pressKeys`. Each press shifts by one step.
+    // EUI range inputs accept arrow keys to step the value.
     await lookBackInput.focus();
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('ArrowRight');
