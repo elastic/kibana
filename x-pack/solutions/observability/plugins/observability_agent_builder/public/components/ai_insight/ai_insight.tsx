@@ -82,7 +82,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const {
     isLoading,
     error,
-    errorRetryable,
+    isErrorRetryable,
     summary,
     context,
     connectorInfo,

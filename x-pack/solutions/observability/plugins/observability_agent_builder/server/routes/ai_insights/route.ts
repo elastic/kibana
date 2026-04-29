@@ -74,7 +74,7 @@ function aiInsightSseErrorResponse({
   });
 }
 
-function toErrorForAiInsightStream({
+function routeAiInsightError({
   error,
   response,
   isCloudEnabled,

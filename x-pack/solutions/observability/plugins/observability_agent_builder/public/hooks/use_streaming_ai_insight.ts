@@ -48,7 +48,7 @@ export interface InsightResponse {
 const handleStreamError = (
   err: unknown,
   setError: (error: string | undefined) => void,
-  setErrorRetryable: (retryable: boolean) => void
+  setIsErrorRetryable: (isRetryable: boolean) => void
 ): void => {
   if (err instanceof AbortError) {
     return;
