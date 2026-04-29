@@ -37,7 +37,7 @@ import {
 import { dataService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import type { DashboardCreationOptions } from './types';
+import type { DashboardApi, DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
@@ -48,6 +48,7 @@ export function initializeUnifiedSearchManager(
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
+  userActivity$: DashboardApi['userActivity$'],
   creationOptions?: DashboardCreationOptions
 ) {
   const {
@@ -229,6 +230,11 @@ export function initializeUnifiedSearchManager(
         .getAutoRefreshFetch$()
         .pipe(
           tap(() => {
+            userActivity$.next({
+              type: 'refresh',
+              start: Date.now(),
+              refreshType: 'auto',
+            });
             reload$.next();
           }),
           switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))

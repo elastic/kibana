@@ -22,7 +22,6 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
-import { getDashboardUserActivityService } from '../../services/user_activity_service';
 import type { DashboardApi } from '../types';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
@@ -110,12 +109,9 @@ export function startQueryPerformanceTracking(
         const completeLoadDuration =
           (performanceState.creationEndTime ?? now) -
           (performanceState.creationStartTime?.startTime ?? now);
-
+        // console.log({ timeToData, loadType, test: dashboard.refreshInterval$?.getValue() });
         if (loadType === 'dashboardSubsequentLoad') {
-          getDashboardUserActivityService(dashboard).logDashboardRefresh(
-            performanceState.creationStartTime?.detail.date,
-            performanceState.creationStartTime?.detail.date + timeToData
-          );
+          dashboard.userActivity$.next({ type: 'refresh', end: Date.now() });
         }
 
         reportPerformanceMetrics({

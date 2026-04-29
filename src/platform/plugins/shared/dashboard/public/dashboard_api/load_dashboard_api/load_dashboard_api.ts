@@ -114,6 +114,7 @@ export async function loadDashboardApi({
     user,
     isAccessControlEnabled,
   });
+  const userActivityService = getDashboardUserActivityService(api);
 
   const performanceSubscription = startQueryPerformanceTracking(api, {
     firstLoad: true,
@@ -125,7 +126,7 @@ export async function loadDashboardApi({
 
   if (savedObjectId) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
-    getDashboardUserActivityService(api).startDashboardView();
+    api.userActivity$.next({ type: 'view', start: Date.now() });
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
@@ -143,10 +144,9 @@ export async function loadDashboardApi({
     cleanup: () => {
       cleanup();
       if (savedObjectId) {
-        (async () => {
-          await getDashboardUserActivityService(api).endDashboardView();
-        })();
+        api.userActivity$.next({ type: 'view', end: Date.now() });
       }
+      userActivityService.cleanup();
       if (onApiCleanup) {
         onApiCleanup();
       }

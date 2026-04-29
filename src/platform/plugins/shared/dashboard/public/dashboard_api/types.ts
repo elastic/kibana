@@ -229,10 +229,21 @@ export type DashboardApi = CanExpandPanels &
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
     user?: DashboardUser;
+    userActivity$: Subject<UserActivity>;
     isAccessControlEnabled?: boolean;
 
     addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
+
+type ActivityTypes = 'view' | 'refresh';
+export type UserActivity<ActivityType extends ActivityTypes = ActivityTypes> =
+  ActivityType extends 'view'
+    ?
+        | { type: ActivityType; start: number; end?: undefined }
+        | { type: ActivityType; start?: undefined; end: number }
+    :
+        | { type: ActivityType; start: number; end?: undefined; refreshType: 'manual' | 'auto' }
+        | { type: ActivityType; start?: undefined; end: number };
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
