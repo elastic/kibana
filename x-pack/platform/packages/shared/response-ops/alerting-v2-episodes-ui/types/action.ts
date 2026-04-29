@@ -10,6 +10,7 @@ export interface EpisodeActionState {
   ruleId: string | null;
   groupHash: string | null;
   lastAckAction: string | null;
+  lastAssigneeUid: string | null;
 }
 
 export interface AlertEpisodeGroupAction {

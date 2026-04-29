@@ -6,7 +6,9 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { ToolOrigin } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
   Attachment,
   VersionedAttachment,
@@ -75,6 +77,7 @@ export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
   compaction = 'compaction',
+  backgroundAgentComplete = 'background_agent_complete',
 }
 
 // tool call step
@@ -91,6 +94,10 @@ export interface ToolCallProgress {
    * The full text message
    */
   message: string;
+  /**
+   * Optional structured metadata attached to this progress event.
+   */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -121,6 +128,7 @@ export interface ToolCallWithResult {
    * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
    */
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -189,7 +197,22 @@ export const isCompactionStep = (step: ConversationRoundStep): step is Compactio
   return step.type === ConversationRoundStepType.compaction;
 };
 
-export type ConversationRoundStep = ToolCallStep | ReasoningStep | CompactionStep;
+export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.backgroundAgentComplete,
+  BackgroundExecutionState
+>;
+
+export const isBackgroundAgentCompleteStep = (
+  step: ConversationRoundStep
+): step is BackgroundAgentCompleteStep => {
+  return step.type === ConversationRoundStepType.backgroundAgentComplete;
+};
+
+export type ConversationRoundStep =
+  | ToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentCompleteStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -303,6 +326,28 @@ export interface ConversationInternalState {
    * Reused across rounds until regeneration is needed.
    */
   compaction_summary?: CompactionSummary;
+  /** Background sub-agent executions keyed by execution ID. */
+  background_executions?: Record<string, BackgroundExecutionState>;
+}
+
+export interface BackgroundExecutionCompletedAt {
+  /** The round it was completed at. */
+  round_id: string;
+  /** If completion was resolved inside a round, the last tool call group ID before completion. */
+  tool_call_group_id?: string;
+}
+
+export interface BackgroundExecutionState {
+  /** The execution ID of the background sub-agent. */
+  execution_id: string;
+  /** Current status of the execution. */
+  status: ExecutionStatus;
+  /** The sub-agent's response, present when status is 'completed'. */
+  response?: AssistantResponse;
+  /** Error details, present when status is 'failed'. */
+  error?: SerializedExecutionError;
+  /** When and where the execution completed, for positioning the notification. */
+  completed_at?: BackgroundExecutionCompletedAt;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

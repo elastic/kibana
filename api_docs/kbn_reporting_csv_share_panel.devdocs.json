@@ -103,6 +103,7 @@
                 "lineNumber": 110,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -197,6 +198,7 @@
                 "lineNumber": 126,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedSearch",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -247,6 +249,7 @@
                 "lineNumber": 141,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "EmbeddableApiContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -297,6 +300,7 @@
                 "lineNumber": 210,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "EmbeddableApiContext",
                 "trackAdoption": false,
                 "isRequired": true
               }

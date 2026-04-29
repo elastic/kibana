@@ -210,6 +210,7 @@
                 "lineNumber": 57,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -280,6 +281,7 @@
                 "lineNumber": 62,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobParamsCSV",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -349,6 +351,7 @@
                 "lineNumber": 67,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunTaskOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -560,6 +563,7 @@
                 "lineNumber": 66,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -634,6 +638,7 @@
                 "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobParamsCsvFromSavedObject",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -651,6 +656,7 @@
                 "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReportingRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -669,6 +675,7 @@
                 "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -738,6 +745,7 @@
                 "lineNumber": 100,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunTaskOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }

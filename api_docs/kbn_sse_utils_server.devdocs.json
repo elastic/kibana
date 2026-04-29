@@ -60,6 +60,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Observable",
             "trackAdoption": false,
             "isRequired": true
           },

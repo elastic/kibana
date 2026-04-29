@@ -67,7 +67,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       */
   copyTimeline(props: CopyTimelineProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
+      .post(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -254,6 +254,9 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
+   */
   resolveTimeline(props: ResolveTimelineProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/timeline/resolve', kibanaSpace))
