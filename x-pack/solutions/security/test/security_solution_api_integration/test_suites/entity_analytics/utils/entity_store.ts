@@ -136,20 +136,16 @@ export const EntityStoreUtils = (
 
     const res = await enableEntityStoreV2(installRequestBody);
 
-    await retry.waitForWithTimeout(
-      `Entity store to reach 'running' status`,
-      60_000,
-      async () => {
-        const { status } = await getEntityStoreStatus();
-        if (status === 'running') {
-          return true;
-        }
-        if (status === 'error') {
-          throw new Error(`Entity store failed to install (status: error)`);
-        }
-        return false;
+    await retry.waitForWithTimeout(`Entity store to reach 'running' status`, 60_000, async () => {
+      const { status } = await getEntityStoreStatus();
+      if (status === 'running') {
+        return true;
       }
-    );
+      if (status === 'error') {
+        throw new Error(`Entity store failed to install (status: error)`);
+      }
+      return false;
+    });
 
     const fromDateISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const toDateISO = new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -235,7 +231,9 @@ export const EntityStoreUtils = (
     fromDateISO?: string;
     toDateISO?: string;
   }) => {
-    const url = namespacedPath(`/internal/security/entity_store/${entityType}/force_log_extraction`);
+    const url = namespacedPath(
+      `/internal/security/entity_store/${entityType}/force_log_extraction`
+    );
 
     log.info(`Force extracting entities for type: ${entityType}`);
     const response = await supertest

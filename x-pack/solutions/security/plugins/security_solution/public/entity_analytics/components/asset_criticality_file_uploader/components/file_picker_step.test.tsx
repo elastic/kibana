@@ -76,7 +76,10 @@ describe('AssetCriticalityFilePickerStep', () => {
   describe('CSV format guidance', () => {
     const renderStep = () =>
       render(
-        <AssetCriticalityFilePickerStep onFileChange={mockOnFileChange} isLoading={mockIsLoading} />,
+        <AssetCriticalityFilePickerStep
+          onFileChange={mockOnFileChange}
+          isLoading={mockIsLoading}
+        />,
         { wrapper: TestProviders }
       );
 
