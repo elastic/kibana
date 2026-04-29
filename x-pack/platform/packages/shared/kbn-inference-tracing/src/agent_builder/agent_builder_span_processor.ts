@@ -10,9 +10,9 @@ import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { InferenceTracingAgentBuilderExportConfig } from '@kbn/inference-tracing-config';
 import { TraceFlags } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { isInInferenceContext } from '../is_in_inference_context';
+import { shouldTrackSpan } from '../should_track_span';
 
-const SHOULD_TRACK_ATTR = '_ab_should_track';
+const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
@@ -56,11 +56,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   }
 
   onStart(span: tracing.Span, parentContext: api.Context): void {
-    const shouldTrack =
-      (isInInferenceContext(parentContext) || span.instrumentationScope.name === 'inference') &&
-      span.instrumentationScope.name !== '@elastic/transport';
-
-    if (shouldTrack) {
+    if (shouldTrackSpan(span, parentContext)) {
       span.setAttribute(SHOULD_TRACK_ATTR, true);
       this.batchProcessor.onStart(span, parentContext);
     }
@@ -76,6 +72,9 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
 
     const exportSpan: tracing.ReadableSpan = {
       ...span,
+      // AgentBuilderSampler upgrades dropped inference spans to RECORD (not RECORD_AND_SAMPLED),
+      // so BatchSpanProcessor.onEnd skips them. Force SAMPLED on the copy to ensure 100% sample
+      // rate for agent builder traces, without affecting the original span or other processors.
       spanContext: () => ({
         ...originalSpanContext,
         traceFlags: TraceFlags.SAMPLED,
