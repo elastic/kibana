@@ -30,7 +30,7 @@ import {
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
 import { ATTACHMENT_TYPES } from '../../attachments/types';
-import { getErrorMessage, parseError } from '../../errors/parse_error';
+import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { retryTransientEsErrors } from '../../helpers/retry';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
@@ -293,19 +293,10 @@ export class ExecutionPlan {
     }
 
     // syncAttachmentList with an empty list clears all attachments of that type for the stream.
-    // Per-type .catch so one type's failure doesn't block cleanup of the others.
     await Promise.all(
       actions.flatMap((action) =>
         ATTACHMENT_TYPES.map((type) =>
-          this.dependencies.attachmentClient
-            .syncAttachmentList(action.request.name, [], type)
-            .catch((error) => {
-              this.dependencies.logger.warn(
-                `Failed to cascade-unlink ${type} attachments on stream "${action.request.name}": ${
-                  parseError(error).message
-                }`
-              );
-            })
+          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
         )
       )
     );
