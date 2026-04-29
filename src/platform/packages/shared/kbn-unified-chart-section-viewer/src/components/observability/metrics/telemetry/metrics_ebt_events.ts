@@ -8,7 +8,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, METRICS_INFO_EVENT_TYPE } from './constants';
+import { METRICS_INFO_EVENT_TYPE } from './constants';
 
 export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
@@ -58,54 +58,6 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
               description: 'Count of METRICS_INFO rows where metric_type had more than one value',
             },
           },
-        },
-      },
-    },
-  });
-
-  analytics.registerEventType({
-    eventType: METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE,
-    schema: {
-      source: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'Which metrics-grid code path produced the error (e.g. useFetchMetricsData, useLensProps)',
-        },
-      },
-      error_type: {
-        type: 'keyword',
-        _meta: {
-          description: 'Constructor name of the Error instance that was reported',
-        },
-      },
-      error_message: {
-        type: 'text',
-        _meta: {
-          description: 'Message from the Error instance that was reported',
-        },
-      },
-      error_stack: {
-        type: 'text',
-        _meta: {
-          description: 'Stack trace of the Error instance, when available',
-          optional: true,
-        },
-      },
-      esql_error_type: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'type field from an EsqlResponseError payload, when the reported error is one',
-          optional: true,
-        },
-      },
-      esql_status: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'HTTP status from an EsqlResponseError payload, when the reported error is one',
-          optional: true,
         },
       },
     },

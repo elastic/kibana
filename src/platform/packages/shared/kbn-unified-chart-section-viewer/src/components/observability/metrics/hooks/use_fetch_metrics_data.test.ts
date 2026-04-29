@@ -112,19 +112,17 @@ const createMockDataView = (): MockDataView => ({
   isTimeBased: () => true,
 });
 
-// Minimal services surface the hook-under-test reads: `data.search.search`,
-// `uiSettings`, and `analytics.reportEvent`. Declared as a partial so we
-// don't have to mock the entire UnifiedHistogramServices tree.
+// Minimal services surface the hook-under-test reads: `data.search.search`
+// and `uiSettings`. Declared as a partial so we don't have to mock the
+// entire UnifiedHistogramServices tree.
 interface MockServices {
   data: { search: { search: jest.Mock } };
   uiSettings: Record<string, unknown>;
-  analytics: { reportEvent: jest.Mock };
 }
 
 const createMockServices = (): MockServices => ({
   data: { search: { search: jest.fn() } },
   uiSettings: {},
-  analytics: { reportEvent: jest.fn() },
 });
 
 const createDefaultParams = (overrides?: Record<string, unknown>) => ({
@@ -504,7 +502,6 @@ describe('useFetchMetricsData', () => {
       expect(mockReportMetricsGridError).toHaveBeenCalledWith({
         error: fetchError,
         source: 'useFetchMetricsData',
-        analytics: params.services.analytics,
       });
     });
 
@@ -527,7 +524,6 @@ describe('useFetchMetricsData', () => {
       expect(mockReportMetricsGridError).toHaveBeenCalledWith({
         error: abortError,
         source: 'useFetchMetricsData',
-        analytics: params.services.analytics,
       });
     });
 

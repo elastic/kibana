@@ -154,7 +154,7 @@ export function useFetchMetricsData({
     executeFetch,
   ]);
 
-  // Report any landed fetch error to APM + EBT. De-duped via a ref so repeat
+  // Report any landed fetch error to APM. De-duped via a ref so repeat
   // renders with the same error instance don't spam the sink.
   // The util internally no-ops on AbortError so cancellations stay silent.
   const lastReportedErrorRef = useRef<unknown>(null);
@@ -166,9 +166,8 @@ export function useFetchMetricsData({
     reportMetricsGridError({
       error,
       source: 'useFetchMetricsData',
-      analytics: services.analytics,
     });
-  }, [error, services.analytics]);
+  }, [error]);
 
   return {
     loading,

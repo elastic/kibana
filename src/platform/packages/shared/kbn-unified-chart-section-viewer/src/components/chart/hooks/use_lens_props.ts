@@ -81,12 +81,6 @@ export const useLensProps = ({
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
-  // Capture the latest analytics reference so the rxjs subscription below
-  // does not need `services.analytics` in its dependency array. Without
-  // this, any upstream render that produces a new `services` object
-  // would rebuild the subscription, wasting work and risking dropped
-  // emissions during the tear-down/rebuild window.
-  const analyticsRef = useLatest(services.analytics);
 
   // Captures errors thrown during LensConfigBuilder.build() so the chart
   // doesn't stay in forever-loading state. Folded into `effectiveError`
@@ -216,7 +210,6 @@ export const useLensProps = ({
             reportMetricsGridError({
               error: buildErr,
               source: 'useLensProps',
-              analytics: analyticsRef.current,
             });
             if (buildErr instanceof Error) {
               setBuildError(buildErr);
@@ -242,17 +235,7 @@ export const useLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    discoverFetch$,
-    buildAttributesFn,
-    updateLensPropsContext,
-    chartRef,
-    euiTheme.size.base,
-    // `services.analytics` is intentionally omitted — the subscription
-    // reads it through `analyticsRef.current` so upstream renders that
-    // produce a fresh `services` object do not rebuild this pipeline.
-    analyticsRef,
-  ]);
+  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
   return lensPropsContext;
 };

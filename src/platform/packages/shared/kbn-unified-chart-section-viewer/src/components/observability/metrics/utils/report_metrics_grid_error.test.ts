@@ -9,7 +9,6 @@
 
 import { apm } from '@elastic/apm-rum';
 import { EsqlResponseError } from './esql_response_error';
-import { METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE } from '../telemetry/constants';
 import { METRICS_GRID_ERROR_TYPE_LABEL, reportMetricsGridError } from './report_metrics_grid_error';
 
 jest.mock('@elastic/apm-rum', () => ({
@@ -44,43 +43,30 @@ const createMockTransaction = (span: MockSpan | undefined): MockTransaction => (
 });
 
 describe('reportMetricsGridError', () => {
-  let reportEvent: jest.Mock;
-  let consoleErrorSpy: jest.SpyInstance;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    reportEvent = jest.fn();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     // Default: no active transaction. Tests that exercise the span path
     // override this explicitly so the default keeps existing assertions
     // (which only check `apm.captureError`) honest.
     getCurrentTransactionMock.mockReturnValue(undefined);
   });
 
-  afterEach(() => {
-    consoleErrorSpy.mockRestore();
-  });
-
   it('is a no-op when error is undefined', () => {
     reportMetricsGridError({
       error: undefined,
       source: 'useFetchMetricsData',
-      analytics: { reportEvent },
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
-    expect(reportEvent).not.toHaveBeenCalled();
   });
 
   it('is a no-op when error is a non-Error value', () => {
     reportMetricsGridError({
       error: 'plain string',
       source: 'useFetchMetricsData',
-      analytics: { reportEvent },
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
-    expect(reportEvent).not.toHaveBeenCalled();
   });
 
   it('is a no-op for AbortError (preserves isSuppressedFetchError semantics)', () => {
@@ -90,20 +76,17 @@ describe('reportMetricsGridError', () => {
     reportMetricsGridError({
       error: abortError,
       source: 'useFetchMetricsData',
-      analytics: { reportEvent },
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
-    expect(reportEvent).not.toHaveBeenCalled();
   });
 
-  it('reports a plain Error to APM and analytics', () => {
+  it('reports a plain Error to APM', () => {
     const plainError = new Error('network blew up');
 
     reportMetricsGridError({
       error: plainError,
       source: 'useFetchMetricsData',
-      analytics: { reportEvent },
     });
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
@@ -112,34 +95,6 @@ describe('reportMetricsGridError', () => {
         error_type: METRICS_GRID_ERROR_TYPE_LABEL,
         metrics_grid_source: 'useFetchMetricsData',
       },
-    });
-
-    expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledWith(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, {
-      source: 'useFetchMetricsData',
-      error_type: 'Error',
-      error_message: 'network blew up',
-      error_stack: plainError.stack,
-    });
-  });
-
-  it('omits error_stack when the Error has no stack', () => {
-    const plainError = new Error('no stack here');
-    // Simulate a platform where Error.stack is not populated (e.g. custom
-    // thrown value). We assert the payload does not include error_stack.
-    Object.defineProperty(plainError, 'stack', { value: undefined });
-
-    reportMetricsGridError({
-      error: plainError,
-      source: 'useFetchMetricsData',
-      analytics: { reportEvent },
-    });
-
-    expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledWith(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, {
-      source: 'useFetchMetricsData',
-      error_type: 'Error',
-      error_message: 'no stack here',
     });
   });
 
@@ -156,7 +111,6 @@ describe('reportMetricsGridError', () => {
     reportMetricsGridError({
       error: esqlError,
       source: 'useLensProps',
-      analytics: { reportEvent },
     });
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
@@ -168,16 +122,6 @@ describe('reportMetricsGridError', () => {
         esql_status: '400',
       },
     });
-
-    expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledWith(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, {
-      source: 'useLensProps',
-      error_type: 'EsqlResponseError',
-      error_message: esqlError.message,
-      error_stack: esqlError.stack,
-      esql_error_type: 'verification_exception',
-      esql_status: '400',
-    });
   });
 
   it('omits esql labels when EsqlResponseError fields are absent', () => {
@@ -186,7 +130,6 @@ describe('reportMetricsGridError', () => {
     reportMetricsGridError({
       error: esqlError,
       source: 'useLensProps',
-      analytics: { reportEvent },
     });
 
     expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
@@ -195,18 +138,6 @@ describe('reportMetricsGridError', () => {
         metrics_grid_source: 'useLensProps',
       },
     });
-  });
-
-  it('still reports to APM when analytics is undefined', () => {
-    const plainError = new Error('no analytics here');
-
-    reportMetricsGridError({
-      error: plainError,
-      source: 'useLensProps',
-    });
-
-    expect(captureErrorMock).toHaveBeenCalledTimes(1);
-    expect(reportEvent).not.toHaveBeenCalled();
   });
 
   it('marks the active APM transaction as failure via a child span', () => {
@@ -221,7 +152,6 @@ describe('reportMetricsGridError', () => {
     reportMetricsGridError({
       error: plainError,
       source: 'useLensProps',
-      analytics: { reportEvent },
     });
 
     expect(transaction.startSpan).toHaveBeenCalledTimes(1);
@@ -256,7 +186,6 @@ describe('reportMetricsGridError', () => {
     reportMetricsGridError({
       error: plainError,
       source: 'useLensProps',
-      analytics: { reportEvent },
     });
 
     expect(transaction.startSpan).toHaveBeenCalledTimes(1);
@@ -267,24 +196,5 @@ describe('reportMetricsGridError', () => {
         metrics_grid_source: 'useLensProps',
       },
     });
-  });
-
-  it('swallows errors thrown by analytics.reportEvent', () => {
-    reportEvent.mockImplementation(() => {
-      throw new Error('analytics is broken');
-    });
-    const plainError = new Error('original');
-
-    expect(() =>
-      reportMetricsGridError({
-        error: plainError,
-        source: 'useFetchMetricsData',
-        analytics: { reportEvent },
-      })
-    ).not.toThrow();
-
-    expect(captureErrorMock).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
   });
 });

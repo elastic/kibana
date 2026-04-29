@@ -8,10 +8,3 @@
  */
 
 export const METRICS_INFO_EVENT_TYPE = 'discover_metrics_info';
-
-/**
- * EBT event type for non-render errors reported by the metrics grid
- * (e.g. fetch failures, Lens attribute build failures). Distinct from the
- * shared-ux `fatal-error-react` schema, which is render-boundary-specific.
- */
-export const METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE = 'metrics_grid_non_render_error';

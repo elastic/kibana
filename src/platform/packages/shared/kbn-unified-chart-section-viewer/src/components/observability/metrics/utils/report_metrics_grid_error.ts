@@ -8,24 +8,14 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { EsqlResponseError } from './esql_response_error';
 import { isSuppressedFetchError } from './is_suppressed_fetch_error';
-import { METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE } from '../telemetry/constants';
 
 /**
  * Identifies which metrics-grid code path produced a non-render error.
  * Used as an APM label so failures can be split by origin in dashboards.
  */
 export type MetricsGridErrorSource = 'useFetchMetricsData' | 'useLensProps';
-
-/**
- * `component_name` value used for every non-render APM capture emitted by
- * the metrics grid. Matches the identifier the ticket spec called out so
- * APM dashboards keyed on `component_name` can find these events alongside
- * React boundary captures.
- */
-export const METRICS_GRID_COMPONENT_NAME = 'MetricsExperienceGrid';
 
 /**
  * APM label value used to distinguish metrics-grid non-render error
@@ -38,16 +28,14 @@ export const METRICS_GRID_ERROR_TYPE_LABEL = 'MetricsGridNonRenderError';
 interface ReportMetricsGridErrorArgs {
   error: unknown;
   source: MetricsGridErrorSource;
-  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 /**
- * Reports a non-render metrics-grid error to APM and, if analytics is
- * available, to EBT using the dedicated `metrics_grid_non_render_error`
- * schema registered by this package. A dedicated schema (rather than
- * reusing `fatal-error-react` from `@kbn/shared-ux-error-boundary`)
- * avoids polluting render-boundary dashboards with placeholder values
- * for fields that do not apply to non-render errors.
+ * Reports a non-render metrics-grid error to APM. Per guidance from the
+ * Observability/EBT stakeholders (see PR #265380 review feedback), EBT is
+ * intended for product-usage analytics rather than observability /
+ * monitoring, so monitoring-style error reporting goes through APM (or
+ * logs) only.
  *
  * Preserves the existing `AbortError` suppression semantics from
  * `isSuppressedFetchError` — user-driven cancellations are dropped
@@ -55,11 +43,7 @@ interface ReportMetricsGridErrorArgs {
  *
  * This util is intentionally side-effect-only and does not re-throw.
  */
-export const reportMetricsGridError = ({
-  error,
-  source,
-  analytics,
-}: ReportMetricsGridErrorArgs): void => {
+export const reportMetricsGridError = ({ error, source }: ReportMetricsGridErrorArgs): void => {
   if (isSuppressedFetchError(error)) {
     return;
   }
@@ -104,34 +88,5 @@ export const reportMetricsGridError = ({
     }
   } else {
     apm.captureError(error, { labels });
-  }
-
-  if (!analytics) {
-    return;
-  }
-
-  try {
-    const payload: Record<string, string> = {
-      source,
-      error_type: error.name,
-      error_message: error.message,
-    };
-    if (typeof error.stack === 'string') {
-      payload.error_stack = error.stack;
-    }
-    if (error instanceof EsqlResponseError) {
-      if (error.type) {
-        payload.esql_error_type = error.type;
-      }
-      if (error.status != null) {
-        payload.esql_status = String(error.status);
-      }
-    }
-    analytics.reportEvent(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, payload);
-  } catch (reportErr) {
-    // Mirror the swallowing pattern in shared-ux/error_boundary/src/services/error_service.ts
-    // so a malformed analytics service cannot mask the original error.
-    // eslint-disable-next-line no-console
-    console.error(reportErr);
   }
 };

@@ -16,7 +16,6 @@ import {
   type LensAttributes,
   type LensSeriesLayer,
 } from '@kbn/lens-embeddable-utils';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -340,12 +339,6 @@ describe('useLensProps', () => {
     it('reports the caught builder error and rebuilds with no datasource', async () => {
       const chartRef = createMockChartRef();
       const builderError = new Error('builder failed');
-      // Minimal AnalyticsServiceStart surface — only `reportEvent` is read
-      // by reportMetricsGridError, so a partial cast avoids pulling in the
-      // full service shape.
-      const analyticsMock: Pick<AnalyticsServiceStart, 'reportEvent'> = {
-        reportEvent: jest.fn(),
-      };
 
       // First build rejects (the silent-failure path). Subsequent builds
       // fall back to the beforeEach `mockImplementation` that resolves —
@@ -362,10 +355,7 @@ describe('useLensProps', () => {
           chartId: 'testChartId',
           title: 'Test Chart',
           query: 'FROM metrics-*',
-          services: {
-            ...(servicesMock as UnifiedHistogramServices),
-            analytics: analyticsMock as unknown as AnalyticsServiceStart,
-          },
+          services: servicesMock as UnifiedHistogramServices,
           fetchParams,
           discoverFetch$,
           chartRef,
@@ -381,7 +371,6 @@ describe('useLensProps', () => {
       expect(mockReportMetricsGridError).toHaveBeenCalledWith({
         error: builderError,
         source: 'useLensProps',
-        analytics: analyticsMock,
       });
 
       // After the setBuildError rerender, the hook should eventually yield
