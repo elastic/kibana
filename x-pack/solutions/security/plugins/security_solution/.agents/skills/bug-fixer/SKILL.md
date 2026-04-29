@@ -16,8 +16,9 @@ Orchestrate bug reproduction and TDD fixing for Kibana Security Solution issues.
 
 ## Prerequisites
 
-- `gh` CLI authenticated (`gh auth status`)
+- `gh` CLI installed and authenticated — see `README.md` for setup
 - Local `elastic/kibana` clone with `yarn kbn bootstrap` completed
+- Browser MCP configured — `cursor-ide-browser` (Cursor, built-in) or `@playwright/mcp` (Claude Code) — see `README.md`
 
 ## Knowledge Base
 
@@ -60,6 +61,14 @@ Dispatch these as subagents — each reads potentially large PR diffs and issue 
 - Search for closed issues with similar symptoms: `gh search issues "<key symptom>" --repo elastic/kibana --state closed --limit 5`. Prior fixes may reveal patterns, pitfalls, or areas the current fix must also cover.
 
 Merge results before proceeding. Summarize what you learned from prior issues/PRs.
+
+**Validate the ticket before proceeding.** Check that the issue contains:
+- Steps to reproduce (specific navigation path and user actions)
+- Current behavior (error message, empty state, wrong value)
+- Expected behavior
+- Feature flags — if the classification or issue body hints at experimental features but no flags are listed, flag this to the user: the skill cannot start services with the right config without them, and the reproduction will fail silently
+
+If any of these are missing, tell the user what's missing and ask them to update the ticket before continuing. A poorly specified ticket leads to misdiagnosis — it's faster to fix the ticket now than to debug a wrong fix later.
 
 If `possibly_fixed` is `true`, let the user know and get their confirmation before starting the environment.
 
