@@ -13,10 +13,10 @@
  * ```yaml
  * soft_fail:
  *   exit_status:
- *     - 92
+ *     - 101
  * ```
  */
-export const PROJECT_INIT_TIMEOUT_EXIT_CODE = 92;
+export const PROJECT_INIT_TIMEOUT_EXIT_CODE = 101;
 
 export interface ProjectInitTimeoutErrorOptions {
   projectId: string;
