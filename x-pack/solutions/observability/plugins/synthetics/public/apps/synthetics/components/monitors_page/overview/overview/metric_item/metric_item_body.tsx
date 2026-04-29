@@ -8,12 +8,19 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
-export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+export const MetricItemBody = ({
+  monitor,
+  onLocationClick,
+}: {
+  monitor: OverviewStatusMetaData;
+  onLocationClick?: (locationId: string, locationLabel: string) => void;
+}) => {
   const tags = monitor.tags;
   const history = useHistory();
 
@@ -28,7 +35,7 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
       }}
     />
   );
-  if (tags.length === 0) {
+  if (tags.length === 0 && (monitor?.locations?.length ?? 0) <= 1) {
     return (
       <>
         <EuiSpacer size="xs" />
@@ -40,17 +47,26 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
   return (
     <>
       <EuiSpacer size="xs" />
-      {(tags ?? []).length > 0 && (
-        <TagsList
-          prependChildren={<EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>}
-          color="default"
-          tags={tags}
-          disableExpand={true}
-          onClick={(tag) => {
-            history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
-          }}
-        />
-      )}
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
+        {monitor?.locations?.length > 1 && (
+          <EuiFlexItem grow={false}>
+            <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />
+          </EuiFlexItem>
+        )}
+        {(tags ?? []).length > 0 && (
+          <EuiFlexItem grow={false}>
+            <TagsList
+              color="default"
+              tags={tags}
+              disableExpand={true}
+              onClick={(tag) => {
+                history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
+              }}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </>
   );
 };
