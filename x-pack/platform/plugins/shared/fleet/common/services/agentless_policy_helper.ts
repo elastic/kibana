@@ -17,17 +17,14 @@ import {
 } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 import { AgentlessDeploymentReleaseStatus } from '../types';
-import type { DeploymentsModes, NewPackagePolicyInput, PackageInfo } from '../types';
+import type {
+  IntegrationCardReleaseLabel,
+  NewPackagePolicyInput,
+  PackageInfo,
+  RegistryPolicyTemplate,
+} from '../types';
 
-export interface PolicyTemplateDeploymentRef {
-  name: string;
-  deployment_modes?: DeploymentsModes;
-}
-
-export interface PackageWithDeploymentInfo {
-  policy_templates?: PolicyTemplateDeploymentRef[];
-  name?: string;
-}
+import { getPackageReleaseLabel } from './package_prerelease';
 
 interface AgentlessGABeforeReleaseFieldEntry {
   packageName: string;
@@ -123,7 +120,7 @@ export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyNa
 };
 
 export const isOnlyAgentlessIntegration = (
-  packageInfo?: PackageWithDeploymentInfo,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
   integrationToEnable?: string
 ) => {
   if (
@@ -141,7 +138,7 @@ export const isOnlyAgentlessIntegration = (
   return false;
 };
 
-export const isOnlyAgentlessPolicyTemplate = (policyTemplate: PolicyTemplateDeploymentRef) => {
+export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemplate) => {
   return Boolean(
     policyTemplate.deployment_modes &&
       policyTemplate.deployment_modes.agentless?.enabled === true &&
@@ -253,14 +250,15 @@ const coerceRelease = (r?: AgentlessDeploymentReleaseStatus) => {
 };
 
 export const getAgentlessRelease = (
-  packageInfo: PackageWithDeploymentInfo & { version?: string },
+  packageInfo: Pick<PackageInfo, 'name' | 'version' | 'policy_templates'>,
   integrationToEnable: string
-): AgentlessDeploymentReleaseStatus | undefined => {
+): IntegrationCardReleaseLabel | undefined => {
+  const version = packageInfo.version ?? '';
   const templates = packageInfo.policy_templates ?? [];
 
-  // Single only-agentless template: spec disallows the release field — defer to package semver
+  // Single only-agentless template: spec disallows the release field — eval package semver instead
   if (templates.length === 1 && isOnlyAgentlessPolicyTemplate(templates[0])) {
-    return undefined;
+    return getPackageReleaseLabel(version);
   }
 
   const template = templates.find(({ name }) => name === integrationToEnable);
@@ -268,26 +266,11 @@ export const getAgentlessRelease = (
   const { release } = template.deployment_modes.agentless;
   if (
     release === undefined &&
-    isGABeforeReleaseField(packageInfo?.name, integrationToEnable, packageInfo?.version)
+    isGABeforeReleaseField(packageInfo.name, integrationToEnable, packageInfo.version)
   ) {
     return AgentlessDeploymentReleaseStatus.GA;
   }
   return coerceRelease(release);
-};
-
-export const isDefaultAgentlessIntegration = (
-  packageInfo?: PackageWithDeploymentInfo,
-  integrationToEnable?: string
-): boolean => {
-  if (integrationToEnable) {
-    return Boolean(
-      packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
-        ?.deployment_modes?.agentless?.is_default === true
-    );
-  }
-  return Boolean(
-    packageInfo?.policy_templates?.some((t) => t.deployment_modes?.agentless?.is_default === true)
-  );
 };
 
 /**

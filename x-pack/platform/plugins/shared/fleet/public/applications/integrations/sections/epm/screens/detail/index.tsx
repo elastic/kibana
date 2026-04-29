@@ -34,7 +34,11 @@ import {
   splitPkgKey,
   packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
-import { resolveEffectiveRelease } from '../../../../../../../common/services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import {
+  getAgentlessRelease,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../common/services/agentless_policy_helper';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -49,7 +53,6 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
@@ -348,10 +351,17 @@ export function Detail() {
 
   const integrationName = integration ?? undefined;
 
-  const effectiveRelease = useMemo(
-    () => resolveEffectiveRelease(packageInfo ?? undefined, integrationName),
-    [packageInfo, integrationName]
-  );
+  const releaseLabel = useMemo(() => {
+    if (
+      packageInfo &&
+      integrationName &&
+      isOnlyAgentlessIntegration(packageInfo, integrationName)
+    ) {
+      const release = getAgentlessRelease(packageInfo, integrationName);
+      if (release !== undefined) return release;
+    }
+    return getPackageReleaseLabel(packageInfo?.version ?? '');
+  }, [packageInfo, integrationName]);
 
   const headerLeftContent = useMemo(
     () => (
@@ -406,9 +416,9 @@ export function Detail() {
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
-                      {effectiveRelease !== 'ga' ? (
+                      {releaseLabel !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <HeaderReleaseBadge release={effectiveRelease} />
+                          <HeaderReleaseBadge release={releaseLabel} />
                         </EuiFlexItem>
                       ) : null}
                     </EuiFlexGroup>
@@ -427,7 +437,7 @@ export function Detail() {
       fromIntegrationsPath,
       queryParams,
       packageInfoError,
-      effectiveRelease,
+      releaseLabel,
     ]
   );
 

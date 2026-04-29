@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { AgentlessDeploymentReleaseStatus } from '../types';
 import type { IntegrationCardReleaseLabel, RegistryRelease } from '../types';
-
-import {
-  getAgentlessRelease,
-  isOnlyAgentlessIntegration,
-  type PackageWithDeploymentInfo,
-} from './agentless_policy_helper';
 
 export function isPackagePrerelease(version: string): boolean {
   // derive from semver
@@ -34,36 +27,4 @@ export function mapPackageReleaseToIntegrationCardRelease(
   release: RegistryRelease
 ): IntegrationCardReleaseLabel {
   return release === 'experimental' ? 'preview' : release;
-}
-
-/**
- * Returns the agentless-specific release when an agentless context applies,
- * or `undefined` if no agentless context applies.
- */
-export function getAgentlessReleaseOverride(
-  packageInfo: PackageWithDeploymentInfo,
-  integrationToEnable: string,
-  options?: { isAgentlessContext?: boolean }
-): AgentlessDeploymentReleaseStatus | undefined {
-  if (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) || options?.isAgentlessContext) {
-    return getAgentlessRelease(packageInfo, integrationToEnable);
-  }
-  return undefined;
-}
-
-/**
- * Resolves the full effective release label for a package, incorporating an agentless-specific
- * override when relevant and falling back to the semver-derived release otherwise.
- * GA agentless defers to package semver so a beta semver version still shows its badge.
- */
-export function resolveEffectiveRelease(
-  packageInfo?: PackageWithDeploymentInfo & { version?: string },
-  integrationToEnable?: string,
-  options?: { isAgentlessContext?: boolean }
-): IntegrationCardReleaseLabel {
-  if (packageInfo && integrationToEnable) {
-    const override = getAgentlessReleaseOverride(packageInfo, integrationToEnable, options);
-    if (override !== undefined && override !== AgentlessDeploymentReleaseStatus.GA) return override;
-  }
-  return getPackageReleaseLabel(packageInfo?.version ?? '');
 }

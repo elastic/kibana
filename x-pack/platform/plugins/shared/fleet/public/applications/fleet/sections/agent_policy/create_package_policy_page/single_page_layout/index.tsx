@@ -42,7 +42,7 @@ import {
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
-import { resolveEffectiveRelease } from '../../../../../../../common/services/package_prerelease';
+import { getAgentlessRelease } from '../../../../../../../common/services/agentless_policy_helper';
 import {
   sendGetAgentStatus,
   useConfig,
@@ -508,9 +508,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const setupTechnologySelector = useMemo(() => {
     if (!addIntegrationFlyoutProps && isAgentless && packageInfo) {
-      const showBetaBadge =
-        resolveEffectiveRelease(packageInfo, integrationToEnable, { isAgentlessContext: true }) !==
-        'ga';
+      const release = integrationToEnable
+        ? getAgentlessRelease(packageInfo, integrationToEnable)
+        : undefined;
+      const showBetaBadge = release !== undefined && release !== 'ga';
       return (
         <SetupTechnologySelector
           disabled={false}
