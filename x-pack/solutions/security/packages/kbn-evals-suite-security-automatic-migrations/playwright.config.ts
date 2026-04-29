@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { FeedBackButton } from './feedback_button';
+import { createPlaywrightEvalsConfig } from '@kbn/evals';
+
+export default createPlaywrightEvalsConfig({
+  testDir: `${__dirname}/evals`,
+  timeout: 30 * 60_000,
+});
