@@ -2,9 +2,12 @@
 name: bug-fixer
 description: >
   End-to-end Kibana Security Solution bug reproduction, TDD fixing, and verification
-  using a browser MCP (Playwright or cursor-ide-browser). Use when user says "reproduce bug #NNN",
-  "fix bug #NNN", "analyze bug #NNN", "investigate issue #NNN", or asks to triage, reproduce,
-  or fix a Kibana Security Solution GitHub issue.
+  using a browser MCP (Playwright or cursor-ide-browser). Trigger this skill whenever
+  the user mentions a bug number, issue number, or asks to fix, reproduce, investigate,
+  triage, or debug anything in Kibana Security Solution — even if they just say
+  "look into #NNN", "something's broken with X", or "can you fix this issue".
+  Don't wait for the magic words "fix bug" — if there's a GitHub issue number and a
+  Security Solution context, this skill applies.
 ---
 
 # Bug Fixer
@@ -22,11 +25,11 @@ At session start, read `.agents/skills/bug-fixer/KNOWLEDGE.md` if it exists. App
 
 ## Workflow
 
-**STRICT PHASE ORDER: 0 → 1 → 2 → 3 → 4 → 5 → 6. NEVER skip or reorder phases. Do NOT touch any source code until Phase 4.**
+The phases run in order: 0 → 1 → 2 → 3 → 4 → 5 → 6. Each phase produces evidence the next phase depends on — skipping Phase 3 (browser reproduction) means writing a fix without diagnostic data, which is the single biggest source of misdiagnosis and rejected PRs. Hold the order.
 
 ### Phase 0: Analyze
 
-Run from the **Kibana repo root** — this is the FIRST thing you do (no running server needed):
+Run from the **Kibana repo root** — this is the first thing you do (no running server needed):
 
 ```bash
 gh issue view <NUMBER> --repo elastic/kibana \
@@ -49,20 +52,20 @@ Parse the issue body and extract into an `analysis.json` file at the Kibana repo
 
 If `screenshots` or `video_urls` are present, review them — use the Read tool for images and `browser_navigate` for videos. The video often shows steps not captured in text.
 
-**Review similar issues and related PRs** — this is mandatory, not optional.
+Reviewing similar issues and related PRs is worth the time — prior fixes are your strongest signal for how to approach this one.
 
-**Run these in parallel** (use parallel tool calls or subagents — these are all independent reads):
+Run these in parallel (use parallel tool calls or subagents — they are all independent reads):
 - If `similar_issues` is non-empty, read each one (`gh issue view <number> --repo elastic/kibana`) to understand how similar bugs manifested and whether the same root cause applies here.
 - If `related_prs` is non-empty, review each PR's diff (`gh pr diff <number> --repo elastic/kibana`) to understand what was changed and why. If a past PR fixed a similar bug, its approach is your strongest signal for how to fix this one.
 - Search for closed issues with similar symptoms: `gh search issues "<key symptom>" --repo elastic/kibana --state closed --limit 5`. Prior fixes may reveal patterns, pitfalls, or areas the current fix must also cover.
 
 Merge results before proceeding. Summarize what you learned from prior issues/PRs.
 
-**GATE**: If `possibly_fixed` is `true`, inform the user and only proceed if they confirm.
+If `possibly_fixed` is `true`, let the user know and get their confirmation before starting the environment.
 
 ### Phase 1: Start Services
 
-**YOU must start the server. Do NOT ask the user.** Use `server_args` from `analysis.json`:
+Start the server yourself — asking the user to do it breaks the flow and costs time. Use `server_args` from `analysis.json`:
 
 ```bash
 # Start Elasticsearch
@@ -85,11 +88,11 @@ done
 echo "Kibana is ready"
 ```
 
-Array feature flag values MUST use JSON format (`["flag1","flag2"]`), not YAML (`['flag1','flag2']`).
+Array feature flag values use JSON format (`["flag1","flag2"]`), not YAML (`['flag1','flag2']`).
 
-**NEVER edit `kibana.dev.yml`** — pass ALL config via command-line args so nothing persists between sessions.
+Pass all config via command-line args rather than `kibana.dev.yml` — CLI args are session-scoped and won't silently affect other developers or future sessions.
 
-**While services are starting** (can take 5+ minutes), **run these research tasks in parallel** using subagents or parallel tool calls — they are all independent and the boot time is wasted otherwise:
+While services are starting (can take 5+ minutes), run these research tasks in parallel — the boot time is otherwise wasted:
 - Read `affected_paths` from `analysis.json` and study the relevant source code
 - Review related PRs: `gh pr diff <NUMBER> --repo elastic/kibana`
 - Read `references/classification-guide.md` for fix strategies
@@ -102,9 +105,9 @@ Stop services:
 pkill -f 'node.*scripts/kibana' ; pkill -f 'org.elasticsearch'
 ```
 
-### Phase 2: Prepare — Do It Yourself
+### Phase 2: Prepare
 
-**YOU set up the environment. Do NOT ask the user to do things you can do.**
+Set up the environment yourself — don't ask the user for things you can do via API.
 
 First verify Kibana is ready:
 ```bash
@@ -112,39 +115,37 @@ curl -s -u elastic:changeme http://localhost:5601/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); print(s['status']['overall']['level'])"
 ```
 
-Read `prerequisites`, `reproduction_steps`, and the original ticket's preconditions. Then **execute**:
+Read `prerequisites`, `reproduction_steps`, and the original ticket's preconditions. Then execute:
 
 1. **Roles/users** — Create via `POST /api/security/role/<name>` and `POST /internal/security/users/<name>` with appropriate privileges.
 2. **Data** — Prefer API for all data setup: index documents, create saved objects, detection rules, sample data via curl. Use the browser MCP only for setup steps that have no API equivalent (e.g., walking through a wizard with no API).
 3. **Feature state** — Walk through required states using the browser MCP.
 4. **License** — Verify trial: `curl -u elastic:changeme http://localhost:5601/api/licensing/info`
 
-**Only ask the user** for: external tooling you lack, large data volumes, or physical access requirements.
+Ask the user only for: external tooling you lack, large data volumes, or physical access requirements.
 
-**GATE**: Verify all prerequisites pass before proceeding.
+Verify all prerequisites pass before moving to reproduction.
 
-### Phase 3: Investigate & Reproduce — MANDATORY
+### Phase 3: Investigate & Reproduce
 
-**You MUST complete this phase before writing or changing ANY code. No exceptions.**
-
-Browser reproduction is an investigation step — the diagnostics you collect here are your primary evidence for writing tests and implementing fixes.
+Complete this phase before touching any source code. The browser diagnostics you collect here — console logs, network traces, component state — are your primary evidence for writing a precise test and targeting the right fix. Without them, you're guessing.
 
 #### Reproduction method
 
-**DEFAULT: Always reproduce through the browser.** Use `browser_navigate`, `browser_click`, `browser_fill`, `browser_snapshot`, and `browser_wait_for` to walk through the steps exactly as a user would.
+Reproduce through the browser. Use `browser_navigate`, `browser_click`, `browser_fill`, `browser_snapshot`, and `browser_wait_for` to walk through the steps exactly as a user would.
 
-**CRITICAL: Follow the EXACT steps from the issue.** If the ticket says "navigate to page X via menu Y", you must navigate there in the browser — not call the API you think backs that page. Different navigation paths hit different code paths. A shortcut API call may exercise a completely different route and mask the real defect.
+Follow the exact steps from the issue. If the ticket says "navigate to page X via menu Y", navigate there in the browser — not via an API call. The UI and API often hit different code paths; a shortcut API call can exercise a completely different route and mask the real defect.
 
-**SELF-CHECK #1:** _"Am I about to use curl, fetch, or any API call to reproduce this bug?"_ If yes, **STOP. That is wrong.** API reproduction is ONLY allowed when the ticket explicitly states the bug is API-only and was reproduced via API.
+Ask yourself: _"Am I about to use curl or an API call to reproduce this bug?"_ If yes, pause — API reproduction is only appropriate when the ticket explicitly states the bug is API-only. The UI path is almost always the right one.
 
-**SELF-CHECK #2:** _"Am I following the exact steps from the issue, or am I taking a shortcut?"_ If you're deviating from the ticket's reproduction steps, **STOP and follow the original steps.** Your shortcut may hit a different code path entirely.
+Also ask: _"Am I following the exact steps from the issue, or taking a shortcut?"_ Shortcuts often hit different code paths entirely.
 
-**Basic auth login**: In a local dev server, log in via `http://localhost:5601/login` with `elastic` / `changeme`.
+**Basic auth login**: Log in via `http://localhost:5601/login` with `elastic` / `changeme`.
 
 #### Authenticate and reproduce
 
 1. `browser_navigate` → `http://localhost:5601/login`
-2. `browser_snapshot` — if you see "Please upgrade your browser", just call `browser_snapshot` again (no wait needed). This is a transient message shown before Kibana's JS bundle loads. Do NOT use `browser_wait_for` here — it can block indefinitely.
+2. `browser_snapshot` — if you see "Please upgrade your browser", call `browser_snapshot` again. This is a transient message shown before Kibana's JS bundle loads; using `browser_wait_for` here can block indefinitely.
 3. Log in with `elastic` / `changeme`
 4. Follow `reproduction_steps` from `analysis.json`: `browser_navigate` → `browser_snapshot` → `browser_click`/`browser_fill` → `browser_wait_for` → assert
 
@@ -155,60 +156,56 @@ After the bug manifests:
 - `browser_network_requests` — 4xx/5xx responses, failed requests, stale payloads
 - For perf issues: `browser_profile_start` before, `browser_profile_stop` after
 
-#### Trace the data path (mandatory for "X is not visible" bugs)
+#### Trace the data path (for "X is not visible" bugs)
 
 When the bug is about missing, empty, or stale data in the UI:
 1. **Identify the API call** — use `browser_network_requests` to find the exact endpoint the UI component calls to display the data.
 2. **Trace what populates that data** — read the route handler and follow the data source: is it a database query? An ES index? A saved object? A cached value from startup?
 3. **Find the lifecycle gap** — ask: _"Is there any scenario where this data would NOT be populated when the API is called?"_ Common gaps: data only seeded at boot, data only created by a different user action, data not initialized for new tenants/spaces.
 
-This trace is your primary evidence for choosing what to fix. Without it, you risk fixing a symptom (e.g., an error on a different API) while the real data path remains broken.
+This trace is your primary evidence for choosing what to fix. Without it, you risk fixing a symptom while the real data path remains broken.
 
-Summarize: failing endpoints, console errors, component names, request/response data, **and the data path trace**. **Present findings to the user** before proceeding.
+Summarize: failing endpoints, console errors, component names, request/response data, and the data path trace. Present findings to the user before proceeding.
 
-**GATE**: Bug reproduced with diagnostics → Phase 4. Could not reproduce → inform user, ask how to proceed.
+If the bug reproduced, move to Phase 4 with your diagnostics. If not, inform the user and ask how to proceed.
 
-### Phase 4: Fix (Strict TDD)
+### Phase 4: Fix (TDD)
 
-**GATE CHECK**: You MUST have completed Phase 3 (browser reproduction + diagnostics) before reaching this phase. If you have not reproduced the bug in the browser yet, go back to Phase 3 NOW.
-
-**Do NOT write any code — not a single test, not a single file edit, not a single line — until the user has explicitly approved the plan in Step 1. This is a hard gate, not a suggestion.**
+Don't write any code until the user has approved the fix plan in Step 1. Engineers reviewing PRs need to validate the diagnosis before implementation starts — presenting the plan and waiting for explicit sign-off is what prevents misdiagnosed fixes from wasting hours of review time.
 
 #### Step 1: Root cause analysis and fix plan
 
 Combine your Phase 1 code reading with Phase 3 diagnostics to pinpoint the defect.
 
-**First**, cross-reference `affected_paths` with network failures (→ route handler), console errors (→ component), stale data (→ mutation hook), missing API calls (→ UI code path). Trace the code path from the UI action to the underlying data source. This gives you an initial hypothesis.
+Cross-reference `affected_paths` with network failures (→ route handler), console errors (→ component), stale data (→ mutation hook), missing API calls (→ UI code path). Trace the code path from the UI action to the underlying data source. This gives you an initial hypothesis.
 
-**Then, run these research tasks in parallel** (use subagents or parallel tool calls — they are all independent):
+Then run these research tasks in parallel (use subagents or parallel tool calls — they are all independent):
 1. **Review prior fixes** — revisit `similar_issues` and `related_prs` from Phase 0. If a past PR fixed a related bug, read its diff carefully: what pattern did it follow? What files did it touch? Did it miss anything that later required a follow-up?
 2. **Map the full impact scope** — identify every area affected by the root cause, not just the one the ticket describes. Ask: _"If this code path is broken here, where else is it used?"_ Check: sibling UI components that share the same hook/utility, other API routes that call the same service method, other spaces/tenants/roles that exercise the same logic.
 3. **Search for codebase conventions** — run SELF-CHECK #3 questions 1–4 (below): `rg` for existing patterns, hardcoded namespaces, plugin boundaries, and lifecycle phases.
 4. **Find all call sites** — run SELF-CHECK #3 questions 5–6 (below): `rg` for every invocation of the broken hook/utility/action and check if a shared utility owns the logic.
 5. **Find existing tests** — look for tests near affected code to copy patterns, and determine the test layer (see `references/classification-guide.md`).
 
-**Merge all results**, then read `references/fix-workflow.md` and answer all six SELF-CHECK #3 questions using the gathered evidence.
+Merge all results, then read `references/fix-workflow.md` and answer all six SELF-CHECK #3 questions using the gathered evidence.
 
-**Present your Root Cause Analysis and Fix Plan** to the user using the template in `references/fix-workflow.md`.
-
-**Your message presenting the plan MUST end with exactly:**
+Present your Root Cause Analysis and Fix Plan to the user using the template in `references/fix-workflow.md`. End your message with exactly:
 
 > _"I am waiting for your approval before writing any code or tests. Do you approve this plan as written?"_
 
-Do NOT write any code, modify any file, or call any tool after that line. Your turn ends here. If the user identifies a misdiagnosis or a better approach, revise the plan and ask for approval again.
+Stop there. If the user identifies a misdiagnosis or a better approach, revise the plan and ask for approval again.
 
 #### Step 2: Red — write failing test
 
-**GATE RE-CHECK**: Re-read the last user message. Did the user explicitly approve the plan (e.g., "yes", "proceed", "approved", "looks good")? If not — even if you believe the plan is obviously correct — go back to Step 1 and present the plan again. Do NOT begin Step 2 without explicit approval.
+Before starting, re-read the user's last message and confirm they explicitly approved the plan (e.g., "yes", "proceed", "approved", "looks good"). Ambiguous responses aren't approval — present the plan again if unclear. Explicit sign-off protects both of you from spending time on a fix that turns out to be in the wrong place.
 
 Write a test asserting correct behavior. Use diagnostic evidence to target precisely.
 
-For Scout tests, read these skills BEFORE writing:
+For Scout tests, read these skills before writing:
 1. `.agents/skills/scout-create-scaffold/SKILL.md`
 2. `.agents/skills/scout-best-practices-reviewer/SKILL.md`
 3. `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`
 
-**Run the test NOW — expect it to fail:**
+Run the test and expect it to fail:
 
 ```bash
 node scripts/jest <path/to/test.ts> --no-coverage 2>&1
@@ -222,11 +219,11 @@ For Scout API/UI tests:
 node scripts/scout run-tests --config <config-path>
 ```
 
-**GATE**: `red_confirmed` (non-zero exit) → proceed. `red_rejected` (zero exit) → rewrite the test.
+A passing test at this stage means the test isn't capturing the bug — rewrite it before moving on.
 
 #### Step 3: Green — implement fix
 
-**Keep fixes simple.** Prefer the smallest, most targeted change that resolves the bug. If a fix starts touching more than 2–3 files or requires architectural changes, **stop and ask the user** how they want to proceed before continuing.
+Keep fixes simple. Prefer the smallest, most targeted change that resolves the bug. If a fix starts touching more than 2–3 files or requires architectural changes, stop and ask the user how they want to proceed — scope creep is easier to catch before implementation than in review.
 
 1. Consult prior fixes or `references/classification-guide.md` for strategy.
 2. Read surrounding source to match codebase patterns.
@@ -242,13 +239,13 @@ node scripts/scout run-tests --config <config-path>
 
 ### Phase 5: Verify
 
-**Clean environment verification** — restart services to ensure no stale data from Phase 3 reproduction influences the result:
+Restart services for a clean environment — stale state from Phase 3 reproduction can produce false positives:
 
 1. Stop and restart services (same commands as Phase 1, with same `server_args`)
 2. Re-create test data from scratch (same steps as Phase 2)
-3. Browser reproduction — bug should NOT reproduce
-4. `browser_console_messages` + `browser_network_requests` — verify that errors captured during Phase 3 reproduction are gone AND no new errors appeared
-5. **Lifecycle edge case check** — if the fix involves a startup migration, initialization routine, or boot-time seeding, explicitly test post-boot creation: create a new space/resource AFTER services are running and verify the fix still works. This catches the common "works at boot but not for resources created later" gap.
+3. Browser reproduction — the bug should not reproduce
+4. `browser_console_messages` + `browser_network_requests` — verify that errors captured during Phase 3 are gone and no new errors appeared
+5. **Lifecycle edge case** — if the fix involves a startup migration or boot-time seeding, create a new space/resource *after* services are running and verify it works. This catches the "works at boot but not for resources created later" failure mode.
 6. Run tests:
    ```bash
    node scripts/jest <path/to/test.ts> --no-coverage
@@ -264,15 +261,13 @@ node scripts/scout run-tests --config <config-path>
 
 ### Phase 6: Open PR
 
-**GATE**: Only enter this phase if Phase 5 verdict is **Fix verified**.
+Only proceed here if Phase 5 verdict is **Fix verified**.
 
-**Your message MUST end with exactly:**
+End your message with exactly:
 
 > _"Fix verified. Would you like me to open a draft PR?"_
 
-Do NOT create a branch, commit, push, or call any tool after that line. Your turn ends here.
-
-**GATE RE-CHECK** (next turn): Re-read the last user message. Did the user explicitly say yes? If not, skip this phase and proceed to Output.
+Stop there. Re-read the user's next message before doing anything — if they didn't explicitly say yes, skip to Output.
 
 If the user confirms:
 
@@ -308,13 +303,11 @@ If the user confirms:
 - **PR**: <url> (draft) or "not requested"
 ```
 
-## Knowledge Update — MANDATORY after every session
+## Knowledge Update
 
-**You MUST complete this section after Phase 5 (or Phase 6), regardless of outcome.**
+After every session (success or failure), present a structured learning summary to the user using the template in `references/fix-workflow.md`. Cover: surprises/mistakes, proposed generic rules for SKILL.md or classification-guide.md, and incident-specific context for KNOWLEDGE.md.
 
-Read `references/fix-workflow.md` (Session Learnings Template) and present the structured learning summary to the user. Cover: surprises/mistakes, proposed generic rules for SKILL.md or classification-guide.md, and incident-specific context for KNOWLEDGE.md.
-
-**STOP. Wait for the user to confirm** which entries to add before writing to any file. See `references/knowledge-update.md` for the entry format.
+Wait for the user to confirm which entries to add before writing to any file. See `references/knowledge-update.md` for the entry format.
 
 ## Troubleshooting
 
@@ -324,9 +317,9 @@ Read `references/fix-workflow.md` (Session Learnings Template) and present the s
 | Kibana fails to start | Check console output; ensure `yarn kbn bootstrap` completed and port 5601 is free |
 | Kibana slow to start | Can take 5+ min on first run; poll `/api/status` rather than assuming a fixed wait time |
 | ES returns 401 | Default credentials are `elastic` / `changeme` |
-| Config not taking effect | **NEVER edit `kibana.dev.yml`**. Pass ALL config via `--xpack.*` CLI args |
-| `red_rejected` — test passes | Test must assert **correct** behavior that is currently broken |
+| Config not taking effect | Pass config via `--xpack.*` CLI args, not `kibana.dev.yml` — CLI args are session-scoped |
+| `red_rejected` — test passes | Test must assert correct behavior that is currently broken |
 | Jest test not found | Verify path is correct and relative to repo root |
 | `gh api` errors | `gh auth status` and `gh auth refresh` |
-| "Please upgrade your browser" on login | Transient — just call `browser_snapshot` again. Do NOT use `browser_wait_for` |
+| "Please upgrade your browser" on login | Transient — call `browser_snapshot` again; using `browser_wait_for` here can block indefinitely |
 | Browser can't find element | Take fresh `browser_snapshot` after navigation/waits |
