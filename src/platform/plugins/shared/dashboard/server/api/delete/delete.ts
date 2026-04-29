@@ -24,5 +24,5 @@ export async function deleteDashboard(
     dashboardState: { title, tags },
   } = transformDashboardOut(soAttributes, soReferences);
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
-  return { id, data: { title: title ?? '', tags } };
+  return { id, data: { title: title ?? '', tags: tags ?? [] } };
 }

@@ -130,7 +130,7 @@ export async function loadDashboardApi({
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
-    if (incomingEmbeddables?.length) {
+    if (!incomingEmbeddables?.length) {
       const contentInsightsClient = new ContentInsightsClient(
         { http: coreServices.http, logger },
         { domainId: 'dashboard' }

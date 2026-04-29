@@ -79,7 +79,9 @@ class DashboardUserActivitySession {
   ) {
     const activityType = type.includes('refresh') ? 'refresh' : type;
     const result = await coreServices.http.post(
-      `/internal/dashboard/user_activity/${activityType}/${this.api.uuid}`,
+      `/internal/dashboard/user_activity/${encodeURIComponent(activityType)}/${encodeURIComponent(
+        this.api.uuid
+      )}`,
       {
         body: JSON.stringify({
           title: this.api.title$.getValue(),

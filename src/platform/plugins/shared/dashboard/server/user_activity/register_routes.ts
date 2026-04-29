@@ -41,7 +41,7 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
       coreServices.userActivity.trackUserAction({
         message: `User ${user ? `"${user.username}" (id: ${user.profile_uid})` : ''} ${
           req.params.type === 'view' ? 'viewed' : 'manually refreshed'
-        } dashboard "${req.body.title}" (id: ${req.id}).`,
+        } dashboard "${req.body.title}" (id: ${req.params.id}).`,
         event: {
           action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_manual_refresh',
           type: 'access',
@@ -49,11 +49,11 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           end: new Date(req.body.end).toISOString(),
           duration,
         },
-        object: await getUserActivityObject({ id: req.id, data: req.body }, req),
+        object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
         metadata: {
           user_id: user?.profile_uid,
           username: user?.username,
-          dashboard_id: req.id,
+          dashboard_id: req.params.id,
           dashboard_title: req.body.title,
           duration,
         },
