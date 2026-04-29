@@ -29,6 +29,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
@@ -156,6 +157,14 @@ export function EpisodeDetailsPage() {
   const lastStatus = useMemo(() => getLastEpisodeStatus(eventRows), [eventRows]);
   const triggeredAt = useMemo(() => getTriggeredTimestamp(eventRows), [eventRows]);
   const durationMs = useMemo(() => getEpisodeDurationMs(eventRows), [eventRows]);
+
+  const hasNoActors = useMemo(
+    () =>
+      episodeAction?.lastAckAction !== ALERT_EPISODE_ACTION_TYPE.ACK &&
+      groupAction?.lastSnoozeAction !== ALERT_EPISODE_ACTION_TYPE.SNOOZE &&
+      groupAction?.lastDeactivateAction !== ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    [episodeAction, groupAction]
+  );
 
   const episodeIsoTimestamp = triggeredAt ?? eventRows[0]?.['@timestamp'];
 
@@ -354,6 +363,77 @@ export function EpisodeDetailsPage() {
                 },
               ]}
             />
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h3 data-test-subj="alertingV2EpisodeDetailsActionsOverviewHeading">
+                {i18n.ACTIONS_OVERVIEW_TITLE}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            {hasNoActors ? (
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="alertingV2EpisodeDetailsActionsOverviewEmpty"
+              >
+                {i18n.ACTIONS_OVERVIEW_EMPTY}
+              </EuiText>
+            ) : (
+              <EuiDescriptionList
+                compressed
+                type="responsiveColumn"
+                listItems={[
+                  ...(episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK
+                    ? [
+                        {
+                          title: i18n.LABEL_ACKNOWLEDGED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={episodeAction.lastAckActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+                    ? [
+                        {
+                          title: i18n.LABEL_RESOLVED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={groupAction.lastDeactivateActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE
+                    ? [
+                        {
+                          title: i18n.LABEL_SNOOZED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={groupAction.lastSnoozeActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                        {
+                          title: i18n.LABEL_SNOOZED_UNTIL,
+                          description: groupAction.snoozeExpiry
+                            ? new Date(groupAction.snoozeExpiry).toLocaleString(undefined, {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              })
+                            : '—',
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            )}
             {rule ? (
               <>
                 <EuiSpacer size="l" />
@@ -364,7 +444,7 @@ export function EpisodeDetailsPage() {
                   gutterSize="s"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xs">
                       <h3 data-test-subj="alertingV2EpisodeDetailsRuleOverviewHeading">
                         {i18n.RULE_OVERVIEW_TITLE}
                       </h3>

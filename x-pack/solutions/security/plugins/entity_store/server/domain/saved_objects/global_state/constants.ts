@@ -20,7 +20,6 @@ export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '25s';
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
-  filter: z.string().default(''),
   additionalIndexPatterns: z.array(z.string()).default([]),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z

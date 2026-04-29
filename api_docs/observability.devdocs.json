@@ -1547,7 +1547,7 @@
           "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => string | number"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/utils/format_alert_evaluation_value.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1563,7 +1563,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/utils/format_alert_evaluation_value.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -1580,7 +1580,7 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/utils/format_alert_evaluation_value.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
