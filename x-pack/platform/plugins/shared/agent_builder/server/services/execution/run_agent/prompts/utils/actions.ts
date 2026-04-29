@@ -102,7 +102,7 @@ export const formatAnswerActionHistory = ({
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
     }
-    // [...] we don't need to format AnswerAction because it will terminate the execution
+    // [...] we don't need to format StructuredAnswerAction because it will terminate the execution
   }
 
   return formatted;
