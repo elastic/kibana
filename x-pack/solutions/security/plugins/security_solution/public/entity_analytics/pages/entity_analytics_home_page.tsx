@@ -60,6 +60,14 @@ import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
+import { NoPrivileges } from '../../common/components/no_privileges';
+
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
+  defaultMessage: 'Entity analytics',
+});
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -93,6 +101,8 @@ export const EntityAnalyticsHomePage = () => {
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
+  const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
+  const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
 
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
@@ -190,7 +200,11 @@ export const EntityAnalyticsHomePage = () => {
     agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
   }, [agentBuilder]);
 
-  if (newDataViewPickerEnabled && entityDataViewLoading) {
+  if (
+    (newDataViewPickerEnabled && entityDataViewLoading) ||
+    entityEnginePrivilegesQuery.isLoading ||
+    riskEngineReadPrivileges.isLoading
+  ) {
     return <PageLoader />;
   }
 
@@ -202,8 +216,32 @@ export const EntityAnalyticsHomePage = () => {
     return <EntityStoreDisabledEmptyPrompt />;
   }
 
+  if (!entityEnginePrivilegesQuery.data?.has_read_permissions) {
+    return (
+      <>
+        <EntityAnalyticsReadPrivilegesCallout
+          riskEngineReadPrivileges={riskEngineReadPrivileges}
+          entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+        />
+        <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsHomePage">
+          <NoPrivileges
+            pageName={PAGE_TITLE.toLowerCase()}
+            docLinkSelector={(docLinks) =>
+              docLinks.securitySolution.entityAnalytics.riskScorePrerequisites
+            }
+          />
+        </SecuritySolutionPageWrapper>
+        <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
+      </>
+    );
+  }
+
   return (
     <>
+      <EntityAnalyticsReadPrivilegesCallout
+        riskEngineReadPrivileges={riskEngineReadPrivileges}
+        entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+      />
       <FiltersGlobal>
         <SiemSearchBar
           dataView={entityDataView}
@@ -215,12 +253,7 @@ export const EntityAnalyticsHomePage = () => {
 
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsHomePage">
         <HeaderPage
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
-              defaultMessage="Entity analytics"
-            />
-          }
+          title={PAGE_TITLE}
           rightSideItems={[
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
