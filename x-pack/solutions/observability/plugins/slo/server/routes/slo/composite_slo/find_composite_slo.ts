@@ -5,21 +5,17 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
-import {
-  type CompositeSLORepository,
-  DefaultBurnRatesClient,
-  DefaultCompositeSLORepository,
-  DefaultSummaryClient,
-  GetCompositeSLO,
-} from '../../../services';
+import { type CompositeSLORepository, DefaultCompositeSLORepository } from '../../../services';
+import { fetchCompositeSloSummariesFromIndex } from '../../../services/composite_slo_summary_index';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
-// TODO: remove once status is a stored field on the composite SLO summary index
-async function findWithComputedStatusFilter({
+async function findFilteredByStatus({
   compositeSloRepository,
-  getCompositeSLO,
+  esClient,
+  spaceId,
   statusFilter,
   search,
   tags,
@@ -29,7 +25,8 @@ async function findWithComputedStatusFilter({
   perPage,
 }: {
   compositeSloRepository: CompositeSLORepository;
-  getCompositeSLO: GetCompositeSLO;
+  esClient: ElasticsearchClient;
+  spaceId: string;
   statusFilter: string[];
   search: string | undefined;
   tags: string[];
@@ -46,13 +43,17 @@ async function findWithComputedStatusFilter({
     sortDirection: sortDirection as 'asc' | 'desc' | undefined,
   });
 
-  const allDetails = await getCompositeSLO.executeBatch(allResults.results.map((r) => r.id));
-
-  const matchingIds = new Set(
-    allDetails.filter((d) => statusFilter.includes(d.summary.status)).map((d) => d.id)
+  const summariesById = await fetchCompositeSloSummariesFromIndex(
+    esClient,
+    spaceId,
+    allResults.results.map((r) => r.id)
   );
 
-  const filtered = allResults.results.filter((r) => matchingIds.has(r.id));
+  const filtered = allResults.results.filter((r) => {
+    const summary = summariesById.get(r.id);
+    return summary !== undefined && statusFilter.includes(summary.status);
+  });
+
   const start = (page - 1) * perPage;
   return { results: filtered.slice(start, start + perPage), total: filtered.length, page, perPage };
 }
@@ -69,7 +70,7 @@ export const findCompositeSLORoute = createSloServerRoute({
   handler: async ({ params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, repository } = await getScopedClients({
+    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({
       request,
       logger,
     });
@@ -82,20 +83,10 @@ export const findCompositeSLORoute = createSloServerRoute({
     const statusFilter = query.status ?? [];
 
     if (statusFilter.length > 0) {
-      const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
-      const summaryClient = new DefaultSummaryClient(
-        scopedClusterClient.asCurrentUser,
-        burnRatesClient
-      );
-      const getCompositeSLO = new GetCompositeSLO(
+      return await findFilteredByStatus({
         compositeSloRepository,
-        repository,
-        summaryClient
-      );
-
-      return await findWithComputedStatusFilter({
-        compositeSloRepository,
-        getCompositeSLO,
+        esClient: scopedClusterClient.asCurrentUser,
+        spaceId,
         statusFilter,
         search: query.search,
         tags,
