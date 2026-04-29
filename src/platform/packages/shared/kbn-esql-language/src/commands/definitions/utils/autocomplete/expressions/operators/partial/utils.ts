@@ -23,6 +23,7 @@ import {
   NOT_IN_REGEX,
   IS_NOT_REGEX,
 } from '../utils';
+import { endsWithOpenParen, normalizeWhitespace } from '../../../../regex';
 
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis
@@ -41,7 +42,7 @@ function createSyntheticInfixOperatorNode(
   leftOperand?: ESQLSingleAstItem
 ): ESQLFunction {
   const textLength = innerText.length;
-  const hasOpenParen = /\(\s*$/.test(innerText);
+  const hasOpenParen = endsWithOpenParen(innerText);
 
   const right = hasOpenParen ? createEmptyListNode(textLength) : createPlaceholderNode(textLength);
   const left = leftOperand ?? extractFieldFromText(innerText, fieldPattern);
@@ -144,7 +145,7 @@ export function detectLike(innerText: string): PartialOperatorDetection | null {
   }
 
   // Normalize: lowercase, trim, collapse multiple spaces
-  const operatorName = match[0].toLowerCase().trim().replace(/\s+/g, ' ');
+  const operatorName = normalizeWhitespace(match[0].toLowerCase()).trim();
 
   return {
     operatorName,
