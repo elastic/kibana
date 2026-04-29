@@ -662,14 +662,6 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
-    // TODO: switch to WATCHLISTS privileges API when backend route lands; https://github.com/elastic/security-team/issues/16102
-    // Keeping this separate from privmon to allow safe removal of privmon later.
-    const fetchWatchlistPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-      });
-
     /**
      * Fetches risk engine settings
      */
@@ -792,6 +784,15 @@ export const useEntityAnalyticsRoutes = () => {
           body: JSON.stringify(params.body),
         }
       );
+
+    const deleteWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+    }) =>
+      http.fetch(`${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'DELETE',
+      });
 
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
@@ -924,7 +925,6 @@ export const useEntityAnalyticsRoutes = () => {
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
-      fetchWatchlistPrivileges,
       createWatchlist,
       getWatchlist,
       updateWatchlist,
@@ -932,6 +932,7 @@ export const useEntityAnalyticsRoutes = () => {
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
       createWatchlistEntitySource,
+      deleteWatchlistEntitySource,
       searchWatchlistIndices,
       uploadWatchlistCsv,
       fetchRiskEngineSettings,

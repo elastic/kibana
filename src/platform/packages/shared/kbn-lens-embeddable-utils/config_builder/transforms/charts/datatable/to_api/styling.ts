@@ -10,11 +10,11 @@
 import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
 import { LENS_ROW_HEIGHT_MODE, LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import { parseTransposeId } from '@kbn/transpose-utils';
-import type { DatatableState } from '../../../../schema';
+import type { DatatableConfig } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
 import { stripUndefined } from '../../utils';
 
-type DatatableStyling = NonNullable<DatatableState['styling']>;
+type DatatableStyling = NonNullable<DatatableConfig['styling']>;
 type HeightAPI = NonNullable<NonNullable<DatatableStyling['density']>['height']>;
 type ValueHeightAPI = HeightAPI['value'];
 type HeaderHeightAPI = HeightAPI['header'];
@@ -141,7 +141,7 @@ function parseSortingToAPI(
 export function convertStylingToAPIFormat(
   visualization: DatatableVisualizationState,
   columnIdMapping: ColumnIdMapping
-): Pick<DatatableState, 'styling'> {
+): Pick<DatatableConfig, 'styling'> {
   const { paging, sorting } = visualization;
 
   const densityAPI = parseDensityToAPI(visualization);

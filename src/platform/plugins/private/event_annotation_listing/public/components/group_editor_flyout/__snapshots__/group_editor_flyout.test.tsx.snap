@@ -12,6 +12,7 @@ Object {
   "group": Object {
     "annotations": Array [
       Object {
+        "color": "auto",
         "icon": "triangle",
         "id": "my-id",
         "key": Object {

@@ -54,6 +54,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDataGridInTableSearchProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -303,6 +304,7 @@
                 "lineNumber": 32,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "InTableSearchRestorableState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -410,6 +412,7 @@
                 "lineNumber": 37,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "RenderCellValuePropsWithInTableSearch",
                 "trackAdoption": false
               }
             ]

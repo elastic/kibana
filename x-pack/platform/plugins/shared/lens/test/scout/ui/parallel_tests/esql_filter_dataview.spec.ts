@@ -24,7 +24,8 @@ async function setEsqlQueryAndRun(page: ScoutPage, query: string) {
   await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
 }
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/264654
+spaceTest.describe.skip(
   'Lens ES|QL filter data view selector',
   { tag: '@local-stateful-classic' },
   () => {

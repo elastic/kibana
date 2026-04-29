@@ -6,6 +6,8 @@
  */
 
 import { boomify, isBoom } from '@hapi/boom';
+
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_VIS_API_PATH,
@@ -19,7 +21,7 @@ import { lensDeleteRequestParamsSchema } from './schema';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, usageCounter }
 ) => {
   const deleteRoute = router.delete({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -71,35 +73,36 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      try {
-        const { result } = await client.delete(req.params.id);
+        try {
+          const { result } = await client.delete(req.params.id);
 
-        if (!result.success) {
-          throw new Error(`Failed to delete Lens visualization with id [${req.params.id}].`);
-        }
-
-        return res.noContent();
-      } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
-              },
-            });
+          if (!result.success) {
+            throw new Error(`Failed to delete Lens visualization with id [${req.params.id}].`);
           }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
-        }
 
-        return boomify(error); // forward unknown error
-      }
-    }
+          return res.noContent();
+        } catch (error) {
+          if (isBoom(error)) {
+            if (error.output.statusCode === 404) {
+              return res.notFound({
+                body: {
+                  message: `A visualization with id [${req.params.id}] was not found.`,
+                },
+              });
+            }
+            if (error.output.statusCode === 403) {
+              return res.forbidden();
+            }
+          }
+
+          return boomify(error); // forward unknown error
+        }
+      })
   );
 };

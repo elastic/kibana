@@ -43,7 +43,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
   const queryClient = useQueryClient();
 
   const { queries, isLoading, refetch } = usePromotableQueries(streamName);
-  const { acknowledgeOnboardingTask } = useOnboardingApi({ saveQueries: true });
+  const { acknowledgeOnboardingTask } = useOnboardingApi();
   const { promote } = useQueriesApi();
 
   const promoteMutation = useMutation<{ promoted: number }, Error>({

@@ -6,7 +6,8 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import type { MlClient } from '../../lib/ml_client';

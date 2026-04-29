@@ -131,6 +131,25 @@ describe('<ResponseSection />', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('should render empty component if document is a remote alert', () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <TestProvider>
+          <DocumentDetailsContext.Provider
+            value={{
+              ...mockContextValue,
+              indexName: 'remote-cluster:index-name',
+              searchHit: { ...mockContextValue.searchHit, _index: 'remote-cluster:index-name' },
+            }}
+          >
+            <ResponseSection />
+          </DocumentDetailsContext.Provider>
+        </TestProvider>
+      </IntlProvider>
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('should render if isPreviewMode is true', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
