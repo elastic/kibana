@@ -25,27 +25,26 @@ import {
 import { createExcludeSemanticEvaluator } from '../../src/evaluators/ki_feature_exclusion/evaluators';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
-evaluate.describe.configure({ timeout: 600_000 });
+evaluate.describe.configure({ timeout: 1_200_000 });
 
 evaluate.describe(
   'Streams features exclusion',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
-    const excludeRuns = activeDatasets.flatMap((dataset) =>
-      (dataset.kiFeatureExclusion ?? []).map((scenario) => ({ dataset, scenario }))
-    );
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, log }) => {
       const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const { dataset, scenario } of excludeRuns) {
-        const source = resolveScenarioSnapshotSource({
-          scenarioId: scenario.input.scenario_id,
-          datasetGcs: dataset.gcs,
-          snapshotSource: scenario.snapshot_source,
-        });
-        uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
+      for (const dataset of activeDatasets) {
+        for (const scenario of dataset.kiFeatureExclusion ?? []) {
+          const source = resolveScenarioSnapshotSource({
+            scenarioId: scenario.input.scenario_id,
+            datasetGcs: dataset.gcs,
+            snapshotSource: scenario.snapshot_source,
+          });
+          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
+        }
       }
 
       for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
@@ -54,37 +53,43 @@ evaluate.describe(
       }
     });
 
-    for (const { dataset, scenario } of excludeRuns) {
-      const scenarioLabel = `${dataset.id} / ${scenario.input.scenario_id} (exclude ${scenario.input.exclude_count})`;
+    for (const dataset of activeDatasets) {
+      evaluate.describe(dataset.id, () => {
+        const availableScenarios: KIFeatureExclusionScenario[] = [];
+        const snapshotSources = new Map<string, { snapshotName: string; gcs: GcsConfig }>();
 
-      evaluate.describe(scenarioLabel, () => {
-        evaluate.beforeAll(async ({ esClient, log }) => {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
+        evaluate.beforeAll(async ({ log }) => {
+          for (const scenario of dataset.kiFeatureExclusion ?? []) {
+            const source = resolveScenarioSnapshotSource({
+              scenarioId: scenario.input.scenario_id,
+              datasetGcs: dataset.gcs,
+              snapshotSource: scenario.snapshot_source,
+            });
 
-          const availableSnapshots =
-            availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
+            const available =
+              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
 
-          if (!availableSnapshots.has(source.snapshotName)) {
-            log.info(
-              `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-            );
-            evaluate.skip();
-            return;
+            if (!available.has(source.snapshotName)) {
+              log.info(
+                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
+                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
+              );
+              continue;
+            }
+
+            availableScenarios.push(scenario);
+            const exampleId = `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`;
+            snapshotSources.set(exampleId, source);
           }
 
-          await cleanSignificantEventsDataStreams(esClient, log);
-          await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
-
-          await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+          if (availableScenarios.length === 0) {
+            log.info(`No scenarios available for dataset "${dataset.id}" - skipping`);
+            evaluate.skip();
+          }
         });
 
         evaluate(
-          scenarioLabel,
+          'KI feature exclusion',
           async ({
             esClient,
             inferenceClient,
@@ -99,19 +104,38 @@ evaluate.describe(
               connectorId: evaluationConnector.id,
             });
 
+            let lastReplayedSnapshot: string | undefined;
+
             await executorClient.runExperiment(
               {
                 dataset: {
                   name: `sigevents: KI feature exclusion (${dataset.id})`,
                   description: `[${dataset.id}] KI feature exclusion across scenarios`,
-                  examples: [
-                    {
-                      id: `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`,
-                      input: scenario.input,
-                    },
-                  ],
+                  examples: availableScenarios.map((scenario) => ({
+                    id: `${scenario.input.scenario_id}:exclude-${scenario.input.exclude_count}`,
+                    input: scenario.input,
+                  })),
                 },
+                concurrency: 1,
                 task: async ({ input }: { input: KIFeatureExclusionScenario['input'] }) => {
+                  const exampleId = `${input.scenario_id}:exclude-${input.exclude_count}`;
+                  const source = snapshotSources.get(exampleId);
+                  if (!source) {
+                    throw new Error(`No snapshot source found for example "${exampleId}"`);
+                  }
+
+                  if (source.snapshotName !== lastReplayedSnapshot) {
+                    await cleanSignificantEventsDataStreams(esClient, log);
+                    await replaySignificantEventsSnapshot(
+                      esClient,
+                      log,
+                      source.snapshotName,
+                      source.gcs
+                    );
+                    await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+                    lastReplayedSnapshot = source.snapshotName;
+                  }
+
                   const result = await runExcludeExperiment({
                     esClient,
                     excludeCount: input.exclude_count,
