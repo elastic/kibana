@@ -20,8 +20,10 @@ export interface DashboardsStats {
 }
 
 export const useDashboardsStats = (): UseQueryResult<DashboardsStats | null> => {
-  const { http } = useKibana().services;
+  const { http, chrome } = useKibana().services;
   const usageTracker = useUsageTracker();
+
+  const hasDashboardsNavLink = chrome.navLinks.get('dashboards') !== undefined;
 
   const queryResult = useQuery<DashboardsStats | null>({
     queryKey: ['fetchDashboardsStats'],
@@ -47,6 +49,7 @@ export const useDashboardsStats = (): UseQueryResult<DashboardsStats | null> => 
         throw error;
       }
     },
+    enabled: hasDashboardsNavLink,
   });
 
   useEffect(() => {

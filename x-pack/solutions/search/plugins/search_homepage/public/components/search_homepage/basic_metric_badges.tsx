@@ -14,7 +14,6 @@ import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useStats } from '../../hooks/api/use_stats';
 import { useAgentCount } from '../../hooks/api/use_agent_count';
-import { useKibana } from '../../hooks/use_kibana';
 
 const BASIC_METRIC_PANEL_TYPES = ['indices', 'storage', 'agentBuilder', 'discover'] as const;
 
@@ -75,13 +74,10 @@ const BasicMetricPanel = ({ type, title, metric, isError = false }: BasicMetricP
 };
 
 export const BasicMetricBadges = () => {
-  const { chrome } = useKibana().services;
   const { data: storageStats, isError: isErrorStorageStats } = useStats();
   const { data: indicesData, isError: isErrorIndicesStats } = useIndicesStats();
   const { data: dashboardsData, isError: isErrorDashboards } = useDashboardsStats();
   const { tools, agents, isError: isErrorAgents } = useAgentCount();
-
-  const hasDashboardsNavLink = chrome.navLinks.get('dashboards') !== undefined;
 
   const basicPanels: Array<BasicMetricPanel> = [
     {
@@ -125,18 +121,14 @@ export const BasicMetricBadges = () => {
       ],
       isError: isErrorAgents,
     },
-    ...(hasDashboardsNavLink
-      ? [
-          {
-            type: 'discover' as const,
-            title: i18n.translate('xpack.searchHomepage.metricPanel.basic.discover.title', {
-              defaultMessage: 'Dashboards',
-            }),
-            metric: dashboardsData?.totalDashboards,
-            isError: isErrorDashboards,
-          },
-        ]
-      : []),
+    {
+      type: 'discover',
+      title: i18n.translate('xpack.searchHomepage.metricPanel.basic.discover.title', {
+        defaultMessage: 'Dashboards',
+      }),
+      metric: dashboardsData?.totalDashboards,
+      isError: isErrorDashboards,
+    },
   ];
   return (
     <EuiFlexGroup gutterSize="s" data-test-subj="searchHomepageMetricBadges">
