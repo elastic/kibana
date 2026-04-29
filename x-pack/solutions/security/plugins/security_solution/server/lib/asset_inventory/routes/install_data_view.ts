@@ -14,7 +14,6 @@ import { ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH } from '../../../../common/a
 import { API_VERSIONS } from '../../../../common/constants';
 import type { AssetInventoryRoutesDeps } from '../types';
 import { errorInactiveFeature } from '../errors';
-import { checkAndInitAssetCriticalityResources } from '../../entity_analytics/asset_criticality/check_and_init_asset_criticality_resources';
 import { installDataView } from '../saved_objects/data_view';
 import { ASSET_INVENTORY_DATA_VIEW_ID_PREFIX, ASSET_INVENTORY_DATA_VIEW_NAME } from '../constants';
 
@@ -53,11 +52,6 @@ export const installAssetInventoryDataViewRoute = (
           if (!isAssetInventoryEnabled) {
             return errorInactiveFeature(response);
           }
-
-          // Asset criticality resources need to exist before the data view is created
-          // so the entity store transforms (which depend on them) keep working when the
-          // page first opens after the user enables Asset Inventory.
-          await checkAndInitAssetCriticalityResources(context, logger);
 
           const spaceId = secSol.getSpaceId();
           const dataViewService = secSol.getDataViewsService();
