@@ -229,7 +229,7 @@ for (const testSuite of testSuites) {
 
     case 'scoutConfig':
       // Scout entries are expanded into per-(arch, domain) BK steps by the
-      // 'scout_flaky_planner' step above, after discovery has produced the manifest.
+      // 'scout_flaky_setup' step above, which discovers configs and uploads the steps.
       break;
 
     case 'group': {
