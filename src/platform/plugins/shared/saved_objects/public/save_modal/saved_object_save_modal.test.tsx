@@ -34,6 +34,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 const mockSave = jest.fn();
+const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(() => false);
 const mockClose = jest.fn();
 
 describe('SavedObjectSaveModal', () => {
@@ -41,6 +42,7 @@ describe('SavedObjectSaveModal', () => {
     const { findByTestId, getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
           title={'Saved Object title'}
@@ -59,6 +61,7 @@ describe('SavedObjectSaveModal', () => {
     const { getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
           title={'Saved Object title'}
@@ -78,6 +81,7 @@ describe('SavedObjectSaveModal', () => {
     const { getByText, rerender } = render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
           title={'Saved Object title'}
@@ -93,6 +97,7 @@ describe('SavedObjectSaveModal', () => {
     rerender(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
           title={'Saved Object title'}
@@ -112,6 +117,7 @@ describe('SavedObjectSaveModal', () => {
     render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
           title={'Saved Object title'}
@@ -133,6 +139,7 @@ describe('SavedObjectSaveModal', () => {
       <EuiProvider>
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={mockClose}
             title={'Saved Object title'}
@@ -163,6 +170,7 @@ describe('SavedObjectSaveModal', () => {
       render(
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
             title="Saved Object"
@@ -187,6 +195,7 @@ describe('SavedObjectSaveModal', () => {
       render(
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
             title="Saved Object [1]"

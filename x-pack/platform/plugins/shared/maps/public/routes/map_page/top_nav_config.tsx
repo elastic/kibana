@@ -23,12 +23,10 @@ import {
   getNavigateToApp,
   getMapsCapabilities,
   getInspector,
-  getCoreOverlays,
   getSavedObjectsTagging,
 } from '../../kibana_services';
-import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import type { SavedMap } from './saved_map';
-import { checkForDuplicateTitle } from '../../content_management';
+import { hasLibraryItemWithTitle } from '../../content_management';
 
 const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
   LazySavedObjectSaveModalDashboardWithSaveResult
@@ -167,32 +165,13 @@ export function getTopNavConfig({
         ) : undefined;
 
         const saveModalProps = {
+          hasLibraryItemWithTitle,
           onSave: async (
             props: OnSaveProps & {
               dashboardId?: string | null;
               addToLibrary: boolean;
             }
           ): Promise<SaveResult> => {
-            try {
-              await checkForDuplicateTitle(
-                {
-                  id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
-                  title: props.newTitle,
-                  copyOnSave: props.newCopyOnSave,
-                  lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
-                  isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
-                  onTitleDuplicate: props.onTitleDuplicate,
-                },
-                {
-                  overlays: getCoreOverlays(),
-                }
-              );
-            } catch (e) {
-              // ignore duplicate title failure, user notified in save modal
-              return {};
-            }
-
             await savedMap.save({
               ...props,
               tags,
@@ -269,9 +248,7 @@ export function getTopNavConfig({
             newTitle: savedMap.getTitle(),
             newDescription: mapDescription,
             newCopyOnSave: false,
-            isTitleDuplicateConfirmed: false,
             returnToOrigin: true,
-            onTitleDuplicate: () => {},
             saveByReference: !savedMap.isByValue(),
             history,
           });

@@ -31,6 +31,7 @@ export interface OriginSaveModalProps {
   onClose: () => void;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => Promise<SaveResult>;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
@@ -101,6 +102,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
 
   return (
     <SavedObjectSaveModalWithSaveResult
+      hasLibraryItemWithTitle={props.hasLibraryItemWithTitle}
       onSave={onModalSave}
       onClose={props.onClose}
       title={documentInfo.title}

@@ -40,8 +40,6 @@ import type { SaveResult } from './show_saved_object_save_modal';
 export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
   newDescription: string;
 }
 
@@ -59,6 +57,7 @@ export interface SaveDashboardReturn {
 }
 
 interface Props<T = void> {
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
   onSave: (props: OnSaveProps) => Promise<T>;
   onClose: () => void;
   title: string;
@@ -256,18 +255,6 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
     });
   };
 
-  private onTitleDuplicate = () => {
-    this.setState({
-      isSaving: false,
-      isTitleDuplicateConfirmed: true,
-      hasTitleDuplicate: true,
-    });
-
-    if (this.warning.current) {
-      this.warning.current.focus();
-    }
-  };
-
   private saveSavedObject = async () => {
     if (this.state.isSaving) return;
 
@@ -275,12 +262,33 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
       isSaving: true,
     });
 
+    const newCopyOnSave = Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave;
+    const isUpdateWithSameTitle = !newCopyOnSave && this.state.title === this.props.title;
+    if (!this.state.isTitleDuplicateConfirmed || !isUpdateWithSameTitle) {
+      try {
+        const hasTitleDuplicate = await this.props.hasLibraryItemWithTitle(this.state.title);
+        if (hasTitleDuplicate) {
+          this.setState({
+            isSaving: false,
+            isTitleDuplicateConfirmed: true,
+            hasTitleDuplicate: true,
+          });
+
+          if (this.warning.current) {
+            this.warning.current.focus();
+          }
+          return;
+        }
+      } catch (error) {
+        // Unable to determine if there is a duplicate title
+        // ignore error and proceed with save
+      }
+    }
+
     try {
       await this.props.onSave({
         newTitle: this.state.title,
-        newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-        onTitleDuplicate: this.onTitleDuplicate,
+        newCopyOnSave,
         newDescription: this.state.visualizationDescription,
       });
     } finally {
