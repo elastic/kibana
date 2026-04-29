@@ -143,7 +143,7 @@ for tarball in "${built_tarballs[@]}"; do
   # A 409 (already published with this version) is the expected no-op
   # for a content-hash-versioned artifact that hasn't changed. Convert
   # that into a success; anything else is still fatal.
-  npm publish "$new_tarball" --tag ci --userconfig "$NPMRC" || {
+  npm publish "$new_tarball" --tag latest --userconfig "$NPMRC" || {
     publish_rc=$?
     if npm view "$(node -p "require('$pkg_manifest').name")@$(node -p "require('$pkg_manifest').version")" \
          --userconfig "$NPMRC" >/dev/null 2>&1; then
