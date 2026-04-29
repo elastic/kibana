@@ -67,7 +67,7 @@ export const SavedObjectActivityRow = ({
       label={
         <>
           <FormattedMessage
-            id="contentListProviderClient.contentEditor.activityLabel"
+            id="contentManagement.contentListProviderClient.contentEditor.activityLabel"
             defaultMessage="Activity"
           />{' '}
           <EuiIconTip
@@ -75,7 +75,7 @@ export const SavedObjectActivityRow = ({
             iconProps={{ style: { verticalAlign: 'bottom' } }}
             content={
               <FormattedMessage
-                id="contentListProviderClient.contentEditor.activityLabelHelpText"
+                id="contentManagement.contentListProviderClient.contentEditor.activityLabelHelpText"
                 defaultMessage="Activity data is auto-generated and cannot be updated."
               />
             }
