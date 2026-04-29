@@ -130,4 +130,21 @@ describe('EpisodeMetadataTab', () => {
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
+
+  it('prefers the error state over the loading state when fetch fails', () => {
+    mockUseFetchEpisodeEventDataQuery.mockReturnValue({
+      isLoading: false,
+      isError: true,
+      data: undefined,
+    } as unknown as ReturnType<typeof useFetchEpisodeEventDataQuery>);
+    mockUseAlertingEpisodeSourceDataView.mockReturnValue({
+      value: undefined,
+      loading: true,
+    } as never);
+
+    render(<EpisodeMetadataTab episodeId="ep-1" />);
+
+    expect(screen.getByText('Failed to load metadata.')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
 });

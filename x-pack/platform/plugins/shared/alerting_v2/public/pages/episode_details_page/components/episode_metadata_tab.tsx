@@ -49,10 +49,6 @@ export const EpisodeMetadataTab = ({ episodeId, ruleQuery }: EpisodeMetadataTabP
     return buildDataTableRecord({ _source: eventData }, dataView);
   }, [eventData, dataView]);
 
-  if (isEventDataLoading || !dataView || isDataViewLoading) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-
   if (isError) {
     return (
       <EuiText size="s" color="subdued">
@@ -63,7 +59,11 @@ export const EpisodeMetadataTab = ({ episodeId, ruleQuery }: EpisodeMetadataTabP
     );
   }
 
-  if (!hit) {
+  if (isEventDataLoading || isDataViewLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  if (!hit || !dataView) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeMetadataTabEmpty">
         {i18n.translate('xpack.alertingV2.episodeDetails.metadataTab.empty', {
