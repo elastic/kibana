@@ -74,8 +74,24 @@ export interface RelationshipIntegrationConfig {
    */
   additionalTargetFilter?: string;
   /**
-   * Fully overrides the ES|QL query builder.
-   * Required for integrations with complex multi-type targets or non-ECS actor fields.
+   * Fully overrides the ES|QL query builder. Use only when the standard builder cannot
+   * express the integration's query (e.g. multi-type targets, non-ECS actor fields).
+   *
+   * When set, the following engine-provided behaviours are NOT applied:
+   * - event.outcome == "success" pre-filtering
+   * - EUID existence filters (user / host)
+   * - getFieldEvaluationsEsql / getEuidEvaluation helpers (future source-field changes
+   *   will not propagate automatically)
+   * - enableFrequencyClassification frequency bucketing
+   * - LIMIT COMPOSITE_PAGE_SIZE ceiling
+   *
+   * Column contract — the query MUST emit these exact column names or results will be
+   * silently empty:
+   * - `actorUserId` (string) — the actor's full EUID, e.g. "user:alice@okta"
+   * - when enableFrequencyClassification is true:
+   *     `accesses_frequently` and `accesses_infrequently` (string | string[])
+   * - otherwise:
+   *     a column named after `relationshipType` (e.g. `communicates_with`) (string | string[])
    */
   esqlQueryOverride?: (namespace: string) => string;
   /**

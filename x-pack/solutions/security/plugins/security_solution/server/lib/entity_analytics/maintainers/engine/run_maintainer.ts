@@ -151,6 +151,18 @@ export const runGenericMaintainer = async ({
 
       const { columns, values } = esqlResult as unknown as EsqlQueryResult;
       if (columns && values) {
+        if (config.esqlQueryOverride) {
+          const colNames = new Set(columns.map((c) => c.name));
+          const expected = config.enableFrequencyClassification
+            ? ['actorUserId', 'accesses_frequently', 'accesses_infrequently']
+            : ['actorUserId', config.relationshipType];
+          const missing = expected.filter((n) => !colNames.has(n));
+          if (missing.length > 0) {
+            logger.warn(
+              `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(', ')} — results will be empty`
+            );
+          }
+        }
         const records = parseTargetsPerActorRows(columns, values, config);
         totalRecords += records.length;
         allRecords.push(...records);
