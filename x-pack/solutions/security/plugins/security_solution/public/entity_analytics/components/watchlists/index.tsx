@@ -67,9 +67,7 @@ export const Watchlists = ({
           />
         </EuiFlexItem>
       ) : (
-        <EuiFlexItem>
-          {spaceId && <WatchlistsManagementTable spaceId={spaceId} />}
-        </EuiFlexItem>
+        <EuiFlexItem>{spaceId && <WatchlistsManagementTable spaceId={spaceId} />}</EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
