@@ -31,6 +31,12 @@ export const MAX_PER_PAGE = 10_000;
 interface WatchlistConfigClientDeps {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  /**
+   * Used for system index operations (e.g. creating the watchlist backing index).
+   * Hidden indices require the `x-elastic-product-origin: kibana` header which is
+   * only attached when using the internal client.
+   */
+  internalEsClient?: ElasticsearchClient;
   namespace: string;
   logger: Logger;
 }
@@ -94,8 +100,12 @@ export class WatchlistConfigClient {
       { id: options?.id, refresh: 'wait_for' }
     );
 
+    if (!this.deps.internalEsClient) {
+      throw new Error('internalEsClient is required to create a watchlist index');
+    }
+
     await createOrUpdateIndex({
-      esClient: this.deps.esClient,
+      esClient: this.deps.internalEsClient,
       logger: this.deps.logger,
       options: {
         index: getIndexForWatchlist(this.deps.namespace),

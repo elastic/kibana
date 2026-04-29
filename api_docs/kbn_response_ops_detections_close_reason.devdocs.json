@@ -76,6 +76,7 @@
             "lineNumber": 38,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "UseBulkClosingReasonItemsProps",
             "trackAdoption": false,
             "isRequired": true
           }

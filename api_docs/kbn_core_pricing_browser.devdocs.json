@@ -26,7 +26,15 @@
             "tags": [],
             "label": "isFeatureAvailable",
             "description": [
-              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying {@link IPricingTiersClient.isFeatureAvailable} implementation.\n"
+              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying ",
+              {
+                "pluginId": "@kbn/core-pricing-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePricingBrowserPluginApi",
+                "section": "def-public.IPricingTiersClient.isFeatureAvailable",
+                "text": "IPricingTiersClient.isFeatureAvailable"
+              },
+              " implementation.\n"
             ],
             "signature": [
               "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
@@ -56,6 +64,7 @@
                 "lineNumber": 67,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "TFeatureId",
                 "trackAdoption": false
               }
             ]
