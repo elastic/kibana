@@ -33,6 +33,9 @@ interface TrialUsageBadgeProps {
   mlNodeCount?: number;
   mlMemoryLimit?: string;
   llmTotalTokens?: number;
+  searchPowerMax?: number;
+  searchPowerMin?: number;
+  boostWindowHours?: number;
 }
 
 export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
@@ -43,6 +46,9 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
   mlNodeCount,
   mlMemoryLimit,
   llmTotalTokens,
+  searchPowerMax,
+  searchPowerMin,
+  boostWindowHours,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -142,7 +148,12 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             {isServerless ? (
-              <ServerlessUsage llmTotalTokens={llmTotalTokens} />
+              <ServerlessUsage
+                searchPowerMax={searchPowerMax}
+                searchPowerMin={searchPowerMin}
+                boostWindowHours={boostWindowHours}
+                llmTotalTokens={llmTotalTokens}
+              />
             ) : (
               <CloudHostedUsage
                 storageUsage={storageUsage}

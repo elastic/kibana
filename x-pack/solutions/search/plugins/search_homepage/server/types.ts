@@ -25,4 +25,7 @@ export interface StatsResponse {
 export interface TrialUsageResponse {
   trialDaysLeft: number;
   llmTotalTokens?: number;
+  searchPowerMax?: number;
+  searchPowerMin?: number;
+  boostWindowHours?: number;
 }

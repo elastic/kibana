@@ -25,6 +25,9 @@ export interface TrialUsageData {
   mlNodeCount?: number;
   mlMemoryLimit?: string;
   llmTotalTokens?: number;
+  searchPowerMax?: number;
+  searchPowerMin?: number;
+  boostWindowHours?: number;
 }
 
 export const useTrialUsageData = () => {
@@ -48,6 +51,9 @@ export const useTrialUsageData = () => {
         mlNodeCount: mlNodeCount?.count,
         mlMemoryLimit: mlInfo?.limits?.effective_max_model_memory_limit,
         llmTotalTokens: trialUsage.llmTotalTokens,
+        searchPowerMax: trialUsage.searchPowerMax,
+        searchPowerMin: trialUsage.searchPowerMin,
+        boostWindowHours: trialUsage.boostWindowHours,
       };
     },
     staleTime: 5 * 60 * 1000,

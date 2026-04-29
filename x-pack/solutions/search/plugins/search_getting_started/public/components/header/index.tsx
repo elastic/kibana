@@ -79,6 +79,9 @@ export const SearchGettingStartedHeader: React.FC = () => {
                   mlNodeCount={trialUsageData?.mlNodeCount}
                   mlMemoryLimit={trialUsageData?.mlMemoryLimit}
                   llmTotalTokens={trialUsageData?.llmTotalTokens}
+                  searchPowerMax={trialUsageData?.searchPowerMax}
+                  searchPowerMin={trialUsageData?.searchPowerMin}
+                  boostWindowHours={trialUsageData?.boostWindowHours}
                 />
               </EuiFlexItem>
             )}
