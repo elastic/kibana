@@ -34,20 +34,38 @@ interface RawAlertEpisode {
 }
 
 /**
- * `fetch_episodes` queries a strictly bounded `@timestamp` window so the
- * upstream rows fed into `INLINE STATS` (and the IN-list flowing into
- * `fetch_suppressions`) stay small enough to never breach ES|QL sub-plan
- * buffer or request-size limits — even at peak ingest.
+ * `fetch_episodes` queries a bounded `@timestamp` window so the upstream rows
+ * fed into `INLINE STATS` (and the IN-list flowing into `fetch_suppressions`)
+ * stay small enough to never breach ES|QL sub-plan buffer or request-size
+ * limits — even at peak ingest.
  *
  * Window semantics:
- *   - `windowStart`:
- *     - subsequent runs: the persisted `eventWatermark` (exclusive lower bound).
- *     - cold start (no watermark): `now − LOOKBACK_WINDOW_MINUTES` (inclusive).
+ *   - `windowStart`: the persisted `eventWatermark` on subsequent runs;
+ *     `now − LOOKBACK_WINDOW_MINUTES` on cold start.
  *   - `windowEnd`: `min(windowStart + TICK_LOOKBACK_CAP_MINUTES, now − SETTLE_BUFFER_SECONDS)`.
- *     The settle buffer absorbs Elasticsearch refresh-interval lag and modest
- *     clock skew between the rule executor and the dispatcher.
- *   - Lower bound is `gte` only on cold start; subsequent ticks use `gt` to
- *     avoid re-processing the boundary event the previous tick already covered.
+ *     The cap bounds the row count fed into INLINE STATS so the ES|QL sub-plan
+ *     buffer stays well under its 16.8 MB limit; the settle buffer absorbs
+ *     Elasticsearch refresh-interval lag and modest clock skew between the
+ *     rule executor and the dispatcher.
+ *   - Lower bound is always `gte`. The boundary timestamp is re-included on
+ *     every tick so any episode whose `last_event_timestamp` ties the previous
+ *     watermark is retried — this is what closes the silent loss path when
+ *     `LIMIT 10000` truncates a busy window. The per-`(rule_id, group_hash)`
+ *     dedup in the ES|QL query (`last_fired < @timestamp`) filters out
+ *     anything we already dispatched, so re-inclusion does not produce
+ *     duplicate fires.
+ *
+ * Watermark semantics:
+ *   - On a tick that returned episodes, `nextEventWatermark` is the
+ *     `last_event_timestamp` of the latest episode actually returned (the last
+ *     row in the SORT-asc result). The cursor advances at the rate of
+ *     observed data, not wall clock, so a `LIMIT 10000` cut tail — which by
+ *     construction has `last_event_timestamp >=` the new watermark — is
+ *     picked up on the next tick.
+ *   - On an empty window, the watermark advances to `windowEnd` so quiet
+ *     periods don't re-read the same empty range forever.
+ *   - On `step_error`, `dispatcher.ts` discards the watermark via
+ *     `extractAdvanceableWatermark`, so the failed window is retried.
  *
  * Backlog/outage handling is implicit: the watermark advances at most one
  * cap per tick, so a long outage drains over many ticks with bounded work
@@ -87,7 +105,7 @@ export class FetchEpisodesStep implements DispatcherStep {
       filter: {
         range: {
           '@timestamp': {
-            ...(isFirstRun ? { gte: lowerBound } : { gt: lowerBound }),
+            gte: lowerBound,
             lte: upperBound,
           },
         },
@@ -95,7 +113,12 @@ export class FetchEpisodesStep implements DispatcherStep {
     });
 
     const episodes = parseAlertEpisodes(result);
-    const nextEventWatermark = upperBound;
+    // Anchor the watermark to the latest episode actually returned (the
+    // ES|QL query sorts `last_event_timestamp` ascending, and the result
+    // preserves that order through `parseAlertEpisodes`). Empty windows
+    // fall back to `upperBound` so quiet periods still progress.
+    const nextEventWatermark =
+      episodes.length > 0 ? episodes[episodes.length - 1].last_event_timestamp : upperBound;
 
     if (episodes.length === 0) {
       return { type: 'halt', reason: 'no_episodes', data: { nextEventWatermark } };

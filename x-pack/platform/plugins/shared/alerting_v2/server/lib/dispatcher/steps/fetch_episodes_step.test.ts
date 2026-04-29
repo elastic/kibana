@@ -48,6 +48,64 @@ describe('FetchEpisodesStep', () => {
     expect(result.data?.episodes?.[0].rule_id).toBe('r1');
   });
 
+  it('anchors nextEventWatermark to the last_event_timestamp of the latest returned episode', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    // Returned in SORT-asc order; the last element's last_event_timestamp
+    // must be what the watermark anchors to.
+    const episodes = [
+      createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:10:00.000Z' }),
+      createAlertEpisode({ episode_id: 'e2', last_event_timestamp: '2026-01-22T07:10:30.000Z' }),
+      createAlertEpisode({ episode_id: 'e3', last_event_timestamp: '2026-01-22T07:10:45.000Z' }),
+    ];
+
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
+
+    const state = createDispatcherPipelineState();
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.nextEventWatermark).toBe('2026-01-22T07:10:45.000Z');
+  });
+
+  it('continues a LIMIT-truncated tick from the last observed timestamp on the next run', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    // First tick: simulate a full LIMIT page; last episode's timestamp is the
+    // boundary the next tick must resume from.
+    const firstPage = [
+      createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:10:00.000Z' }),
+      createAlertEpisode({ episode_id: 'e2', last_event_timestamp: '2026-01-22T07:10:30.000Z' }),
+    ];
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(firstPage));
+
+    const firstResult = await step.execute(createDispatcherPipelineState());
+    expect(firstResult.type).toBe('continue');
+    if (firstResult.type !== 'continue') return;
+    const watermarkAfterFirst = firstResult.data?.nextEventWatermark;
+    expect(watermarkAfterFirst).toBe('2026-01-22T07:10:30.000Z');
+
+    // Second tick: re-feed the watermark; the lower bound must be `gte` so
+    // any episode whose `last_event_timestamp` ties the boundary is picked up.
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+    await step.execute(
+      createDispatcherPipelineState({
+        input: {
+          startedAt: new Date(),
+          previousStartedAt: new Date(),
+          eventWatermark: new Date(watermarkAfterFirst as string),
+        },
+      })
+    );
+
+    const range = extractTimestampRange(mockEsClient.esql.query.mock.calls[1][0]);
+    expect(range).toHaveProperty('gte', watermarkAfterFirst);
+    expect(range).not.toHaveProperty('gt');
+  });
+
   it('parses data_json into data on episodes', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
@@ -145,7 +203,7 @@ describe('FetchEpisodesStep', () => {
       expect(lte).toBeLessThanOrEqual(after - settleMs + TOLERANCE_MS);
     });
 
-    it('subsequent run (eventWatermark present): uses gt = watermark and caps at TICK_CAP', async () => {
+    it('subsequent run (eventWatermark present): uses gte = watermark and caps at TICK_CAP', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const step = new FetchEpisodesStep(queryService);
       mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
@@ -161,13 +219,13 @@ describe('FetchEpisodesStep', () => {
       await step.execute(state);
 
       const range = extractTimestampRange(mockEsClient.esql.query.mock.calls[0][0]);
-      expect(range).toHaveProperty('gt', watermark.toISOString());
-      expect(range).not.toHaveProperty('gte');
+      expect(range).toHaveProperty('gte', watermark.toISOString());
+      expect(range).not.toHaveProperty('gt');
       // Window narrower than the cap because settle buffer pulls lte back.
-      const gt = new Date(range.gt as string).getTime();
+      const gte = new Date(range.gte as string).getTime();
       const lte = new Date(range.lte as string).getTime();
-      expect(lte).toBeGreaterThan(gt);
-      expect(lte - gt).toBeLessThanOrEqual(TICK_LOOKBACK_CAP_MINUTES * 60_000 + TOLERANCE_MS);
+      expect(lte).toBeGreaterThan(gte);
+      expect(lte - gte).toBeLessThanOrEqual(TICK_LOOKBACK_CAP_MINUTES * 60_000 + TOLERANCE_MS);
     });
 
     it('stale watermark: window length is capped at TICK_LOOKBACK_CAP_MINUTES', async () => {
@@ -186,12 +244,12 @@ describe('FetchEpisodesStep', () => {
       await step.execute(state);
 
       const range = extractTimestampRange(mockEsClient.esql.query.mock.calls[0][0]);
-      const gt = new Date(range.gt as string).getTime();
+      const gte = new Date(range.gte as string).getTime();
       const lte = new Date(range.lte as string).getTime();
-      expect(lte - gt).toBeLessThanOrEqual(TICK_LOOKBACK_CAP_MINUTES * 60_000 + TOLERANCE_MS);
+      expect(lte - gte).toBeLessThanOrEqual(TICK_LOOKBACK_CAP_MINUTES * 60_000 + TOLERANCE_MS);
     });
 
-    it('publishes nextEventWatermark equal to the queried lte bound', async () => {
+    it('on an empty window publishes nextEventWatermark equal to the queried lte bound', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const step = new FetchEpisodesStep(queryService);
       mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));

@@ -656,7 +656,7 @@ describe('DispatcherService', () => {
   });
 
   describe('event watermark plumbing', () => {
-    it('returns nextEventWatermark when the pipeline completes', async () => {
+    it('returns nextEventWatermark anchored to the last observed episode when the pipeline completes', async () => {
       queryEsClient.esql.query
         .mockResolvedValueOnce(
           createDispatchableAlertEventsResponse([
@@ -690,11 +690,10 @@ describe('DispatcherService', () => {
         previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
       });
 
-      const range = extractTimestampRange(queryEsClient.esql.query.mock.calls[0][0]);
-      expect(result.nextEventWatermark).toBe(range.lte);
+      expect(result.nextEventWatermark).toBe('2026-01-22T07:10:00.000Z');
     });
 
-    it('returns nextEventWatermark when fetch_episodes halts on no_episodes', async () => {
+    it('returns nextEventWatermark equal to the queried lte when fetch_episodes halts on no_episodes', async () => {
       queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
       const result = await dispatcherService.run({
@@ -705,7 +704,7 @@ describe('DispatcherService', () => {
       expect(result.nextEventWatermark).toBe(range.lte);
     });
 
-    it('threads eventWatermark from params as a `gt` lower bound on subsequent runs', async () => {
+    it('threads eventWatermark from params as a `gte` lower bound on subsequent runs', async () => {
       queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
       const watermark = moment().subtract(20, 'seconds').toDate();
@@ -715,8 +714,8 @@ describe('DispatcherService', () => {
       });
 
       const range = extractTimestampRange(queryEsClient.esql.query.mock.calls[0][0]);
-      expect(range.gt).toBe(watermark.toISOString());
-      expect(range).not.toHaveProperty('gte');
+      expect(range.gte).toBe(watermark.toISOString());
+      expect(range).not.toHaveProperty('gt');
     });
 
     it('does not return nextEventWatermark when the pipeline throws', async () => {
