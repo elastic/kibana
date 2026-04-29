@@ -21,6 +21,10 @@ permissions:
 
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test')) }}"
 
+concurrency:
+  group: "failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}"
+  cancel-in-progress: true
+
 engine:
   id: codex
   version: '0.104.0'
@@ -64,7 +68,7 @@ Investigate a failed-test issue selected by the trigger.
 ## Target Issue Selection
 
 - If triggered by `issues`, use the triggering issue. This path should only run for non-PR issues labeled `failed-test`.
-- If triggered by `workflow_dispatch`, use issue number `${{ github.event.inputs.issue_number }}` in the current repository as the target issue.
+- If triggered by `workflow_dispatch`, use the issue number from the `$GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER` environment variable in the current repository as the target issue.
 - In manual mode, fetch that issue explicitly with GitHub tools before doing any analysis.
 - In manual mode, post the final comment back to that selected issue, not to the workflow run or any other issue.
 
@@ -134,13 +138,6 @@ One short paragraph with the current best explanation.
 - `classification`: `test` | `code` | `external` | `inconclusive`
 - `confidence`: `high` | `medium` | `low`
 
-### Classification Guide
-
-- `test`: the failure is most likely caused by test logic, timing, fixtures, isolation, cleanup, selectors, retries, or assertions.
-- `code`: the failure is most likely caused by a real bug or regression in product or shared code.
-- `external`: the failure is most likely caused by something outside the test and product code, such as CI, environment, credentials, networking, or a dependency outage.
-- `inconclusive`: the available evidence does not support a defensible classification.
-
 ### Suspected Root Cause
 
 Use 2 to 5 bullets tied to evidence.
@@ -167,4 +164,4 @@ List the key issue comments, file paths, commits, or links that drove the conclu
 - Be explicit when evidence is missing or inaccessible.
 - Do not speculate beyond the evidence you collected.
 - Use GitHub links for repository files and commits wherever you cite concrete code evidence.
-- If manually dispatched, ensure the final safe-output comment targets issue `${{ github.event.inputs.issue_number }}` in the current repository.
+- If manually dispatched, ensure the final safe-output comment targets the issue number from `$GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER` in the current repository.
