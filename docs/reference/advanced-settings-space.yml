@@ -2157,7 +2157,7 @@ groups:
           self: ga
           security: ga
 
-      - setting: "securitySolution:includedDataStreamNamespacesForRuleExecution" 
+      - setting: "securitySolution:includedDataStreamNamespacesForRuleExecution"
         id: security-solution-included-data-stream-namespaces-for-rule-execution
         description: |
           When configured, the setting restricts which documents detection rules search. Only events whose `data_stream.namespace` field matches one of the specified namespaces are queried. This applies to all detection rules in the {{kib}} space and acts like a global filter on `data_stream.namespace`. Specify an array of namespace strings (for example, `["namespace1", "namespace2"]`). You can configure up to 50 namespaces. Empty by default (searches all namespaces).
