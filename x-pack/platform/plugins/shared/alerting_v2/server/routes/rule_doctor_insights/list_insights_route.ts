@@ -9,7 +9,7 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { listInsightsQuerySchema, type ListInsightsQuery } from '@kbn/alerting-v2-schemas';
 import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { InsightsClientScopedToken } from '../../lib/rule_doctor_insights_client/tokens';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -17,27 +17,6 @@ import { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { SpaceContext } from './space_context';
-
-const listInsightsQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().default(1).describe('The page number to return.'),
-  perPage: z.coerce
-    .number()
-    .min(1)
-    .max(1000)
-    .optional()
-    .default(20)
-    .describe('The number of insights to return per page.'),
-  status: z
-    .enum(['open', 'dismissed', 'applied'])
-    .optional()
-    .describe('Filter insights by status.'),
-  type: z.string().optional().describe('Filter insights by type.'),
-  execution_id: z.string().optional().describe('Filter insights by execution ID.'),
-  rule_ids: z
-    .string()
-    .optional()
-    .describe('Comma-separated list of rule IDs to filter by.'),
-});
 
 @injectable()
 export class ListInsightsRoute extends BaseAlertingRoute {
@@ -62,11 +41,7 @@ export class ListInsightsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      unknown,
-      z.infer<typeof listInsightsQuerySchema>,
-      unknown
-    >,
+    private readonly request: KibanaRequest<unknown, ListInsightsQuery, unknown>,
     @inject(InsightsClientScopedToken)
     private readonly insightsClient: RuleDoctorInsightsClient,
     @inject(SpaceContext) private readonly spaceContext: SpaceContext

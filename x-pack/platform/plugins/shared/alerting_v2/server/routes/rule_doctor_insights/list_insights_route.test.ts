@@ -54,7 +54,7 @@ describe('ListInsightsRoute', () => {
   });
 
   it('splits comma-separated rule_ids into an array', async () => {
-    const { ctx, response } = createRouteDependencies();
+    const { ctx } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
       query: { page: 1, perPage: 20, rule_ids: 'abc,def,ghi' },
     });
