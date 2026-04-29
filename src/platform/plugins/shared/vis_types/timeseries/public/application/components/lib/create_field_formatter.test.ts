@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import { isValidElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createFieldFormatter, createReactFieldFormatter } from './create_field_formatter';
+import { createTextFieldFormatter, createReactFieldFormatter } from './create_field_formatter';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { setFieldFormats } from '../../../services';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
@@ -22,7 +22,7 @@ const mockUiSettings = {
   [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
 } as unknown as CoreSetup['uiSettings'];
 
-describe('createFieldFormatter and createReactFieldFormatter', () => {
+describe('createTextFieldFormatter and createReactFieldFormatter', () => {
   setFieldFormats(
     getFieldFormatsRegistry({
       uiSettings: mockUiSettings,
@@ -65,7 +65,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   };
 
   it('should return byte formatted value for bytesField', () => {
-    const textFormatter = createFieldFormatter('bytesField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('bytesField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('bytesField', fieldFormatMap);
 
     expect(textFormatter(value)).toBe('1.15GB');
@@ -73,7 +73,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return base64 formatted value for stringField', () => {
-    const textFormatter = createFieldFormatter('stringField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('stringField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('stringField', fieldFormatMap);
 
     expect(textFormatter(value)).toBe('×møç®ü÷');
@@ -81,7 +81,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return formatted value for colorField (text vs react element)', () => {
-    const textFormatter = createFieldFormatter('colorField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('colorField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('colorField', fieldFormatMap);
 
     const textResult = textFormatter(value);
@@ -95,7 +95,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return number formatted value for colorField when color rules are applied', () => {
-    const textFormatter = createFieldFormatter('colorField', fieldFormatMap, true);
+    const textFormatter = createTextFieldFormatter('colorField', fieldFormatMap, true);
     const reactFormatter = createReactFieldFormatter('colorField', fieldFormatMap, true);
 
     expect(textFormatter(value)).toBe('1,234,567,890');
@@ -103,7 +103,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return not formatted string value for colorField when color rules are applied', () => {
-    const textFormatter = createFieldFormatter('colorField', fieldFormatMap, true);
+    const textFormatter = createTextFieldFormatter('colorField', fieldFormatMap, true);
     const reactFormatter = createReactFieldFormatter('colorField', fieldFormatMap, true);
 
     expect(textFormatter(stringValue)).toBe(stringValue);
@@ -111,7 +111,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return formatted value for urlField (text vs react element)', () => {
-    const textFormatter = createFieldFormatter('urlField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('urlField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('urlField', fieldFormatMap);
 
     const textResult = textFormatter(value);
@@ -125,7 +125,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return "-" for null value when field has format', () => {
-    const textFormatter = createFieldFormatter('bytesField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('bytesField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('bytesField', fieldFormatMap);
 
     expect(textFormatter(null)).toBe('-');
@@ -133,7 +133,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return "-" for null value when field that has no format', () => {
-    const textFormatter = createFieldFormatter('urlField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('urlField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('urlField', fieldFormatMap);
 
     expect(textFormatter(null)).toBe('-');
@@ -141,7 +141,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should return number formatted value for number when field has no format', () => {
-    const textFormatter = createFieldFormatter('noSuchField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('noSuchField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('noSuchField', fieldFormatMap);
 
     expect(textFormatter(value)).toBe('1,234,567,890');
@@ -149,7 +149,7 @@ describe('createFieldFormatter and createReactFieldFormatter', () => {
   });
 
   it('should not format string value when field has no format', () => {
-    const textFormatter = createFieldFormatter('noSuchField', fieldFormatMap);
+    const textFormatter = createTextFieldFormatter('noSuchField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('noSuchField', fieldFormatMap);
 
     expect(textFormatter(stringValue)).toBe(stringValue);

@@ -27,7 +27,7 @@ const getFieldFormatAndType = (
     !serializedFieldFormat ||
     (hasColorRules && serializedFieldFormat?.id === FIELD_FORMAT_IDS.COLOR);
 
-  const fieldType = dataView?.getFieldByName?.(fieldName)?.type || 'number';
+  const fieldType = dataView?.getFieldByName(fieldName)?.type || 'number';
   const defaultFieldFormat =
     fieldType === 'date'
       ? { id: 'date' }
@@ -44,7 +44,7 @@ const getFieldFormatAndType = (
   return { fieldFormat, fieldType, shouldSkipFormatting };
 };
 
-export const createFieldFormatter = (
+export const createTextFieldFormatter = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
   hasColorRules: boolean = false,
