@@ -52,6 +52,11 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       const text = await notification.getVisibleText();
       return text.includes('Unable to profile');
     },
+    async editorHasIndexNotFoundNotification() {
+      const notification = await testSubjects.find('noShardsNotification');
+      const text = await notification.getVisibleText();
+      return text.includes('no such index');
+    },
     async editorHasJsonParseErrorNotification() {
       return await testSubjects.exists('jsonParseErrorToast');
     },

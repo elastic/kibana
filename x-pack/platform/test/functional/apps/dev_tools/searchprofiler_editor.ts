@@ -181,8 +181,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.searchProfiler.clickProfileButton();
 
-        await retry.waitFor('notification renders', async () => {
-          return await PageObjects.searchProfiler.editorHasErrorNotification();
+        await retry.waitFor('index not found notification renders', async () => {
+          return await PageObjects.searchProfiler.editorHasIndexNotFoundNotification();
+        });
+      });
+    });
+
+    describe('No indices with _all index pattern', function () {
+      this.tags('skipFIPS');
+
+      it('returns error if profile is executed with _all and no indices exist', async () => {
+        await PageObjects.searchProfiler.setIndexName('_all');
+        await PageObjects.searchProfiler.setQuery(testQuery);
+
+        await PageObjects.searchProfiler.clickProfileButton();
+
+        await retry.waitFor('index not found notification renders', async () => {
+          return await PageObjects.searchProfiler.editorHasIndexNotFoundNotification();
         });
       });
     });
