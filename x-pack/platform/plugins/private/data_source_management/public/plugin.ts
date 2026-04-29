@@ -7,7 +7,7 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import type { DataSourceManagementPluginStart } from './plugin_start_contract';
 import type { SetupDependencies, StartDependencies } from './types';
@@ -24,15 +24,8 @@ export class DataSourceManagementPlugin
         const { mountManagementSection } = await import('./mount_management_section');
         const [coreStart] = await core.getStartServices();
 
-        const { docTitle } = coreStart.chrome;
-        docTitle.change(PLUGIN_NAME);
-
-        const { setBreadcrumbs } = params;
-        setBreadcrumbs(LIST_BREADCRUMB);
-
         const unmountAppCallback = mountManagementSection(coreStart, params);
         return () => {
-          docTitle.reset();
           unmountAppCallback();
         };
       },

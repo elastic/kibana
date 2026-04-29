@@ -7,6 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -17,32 +18,87 @@ import {
   EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
+
 import type { DataSourceWithSecrets } from '../common';
-import type { DataSetListItem } from '../common/sample_data_sets_client';
-import { SampleDataSetsClient } from '../common/sample_data_sets_client';
+import { LIST_BREADCRUMB, PLUGIN_NAME } from '../common';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
-import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
-import { DataSourcePreviewFlyout } from './data_source_preview_flyout';
+import {
+  DATA_SOURCE_MANAGEMENT_ROUTES,
+  getDataSourceDetailPath,
+} from './data_source_management_routes';
+import { useDataSourceManagementAppContext } from './data_source_management_app_context';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
 export interface DataSourcesPageProps {
   pageTitle: string;
+  /**
+   * When true (e.g. `/connect` deep link), open the connect flyout once the page is shown.
+   */
+  openConnectFlyoutOnMount?: boolean;
 }
 
-export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageTitle }) => {
-  const dataClient = useMemo(() => new SampleDataSourcesClient(), []);
-  const dataSetsClient = useMemo(() => new SampleDataSetsClient(), []);
+export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
+  pageTitle,
+  openConnectFlyoutOnMount = false,
+}) => {
+  const history = useHistory();
+  const { coreStart, setBreadcrumbs, dataSourcesClient } = useDataSourceManagementAppContext();
+  const { docTitle } = coreStart.chrome;
+
   const [items, setItems] = useState<DataSourceListItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSourceListItem[]>([]);
-  const [dataSetItems, setDataSetItems] = useState<DataSetListItem[]>([]);
-  const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
-  const [previewSource, setPreviewSource] = useState<DataSourceListItem | null>(null);
+  const [isConnectFlyoutOpen, setConnectFlyoutOpen] = useState(openConnectFlyoutOnMount);
+
+  useEffect(() => {
+    if (openConnectFlyoutOnMount) {
+      setConnectFlyoutOpen(true);
+    }
+  }, [openConnectFlyoutOnMount]);
+
+  const refreshItems = useCallback(async () => {
+    setItems(await dataSourcesClient.get());
+  }, [dataSourcesClient]);
+
+  const handleConnectFlyoutClose = useCallback(() => {
+    setConnectFlyoutOpen(false);
+    void refreshItems();
+    const { pathname } = history.location;
+    if (
+      pathname === DATA_SOURCE_MANAGEMENT_ROUTES.connect ||
+      pathname.endsWith(DATA_SOURCE_MANAGEMENT_ROUTES.connect)
+    ) {
+      history.replace(DATA_SOURCE_MANAGEMENT_ROUTES.list);
+    }
+  }, [history, refreshItems]);
+
+  const handleConnectSave = useCallback(
+    async (values: {
+      name: string;
+      dataSource: Omit<DataSourceWithSecrets, 'id'>;
+    }): Promise<string | null> => {
+      try {
+        await dataSourcesClient.add(values);
+        return null;
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Unknown error';
+      }
+    },
+    [dataSourcesClient]
+  );
+
+  useEffect(() => {
+    setBreadcrumbs(LIST_BREADCRUMB);
+    docTitle.change(PLUGIN_NAME);
+    return () => {
+      docTitle.reset();
+    };
+  }, [docTitle, setBreadcrumbs]);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const nextItems = await dataClient.get();
+      const nextItems = await dataSourcesClient.get();
       if (!cancelled) {
         setItems(nextItems);
       }
@@ -50,50 +106,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
     return () => {
       cancelled = true;
     };
-  }, [dataClient]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const nextItems = await dataSetsClient.get();
-      if (!cancelled) {
-        setDataSetItems(nextItems);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [dataSetsClient]);
-
-  useEffect(() => {
-    if (previewSource && !items.some((row) => row.id === previewSource.id)) {
-      setPreviewSource(null);
-    }
-  }, [items, previewSource]);
-
-  const previewSets = useMemo(
-    () =>
-      previewSource
-        ? dataSetItems.filter((setItem) => setItem.sourceName === previewSource.name)
-        : [],
-    [dataSetItems, previewSource]
-  );
-
-  const handleCreateDataSourceSave = useCallback(
-    async (values: {
-      name: string;
-      dataSource: Omit<DataSourceWithSecrets, 'id'>;
-    }): Promise<string | null> => {
-      try {
-        await dataClient.add(values);
-        setItems(await dataClient.get());
-        return null;
-      } catch (e) {
-        return e instanceof Error ? e.message : 'Unknown error';
-      }
-    },
-    [dataClient]
-  );
+  }, [dataSourcesClient]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSourceListItem>>>(
     () => [
@@ -111,7 +124,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               e.stopPropagation();
-              setPreviewSource(record);
+              history.push(getDataSourceDetailPath(record.id));
             }}
           >
             {value}
@@ -139,7 +152,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
         'data-test-subj': 'dataSourceManagementColDescription',
       },
     ],
-    [setPreviewSource]
+    [history]
   );
 
   return (
@@ -157,19 +170,17 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
               color="primary"
               fill
               data-test-subj="dataSourceManagementCreateButton"
-              iconType="plusInCircle"
               onClick={() => {
-                setCreateFlyoutOpen(true);
+                setConnectFlyoutOpen(true);
               }}
             >
-              {i18n.translate('dataSourceManagement.addButtonLabel', {
-                defaultMessage: 'Add',
+              {i18n.translate('dataSourceManagement.connectExternalSourceButton', {
+                defaultMessage: 'Connect external source',
               })}
             </EuiButton>,
           ]}
         />
         <EuiSpacer size="l" />
-        <EuiSpacer size="m" />
         <EuiInMemoryTable<DataSourceListItem>
           items={items}
           itemId="id"
@@ -197,8 +208,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                   iconType="trash"
                   onClick={() => {
                     void (async () => {
-                      await dataClient.delete(selectedItems.map((item) => item.name));
-                      setItems(await dataClient.get());
+                      await dataSourcesClient.delete(selectedItems.map((item) => item.name));
+                      setItems(await dataSourcesClient.get());
                       setSelectedItems([]);
                     })();
                   }}
@@ -230,18 +241,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
           responsiveBreakpoint={false}
         />
       </EuiPageSection>
-      {isCreateFlyoutOpen ? (
-        <CreateDataSourceFlyout
-          onClose={() => setCreateFlyoutOpen(false)}
-          onSave={handleCreateDataSourceSave}
-        />
-      ) : null}
-      {previewSource ? (
-        <DataSourcePreviewFlyout
-          source={previewSource}
-          sets={previewSets}
-          onClose={() => setPreviewSource(null)}
-        />
+      {isConnectFlyoutOpen ? (
+        <CreateDataSourceFlyout onClose={handleConnectFlyoutClose} onSave={handleConnectSave} />
       ) : null}
     </>
   );

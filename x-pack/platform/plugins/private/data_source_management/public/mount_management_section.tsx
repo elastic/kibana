@@ -9,15 +9,21 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { PLUGIN_NAME } from '../common';
-import { DataSourcesPage } from './data_sources_page';
+
+import { DataSourceManagementApp } from './data_source_management_app';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
-  { element }: ManagementAppMountParams
+  { element, history, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   ReactDOM.render(
-    coreStart.rendering.addContext(<DataSourcesPage pageTitle={PLUGIN_NAME} />),
+    coreStart.rendering.addContext(
+      <DataSourceManagementApp
+        coreStart={coreStart}
+        history={history}
+        setBreadcrumbs={setBreadcrumbs}
+      />
+    ),
     element
   );
 
