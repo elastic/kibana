@@ -306,22 +306,18 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const allItems = useMemo(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
-    const areAllAlerts = attackDiscoveries.every(isAttackDiscoveryAlert);
 
-    const isOpen =
-      areAllAlerts &&
-      attackDiscoveries.length > 0 &&
-      attackDiscoveries.every((ad) => ad.alertWorkflowStatus === 'open');
+    const isOpen = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'open'
+    );
 
-    const isAcknowledged =
-      areAllAlerts &&
-      attackDiscoveries.length > 0 &&
-      attackDiscoveries.every((ad) => ad.alertWorkflowStatus === 'acknowledged');
+    const isAcknowledged = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'acknowledged'
+    );
 
-    const isClosed =
-      areAllAlerts &&
-      attackDiscoveries.length > 0 &&
-      attackDiscoveries.every((ad) => ad.alertWorkflowStatus === 'closed');
+    const isClosed = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'closed'
+    );
 
     const markAsOpenItem =
       !isOpen && hasAlertsUpdate
