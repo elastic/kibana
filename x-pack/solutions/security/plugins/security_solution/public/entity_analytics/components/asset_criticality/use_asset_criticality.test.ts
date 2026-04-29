@@ -14,14 +14,12 @@ import {
 import type { Entity } from './use_asset_criticality';
 import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 
-const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
 const mockFetchEntityStoreV2Privileges = jest.fn().mockResolvedValue({});
 const mockFetchAssetCriticality = jest.fn().mockResolvedValue({});
 const mockDeleteAssetCriticality = jest.fn().mockResolvedValue({});
 const mockCreateAssetCriticality = jest.fn().mockResolvedValue({});
 jest.mock('../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
-    fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
     fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
     fetchAssetCriticality: mockFetchAssetCriticality,
     deleteAssetCriticality: mockDeleteAssetCriticality,
@@ -34,56 +32,32 @@ jest.mock('../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-const mockUseUiSettings = jest.fn().mockReturnValue([false]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSettings(),
-  };
-});
-
 describe('useAssetCriticality', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('useAssetCriticalityPrivileges', () => {
-    it('does not call any privileges API when hasEntityAnalyticsCapability is false', async () => {
+    it('does not call the privileges API when hasEntityAnalyticsCapability is false', async () => {
       mockUseHasSecurityCapability.mockReturnValue(false);
-      mockUseUiSettings.mockReturnValue([true]);
 
       await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
 
       expect(mockFetchEntityStoreV2Privileges).not.toHaveBeenCalled();
-      expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
     });
 
-    it('calls entity store v2 privileges API when entityStoreV2Enabled is true', async () => {
+    it('calls the entity store v2 privileges API when hasEntityAnalyticsCapability is true', async () => {
       mockUseHasSecurityCapability.mockReturnValue(true);
-      mockUseUiSettings.mockReturnValue([true]);
 
       await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
 
       expect(mockFetchEntityStoreV2Privileges).toHaveBeenCalled();
-      expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
-    });
-
-    it('calls asset criticality privileges API when entityStoreV2Enabled is false', async () => {
-      mockUseHasSecurityCapability.mockReturnValue(true);
-      mockUseUiSettings.mockReturnValue([false]);
-
-      await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
-
-      expect(mockFetchAssetCriticalityPrivileges).toHaveBeenCalled();
-      expect(mockFetchEntityStoreV2Privileges).not.toHaveBeenCalled();
     });
   });
 
   describe('useAssetCriticalityData', () => {
     it('calls delete api when the mutation is called with unassigned criticality level', async () => {
-      mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
+      mockFetchEntityStoreV2Privileges.mockResolvedValue({ has_all_required: true });
       mockDeleteAssetCriticality.mockResolvedValue({});
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
@@ -102,7 +76,7 @@ describe('useAssetCriticality', () => {
     });
 
     it('calls create api when the mutation is called with assigned criticality level', async () => {
-      mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
+      mockFetchEntityStoreV2Privileges.mockResolvedValue({ has_all_required: true });
       mockDeleteAssetCriticality.mockResolvedValue({});
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
