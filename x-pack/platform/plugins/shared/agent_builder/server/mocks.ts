@@ -10,6 +10,7 @@ import { createMockedExecutableTool, createToolRegistryMock } from './test_utils
 import { createMockedAgentRegistry } from './test_utils/agents';
 import { createFormatContextMock } from './test_utils/attachments';
 import { createToolHandlerContextMock } from './test_utils/runner';
+import { createModelProviderMock } from './test_utils/model_provider';
 
 export type { ToolHandlerContextMock } from './test_utils/runner';
 
@@ -91,4 +92,5 @@ export const agentBuilderMocks = {
   tools: {
     createHandlerContext: createToolHandlerContextMock,
   },
+  createModelProvider: createModelProviderMock,
 };
