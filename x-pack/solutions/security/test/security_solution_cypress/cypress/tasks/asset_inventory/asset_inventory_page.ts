@@ -6,6 +6,11 @@
  */
 
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import {
+  ENTITY_STORE_ROUTES,
+  API_VERSIONS,
+  getLatestEntitiesIndexName,
+} from '@kbn/entity-store/common';
 import { rootRequest } from '../api_calls/common';
 import { setKibanaSetting } from '../api_calls/kibana_advanced_settings';
 
@@ -345,11 +350,20 @@ export const createMockAsset = (indexName: string) => {
   });
 };
 
-export const enableAssetInventoryApiCall = () => {
+// Asset Inventory now relies on the Entity Store V2 lifecycle (no dedicated /api/asset_inventory/enable
+// route). Installing the entity store creates the unified `entities-latest-{namespace}` alias and
+// underlying indices the page reads from.
+export const installEntityStoreV2ApiCall = () => {
   return rootRequest({
     method: 'POST',
-    url: `/api/asset_inventory/enable`,
+    url: ENTITY_STORE_ROUTES.public.INSTALL,
+    headers: {
+      'kbn-xsrf': 'xxxx',
+      'elastic-api-version': API_VERSIONS.public.v1,
+      'x-elastic-internal-origin': 'kibana',
+    },
     body: {},
+    failOnStatusCode: false,
   });
 };
 
@@ -361,19 +375,24 @@ export const enableAssetInventory = () => {
   setKibanaSetting(SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING, true);
 };
 
-export const waitForStatusReady = (retries = 5) => {
-  if (retries === 0) throw new Error('Status never became ready');
+// In the v2 flow the "ready" state is determined entirely client-side by composing the entity store
+// status, the privileges check, and a search for any document on `entities-latest-*`. Tests should
+// seed entity docs into `entities-latest-{namespace}` and the All Assets title becomes visible once
+// the page renders.
+export const ALL_ASSETS_TITLE_TEST_ID = '[data-test-subj="asset-inventory-test-subj-page-title"]';
+export const waitForAssetInventoryReady = (timeoutMs = 30000) => {
+  cy.get(ALL_ASSETS_TITLE_TEST_ID, { timeout: timeoutMs }).should('be.visible');
+};
 
-  cy.intercept('GET', '/api/asset_inventory/status').as('getStatus');
-
-  cy.reload();
-  cy.wait('@getStatus', { timeout: 20000 }).then(({ response }) => {
-    if (response?.body?.status !== 'ready') {
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(3000);
-      waitForStatusReady(retries - 1);
-    } else {
-      expect(response.body.status).to.eq('ready');
-    }
+// Indexes a v2 entity document directly into the underlying latest entity index that backs the
+// `entities-latest-{namespace}` alias. We bypass the live extraction transforms so UI tests don't
+// depend on the entity store extraction cadence.
+export const createMockEntityV2 = (entityDoc: Record<string, unknown>, namespace = 'default') => {
+  return rootRequest({
+    method: 'POST',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${getLatestEntitiesIndexName(
+      namespace
+    )}/_doc?refresh=wait_for`,
+    body: entityDoc,
   });
 };
