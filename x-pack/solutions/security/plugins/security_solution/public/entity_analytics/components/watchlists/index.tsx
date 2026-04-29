@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { WatchlistsManagementTable } from './components/watchlists_management_table';
 
 interface WatchlistsProps {
