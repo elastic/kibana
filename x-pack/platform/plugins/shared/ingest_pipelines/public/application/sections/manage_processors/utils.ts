@@ -8,6 +8,9 @@
 import type { DatabaseType, DatabaseNameOption } from '../../../../common/types';
 import { GEOIP_NAME_OPTIONS, IPINFO_NAME_OPTIONS } from './constants';
 
+export const MMDB_EXTENSION = '.mmdb';
+const mmdbSuffixRegExp = /(\.mmdb)+$/;
+
 const getDatabaseNameOptions = (type?: DatabaseType): DatabaseNameOption[] => {
   switch (type) {
     case 'maxmind':
@@ -41,4 +44,30 @@ export const getDatabaseValue = (databaseText: string, type?: DatabaseType): str
 export const getDatabaseText = (databaseValue: string, type?: DatabaseType): string | undefined => {
   const options = getDatabaseNameOptions(type);
   return options.find((opt) => opt.value === databaseValue)?.text;
+};
+
+/**
+ * Returns the normalized filename of the database.
+ * @param name The name of the database
+ * @returns The normalized filename of the database
+ */
+export const normalizeMmdbFilename = (name: string) => {
+  if (name.endsWith(MMDB_EXTENSION)) {
+    return name.replace(mmdbSuffixRegExp, MMDB_EXTENSION);
+  }
+
+  return `${name}${MMDB_EXTENSION}`;
+};
+
+/**
+ * Returns the label of the database, if it exists.
+ * @param item The database item
+ * @returns The label of the database
+ */
+export const getDatabaseOptionLabel = (item: { type: DatabaseType; name: string }) => {
+  if (item.type === 'local') {
+    return normalizeMmdbFilename(item.name);
+  }
+
+  return getDatabaseText(item.name) ?? item.name;
 };

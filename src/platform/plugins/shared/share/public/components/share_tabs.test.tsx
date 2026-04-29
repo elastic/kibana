@@ -81,7 +81,7 @@ const mockShareContext: IShareContext = {
     },
   },
   objectType: 'type',
-  sharingData: { title: 'title', url: 'url' },
+  sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
   isDirty: false,
   onClose: jest.fn(),
 };
