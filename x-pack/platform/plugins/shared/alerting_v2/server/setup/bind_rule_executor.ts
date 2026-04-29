@@ -17,6 +17,7 @@ import {
   ValidateRuleStep,
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
+  ApplyDetectionEngineFeaturesStep,
   CreateRecoveryEventsStep,
 } from '../lib/rule_executor/steps';
 import {
@@ -52,6 +53,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(ApplyDetectionEngineFeaturesStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
