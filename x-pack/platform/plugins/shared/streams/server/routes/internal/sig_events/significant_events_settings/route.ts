@@ -48,6 +48,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     getScopedClients,
     server,
     continuousKiExtractionWorkflowService,
+    logger,
   }): Promise<{ success: true }> => {
     const { licensing, uiSettingsClient, globalUiSettingsClient, taskClient } =
       await getScopedClients({ request });
@@ -71,10 +72,14 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     }
 
     const previousValues: Record<string, boolean | number | string> = {};
-    if (Object.keys(updates).length > 0) {
-      for (const key of Object.keys(updates)) {
-        previousValues[key] = await globalUiSettingsClient.get<boolean | number | string>(key);
-      }
+    const keys = Object.keys(updates);
+    if (keys.length > 0) {
+      const prev = await Promise.all(
+        keys.map((key) => globalUiSettingsClient.get<boolean | number | string>(key))
+      );
+      keys.forEach((key, i) => {
+        previousValues[key] = prev[i];
+      });
       await globalUiSettingsClient.setMany(updates);
     }
 
@@ -92,7 +97,9 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
         });
       } catch (err) {
         if (Object.keys(previousValues).length > 0) {
-          await globalUiSettingsClient.setMany(previousValues).catch(() => {});
+          await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+            logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+          });
         }
         throw err;
       }
