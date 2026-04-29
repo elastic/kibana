@@ -1116,6 +1116,67 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkNamespaceCustomizationRequest: {
+                      value: {
+                        packages: ['system', 'nginx'],
+                        enable: ['production', 'staging'],
+                        disable: ['dev'],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          items: [
+                            {
+                              name: 'system',
+                              success: true,
+                              namespace_customization_enabled_for: ['production', 'staging'],
+                            },
+                            {
+                              name: 'nginx',
+                              success: false,
+                              error: 'Package nginx is not installed',
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          statusCode: 400,
+                          error: 'Bad Request',
+                          message:
+                            'Namespaces must not appear in both enable and disable: production',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: BulkNamespaceCustomizationRequestSchema,
           response: {
