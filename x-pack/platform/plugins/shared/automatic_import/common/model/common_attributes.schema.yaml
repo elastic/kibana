@@ -185,6 +185,11 @@ components:
               description: The data streams of the integration
               items:
                 $ref: "#/components/schemas/DataStreamResponse"
+            categories:
+              description: The categories of the integration
+              type: array
+              items:
+                type: string
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"

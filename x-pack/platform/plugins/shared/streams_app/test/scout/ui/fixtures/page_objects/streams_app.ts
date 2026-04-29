@@ -142,7 +142,10 @@ export class StreamsApp {
   }
 
   async gotoAdvancedTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'advanced');
+    // Navigate to a stable tab first, then open Advanced to avoid races from direct URL nav
+    await this.gotoDataRetentionTab(streamName);
+    await this.page.getByRole('tab', { name: 'Advanced' }).click();
+    await this.page.waitForURL(/\/advanced/);
   }
 
   async gotoAttachmentsTab(streamName: string) {

@@ -84,7 +84,7 @@ describe('ApiKeyService', () => {
       expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'My Policy',
         role_descriptors: {},
-        metadata: { managed: true, kibana: { type: 'notification_policy' } },
+        metadata: { managed: true, kibana: { type: 'action_policy' } },
       });
 
       expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
@@ -118,7 +118,7 @@ describe('ApiKeyService', () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create API key for notification policy: My Policy - unable to determine current user'
+        'Failed to create API key for action policy: My Policy - unable to determine current user'
       );
     });
 
@@ -130,7 +130,7 @@ describe('ApiKeyService', () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create ES API key for notification policy: My Policy'
+        'Failed to create ES API key for action policy: My Policy'
       );
     });
 
@@ -142,7 +142,7 @@ describe('ApiKeyService', () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create UIAM API key for notification policy: My Policy'
+        'Failed to create UIAM API key for action policy: My Policy'
       );
     });
   });
@@ -201,7 +201,7 @@ describe('ApiKeyService', () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to extract API key from authorization header for notification policy: My Policy'
+        'Failed to extract API key from authorization header for action policy: My Policy'
       );
     });
   });
