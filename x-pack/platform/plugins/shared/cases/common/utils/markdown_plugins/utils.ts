@@ -39,7 +39,7 @@ export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | N
  */
 export const parseCommentString = (comment: string) => {
   const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
-  return processor.parse(comment) as MarkdownNode;
+  return processor.parse(comment) as unknown as MarkdownNode;
 };
 
 export const stringifyMarkdownComment = (comment: MarkdownNode) =>
@@ -53,7 +53,7 @@ export const stringifyMarkdownComment = (comment: MarkdownNode) =>
       LensSerializer,
       TimelineSerializer,
     ])
-    .stringify(comment);
+    .stringify(comment as unknown as { type: string });
 
 export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => {
   const unsafeNode = node as LensMarkdownNode;

@@ -169,10 +169,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
-import {
-  initializeEndpointExceptionsPerPolicyOptInStatus,
-  REFERENCE_DATA_SAVED_OBJECT_TYPE,
-} from './endpoint/lib/reference_data';
+import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -841,16 +838,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
-      new SavedObjectsClient(
-        core.savedObjects.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
-      ),
+      core.savedObjects,
       config.experimentalFeatures,
       logger
-    ).catch((error) => {
-      this.logger.error(
-        `Error initializing Endpoint Exceptions per-policy opt-in status: ${error}`
-      );
-    });
+    ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
 
