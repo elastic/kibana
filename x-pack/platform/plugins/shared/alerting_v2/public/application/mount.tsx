@@ -33,6 +33,7 @@ import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import { ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH } from '../constants';
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -168,4 +169,19 @@ export const mountActionPoliciesApp = async ({
   );
 
   return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+export const mountExecutionHistoryRedirect = async ({
+  params,
+  coreStart,
+}: {
+  params: AlertingV2MountParams;
+  coreStart: CoreStart;
+}): Promise<AppUnmount> => {
+  await coreStart.application.navigateToApp('management', {
+    path: `${ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH}/execution-history`,
+    replace: true,
+  });
+
+  return () => {};
 };

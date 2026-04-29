@@ -9,6 +9,7 @@ export const ALERTING_V2_SECTION_ID = 'alertingV2';
 export const ALERTING_V2_RULES_APP_ID = 'rules';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
 export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
+export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
 
 export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
@@ -36,4 +37,5 @@ export const paths = {
   alertEpisodesList: ALERTING_V2_EPISODES_BASE_PATH,
   alertEpisodeDetails: (episodeId: string) =>
     `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
+  actionPolicyExecutionHistory: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/execution-history`,
 };
