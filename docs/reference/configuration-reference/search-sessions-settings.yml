@@ -1,0 +1,91 @@
+---
+# This file is used to generate "Background search and search sessions settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Background search and search sessions settings in Kibana
+id: search-session-settings-kb
+
+groups:
+  - group: Background search settings
+    id: background-search-settings
+    settings:
+
+      - setting: data.search.sessions.enabled
+        description: |
+          `false` by default. Set to `true` to enable background searches.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.2+
+          ech: ga
+          self: ga
+
+      - setting: data.search.sessions.maxUpdateRetries
+        description: |
+          How many retries {{kib}} can perform while attempting to send a search to the background. The default is `10`.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga 9.2+
+          ech: ga
+          self: ga
+
+      - setting: data.search.sessions.defaultExpiration
+        description: |
+          How long background search results are stored before they expire and are deleted. When users extend the validity period of the background search, this setting also determines by how long. The default is `7d`.
+        datatype: string
+        default: 7d
+        applies_to:
+          stack: ga 9.2+
+          ech: ga
+          self: ga
+
+  - group: Search sessions settings (deprecated)
+    id: search-sessions-settings-deprecated
+    settings:
+
+      - setting: data.search.sessions.enabled
+        description: |
+          Deprecated in 8.15.0. `false` by default. Set to `true` to enable search sessions.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: deprecated 8.15
+          ech: deprecated
+          self: deprecated
+        deprecation_details: "Deprecated in 8.15.0. Replaced by the background search feature in 9.2."
+
+      - setting: data.search.sessions.notTouchedTimeout
+        description: |
+          Deprecated in 8.15.0. How long {{kib}} stores search results from unsaved sessions, after the last search in the session completes. The default is `5m`.
+        datatype: string
+        default: 5m
+        applies_to:
+          stack: deprecated 8.15, removed 9.2
+          ech: deprecated
+          self: deprecated
+        deprecation_details: "Deprecated in 8.15.0. This setting was part of the search sessions feature, which has been replaced by background search in 9.2."
+
+      - setting: data.search.sessions.maxUpdateRetries
+        description: |
+          Deprecated in 8.15.0. How many retries {{kib}} can perform while attempting to save a search session. The default is `10`.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: deprecated 8.15
+          ech: deprecated
+          self: deprecated
+        deprecation_details: "Deprecated in 8.15.0. Replaced by the background search feature in 9.2."
+
+      - setting: data.search.sessions.defaultExpiration
+        description: |
+          Deprecated in 8.15.0. How long search session results are stored before they are deleted. Extending a search session resets the expiration by the same value. The default is `7d`.
+        datatype: string
+        default: 7d
+        applies_to:
+          stack: deprecated 8.15
+          ech: deprecated
+          self: deprecated
+        deprecation_details: "Deprecated in 8.15.0. Replaced by the background search feature in 9.2."

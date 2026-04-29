@@ -1050,6 +1050,7 @@
                 "lineNumber": 191,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutTargetLocation",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -137,7 +137,7 @@ export const createWinlogbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
   },
 });
@@ -166,7 +166,7 @@ export const createWinlogbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
   },
 });

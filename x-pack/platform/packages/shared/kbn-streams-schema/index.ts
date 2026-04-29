@@ -207,6 +207,7 @@ export type {
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
+export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
@@ -243,6 +244,8 @@ export {
   featureStatusSchema,
 } from './src/feature';
 
+export { FeatureAccumulator } from './src/feature_accumulator';
+
 export {
   type BaseSimulationError,
   type SimulationError,
@@ -261,6 +264,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type GenerateInsightsResult,

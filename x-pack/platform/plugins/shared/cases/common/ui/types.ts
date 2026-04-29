@@ -197,6 +197,11 @@ export interface SystemFilterOptions {
   category: string[];
 }
 
+export interface ExtendedFieldFilter {
+  label: string;
+  value: string;
+}
+
 export interface FilterOptions extends SystemFilterOptions {
   customFields: {
     [key: string]: {
@@ -204,6 +209,7 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  extendedFieldFilters: ExtendedFieldFilter[];
   from: string;
   to: string;
 }
