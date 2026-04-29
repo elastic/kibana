@@ -84,12 +84,8 @@ const augmentAlerts = async <T>({
   const maintenanceWindowIdsField = maintenanceWindowIds.length
     ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
     : {};
-  const cpsResolvedExpression = cpsData.resolvedExpression
-    ? { [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression }
-    : {};
-  const cpsLinkedProjects = cpsData.linkedProjects.length
-    ? { [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects }
-    : {};
+  const cpsResolvedExpression = { [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression ?? null };
+  const cpsLinkedProjects = { [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects };
   return alerts.map((alert) => {
     return {
       ...alert,

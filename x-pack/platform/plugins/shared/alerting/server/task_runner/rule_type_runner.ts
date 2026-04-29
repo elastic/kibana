@@ -255,7 +255,9 @@ export class RuleTypeRunner<
             return maintenanceWindowsPromise;
           };
 
-          const cpsData = await executorServices.getCpsData();
+          const cpsData = context.isServerless
+            ? await executorServices.getCpsData()
+            : undefined;
 
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
