@@ -367,6 +367,8 @@ export class FeatureClient {
       includeExpired?: boolean;
       includeExcluded?: boolean;
       limit?: number;
+      type?: string[];
+      minConfidence?: number;
     }
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -386,6 +388,8 @@ export class FeatureClient {
       limit?: number;
       includeExpired?: boolean;
       includeExcluded?: boolean;
+      type?: string[];
+      minConfidence?: number;
     } = {}
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];

@@ -68,6 +68,9 @@ Schema features describe the **log schema family** evident from field names and 
 - **Prefer the simplest valid filter**: start with a single equality when it is selective enough; use `and` only when needed to disambiguate; use `or` only for true alternatives of the same component.
 - **Filter quality constraints**: Prefer stable, selective fields (for example, service/component names). Avoid broad filters that match most documents (for example, `agent.name=filebeat`) and avoid high-cardinality or instance-like values (pod names, hostnames, container IDs, request/trace IDs, IPs).
 - **Filter-evidence consistency**: every field/value used in `filter` must appear in, or be directly justified by, the feature's `evidence`.
+- **Grouping field hint**: when the primary ECS field whose values enumerate distinct instances of this entity type can be determined unambiguously (typically the same field used in `filter`, e.g. `service.name`, `kubernetes.pod.name`), record it under `meta`:
+  - `meta: { "entity_store": { "grouping_field": "service.name" } }`
+  - Omit this hint when the grouping field is ambiguous (e.g. multiple equally plausible identifying fields). Downstream consumers will derive a grouping field from the `filter` shape in that case.
 - **Keep rules generic**: Entity identification is not tied to specific technologies or log patterns. Any log evidence that reveals a distinct, named system component qualifies.
 
 ## Consolidation Rules
