@@ -103,7 +103,7 @@ export function ServiceMapEmbeddable({
     serviceName,
   });
 
-  const nodesForGraph = useServiceMapBadges({
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
     start,
     end,
@@ -191,6 +191,8 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
   });
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
     <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
       <div
@@ -204,11 +206,11 @@ export function ServiceMapEmbeddable({
           boxSizing: 'border-box',
         }}
       >
-        {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+        {isLoading && <LoadingSpinner />}
         <ServiceMapGraph
           height="100%"
-          nodes={nodesForGraph}
-          edges={data.edges}
+          nodes={isLoading ? [] : nodesForGraph}
+          edges={isLoading ? [] : data.edges}
           serviceName={serviceName}
           highlightedServiceName={serviceName}
           environment={environment}

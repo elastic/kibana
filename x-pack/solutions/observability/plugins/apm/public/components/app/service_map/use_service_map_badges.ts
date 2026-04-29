@@ -15,6 +15,11 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { mergeServiceMapNodesWithBadges } from './merge_service_map_nodes_with_badges';
 
+interface ServiceMapBadgesReturn {
+  nodes: ServiceMapNode[];
+  status: FETCH_STATUS;
+}
+
 /**
  * One POST returns **per-service** alert counts and SLO stats for every service node on the map
  * (same `body.serviceNames` shape as `POST /internal/apm/services/detailed_statistics`).
@@ -35,7 +40,7 @@ export function useServiceMapBadges({
   kuery: string;
   nodes: ServiceMapNode[];
   nodesStatus: FETCH_STATUS;
-}): ServiceMapNode[] {
+}): ServiceMapBadgesReturn {
   const { config } = useApmPluginContext();
   const license = useLicenseContext();
 
@@ -93,8 +98,8 @@ export function useServiceMapBadges({
 
   return useMemo(() => {
     if (badgesStatus !== FETCH_STATUS.SUCCESS || !badgesData) {
-      return nodes;
+      return { nodes, status: badgesStatus };
     }
-    return mergeServiceMapNodesWithBadges(nodes, badgesData);
+    return { nodes: mergeServiceMapNodesWithBadges(nodes, badgesData), status: badgesStatus };
   }, [badgesData, badgesStatus, nodes]);
 }

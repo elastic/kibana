@@ -175,7 +175,7 @@ export function ServiceMap({
     }
   }, [isFullscreen, bodyClassesToToggle]);
 
-  const nodesForGraph = useServiceMapBadges({
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
     start,
     end,
@@ -240,6 +240,8 @@ export function ServiceMap({
     });
   }
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
     <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
       <div
@@ -259,11 +261,11 @@ export function ServiceMap({
             }}
             ref={ref}
           >
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            {isLoading && <LoadingSpinner />}
             <ServiceMapGraph
               height={mapHeight}
-              nodes={nodesForGraph}
-              edges={data.edges}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
               highlightedServiceName={serviceName}
               environment={environment}
