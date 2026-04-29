@@ -171,7 +171,7 @@ describe('Monitor Detail Flyout', () => {
 
     expect(getByText('Every 1 minute'));
     expect(getByText('test-id'));
-    expect(getByText('Pending'));
+    expect(getByText('Last 24 hours'));
     expect(
       getByRole('heading', {
         level: 2,
