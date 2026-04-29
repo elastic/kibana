@@ -72,34 +72,6 @@ api-docs-overlay: ## Apply all overlays
 	rm -f output/kibana.tmp*.yaml
 	rm -f output/kibana.serverless.tmp*.yaml
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Producing kibana.external.yaml for external Dashboards/Visualizations hosting
-# ⚠️  TEMPORARY — retire this target when Dashboards & Visualizations APIs reach GA.
-# See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
-# ──────────────────────────────────────────────────────────────────────────────
-# This target is NOT run by CI. Run it manually whenever you need to update the
-# external hosting repo (https://elastic.github.io/as-code-docs/).
-#
-# Note: this target depends on merge-api-docs-stateful to always start from a
-# fresh raw merged kibana.yaml, avoiding any previously applied overlays.
-#
-# Note: space-aware-api-docs is intentionally NOT applied here — that step
-# injects Bump-specific HTML and would render incorrectly in other tools.
-# ──────────────────────────────────────────────────────────────────────────────
-.PHONY: api-docs-overlay-external
-api-docs-overlay-external: merge-api-docs-stateful api-docs-fix-required ## Apply all overlays for external hosting — output is kibana.external.yaml
-	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/required_field_fixes.overlays.yaml" > "output/kibana.tmp0.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp0.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@./node_modules/.bin/redocly bundle output/kibana.tmp7.yaml --ext yaml -o output/kibana.external.yaml
-	rm -f output/kibana.tmp*.yaml
-	rm -f overlays/required_field_fixes.overlays.yaml
-
 .PHONY: api-docs-preview
 api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
 	@echo "Rendering stateful docs preview..."
