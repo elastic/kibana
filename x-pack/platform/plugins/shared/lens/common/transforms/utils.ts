@@ -7,7 +7,11 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { LensByRefSerializedState, LensSerializedState } from '@kbn/lens-common';
+import type {
+  LensByRefSerializedState,
+  LensByValueSerializedState,
+  LensSerializedState,
+} from '@kbn/lens-common';
 import type {
   LensByRefSerializedAPIConfig,
   LensByValueFlattenedSerializedAPIConfig,
@@ -41,7 +45,13 @@ export function isByRefLensConfig(
   return 'ref_id' in config && !!config.ref_id;
 }
 
-export function isFlattenedAPIConfig(config: unknown): config is FlattenedLensByValuePanelSchema {
+export function isFlattenedAPIConfig(
+  config:
+    | FlattenedLensByValuePanelSchema
+    | LensSerializedAPIConfig
+    | LensByValueSerializedState
+    | Partial<LensSerializedState>
+): config is FlattenedLensByValuePanelSchema {
   return (
     typeof config === 'object' && config !== null && 'type' in config && !('attributes' in config)
   );

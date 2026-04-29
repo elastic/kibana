@@ -12,7 +12,17 @@ import { flattenApiConfig, isFlattenedAPIConfig, unflattenAPIConfig } from './ut
 
 describe('isFlattenedAPIConfig', () => {
   it('returns true for a flattened config with a type discriminant', () => {
-    expect(isFlattenedAPIConfig({ type: 'xy' })).toBe(true);
+    expect(
+      isFlattenedAPIConfig({
+        type: 'metric',
+        metrics: [
+          { type: 'primary', operation: 'count', label: 'Count of records', empty_as_null: true },
+        ],
+        data_source: { type: 'data_view_reference', ref_id: '123' },
+        ignore_global_filters: false,
+        sampling: 1,
+      })
+    ).toBe(true);
   });
 
   it('returns false for a by-ref config (no type, no attributes)', () => {
@@ -20,17 +30,25 @@ describe('isFlattenedAPIConfig', () => {
   });
 
   it('returns false for a nested config with attributes', () => {
-    expect(isFlattenedAPIConfig({ attributes: { type: 'xy' } })).toBe(false);
+    expect(
+      isFlattenedAPIConfig({
+        attributes: {
+          visualizationType: 'xy',
+          title: 'Panel',
+          references: [],
+          state: {
+            datasourceStates: {},
+            visualization: {},
+            query: { query: '', language: 'kuery' },
+            filters: [],
+          },
+        },
+      })
+    ).toBe(false);
   });
 
   it('returns false for an empty object', () => {
     expect(isFlattenedAPIConfig({})).toBe(false);
-  });
-
-  it('returns false for null and non-object values', () => {
-    expect(isFlattenedAPIConfig(null)).toBe(false);
-    expect(isFlattenedAPIConfig(undefined)).toBe(false);
-    expect(isFlattenedAPIConfig('string')).toBe(false);
   });
 });
 
