@@ -143,37 +143,38 @@ export class CcsLogsExtractionClient {
     const onAbort = () => this.logger.debug('Aborting CCS logs extraction');
     abortController?.signal.addEventListener('abort', onAbort);
 
-    const { effectiveFromDateISO, toDateISO, recoveryId, isOverride } =
-      await this.resolveExtractionWindow(type, lookbackPeriod, delay, windowOverride);
+    try {
+      const { effectiveFromDateISO, toDateISO, recoveryId, isOverride } =
+        await this.resolveExtractionWindow(type, lookbackPeriod, delay, windowOverride);
 
-    if (effectiveFromDateISO >= toDateISO) {
-      this.logger.error(
-        `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${toDateISO}), skipping`
-      );
+      if (effectiveFromDateISO >= toDateISO) {
+        this.logger.error(
+          `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${toDateISO}), skipping`
+        );
+        return { count: 0, pages: 0 };
+      }
+
+      const result = await this.runLogsPaginationOuterLoop({
+        type,
+        remoteIndexPatterns,
+        toDateISO,
+        docsLimit,
+        maxLogsPerPage,
+        entityDefinition,
+        abortController,
+        effectiveFromDateISO,
+        recoveryId,
+        skipStateUpdates: isOverride,
+      });
+
+      if (!isOverride && result.count === 0) {
+        await this.ccsStateClient.clearRecoveryId(type);
+      }
+
+      return result;
+    } finally {
       abortController?.signal.removeEventListener('abort', onAbort);
-      return { count: 0, pages: 0 };
     }
-
-    const result = await this.runLogsPaginationOuterLoop({
-      type,
-      remoteIndexPatterns,
-      toDateISO,
-      docsLimit,
-      maxLogsPerPage,
-      entityDefinition,
-      abortController,
-      effectiveFromDateISO,
-      recoveryId,
-      skipStateUpdates: isOverride,
-    });
-
-    if (!isOverride && result.count === 0) {
-      await this.ccsStateClient.clearRecoveryId(type);
-    }
-
-    abortController?.signal.removeEventListener('abort', onAbort);
-
-    return result;
   }
 
   /**
