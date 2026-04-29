@@ -66,7 +66,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Alerts',
           'Applications',
           'User Experience',
-          'Workflows',
           'Stack Management',
         ]);
       });
