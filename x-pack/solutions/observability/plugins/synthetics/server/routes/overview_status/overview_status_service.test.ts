@@ -1416,12 +1416,11 @@ describe('current status route', () => {
       expect(result.up).toBe(0);
     });
 
-    it('skips meta.space_id filter when CCS is enabled', async () => {
-      // `_index` is evaluated against shard-local names (no cluster alias prefix),
-      // so we can't reliably gate by `_index` at filter time. Cross-space leakage
-      // from local pings is instead prevented in JS: the remote-only branch
-      // drops any bucket whose `_index` has no `:` prefix
-      // (see `getRemoteMonitorInfo`).
+    it('keeps the meta.space_id filter for local pings (OR remote-index wildcard) when CCS is enabled', async () => {
+      // Local pings must still honour the active space; remote-cluster pings
+      // bypass the space terms via a `wildcard` match on the cluster-alias
+      // prefix in `_index` (the prefix is visible at filter time when the
+      // search target includes the alias).
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(
@@ -1468,8 +1467,19 @@ describe('current status route', () => {
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
-      expect(spaceFilter).toBeUndefined();
+      const spaceFilter = filters.find(
+        (f: any) =>
+          f.bool?.should?.some((s: any) => s.terms?.['meta.space_id']) &&
+          f.bool?.should?.some((s: any) => s.wildcard?._index)
+      );
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.bool.minimum_should_match).toBe(1);
+
+      const localTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(localTerms.terms['meta.space_id']).toContain('default');
+
+      const remoteWildcard = spaceFilter.bool.should.find((s: any) => s.wildcard?._index);
+      expect(remoteWildcard.wildcard._index).toBe('*:*');
     });
 
     it('includes meta.space_id filter when CCS is disabled', async () => {

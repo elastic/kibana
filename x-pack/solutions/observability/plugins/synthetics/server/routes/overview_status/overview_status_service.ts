@@ -134,20 +134,30 @@ export class OverviewStatusService {
         },
       ];
     };
-    // When CCS is enabled, skip the meta.space_id filter entirely: remote-cluster
-    // pings carry the *remote* cluster's `meta.space_id`, and we cannot
-    // discriminate local vs remote shards at filter time (`_index` matches the
-    // shard-local name, before the coordinating node adds the cluster alias).
-    // Cross-space leakage from local pings is prevented downstream: monitors
-    // without a matching local SO are routed through the remote-only branch,
-    // which drops any bucket whose `_index` lacks a `:` prefix
-    // (see `getRemoteMonitorInfo`).
+    // Local pings must always honour the active space, otherwise a monitor in
+    // a different local space would surface as a remote-rendered entry on the
+    // Overview. Remote-cluster pings (with `_index` like
+    // "cluster1:.ds-synthetics-*") carry the *remote* cluster's
+    // `meta.space_id`, so applying the local space terms there would
+    // over-filter them — accept them regardless of space via a `wildcard`
+    // match on the cluster-alias prefix in `_index`. Note: `regexp` is not
+    // allowed on `_index`; `wildcard` is.
     const ccsEnabled = isCCSEnabled(this.routeContext.server);
-    const skipSpaceFilter =
-      showFromAllSpaces || ccsEnabled || !spaceId || spaceId === ALL_SPACES_ID;
+    const skipSpaceFilter = showFromAllSpaces || !spaceId || spaceId === ALL_SPACES_ID;
+    const localSpaceTerms: QueryDslQueryContainer = {
+      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
+    };
+    const spaceFilter: QueryDslQueryContainer = ccsEnabled
+      ? {
+          bool: {
+            should: [localSpaceTerms, { wildcard: { _index: '*:*' } }],
+            minimum_should_match: 1,
+          },
+        }
+      : localSpaceTerms;
 
     const filters: QueryDslQueryContainer[] = [
-      ...(skipSpaceFilter ? [] : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }]),
+      ...(skipSpaceFilter ? [] : [spaceFilter]),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
