@@ -30,6 +30,7 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
+    "@kbn/response-ops-alert-snooze",
     "@kbn/data-plugin",
     "@kbn/discover-utils",
     "@kbn/i18n-react",

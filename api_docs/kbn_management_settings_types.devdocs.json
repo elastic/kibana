@@ -85,7 +85,23 @@
         "tags": [],
         "label": "FieldDefinition",
         "description": [
-          "\nA {@link FieldDefinition} adapts a {@link UiSettingMetadata} object to be more\neasily consumed by the UI.  It contains additional information about the field\nthat is determined from a given UiSettingMetadata object, (which is a type\nrepresenting a UiSetting)."
+          "\nA ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " adapts a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          " object to be more\neasily consumed by the UI.  It contains additional information about the field\nthat is determined from a given UiSettingMetadata object, (which is a type\nrepresenting a UiSetting)."
         ],
         "signature": [
           {
@@ -505,7 +521,23 @@
         "tags": [],
         "label": "SelectFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `select` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `select` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -681,7 +713,17 @@
         "tags": [],
         "label": "UiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} type, whose fields\nare not only optional, but also not strongly typed to\n{@link @kbn/core-ui-settings-common#UiSettingsType}.\n"
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " type, whose fields\nare not only optional, but also not strongly typed to\n",
+          "@kbn/core-ui-settings-common#UiSettingsType",
+          ".\n"
         ],
         "signature": [
           {
@@ -773,7 +815,15 @@
         "tags": [],
         "label": "UnsavedFieldChange",
         "description": [
-          "\nA {@link UnsavedFieldChange} represents local changes to a field that have not\nyet been saved."
+          "\nA ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " represents local changes to a field that have not\nyet been saved."
         ],
         "signature": [
           {
@@ -922,7 +972,23 @@
         "tags": [],
         "label": "ArrayFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `array` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `array` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -948,7 +1014,15 @@
         "tags": [],
         "label": "ArraySettingType",
         "description": [
-          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `array` primitive type value."
+          "\nA narrowing type representing all ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          " values that correspond\nto an `array` primitive type value."
         ],
         "signature": [
           "\"array\""
@@ -967,7 +1041,15 @@
         "tags": [],
         "label": "ArrayUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `array` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `array` type."
         ],
         "signature": [
           {
@@ -993,7 +1075,31 @@
         "tags": [],
         "label": "ArrayUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `number` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `number` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1019,7 +1125,23 @@
         "tags": [],
         "label": "BooleanFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `boolean` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `boolean` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1045,7 +1167,15 @@
         "tags": [],
         "label": "BooleanSettingType",
         "description": [
-          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `boolean` primitive type value."
+          "\nA narrowing type representing all ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          " values that correspond\nto an `boolean` primitive type value."
         ],
         "signature": [
           "\"boolean\""
@@ -1064,7 +1194,15 @@
         "tags": [],
         "label": "BooleanUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `boolean` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `boolean` type."
         ],
         "signature": [
           {
@@ -1090,7 +1228,31 @@
         "tags": [],
         "label": "BooleanUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `boolean` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `boolean` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1116,7 +1278,23 @@
         "tags": [],
         "label": "ColorFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `color` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `color` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1142,7 +1320,15 @@
         "tags": [],
         "label": "ColorUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `color` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `color` type."
         ],
         "signature": [
           {
@@ -1168,7 +1354,31 @@
         "tags": [],
         "label": "ColorUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `color` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `color` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1194,7 +1404,23 @@
         "tags": [],
         "label": "ImageFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `image` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `image` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1220,7 +1446,15 @@
         "tags": [],
         "label": "ImageUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `image` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `image` type."
         ],
         "signature": [
           {
@@ -1246,7 +1480,31 @@
         "tags": [],
         "label": "ImageUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `image` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `image` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1272,7 +1530,23 @@
         "tags": [],
         "label": "JsonFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `json` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `json` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1298,7 +1572,15 @@
         "tags": [],
         "label": "JsonUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `json` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `json` type."
         ],
         "signature": [
           {
@@ -1324,7 +1606,31 @@
         "tags": [],
         "label": "JsonUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `json` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `json` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1350,7 +1656,23 @@
         "tags": [],
         "label": "KnownTypeToMetadata",
         "description": [
-          "\nThis is a narrowing type, which finds the correct {@link UiSettingMetadata}\ntype based on a given {@link SettingType}."
+          "\nThis is a narrowing type, which finds the correct ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "\ntype based on a given ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          "."
         ],
         "signature": [
           "T extends \"array\" ? ",
@@ -1449,7 +1771,15 @@
         "tags": [],
         "label": "KnownTypeToValue",
         "description": [
-          "\nThis is a narrowing type, which finds the correct primitive type based on a\ngiven {@link SettingType}."
+          "\nThis is a narrowing type, which finds the correct primitive type based on a\ngiven ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          "."
         ],
         "signature": [
           "T extends \"string\" | \"color\" | \"select\" | \"image\" | \"markdown\" | \"json\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
@@ -1468,7 +1798,23 @@
         "tags": [],
         "label": "MarkdownFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `markdown` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `markdown` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1494,7 +1840,15 @@
         "tags": [],
         "label": "MarkdownUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `markdown` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `markdown` type."
         ],
         "signature": [
           {
@@ -1520,7 +1874,31 @@
         "tags": [],
         "label": "MarkdownUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `markdown` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `markdown` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1546,7 +1924,23 @@
         "tags": [],
         "label": "NumberFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `number` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `number` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1572,7 +1966,15 @@
         "tags": [],
         "label": "NumberSettingType",
         "description": [
-          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `number` primitive type value."
+          "\nA narrowing type representing all ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          " values that correspond\nto an `number` primitive type value."
         ],
         "signature": [
           "\"number\""
@@ -1591,7 +1993,15 @@
         "tags": [],
         "label": "NumberUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `number` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `number` type."
         ],
         "signature": [
           {
@@ -1617,7 +2027,31 @@
         "tags": [],
         "label": "NumberUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `number` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `number` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1685,7 +2119,15 @@
             "tags": [],
             "label": "change",
             "description": [
-              "The {@link UnsavedFieldChange } corresponding to any unsaved change to the field."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              " corresponding to any unsaved change to the field."
             ],
             "signature": [
               {
@@ -1701,6 +2143,7 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnsavedFieldChange",
             "trackAdoption": false
           }
         ],
@@ -1713,7 +2156,15 @@
         "tags": [],
         "label": "OnInputChangeFn",
         "description": [
-          "\nA function that is called when the value of a {@link FieldInput} changes."
+          "\nA function that is called when the value of a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " changes."
         ],
         "signature": [
           "(change?: ",
@@ -1740,7 +2191,15 @@
             "tags": [],
             "label": "change",
             "description": [
-              "The {@link UnsavedFieldChange } passed to the handler."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              " passed to the handler."
             ],
             "signature": [
               {
@@ -1756,6 +2215,7 @@
             "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnsavedFieldChange",
             "trackAdoption": false
           }
         ],
@@ -1787,7 +2247,15 @@
         "tags": [],
         "label": "SelectUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `select` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `select` type."
         ],
         "signature": [
           {
@@ -1813,7 +2281,31 @@
         "tags": [],
         "label": "SelectUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `select` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `select` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1839,7 +2331,15 @@
         "tags": [],
         "label": "SettingType",
         "description": [
-          "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
+          "\nThis is a local type equivalent to ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          " for flexibility."
         ],
         "signature": [
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"select\" | \"image\" | \"markdown\" | \"json\""
@@ -1858,7 +2358,23 @@
         "tags": [],
         "label": "StringFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `string` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `string` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1884,7 +2400,15 @@
         "tags": [],
         "label": "StringSettingType",
         "description": [
-          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `string` primitive type value."
+          "\nA narrowing type representing all ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          " values that correspond\nto an `string` primitive type value."
         ],
         "signature": [
           "\"string\" | \"color\" | \"select\" | \"image\" | \"markdown\" | \"json\""
@@ -1903,7 +2427,15 @@
         "tags": [],
         "label": "StringUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `string` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `string` type."
         ],
         "signature": [
           {
@@ -1929,7 +2461,31 @@
         "tags": [],
         "label": "StringUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `string` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `string` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -1955,7 +2511,15 @@
         "tags": [],
         "label": "UiSetting",
         "description": [
-          "\nCreating this type based on {@link UiSettingsClientCommon} and exporting for ease."
+          "\nCreating this type based on ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingsClientCommon",
+            "text": "UiSettingsClientCommon"
+          },
+          " and exporting for ease."
         ],
         "signature": [
           "PublicUiSettingsParams",
@@ -1977,7 +2541,23 @@
         "tags": [],
         "label": "UndefinedFieldDefinition",
         "description": [
-          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `undefined` type\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " representing ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `undefined` type\nfor use in the UI."
         ],
         "signature": [
           {
@@ -2003,7 +2583,15 @@
         "tags": [],
         "label": "UndefinedSettingType",
         "description": [
-          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `undefined` type value."
+          "\nA narrowing type representing all ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          " values that correspond\nto an `undefined` type value."
         ],
         "signature": [
           "\"undefined\""
@@ -2022,7 +2610,15 @@
         "tags": [],
         "label": "UndefinedUiSettingMetadata",
         "description": [
-          "\nThis is an type-safe abstraction over the {@link UiSetting} `undefined` type."
+          "\nThis is an type-safe abstraction over the ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `undefined` type."
         ],
         "signature": [
           {
@@ -2048,7 +2644,31 @@
         "tags": [],
         "label": "UndefinedUnsavedFieldChange",
         "description": [
-          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `undefined` value\nfor use in the UI."
+          "\nThis is a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          " representing an unsaved change to a\n",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " which has a ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          " `undefined` value\nfor use in the UI."
         ],
         "signature": [
           {
@@ -2101,7 +2721,15 @@
         "tags": [],
         "label": "Value",
         "description": [
-          "\nA type representing all possible values corresponding to a given {@link SettingType}."
+          "\nA type representing all possible values corresponding to a given ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SettingType",
+            "text": "SettingType"
+          },
+          "."
         ],
         "signature": [
           "string | number | boolean | (string | number)[] | null | undefined"

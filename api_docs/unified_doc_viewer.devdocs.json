@@ -44,6 +44,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -90,6 +91,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -198,6 +200,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -250,6 +253,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -366,6 +370,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -404,6 +409,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -446,6 +452,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -504,6 +511,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -559,6 +567,7 @@
             "lineNumber": 57,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "EsDocSearchProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1074,6 +1083,7 @@
                 "lineNumber": 64,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "DocViewRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1112,6 +1122,7 @@
                 "lineNumber": 65,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "DocViewRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1163,6 +1174,7 @@
                 "lineNumber": 66,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataTableRecord",
                 "trackAdoption": false,
                 "isRequired": false
               }

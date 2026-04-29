@@ -20,7 +20,14 @@ describe('FormatEditorSamples', () => {
           samples={[
             { input: 'test', output: 'TEST' },
             { input: 123, output: '456' },
-            { input: ['foo', 'bar'], output: '<span>foo</span>, <span>bar</span>' },
+            {
+              input: ['foo', 'bar'],
+              output: (
+                <>
+                  <span>foo</span>, <span>bar</span>
+                </>
+              ),
+            },
           ]}
         />
       </I18nProvider>
