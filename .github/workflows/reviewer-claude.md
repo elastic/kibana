@@ -2,7 +2,7 @@
 name: Claude Reviewer
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [synchronize, reopened, labeled]
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -33,7 +33,8 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: llm-gateway/claude-opus-4-6
 # Activation rules:
 # - Manual runs always activate.
-# - PR events activate when the reviewer label was just added, or is already present.
+# - Reviewer label events activate, including labels added while creating a PR.
+# - Synchronize/reopened PR events activate when the reviewer label is already present.
 # - Comment events activate only for `@claude` comments on labeled PRs.
 if: >-
   !github.event.repository.fork &&
