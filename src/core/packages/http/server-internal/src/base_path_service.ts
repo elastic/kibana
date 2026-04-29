@@ -33,9 +33,16 @@ export class BasePath implements IBasePath {
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  public set = (request: KibanaRequest | Request, requestSpecificBasePath: string) => {
-    const rawRequest = ensureRawRequest(request);
+  public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
+    this.setForRawRequest(ensureRawRequest(request), requestSpecificBasePath);
+  };
 
+  /**
+   * Internal variant of {@link set} that accepts a raw Hapi Request directly.
+   * Used by Core's onRequest handler which runs before KibanaRequest is created.
+   * @internal
+   */
+  public setForRawRequest = (rawRequest: Request, requestSpecificBasePath: string) => {
     if (this.basePathCache.has(rawRequest)) {
       throw new Error(
         'Request basePath was previously set. Setting multiple times is not supported.'

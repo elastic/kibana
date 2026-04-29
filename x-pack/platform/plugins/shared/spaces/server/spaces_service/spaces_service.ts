@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { IBasePath, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type { Space } from '../../common';
-import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient, SpacesClientServiceStart } from '../spaces_client';
@@ -77,12 +76,7 @@ export interface SpacesServiceStart {
   namespaceToSpaceId(namespace: string | undefined): string;
 }
 
-interface SpacesServiceSetupDeps {
-  basePath: IBasePath;
-}
-
 interface SpacesServiceStartDeps {
-  basePath: IBasePath;
   spacesClientService: SpacesClientServiceStart;
 }
 
@@ -90,32 +84,22 @@ interface SpacesServiceStartDeps {
  * Service for interacting with spaces.
  */
 export class SpacesService {
-  public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {
+  public setup(): SpacesServiceSetup {
     return {
-      getSpaceId: (request: KibanaRequest) => {
-        return this.getSpaceId(request, basePath);
-      },
+      getSpaceId: (request: KibanaRequest) => request.spaceId,
       spaceIdToNamespace,
       namespaceToSpaceId,
     };
   }
 
-  public start({ basePath, spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
+  public start({ spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
     return {
-      getSpaceId: (request: KibanaRequest) => {
-        return this.getSpaceId(request, basePath);
-      },
+      getSpaceId: (request: KibanaRequest) => request.spaceId,
 
-      getActiveSpace: (request: KibanaRequest) => {
-        const spaceId = this.getSpaceId(request, basePath);
-        return spacesClientService.createSpacesClient(request).get(spaceId);
-      },
+      getActiveSpace: (request: KibanaRequest) =>
+        spacesClientService.createSpacesClient(request).get(request.spaceId),
 
-      isInDefaultSpace: (request: KibanaRequest) => {
-        const spaceId = this.getSpaceId(request, basePath);
-
-        return spaceId === DEFAULT_SPACE_ID;
-      },
+      isInDefaultSpace: (request: KibanaRequest) => request.spaceId === DEFAULT_SPACE_ID,
 
       createSpacesClient: (request: KibanaRequest) =>
         spacesClientService.createSpacesClient(request),
@@ -126,12 +110,4 @@ export class SpacesService {
   }
 
   public stop() {}
-
-  private getSpaceId(request: KibanaRequest, basePathService: IBasePath) {
-    const basePath = basePathService.get(request);
-
-    const { spaceId } = getSpaceIdFromPath(basePath, basePathService.serverBasePath);
-
-    return spaceId;
-  }
 }

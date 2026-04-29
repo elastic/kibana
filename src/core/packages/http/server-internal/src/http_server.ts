@@ -639,11 +639,16 @@ export class HttpServer {
 
       if (pathHasExplicitSpaceIdentifier && spaceId) {
         const reqBasePath = `/s/${spaceId}`;
-        basePathService.set(request, reqBasePath);
+        basePathService.setForRawRequest(request, reqBasePath);
 
         app.rewrittenUrl = app.rewrittenUrl ?? request.url;
-        const newPathname = request.url.pathname.substr(reqBasePath.length) || '/';
-        const newUrl = `${newPathname}${request.url.search ?? ''}`;
+
+        const pathname = request.url.pathname;
+        const serverBase =
+          config.basePath && pathname.startsWith(config.basePath) ? config.basePath : '';
+        const pathAfterBase = serverBase ? pathname.slice(serverBase.length) : pathname;
+        const pathAfterSpace = pathAfterBase.slice(reqBasePath.length) || '/';
+        const newUrl = `${serverBase}${pathAfterSpace}${request.url.search}`;
         request.setUrl(newUrl);
         request.raw.req.url = newUrl;
       }

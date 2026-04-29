@@ -2326,8 +2326,15 @@ describe('space extraction in onRequest', () => {
     expect(basePath.get).toBeDefined();
   });
 
-  test('sets basePath for explicit space requests', async () => {
-    let capturedBasePath: string | undefined;
+  test('extracts spaceId and rewrites URL when rewriteBasePath is true', async () => {
+    const rewriteConfig = {
+      ...config,
+      basePath: '/kibana',
+      rewriteBasePath: true,
+    } as any;
+    const rewriteConfig$ = of(rewriteConfig);
+    const rewriteServer = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
+
     const router = new Router('/', logger, enhanceWithContext, routerOptions);
 
     router.get(
@@ -2341,16 +2348,21 @@ describe('space extraction in onRequest', () => {
         },
       },
       (context, req, res) => {
-        capturedBasePath = (req as any).raw?.route?.realm?.settings?.app?.basePath;
-        return res.ok({ body: { spaceId: req.spaceId } });
+        return res.ok({ body: { spaceId: req.spaceId, url: req.url.pathname } });
       }
     );
 
-    const { registerRouter, server: innerServer, basePath } = await server.setup({ config$ });
+    const { registerRouter, server: innerServer } = await rewriteServer.setup({
+      config$: rewriteConfig$,
+    });
     registerRouter(router);
-    await server.start();
+    await rewriteServer.start();
 
-    await supertest(innerServer.listener).get('/s/my-space/foo').expect(200);
+    const response = await supertest(innerServer.listener).get('/kibana/s/custom/foo').expect(200);
+
+    expect(response.body).toEqual({ spaceId: 'custom', url: '/foo' });
+
+    await rewriteServer.stop();
   });
 
   test('defaults to "default" spaceId for requests without /s/ prefix', async () => {
