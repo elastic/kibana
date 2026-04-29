@@ -30,12 +30,24 @@ export class CcsLogExtractionStateClient {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         this.logger.debug(`CCS log extraction state not found for ${entityType}, creating default`);
         const defaultState = CcsLogExtractionState.parse({});
-        await this.soClient.create<CcsLogExtractionState>(
-          CcsLogExtractionStateTypeName,
-          defaultState,
-          { id }
-        );
-        return defaultState;
+        try {
+          await this.soClient.create<CcsLogExtractionState>(
+            CcsLogExtractionStateTypeName,
+            defaultState,
+            { id }
+          );
+          return defaultState;
+        } catch (createErr) {
+          // A concurrent findOrInit won the race — read and return what it created.
+          if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
+            const { attributes } = await this.soClient.get<CcsLogExtractionState>(
+              CcsLogExtractionStateTypeName,
+              id
+            );
+            return CcsLogExtractionState.parse(attributes);
+          }
+          throw createErr;
+        }
       }
       throw err;
     }

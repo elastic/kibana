@@ -100,8 +100,8 @@ export class CcsLogsExtractionClient {
     const ccsState = await this.ccsStateClient.findOrInit(type);
     const toDateISO = moment().utc().subtract(parseDurationToMs(delay), 'ms').toISOString();
 
-    if (ccsState.paginationRecoveryId) {
-      const effectiveFromDateISO = ccsState.checkpointTimestamp!;
+    if (ccsState.paginationRecoveryId && ccsState.checkpointTimestamp) {
+      const effectiveFromDateISO = ccsState.checkpointTimestamp;
       const recoveryId = ccsState.paginationRecoveryId;
       this.logger.warn(
         `CCS extraction resuming from broken state: checkpointTimestamp=${effectiveFromDateISO}, paginationRecoveryId=${recoveryId}`
@@ -119,6 +119,12 @@ export class CcsLogsExtractionClient {
         recoveryId: undefined,
         isOverride: false,
       };
+    }
+
+    if (ccsState.paginationRecoveryId && !ccsState.checkpointTimestamp) {
+      this.logger.error(
+        `CCS extraction can't be resumed from broken state because checkpointTimestamp is null (recovery id is present), defaulting to lookback period`
+      );
     }
 
     const effectiveFromDateISO = moment()
