@@ -18,7 +18,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
-import React, { useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { AppMenuHeaderTab, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
@@ -209,10 +209,11 @@ const useAppMenuBarStyles = (
     };
   }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs]);
 
-const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
+const AppMenuBarHeaderTabs = ({ tabs, size }: { tabs: AppMenuHeaderTab[]; size: 's' | 'm' }) => (
   <EuiTabs
     bottomBorder={false}
     data-test-subj="kibanaProjectHeaderAppMenuTabs"
+    size={size}
     css={{ marginBottom: 0, width: '100%' }}
   >
     {tabs.map((tab) => (
@@ -231,7 +232,86 @@ const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   </EuiTabs>
 );
 
+// --- Prototype: title-size bridge (not for merge) ---
+// Shared with the dev toolbar via localStorage + a custom event.
+export const PROTO_TITLE_SIZE_KEY = '__proto_app_menu_title_size';
+export const PROTO_TITLE_SIZE_EVENT = '__proto_app_menu_title_size_change';
+export type TitleSize = 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l';
+const TITLE_SIZE_DEFAULT: TitleSize = 's';
+
+const readTitleSizeFromStorage = (): TitleSize => {
+  try {
+    const v = localStorage.getItem(PROTO_TITLE_SIZE_KEY);
+    if (v) return v as TitleSize;
+  } catch {
+    // ignore
+  }
+  return TITLE_SIZE_DEFAULT;
+};
+
+const useProtoTitleSize = (): TitleSize => {
+  const [titleSize, setTitleSize] = useState<TitleSize>(readTitleSizeFromStorage);
+  useEffect(() => {
+    const handler = () => setTitleSize(readTitleSizeFromStorage());
+    window.addEventListener(PROTO_TITLE_SIZE_EVENT, handler);
+    return () => window.removeEventListener(PROTO_TITLE_SIZE_EVENT, handler);
+  }, []);
+  return titleSize;
+};
+export const PROTO_HEADER_PADDING_KEY = '__proto_app_menu_header_padding_v2';
+export const PROTO_HEADER_PADDING_EVENT = '__proto_app_menu_header_padding_change';
+const HEADER_PADDING_DEFAULT = '12';
+
+export const PROTO_TAB_SIZE_KEY = '__proto_app_menu_tab_size_v2';
+export const PROTO_TAB_SIZE_EVENT = '__proto_app_menu_tab_size_change';
+type TabSize = 's' | 'm';
+const TAB_SIZE_DEFAULT: TabSize = 'm';
+
+const readTabSizeFromStorage = (): TabSize => {
+  try {
+    const v = localStorage.getItem(PROTO_TAB_SIZE_KEY);
+    if (v) return v as TabSize;
+  } catch {
+    // ignore
+  }
+  return TAB_SIZE_DEFAULT;
+};
+
+const useProtoTabSize = (): TabSize => {
+  const [tabSize, setTabSize] = useState<TabSize>(readTabSizeFromStorage);
+  useEffect(() => {
+    const handler = () => setTabSize(readTabSizeFromStorage());
+    window.addEventListener(PROTO_TAB_SIZE_EVENT, handler);
+    return () => window.removeEventListener(PROTO_TAB_SIZE_EVENT, handler);
+  }, []);
+  return tabSize;
+};
+
+const readHeaderPaddingFromStorage = (): string => {
+  try {
+    const v = localStorage.getItem(PROTO_HEADER_PADDING_KEY);
+    if (v) return v;
+  } catch {
+    // ignore
+  }
+  return HEADER_PADDING_DEFAULT;
+};
+
+const useProtoHeaderPadding = (): string => {
+  const [padding, setPadding] = useState<string>(readHeaderPaddingFromStorage);
+  useEffect(() => {
+    const handler = () => setPadding(readHeaderPaddingFromStorage());
+    window.addEventListener(PROTO_HEADER_PADDING_EVENT, handler);
+    return () => window.removeEventListener(PROTO_HEADER_PADDING_EVENT, handler);
+  }, []);
+  return `${padding}px`;
+};
+// --- End prototype bridge ---
+
 export const AppMenuBar = React.memo(() => {
+  const titleSize = useProtoTitleSize();
+  const headerPadding = useProtoHeaderPadding();
+  const tabSize = useProtoTabSize();
   const { euiTheme } = useEuiTheme();
   const updateLayout = useLayoutUpdate();
   const appMenuConfig = useAppMenu();
@@ -375,7 +455,14 @@ export const AppMenuBar = React.memo(() => {
         ref={projectHeaderRef}
         className="header__actionMenu"
         data-test-subj="kibanaProjectHeader"
-        css={styles.root}
+        css={[
+          styles.root,
+          {
+            paddingTop: headerPadding,
+            paddingInline: headerPadding,
+            paddingBottom: hasHeaderTabs ? 0 : headerPadding,
+          },
+        ]}
       >
         <div css={styles.topRow}>
           <div css={styles.leftCluster}>
@@ -395,18 +482,22 @@ export const AppMenuBar = React.memo(() => {
             <div css={styles.titleSection}>
               {hasTitle ? (
                 typeof titleContent === 'string' ? (
-                  <EuiTitle size="xs" css={styles.titleEuiTitle}>
+                  <EuiTitle size={titleSize} css={styles.titleEuiTitle}>
                     <span className="eui-textTruncate" title={titleContent}>
                       {titleContent}
                     </span>
                   </EuiTitle>
                 ) : (
-                  <EuiTitle size="xs" css={styles.titleEuiTitleReact} {...reactNodeAriaLabel}>
+                  <EuiTitle
+                    size={titleSize}
+                    css={styles.titleEuiTitleReact}
+                    {...reactNodeAriaLabel}
+                  >
                     <span className="eui-textTruncate">{titleContent}</span>
                   </EuiTitle>
                 )
               ) : (
-                <EuiTitle size="xs" css={styles.titleEuiTitle}>
+                <EuiTitle size={titleSize} css={styles.titleEuiTitle}>
                   <span className="eui-textTruncate" title={titleWhenNoProjectBreadcrumb}>
                     {titleWhenNoProjectBreadcrumb}
                   </span>
@@ -484,7 +575,7 @@ export const AppMenuBar = React.memo(() => {
         ) : null}
         {headerTabs && headerTabs.length > 0 ? (
           <div css={styles.tabsRow}>
-            <AppMenuBarHeaderTabs tabs={headerTabs} />
+            <AppMenuBarHeaderTabs tabs={headerTabs} size={tabSize} />
           </div>
         ) : null}
       </div>
