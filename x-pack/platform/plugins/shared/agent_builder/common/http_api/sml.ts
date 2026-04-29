@@ -20,23 +20,38 @@ export const SML_HTTP_ATTACH_ITEMS_MAX = 50;
 export interface SmlSearchHttpResponse {
   total: number;
   results: SmlSearchHttpResultItem[];
+  /**
+   * Ready-to-inject memory context prompt (instructions + formatted hits).
+   * Only present when `include_prompt: true` was set in the request.
+   */
+  prompt?: string;
 }
 
 /**
- * One SML search hit returned to the browser — aligned with server `SmlDocument` (`id`, `origin_id`, `type`, …).
+ * One SML search hit returned to the browser — aligned with server `SmlDocument` and the `sml_search` tool output.
  * When the request sets `skip_content: true`, `content` is omitted to shrink the payload (e.g. autocomplete).
  */
 export interface SmlSearchHttpResultItem {
+  /** SML chunk document id (Elasticsearch `_id` for the chunk row). Alias for `id`. */
+  chunk_id: string;
   /** SML chunk document id (Elasticsearch `_id` for the chunk row). */
   id: string;
   /** Registered SML type id (e.g. `visualization`, `dashboard`). */
   type: string;
+  /** Origin asset id (e.g. saved object id). Alias for `origin_id`. */
+  item_id: string;
   /** Origin asset id (e.g. saved object id); matches stored `origin_id`. */
   origin_id: string;
   title: string;
   score: number;
   /** Indexed searchable text; omitted when `skip_content` was true on the request. */
   content?: string;
+  /** True when the indexed content exceeds the 200-character preview length. */
+  has_more: boolean;
+  /** ISO timestamp when this chunk was first created. */
+  created_at: string;
+  /** Whether this item can be attached to a conversation via `sml_attach`. */
+  attachable: boolean;
 }
 
 /**

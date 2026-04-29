@@ -47,6 +47,12 @@ const smlSearchSchema = z.object({
       'Return chunks chronologically around this chunk_id (size/2 before + size/2 after, same item). ' +
         'Useful for browsing conversation turns around a specific result. The query parameter is ignored when around_id is set.'
     ),
+  min_score: z
+    .number()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe('Minimum relevance score threshold (0–1). Results with score below this value are excluded.'),
 });
 
 /**
@@ -79,7 +85,7 @@ export const createSmlSearchTool = ({
           };
     },
   },
-  handler: async ({ query, size, type, item_id: itemId, around_id: aroundId }, context) => {
+  handler: async ({ query, size, type, item_id: itemId, around_id: aroundId, min_score: minScore }, context) => {
     const smlService = getSmlService();
     const { spaceId, esClient, request } = context;
 
@@ -103,6 +109,13 @@ export const createSmlSearchTool = ({
             metadata: { query },
           }),
         ],
+      };
+    }
+
+    if (minScore != null) {
+      searchResult = {
+        ...searchResult,
+        results: searchResult.results.filter((r) => r.score >= minScore),
       };
     }
 
