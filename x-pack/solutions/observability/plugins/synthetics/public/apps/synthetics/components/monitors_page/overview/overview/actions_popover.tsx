@@ -39,7 +39,7 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewView } from '../../../../state';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -113,10 +113,11 @@ export function ActionsPopover({
   const locationName = useLocationName(monitor);
 
   const { http } = useKibana().services;
+  const locationLabel = monitor.locations[0]?.label ?? '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
+    locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
@@ -154,7 +155,7 @@ export function ActionsPopover({
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -173,10 +174,10 @@ export function ActionsPopover({
       if (locationName) {
         dispatch(
           setFlyoutConfig({
+            locationId,
             configId: monitor.configId,
             location: locationName,
             id: monitor.configId,
-            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -190,13 +191,13 @@ export function ActionsPopover({
       filters: {
         monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
-        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
+        locations: [{ label: locationLabel, value: locationId }],
         monitor_types: [],
         projects: [],
       },
       view,
     },
-    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    documentTitle: `${monitor.name} - ${locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
       defaultMessage: 'Monitor Overview',
     }),
