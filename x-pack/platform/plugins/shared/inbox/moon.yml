@@ -43,6 +43,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
