@@ -47,13 +47,15 @@ evaluate.describe(
         .set('elastic-api-version', '2023-10-31')
         .send({ entityTypes: ['user', 'host'] });
       log.info(
-        `[attachment-evals] beforeAll: install responded status=${installRes.status} body=${JSON.stringify(
-          installRes.body
-        )}`
+        `[attachment-evals] beforeAll: install responded status=${
+          installRes.status
+        } body=${JSON.stringify(installRes.body)}`
       );
       if (installRes.status !== 200 && installRes.status !== 201) {
         throw new Error(
-          `Entity Store V2 install failed (${installRes.status}): ${JSON.stringify(installRes.body)}`
+          `Entity Store V2 install failed (${installRes.status}): ${JSON.stringify(
+            installRes.body
+          )}`
         );
       }
 
@@ -68,9 +70,7 @@ evaluate.describe(
           if (res.status !== 200) return false;
           const status = (res.body as { status?: string }).status;
           if (status === 'error') {
-            throw new Error(
-              `Entity Store V2 is in error state: ${JSON.stringify(res.body)}`
-            );
+            throw new Error(`Entity Store V2 is in error state: ${JSON.stringify(res.body)}`);
           }
           return status === 'running';
         },
@@ -224,7 +224,12 @@ async function waitForCondition(
     timeoutMs,
     intervalMs = 2000,
     log,
-  }: { label: string; timeoutMs: number; intervalMs?: number; log: { warning: (m: string) => void } }
+  }: {
+    label: string;
+    timeoutMs: number;
+    intervalMs?: number;
+    log: { warning: (m: string) => void };
+  }
 ): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {

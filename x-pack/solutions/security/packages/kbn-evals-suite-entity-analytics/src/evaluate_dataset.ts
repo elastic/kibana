@@ -465,7 +465,10 @@ const findMatchingAttachments = (
 ): Array<{ attachment: AttachmentRecord; shape: AttachmentPayloadShape }> => {
   return attachments
     .filter((a) => a.type === assertion.type && a.active !== false)
-    .map((attachment) => ({ attachment, shape: classifyPayload(getCurrentAttachmentData(attachment)) }))
+    .map((attachment) => ({
+      attachment,
+      shape: classifyPayload(getCurrentAttachmentData(attachment)),
+    }))
     .filter(({ shape }) => {
       if (assertion.shape && shape.shape !== assertion.shape) return false;
       if (assertion.entityType && shape.identifierType !== assertion.entityType) return false;
@@ -506,7 +509,9 @@ const evaluateAttachmentAssertion = async (
       return {
         score: 0,
         label: 'FAIL',
-        explanation: `Expected ${formatCountBounds(count)} attachments of type "${assertion.type}" matching shape/entity filters, found ${n}.`,
+        explanation: `Expected ${formatCountBounds(count)} attachments of type "${
+          assertion.type
+        }" matching shape/entity filters, found ${n}.`,
       };
     }
     // If exact=0, pass here — no criteria to judge.
