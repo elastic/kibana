@@ -27,14 +27,11 @@ export async function update(
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const transformInTimer = serverTiming?.start('transform-dashboard-in');
-
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     updateBody,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
-
-  transformInTimer?.end();
 
   let isCreateRequest = false;
   try {

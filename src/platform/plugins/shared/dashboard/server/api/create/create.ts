@@ -27,14 +27,11 @@ export async function create(
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
 
-  const transformInTimer = serverTiming?.start('transform-dashboard-in');
-
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfData,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
-
-  transformInTimer?.end();
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
