@@ -256,6 +256,27 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     return fullUrl;
   }
 
+  private buildFormData(formData: Record<string, FormDataFieldSpec>): FormData {
+    const fd = new FormData();
+    for (const [fieldName, spec] of Object.entries(formData)) {
+      if (spec.filename !== undefined) {
+        // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
+        const blob = new Blob([spec.content], {
+          type: spec.content_type ?? 'application/octet-stream',
+        });
+        fd.append(fieldName, blob, spec.filename);
+      } else if (spec.content_type !== undefined) {
+        // Typed blob without a filename (e.g. application/json fragment)
+        const blob = new Blob([spec.content], { type: spec.content_type });
+        fd.append(fieldName, blob);
+      } else {
+        // Plain text field — serialize as a string so Content-Disposition has no filename
+        fd.append(fieldName, spec.content);
+      }
+    }
+    return fd;
+  }
+
   private async makeHttpRequest(
     kibanaUrl: string,
     requestConfig: {
@@ -296,12 +317,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // Build fetch body: multipart FormData or JSON
     let fetchBody: RequestInit['body'];
     if (formData) {
-      const fd = new FormData();
-      for (const [fieldName, spec] of Object.entries(formData)) {
-        const blob = new Blob([spec.content], { type: spec.content_type ?? 'text/plain' });
-        fd.append(fieldName, blob, spec.filename ?? fieldName);
-      }
-      fetchBody = fd;
+      fetchBody = this.buildFormData(formData);
     } else {
       fetchBody = body != null ? JSON.stringify(body) : undefined;
     }
