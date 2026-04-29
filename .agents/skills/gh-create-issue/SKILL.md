@@ -68,44 +68,27 @@ For **feature requests**, also probe for these common gaps (even if the field is
 
 ## Step 7 — Collect and validate labels
 
-### 7a — Ask about labels
-
-Ask the user:
-1. **Team label**: Does a team own this area? If so, which team label should be applied (e.g. `Team:Visualizations`, `Team:Security`)? Accept "none" or "not sure".
-2. **Additional labels**: Are there any other labels they'd like to add (e.g. `accessibility`, `performance`, `tech-debt`)? Accept "none".
-
-The type label (`bug` or `enhancement`) is always added automatically based on the classification in Step 2.
+Ask the user for a **team label** (e.g. `Team:Visualizations`) and any **additional labels** (e.g. `accessibility`, `performance`). Accept "none" for either. The type label (`bug` or `enhancement`) is added automatically.
 
 **End your response and wait for the user to reply before proceeding.**
 
-### 7b — Validate every user-provided label
-
-For each label the user provided, verify it exists in the repository:
+Once the user provides labels, validate **all of them in parallel** against the repository:
 
 ```bash
-gh label list --repo elastic/kibana --search "<label>" --limit 10 --json name --jq '.[].name'
+gh label list --repo elastic/kibana --search "<label>" --limit 10 --json name,description --jq '.[] | "- `\(.name)` — \(.description // "no description")"'
 ```
 
-Apply this logic per label:
+For each label:
 
-- **Exact match found** → keep it.
-- **No exact match but close matches returned** → show the user the closest matches and ask them to pick one or skip. **Wait for the user to reply.**
-- **No matches at all** → inform the user the label doesn't exist and ask whether to skip it or provide an alternative. **Wait for the user to reply.**
+- **Exact match** → keep it.
+- **Close matches only** → show them as `` `<name>` — <description> `` and ask the user to pick one or skip.
+- **No matches** → inform the user and ask to skip or provide an alternative.
 
-Repeat until all labels are resolved. Build the final label list: the type label (`bug` or `enhancement`) plus all validated labels.
+If any labels need user input, **wait for the reply**, then re-validate any new labels. Repeat until all labels are resolved.
 
 ## Step 8 — Show the draft and confirm
 
-Display the complete proposed issue in this format:
-
-> **Title:** `<title>`
-> **Labels:** `<label1>`, `<label2>`, ...
->
-> ---
-> \<issue body\>
-> ---
-
-Ask the user to confirm or request changes. Explicitly mention they can also add, remove, or change labels at this point. If they request new labels, loop back to Step 7b to validate them before continuing.
+Display the complete proposed issue (title + labels + body) and ask the user to confirm or request changes. **End your response and wait for explicit confirmation before filing.**
 
 **End your response and wait for explicit confirmation before filing.**
 
