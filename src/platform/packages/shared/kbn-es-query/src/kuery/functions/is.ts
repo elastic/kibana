@@ -174,10 +174,14 @@ export function toElasticsearchQuery(
       /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
+      Epoch values (numeric or digit-only strings) are absolute UTC timestamps and must not be timezone-adjusted.
     */
-      const timeZoneParam = config.dateFormatTZ
-        ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
-        : {};
+      const isEpoch =
+        typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value));
+      const timeZoneParam =
+        config.dateFormatTZ && !isEpoch
+          ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
+          : {};
       return [
         ...accumulator,
         wrapWithNestedQuery({

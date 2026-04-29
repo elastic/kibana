@@ -329,6 +329,60 @@ describe('kuery functions', () => {
         expect(result).toEqual(expected);
       });
 
+      test('should not add time_zone for epoch millisecond values even when dateFormat is provided', () => {
+        const config = { dateFormatTZ: 'America/Phoenix' };
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 1776338120239,
+                    lte: 1776338120239,
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '@timestamp',
+          1776338120239
+        ) as KqlIsFunctionNode;
+        const result = is.toElasticsearchQuery(node, indexPattern, config);
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should not add time_zone for digit-only string epoch values even when dateFormat is provided', () => {
+        const config = { dateFormatTZ: 'America/Phoenix' };
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '1776338120239',
+                    lte: '1776338120239',
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '@timestamp',
+          '1776338120239'
+        ) as KqlIsFunctionNode;
+        const result = is.toElasticsearchQuery(node, indexPattern, config);
+
+        expect(result).toEqual(expected);
+      });
+
       test('should use a provided nested context to create a full field name', () => {
         const expected = {
           bool: {

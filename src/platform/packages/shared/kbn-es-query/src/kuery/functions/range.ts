@@ -103,8 +103,9 @@ export function toElasticsearchQuery(
       }
     };
 
+    const queryValue = ast.toElasticsearchQuery(valueArg);
     const queryParams = {
-      [operatorArg]: ast.toElasticsearchQuery(valueArg),
+      [operatorArg]: queryValue,
     };
 
     if (field.scripted) {
@@ -112,9 +113,14 @@ export function toElasticsearchQuery(
         script: getRangeScript(field, queryParams),
       };
     } else if (field.type === 'date') {
-      const timeZoneParam = config.dateFormatTZ
-        ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
-        : {};
+      // Epoch values (numeric or digit-only strings) are absolute UTC timestamps and must not be timezone-adjusted.
+      const isEpoch =
+        typeof queryValue === 'number' ||
+        (typeof queryValue === 'string' && /^\d+$/.test(queryValue));
+      const timeZoneParam =
+        config.dateFormatTZ && !isEpoch
+          ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
+          : {};
       return wrapWithNestedQuery({
         range: {
           [field.name]: {
