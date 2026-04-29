@@ -219,8 +219,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
-            // name: fieldConfig.splitField,
-            name: 'very.long.field.name.with.many.dots.and.dots.and.dots', // remove after testing
+            name: fieldConfig.splitField,
             truncateText: false,
             sortable: true,
             width: isDashboardEmbedding ? '120px' : '15%',
