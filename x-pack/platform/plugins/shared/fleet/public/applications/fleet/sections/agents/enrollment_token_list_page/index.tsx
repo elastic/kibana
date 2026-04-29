@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiLink,
   EuiFilterGroup,
   EuiFilterButton,
   EuiIcon,
@@ -22,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+
 import { ApiKeyField } from '../../../../../components/api_key_field';
 
 import {
@@ -638,9 +640,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 {hasNonDefaultFilters && (
                   <>
                     {' '}
-                    <EuiButtonEmpty
-                      size="s"
-                      flush="both"
+                    <EuiLink
                       onClick={resetFilters}
                       data-test-subj="enrollmentTokensList.clearFiltersButton"
                     >
@@ -648,7 +648,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                         id="xpack.fleet.enrollmentTokensList.clearFiltersLink"
                         defaultMessage="Clear filters"
                       />
-                    </EuiButtonEmpty>
+                    </EuiLink>
                   </>
                 )}
               </>
