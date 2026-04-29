@@ -6,14 +6,19 @@
  */
 
 import {
+  ENTITY_ANALYTICS_HOME_PAGE_LOADER,
   IS_LOADING_GROUPING_TABLE,
   GROUPING_LEVEL_0,
   GROUP_SELECTOR_DROPDOWN,
   GLOBAL_LOADING_INDICATOR_HIDDEN,
   GLOBAL_LOADING_INDICATOR,
+  PAGE_TITLE,
 } from '../../screens/entity_analytics/entity_analytics_home';
 
 const ENTITY_STORE_SEARCH_API = '/internal/search/ese';
+
+/** Time for global nav, Entity Analytics shell, and sourcerer to settle (CI can be slow). */
+const ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS = 120_000;
 
 /**
  * Sets the grouping via localStorage before navigating to avoid flaky
@@ -27,6 +32,22 @@ export const setGrouping = (activeGroups: string[]) => {
       JSON.stringify({ 'entityAnalytics:grouping': { activeGroups } })
     )
   );
+};
+
+/**
+ * Waits for Kibana global navigation loading to finish, the Entity Analytics home
+ * shell to mount (past EmptyPrompt / data-view PageLoader), and the page-level
+ * sourcerer spinner to disappear so charts and grid are in the DOM.
+ */
+export const waitForEntityAnalyticsHomeShell = () => {
+  cy.get(GLOBAL_LOADING_INDICATOR_HIDDEN, {
+    timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS,
+  }).should('exist');
+  cy.get(GLOBAL_LOADING_INDICATOR).should('not.exist');
+  cy.get(PAGE_TITLE, { timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS }).should('exist');
+  cy.get(ENTITY_ANALYTICS_HOME_PAGE_LOADER, {
+    timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS,
+  }).should('not.exist');
 };
 
 /**
@@ -44,6 +65,16 @@ export const waitForGroupingTable = () => {
  */
 export const interceptEntityStoreSearch = () => {
   cy.intercept('POST', ENTITY_STORE_SEARCH_API).as('entityStoreSearch');
+};
+
+export const interceptEntityStoreStatus = (status: 'running' | 'not_installed') => {
+  cy.intercept(
+    { method: 'GET', pathname: '/api/security/entity_store/status' },
+    {
+      statusCode: 200,
+      body: { status, engines: [] },
+    }
+  ).as('entityStoreStatus');
 };
 
 /**

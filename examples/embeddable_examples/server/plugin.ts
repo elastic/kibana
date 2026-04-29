@@ -39,7 +39,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, {
+    embeddable.registerEmbeddableServerDefinition(BOOK_EMBEDDABLE_TYPE, {
       title: 'Book',
       getTransforms: () => bookTransforms,
     });

@@ -30,6 +30,8 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
           ruleId: row.rule_id ?? null,
           groupHash: row.group_hash ?? null,
           lastAckAction: row.last_ack_action ?? null,
+          lastAssigneeUid: row.last_assignee_uid ?? null,
+          lastAckActor: row.last_ack_actor ?? null,
         });
       }
       return map;
