@@ -48,7 +48,7 @@ const mockConnectorInfo = {
 const baseStreamingState = () => ({
   isLoading: false,
   error: undefined as string | undefined,
-  errorRetryable: true,
+  isErrorRetryable: true,
   summary: '',
   context: '',
   connectorInfo: mockConnectorInfo,
@@ -153,9 +153,9 @@ describe('AiInsight', () => {
       unmount();
     });
 
-    it('hides the retry button when errorRetryable is false', () => {
+    it('hides the retry button when isErrorRetryable is false', () => {
       mockUseStreamingAiInsight.mockReturnValue(
-        createStreamingState({ error: errorMessage, errorRetryable: false })
+        createStreamingState({ error: errorMessage, isErrorRetryable: false })
       );
 
       const { container, unmount } = renderComponent();
