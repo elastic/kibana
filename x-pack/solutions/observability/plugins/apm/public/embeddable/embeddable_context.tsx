@@ -82,6 +82,8 @@ export function ApmEmbeddableContext({
             ...deps.coreStart,
             apmSourcesAccess: deps.pluginsStart.apmSourcesAccess,
             dataViews: deps.pluginsStart.dataViews,
+            slo: deps.pluginsStart.slo,
+            telemetry: deps.telemetry,
           }}
         >
           <RouterProvider router={apmRouter as any} history={history}>

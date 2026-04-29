@@ -63,6 +63,7 @@ import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { listMetricColumnPreset } from '../../../../utils/column_presets';
+import { useSloOverviewFlyout } from '../../../shared/slo_overview_flyout/use_slo_overview_flyout';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -441,18 +442,8 @@ export function ApmServicesTable({
     });
   }, []);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: AgentName;
-  } | null>(null);
-
-  const openSloOverviewFlyout = useCallback((serviceName: string, agentName?: AgentName) => {
-    setSloOverviewFlyout({ serviceName, agentName });
-  }, []);
-
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   const CreateSloFlyout =
     sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName
