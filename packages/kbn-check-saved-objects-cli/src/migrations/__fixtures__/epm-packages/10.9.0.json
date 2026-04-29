@@ -66,8 +66,7 @@
             "version": "1.0.0"
             }
         ],
-        "installed_as_dependency": true,
-        "namespace_customization_enabled_for": ["production"]
+        "installed_as_dependency": true
       }
     ]
   }
