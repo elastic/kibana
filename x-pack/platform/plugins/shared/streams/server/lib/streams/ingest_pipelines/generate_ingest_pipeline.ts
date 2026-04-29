@@ -28,6 +28,39 @@ import {
 } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 
+// Painless guard skipping a processor when an upstream execution layer has
+// already applied the same processing. Cloud Pipelines' streamlang-runtime
+// stamps `attributes._streamlang_processed = true` on every record it has
+// finished processing+routing. Records arriving via the OTel path therefore
+// bypass the per-stream user processing and the reroutes pipeline (which
+// the runtime has already done in-stream); records arriving via /_bulk
+// without that marker continue to flow through the ingest pipeline as
+// before, preserving the "ingest pipeline as backup" property.
+const STREAMLANG_PROCESSED_GUARD = 'ctx.attributes?._streamlang_processed != true';
+
+const gateProcessor = (proc: IngestProcessorContainer, guard: string): IngestProcessorContainer => {
+  // Each processor container has exactly one type-named key whose value is
+  // the processor config. Add/AND the `if` clause on that inner config.
+  // Painless `if` accepts either an expression OR a script (with `return`).
+  // When the existing `if` is in script form, expression-style `&&`
+  // composition is invalid — combine in script form instead.
+  const [type, configRaw] = Object.entries(proc)[0] as [
+    string,
+    Record<string, unknown> | undefined
+  ];
+  const config = configRaw ?? {};
+  const existingIf = typeof config.if === 'string' ? (config.if as string).trim() : '';
+  let combined: string;
+  if (!existingIf) {
+    combined = guard;
+  } else if (/\breturn\b/.test(existingIf)) {
+    combined = `if (!(${guard})) { return false; } ${existingIf}`;
+  } else {
+    combined = `(${existingIf}) && (${guard})`;
+  }
+  return { [type]: { ...config, if: combined } } as IngestProcessorContainer;
+};
+
 export async function generateIngestPipeline(
   name: string,
   definition: Streams.all.Definition,
@@ -87,14 +120,17 @@ export async function generateIngestPipeline(
               undefined,
               createStreamlangResolverOptions(esClient)
             )
-          ).processors
+          ).processors.map((p) => gateProcessor(p, STREAMLANG_PROCESSED_GUARD))
         : []),
-      {
-        pipeline: {
-          name: `${name}@stream.reroutes`,
-          ignore_missing_pipeline: true,
+      gateProcessor(
+        {
+          pipeline: {
+            name: `${name}@stream.reroutes`,
+            ignore_missing_pipeline: true,
+          },
         },
-      },
+        STREAMLANG_PROCESSED_GUARD
+      ),
     ],
     // root doesn't need flexible access pattern because it can't contain custom processing and default special case processing doesn't work properly with it
     ...(!isRoot(definition.name)

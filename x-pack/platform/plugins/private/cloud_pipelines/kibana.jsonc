@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-pipelines-plugin",
+  "owner": [
+    "@elastic/obs-ingest-team"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Cloud Pipelines — watches Streams definitions and deploys OTTL processing configs to the collector layer",
+  "plugin": {
+    "id": "cloudPipelines",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "cloudPipelines"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+    "enabledOnAnonymousPages": false
+  }
+}

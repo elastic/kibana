@@ -23,6 +23,9 @@ export {
   conditionToESQL,
   conditionToESQLAst,
 } from './src/transpilers/esql';
+export { transpile as transpileOttl } from './src/transpilers/ottl';
+export type { OttlTranspilationOptions, OttlTranspilationResult } from './src/transpilers/ottl';
+export type { SchemaContext } from './src/transpilers/ottl';
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';

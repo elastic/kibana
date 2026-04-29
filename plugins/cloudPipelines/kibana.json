@@ -1,0 +1,13 @@
+{
+  "id": "cloudPipelines",
+  "version": "kibana",
+  "owner": { "name": "Elastic Observability Ingest", "githubTeam": "obs-ingest-team" },
+  "description": "Cloud Pipelines — watches Streams definitions and deploys OTTL processing configs to the collector layer",
+  "ui": true,
+  "server": true,
+  "configPath": ["xpack", "cloudPipelines"],
+  "requiredPlugins": [],
+  "optionalPlugins": [],
+  "requiredBundles": [],
+  "enabledOnAnonymousPages": false
+}
