@@ -455,7 +455,7 @@ const entityIdMatches = (expected: string, shape: AttachmentPayloadShape): boole
     : expectedLower;
   return candidates.some((c) => {
     const cLower = c.toLowerCase();
-    return cLower === expectedLower || cLower === expectedStripped || cLower.endsWith(expectedStripped);
+    return cLower === expectedLower || cLower === expectedStripped;
   });
 };
 
