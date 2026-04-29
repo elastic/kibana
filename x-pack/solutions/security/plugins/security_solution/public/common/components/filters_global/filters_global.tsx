@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
 export interface FiltersGlobalProps {
@@ -16,7 +16,9 @@ export interface FiltersGlobalProps {
 }
 
 const headerStyles = css`
-  overflow-x: auto;
+  @media (max-width: 767px) {
+    overflow-x: auto;
+  }
 `;
 
 export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {

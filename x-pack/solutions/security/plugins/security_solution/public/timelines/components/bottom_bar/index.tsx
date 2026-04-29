@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as i18n from './translations';
 import type { State } from '../../../common/store';
@@ -18,16 +17,6 @@ import { TimelineSaveStatus } from '../save_status';
 import { AddToFavoritesButton } from '../add_to_favorites';
 import TimelineQueryTabEventsCount from '../timeline/tabs/query/events_count';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
-
-const bottomBarStyles = css`
-  overflow-x: auto;
-  overflow-y: hidden;
-`;
-
-const titleButtonStyles = css`
-  white-space: nowrap;
-  display: inline-block;
-`;
 
 interface TimelineBottomBarProps {
   /**
@@ -59,12 +48,7 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
 
     return (
       !hasFullScreenContent && (
-        <EuiPanel
-          borderRadius="none"
-          hasShadow={false}
-          data-test-subj="timeline-bottom-bar"
-          css={bottomBarStyles}
-        >
+        <EuiPanel borderRadius="none" hasShadow={false} data-test-subj="timeline-bottom-bar">
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <AddTimelineButton timelineId={timelineId} />
@@ -78,7 +62,6 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
                 onClick={openTimeline}
                 data-test-subj="timeline-bottom-bar-title-button"
                 ref={openToggleRef}
-                css={titleButtonStyles}
               >
                 {title}
               </EuiLink>
