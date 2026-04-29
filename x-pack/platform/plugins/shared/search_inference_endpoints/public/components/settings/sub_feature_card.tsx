@@ -28,42 +28,16 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceConnectorType } from '@kbn/inference-common';
-import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { css } from '@emotion/react';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import { getProviderKeyForCreator } from '../../utils/eis_utils';
+import { getConnectorIcon } from '../../utils/connector_display';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 import { useConnectors } from '../../hooks/use_connectors';
 
 const COLLAPSED_COUNT = 5;
-
-const getConnectorIcon = (connector: InferenceConnector): string => {
-  let key: string | undefined;
-  switch (connector.type) {
-    case InferenceConnectorType.OpenAI:
-      key = connector.config?.apiProvider === 'Azure OpenAI' ? 'azureopenai' : 'openai';
-      break;
-    case InferenceConnectorType.Bedrock:
-      key = 'amazonbedrock';
-      break;
-    case InferenceConnectorType.Gemini:
-      key = 'googlevertexai';
-      break;
-    case InferenceConnectorType.Inference:
-      key =
-        getProviderKeyForCreator(connector.config?.modelCreator) ??
-        connector.config?.service ??
-        connector.config?.provider;
-      break;
-  }
-  return SERVICE_PROVIDERS[key as ServiceProviderKeys]?.icon ?? 'compute';
-};
 
 interface SubFeatureCardProps {
   featureId: string;
@@ -442,7 +416,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   <AddModelPopover
                     existingEndpointIds={endpointIds}
                     onAdd={handleAdd}
-                    taskType={feature.taskType}
                     panelWidth={listWidth}
                   />
                 </EuiFlexItem>

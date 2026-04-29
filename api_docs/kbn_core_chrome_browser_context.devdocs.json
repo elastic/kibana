@@ -51,6 +51,7 @@
             "lineNumber": 24,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ChromeServiceProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
