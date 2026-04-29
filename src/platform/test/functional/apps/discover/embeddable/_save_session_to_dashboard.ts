@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can save a new session from an existing one to a dashboard without overriding the original', async () => {
         const existingDashboardName = 'Existing Target Dashboard 2';
-        const originalSession = 'Original Session for Copy';
+        const originalSession = 'Original Session for Save As';
 
         await discover.navigateToApp();
         await discover.clickNewSearchButton();

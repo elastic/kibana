@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can save a new session from an existing By-Value panel to a dashboard without overriding the original', async () => {
-        const existingDashboardName = 'Existing Target Dashboard 2';
+        const existingDashboardName = 'Existing Target Dashboard 3';
 
         await dashboard.navigateToApp();
         await dashboard.gotoDashboardLandingPage();
