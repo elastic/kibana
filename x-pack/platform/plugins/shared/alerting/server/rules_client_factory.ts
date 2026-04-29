@@ -45,6 +45,7 @@ import {
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_INVALIDATE_TAGS,
 } from './constants';
+
 export interface RulesClientCreateOptions {
   /**
    * When true, clone the request's API key for each newly created rule.

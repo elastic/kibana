@@ -6,8 +6,7 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import type { RulesClientContext } from '../types';
-import type { CreateAPIKeyResult } from '../types';
+import type { RulesClientContext, CreateAPIKeyResult } from '../types';
 
 export interface ResolvedAPIKey {
   createdAPIKey: CreateAPIKeyResult | null;
