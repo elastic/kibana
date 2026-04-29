@@ -124,7 +124,7 @@ export interface DiscoverServices {
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
   inspector: InspectorPublicPluginStart;
-  metadata: { branch: string };
+  metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
@@ -230,6 +230,7 @@ export const buildServices = ({
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
+      version: context.env.packageInfo.version,
     },
     navigation: plugins.navigation,
     share: plugins.share,

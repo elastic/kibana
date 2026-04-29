@@ -34,8 +34,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT,
 } from '../../../screens/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
 import {
-  openTimelineFromPrevalenceTableCell,
   openPrevalenceTab,
+  openTimelineFromPrevalenceTableCell,
 } from '../../../tasks/expandable_flyout/alert_details_left_panel_prevalence_tab';
 import {
   openCorrelationsTab,
@@ -80,7 +80,7 @@ describe(
         openTakeActionButton();
         selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
 
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
 
@@ -106,7 +106,7 @@ describe(
         openPrevalenceTab();
         openTimelineFromPrevalenceTableCell();
 
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
 
@@ -116,19 +116,19 @@ describe(
         openCorrelationsTab();
         openTimelineFromRelatedSourceEvent();
 
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
 
         closeTimeline();
         openTimelineFromRelatedBySession();
 
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
 
         closeTimeline();
         openTimelineFromRelatedByAncestry();
 
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
     });
