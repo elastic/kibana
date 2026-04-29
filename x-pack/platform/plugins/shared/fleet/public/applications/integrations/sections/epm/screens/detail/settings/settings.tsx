@@ -224,7 +224,7 @@ export const SettingsPage: React.FC<Props> = memo(
     const updateAvailable =
       installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
-    const isViewingOldPackage = version < latestVersion;
+    const isViewingOldPackage = semverLt(version, latestVersion);
     // hide install/remove options if the user has version of the package is installed
     // and this package is out of date or if they do have a version installed but it's not this one
     const hideInstallOptions =
