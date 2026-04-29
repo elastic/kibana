@@ -1729,10 +1729,6 @@
         "dynamic": false,
         "properties": {}
       },
-      "policy_templates_deployment_info": {
-        "enabled": false,
-        "type": "object"
-      },
       "previous_version": {
         "type": "keyword"
       },

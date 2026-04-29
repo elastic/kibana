@@ -146,10 +146,8 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
-  isAgentlessContext,
 }: {
   prereleaseIntegrationsEnabled: boolean;
-  isAgentlessContext?: boolean;
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
@@ -230,10 +228,7 @@ export const useAvailablePackages = ({
             item,
             addBasePath,
             packageVerificationKeyId,
-            filterState: {
-              selectedCategory,
-              onlyAgentless: onlyAgentlessFilter || isAgentlessContext,
-            },
+            selectedCategory,
           });
         })
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -243,7 +238,6 @@ export const useAvailablePackages = ({
     appendCustomIntegrations,
     getAbsolutePath,
     getHref,
-    isAgentlessContext,
     isAgentlessEnabled,
     mergedEprPackages,
     onlyAgentlessFilter,

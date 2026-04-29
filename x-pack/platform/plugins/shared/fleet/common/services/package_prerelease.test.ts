@@ -96,7 +96,7 @@ describe('getAgentlessReleaseOverride', () => {
       ] as RegistryPolicyTemplate[],
       version: '1.0.0',
     };
-    expect(getAgentlessReleaseOverride(packageInfo)).toBeUndefined();
+    expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBeUndefined();
   });
 
   it('should return undefined for a dual-mode integration without agentless context', () => {

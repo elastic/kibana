@@ -509,7 +509,6 @@
     "name",
     "package_assets",
     "pending_upgrade_review",
-    "policy_templates_deployment_info",
     "previous_version",
     "verification_key_id",
     "verification_status",

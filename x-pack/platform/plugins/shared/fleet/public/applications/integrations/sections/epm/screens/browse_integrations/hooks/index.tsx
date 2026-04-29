@@ -23,7 +23,6 @@ export function useBrowseIntegrationHook({
   const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
   const setUrlCategory = useSetUrlCategory();
   const urlFilters = useUrlFilters();
-  const isAgentlessContext = urlFilters.setupMethod?.includes('agentless') === true;
 
   const {
     initialSelectedCategory,
@@ -35,7 +34,7 @@ export function useBrowseIntegrationHook({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards: originalFilteredCards,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled, isAgentlessContext });
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
   const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;

@@ -649,7 +649,6 @@ export default function (providerContext: FtrProviderContext) {
           install_source: 'registry',
           install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
           latest_install_failed_attempts: [],
-          policy_templates_deployment_info: [],
           rolled_back: false,
           verification_status: 'unknown',
           verification_key_id: null,

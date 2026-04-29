@@ -86,14 +86,14 @@ export const mapToCard = ({
   item,
   addBasePath,
   packageVerificationKeyId,
-  filterState,
+  selectedCategory,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
   addBasePath: (url: string) => string;
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
-  filterState?: { selectedCategory?: string; onlyAgentless?: boolean };
+  selectedCategory?: string;
 }): IntegrationCardItem => {
   let uiInternalPathUrl: string;
 
@@ -155,7 +155,7 @@ export const mapToCard = ({
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
     url: uiInternalPathUrl,
-    fromIntegrations: filterState?.selectedCategory,
+    fromIntegrations: selectedCategory,
     integration,
     name: 'name' in item ? item.name : item.id,
     version,
