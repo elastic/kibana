@@ -193,6 +193,7 @@ export class SLOPlugin
         plugins: mappedPlugins,
         config: {
           isServerless: this.isServerless,
+          compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
         },
         getScopedClients: async ({ request, logger }) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
