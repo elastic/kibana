@@ -49,15 +49,15 @@ function createScenarioTest(scenario: AlertScenario) {
         scenario.gcs
       );
 
+      await kbnClient.request<void>({
+        method: 'POST',
+        path: `/internal/alerting/rule/${ruleId}/_run_soon`,
+      });
+
       log.info('Polling for alert to be created');
 
       alertId = await pRetry(
         async () => {
-          await kbnClient.request<void>({
-            method: 'POST',
-            path: `/internal/alerting/rule/${ruleId}/_run_soon`,
-          });
-
           await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
 
           const alertsResponse = await esClient.search({
