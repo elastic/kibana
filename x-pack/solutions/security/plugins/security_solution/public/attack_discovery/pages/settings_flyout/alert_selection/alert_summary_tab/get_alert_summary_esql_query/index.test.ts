@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_RULE_TAGS, ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
+
 import { getAlertSummaryEsqlQuery } from '.';
 
 describe('getAlertSummaryEsqlQuery', () => {
@@ -42,6 +44,37 @@ describe('getAlertSummaryEsqlQuery', () => {
 | STATS Count = count() by \`kibana.alert.severity\`
 | SORT Count DESC
 | KEEP \`kibana.alert.severity\`, Count\n`
+    );
+  });
+
+  it('converts alert workflow tags to a single value before counting', () => {
+    const query = getAlertSummaryEsqlQuery({
+      alertsIndexPattern: 'alerts-*',
+      maxAlerts: 100,
+      tableStackBy0: ALERT_WORKFLOW_TAGS,
+    });
+
+    expect(query).toBe(
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
+| SORT kibana.alert.risk_score DESC, @timestamp DESC
+| LIMIT 100
+| EVAL \`kibana.alert.workflow_tags\` = MV_CONCAT(MV_SORT(\`kibana.alert.workflow_tags\`), ", ")
+| STATS Count = count() by \`kibana.alert.workflow_tags\`
+| SORT Count DESC
+| KEEP \`kibana.alert.workflow_tags\`, Count\n`
+    );
+  });
+
+  it('converts rule tags to a single value before counting', () => {
+    const query = getAlertSummaryEsqlQuery({
+      alertsIndexPattern: 'alerts-*',
+      maxAlerts: 100,
+      tableStackBy0: ALERT_RULE_TAGS,
+    });
+
+    expect(query).toContain(
+      '| EVAL `kibana.alert.rule.tags` = MV_CONCAT(MV_SORT(`kibana.alert.rule.tags`), ", ")\n| STATS Count = count() by `kibana.alert.rule.tags`'
     );
   });
 });

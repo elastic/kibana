@@ -5,7 +5,17 @@
  * 2.0.
  */
 
+import { ALERT_RULE_TAGS, ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
+
 import { getEsqlKeepStatement } from './get_esql_keep_statement';
+
+const TAG_FIELDS = new Set([ALERT_RULE_TAGS, ALERT_WORKFLOW_TAGS, 'tags']);
+
+const getSingleValueGroupingStatement = (tableStackBy0: string): string =>
+  TAG_FIELDS.has(tableStackBy0)
+    ? `| EVAL \`${tableStackBy0}\` = MV_CONCAT(MV_SORT(\`${tableStackBy0}\`), ", ")
+`
+    : '';
 
 export const getAlertSummaryEsqlQuery = ({
   alertsIndexPattern,
@@ -19,7 +29,7 @@ export const getAlertSummaryEsqlQuery = ({
 | WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT ${maxAlerts}
-| STATS Count = count() by \`${tableStackBy0}\`
+${getSingleValueGroupingStatement(tableStackBy0)}| STATS Count = count() by \`${tableStackBy0}\`
 | SORT Count DESC
 ${getEsqlKeepStatement(tableStackBy0)}
 `;
