@@ -108,4 +108,103 @@ describe('convertGraphEvents', () => {
       }),
     ]);
   });
+
+  it('emits messageEvent at on_chain_end of finalize using state.finalAnswer (string)', async () => {
+    const { createMessageEvent } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain');
+    createMessageEvent.mockImplementation((content: string | object, opts: any) => ({
+      type: 'message_complete',
+      data: {
+        message_id: opts?.messageId ?? 'unknown',
+        message_content: typeof content === 'string' ? content : JSON.stringify(content),
+        ...(typeof content === 'object' ? { structured_output: content } : {}),
+      },
+    }));
+
+    const streamEvent = {
+      event: 'on_chain_end',
+      name: steps.finalize,
+      metadata: { graphName: 'test-graph' },
+      data: {
+        output: {
+          finalAnswer: 'final answer text',
+        },
+      },
+    } as any;
+
+    const events = await lastValueFrom(
+      of(streamEvent).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolOrigin: jest.fn(),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: false,
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        type: 'message_complete',
+        data: expect.objectContaining({
+          message_content: 'final answer text',
+        }),
+      })
+    );
+  });
+
+  it('emits messageEvent at on_chain_end of finalize using state.finalAnswer (object) for structured output', async () => {
+    const { createMessageEvent } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain');
+    createMessageEvent.mockImplementation((content: string | object, opts: any) => ({
+      type: 'message_complete',
+      data: {
+        message_id: opts?.messageId ?? 'unknown',
+        message_content: typeof content === 'string' ? content : JSON.stringify(content),
+        ...(typeof content === 'object' ? { structured_output: content } : {}),
+      },
+    }));
+
+    const structuredAnswer = { foo: 'bar' };
+    const streamEvent = {
+      event: 'on_chain_end',
+      name: steps.finalize,
+      metadata: { graphName: 'test-graph' },
+      data: {
+        output: {
+          finalAnswer: structuredAnswer,
+        },
+      },
+    } as any;
+
+    const events = await lastValueFrom(
+      of(streamEvent).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolOrigin: jest.fn(),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: true,
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        type: 'message_complete',
+        data: expect.objectContaining({
+          structured_output: structuredAnswer,
+        }),
+      })
+    );
+  });
 });

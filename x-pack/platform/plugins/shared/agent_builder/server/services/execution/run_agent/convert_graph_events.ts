@@ -38,10 +38,8 @@ import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
 import {
-  isAnswerAction,
   isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
-  isStructuredAnswerAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -161,27 +159,15 @@ export const convertGraphEvents = ({
           return of(...events);
         }
 
-        // emit messages for answering step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
-          const events: ConvertedEvents[] = [];
-
-          // process last emitted message
-          const answerActions = (event.data.output as StateType).answerActions;
-          const lastAction = answerActions[answerActions.length - 1];
-
-          if (isStructuredAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.data, {
-              messageId,
-            });
-            events.push(messageEvent);
-          } else if (isAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.message, {
-              messageId,
-            });
-            events.push(messageEvent);
+        // emit messageEvent at finalize: state.finalAnswer is the canonical answer
+        // (string for non-structured, object for structured)
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.finalize)) {
+          const finalState = event.data.output as StateType;
+          const finalAnswer = finalState.finalAnswer;
+          if (finalAnswer !== undefined && finalAnswer !== null && finalAnswer !== '') {
+            return of(createMessageEvent(finalAnswer, { messageId }));
           }
-
-          return of(...events);
+          return EMPTY;
         }
 
         // emit tool result events and/or prompt request events
