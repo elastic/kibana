@@ -188,6 +188,19 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       await esClient.bulk({ index: TSDB_OTHER_STREAM, operations, refresh: true });
     });
 
+    test.beforeEach(async ({ apiServices }) => {
+      // Reset TSDB_STREAM lifecycle between tests to prevent state from leaking
+      // across the shared stream (e.g. ILM policy applied by a previous test)
+      const streamDefinition = await apiServices.streams.getStreamDefinition(TSDB_STREAM);
+      await apiServices.streams.updateStream(TSDB_STREAM, {
+        ingest: {
+          ...streamDefinition.stream.ingest,
+          processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
+      });
+    });
+
     test.afterAll(async ({ esClient }) => {
       await esClient.indices.deleteDataStream({ name: TSDB_STREAM }).catch(() => {});
       await esClient.indices.deleteDataStream({ name: TSDB_OTHER_STREAM }).catch(() => {});

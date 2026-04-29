@@ -66,7 +66,7 @@ test.describe(
       pageObjects,
     }) => {
       // Verify processors are visible
-      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
+      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
 
       // Verify edit button is disabled (requires simulate)
       const editButton = await pageObjects.streams.getProcessorEditButton(0);
@@ -77,7 +77,7 @@ test.describe(
       pageObjects,
     }) => {
       // Verify processors are visible
-      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
+      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
 
       // Verify duplicate button is disabled (requires manage)
       const duplicateButton = await pageObjects.streams.getProcessorDuplicateButton(0);
@@ -89,7 +89,7 @@ test.describe(
       pageObjects,
     }) => {
       // Verify processors are visible
-      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
+      expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
 
       // Try to access the context menu
       const processors = await pageObjects.streams.getProcessorsListItems();
