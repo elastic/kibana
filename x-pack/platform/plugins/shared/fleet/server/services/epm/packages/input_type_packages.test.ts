@@ -1474,6 +1474,20 @@ describe('removeAssetsForInputPackagePolicy', () => {
       release: 'ga' as const,
       package: 'nginx',
       path: 'access',
+      elasticsearch: {
+        'index_template.mappings': { dynamic: false },
+        'index_template.settings': { number_of_shards: 1 },
+      },
+      streams: [
+        {
+          input: 'logfile',
+          vars: [{ name: 'paths', type: 'text' }],
+          title: 'Nginx access log stream',
+          description: 'Collect nginx access logs',
+          enabled: true,
+          template_path: 'log.yml.hbs',
+        },
+      ],
     };
 
     const TEST_PKG_INFO = {
@@ -1566,11 +1580,18 @@ describe('removeAssetsForInputPackagePolicy', () => {
       const callArgs = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0][0];
       expect(callArgs.onlyForDataStreams).toHaveLength(1);
       const customDs = callArgs.onlyForDataStreams![0];
+
+      // Custom name is applied
       expect(customDs.dataset).toBe('my_nginx');
       expect(customDs.path).toBe('my_nginx');
-      // Original fields preserved
+
+      // All original fields from the package data stream are preserved —
+      // wrong values here mean wrong mappings in the installed template
       expect(customDs.type).toBe('logs');
       expect(customDs.title).toBe('Nginx access logs');
+      expect(customDs.elasticsearch).toEqual(NGINX_DATA_STREAM.elasticsearch);
+      expect(customDs.streams).toEqual(NGINX_DATA_STREAM.streams);
+
       expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledTimes(1);
     });
 
@@ -1628,6 +1649,67 @@ describe('removeAssetsForInputPackagePolicy', () => {
       expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
+    it('preserves dataset_is_prefix on the synthesized data stream passed to installIndexTemplatesAndPipelines', async () => {
+      const promDataStream = {
+        type: 'metrics',
+        dataset: 'prometheus.collector',
+        title: 'Prometheus metrics',
+        release: 'ga' as const,
+        package: 'prometheus',
+        path: 'collector',
+        dataset_is_prefix: true,
+      };
+      const promPkgInfo = {
+        type: 'integration',
+        name: 'prometheus',
+        version: '1.0.0',
+        data_streams: [promDataStream],
+      };
+      const promPolicy = {
+        id: 'policy-prom',
+        inputs: [
+          {
+            streams: [
+              {
+                data_stream: { dataset: 'prometheus.collector', type: 'metrics' },
+                vars: { 'data_stream.dataset': { value: 'my_prom' } },
+              },
+            ],
+          },
+        ],
+      } as any;
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'prometheus',
+          version: '1.0.0',
+          installed_es: [],
+          installed_kibana: [],
+        },
+        packageInfo: promPkgInfo,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+      await installAssetsForIntegrationPackagePolicyCustomDatasets({
+        pkgInfo: promPkgInfo as any,
+        packagePolicy: promPolicy,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+      });
+
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+      const callArgs = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0][0];
+      const customDs = callArgs.onlyForDataStreams![0];
+
+      expect(customDs.dataset).toBe('my_prom');
+      expect(customDs.path).toBe('my_prom');
+      expect(customDs.dataset_is_prefix).toBe(true);
+      expect(customDs.type).toBe('metrics');
+    });
+
     it('throws when index template owned by different package and force=false', async () => {
       jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
         name: 'logs-my_nginx',
@@ -1644,6 +1726,26 @@ describe('removeAssetsForInputPackagePolicy', () => {
           logger: mockedLogger,
         })
       ).rejects.toThrow('force flag is required');
+    });
+
+    it('skips install and logs warn when user-created template (no _meta.package) exists', async () => {
+      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+        name: 'logs-my_nginx',
+        // No _meta.package — user-created template
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+      await installAssetsForIntegrationPackagePolicyCustomDatasets({
+        pkgInfo: TEST_PKG_INFO as any,
+        packagePolicy: POLICY_WITH_CUSTOM_DATASET,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+      });
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('user-managed template')
+      );
     });
   });
 
@@ -1691,6 +1793,18 @@ describe('removeAssetsForInputPackagePolicy', () => {
         my_nginx: 'logs-my_nginx-*',
         'nginx.access': 'logs-nginx.access-*',
       },
+    };
+
+    const MOCK_INSTALLATION_WITH_COMPONENT_TEMPLATES = {
+      ...MOCK_INSTALLATION,
+      installed_es: [
+        { id: 'logs-my_nginx', type: 'index_template' },
+        { id: 'logs-my_nginx@package', type: 'component_template' },
+        { id: 'logs-my_nginx@mappings', type: 'component_template' },
+        { id: 'logs-my_nginx@settings', type: 'component_template' },
+        { id: 'logs-my_nginx_extra', type: 'index_template' }, // should NOT be cleaned up
+        { id: 'logs-nginx.access', type: 'index_template' }, // different dataset, not cleaned up
+      ],
     };
 
     beforeEach(() => {
@@ -1773,6 +1887,42 @@ describe('removeAssetsForInputPackagePolicy', () => {
         })
       ).resolves.not.toThrow();
       expect(mockedLogger.warn).toHaveBeenCalled();
+    });
+
+    it('includes @package, @mappings, @settings component templates in cleanup but not prefix-colliding datasets', async () => {
+      jest
+        .mocked(getInstallation)
+        .mockResolvedValue(MOCK_INSTALLATION_WITH_COMPONENT_TEMPLATES as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+      await removeAssetsForIntegrationPackagePolicyCustomDatasets({
+        packageInfo: TEST_PKG_INFO as any,
+        packagePolicy: POLICY,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        logger: mockedLogger,
+      });
+
+      expect(cleanupAssetsMock).toHaveBeenCalledTimes(1);
+      const cleanupCall = cleanupAssetsMock.mock.calls[0];
+      const installedEsPassedToCleanup = cleanupCall[1].installed_es;
+
+      // All four my_nginx assets should be included
+      expect(installedEsPassedToCleanup).toEqual(
+        expect.arrayContaining([
+          { id: 'logs-my_nginx', type: 'index_template' },
+          { id: 'logs-my_nginx@package', type: 'component_template' },
+          { id: 'logs-my_nginx@mappings', type: 'component_template' },
+          { id: 'logs-my_nginx@settings', type: 'component_template' },
+        ])
+      );
+      // The prefix-colliding dataset and unrelated dataset must NOT be included
+      expect(installedEsPassedToCleanup).not.toEqual(
+        expect.arrayContaining([
+          { id: 'logs-my_nginx_extra', type: 'index_template' },
+          { id: 'logs-nginx.access', type: 'index_template' },
+        ])
+      );
+      expect(installedEsPassedToCleanup).toHaveLength(4);
     });
   });
 

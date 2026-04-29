@@ -426,23 +426,32 @@ export async function installAssetsForIntegrationPackagePolicyCustomDatasets(opt
     });
 
     if (existingIndexTemplate) {
-      const ownedByDifferentPackage =
-        existingIndexTemplate._meta?.package?.name &&
-        existingIndexTemplate._meta.package.name !== pkgInfo.name;
+      const templateName = `${customDataStream.type}-${customDatasetName}`;
+      const existingOwner = existingIndexTemplate._meta?.package?.name;
+      const ownedByDifferentPackage = existingOwner && existingOwner !== pkgInfo.name;
+      const isUserCreated = !existingOwner;
+
       if (ownedByDifferentPackage && !force) {
         throw new PackagePolicyValidationError(
-          `Index template "${customDataStream.type}-${customDatasetName}" already exist and is not managed by this package, force flag is required`
+          `Index template "${templateName}" already exist and is not managed by this package, force flag is required`
         );
       }
       if (ownedByDifferentPackage && force) {
         logger.info(
-          `Index template "${customDataStream.type}-${customDatasetName}" already exists, but is managed by a different package, skipping index template creation`
+          `Index template "${templateName}" already exists, but is managed by a different package, skipping index template creation`
+        );
+        continue;
+      }
+      if (isUserCreated) {
+        logger.warn(
+          `Index template "${templateName}" already exists and was not created by Fleet, skipping index template creation to avoid overwriting user-managed template`
         );
         continue;
       }
       if (!force) {
+        // Same package owns it — idempotent skip
         logger.info(
-          `Index template "${customDataStream.type}-${customDatasetName}" already exists, skipping index template creation`
+          `Index template "${templateName}" already exists, skipping index template creation`
         );
         continue;
       }
@@ -569,17 +578,19 @@ export async function removeAssetsForIntegrationPackagePolicyCustomDatasets(opts
         continue;
       }
 
-      // Use exact string match (not word-boundary regex) to avoid collisions between
-      // dataset names that share a prefix (e.g. "nginx" vs "nginx_extra").
-      const filteredInstalledEs = installedEs.filter((asset) => {
-        const parts = asset.id.split('-');
-        // Index template IDs have the form "{type}-{dataset}" — match the dataset part exactly
-        return parts.length >= 2 && parts.slice(1).join('-') === customDatasetName;
-      });
-      const filteredInstalledKibana = installedKibana.filter((asset) => {
-        const parts = asset.id.split('-');
-        return parts.length >= 2 && parts.slice(1).join('-') === customDatasetName;
-      });
+      // Match asset IDs where the dataset name is followed by end-of-string or '@'
+      // (component template suffixes like @package, @mappings, @settings).
+      // This avoids prefix collisions (e.g. "nginx" matching "nginx_extra") while
+      // correctly matching "logs-my_nginx", "logs-my_nginx@package", etc.
+      const datasetSuffixRegex = new RegExp(
+        `${customDatasetName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(@|$)`
+      );
+      const filteredInstalledEs = installedEs.filter((asset) =>
+        datasetSuffixRegex.test(asset.id.replace(/^[^-]+-/, ''))
+      );
+      const filteredInstalledKibana = installedKibana.filter((asset) =>
+        datasetSuffixRegex.test(asset.id.replace(/^[^-]+-/, ''))
+      );
       const filteredEsIndexPatterns: Record<string, string> = {};
       if (esIndexPatterns?.[customDatasetName]) {
         filteredEsIndexPatterns[customDatasetName] = esIndexPatterns[customDatasetName];
