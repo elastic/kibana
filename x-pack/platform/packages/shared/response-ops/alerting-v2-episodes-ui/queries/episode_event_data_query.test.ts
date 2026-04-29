@@ -29,4 +29,10 @@ describe('buildEpisodeEventDataQuery', () => {
     expect(queryString.toUpperCase()).toContain('LAST');
     expect(queryString).toContain('last_data');
   });
+
+  it('aggregates data and event timestamps so callers can detect stale data', () => {
+    const queryString = buildEpisodeEventDataQuery('ep-1').print('basic');
+    expect(queryString).toContain('last_data_timestamp = MAX(@timestamp)');
+    expect(queryString).toContain('last_event_timestamp = MAX(@timestamp)');
+  });
 });

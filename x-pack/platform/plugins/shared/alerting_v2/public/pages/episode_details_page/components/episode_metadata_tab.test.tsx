@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { render, screen } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
@@ -38,6 +39,9 @@ const mockServices = {
   data: {},
   dataViews: {},
   http: {},
+  uiSettings: {
+    get: jest.fn(() => 'YYYY-MM-DD HH:mm:ss'),
+  },
   unifiedDocViewer: {
     registry: {
       getAll: () => [{ id: 'doc_view_table', render: mockTableRender }],
@@ -101,7 +105,11 @@ describe('EpisodeMetadataTab', () => {
     mockUseFetchEpisodeEventDataQuery.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: mockData,
+      data: {
+        data: mockData,
+        dataTimestamp: '2026-04-29T10:00:00.000Z',
+        isStale: false,
+      },
     } as unknown as ReturnType<typeof useFetchEpisodeEventDataQuery>);
 
     render(<EpisodeMetadataTab episodeId="ep-1" />);
@@ -109,17 +117,45 @@ describe('EpisodeMetadataTab', () => {
     expect(screen.getByTestId('mock-doc-viewer-table')).toBeInTheDocument();
     expect(mockTableRender).toHaveBeenCalledWith(
       expect.objectContaining({
-        hit: expect.objectContaining({ id: 'mock-id' }),
+        hit: expect.objectContaining({ id: 'mock-id', raw: { _source: mockData } }),
         dataView: expect.objectContaining({ id: 'mock-data-view' }),
       })
     );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeMetadataTabStaleCallout')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a stale-data callout when the displayed data is older than the latest event', () => {
+    mockUseFetchEpisodeEventDataQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: {
+        data: { threshold_met: true },
+        dataTimestamp: '2026-04-29T10:00:00.000Z',
+        isStale: true,
+      },
+    } as unknown as ReturnType<typeof useFetchEpisodeEventDataQuery>);
+
+    render(<EpisodeMetadataTab episodeId="ep-1" />);
+
+    const callout = screen.getByTestId('alertingV2EpisodeMetadataTabStaleCallout');
+    expect(callout).toBeInTheDocument();
+    expect(callout).toHaveTextContent(
+      moment('2026-04-29T10:00:00.000Z').format('YYYY-MM-DD HH:mm:ss')
+    );
+    expect(screen.getByTestId('mock-doc-viewer-table')).toBeInTheDocument();
   });
 
   it('shows spinner when dataView is not ready', () => {
     mockUseFetchEpisodeEventDataQuery.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: { threshold_met: true },
+      data: {
+        data: { threshold_met: true },
+        dataTimestamp: '2026-04-29T10:00:00.000Z',
+        isStale: false,
+      },
     } as unknown as ReturnType<typeof useFetchEpisodeEventDataQuery>);
     mockUseAlertingEpisodeSourceDataView.mockReturnValue({
       value: undefined,

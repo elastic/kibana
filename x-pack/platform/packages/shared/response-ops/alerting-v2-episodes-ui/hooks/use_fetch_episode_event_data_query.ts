@@ -20,10 +20,24 @@ export interface UseFetchEpisodeEventDataQueryOptions {
   data: DataPublicPluginStart;
 }
 
+export interface EpisodeEventData {
+  /** Parsed `data` object from the latest non-empty event. */
+  data: Record<string, unknown>;
+  /** Timestamp of the event that produced `data`. */
+  dataTimestamp: string;
+  /**
+   * `true` when the latest event for the episode does not carry `data`
+   * (e.g. an inactive/recovery event), so the displayed `data` is older
+   * than the most recent event.
+   */
+  isStale: boolean;
+}
+
 /**
- * Fetches the alert `data` object from the latest non-empty event for an episode.
- * Returns a parsed `Record<string, unknown>` or `null` when unavailable
- * (e.g. episode has no events with non-empty data yet).
+ * Fetches the alert `data` object from the latest non-empty event for an episode,
+ * along with the timestamp of that event and a flag indicating whether a more
+ * recent event without data exists. Returns `null` when no event with non-empty
+ * data is available yet.
  */
 export const useFetchEpisodeEventDataQuery = ({
   episodeId,
@@ -40,16 +54,25 @@ export const useFetchEpisodeEventDataQuery = ({
         },
         abortSignal: signal,
       }),
-    select: (raw) => {
+    select: (raw): EpisodeEventData | null => {
       const rows = esqlResponseToObjectRows<EpisodeEventDataRow>(raw);
       const row = rows[0];
-      if (!row || !row.last_data) return null;
+      if (!row || !row.last_data || !row.last_data_timestamp) return null;
 
+      let parsed: Record<string, unknown>;
       try {
-        return JSON.parse(row.last_data) as Record<string, unknown>;
+        parsed = JSON.parse(row.last_data) as Record<string, unknown>;
       } catch {
         return null;
       }
+
+      return {
+        data: parsed,
+        dataTimestamp: row.last_data_timestamp,
+        isStale: Boolean(
+          row.last_event_timestamp && row.last_event_timestamp !== row.last_data_timestamp
+        ),
+      };
     },
     enabled: Boolean(episodeId),
   });

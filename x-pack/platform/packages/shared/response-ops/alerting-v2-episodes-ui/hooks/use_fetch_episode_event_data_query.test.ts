@@ -38,14 +38,19 @@ describe('useFetchEpisodeEventDataQuery', () => {
     expect(mockRunEsqlAsyncSearch).not.toHaveBeenCalled();
   });
 
-  it('parses the last_data JSON string and returns an object', async () => {
+  const COLUMNS = [
+    { name: 'episode.id', type: 'keyword' as const },
+    { name: 'last_data', type: 'keyword' as const },
+    { name: 'last_data_timestamp', type: 'date' as const },
+    { name: 'last_event_timestamp', type: 'date' as const },
+  ];
+
+  it('parses last_data, returns its timestamp, and flags fresh data as not stale', async () => {
     const rawData = { threshold_met: true, current_value: 95 };
+    const timestamp = '2026-04-29T10:00:00.000Z';
     mockRunEsqlAsyncSearch.mockResolvedValue({
-      columns: [
-        { name: 'episode.id', type: 'keyword' },
-        { name: 'last_data', type: 'keyword' },
-      ],
-      values: [['ep-1', JSON.stringify(rawData)]],
+      columns: COLUMNS,
+      values: [['ep-1', JSON.stringify(rawData), timestamp, timestamp]],
     });
 
     const { result } = renderHook(
@@ -64,16 +69,39 @@ describe('useFetchEpisodeEventDataQuery', () => {
         }),
       })
     );
-    expect(result.current.data).toEqual(rawData);
+    expect(result.current.data).toEqual({
+      data: rawData,
+      dataTimestamp: timestamp,
+      isStale: false,
+    });
+  });
+
+  it('flags data as stale when a more recent event without data exists', async () => {
+    const rawData = { threshold_met: true };
+    const dataTimestamp = '2026-04-29T10:00:00.000Z';
+    const lastEventTimestamp = '2026-04-29T10:05:00.000Z';
+    mockRunEsqlAsyncSearch.mockResolvedValue({
+      columns: COLUMNS,
+      values: [['ep-1', JSON.stringify(rawData), dataTimestamp, lastEventTimestamp]],
+    });
+
+    const { result } = renderHook(
+      () => useFetchEpisodeEventDataQuery({ episodeId: 'ep-1', data }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual({
+      data: rawData,
+      dataTimestamp,
+      isStale: true,
+    });
   });
 
   it('returns null when last_data is null (all events had empty data)', async () => {
     mockRunEsqlAsyncSearch.mockResolvedValue({
-      columns: [
-        { name: 'episode.id', type: 'keyword' },
-        { name: 'last_data', type: 'keyword' },
-      ],
-      values: [['ep-1', null]],
+      columns: COLUMNS,
+      values: [['ep-1', null, null, '2026-04-29T10:05:00.000Z']],
     });
 
     const { result } = renderHook(
@@ -87,11 +115,8 @@ describe('useFetchEpisodeEventDataQuery', () => {
 
   it('returns null when last_data is malformed JSON', async () => {
     mockRunEsqlAsyncSearch.mockResolvedValue({
-      columns: [
-        { name: 'episode.id', type: 'keyword' },
-        { name: 'last_data', type: 'keyword' },
-      ],
-      values: [['ep-1', 'not-valid-json']],
+      columns: COLUMNS,
+      values: [['ep-1', 'not-valid-json', '2026-04-29T10:00:00.000Z', '2026-04-29T10:00:00.000Z']],
     });
 
     const { result } = renderHook(
