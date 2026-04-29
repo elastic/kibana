@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -14,7 +15,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiHealth,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -202,6 +202,7 @@ function LocationScopeBadges({
   currentLocation: string;
   setCurrentLocation: (location: string, locationId: string) => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiPageSection bottomBorder="extended" paddingSize="s">
       <EuiTitle size="xxxs">
@@ -211,21 +212,51 @@ function LocationScopeBadges({
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         {locations.map((loc) => {
           const isSelected = loc.label === currentLocation;
+          const onClick = isSelected ? undefined : () => setCurrentLocation(loc.label, loc.id);
+          // The shared health color uses `colors.disabled` for pending, which is
+          // nearly invisible on the filled primary background of the selected
+          // badge. Lift it to a near-white shade so the dot stays legible while
+          // keeping the unselected pending color subtle as designed.
+          const dotColor =
+            isSelected && loc.status === 'pending' ? euiTheme.colors.emptyShade : loc.color;
           return (
             <EuiFlexItem grow={false} key={loc.id}>
-              <EuiButton
-                size="s"
-                color={isSelected ? 'primary' : 'text'}
-                fill={isSelected}
-                onClick={() => {
-                  if (!isSelected) setCurrentLocation(loc.label, loc.id);
-                }}
+              <EuiBadge
+                color={isSelected ? 'primary' : 'hollow'}
+                {...(onClick
+                  ? {
+                      onClick,
+                      onClickAriaLabel: i18n.translate(
+                        'xpack.synthetics.flyout.selectLocationAriaLabel',
+                        {
+                          defaultMessage: 'Select location {label}',
+                          values: { label: loc.label },
+                        }
+                      ),
+                    }
+                  : {})}
                 data-test-subj={`syntheticsLocationButton-${loc.id}`}
               >
-                <EuiHealth color={loc.color}>
+                <span
+                  css={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.xs,
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    css={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: dotColor,
+                      flexShrink: 0,
+                    }}
+                  />
                   {loc.label} · {loc.status}
-                </EuiHealth>
-              </EuiButton>
+                </span>
+              </EuiBadge>
             </EuiFlexItem>
           );
         })}
