@@ -1,0 +1,27 @@
+{
+  "description": "Kibana SML memory recall - injects relevant past conversations into context before each prompt",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/sml_session_init.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/sml_recall.py\"",
+            "timeout": 8
+          }
+        ]
+      }
+    ]
+  }
+}

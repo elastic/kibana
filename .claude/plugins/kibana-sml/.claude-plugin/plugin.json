@@ -1,0 +1,5 @@
+{
+  "name": "kibana-sml",
+  "version": "1.0.0",
+  "description": "Kibana SML memory recall for Claude Code. Injects relevant past conversations into context on each prompt, and exposes sml_search/sml_read tools via MCP."
+}
