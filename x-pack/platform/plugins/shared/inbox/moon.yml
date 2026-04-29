@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod

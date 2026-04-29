@@ -98,7 +98,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
-  - '@kbn/std'
+  - '@kbn/inbox-plugin'
+  - '@kbn/inbox-common'
 tags:
   - plugin
   - prod
