@@ -13,18 +13,19 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 // `counter_double` and `counter_long` are TSDB counter variants that live alongside
 // their non-counter counterparts in backing indices after rollover or reindex.
 // ES|QL can cast them via TO_DOUBLE / TO_LONG so they coexist with `double` / `long`.
-const FLOAT_FAMILY = ['float', 'half_float', 'scaled_float'];
-const INT_FAMILY = ['integer', 'short', 'byte'];
-const COUNTER_DOUBLE_FAMILY = ['counter_double'];
-const COUNTER_LONG_FAMILY = ['counter_long'];
-const ALL_NUMERIC = [
+const DOUBLE_FAMILY: readonly string[] = [
   'double',
-  ...FLOAT_FAMILY,
-  'long',
-  ...INT_FAMILY,
-  ...COUNTER_DOUBLE_FAMILY,
-  ...COUNTER_LONG_FAMILY,
+  'float',
+  'half_float',
+  'scaled_float',
+  'counter_double',
 ];
+const LONG_FAMILY: readonly string[] = ['long', 'integer', 'short', 'byte', 'counter_long'];
+const ALL_NUMERIC: readonly string[] = [...DOUBLE_FAMILY, ...LONG_FAMILY];
+
+const isDoubleFamily = (type: string): boolean => DOUBLE_FAMILY.includes(type);
+const isLongFamily = (type: string): boolean => LONG_FAMILY.includes(type);
+const isNumeric = (type: string): boolean => ALL_NUMERIC.includes(type);
 
 /**
  * Resolves conflicting field types to a single compatible type for casting.
@@ -60,31 +61,17 @@ export function resolveConflictingFieldTypes(
   }
 
   // Check if all types are in the float family, including counter_double (double is the widest)
-  if (
-    uniqueTypes.every(
-      (type) =>
-        type === 'double' ||
-        FLOAT_FAMILY.includes(type as string) ||
-        COUNTER_DOUBLE_FAMILY.includes(type as string)
-    )
-  ) {
+  if (uniqueTypes.every(isDoubleFamily)) {
     return ES_FIELD_TYPES.DOUBLE;
   }
 
   // Check if all types are in the integer family, including counter_long (long is the widest)
-  if (
-    uniqueTypes.every(
-      (type) =>
-        type === 'long' ||
-        INT_FAMILY.includes(type as string) ||
-        COUNTER_LONG_FAMILY.includes(type as string)
-    )
-  ) {
+  if (uniqueTypes.every(isLongFamily)) {
     return ES_FIELD_TYPES.LONG;
   }
 
   // Mixed numeric: if all types are numeric (including counter_*), prefer double
-  if (uniqueTypes.every((type) => ALL_NUMERIC.includes(type as string))) {
+  if (uniqueTypes.every(isNumeric)) {
     return ES_FIELD_TYPES.DOUBLE;
   }
 
