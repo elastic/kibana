@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -31,6 +31,7 @@ import {
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
+  cancelWaitingWorkflow,
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
@@ -46,7 +47,9 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
@@ -55,6 +58,7 @@ import type {
   InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
+  TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -141,6 +145,7 @@ export class WorkflowsExecutionEnginePlugin
     this.coreSetup = core;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
+    initializeTriggerEventsDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -240,8 +245,6 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
-                  isEventDrivenExecutionEnabled:
-                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -1120,22 +1123,29 @@ export class WorkflowsExecutionEnginePlugin
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
       }
 
-      if (
-        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-          workflowExecution.status
-        )
-      ) {
-        // Already in a terminal state or being canceled
+      if (isTerminalStatus(workflowExecution.status)) {
         return;
       }
 
-      const cancelledAt = new Date().toISOString();
+      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        await cancelWaitingWorkflow({
+          workflowExecution,
+          workflowExecutionRepository,
+          stepExecutionRepository: new StepExecutionRepository(
+            coreStart.elasticsearch.client.asInternalUser
+          ),
+        });
+        return;
+      }
 
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
+        ...(workflowExecution.status === ExecutionStatus.PENDING
+          ? { status: ExecutionStatus.CANCELLED }
+          : {}),
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt,
+        cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
@@ -1241,6 +1251,22 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const triggerEventHandler = new TriggerEventHandler({
+      coreStart,
+      workflowsExtensions: plugins.workflowsExtensions,
+      spaces: plugins.spaces?.spacesService,
+      scheduleWorkflow,
+      logger: this.logger,
+      config: this.config.eventDriven,
+    });
+
+    const triggerEvents: TriggerEventsContract = {
+      emitEvent: (params) => triggerEventHandler.handleEvent(params),
+      isEnabled: this.config.eventDriven.enabled,
+      isLogEventsEnabled: this.config.eventDriven.logEvents,
+      maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+    };
+
     return {
       workflowEventLoggerService,
       executeWorkflow,
@@ -1251,30 +1277,11 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       internalResumeWorkflowExecution,
-      isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
-      isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
-      getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),
-      getMaxWorkflowDepth: this.getMaxWorkflowDepth.bind(this),
+      triggerEvents,
     };
   }
 
   public stop() {}
-
-  private isEventDrivenExecutionEnabled(): boolean {
-    return this.config?.eventDriven?.enabled ?? true;
-  }
-
-  private isLogTriggerEventsEnabled(): boolean {
-    return this.config?.eventDriven?.logEvents ?? true;
-  }
-
-  private getMaxEventChainDepth(): number {
-    return this.config?.eventDriven?.maxChainDepth ?? 10;
-  }
-
-  private getMaxWorkflowDepth(): number {
-    return this.config?.maxWorkflowDepth ?? 10;
-  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

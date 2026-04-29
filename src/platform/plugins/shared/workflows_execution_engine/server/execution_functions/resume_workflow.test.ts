@@ -14,6 +14,7 @@ import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { resumeWorkflow } from './resume_workflow';
 import { setupDependencies } from './setup_dependencies';
+import { workflowsExecutionEngineMock } from '../mocks';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
@@ -25,6 +26,8 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 >;
 
 describe('resumeWorkflow', () => {
+  const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
+
   const workflowRunId = 'run-1';
   const spaceId = 'default';
   const logger = loggingSystemMock.create().get();
@@ -50,11 +53,6 @@ describe('resumeWorkflow', () => {
     jest.clearAllMocks();
     dependencies = mockContextDependencies();
     mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    (
-      dependencies as unknown as { workflowsExtensions: { emitEvent: jest.Mock } }
-    ).workflowsExtensions = {
-      emitEvent: mockEmitEvent,
-    };
     mockGetWorkflowExecutionById = jest.fn();
     mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
     mockGetWorkflowExecutionStatus = jest.fn();
@@ -109,6 +107,7 @@ describe('resumeWorkflow', () => {
       logger: logger as Logger,
       config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
+      workflowsExecutionEngine: mockWorkflowExecutionEngine,
     });
 
     expect(resume).not.toHaveBeenCalled();
@@ -146,6 +145,7 @@ describe('resumeWorkflow', () => {
       logger: logger as Logger,
       config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
+      workflowsExecutionEngine: mockWorkflowExecutionEngine,
     });
 
     expect(resume).toHaveBeenCalledTimes(1);
@@ -182,6 +182,7 @@ describe('resumeWorkflow', () => {
       logger: logger as Logger,
       config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
+      workflowsExecutionEngine: mockWorkflowExecutionEngine,
     });
 
     expect(resume).not.toHaveBeenCalled();
@@ -219,6 +220,7 @@ describe('resumeWorkflow', () => {
       logger: logger as Logger,
       config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
+      workflowsExecutionEngine: mockWorkflowExecutionEngine,
     });
 
     expect(resume).toHaveBeenCalledTimes(1);
@@ -258,6 +260,7 @@ describe('resumeWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
         fakeRequest,
         dependencies,
+        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
       })
     ).rejects.toThrow('Step failed');
 
@@ -266,7 +269,6 @@ describe('resumeWorkflow', () => {
     expect(mockEmitEvent).toHaveBeenCalledTimes(1);
     expect(mockEmitEvent).toHaveBeenCalledWith({
       triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-      spaceId,
       payload: expect.objectContaining({
         workflow: expect.objectContaining({
           id: 'wf-1',
@@ -312,6 +314,7 @@ describe('resumeWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
         fakeRequest,
         dependencies,
+        workflowsExecutionEngine: { triggerEvents: { emitEvent: mockEmitEvent } } as any,
       })
     ).rejects.toThrow('Runtime error');
 

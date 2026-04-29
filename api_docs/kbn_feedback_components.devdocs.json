@@ -33,6 +33,7 @@
             "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -70,6 +71,7 @@
             "lineNumber": 29,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }

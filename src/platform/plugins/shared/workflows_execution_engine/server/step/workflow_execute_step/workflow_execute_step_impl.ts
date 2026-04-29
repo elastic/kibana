@@ -14,14 +14,11 @@ import type {
   WorkflowExecuteStep,
   WorkflowRepository,
 } from '@kbn/workflows';
-import type {
-  WorkflowExecuteAsyncGraphNode,
-  WorkflowExecuteGraphNode,
-  WorkflowGraph,
-} from '@kbn/workflows/graph';
+import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
+import type { WorkflowsExecutionEngineConfig } from '../../config';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -41,8 +38,7 @@ export interface WorkflowExecuteStepImplInit {
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   workflowLogger: IWorkflowEventLogger;
-  maxWorkflowDepth: number;
-  workflowExecutionGraph: WorkflowGraph;
+  config: WorkflowsExecutionEngineConfig;
 }
 
 export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableNode {
@@ -134,7 +130,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     try {
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
       const currentDepth = (typeof rawDepth === 'number' ? rawDepth : -1) + 1;
-      const maxWorkflowDepth = this.init.maxWorkflowDepth;
+      const maxWorkflowDepth = this.init.config.maxWorkflowDepth;
       if (currentDepth >= maxWorkflowDepth) {
         const error = new Error(
           `Workflow composition depth limit (${maxWorkflowDepth}) exceeded at step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}". Refactor to reduce nesting.`
