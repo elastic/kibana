@@ -19,7 +19,6 @@ import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
-import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
 import { docLinks } from '../../../common/doc_links';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
@@ -100,28 +99,20 @@ export const SearchHomepagePage = () => {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {isTrial && isTrialBadgeEnabled ? (
-                <EuiFlexItem grow={false}>
-                  <TrialUsageBadge
-                    billingUrl={billingUrl}
-                    isServerless={cloud?.isServerlessEnabled}
-                    trialDaysLeft={trialUsageData?.trialDaysLeft}
-                    storageUsage={trialUsageData?.storageUsage}
-                    mlNodeCount={trialUsageData?.mlNodeCount}
-                    mlMemoryLimit={trialUsageData?.mlMemoryLimit}
-                    llmTotalTokens={trialUsageData?.llmTotalTokens}
-                    searchPowerMax={trialUsageData?.searchPowerMax}
-                    searchPowerMin={trialUsageData?.searchPowerMin}
-                    boostWindowHours={trialUsageData?.boostWindowHours}
-                  />
-                </EuiFlexItem>
-              ) : (
-                !cloud?.isCloudEnabled && (
-                  <EuiFlexItem grow={false}>
-                    <LicenseBadge />
-                  </EuiFlexItem>
-                )
-              )}
+              <EuiFlexItem grow={false}>
+                <TrialUsageBadge
+                  billingUrl={billingUrl}
+                  isServerless={cloud?.isServerlessEnabled}
+                  trialDaysLeft={trialUsageData?.trialDaysLeft}
+                  storageUsage={trialUsageData?.storageUsage}
+                  mlNodeCount={trialUsageData?.mlNodeCount}
+                  mlMemoryLimit={trialUsageData?.mlMemoryLimit}
+                  llmTotalTokens={trialUsageData?.llmTotalTokens}
+                  searchPowerMax={trialUsageData?.searchPowerMax}
+                  searchPowerMin={trialUsageData?.searchPowerMin}
+                  boostWindowHours={trialUsageData?.boostWindowHours}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

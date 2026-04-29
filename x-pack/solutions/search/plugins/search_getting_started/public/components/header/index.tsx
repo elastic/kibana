@@ -56,35 +56,26 @@ export const SearchGettingStartedHeader: React.FC = () => {
             alignSelf: 'stretch',
           })}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent={
-              isTrialBadgeEnabled && (!cloud?.isCloudEnabled || cloud?.isInTrial())
-                ? 'spaceBetween'
-                : 'flexEnd'
-            }
-          >
-            {isTrialBadgeEnabled && (!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
-              <EuiFlexItem
-                grow={false}
-                css={css({
-                  alignItems: 'flex-start',
-                })}
-              >
-                <TrialUsageBadge
-                  billingUrl={billingUrl}
-                  isServerless={cloud?.isServerlessEnabled}
-                  trialDaysLeft={trialUsageData?.trialDaysLeft}
-                  storageUsage={trialUsageData?.storageUsage}
-                  mlNodeCount={trialUsageData?.mlNodeCount}
-                  mlMemoryLimit={trialUsageData?.mlMemoryLimit}
-                  llmTotalTokens={trialUsageData?.llmTotalTokens}
-                  searchPowerMax={trialUsageData?.searchPowerMax}
-                  searchPowerMin={trialUsageData?.searchPowerMin}
-                  boostWindowHours={trialUsageData?.boostWindowHours}
-                />
-              </EuiFlexItem>
-            )}
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem
+              grow={false}
+              css={css({
+                alignItems: 'flex-start',
+              })}
+            >
+              <TrialUsageBadge
+                billingUrl={billingUrl}
+                isServerless={cloud?.isServerlessEnabled}
+                trialDaysLeft={trialUsageData?.trialDaysLeft}
+                storageUsage={trialUsageData?.storageUsage}
+                mlNodeCount={trialUsageData?.mlNodeCount}
+                mlMemoryLimit={trialUsageData?.mlMemoryLimit}
+                llmTotalTokens={trialUsageData?.llmTotalTokens}
+                searchPowerMax={trialUsageData?.searchPowerMax}
+                searchPowerMin={trialUsageData?.searchPowerMin}
+                boostWindowHours={trialUsageData?.boostWindowHours}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <KibanaVersionBadge
                 docLink={
