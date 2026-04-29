@@ -59,8 +59,7 @@ describe('Enrollment token page', () => {
     // Open the per-row actions menu and click revoke
     cy.getBySel(ENROLLMENT_TOKENS.TABLE_ACTIONS_MENU).first().click();
     cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).click();
-    cy.get('.euiPanel').contains('Are you sure you want to revoke');
-    cy.get('.euiButton').contains('Revoke enrollment token').click({ force: true });
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     // Default filter is "Active", so the revoked token should disappear from the list.
     // Switch to "Inactive" to verify it was revoked.

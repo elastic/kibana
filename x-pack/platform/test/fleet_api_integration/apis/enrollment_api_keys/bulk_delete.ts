@@ -135,12 +135,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('bulk revoke by kuery', () => {
-        let policyKeyIds: string[];
+        let allPolicyKeyIds: string[];
 
         before(async () => {
           await apiClient.createAgentPolicy(undefined, { id: 'bulk-kuery-policy' });
 
-          const created = await Promise.all(
+          await Promise.all(
             Array.from({ length: 2 }, () =>
               supertest
                 .post(`/api/fleet/enrollment_api_keys`)
@@ -150,7 +150,11 @@ export default function (providerContext: FtrProviderContext) {
             )
           );
 
-          policyKeyIds = created.map((r) => r.body.item.id);
+          // Include the auto-created default enrollment key
+          const { body: allKeys } = await supertest
+            .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:bulk-kuery-policy`)
+            .expect(200);
+          allPolicyKeyIds = allKeys.items.map((k: any) => k.id);
         });
 
         it('should revoke tokens matching the kuery', async () => {
@@ -160,10 +164,10 @@ export default function (providerContext: FtrProviderContext) {
             .send({ kuery: 'policy_id:bulk-kuery-policy', forceDelete: false })
             .expect(200);
 
-          expect(body.successCount).to.be(policyKeyIds.length);
+          expect(body.successCount).to.be(allPolicyKeyIds.length);
           expect(body.errorCount).to.be(0);
 
-          for (const keyId of policyKeyIds) {
+          for (const keyId of allPolicyKeyIds) {
             const { body: getBody } = await supertest
               .get(`/api/fleet/enrollment_api_keys/${keyId}`)
               .expect(200);
