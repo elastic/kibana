@@ -44,10 +44,6 @@ export interface PickScoutFlakyRunOrderOptions {
 // Normalize "./foo/bar.config.ts" -> "foo/bar.config.ts" so it matches manifest entries.
 const normalizeConfigPath = (path: string): string => path.replace(/^\.\//, '');
 
-// The discovery manifest now stores one entry per Scout module with the full set of
-// `(arch, domain)` modes in `serverRunFlags`, so a path-keyed Map is unambiguous.
-// Heavy-suite fan-out (streams_app, dashboard, ...) lives in `module_split.ts` and is
-// applied by the regular Scout pipeline at scheduling time, not by discovery.
 const indexConfigsByPath = (
   manifest: ModuleDiscoveryInfo[]
 ): Map<string, ModuleDiscoveryInfo['configs'][number]> => {
@@ -101,7 +97,18 @@ const buildSteps = (
       );
     }
 
-    for (const mode of entry.serverRunFlags) {
+    // Dedupe modes in case the manifest contains duplicate (arch, domain) entries, and
+    // log a warning so the upstream issue is visible.
+    const modes = [...new Set(entry.serverRunFlags)];
+    if (modes.length !== entry.serverRunFlags.length) {
+      console.warn(
+        `⚠️ scoutConfig '${normalized}' had duplicate serverRunFlags in the manifest ` +
+          `(${entry.serverRunFlags.length} entries, ${modes.length} unique). ` +
+          `Deduping for step generation; consider fixing the discovery output.`
+      );
+    }
+
+    for (const mode of modes) {
       scoutJobs += req.count;
       if (reservedJobs + scoutJobs > MAX_JOBS) {
         throw new Error(

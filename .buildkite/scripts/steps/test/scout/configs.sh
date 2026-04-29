@@ -76,14 +76,12 @@ if [ -z "$configs" ]; then
   exit 1
 fi
 
-# Warn only when neither the JSON manifest nor an explicit SCOUT_SERVER_RUN_FLAGS value is
-# available — that's the only case in which serverRunFlags truly cannot be determined.
-# The "split heavy module" path in pickScoutTestGroupRunOrder and the flaky test runner both
-# pass SCOUT_CONFIG + SCOUT_SERVER_RUN_FLAGS, which is fully supported below.
-if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" && -z "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
-  echo "⚠️ Warning: SCOUT_CONFIG is set but neither module_data nor SCOUT_SERVER_RUN_FLAGS is available."
-  echo "   Server run flags cannot be determined from tags; tests may not run in the expected modes."
-  echo "   Use SCOUT_CONFIG_GROUP_KEY (manifest lookup) or pass SCOUT_SERVER_RUN_FLAGS explicitly."
+# If we have module_data, we can process configs with their serverRunFlags directly
+# Otherwise, we need to handle the case where SCOUT_CONFIG is set directly
+if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" ]]; then
+  echo "⚠️ Warning: SCOUT_CONFIG is set but module_data is not available. Server run flags cannot be determined from tags."
+  echo "   As a result, tests may not run in the expected modes or with the correct configuration, which could lead to unexpected failures or incomplete test coverage."
+  echo "   Execution will proceed, but it is strongly recommended to use SCOUT_CONFIG_GROUP_KEY instead to ensure serverRunFlags are set from the JSON file."
 fi
 
 results=()

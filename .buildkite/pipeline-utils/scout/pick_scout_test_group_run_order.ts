@@ -12,7 +12,6 @@ import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
 import { getRequiredEnv } from '#pipeline-utils';
-import { splitModulesByServerRunFlags } from './module_split';
 
 export interface ModuleDiscoveryInfo {
   name: string;
@@ -66,33 +65,16 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
           .filter(Boolean)
       : ['build_scout_tests', 'build'];
 
-  // Heavy modules (streams_app, dashboard, ...) are fanned out here into one virtual
-  // module per (arch, domain) so each mode runs in its own BK step. This used to happen
-  // in `kbn-scout`'s discovery CLI before saving the manifest, but that conflated
-  // "describe the codebase" with "schedule the build" and produced duplicate config-path
-  // entries that broke the flaky-runner planner. Now the manifest stays canonical and the
-  // split is applied here at scheduling time.
-  const scheduledModules = splitModulesByServerRunFlags(modulesWithTests);
-
-  const scoutCiRunGroups = scheduledModules.map((module) => {
+  const scoutCiRunGroups = modulesWithTests.map((module) => {
+    // Check if any config in this module uses parallel workers
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
     const affectedPrefix = module.isAffected ? 'affected ' : '';
-
-    // A module is "split" when it contributes exactly one config with exactly one
-    // `serverRunFlag` (i.e. a single arch/domain mode). For these, we set SCOUT_CONFIG +
-    // SCOUT_SERVER_RUN_FLAGS directly so the BK step skips the manifest jq lookup in
-    // configs.sh and runs only the targeted mode. Non-split modules keep the existing
-    // SCOUT_CONFIG_GROUP_KEY contract and let configs.sh iterate every config/mode.
-    const isSplitModule =
-      module.configs.length === 1 && module.configs[0].serverRunFlags.length === 1;
-    const splitConfig = isSplitModule ? module.configs[0] : undefined;
 
     return {
       label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
       key: module.name,
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       group: module.group,
-      splitConfig,
     };
   });
 
@@ -102,26 +84,18 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       key: 'scout-configs',
       depends_on: SCOUT_CONFIGS_DEPS,
       steps: scoutCiRunGroups.map(
-        ({ label, key, group, agents, splitConfig }): BuildkiteStep => ({
+        ({ label, key, group, agents }): BuildkiteStep => ({
           label,
           command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
           timeout_in_minutes: 60,
           key,
           agents,
-          env: splitConfig
-            ? {
-                SCOUT_CONFIG: splitConfig.path,
-                SCOUT_SERVER_RUN_FLAGS: splitConfig.serverRunFlags[0],
-                SCOUT_CONFIG_GROUP_TYPE: group,
-                ...envFromlabels,
-                ...scoutExtraEnv,
-              }
-            : {
-                SCOUT_CONFIG_GROUP_KEY: key,
-                SCOUT_CONFIG_GROUP_TYPE: group,
-                ...envFromlabels,
-                ...scoutExtraEnv,
-              },
+          env: {
+            SCOUT_CONFIG_GROUP_KEY: key,
+            SCOUT_CONFIG_GROUP_TYPE: group,
+            ...envFromlabels,
+            ...scoutExtraEnv,
+          },
           retry: {
             automatic: [
               { exit_status: '-1', limit: 3 },
