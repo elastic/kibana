@@ -21,7 +21,7 @@ Orchestrate bug reproduction and TDD fixing for Kibana Security Solution issues.
 
 ## Knowledge Base
 
-At session start, read `.agents/skills/bug-fixer/KNOWLEDGE.md` if it exists. Apply relevant learnings. See `references/knowledge-update.md` for the update protocol used at session end.
+At session start, read `.agents/skills/bug-fixer/KNOWLEDGE.md` if it exists. Apply relevant learnings.
 
 ## Workflow
 
@@ -54,7 +54,7 @@ If `screenshots` or `video_urls` are present, review them — use the Read tool 
 
 Reviewing similar issues and related PRs is worth the time — prior fixes are your strongest signal for how to approach this one.
 
-Run these in parallel (use parallel tool calls or subagents — they are all independent reads):
+Dispatch these as subagents — each reads potentially large PR diffs and issue threads, and keeping that work out of the main conversation saves significant context:
 - If `similar_issues` is non-empty, read each one (`gh issue view <number> --repo elastic/kibana`) to understand how similar bugs manifested and whether the same root cause applies here.
 - If `related_prs` is non-empty, review each PR's diff (`gh pr diff <number> --repo elastic/kibana`) to understand what was changed and why. If a past PR fixed a similar bug, its approach is your strongest signal for how to fix this one.
 - Search for closed issues with similar symptoms: `gh search issues "<key symptom>" --repo elastic/kibana --state closed --limit 5`. Prior fixes may reveal patterns, pitfalls, or areas the current fix must also cover.
@@ -179,7 +179,7 @@ Combine your Phase 1 code reading with Phase 3 diagnostics to pinpoint the defec
 
 Cross-reference `affected_paths` with network failures (→ route handler), console errors (→ component), stale data (→ mutation hook), missing API calls (→ UI code path). Trace the code path from the UI action to the underlying data source. This gives you an initial hypothesis.
 
-Then run these research tasks in parallel (use subagents or parallel tool calls — they are all independent):
+Then dispatch these as subagents — PR diffs and source files are large, and running them as subagents keeps that bulk out of the main conversation context:
 1. **Review prior fixes** — revisit `similar_issues` and `related_prs` from Phase 0. If a past PR fixed a related bug, read its diff carefully: what pattern did it follow? What files did it touch? Did it miss anything that later required a follow-up?
 2. **Map the full impact scope** — identify every area affected by the root cause, not just the one the ticket describes. Ask: _"If this code path is broken here, where else is it used?"_ Check: sibling UI components that share the same hook/utility, other API routes that call the same service method, other spaces/tenants/roles that exercise the same logic.
 3. **Search for codebase conventions** — run SELF-CHECK #3 questions 1–4 (below): `rg` for existing patterns, hardcoded namespaces, plugin boundaries, and lifecycle phases.
@@ -305,21 +305,8 @@ If the user confirms:
 
 ## Knowledge Update
 
-After every session (success or failure), present a structured learning summary to the user using the template in `references/fix-workflow.md`. Cover: surprises/mistakes, proposed generic rules for SKILL.md or classification-guide.md, and incident-specific context for KNOWLEDGE.md.
-
-Wait for the user to confirm which entries to add before writing to any file. See `references/knowledge-update.md` for the entry format.
+After Phase 5 (or Phase 6), read `references/fix-workflow.md` (Session Learnings Template) and present a structured learning summary to the user. Also read `references/knowledge-update.md` for the entry format. Wait for the user to confirm which entries to add before writing to any file.
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| ES fails to start | Check `node scripts/es snapshot` output; ensure no other ES instance is running on port 9200 |
-| Kibana fails to start | Check console output; ensure `yarn kbn bootstrap` completed and port 5601 is free |
-| Kibana slow to start | Can take 5+ min on first run; poll `/api/status` rather than assuming a fixed wait time |
-| ES returns 401 | Default credentials are `elastic` / `changeme` |
-| Config not taking effect | Pass config via `--xpack.*` CLI args, not `kibana.dev.yml` — CLI args are session-scoped |
-| `red_rejected` — test passes | Test must assert correct behavior that is currently broken |
-| Jest test not found | Verify path is correct and relative to repo root |
-| `gh api` errors | `gh auth status` and `gh auth refresh` |
-| "Please upgrade your browser" on login | Transient — call `browser_snapshot` again; using `browser_wait_for` here can block indefinitely |
-| Browser can't find element | Take fresh `browser_snapshot` after navigation/waits |
+If something goes wrong, read `references/troubleshooting.md` for common problems and solutions.
