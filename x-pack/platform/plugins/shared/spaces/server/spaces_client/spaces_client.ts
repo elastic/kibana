@@ -166,7 +166,7 @@ export class SpacesClient implements ISpacesClient {
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
-    const attributes = this.generateSpaceAttributes(space);
+    const attributes = this.generateSpaceAttributes({ ...space, name: space.name.trim() });
 
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
@@ -196,7 +196,16 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 
-    const attributes = this.generateSpaceAttributes(space);
+    const existingSpaceSavedObject = await this.repository.get<SpaceSavedObjectAttributes>(
+      'space',
+      id
+    );
+
+    // Preserve existing leading/trailing whitespace (backwards compatibility for legacy spaces),
+    // but trim if a new name is being set to prevent introducing new whitespace.
+    const existingName = existingSpaceSavedObject.attributes.name as string;
+    const resolvedName = space.name === existingName ? space.name : space.name.trim();
+    const attributes = this.generateSpaceAttributes({ ...space, name: resolvedName });
     await this.repository.update('space', id, attributes);
     const updatedSavedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(updatedSavedObject);
