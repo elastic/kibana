@@ -563,10 +563,7 @@ export const SettingsPage: React.FC<Props> = memo(
                               values={{
                                 version,
                                 installedVersionLink: (
-                                  <InstalledVersionLink
-                                    name={name}
-                                    version={installedVersion!}
-                                  />
+                                  <InstalledVersionLink name={name} version={installedVersion!} />
                                 ),
                               }}
                             />
