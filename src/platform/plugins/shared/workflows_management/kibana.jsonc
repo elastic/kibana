@@ -32,7 +32,7 @@
       "embeddable",
       "licensing"
     ],
-    "optionalPlugins": ["alerting", "serverless", "cloud"],
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
     "runtimePluginDependencies": ["agentBuilder"]
   }
 }

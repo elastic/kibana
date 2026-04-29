@@ -19,6 +19,7 @@
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-browser",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/spaces-plugin"
   ]
 }

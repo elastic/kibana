@@ -4370,4 +4370,106 @@ steps:
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
   });
+
+  describe('listWaitingForInputSteps', () => {
+    // Regression coverage for the Inbox <-> Workflows integration.
+    //
+    // The .workflows-step-executions index only indexes `spaceId` and
+    // `status` as keyword fields; `stepType` lives in `_source` only. An
+    // earlier draft included a `term: { stepType: 'waitForInput' }` filter
+    // here, which silently matched zero docs and caused the Inbox UI to
+    // appear empty even when workflows were paused on `waitForInput`. These
+    // tests pin the wire-level query so a future refactor can't reintroduce
+    // an unindexed filter without going red.
+    const buildHit = (overrides: Record<string, unknown> = {}) => ({
+      _id: 'doc-1',
+      _source: {
+        id: 'doc-1',
+        stepId: 'ask',
+        stepType: 'waitForInput',
+        status: 'waiting_for_input',
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        workflowRunId: 'run-1',
+        startedAt: '2026-04-28T15:00:00.000Z',
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        topologicalIndex: 0,
+        scopeStack: [],
+        isTestRun: false,
+        ...overrides,
+      },
+    });
+
+    it('issues a term-only query against keyword-indexed fields and omits stepType', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [buildHit()], total: { value: 1 } },
+      } as any);
+
+      const result = await service.listWaitingForInputSteps('default');
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      const searchArgs = mockEsClient.search.mock.calls[0][0] as {
+        index: string;
+        query: { bool: { must: Array<Record<string, unknown>> } };
+      };
+      expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+
+      const must = searchArgs.query.bool.must;
+      // Only the two keyword-indexed fields show up. Adding `stepType` here
+      // would re-introduce the empty-inbox bug — see method comment.
+      expect(must).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: 'default' } },
+          { term: { status: 'waiting_for_input' } },
+        ])
+      );
+      expect(must).toHaveLength(2);
+      const filterFields = must.flatMap((clause) =>
+        Object.keys(clause.term as Record<string, unknown>)
+      );
+      expect(filterFields).not.toContain('stepType');
+
+      expect(result.total).toBe(1);
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].stepType).toBe('waitForInput');
+    });
+
+    it('paginates via from/size derived from page/perPage', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.listWaitingForInputSteps('default', { page: 3, perPage: 25 });
+
+      const searchArgs = mockEsClient.search.mock.calls[0][0] as { from: number; size: number };
+      expect(searchArgs.size).toBe(25);
+      expect(searchArgs.from).toBe(50);
+    });
+
+    it('swallows index_not_found_exception with an empty result (cold install case)', async () => {
+      mockEsClient.search.mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        })
+      );
+
+      const result = await service.listWaitingForInputSteps('default');
+
+      expect(result).toEqual({ results: [], total: 0 });
+    });
+
+    it('logs and rethrows for any other ES failure', async () => {
+      mockEsClient.search.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(service.listWaitingForInputSteps('default')).rejects.toThrow('boom');
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to list waiting-for-input step executions')
+      );
+    });
+  });
 });

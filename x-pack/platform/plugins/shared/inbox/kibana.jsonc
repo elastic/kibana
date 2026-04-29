@@ -10,7 +10,7 @@
     "browser": true,
     "configPath": ["xpack", "inbox"],
     "requiredPlugins": ["features"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["spaces"],
     "requiredBundles": ["kibanaReact"]
   }
 }

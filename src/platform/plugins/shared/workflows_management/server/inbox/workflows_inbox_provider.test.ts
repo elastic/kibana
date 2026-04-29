@@ -1,0 +1,129 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
+import {
+  createWorkflowsInboxProvider,
+  InvalidWorkflowSourceIdError,
+  WORKFLOWS_INBOX_SOURCE_APP,
+} from './workflows_inbox_provider';
+import type { WorkflowsManagementApi } from '../api/workflows_management_api';
+
+const buildStep = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflowStepExecution => ({
+  spaceId: 'default',
+  id: 'step-exec-1',
+  stepId: 'wait_approval',
+  stepType: 'waitForInput',
+  scopeStack: [],
+  workflowRunId: 'run-1',
+  workflowId: 'wf-1',
+  status: ExecutionStatus.WAITING_FOR_INPUT,
+  startedAt: '2026-04-24T12:00:00.000Z',
+  topologicalIndex: 0,
+  globalExecutionIndex: 0,
+  stepExecutionIndex: 0,
+  input: {
+    message: 'Approve isolation of host-42?',
+    schema: {
+      type: 'object',
+      properties: { approved: { type: 'boolean' } },
+      required: ['approved'],
+    },
+  },
+  ...overrides,
+});
+
+const ctx = () => ({
+  request: httpServerMock.createKibanaRequest(),
+  spaceId: 'default',
+});
+
+const fakeApi = () => {
+  const api: Partial<WorkflowsManagementApi> = {
+    listWaitingForInputSteps: jest.fn(async () => ({ results: [buildStep()], total: 1 })),
+    resumeWorkflowExecution: jest.fn(async () => {}),
+  };
+  return api as jest.Mocked<WorkflowsManagementApi>;
+};
+
+describe('createWorkflowsInboxProvider', () => {
+  it('declares sourceApp = "workflows"', () => {
+    const provider = createWorkflowsInboxProvider({
+      api: fakeApi(),
+      logger: loggerMock.create(),
+    });
+    expect(provider.sourceApp).toBe(WORKFLOWS_INBOX_SOURCE_APP);
+  });
+
+  describe('list()', () => {
+    it('delegates to the management service and maps results to InboxActions', async () => {
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const result = await provider.list({}, ctx());
+
+      expect(api.listWaitingForInputSteps).toHaveBeenCalledWith(
+        'default',
+        expect.objectContaining({ page: 1, perPage: 1000 })
+      );
+      expect(result.total).toBe(1);
+      expect(result.actions[0]).toMatchObject({
+        source_app: 'workflows',
+        source_id: 'wf-1:run-1:step-exec-1',
+        status: 'pending',
+        input_message: 'Approve isolation of host-42?',
+      });
+    });
+
+    it('returns an empty list when the service returns no results', async () => {
+      const api = fakeApi();
+      (api.listWaitingForInputSteps as jest.Mock).mockResolvedValueOnce({
+        results: [],
+        total: 0,
+      });
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const result = await provider.list({}, ctx());
+
+      expect(result).toEqual({ actions: [], total: 0 });
+    });
+  });
+
+  describe('respond()', () => {
+    it('calls resumeWorkflowExecution with the parsed executionId and the opaque input', async () => {
+      const api = fakeApi();
+      const logger = loggerMock.create();
+      const provider = createWorkflowsInboxProvider({ api, logger });
+      const c = ctx();
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true, reason: 'contained' }, c);
+
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'run-1',
+        'default',
+        { approved: true, reason: 'contained' },
+        c.request
+      );
+    });
+
+    it('throws InvalidWorkflowSourceIdError when source_id is malformed', async () => {
+      const provider = createWorkflowsInboxProvider({
+        api: fakeApi(),
+        logger: loggerMock.create(),
+      });
+
+      await expect(provider.respond('invalid', {}, ctx())).rejects.toBeInstanceOf(
+        InvalidWorkflowSourceIdError
+      );
+    });
+  });
+});

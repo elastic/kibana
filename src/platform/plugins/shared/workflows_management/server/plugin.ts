@@ -25,6 +25,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
 import type {
   AgentBuilderPluginSetupContract,
@@ -99,6 +100,13 @@ export class WorkflowsPlugin
     defineRoutes(router, api, this.logger, spaces, workflowsService);
 
     this.setupAiIntegration(core, api, this.aiTelemetryClient);
+
+    if (plugins.inbox) {
+      this.logger.debug('Workflows Management: registering inbox provider');
+      plugins.inbox.registerActionProvider(
+        createWorkflowsInboxProvider({ api, logger: this.logger })
+      );
+    }
 
     return {
       management: api,

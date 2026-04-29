@@ -15,7 +15,14 @@ import type {
 } from './types';
 import { InboxPlugin } from './plugin';
 
-export type { InboxPluginSetup, InboxPluginStart };
+export type {
+  InboxPluginSetup,
+  InboxPluginStart,
+  InboxActionProvider,
+  InboxActionProviderListParams,
+  InboxActionProviderListResult,
+  InboxRequestContext,
+} from './types';
 
 export const plugin: PluginInitializer<
   InboxPluginSetup,

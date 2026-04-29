@@ -1725,6 +1725,60 @@ export class WorkflowsService {
     });
   }
 
+  /**
+   * Cross-workflow fan-out: returns every step execution currently blocked on
+   * `waitForInput` in the given space. Used by the Inbox plugin to surface
+   * pending HITL items across all workflows a user has access to.
+   *
+   * Intentionally minimal — the Inbox registry owns higher-level concerns
+   * like status filtering and paginated merge-sort across providers.
+   */
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    { page = 1, perPage = 100 }: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    const from = Math.max(0, (page - 1) * perPage);
+    try {
+      const response = await this.esClient.search<EsWorkflowStepExecution>({
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            must: [
+              { term: { spaceId } },
+              // `waiting_for_input` is only ever produced by the `waitForInput`
+              // step type, so this single filter is sufficient. We deliberately
+              // do NOT add a `term: { stepType: 'waitForInput' }` filter — the
+              // .workflows-step-executions mapping only indexes `spaceId` and
+              // `status` as keywords; `stepType` is in `_source` only and a
+              // term query against it matches nothing.
+              { term: { status: 'waiting_for_input' } },
+            ],
+          },
+        },
+        sort: [{ startedAt: { order: 'desc' } }],
+        from,
+        size: perPage,
+        track_total_hits: true,
+      });
+      const total =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 0;
+      return {
+        results: response.hits.hits
+          .map((hit) => hit._source)
+          .filter((src): src is EsWorkflowStepExecution => Boolean(src)),
+        total,
+      };
+    } catch (error) {
+      if (isResponseError(error) && error.body?.error?.type === 'index_not_found_exception') {
+        return { results: [], total: 0 };
+      }
+      this.logger.error(`Failed to list waiting-for-input step executions: ${error}`);
+      throw error;
+    }
+  }
+
   public async getWorkflowExecutionHistory(
     executionId: string,
     spaceId: string
