@@ -1661,7 +1661,7 @@
           " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }) => void]"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-        "lineNumber": 198,
+        "lineNumber": 200,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1677,7 +1677,7 @@
               "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-            "lineNumber": 199,
+            "lineNumber": 201,
             "columnNumber": 3,
             "deprecated": false,
             "docsReferencedTypeName": "ControlPanels",
@@ -1702,7 +1702,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-            "lineNumber": 200,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
