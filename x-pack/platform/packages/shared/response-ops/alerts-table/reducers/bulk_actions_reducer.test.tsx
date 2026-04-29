@@ -389,6 +389,51 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(await screen.findByTestId('bulk-actions-header')).toBeInTheDocument();
     });
 
+    it('should hide bulk action items when isVisible returns false for the selected alerts', async () => {
+      const mockVisiblePredicate = jest.fn(() => false);
+      const props: AlertsTableWithBulkActionsContextProps = {
+        ...dataGridPropsWithBulkActions,
+        initialBulkActionsState: {
+          ...createDefaultBulkActionsState(),
+          rowSelection: new Map([[0, { isLoading: false }]]),
+        },
+        additionalBulkActions: [
+          {
+            id: 0,
+            items: [
+              {
+                label: 'Visible Bulk Action',
+                key: 'visibleBulkAction',
+                'data-test-subj': 'visible-bulk-action',
+                disableOnQuery: false,
+                onClick: () => {},
+              },
+              {
+                label: 'Hidden Bulk Action',
+                key: 'hiddenBulkAction',
+                'data-test-subj': 'hidden-bulk-action',
+                disableOnQuery: false,
+                isVisible: mockVisiblePredicate,
+                onClick: () => {},
+              },
+            ],
+          },
+        ],
+      };
+
+      render(<TestComponent {...props} />);
+
+      await userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByText('Visible Bulk Action')).toBeInTheDocument();
+      expect(screen.queryByText('Hidden Bulk Action')).not.toBeInTheDocument();
+      expect(mockVisiblePredicate).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ _id: 'alert0' })]),
+        false
+      );
+    });
+
     describe('and triggering the "select all" action', () => {
       it('should check that all rows are selected', async () => {
         render(<TestComponent {...dataGridPropsWithBulkActions} />);

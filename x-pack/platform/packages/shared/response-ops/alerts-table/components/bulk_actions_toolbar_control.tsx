@@ -82,28 +82,32 @@ const useBulkActionsToMenuPanelMapper = (
     for (const panel of panels) {
       const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection);
       if (panel.items) {
-        const newItems = panel.items.map((item) => {
-          const isDisabled = isAllSelected && item.disableOnQuery;
-          return {
-            key: item.key,
-            'data-test-subj': item['data-test-subj'],
-            disabled: isDisabled,
-            onClick: item.onClick
-              ? () => {
-                  closeIfPopoverIsOpen();
-                  item.onClick?.(
-                    selectedAlertItems,
-                    isAllSelected,
-                    setIsBulkActionsLoading,
-                    clearSelection,
-                    refresh
-                  );
-                }
-              : undefined,
-            name: isDisabled && item.disabledLabel ? item.disabledLabel : item.label,
-            panel: item.panel,
-          };
-        });
+        const newItems = panel.items
+          .filter((item) => {
+            return item.isVisible ? item.isVisible(selectedAlertItems, isAllSelected) : true;
+          })
+          .map((item) => {
+            const isDisabled = isAllSelected && item.disableOnQuery;
+            return {
+              key: item.key,
+              'data-test-subj': item['data-test-subj'],
+              disabled: isDisabled,
+              onClick: item.onClick
+                ? () => {
+                    closeIfPopoverIsOpen();
+                    item.onClick?.(
+                      selectedAlertItems,
+                      isAllSelected,
+                      setIsBulkActionsLoading,
+                      clearSelection,
+                      refresh
+                    );
+                  }
+                : undefined,
+              name: isDisabled && item.disabledLabel ? item.disabledLabel : item.label,
+              panel: item.panel,
+            };
+          });
         bulkActionPanelsToReturn.push({ ...panel, items: newItems });
       } else {
         const ContentPanel = panel.renderContent({

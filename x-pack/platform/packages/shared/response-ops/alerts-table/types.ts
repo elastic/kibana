@@ -644,6 +644,7 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
+  isVisible?: (selectedAlerts: TimelineItem[], isAllSelected: boolean) => boolean;
   onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,

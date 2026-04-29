@@ -40,6 +40,8 @@ import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useAttackRunWorkflowContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 
+type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
+
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
   buttonText?: string;
@@ -49,6 +51,29 @@ interface Props {
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
+const isWorkflowStatus = (status: string | null | undefined): status is WorkflowStatus =>
+  status === 'open' || status === 'acknowledged' || status === 'closed';
+
+const getSharedAlertWorkflowStatus = (
+  attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[]
+): WorkflowStatus | null => {
+  if (attackDiscoveries.length === 0) {
+    return null;
+  }
+
+  const statuses = attackDiscoveries.map((attackDiscovery) =>
+    isAttackDiscoveryAlert(attackDiscovery) ? attackDiscovery.alertWorkflowStatus : undefined
+  );
+
+  const [firstStatus] = statuses;
+
+  if (!isWorkflowStatus(firstStatus)) {
+    return null;
+  }
+
+  return statuses.every((status) => status === firstStatus) ? firstStatus : null;
+};
+
 const TakeActionComponent: React.FC<Props> = ({
   attackDiscoveries,
   buttonSize = 's',
@@ -57,9 +82,7 @@ const TakeActionComponent: React.FC<Props> = ({
   replacements,
   setSelectedAttackDiscoveries,
 }) => {
-  const [pendingAction, setPendingAction] = useState<'open' | 'acknowledged' | 'closed' | null>(
-    null
-  );
+  const [pendingAction, setPendingAction] = useState<WorkflowStatus | null>(null);
 
   const {
     services: { cases, evals },
@@ -129,7 +152,7 @@ const TakeActionComponent: React.FC<Props> = ({
       workflowStatus,
     }: {
       updateAlerts: boolean;
-      workflowStatus: 'open' | 'acknowledged' | 'closed';
+      workflowStatus: WorkflowStatus;
     }) => {
       setPendingAction(null);
 
@@ -162,7 +185,7 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const onUpdateWorkflowStatus = useCallback(
-    async (workflowStatus: 'open' | 'acknowledged' | 'closed') => {
+    async (workflowStatus: WorkflowStatus) => {
       closePopover();
 
       setPendingAction(workflowStatus);
@@ -306,12 +329,11 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const allItems = useMemo(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
-    const firstAttackDiscovery = isSingleAttackDiscovery ? attackDiscoveries[0] : null;
-    const isAlert = firstAttackDiscovery != null && isAttackDiscoveryAlert(firstAttackDiscovery);
+    const sharedWorkflowStatus = getSharedAlertWorkflowStatus(attackDiscoveries);
 
-    const isOpen = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'open';
-    const isAcknowledged = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'acknowledged';
-    const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
+    const isOpen = sharedWorkflowStatus === 'open';
+    const isAcknowledged = sharedWorkflowStatus === 'acknowledged';
+    const isClosed = sharedWorkflowStatus === 'closed';
 
     const markAsOpenItem =
       !isOpen && hasAlertsUpdate
@@ -443,6 +465,7 @@ const TakeActionComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.TAKE_ACTION}
         anchorPosition="downCenter"
         button={button}
         closePopover={closePopover}

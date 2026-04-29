@@ -291,7 +291,7 @@ describe('TakeAction', () => {
           markAsClosed: false,
         },
       },
-    ];
+    ] as const;
 
     it.each(workflowStatuses)(
       'renders correct actions for status $status (single alert selection)',
@@ -327,23 +327,76 @@ describe('TakeAction', () => {
   });
 
   describe('actions when multiple alerts are selected', () => {
-    const alerts = getMockAttackDiscoveryAlerts(); // <-- multiple alerts
-    const testCases = [
+    const workflowStatuses = [
       {
-        testId: 'markAsAcknowledged',
-        description: 'renders mark as acknowledged',
+        status: 'open',
+        expected: {
+          markAsOpen: false,
+          markAsAcknowledged: true,
+          markAsClosed: true,
+        },
       },
       {
-        testId: 'markAsClosed',
-        description: 'renders mark as closed',
+        status: 'acknowledged',
+        expected: {
+          markAsOpen: true,
+          markAsAcknowledged: false,
+          markAsClosed: true,
+        },
       },
       {
-        testId: 'markAsOpen',
-        description: 'renders mark as open',
+        status: 'closed',
+        expected: {
+          markAsOpen: true,
+          markAsAcknowledged: true,
+          markAsClosed: false,
+        },
       },
     ];
 
-    beforeEach(() => {
+    it.each(workflowStatuses)(
+      'renders correct actions when all selected alerts are $status',
+      ({ status, expected }) => {
+        const alerts = getMockAttackDiscoveryAlerts().map((alert) => ({
+          ...alert,
+          alertWorkflowStatus: status,
+        }));
+
+        render(
+          <TestProviders>
+            <TakeAction attackDiscoveries={alerts} setSelectedAttackDiscoveries={jest.fn()} />
+          </TestProviders>
+        );
+
+        openPopover();
+
+        if (expected.markAsOpen) {
+          expect(screen.getByTestId('markAsOpen')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('markAsOpen')).toBeNull();
+        }
+
+        if (expected.markAsAcknowledged) {
+          expect(screen.getByTestId('markAsAcknowledged')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('markAsAcknowledged')).toBeNull();
+        }
+
+        if (expected.markAsClosed) {
+          expect(screen.getByTestId('markAsClosed')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('markAsClosed')).toBeNull();
+        }
+      }
+    );
+
+    it('renders all status actions when selected alerts have mixed statuses', () => {
+      const [firstAlert, secondAlert] = getMockAttackDiscoveryAlerts();
+      const alerts = [
+        { ...firstAlert, alertWorkflowStatus: 'open' as const },
+        { ...secondAlert, alertWorkflowStatus: 'closed' as const },
+      ];
+
       render(
         <TestProviders>
           <TakeAction attackDiscoveries={alerts} setSelectedAttackDiscoveries={jest.fn()} />
@@ -351,10 +404,10 @@ describe('TakeAction', () => {
       );
 
       openPopover();
-    });
 
-    it.each(testCases)('$description', ({ testId }) => {
-      expect(screen.getByTestId(testId)).toBeInTheDocument();
+      expect(screen.getByTestId('markAsOpen')).toBeInTheDocument();
+      expect(screen.getByTestId('markAsAcknowledged')).toBeInTheDocument();
+      expect(screen.getByTestId('markAsClosed')).toBeInTheDocument();
     });
   });
 

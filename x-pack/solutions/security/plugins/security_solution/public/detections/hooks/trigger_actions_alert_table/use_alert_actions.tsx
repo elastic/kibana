@@ -8,12 +8,14 @@
 import type {
   BulkActionsConfig,
   BulkActionsPanelConfig,
+  TimelineItem,
 } from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { AlertClosingReason } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
@@ -37,6 +39,23 @@ export interface UseBulkAlertActionItemsArgs {
   filters: Filter[];
   refetch?: () => void;
 }
+
+const getAlertWorkflowStatus = (alertItem: TimelineItem): AlertWorkflowStatus | undefined => {
+  const status = alertItem.data.find(({ field }) => field === ALERT_WORKFLOW_STATUS)?.value?.[0];
+
+  return status === FILTER_OPEN || status === FILTER_ACKNOWLEDGED || status === FILTER_CLOSED
+    ? (status as AlertWorkflowStatus)
+    : undefined;
+};
+
+const shouldShowStatusAction =
+  (status: AlertWorkflowStatus) => (selectedAlerts: TimelineItem[], isAllSelected: boolean) => {
+    if (isAllSelected || selectedAlerts.length === 0) {
+      return true;
+    }
+
+    return !selectedAlerts.every((alertItem) => getAlertWorkflowStatus(alertItem) === status);
+  };
 
 export const useBulkAlertActionItems = ({
   filters,
@@ -201,7 +220,12 @@ export const useBulkAlertActionItems = ({
           : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
 
       if (status === FILTER_CLOSED) {
-        return alertClosingReasonItem;
+        return alertClosingReasonItem
+          ? {
+              ...alertClosingReasonItem,
+              isVisible: shouldShowStatusAction(status),
+            }
+          : undefined;
       }
 
       return {
@@ -209,6 +233,7 @@ export const useBulkAlertActionItems = ({
         key: `${status}-alert-status`,
         'data-test-subj': `${status}-alert-status`,
         disableOnQuery: false,
+        isVisible: shouldShowStatusAction(status),
         onClick: getOnAction(status),
       };
     },
