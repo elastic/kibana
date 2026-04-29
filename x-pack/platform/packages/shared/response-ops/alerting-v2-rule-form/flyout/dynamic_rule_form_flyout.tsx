@@ -26,10 +26,7 @@ export interface DynamicRuleFormFlyoutProps {
   /** Required services */
   services: RuleFormServices;
   /**
-   * Caller-supplied validation errors. When non-empty, the flyout renders a
-   * blocking callout above the form and disables the Save button. Each entry
-   * is shown verbatim — callers should include any prefix needed for clarity
-   * (e.g. `?foo`, `??bar`).
+   * Caller-supplied validation errors.
    */
   validationErrors?: string[];
 }
