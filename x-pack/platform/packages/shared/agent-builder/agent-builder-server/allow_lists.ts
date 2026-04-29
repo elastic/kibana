@@ -112,6 +112,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-memory',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'sig-events-management',
 
   // Platform – Workflows
   'workflow-authoring',

@@ -63,6 +63,7 @@ import { TaskService } from './lib/tasks/task_service';
 import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
 import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
 import { InsightService } from './lib/sig_events/insights/client/insight_service';
+import { EventsService } from './lib/sig_events/events/events_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
@@ -152,6 +153,7 @@ export class StreamsPlugin
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
+    const eventsService = new EventsService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -177,15 +179,17 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [attachmentClient, insightClient, contentClient, tuningConfig] = await Promise.all([
-        attachmentService.getClient({
-          soClient,
-          rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
-        }),
-        insightService.getInternalClient(),
-        contentService.getClient(),
-        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
-      ]);
+      const [attachmentClient, insightClient, eventsClient, contentClient, tuningConfig] =
+        await Promise.all([
+          attachmentService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+          }),
+          insightService.getInternalClient(),
+          eventsService.getInternalClient(),
+          contentService.getClient(),
+          getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
+        ]);
 
       let featureClientPromise: Promise<FeatureClient> | undefined;
       const getFeatureClient = (): Promise<FeatureClient> => {
@@ -235,6 +239,7 @@ export class StreamsPlugin
         streamsClient,
         getFeatureClient,
         insightClient,
+        eventsClient,
         inferenceClient,
         contentClient,
         getQueryClient,

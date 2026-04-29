@@ -5,20 +5,27 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
+import type { StreamsServer } from '../../types';
 import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
+import { createSigEventsManagementSkill } from './sig_events_management';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
   getScopedClients,
+  server,
+  logger,
   telemetry,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
+  server: StreamsServer;
+  logger: Logger;
   telemetry: EbtTelemetryClient;
 }): void => {
   if (!agentBuilder) {
@@ -28,6 +35,11 @@ export const registerAgentBuilderSkills = ({
   const streamsSkills = [
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
+    createSigEventsManagementSkill({
+      getScopedClients,
+      server,
+      logger,
+    }),
     createKiIdentificationManagementSkill({ getScopedClients, telemetry }),
   ];
 
