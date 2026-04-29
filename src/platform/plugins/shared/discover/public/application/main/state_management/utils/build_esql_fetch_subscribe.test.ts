@@ -815,7 +815,7 @@ describe('buildEsqlFetchSubscribe', () => {
 
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
-  
+
   test('should remove dropped columns from the DROP command', async () => {
     const { toolkit, replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
