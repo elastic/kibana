@@ -10,7 +10,7 @@
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
-import { createProvider } from '../../../../disposed_safe_model';
+import { createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoMessages } from '../converters/positions';
 
 export async function esqlValidate(
@@ -19,7 +19,7 @@ export async function esqlValidate(
   callbacks?: ESQLCallbacks,
   options?: { invalidateColumnsCache?: boolean }
 ) {
-  return createProvider({
+  return createMonacoProvider({
     model,
     run: async (safeModel) => {
       const text = code ?? safeModel.getValue();

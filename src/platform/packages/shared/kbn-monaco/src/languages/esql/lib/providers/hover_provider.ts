@@ -9,7 +9,7 @@
 
 import { getHoverItem } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
-import { createProvider } from '../../../../disposed_safe_model';
+import { createMonacoProvider } from './providers_factory';
 import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
 
@@ -17,12 +17,8 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
   let lastHoveredWord: string;
 
   return {
-    async provideHover(
-      model: monaco.editor.ITextModel,
-      position: monaco.Position,
-      token: monaco.CancellationToken
-    ) {
-      return createProvider({
+    async provideHover(model: monaco.editor.ITextModel, position: monaco.Position) {
+      return createMonacoProvider({
         model,
         run: async (safeModel) => {
           const fullText = safeModel.getValue();

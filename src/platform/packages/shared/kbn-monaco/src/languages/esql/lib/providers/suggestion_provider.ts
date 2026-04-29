@@ -9,7 +9,7 @@
 
 import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
-import { createProvider } from '../../../../disposed_safe_model';
+import { createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoSuggestions } from '../converters/suggestions';
 import { filterSuggestionsWithCustomCommands, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
@@ -37,7 +37,7 @@ export function getSuggestionProvider(
       model: monaco.editor.ITextModel,
       position: monaco.Position
     ): Promise<monaco.languages.CompletionList> {
-      return createProvider({
+      return createMonacoProvider({
         model,
         run: async (safeModel) => {
           const editors = monaco.editor

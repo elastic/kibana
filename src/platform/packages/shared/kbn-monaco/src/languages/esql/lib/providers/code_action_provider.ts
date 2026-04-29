@@ -9,7 +9,7 @@
 
 import { getQuickFixForMessage } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
-import { createProvider } from '../../../../disposed_safe_model';
+import { createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoCodeAction } from '../converters/code_actions';
 import { findMessageByMarker } from '../shared/utils';
 import type { ESQLDependencies } from './types';
@@ -19,7 +19,7 @@ export function getCodeActionProvider(
 ): monaco.languages.CodeActionProvider {
   return {
     async provideCodeActions(model, _range, context, _token) {
-      return createProvider({
+      return createMonacoProvider({
         model,
         run: async (safeModel) => {
           const actions: monaco.languages.CodeAction[] = [];

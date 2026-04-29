@@ -10,7 +10,7 @@
 import { inlineSuggest } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
-import { createProvider } from '../../../../disposed_safe_model';
+import { createMonacoProvider } from './providers_factory';
 
 export function getInlineCompletionsProvider(
   callbacks?: ESQLCallbacks
@@ -22,7 +22,7 @@ export function getInlineCompletionsProvider(
       _context: monaco.languages.InlineCompletionContext,
       _token: monaco.CancellationToken
     ) {
-      return createProvider({
+      return createMonacoProvider({
         model,
         run: async (safeModel) => {
           const fullText = safeModel.getValue();
