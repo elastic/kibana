@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { statusSchema } from './common';
+import { z } from '@kbn/zod';
+import { compositeStatusSchema } from './composite_slo';
 
 /**
  * Flat summary fields persisted on composite summary index documents (see task `buildSummaryDoc`).
  * Other top-level keys (`spaceId`, `summaryUpdatedAt`, `compositeSlo`, …) are ignored by decode.
  */
-const compositeSloSummaryIndexSummaryFieldsSchema = t.type({
-  sliValue: t.number,
-  status: statusSchema,
-  errorBudgetInitial: t.number,
-  errorBudgetConsumed: t.number,
-  errorBudgetRemaining: t.number,
-  errorBudgetIsEstimated: t.boolean,
-  fiveMinuteBurnRate: t.number,
-  oneHourBurnRate: t.number,
-  oneDayBurnRate: t.number,
+const compositeSloSummaryIndexSummaryFieldsSchema = z.object({
+  sliValue: z.number(),
+  status: compositeStatusSchema,
+  errorBudgetInitial: z.number(),
+  errorBudgetConsumed: z.number(),
+  errorBudgetRemaining: z.number(),
+  errorBudgetIsEstimated: z.boolean(),
+  fiveMinuteBurnRate: z.number(),
+  oneHourBurnRate: z.number(),
+  oneDayBurnRate: z.number(),
 });
 
-type CompositeSloSummaryIndexSummaryFields = t.OutputOf<
+type CompositeSloSummaryIndexSummaryFields = z.infer<
   typeof compositeSloSummaryIndexSummaryFieldsSchema
 >;
 

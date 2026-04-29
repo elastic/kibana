@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOSummary } from '@kbn/slo-schema';
 import { compositeSloSummaryIndexSummaryFieldsSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
 
 export function buildCompositeSloSummaryDocId(spaceId: string, compositeId: string): string {
@@ -18,11 +17,11 @@ export function buildCompositeSloSummaryDocId(spaceId: string, compositeId: stri
 export function mapCompositeSummaryIndexSourceToSummary(
   source: unknown
 ): CompositeSLOSummary | undefined {
-  const decoded = compositeSloSummaryIndexSummaryFieldsSchema.decode(source);
-  if (isLeft(decoded)) {
+  const decoded = compositeSloSummaryIndexSummaryFieldsSchema.safeParse(source);
+  if (!decoded.success) {
     return undefined;
   }
-  const f = decoded.right;
+  const f = decoded.data;
   return {
     sliValue: f.sliValue,
     status: f.status,
