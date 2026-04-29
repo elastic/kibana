@@ -38,10 +38,6 @@ export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) =
     replacements: attack.replacements,
   });
 
-  if (!isAssistantVisible) {
-    return null;
-  }
-
   if (isAgentChatExperienceEnabled) {
     return (
       <NewAgentBuilderAttachment
@@ -52,6 +48,10 @@ export const AttackAiAssistantButton = React.memo<Props>(({ attack, pathway }) =
         }}
       />
     );
+  }
+
+  if (!isAssistantVisible) {
+    return null;
   }
 
   return (
