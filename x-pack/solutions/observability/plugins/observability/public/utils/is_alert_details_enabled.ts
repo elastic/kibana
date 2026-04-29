@@ -17,6 +17,8 @@ import type { ConfigSchema } from '../plugin';
 import type { TopAlert } from '../typings/alerts';
 
 const ALLOWED_RULE_TYPES = [
+  ApmRuleType.Anomaly,
+  ApmRuleType.ErrorCount,
   ApmRuleType.TransactionDuration,
   ApmRuleType.TransactionErrorRate,
   LOG_THRESHOLD_ALERT_TYPE_ID,

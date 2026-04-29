@@ -291,6 +291,7 @@
                 "lineNumber": 31,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventAnnotationGroupConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -341,6 +342,7 @@
                 "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventAnnotationGroupConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -782,6 +784,7 @@
               "lineNumber": 21,
               "columnNumber": 15,
               "deprecated": false,
+              "docsReferencedTypeName": "CoreStart",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -805,6 +808,7 @@
               "lineNumber": 21,
               "columnNumber": 32,
               "deprecated": false,
+              "docsReferencedTypeName": "ContentManagementPublicStart",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2335,6 +2339,7 @@
                 "lineNumber": 94,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "ManualPointEventAnnotationArgs",
                 "trackAdoption": false
               }
             ]
@@ -2858,6 +2863,7 @@
                 "lineNumber": 160,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "ManualRangeEventAnnotationArgs",
                 "trackAdoption": false
               }
             ]
@@ -3681,6 +3687,7 @@
                 "lineNumber": 108,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "QueryPointEventAnnotationArgs",
                 "trackAdoption": false
               }
             ]

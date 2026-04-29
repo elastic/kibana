@@ -36,6 +36,7 @@ const BUTTON_LABEL = i18n.translate('discover.saveDiscoverTable.buttonLabel', {
 export function SaveDiscoverTableButton() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const getState = useInternalStateGetState();
   const services = useDiscoverServices();
   const runtimeStateManager = useRuntimeStateManager();
@@ -54,12 +55,15 @@ export function SaveDiscoverTableButton() {
       });
 
       services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-        state: { ...byValueState, title: newTitle, description: newDescription },
+        state: {
+          byValueState: { ...byValueState, title: newTitle, description: newDescription },
+          controlGroupState,
+        },
         app: 'dashboards',
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [getState, currentTabId, services, runtimeStateManager]
+    [currentTabId, getState, runtimeStateManager, services, controlGroupState]
   );
 
   return (

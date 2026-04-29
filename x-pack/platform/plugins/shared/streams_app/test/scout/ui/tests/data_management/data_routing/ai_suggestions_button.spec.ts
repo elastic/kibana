@@ -16,88 +16,83 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/260324
-test.describe.skip(
-  'Stream data routing - AI suggestions button',
-  { tag: tags.stateful.classic },
-  () => {
-    let llmSetup: LlmProxySetup;
+test.describe('Stream data routing - AI suggestions button', { tag: tags.stateful.classic }, () => {
+  let llmSetup: LlmProxySetup;
 
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
-      await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
+  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
+    await logsSynthtraceEsClient.clean();
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
 
-      llmSetup = await setupLlmProxyAndConnector(log, apiServices);
-    });
+    llmSetup = await setupLlmProxyAndConnector(log, apiServices);
+  });
 
-    test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs.otel');
-      await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
+  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoPartitioningTab('logs.otel');
+    await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
-      await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
-    });
+    await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
+  });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await cleanupLlmProxyAndConnector(llmSetup, apiServices);
-      await logsSynthtraceEsClient.clean();
-    });
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await cleanupLlmProxyAndConnector(llmSetup, apiServices);
+    await logsSynthtraceEsClient.clean();
+  });
 
-    test('should show button when AI features are enabled', async ({ page }) => {
-      const button = page.getByTestId('streamsAppGenerateSuggestionButton');
-      await expect(button).toBeVisible();
-      await expect(button).toContainText('Get partitions suggestions');
-    });
+  test('should show button when AI features are enabled', async ({ page }) => {
+    const button = page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeVisible();
+    await expect(button).toContainText('Get partitions suggestions');
+  });
 
-    test('should disable button when no connector is selected', async ({ page }) => {
-      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
-        await route.fulfill({
-          status: 200,
-          body: JSON.stringify({ connectors: [], soEntryFound: false }),
-        });
+  test('should disable button when no connector is selected', async ({ page }) => {
+    await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({ connectors: [], soEntryFound: false }),
       });
-
-      await page.reload();
-
-      const button = page.getByTestId('streamsAppGenerateSuggestionButton');
-      await expect(button).toBeHidden();
     });
 
-    test('should show connector dropdown when multiple connectors exist', async ({ page }) => {
-      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
-        await route.fulfill({
-          status: 200,
-          body: JSON.stringify({
-            connectors: [
-              {
-                connectorId: 'test-connector-1',
-                name: 'Test Connector 1',
-                type: '.gen-ai',
-                config: {},
-                capabilities: {},
-                isPreconfigured: false,
-                isInferenceEndpoint: false,
-              },
-              {
-                connectorId: 'test-connector-2',
-                name: 'Test Connector 2',
-                type: '.gen-ai',
-                config: {},
-                capabilities: {},
-                isPreconfigured: false,
-                isInferenceEndpoint: false,
-              },
-            ],
-            allConnectors: [],
-            soEntryFound: false,
-          }),
-        });
+    await page.reload();
+
+    const button = page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeHidden();
+  });
+
+  test('should show connector dropdown when multiple connectors exist', async ({ page }) => {
+    await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({
+          connectors: [
+            {
+              connectorId: 'test-connector-1',
+              name: 'Test Connector 1',
+              type: '.gen-ai',
+              config: {},
+              capabilities: {},
+              isPreconfigured: false,
+              isInferenceEndpoint: false,
+            },
+            {
+              connectorId: 'test-connector-2',
+              name: 'Test Connector 2',
+              type: '.gen-ai',
+              config: {},
+              capabilities: {},
+              isPreconfigured: false,
+              isInferenceEndpoint: false,
+            },
+          ],
+          allConnectors: [],
+          soEntryFound: false,
+        }),
       });
-
-      await page.reload();
-
-      const moreButton = page.getByTestId('streamsAppAiPickConnectorButton');
-      await expect(moreButton).toBeVisible();
     });
-  }
-);
+
+    await page.reload();
+
+    const moreButton = page.getByTestId('streamsAppAiPickConnectorButton');
+    await expect(moreButton).toBeVisible();
+  });
+});
