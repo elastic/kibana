@@ -14,6 +14,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
+  enableFrequencyClassification: true,
   esqlWhereClause:
     'event.action == "log_on" AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")',
 };

@@ -13,34 +13,32 @@ import { COMPOSITE_PAGE_SIZE } from './constants';
 
 const DEFAULT_FREQUENCY_THRESHOLD = 4;
 
-function buildAccessesEsql(config: RelationshipIntegrationConfig, namespace: string): string {
+function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace: string): string {
   const indexPattern = config.indexPattern(namespace);
   const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
-  const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
   const actorEval =
     config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
   const targetEval =
     config.targetEvalOverride ??
     euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
-  const threshold = config.frequencyThreshold ?? DEFAULT_FREQUENCY_THRESHOLD;
   const additionalTargetFilter = config.additionalTargetFilter
     ? `\n    ${config.additionalTargetFilter}`
     : '';
 
-  return `SET unmapped_fields="nullify";
-FROM ${indexPattern}
-| WHERE ${config.esqlWhereClause}
-    AND event.outcome == "success"
-    AND (${userIdFilter})
-    AND (${hostIdFilter})
-${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
-| WHERE actorUserId IS NOT NULL AND actorUserId != ""
-| EVAL targetEntityId = ${targetEval}
-| MV_EXPAND targetEntityId
-| WHERE targetEntityId IS NOT NULL AND targetEntityId != ""${additionalTargetFilter}
-| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
+  const outcomeFilterLine = config.enableFrequencyClassification
+    ? `    AND event.outcome == "success"\n`
+    : '';
+  const hostIdFilterLine =
+    config.targetEntityType === 'host'
+      ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter('host')})\n`
+      : '';
+
+  const statsClause = config.enableFrequencyClassification
+    ? (() => {
+        const threshold = config.frequencyThreshold ?? DEFAULT_FREQUENCY_THRESHOLD;
+        return `| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
     access_count >= ${threshold}, "accesses_frequently",
     "accesses_infrequently"
@@ -49,52 +47,31 @@ ${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
 | STATS
     accesses_frequently   = VALUES(targets) WHERE access_type == "accesses_frequently",
     accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently"
-  BY actorUserId
-| LIMIT ${COMPOSITE_PAGE_SIZE}`;
-}
-
-function buildCommunicatesWithEsql(
-  config: RelationshipIntegrationConfig,
-  namespace: string
-): string {
-  const indexPattern = config.indexPattern(namespace);
-  const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
-  const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
-  const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
-
-  const hostIdFilterLine =
-    config.targetEntityType === 'host'
-      ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter('host')})\n`
-      : '';
-
-  const actorEval =
-    config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
-
-  const defaultTargetEval = euid.esql.getEuidEvaluation(config.targetEntityType, {
-    withTypeId: true,
-  });
-
-  const targetEval = config.targetEvalOverride ?? defaultTargetEval;
-  const additionalTargetFilter = config.additionalTargetFilter
-    ? `\n    ${config.additionalTargetFilter}`
-    : '';
+  BY actorUserId`;
+      })()
+    : `| STATS ${config.relationshipType} = VALUES(targetEntityId) BY actorUserId`;
 
   return `SET unmapped_fields="nullify";
 FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
-    AND (${userIdFilter})
+${outcomeFilterLine}    AND (${userIdFilter})
 ${hostIdFilterLine}${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
 | WHERE actorUserId IS NOT NULL AND actorUserId != ""
 | EVAL targetEntityId = ${targetEval}
 | MV_EXPAND targetEntityId
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != ""${additionalTargetFilter}
-| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
+${statsClause}
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }
 
 /**
  * Builds the ES|QL query for the given integration config.
- * If esqlQueryOverride is provided, delegates to it directly (azure_auditlogs uses this).
+ *
+ * If esqlQueryOverride is provided, delegates to it directly.
+ * NOTE: overrides must emit columns named `actorUserId` plus either
+ * `accesses_frequently` + `accesses_infrequently` (when enableFrequencyClassification is true)
+ * or `<relationshipType>` (e.g. `communicates_with`) otherwise. Mismatched column names
+ * produce silent empty results.
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
@@ -104,9 +81,5 @@ export const buildTargetsPerActorQuery = (
     return config.esqlQueryOverride(namespace);
   }
 
-  if (config.relationshipType === 'accesses') {
-    return buildAccessesEsql(config, namespace);
-  }
-
-  return buildCommunicatesWithEsql(config, namespace);
+  return buildRelationshipEsql(config, namespace);
 };

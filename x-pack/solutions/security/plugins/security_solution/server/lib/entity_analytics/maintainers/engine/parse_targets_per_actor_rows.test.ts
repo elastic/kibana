@@ -18,13 +18,16 @@ const COMM_COLUMNS = [
   { name: 'communicates_with', type: 'keyword' },
 ];
 
+const ACCESSES_CONFIG = { relationshipType: 'accesses' as const, enableFrequencyClassification: true };
+const COMM_CONFIG = { relationshipType: 'communicates_with' as const };
+
 describe('parseTargetsPerActorRows — accesses', () => {
   it('returns [] for empty values', () => {
-    expect(parseTargetsPerActorRows(ACCESSES_COLUMNS, [], 'accesses')).toEqual([]);
+    expect(parseTargetsPerActorRows(ACCESSES_COLUMNS, [], ACCESSES_CONFIG)).toEqual([]);
   });
 
   it('sets entityId to null when actorUserId is null', () => {
-    const [rec] = parseTargetsPerActorRows(ACCESSES_COLUMNS, [[null, null, null]], 'accesses');
+    const [rec] = parseTargetsPerActorRows(ACCESSES_COLUMNS, [[null, null, null]], ACCESSES_CONFIG);
     expect(rec.entityId).toBeNull();
   });
 
@@ -32,7 +35,7 @@ describe('parseTargetsPerActorRows — accesses', () => {
     const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, null]],
-      'accesses'
+      ACCESSES_CONFIG
     );
     expect(rec.entityId).toBe('user:alice@corp');
   });
@@ -41,7 +44,7 @@ describe('parseTargetsPerActorRows — accesses', () => {
     const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', ['host:D3F5C9B9-web-01', 'host:D3F5C9B9-web-02'], null]],
-      'accesses'
+      ACCESSES_CONFIG
     );
     expect(rec.relationships.accesses_frequently).toEqual([
       'host:D3F5C9B9-web-01',
@@ -53,7 +56,7 @@ describe('parseTargetsPerActorRows — accesses', () => {
     const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, 'host:D3F5C9B9-db-01']],
-      'accesses'
+      ACCESSES_CONFIG
     );
     expect(rec.relationships.accesses_infrequently).toEqual(['host:D3F5C9B9-db-01']);
   });
@@ -62,7 +65,7 @@ describe('parseTargetsPerActorRows — accesses', () => {
     const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, null]],
-      'accesses'
+      ACCESSES_CONFIG
     );
     expect(rec.relationships.accesses_frequently).toEqual([]);
     expect(rec.relationships.accesses_infrequently).toEqual([]);
@@ -74,7 +77,7 @@ describe('parseTargetsPerActorRows — communicates_with', () => {
     const [rec] = parseTargetsPerActorRows(
       COMM_COLUMNS,
       [['user:alice@okta', ['user:bob@okta', 'user:carol@okta']]],
-      'communicates_with'
+      COMM_CONFIG
     );
     expect(rec.relationships.communicates_with).toEqual(['user:bob@okta', 'user:carol@okta']);
   });
@@ -83,7 +86,7 @@ describe('parseTargetsPerActorRows — communicates_with', () => {
     const [rec] = parseTargetsPerActorRows(
       COMM_COLUMNS,
       [['user:alice@okta', null]],
-      'communicates_with'
+      COMM_CONFIG
     );
     expect(rec.entityId).toBe('user:alice@okta');
   });

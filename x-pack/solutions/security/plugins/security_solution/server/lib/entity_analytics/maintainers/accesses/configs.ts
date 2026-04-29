@@ -16,6 +16,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
+    enableFrequencyClassification: true,
     esqlWhereClause: `event.action == "log_on"
     AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")`,
     compositeAggAdditionalFilters: [{ term: { 'event.action': 'log_on' } }],
@@ -26,6 +27,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
+    enableFrequencyClassification: true,
     esqlWhereClause: `event.module == "aws"
     AND event.action IN ("StartSession", "SendSSHPublicKey")`,
     compositeAggAdditionalFilters: [
@@ -38,6 +40,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-system.auth-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
+    enableFrequencyClassification: true,
     esqlWhereClause: `event.category IN ("authentication", "session")
     AND event.action == "ssh_login"`,
     compositeAggAdditionalFilters: [{ term: { 'event.action': 'ssh_login' } }],
@@ -48,6 +51,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: (ns) => `logs-system.security-${ns}`,
     relationshipType: 'accesses',
     targetEntityType: 'host',
+    enableFrequencyClassification: true,
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")

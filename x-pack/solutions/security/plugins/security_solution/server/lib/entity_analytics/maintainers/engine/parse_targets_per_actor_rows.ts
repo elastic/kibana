@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RelationshipType, ProcessedEngineRecord } from './types';
+import type { RelationshipIntegrationConfig, ProcessedEngineRecord } from './types';
 
 interface EsqlColumn {
   name: string;
@@ -22,7 +22,7 @@ function toStringArray(value: unknown): string[] {
 export const parseTargetsPerActorRows = (
   columns: EsqlColumn[],
   values: unknown[][],
-  relationshipType: RelationshipType
+  config: Pick<RelationshipIntegrationConfig, 'relationshipType' | 'enableFrequencyClassification'>
 ): ProcessedEngineRecord[] => {
   return values.map((row): ProcessedEngineRecord => {
     const record: Record<string, unknown> = {};
@@ -32,7 +32,7 @@ export const parseTargetsPerActorRows = (
 
     const actorUserId = record.actorUserId != null ? String(record.actorUserId) : null;
 
-    if (relationshipType === 'accesses') {
+    if (config.enableFrequencyClassification) {
       return {
         entityId: actorUserId,
         entityType: 'user' as const,
@@ -47,7 +47,7 @@ export const parseTargetsPerActorRows = (
       entityId: actorUserId,
       entityType: 'user' as const,
       relationships: {
-        communicates_with: toStringArray(record.communicates_with),
+        [config.relationshipType]: toStringArray(record[config.relationshipType]),
       },
     };
   });

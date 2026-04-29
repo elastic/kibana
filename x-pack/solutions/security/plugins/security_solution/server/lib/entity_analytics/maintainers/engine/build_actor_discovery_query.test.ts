@@ -14,6 +14,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-test-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
+  enableFrequencyClassification: true,
   esqlWhereClause: 'event.action == "log_on"',
 };
 

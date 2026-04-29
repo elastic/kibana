@@ -151,7 +151,7 @@ export const runGenericMaintainer = async ({
 
       const { columns, values } = esqlResult as unknown as EsqlQueryResult;
       if (columns && values) {
-        const records = parseTargetsPerActorRows(columns, values, config.relationshipType);
+        const records = parseTargetsPerActorRows(columns, values, config);
         totalRecords += records.length;
         allRecords.push(...records);
         logger.debug(`[${config.id}] Produced ${records.length} records`);

@@ -79,8 +79,15 @@ export interface RelationshipIntegrationConfig {
    */
   esqlQueryOverride?: (namespace: string) => string;
   /**
+   * When true, the engine classifies targets into accesses_frequently / accesses_infrequently
+   * buckets by access count, applies event.outcome == "success" pre-filtering, and requires
+   * the target entity to be present in the entity store.
+   * Set this for accesses-type relationships. Default: false.
+   */
+  enableFrequencyClassification?: boolean;
+  /**
    * Frequency threshold for accesses_frequently vs accesses_infrequently classification.
-   * Only used when relationshipType === 'accesses'. Default: 4.
+   * Only used when enableFrequencyClassification is true. Default: 4.
    */
   frequencyThreshold?: number;
 }
