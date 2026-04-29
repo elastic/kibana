@@ -37,8 +37,14 @@ const isMetricEmpty = (metric: BasicMetricPanel['metric']): boolean => {
   return false;
 };
 
-type BasicMetricPanelProps = Omit<BasicMetricPanel, 'type'>;
-const BasicMetricPanel = ({ title, metric, isError = false }: BasicMetricPanelProps) => {
+interface BasicMetricPanelProps {
+  type: BasicMetricPanelType;
+  title: string;
+  metric?: string | number | Array<string | undefined> | undefined;
+  isError?: boolean;
+}
+
+const BasicMetricPanel = ({ type, title, metric, isError = false }: BasicMetricPanelProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (!isError && isMetricEmpty(metric)) {
@@ -51,6 +57,7 @@ const BasicMetricPanel = ({ title, metric, isError = false }: BasicMetricPanelPr
       css={css({
         padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
       })}
+      data-test-subj={`searchHomepageMetricBadge-${type}`}
     >
       <EuiText size="s">
         <EuiTextColor color="subdued">{title}</EuiTextColor>
@@ -132,10 +139,11 @@ export const BasicMetricBadges = () => {
       : []),
   ];
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" data-test-subj="searchHomepageMetricBadges">
       {basicPanels.map((panel) => {
         return (
           <BasicMetricPanel
+            type={panel.type}
             title={panel.title}
             metric={panel.metric}
             key={panel.type}
