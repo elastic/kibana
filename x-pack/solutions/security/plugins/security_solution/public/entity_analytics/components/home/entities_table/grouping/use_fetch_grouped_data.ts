@@ -32,6 +32,7 @@ export interface TargetEntityMetadata {
   name: string;
   type: EntityType;
   riskScore: number | null;
+  individualRiskScore: number | null;
 }
 
 export type TargetMetadataMap = Map<string, TargetEntityMetadata>;
@@ -43,6 +44,9 @@ interface TargetEntitySource {
     id?: string;
     name?: string;
     EngineMetadata?: { Type?: EntityType };
+    risk?: {
+      calculated_score_norm?: number;
+    };
     relationships?: {
       resolution?: {
         risk?: {
@@ -56,13 +60,14 @@ interface TargetEntitySource {
 export const parseTargetMetadataHits = (hits: Array<{ _source?: unknown }>): TargetMetadataMap => {
   const result: TargetMetadataMap = new Map();
   for (const hit of hits) {
-    const { id, name, EngineMetadata, relationships } =
+    const { id, name, EngineMetadata, risk, relationships } =
       (hit._source as TargetEntitySource)?.entity ?? {};
     const type = EngineMetadata?.Type;
     const riskScore = relationships?.resolution?.risk?.calculated_score_norm ?? null;
+    const individualRiskScore = risk?.calculated_score_norm ?? null;
 
     if (id && name && type) {
-      result.set(id, { name, type, riskScore });
+      result.set(id, { name, type, riskScore, individualRiskScore });
     }
   }
   return result;
@@ -148,6 +153,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
               ENTITY_FIELDS.ENTITY_ID,
               ENTITY_FIELDS.ENTITY_NAME,
               ENTITY_FIELDS.ENTITY_TYPE,
+              ENTITY_FIELDS.ENTITY_RISK,
               ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
             ],
             query: {

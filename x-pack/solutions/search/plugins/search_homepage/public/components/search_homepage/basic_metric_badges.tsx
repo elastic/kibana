@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiBadge,
@@ -21,6 +21,8 @@ import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useStats } from '../../hooks/api/use_stats';
 import { useAgentCount } from '../../hooks/api/use_agent_count';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 const BASIC_METRIC_PANEL_TYPES = ['indices', 'storage', 'agentBuilder', 'discover'] as const;
 
@@ -83,6 +85,40 @@ export const BasicMetricBadges = () => {
     isError: isErrorDashboards,
   } = useDashboardsStats();
   const { tools, agents, isLoading: isLoadingAgents, isError: isErrorAgents } = useAgentCount();
+  const usageTracker = useUsageTracker();
+
+  useEffect(() => {
+    if (isErrorStorageStats) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_storage`,
+      ]);
+    }
+  }, [isErrorStorageStats, usageTracker]);
+  useEffect(() => {
+    if (isErrorIndicesStats) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_indices`,
+      ]);
+    }
+  }, [isErrorIndicesStats, usageTracker]);
+  useEffect(() => {
+    if (isErrorDashboards) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_dashboards`,
+      ]);
+    }
+  }, [isErrorDashboards, usageTracker]);
+  useEffect(() => {
+    if (isErrorAgents) {
+      usageTracker.count([
+        AnalyticsEvents.metricFetchFailed,
+        `${AnalyticsEvents.metricFetchFailed}_agents`,
+      ]);
+    }
+  }, [isErrorAgents, usageTracker]);
 
   const basicPanels: Array<BasicMetricPanel> = [
     {

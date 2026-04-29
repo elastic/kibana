@@ -153,12 +153,10 @@ export class WorkflowsPlugin
         })
       )
       .subscribe(() => {
-        core.http
-          .post('/internal/workflows/disable_all_workflows', { version: '1' })
-          .catch((err) => {
-            // eslint-disable-next-line no-console
-            console.error('Failed to disable all workflows on opt-out:', err);
-          });
+        core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to disable space workflows on opt-out:', err);
+        });
       });
   }
 
