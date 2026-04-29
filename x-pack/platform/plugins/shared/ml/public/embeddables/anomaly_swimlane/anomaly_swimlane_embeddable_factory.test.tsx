@@ -11,9 +11,10 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 
 // Mock dependencies
 const pluginStartDeps = {

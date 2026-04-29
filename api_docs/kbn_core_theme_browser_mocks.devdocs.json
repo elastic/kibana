@@ -73,6 +73,7 @@
                 "lineNumber": 29,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreTheme",
                 "trackAdoption": false
               }
             ]
@@ -112,6 +113,7 @@
                 "lineNumber": 29,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreTheme",
                 "trackAdoption": false
               }
             ]
@@ -172,6 +174,7 @@
                 "lineNumber": 25,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreTheme",
                 "trackAdoption": false
               }
             ]

@@ -751,6 +751,7 @@
                 "lineNumber": 20,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -983,6 +984,7 @@
                 "lineNumber": 42,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "EuiListTestHarnessOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1052,6 +1054,7 @@
                 "lineNumber": 58,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1069,6 +1072,7 @@
                 "lineNumber": 58,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1162,6 +1166,7 @@
                 "lineNumber": 99,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1249,6 +1254,7 @@
                 "lineNumber": 22,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Root",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1875,6 +1881,7 @@
                 "lineNumber": 27,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Root",
                 "trackAdoption": false,
                 "isRequired": true
               }
