@@ -10,7 +10,15 @@
 import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPageBody, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiPageBody,
+  EuiPageHeader,
+  EuiSpacer,
+  useEuiTheme,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 
@@ -70,7 +78,7 @@ export const ManagementLandingPage = ({
 
   if (cardsNavigationConfig?.enabled) {
     return (
-      <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
+      <EuiPageBody restrictWidth={false} data-test-subj="cards-navigation-page">
         <CardsNavigation
           sections={sections}
           appBasePath={appBasePath}
@@ -84,11 +92,31 @@ export const ManagementLandingPage = ({
   if (!chromeStyle) return null;
 
   if (chromeStyle === 'project') {
-    return <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />;
+    return (
+      <EuiPageBody restrictWidth={false}>
+        <EuiPageHeader
+          bottomBorder
+          data-test-subj="managementLandingPageHeader"
+          pageTitle={i18n.translate('management.landing.pageTitle', {
+            defaultMessage: 'Management',
+          })}
+        />
+        <EuiSpacer size="l" />
+        <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />
+      </EuiPageBody>
+    );
   }
 
   return (
-    <EuiPageBody restrictWidth={true}>
+    <EuiPageBody restrictWidth={false}>
+      <EuiPageHeader
+        bottomBorder
+        data-test-subj="managementLandingPageHeader"
+        pageTitle={i18n.translate('management.landing.pageTitle', {
+          defaultMessage: 'Management',
+        })}
+      />
+      <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           {shouldShowAutoOpsPromotion && (

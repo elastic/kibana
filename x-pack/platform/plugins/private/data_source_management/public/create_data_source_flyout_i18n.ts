@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 /** Localized strings for the create data source flyout. */
 export const createDataSourceFlyoutStrings = {
   title: () =>
-    i18n.translate('dataSourceManagement.createFlyout.title', {
-      defaultMessage: 'Add data source',
+    i18n.translate('dataSourceManagement.createFlyout.connectExternalTitle', {
+      defaultMessage: 'Connect external data source',
     }),
 
   nameRequired: () =>
@@ -47,5 +47,11 @@ export const createDataSourceFlyoutStrings = {
   saveButton: () =>
     i18n.translate('dataSourceManagement.createFlyout.saveButton', {
       defaultMessage: 'Save',
+    }),
+
+  /** Full-page connect flow uses Cancel; flyout keeps Close. */
+  pageCancelButton: () =>
+    i18n.translate('dataSourceManagement.createFlyout.pageCancelButton', {
+      defaultMessage: 'Cancel',
     }),
 };

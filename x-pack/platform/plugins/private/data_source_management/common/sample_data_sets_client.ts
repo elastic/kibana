@@ -20,9 +20,27 @@ const INITIAL_ROWS: DataSetListItem[] = [
     sourceName: 'logs-production',
   },
   {
+    id: 'set-prod-slo',
+    name: 'production-slo-burn',
+    description: 'SLO and error-budget views backed by the same production log indices.',
+    sourceName: 'logs-production',
+  },
+  {
+    id: 'set-prod-audit',
+    name: 'audit-trail-readonly',
+    description: 'Compliance dashboards that query immutable audit indices on this connection.',
+    sourceName: 'logs-production',
+  },
+  {
     id: 'set-security',
     name: 'security-analytics-bundle',
     description: 'Detection content that reads from the dedicated security analytics cluster.',
+    sourceName: 'security-analytics',
+  },
+  {
+    id: 'set-security-ti',
+    name: 'threat-intel-enrichment',
+    description: 'Indicator feeds and enrichments stored alongside detection rules.',
     sourceName: 'security-analytics',
   },
   {
@@ -32,9 +50,21 @@ const INITIAL_ROWS: DataSetListItem[] = [
     sourceName: 'reporting-archive',
   },
   {
+    id: 'set-reports-exec',
+    name: 'executive-summary-packs',
+    description: 'Curated monthly PDF bundles for leadership reviews.',
+    sourceName: 'reporting-archive',
+  },
+  {
     id: 'set-staging',
     name: 'staging-validation',
     description: 'Pre-release checks against staging metrics before promoting to production.',
+    sourceName: 'staging-metrics',
+  },
+  {
+    id: 'set-staging-load',
+    name: 'load-test-artifacts',
+    description: 'Synthetic traffic runs and saved objects used during perf experiments.',
     sourceName: 'staging-metrics',
   },
 ];
@@ -51,5 +81,15 @@ export class SampleDataSetsClient {
 
   public async get(): Promise<DataSetListItem[]> {
     return cloneRows(this.rows);
+  }
+
+  public async delete(ids: string[]): Promise<void> {
+    const idSet = new Set(ids);
+    this.rows = this.rows.filter((row) => !idSet.has(row.id));
+  }
+
+  /** Removes every data set tied to a given source name (e.g. when the source is deleted). */
+  public async deleteBySourceName(sourceName: string): Promise<void> {
+    this.rows = this.rows.filter((row) => row.sourceName !== sourceName);
   }
 }
