@@ -6,6 +6,11 @@ description: >-
   and either recommends closing or implements a fix with a linked pull request.
 on:
   workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to process"
+        required: true
+        type: string
   issues:
     types: [opened, labeled]
   status-comment: true
@@ -31,8 +36,14 @@ on:
           let reason = '';
 
           if (eventName === 'workflow_dispatch') {
-            eligible = true;
-            reason = 'Manual workflow_dispatch trigger.';
+            const inputNumber = context.payload.inputs?.issue_number ?? '';
+            if (!inputNumber || !/^\d+$/.test(inputNumber)) {
+              eligible = false;
+              reason = `workflow_dispatch requires a valid issue_number input; got '${inputNumber}'.`;
+            } else {
+              eligible = true;
+              reason = `Manual workflow_dispatch for issue #${inputNumber}.`;
+            }
           } else if (eventName !== 'issues') {
             reason = `Unsupported event '${eventName}'; expected 'issues' or 'workflow_dispatch'.`;
           } else if (eventAction === 'labeled' && labelName === FACTORY_LABEL) {
@@ -52,11 +63,25 @@ on:
 
     - name: Capture issue context
       id: capture_issue_context
+      if: steps.qualify_trigger.outputs.event_eligible == 'true'
       uses: actions/github-script@v9
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          core.setOutput('issue_body', context.payload.issue?.body ?? '');
+          let issue = context.payload.issue;
+          if (!issue && context.eventName === 'workflow_dispatch') {
+            const num = parseInt(context.payload.inputs?.issue_number, 10);
+            const { data } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: num,
+            });
+            issue = data;
+          }
+          core.setOutput('issue_number', String(issue?.number ?? ''));
+          core.setOutput('issue_title', issue?.title ?? '');
+          core.setOutput('issue_body', issue?.body ?? '');
+          core.setOutput('issue_author', issue?.user?.login ?? '');
 
     - name: Check actor trust
       id: check_actor_trust
@@ -76,17 +101,38 @@ on:
             core.setOutput('actor_trusted_reason', 'github-actions[bot] is trusted.');
             return;
           }
-          const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+          const { data: senderPerm } = await github.rest.repos.getCollaboratorPermissionLevel({
             owner: context.repo.owner,
             repo: context.repo.repo,
             username: sender,
           });
-          const trusted = ['write', 'maintain', 'admin'].includes(data.permission);
+          const senderTrusted = ['write', 'maintain', 'admin'].includes(senderPerm.permission);
+          if (!senderTrusted) {
+            core.setOutput('actor_trusted', 'false');
+            core.setOutput('actor_trusted_reason',
+              `Sender '${sender}' not trusted; permission '${senderPerm.permission}'.`);
+            return;
+          }
+
+          const issueAuthor = context.payload.issue?.user?.login
+            ?? '${{ steps.capture_issue_context.outputs.issue_author }}';
+          if (!issueAuthor) {
+            core.setOutput('actor_trusted', 'false');
+            core.setOutput('actor_trusted_reason', 'Issue author login missing from payload.');
+            return;
+          }
+          const { data: authorPerm } = await github.rest.repos.getCollaboratorPermissionLevel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            username: issueAuthor,
+          });
+          const authorTrusted = ['read', 'triage', 'write', 'maintain', 'admin'].includes(authorPerm.permission);
+          const trusted = senderTrusted && authorTrusted;
           core.setOutput('actor_trusted', trusted ? 'true' : 'false');
           core.setOutput('actor_trusted_reason',
             trusted
-              ? `Actor '${sender}' trusted with '${data.permission}' permission.`
-              : `Actor '${sender}' not trusted; permission '${data.permission}'.`
+              ? `Sender '${sender}' (${senderPerm.permission}) and author '${issueAuthor}' (${authorPerm.permission}) trusted.`
+              : `Author '${issueAuthor}' not trusted; permission '${authorPerm.permission}'.`
           );
 
     - name: Check duplicate PR
@@ -99,7 +145,8 @@ on:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { owner, repo } = context.repo;
-          const issueNumber = context.payload.issue?.number;
+          const issueNumber = context.payload.issue?.number
+            ?? parseInt('${{ steps.capture_issue_context.outputs.issue_number }}', 10);
           const expectedBranch = `backlog-groom/issue-${issueNumber}`;
 
           const pulls = await github.paginate(github.rest.pulls.list, {
@@ -112,7 +159,7 @@ on:
             pr.state === 'open' &&
             pr.head.ref === expectedBranch &&
             pr.labels.some(l => l.name === 'backlog-groom') &&
-            /Closes #\d+/.test(pr.body ?? '')
+            new RegExp(`Closes #${issueNumber}`).test(pr.body ?? '')
           );
 
           core.setOutput('duplicate_pr_found', duplicate ? 'true' : 'false');
@@ -140,32 +187,29 @@ jobs:
     outputs:
       event_eligible: ${{ steps.qualify_trigger.outputs.event_eligible }}
       event_eligible_reason: ${{ steps.qualify_trigger.outputs.event_eligible_reason }}
+      issue_number: ${{ steps.capture_issue_context.outputs.issue_number }}
+      issue_title: ${{ steps.capture_issue_context.outputs.issue_title }}
       issue_body: ${{ steps.capture_issue_context.outputs.issue_body }}
+      issue_author: ${{ steps.capture_issue_context.outputs.issue_author }}
       actor_trusted: ${{ steps.check_actor_trust.outputs.actor_trusted }}
       actor_trusted_reason: ${{ steps.check_actor_trust.outputs.actor_trusted_reason }}
       duplicate_pr_found: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_found }}
       duplicate_pr_url: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_url }}
-# --- ENGINE CONFIGURATION ---
-# POC: Uses the default Copilot engine (no secrets needed).
-# To switch to Claude via LiteLLM for elastic/kibana, uncomment the block below
-# and remove the comment markers.
-#
-# engine:
-#   id: claude
-#   model: "llm-gateway/claude-sonnet-4-6"
-#   env:
-#     ANTHROPIC_BASE_URL: "https://elastic.litellm-prod.ai/"
-#     ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_LITELLM_PROXY_API_KEY }}
-# --- END ENGINE CONFIGURATION ---
+engine:
+  id: claude
+  model: "llm-gateway/claude-sonnet-4-6"
+  env:
+    ANTHROPIC_BASE_URL: "https://elastic.litellm-prod.ai/"
+    ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_LITELLM_PROXY_API_KEY }}
 tools:
   github:
     toolsets: [issues, pull_requests, repos]
 network:
-  allowed: [defaults, node]
-  # When switching to LiteLLM, add: elastic.litellm-prod.ai
+  allowed: [defaults, node, elastic.litellm-prod.ai]
 checkout:
   fetch-depth: 0
 safe-outputs:
+  staged: true
   create-pull-request:
     labels: [backlog-groom]
     max: 1
