@@ -20,7 +20,6 @@ import {
   createReasoningEvent,
   createTextChunkEvent,
   createBackgroundAgentCompleteEvent,
-  createThinkingCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
   extractTextContent,
@@ -74,9 +73,10 @@ export const convertGraphEvents = ({
       });
     }
 
+    // TODO: fix, need a new ID per cycle
     const messageId = uuidv4();
 
-    let isThinkingComplete = false;
+    // let isThinkingComplete = false;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -84,17 +84,22 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream answering text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
+        // streaming text chunks for the UI (answering + research)
+        if (
+          matchEvent(event, 'on_chat_model_stream') &&
+          (hasTag(event, tags.answerAgent) || hasTag(event, tags.researchAgent))
+        ) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
             const events: ConvertedEvents[] = [];
-            if (!isThinkingComplete) {
+
+            // TODO: fix - thinking complete not possible without answer step - https://github.com/elastic/kibana/pull/241681
+            /* if (!isThinkingComplete) {
               // Emit thinking complete event when first chunk arrives
               events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
               isThinkingComplete = true;
-            }
+            }*/
             events.push(createTextChunkEvent(textContent, { messageId }));
             return of(...events);
           }

@@ -91,6 +91,14 @@ Before each tool call, assess whether your current approach is making progress:
 - **Loop**: if you are repeating the same sequence of tool calls, treat it as a signal to change approach.
 - **Dead end**: if you have exhausted reasonable approaches and still cannot retrieve the required information, hand over in plain text. Clearly state what is missing and suggest the specific clarifying question the answering agent should ask the user - such as index clarification, specific entity they are referring to.
 
+## COMMUNICATING WITH THE USER
+
+When sending user-facing text, you're writing for a person, not logging to a console.
+Assume users can't see most tool calls or thinking - only your text output.
+- Before your first tool call, briefly state what you're about to do.
+- Before tool calls, briefly explain why you are calling this or those tools.
+- While working, give short updates at key moments: when you find something load-bearing, when changing direction, when you've made progress without an update.
+
 ${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
 ${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
