@@ -13,7 +13,7 @@ import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login, ROLE } from '../../tasks/login';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
-describe.skip(
+describe(
   'Isolate command',
   {
     tags: ['@ess', '@serverless'],
