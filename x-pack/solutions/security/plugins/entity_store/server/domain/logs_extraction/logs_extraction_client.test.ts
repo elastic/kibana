@@ -67,6 +67,7 @@ import {
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 
 function createMockCcsLogsExtractionClient(): jest.Mocked<
   Pick<CcsLogsExtractionClient, 'extractToUpdates'>
@@ -1235,6 +1236,193 @@ describe('LogsExtractionClient', () => {
       const result = await client.getRemainingLogsCount('user');
 
       expect(result).toBe(100);
+    });
+  });
+
+  describe('extractLogsForDefinition', () => {
+    const blankPaginationState = {
+      paginationTimestamp: null,
+      paginationId: null,
+      lastExecutionTimestamp: null,
+      logsPageCursorStartTimestamp: null,
+      logsPageCursorStartId: null,
+      logsPageCursorEndTimestamp: null,
+      logsPageCursorEndId: null,
+    };
+
+    const buildSyntheticDefinition = () => {
+      return getEntityDefinition('generic', 'default');
+    };
+
+    const buildConfig = () =>
+      LogExtractionConfig.parse({
+        docsLimit: 10000,
+        additionalIndexPatterns: [],
+        lookbackPeriod: '3h',
+        delay: '1m',
+      });
+
+    it('drives the extraction loop using only caller-provided index patterns and never touches the engine descriptor', async () => {
+      const lastTimestamp = '2024-01-02T12:00:00.000Z';
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'entity.id', type: 'keyword' },
+        ],
+        values: [
+          ['2024-01-02T10:00:00.000Z', 'hash1', 'pod-1'],
+          [lastTimestamp, 'hash2', 'pod-2'],
+        ],
+      };
+
+      mockExtractSuccessSequence(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const persistState = jest.fn().mockResolvedValue(undefined);
+
+      const result = await client.extractLogsForDefinition({
+        entityDefinition: buildSyntheticDefinition(),
+        paginationState: blankPaginationState,
+        config: buildConfig(),
+        indexPatterns: { localIndexPatterns: ['logs.k8s.pods'], remoteIndexPatterns: [] },
+        persistState,
+      });
+
+      expect(result.count).toBe(2);
+      expect(result.pages).toBeGreaterThan(0);
+      expect(result.scannedIndices).toEqual(['logs.k8s.pods']);
+      expect(result.updatedState).toEqual({
+        paginationTimestamp: null,
+        paginationId: null,
+        logsPageCursorStartTimestamp: null,
+        logsPageCursorStartId: null,
+        logsPageCursorEndTimestamp: null,
+        logsPageCursorEndId: null,
+        lastExecutionTimestamp: expect.any(String),
+      });
+      expect(result.lastSearchTimestamp).toBeTruthy();
+      expect(result.ccsError).toBeUndefined();
+
+      // Definition-agnostic: must not touch the engine descriptor.
+      expect(mockEngineDescriptorClient.findOrThrow).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+
+      // Index-pattern resolution: must not consult the data view; callers own the patterns.
+      expect(mockDataViewsService.get).not.toHaveBeenCalled();
+
+      // persistState is invoked with intermediate (not final-reset) state.
+      expect(persistState).toHaveBeenCalled();
+      const lastIntermediate = persistState.mock.calls.at(-1)?.[0];
+      expect(lastIntermediate).toBeDefined();
+      // Intermediate state has the slice cursor advanced; final reset has it null.
+      // We only assert that what was persisted is a valid state object distinct from the
+      // returned reset (final reset is not persisted via callback).
+      expect(lastIntermediate.paginationId).toBeNull();
+    });
+
+    it('does not invoke persistState when opts.specificWindow is set (manual-window semantics)', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'entity.id', type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'pod-1']],
+      };
+
+      mockExtractSuccessSequence(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const persistState = jest.fn().mockResolvedValue(undefined);
+
+      const result = await client.extractLogsForDefinition({
+        entityDefinition: buildSyntheticDefinition(),
+        paginationState: blankPaginationState,
+        config: buildConfig(),
+        indexPatterns: { localIndexPatterns: ['logs.k8s.pods'], remoteIndexPatterns: [] },
+        opts: {
+          specificWindow: {
+            fromDateISO: '2024-01-01T00:00:00.000Z',
+            toDateISO: '2024-01-02T13:00:00.000Z',
+          },
+        },
+        persistState,
+      });
+
+      expect(persistState).not.toHaveBeenCalled();
+      expect(result.count).toBe(1);
+    });
+
+    it('runs the CCS extractor in parallel when remote index patterns are provided and surfaces ccsError', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'entity.id', type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'pod-1']],
+      };
+
+      mockExtractSuccessSequence(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const ccsBoom = new Error('CCS unreachable');
+      mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
+        count: 0,
+        pages: 0,
+        error: ccsBoom,
+      } as unknown as Awaited<ReturnType<CcsLogsExtractionClient['extractToUpdates']>>);
+
+      const result = await client.extractLogsForDefinition({
+        entityDefinition: buildSyntheticDefinition(),
+        paginationState: blankPaginationState,
+        config: buildConfig(),
+        indexPatterns: {
+          localIndexPatterns: ['logs.k8s.pods'],
+          remoteIndexPatterns: ['cluster_b:logs-*'],
+        },
+      });
+
+      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          remoteIndexPatterns: ['cluster_b:logs-*'],
+          entityDefinition: expect.objectContaining({ type: 'generic' }),
+        })
+      );
+      expect(result.scannedIndices).toEqual(['logs.k8s.pods', 'cluster_b:logs-*']);
+      expect(result.ccsError).toBe(ccsBoom);
+    });
+
+    it('propagates errors from the extraction loop to the caller (no engine-descriptor mutation)', async () => {
+      mockExecuteEsqlQuery.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        client.extractLogsForDefinition({
+          entityDefinition: buildSyntheticDefinition(),
+          paginationState: blankPaginationState,
+          config: buildConfig(),
+          indexPatterns: { localIndexPatterns: ['logs.k8s.pods'], remoteIndexPatterns: [] },
+        })
+      ).rejects.toThrow('boom');
+
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws when the computed extraction window has from after to (validateExtractionWindow)', async () => {
+      const futureFromState = {
+        ...blankPaginationState,
+        paginationTimestamp: '2099-01-01T00:00:00.000Z',
+      };
+
+      await expect(
+        client.extractLogsForDefinition({
+          entityDefinition: buildSyntheticDefinition(),
+          paginationState: futureFromState,
+          config: buildConfig(),
+          indexPatterns: { localIndexPatterns: ['logs.k8s.pods'], remoteIndexPatterns: [] },
+        })
+      ).rejects.toThrow(/From .* date is after to .* date/);
     });
   });
 });

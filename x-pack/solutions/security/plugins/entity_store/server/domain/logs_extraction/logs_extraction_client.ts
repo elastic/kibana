@@ -132,23 +132,29 @@ export class LogsExtractionClient {
 
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const delayMs = parseDurationToMs(config.delay);
+      const indexPatterns = await this.getLocalAndRemoteIndexPatterns(
+        config.additionalIndexPatterns
+      );
       const entityDefinition = getEntityDefinition(type, this.namespace);
-      const { count, pages, indexPatterns, lastSearchTimestamp, ccsError } =
-        await this.runQueryAndIngestDocs({
-          type,
-          config,
-          engineState,
-          opts,
-          delayMs,
-          entityDefinition,
-        });
+
+      const persistState = async (state: EngineLogExtractionState) => {
+        await this.engineDescriptorClient.update(type, { logExtractionState: state });
+      };
+
+      const result = await this.extractLogsForDefinition({
+        entityDefinition,
+        paginationState: engineState,
+        config,
+        indexPatterns,
+        opts,
+        persistState,
+      });
 
       const operationResult = {
         success: true as const,
-        count,
-        pages,
-        scannedIndices: indexPatterns,
+        count: result.count,
+        pages: result.pages,
+        scannedIndices: result.scannedIndices,
       };
 
       if (opts?.specificWindow) {
@@ -156,16 +162,8 @@ export class LogsExtractionClient {
       }
 
       await this.engineDescriptorClient.update(type, {
-        logExtractionState: {
-          paginationTimestamp: null,
-          paginationId: null,
-          logsPageCursorStartTimestamp: null,
-          logsPageCursorStartId: null,
-          logsPageCursorEndTimestamp: null,
-          logsPageCursorEndId: null,
-          lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
-        },
-        error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+        logExtractionState: result.updatedState,
+        error: result.ccsError ? { message: result.ccsError.message, action: 'extractLogs' } : null,
       });
 
       return operationResult;
@@ -220,41 +218,69 @@ export class LogsExtractionClient {
     }
   }
 
-  private async runQueryAndIngestDocs({
-    type,
-    config,
-    engineState,
-    opts,
-    delayMs,
+  /**
+   * Definition-agnostic core: drives the local + CCS extraction pipelines for any
+   * `ManagedEntityDefinition` and lets the caller own pagination-state persistence.
+   *
+   * Used by:
+   * - `extractLogs(type, opts)` for static built-in types (state stored on the
+   *   per-type EngineDescriptor SO);
+   * - the `generic` extract-entity task for stream-derived KI definitions
+   *   (state stored under a `(stream_name, subtype)` key in task state).
+   *
+   * Persistence contract:
+   * - `persistState` is invoked after each entity-page write that produces a
+   *   non-null pagination cursor, and after each completed outer log slice
+   *   (with the slice-advanced state).
+   * - `persistState` is NOT invoked with the final "completion reset" state;
+   *   that state is returned as `updatedState` and the caller writes it.
+   * - `persistState` is NOT invoked at all when `opts.specificWindow` is set,
+   *   matching the existing manual-window semantics of `extractLogs`.
+   *
+   * Errors propagate to the caller. The `extractLogs` wrapper translates them
+   * into `{ success: false, error }` and stamps the engine descriptor; the KI
+   * task records them per-group into its own state.
+   */
+  public async extractLogsForDefinition({
     entityDefinition,
+    paginationState,
+    config,
+    indexPatterns,
+    opts,
+    persistState,
   }: {
-    type: EntityType;
-    config: LogExtractionConfig;
-    engineState: EngineLogExtractionState;
-    opts?: LogsExtractionOptions;
-    delayMs: number;
     entityDefinition: ManagedEntityDefinition;
+    paginationState: EngineLogExtractionState;
+    config: LogExtractionConfig;
+    indexPatterns: { localIndexPatterns: string[]; remoteIndexPatterns: string[] };
+    opts?: LogsExtractionOptions;
+    persistState?: (state: EngineLogExtractionState) => Promise<void>;
   }): Promise<{
     count: number;
     pages: number;
-    indexPatterns: string[];
+    scannedIndices: string[];
+    updatedState: EngineLogExtractionState;
     lastSearchTimestamp: string;
     ccsError?: Error;
   }> {
+    const { localIndexPatterns, remoteIndexPatterns } = indexPatterns;
     const { docsLimit, maxLogsPerPage } = config;
-    const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
-      config.additionalIndexPatterns
-    );
+    const delayMs = parseDurationToMs(config.delay);
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const { type } = entityDefinition;
 
     const { fromDateISO, toDateISO } =
-      opts?.specificWindow || this.getExtractionWindow(config, engineState, delayMs);
+      opts?.specificWindow || this.getExtractionWindow(config, paginationState, delayMs);
 
     this.validateExtractionWindow(fromDateISO, toDateISO);
 
+    // Mirror the historical `persistMainLogExtractionStateIfNotManualWindow` gating:
+    // for manual (specificWindow) runs, no mid-run state is persisted.
+    const effectivePersistState = opts?.specificWindow ? undefined : persistState;
+
     const mainPromise = this.runMainExtractionLoop({
       type,
-      engineState,
+      engineState: paginationState,
       opts,
       indexPatterns: localIndexPatterns,
       latestIndex,
@@ -263,7 +289,11 @@ export class LogsExtractionClient {
       docsLimit,
       maxLogsPerPage,
       entityDefinition,
+      persistState: effectivePersistState,
     });
+
+    let mainResult: Awaited<typeof mainPromise>;
+    let ccsError: Error | undefined;
 
     if (remoteIndexPatterns.length > 0) {
       const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
@@ -278,16 +308,31 @@ export class LogsExtractionClient {
         windowOverride: opts?.specificWindow,
       });
 
-      const [mainResult, ccsResult] = await Promise.all([mainPromise, ccsPromise]);
-
-      return {
-        ...mainResult,
-        indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
-        ccsError: ccsResult.error,
-      };
+      const [main, ccs] = await Promise.all([mainPromise, ccsPromise]);
+      mainResult = main;
+      ccsError = ccs.error;
+    } else {
+      mainResult = await mainPromise;
     }
 
-    return await mainPromise;
+    const updatedState: EngineLogExtractionState = {
+      paginationTimestamp: null,
+      paginationId: null,
+      logsPageCursorStartTimestamp: null,
+      logsPageCursorStartId: null,
+      logsPageCursorEndTimestamp: null,
+      logsPageCursorEndId: null,
+      lastExecutionTimestamp: mainResult.lastSearchTimestamp || moment().utc().toISOString(),
+    };
+
+    return {
+      count: mainResult.count,
+      pages: mainResult.pages,
+      scannedIndices: [...localIndexPatterns, ...remoteIndexPatterns],
+      updatedState,
+      lastSearchTimestamp: mainResult.lastSearchTimestamp,
+      ccsError,
+    };
   }
 
   /**
@@ -304,6 +349,7 @@ export class LogsExtractionClient {
     docsLimit,
     maxLogsPerPage,
     entityDefinition,
+    persistState,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -315,6 +361,7 @@ export class LogsExtractionClient {
     docsLimit: number;
     maxLogsPerPage: number;
     entityDefinition: ManagedEntityDefinition;
+    persistState?: (state: EngineLogExtractionState) => Promise<void>;
   }) {
     let totalCount = 0;
     let pages = 0;
@@ -387,6 +434,7 @@ export class LogsExtractionClient {
           entityPagination,
           recoveryId,
           state,
+          persistState,
         });
 
         totalCount += sliceIngestOutcome.addedToTotalCount;
@@ -396,7 +444,7 @@ export class LogsExtractionClient {
         recoveryId = undefined;
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
-        await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        await persistState?.(state);
         isFirstRunInThisCycle = false;
       } while (!lastLogsPages);
     } finally {
@@ -487,6 +535,7 @@ export class LogsExtractionClient {
     entityPagination,
     recoveryId,
     state: initialSliceState,
+    persistState,
   }: {
     type: EntityType;
     opts?: LogsExtractionOptions;
@@ -501,6 +550,7 @@ export class LogsExtractionClient {
     entityPagination: PaginationParams | undefined;
     recoveryId: string | undefined;
     state: EngineLogExtractionState;
+    persistState?: (state: EngineLogExtractionState) => Promise<void>;
   }): Promise<{
     addedToTotalCount: number;
     addedToPageCount: number;
@@ -569,7 +619,7 @@ export class LogsExtractionClient {
           logsPageCursorStartTimestamp: logsPageCursorStart?.timestampCursor ?? null,
           logsPageCursorStartId: logsPageCursorStart?.idCursor ?? null,
         };
-        await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        await persistState?.(state);
       }
     } while (pagination);
 
@@ -593,19 +643,6 @@ export class LogsExtractionClient {
       logsPageCursorStartTimestamp: logsPageCursorEnd.timestampCursor,
       logsPageCursorStartId: logsPageCursorEnd.idCursor,
     };
-  }
-
-  private async persistMainLogExtractionStateIfNotManualWindow(
-    type: EntityType,
-    opts: LogsExtractionOptions | undefined,
-    logExtractionState: Partial<EngineLogExtractionState>
-  ): Promise<void> {
-    if (opts?.specificWindow) {
-      return;
-    }
-    await this.engineDescriptorClient.update(type, {
-      logExtractionState: logExtractionState as EngineLogExtractionState,
-    });
   }
 
   private validateExtractionWindow(fromDateISO: string, toDateISO: string) {
