@@ -1382,6 +1382,6 @@ export class StreamsApp {
     await this.clickDeleteQueryStreamButton();
     await this.fillDeleteQueryStreamModalInput(streamName);
     await this.clickDeleteQueryStreamModalDeleteButton();
-    await expect(this.queryStreamDeletedSuccessToast).toBeVisible();
+    await this.queryStreamDeletedSuccessToast.waitFor({ state: 'visible' });
   }
 }
