@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { FeedBackButton } from './feedback_button';
+require('@kbn/babel-register').install();
+require('./tasks/seed_down_summary').seedDownSummary();
