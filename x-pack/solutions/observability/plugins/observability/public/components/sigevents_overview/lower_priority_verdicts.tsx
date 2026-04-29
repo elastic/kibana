@@ -187,7 +187,9 @@ export function LowerPriorityVerdicts({ verdicts }: LowerPriorityVerdictsProps) 
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink onClick={() => toggleVerdict(item)}>{title}</EuiLink>
+              <EuiLink data-test-subj="o11yColumnsLink" onClick={() => toggleVerdict(item)}>
+                {title}
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         );

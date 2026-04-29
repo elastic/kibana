@@ -129,6 +129,7 @@
             "lineNumber": 21,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ControlGroupRendererProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -364,6 +365,7 @@
                 "lineNumber": 48,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ControlGroupRendererApi",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -465,6 +467,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ControlGroupRuntimeState",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -524,6 +527,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ControlGroupStateBuilder",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1024,6 +1028,7 @@
             "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false
           },
           {
@@ -1113,6 +1118,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1155,6 +1161,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiActionsStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1224,6 +1231,7 @@
                 "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1310,6 +1318,7 @@
                 "lineNumber": 94,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1396,6 +1405,7 @@
                 "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },

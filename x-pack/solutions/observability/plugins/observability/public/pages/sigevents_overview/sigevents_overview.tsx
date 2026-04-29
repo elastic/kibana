@@ -46,6 +46,12 @@ const contentColumnStyles = css`
   min-height: 0;
 `;
 
+const embeddableConversationWrapperStyles = css`
+  [data-test-subj='agentBuilderEmbeddableConversation'] {
+    background: transparent;
+  }
+`;
+
 export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
@@ -264,7 +270,11 @@ export function SigeventsOverviewPage() {
             </EuiFlexItem>
 
             {EmbeddableConversation && (
-              <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
+              <EuiFlexItem
+                grow={true}
+                css={embeddableConversationWrapperStyles}
+                style={{ minHeight: 0 }}
+              >
                 <EmbeddableConversation
                   sessionTag="sigevents"
                   hideWelcomeTitle

@@ -91,6 +91,7 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private isEarsEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -106,6 +107,7 @@ export class AgentBuilderPlugin
     });
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
+    this.isEarsEnabled = deps.actions.isEarsEnabled;
 
     registerApp({
       core,
@@ -221,6 +223,7 @@ export class AgentBuilderPlugin
       usageCollection,
       accessChecker,
       eventsService,
+      isEarsEnabled: this.isEarsEnabled,
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
