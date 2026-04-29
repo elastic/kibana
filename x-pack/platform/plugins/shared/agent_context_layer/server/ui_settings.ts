@@ -16,7 +16,8 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       description: i18n.translate(
         'xpack.agentContextLayer.uiSettings.experimentalFeatures.description',
         {
-          defaultMessage: 'Enables experimental features for the Agent Context Layer.',
+          defaultMessage:
+            'Turns on preview Agent Context Layer behavior, including Semantic Metadata Layer (SML).',
         }
       ),
       name: i18n.translate('xpack.agentContextLayer.uiSettings.experimentalFeatures.name', {
