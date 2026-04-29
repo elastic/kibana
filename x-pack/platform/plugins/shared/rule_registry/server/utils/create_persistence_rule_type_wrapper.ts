@@ -28,6 +28,8 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  CPS_SCOPE_LINKED_PROJECTS,
+  CPS_SCOPE_EXPRESSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
@@ -38,6 +40,7 @@ import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import type { CommonAlertFields870, SuppressionFields870 } from '../../common/schemas';
+import type { CpsData } from '@kbn/alerting-plugin/server';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -62,12 +65,14 @@ const augmentAlerts = async <T>({
   kibanaVersion,
   currentTimeOverride,
   dangerouslyCreateAlertsInAllSpaces,
+  cpsData,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
+  cpsData: CpsData;
 }) => {
   const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
@@ -75,6 +80,10 @@ const augmentAlerts = async <T>({
 
   const currentDate = new Date();
   const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
+
+  const maintenanceWindowIdsField = maintenanceWindowIds.length ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds } : {};
+  const cpsResolvedExpression = cpsData.resolvedExpression ? { [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression } : {};
+  const cpsLinkedProjects = cpsData.linkedProjects.length ? { [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects } : {};
   return alerts.map((alert) => {
     return {
       ...alert,
@@ -83,9 +92,9 @@ const augmentAlerts = async <T>({
         [ALERT_START]: timestampOverrideOrCurrent,
         [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
-        ...(maintenanceWindowIds.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
-          : {}),
+        ...maintenanceWindowIdsField,
+        ...cpsResolvedExpression,
+        ...cpsLinkedProjects,
         ...commonRuleFields,
         ...alert._source,
       },
@@ -261,6 +270,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
     return {
       ...type,
       executor: async (options) => {
+        const cpsData: CpsData = options.cpsData ?? { linkedProjects: [] };
         const result = await type.executor({
           ...options,
           services: {
@@ -320,6 +330,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
                   dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+                  cpsData,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -599,6 +610,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
                   dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+                  cpsData,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
