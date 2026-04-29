@@ -30,6 +30,7 @@ import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
+import { createRuleAttachmentDefinition } from './agent_builder/attachments/rule_attachment_definition';
 
 export type { AlertingV2PublicStart } from './types';
 export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
@@ -66,19 +67,15 @@ export const module = new ContainerModule(({ bind }) => {
       if (experimentalEnabled && diContainer.isBound(agentBuilderToken)) {
         const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
         const rulesApi = diContainer.get(RulesApi);
-        import('./agent_builder/attachments/rule_attachment_definition').then(
-          ({ createRuleAttachmentDefinition }) => {
-            agentBuilder.attachments.addAttachmentType(
-              RULE_ATTACHMENT_TYPE,
-              createRuleAttachmentDefinition({
-                rulesApi,
-                application: coreStart.application,
-                basePath: coreStart.http.basePath,
-                notifications: coreStart.notifications,
-                container: diContainer,
-              })
-            );
-          }
+        agentBuilder.attachments.addAttachmentType(
+          RULE_ATTACHMENT_TYPE,
+          createRuleAttachmentDefinition({
+            rulesApi,
+            application: coreStart.application,
+            basePath: coreStart.http.basePath,
+            notifications: coreStart.notifications,
+            container: diContainer,
+          })
         );
       }
     });
