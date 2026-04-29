@@ -18,6 +18,22 @@ export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
 export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 40000;
 export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '59s';
 
+// Knowledge Indicators (KI) — controls Streams-derived entity extraction.
+//
+// The default for entityMinConfidence is intentionally high (99) so that the
+// KI extraction loop, once wired in by the generic task, has no behavioral
+// effect on existing deployments. Operators must explicitly lower this
+// threshold via the API to opt their tenant into stream-derived entities.
+// This avoids carrying a separate boolean feature flag and a flag-removal
+// PR later: as confidence in the feature grows, we lower the default.
+export const KI_ENTITY_MIN_CONFIDENCE_DEFAULT = 99;
+// Hard upper bound on the number of distinct (stream, subtype) groups the
+// generic task will process per run. Exceeding this triggers a warn log,
+// telemetry, and deterministic truncation (sorted by stream, subtype) so
+// behavior is reproducible. The cap protects task budget against runaway
+// LLM-emitted feature counts.
+export const KI_AGGREGATION_GROUP_CAP_DEFAULT = 200;
+
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
@@ -61,8 +77,15 @@ export const HistorySnapshotState = z.object({
     .optional(),
 });
 
+export type KnowledgeIndicatorsConfig = z.infer<typeof KnowledgeIndicatorsConfig>;
+export const KnowledgeIndicatorsConfig = z.object({
+  entityMinConfidence: z.number().int().min(0).max(100).default(KI_ENTITY_MIN_CONFIDENCE_DEFAULT),
+  aggregationGroupCap: z.number().int().min(1).default(KI_AGGREGATION_GROUP_CAP_DEFAULT),
+});
+
 export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
 export const EntityStoreGlobalState = z.object({
   historySnapshot: HistorySnapshotState,
   logsExtraction: LogExtractionConfig,
+  knowledgeIndicators: KnowledgeIndicatorsConfig,
 });
