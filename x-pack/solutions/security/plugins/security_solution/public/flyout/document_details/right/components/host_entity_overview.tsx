@@ -25,8 +25,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -117,7 +116,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -146,7 +144,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     entityId: storeHostEntityId,
     identityFields,
     entityType: 'host',
-    skip: !entityStoreV2Enabled,
+    skip: false,
   });
   const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
@@ -155,28 +153,24 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     [entityRecord]
   );
 
-  const {
-    data: hostRisk,
-    isAuthorized: isRiskScoreAuthorized,
-    loading: isRiskScoreLoading,
-  } = useRiskScore({
+  const { data: hostRisk, loading: isRiskScoreLoading } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.host,
-    skip: (entityStoreV2Enabled && riskFromEntityRecord != null) || hostName == null,
+    skip: riskFromEntityRecord != null || hostName == null,
     timerange,
   });
   const hostRiskFromSearch = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     hostName,
-    entityId: entityStoreV2Enabled ? storeHostEntityId : undefined,
+    entityId: storeHostEntityId,
     indexNames: selectedPatterns,
     startDate: from,
     endDate: to,
   });
 
   const hostRiskData = useMemo(() => {
-    if (entityStoreV2Enabled && entityRecord) {
+    if (entityRecord) {
       const riskFromRecord = getRiskFromEntityRecord(entityRecord);
       if (riskFromRecord != null) {
         return {
@@ -192,20 +186,17 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       }
     }
     return hostRiskFromSearch;
-  }, [entityStoreV2Enabled, entityRecord, hostName, hostRiskFromSearch]);
+  }, [entityRecord, hostName, hostRiskFromSearch]);
 
   const isRiskScoreExist = !!hostRiskData?.host?.risk;
-  const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
+  const isAuthorized = true;
 
   const hostOSFamilyValue = useMemo(() => {
-    if (entityStoreV2Enabled && entityRecord != null) {
+    if (entityRecord != null) {
       return getField(get(entityRecord, 'host.os.family'));
     }
-    if (entityStoreV2Enabled) {
-      return null;
-    }
     return getField(getOr([], 'host.os.family', hostDetails));
-  }, [entityRecord, entityStoreV2Enabled, hostDetails]);
+  }, [entityRecord, hostDetails]);
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
@@ -222,38 +213,38 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     [hostOSFamilyValue]
   );
 
-  const hostLastSeen: DescriptionList[] = useMemo(
-    () => [
+  const hostLastSeen: DescriptionList[] = useMemo(() => {
+    if (hostName == null || hostName === '') {
+      return [{ title: LAST_SEEN, description: getEmptyTagValue() }];
+    }
+    if (entityFromStore.lastSeen) {
+      return [
+        {
+          title: LAST_SEEN,
+          description: <PreferenceFormattedDateFromPrimitive value={entityFromStore.lastSeen} />,
+        },
+      ];
+    }
+    return [
       {
         title: LAST_SEEN,
-        description:
-          hostName != null && hostName !== '' ? (
-            entityStoreV2Enabled && entityFromStore.lastSeen ? (
-              <PreferenceFormattedDateFromPrimitive value={entityFromStore.lastSeen} />
-            ) : !entityStoreV2Enabled ? (
-              <FirstLastSeen
-                indexPatterns={selectedPatterns}
-                field={HOST_NAME_FIELD_NAME}
-                value={hostName}
-                type={FirstLastSeenType.LAST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            )
-          ) : (
-            getEmptyTagValue()
-          ),
+        description: (
+          <FirstLastSeen
+            indexPatterns={selectedPatterns}
+            field={HOST_NAME_FIELD_NAME}
+            value={hostName}
+            type={FirstLastSeenType.LAST_SEEN}
+          />
+        ),
       },
-    ],
-    [hostName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
-  );
+    ];
+  }, [hostName, selectedPatterns, entityFromStore.lastSeen]);
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const isLoading = entityStoreV2Enabled
-    ? entityFromStore.isLoading || (riskFromEntityRecord == null && isRiskScoreLoading)
-    : isRiskScoreLoading || isHostDetailsLoading;
+  const isLoading =
+    isHostDetailsLoading || (riskFromEntityRecord == null && isRiskScoreLoading);
 
   const [hostRiskLevel] = useMemo(() => {
     const level = hostRiskData?.host?.risk?.calculated_level;
@@ -293,13 +284,11 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const hostCspIdentityDoc = entityRecord ?? identityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: identityFields,
     })
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: identityFields,
     })
   );

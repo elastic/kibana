@@ -138,30 +138,7 @@ describe('<UserEntityOverview />', () => {
     });
   });
 
-  describe('license is not valid', () => {
-    it('should render domain and last seen', () => {
-      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: false });
-      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen }]);
-
-      const { getByTestId, queryByTestId } = renderUserEntityOverview();
-
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent(domain);
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent(lastSeenText);
-      expect(queryByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('should render correctly if returned data is null', () => {
-      mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
-      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
-      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
-
-      const { getByTestId } = renderUserEntityOverview();
-
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent('—');
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
-    });
-
+  describe('loading and preview behavior', () => {
     it('should render loading if user details returns loading as true', () => {
       mockUseUserDetails.mockReturnValue([true, { userDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });

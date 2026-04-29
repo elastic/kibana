@@ -20,8 +20,7 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
@@ -113,7 +112,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -134,11 +132,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const userIdentityFields = useMemo(() => {
     const legacyFields =
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
-    if (!entityStoreV2Enabled) {
-      return legacyFields;
-    }
     return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
-  }, [entityStoreV2Enabled, userName, identityFields]);
+  }, [userName, identityFields]);
 
   const riskScoreFilterQuery = useMemo(
     () => (userName ? (buildUserNamesFilter([userName]) as ESQuery) : undefined),
@@ -152,27 +147,23 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
 
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
     userName,
-    entityId: entityStoreV2Enabled ? entityRecord?.entity?.id : undefined,
+    entityId: entityRecord?.entity?.id,
     endDate: to,
     indexNames: selectedPatterns,
     startDate: from,
-    skip: entityStoreV2Enabled,
+    skip: entityRecord != null,
   });
 
-  const {
-    data: userRisk,
-    isAuthorized: isRiskScoreAuthorized,
-    loading: isRiskScoreLoading,
-  } = useRiskScore({
+  const { data: userRisk, loading: isRiskScoreLoading } = useRiskScore({
     filterQuery: riskScoreFilterQuery,
     riskEntity: EntityType.user,
-    skip: entityStoreV2Enabled,
+    skip: riskFromEntityRecord != null,
     timerange,
   });
   const userRiskFromSearch = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
   const userRiskData = useMemo(() => {
-    if (entityStoreV2Enabled && entityRecord) {
+    if (entityRecord) {
       const riskFromRecord = getRiskFromEntityRecord(entityRecord);
       if (riskFromRecord != null) {
         return {
@@ -188,15 +179,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
       }
     }
     return userRiskFromSearch;
-  }, [entityStoreV2Enabled, entityRecord, userName, userRiskFromSearch]);
+  }, [entityRecord, userName, userRiskFromSearch]);
 
   const isRiskScoreExist = !!userRiskData?.user?.risk;
-  const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
+  const isAuthorized = true;
 
   const userCspIdentityDoc = entityRecord ?? userIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: userIdentityFields,
     })
   );
@@ -221,10 +211,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     contextID: 'UserEntityOverview',
   });
 
-  const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
-    () => getField(getOr([], 'user.domain', userDetailsForDomain)),
-    [userDetailsForDomain]
+    () => getField(getOr([], 'user.domain', entityRecord ?? userDetails)),
+    [entityRecord, userDetails]
   );
   const userDomain: DescriptionList[] = useMemo(
     () => [
@@ -242,45 +231,38 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [userDomainValue]
   );
 
-  const userLastSeen: DescriptionList[] = useMemo(
-    () => [
+  const userLastSeen: DescriptionList[] = useMemo(() => {
+    const fromEntityRecord = entityRecord?.entity?.lifecycle?.last_activity;
+    if (userName == null || userName === '') {
+      return [{ title: LAST_SEEN, description: getEmptyTagValue() }];
+    }
+    if (fromEntityRecord) {
+      return [
+        {
+          title: LAST_SEEN,
+          description: <PreferenceFormattedDateFromPrimitive value={fromEntityRecord} />,
+        },
+      ];
+    }
+    return [
       {
         title: LAST_SEEN,
-        description:
-          userName != null && userName !== '' ? (
-            entityStoreV2Enabled && entityRecord?.entity?.lifecycle?.last_activity ? (
-              <PreferenceFormattedDateFromPrimitive
-                value={entityRecord.entity.lifecycle.last_activity}
-              />
-            ) : !entityStoreV2Enabled ? (
-              <FirstLastSeen
-                indexPatterns={selectedPatterns}
-                field="user.name"
-                value={userName}
-                type={FirstLastSeenType.LAST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            )
-          ) : (
-            getEmptyTagValue()
-          ),
+        description: (
+          <FirstLastSeen
+            indexPatterns={selectedPatterns}
+            field="user.name"
+            value={userName}
+            type={FirstLastSeenType.LAST_SEEN}
+          />
+        ),
       },
-    ],
-    [
-      userName,
-      selectedPatterns,
-      entityStoreV2Enabled,
-      entityRecord?.entity?.lifecycle?.last_activity,
-    ]
-  );
+    ];
+  }, [userName, selectedPatterns, entityRecord?.entity?.lifecycle?.last_activity]);
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const isLoading = entityStoreV2Enabled
-    ? riskFromEntityRecord == null && isRiskScoreLoading
-    : isUserDetailsLoading || isRiskScoreLoading;
+  const isLoading = isUserDetailsLoading || (riskFromEntityRecord == null && isRiskScoreLoading);
 
   const [userRiskLevel] = useMemo(() => {
     const level = userRiskData?.user?.risk?.calculated_level;

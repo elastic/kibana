@@ -177,30 +177,7 @@ describe('<HostEntityContent />', () => {
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  describe('license is not valid', () => {
-    it('should render os family and last seen', () => {
-      mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: false });
-      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen }]);
-
-      const { getByTestId, queryByTestId } = renderHostEntityContent();
-
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent(osFamily);
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent(lastSeenText);
-      expect(queryByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('should render correctly if returned data is null', () => {
-      mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
-      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
-      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
-
-      const { getByTestId } = renderHostEntityContent();
-
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent('—');
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
-    });
-
+  describe('preview behavior', () => {
     it('should open host preview when clicking on title', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
