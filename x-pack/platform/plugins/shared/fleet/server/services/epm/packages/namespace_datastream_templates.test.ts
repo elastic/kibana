@@ -384,6 +384,28 @@ describe('syncNamespaceTemplates', () => {
     expect(summary.removed).toEqual([]);
   });
 
+  it('does not throw when no data stream exists yet for the new namespace', async () => {
+    mockInstalledPackage();
+    const esClient = makeEsClientWithTemplate();
+    // updateCurrentWriteIndices throws index_not_found when the namespace's
+    // data stream doesn't exist yet (no data ingested). The handler should
+    // swallow the 404 so the sync task can complete.
+    mockedUpdateCurrentWriteIndices.mockRejectedValueOnce({
+      meta: { statusCode: 404 },
+      message: 'index_not_found_exception',
+    });
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      addedNamespaces: ['production'],
+      removedNamespaces: [],
+    });
+
+    expect(summary.created).toEqual(['production']);
+  });
+
   it('deletes namespace templates for removed namespaces', async () => {
     mockInstalledPackage();
     const esClient = elasticsearchServiceMock.createElasticsearchClient();

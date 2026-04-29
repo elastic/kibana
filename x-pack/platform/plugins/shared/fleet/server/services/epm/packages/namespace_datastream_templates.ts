@@ -259,7 +259,19 @@ async function createNamespaceTemplatesForPackage({
     return [];
   }
 
-  await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
+  // A user can opt in a namespace before any data stream for that namespace exists
+  // (no data has been ingested yet). In that case `getDataStream` 404s on the
+  // namespace-scoped pattern; nothing to update, so just continue.
+  try {
+    await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
+  } catch (err: unknown) {
+    if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
+      throw err;
+    }
+    logger.debug(
+      `[${logContext}] no existing data streams to update for new namespace templates`
+    );
+  }
 
   const freshInstallation = await getInstallation({
     savedObjectsClient: soClient,
