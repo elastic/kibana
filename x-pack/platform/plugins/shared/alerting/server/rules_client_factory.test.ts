@@ -836,7 +836,7 @@ describe('RulesClientFactory', () => {
     );
   });
 
-  test('cloneAPIKey is undefined when cloneApiKeys option is not set', async () => {
+  test('cloneAPIKey is always defined on the context', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -849,10 +849,10 @@ describe('RulesClientFactory', () => {
     await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    expect(constructorCall.cloneAPIKey).toBeUndefined();
+    expect(constructorCall.cloneAPIKey).toEqual(expect.any(Function));
   });
 
-  test('cloneAPIKey is defined when cloneApiKeys option is true', async () => {
+  test('cloneApiKeysOnCreate is false when option is not set', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -862,10 +862,26 @@ describe('RulesClientFactory', () => {
     });
 
     const request = mockRouter.createKibanaRequest();
-    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    expect(constructorCall.cloneAPIKey).toEqual(expect.any(Function));
+    expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
+  });
+
+  test('cloneApiKeysOnCreate is true when option is true', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest();
+    await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: true });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
 
   test('cloneAPIKey calls cloneAsInternalUser and returns the result', async () => {
@@ -888,7 +904,7 @@ describe('RulesClientFactory', () => {
     const request = mockRouter.createKibanaRequest({
       headers: { authorization: `ApiKey ${apiKeyCredentials}` },
     });
-    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     const result = await constructorCall.cloneAPIKey('test-rule-key');
@@ -927,7 +943,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: `ApiKey ${apiKeyCredentials}` },
     });
 
-    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
@@ -952,7 +968,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'Bearer some-bearer-token' },
     });
 
-    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(

@@ -14,29 +14,53 @@ export interface ResolvedAPIKey {
   isAuthTypeApiKey: boolean;
 }
 
+export interface ExistingRuleKeyState {
+  apiKeyCreatedByUser?: boolean | null;
+}
+
+const cloneKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
+  if (!context.cloneAPIKey) {
+    throw new Error(
+      'cloneAPIKey is not available on RulesClientContext — this should never happen as it is always defined by the factory'
+    );
+  }
+  return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
+};
+
+const grantKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
+  const createdAPIKey = await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
+    context.createAPIKey(name)
+  );
+  return { createdAPIKey, isAuthTypeApiKey: false };
+};
+
 export const resolveRuleAPIKey = async (
   context: RulesClientContext,
   name: string,
-  enabled: boolean
+  enabled: boolean,
+  existing?: ExistingRuleKeyState
 ): Promise<ResolvedAPIKey> => {
   if (!enabled) {
     return { createdAPIKey: null, isAuthTypeApiKey: false };
   }
 
-  if (context.cloneAPIKey) {
-    return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
+  if (!existing && context.cloneApiKeysOnCreate) {
+    return cloneKey(context, name);
   }
 
-  const isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-  if (isAuthTypeApiKey) {
+  const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
+  const frameworkManaged = existing?.apiKeyCreatedByUser === false;
+
+  if (frameworkManaged) {
+    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name);
+  }
+
+  if (isApiKeyAuth) {
     return {
       createdAPIKey: context.getAuthenticationAPIKey(`${name}-user-created`),
       isAuthTypeApiKey: true,
     };
   }
 
-  const createdAPIKey = await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-    context.createAPIKey(name)
-  );
-  return { createdAPIKey, isAuthTypeApiKey: false };
+  return grantKey(context, name);
 };

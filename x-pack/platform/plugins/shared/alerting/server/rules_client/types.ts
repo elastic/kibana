@@ -85,6 +85,7 @@ export interface RulesClientContext {
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly cloneAPIKey?: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly cloneApiKeysOnCreate?: boolean;
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;

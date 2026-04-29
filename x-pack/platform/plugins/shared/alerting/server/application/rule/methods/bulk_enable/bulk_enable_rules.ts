@@ -245,6 +245,7 @@ const bulkEnableRulesWithOCC = async (
                   ruleName,
                   username,
                   shouldUpdateApiKey: true,
+                  existing: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
                 })
               : undefined;
 

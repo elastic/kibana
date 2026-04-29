@@ -47,11 +47,11 @@ import {
 } from './constants';
 export interface RulesClientCreateOptions {
   /**
-   * When true and the request uses API key authentication, clone the API key
-   * per rule instead of reusing the request's key. The cloned key is independent,
-   * non-expiring, and managed by alerting (invalidated on rule delete/update).
+   * When true, clone the request's API key for each newly created rule.
+   * The cloned key is independent, non-expiring, and managed by alerting
+   * (invalidated on rule delete/update). Only applies to rule creation.
    */
-  cloneApiKeys?: boolean;
+  cloneApiKeysOnCreate?: boolean;
 }
 
 export interface RulesClientFactoryOpts {
@@ -409,21 +409,20 @@ export class RulesClientFactory {
         }
         return { apiKeysEnabled: false };
       },
-      cloneAPIKey: options?.cloneApiKeys
-        ? async (name: string) => {
-            const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
-              name,
-              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-            });
-            if (!cloneResult) {
-              throw new Error('API key clone returned null (security feature may be disabled)');
-            }
-            return {
-              apiKeysEnabled: true,
-              result: cloneResult,
-            };
-          }
-        : undefined,
+      cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
+      async cloneAPIKey(name: string) {
+        const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
+          name,
+          metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        });
+        if (!cloneResult) {
+          throw new Error('API key clone returned null (security feature may be disabled)');
+        }
+        return {
+          apiKeysEnabled: true,
+          result: cloneResult,
+        };
+      },
       isSystemAction(actionId: string) {
         return actions.isSystemActionConnector(actionId);
       },
