@@ -27,7 +27,7 @@ export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
-  const { attachments, caseId, mode = 'legacy' } = args;
+  const { attachments, caseId, mode = 'legacy', user } = args;
 
   const {
     logger,
@@ -79,7 +79,10 @@ export const bulkCreate = async (
       entities,
     });
 
-    const model = await CaseCommentModel.create(caseId, clientArgs);
+    const model = await CaseCommentModel.create(
+      caseId,
+      user ? { ...clientArgs, user } : clientArgs
+    );
     const updatedModel = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });

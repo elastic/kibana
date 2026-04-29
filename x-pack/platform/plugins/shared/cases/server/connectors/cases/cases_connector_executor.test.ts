@@ -3513,7 +3513,7 @@ describe('CasesConnectorExecutor', () => {
 
           await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
 
-          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(5);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(
             1,
             expect.objectContaining({
@@ -3525,6 +3525,11 @@ describe('CasesConnectorExecutor', () => {
                   owner: 'securitySolution',
                 }),
               ]),
+              user: {
+                username: 'Assistant',
+                full_name: 'Assistant',
+                email: null,
+              },
             })
           );
         });
@@ -3547,7 +3552,7 @@ describe('CasesConnectorExecutor', () => {
             reopenClosedCases: true,
           });
 
-          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
@@ -3556,6 +3561,16 @@ describe('CasesConnectorExecutor', () => {
                 owner: 'securitySolution',
                 type: 'user',
               },
+            ],
+            user: {
+              username: 'Assistant',
+              full_name: 'Assistant',
+              email: null,
+            },
+          });
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+            caseId: 'mock-id-1',
+            attachments: [
               {
                 alertId: ['alert-id-1', 'alert-id-2'],
                 index: ['alert-index-1', 'alert-index-1'],
@@ -3646,7 +3661,7 @@ describe('CasesConnectorExecutor', () => {
 
           await connectorExecutor.execute(paramsWithGroupedAlerts);
 
-          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
         });
       });
     });

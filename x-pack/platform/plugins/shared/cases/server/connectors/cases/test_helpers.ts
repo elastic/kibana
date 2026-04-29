@@ -118,12 +118,32 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
 export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   casesClientMock: CasesClientMock
 ) => {
-  expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+  const assistantUser = {
+    username: 'Assistant',
+    full_name: 'Assistant',
+    email: null,
+  };
+
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(5);
 
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
     caseId: 'mock-id-1',
+    attachments: [{ comment: 'comment-1', owner: 'securitySolution', type: 'user' }],
+    user: assistantUser,
+  });
+
+  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+    caseId: 'mock-id-2',
     attachments: [
-      { comment: 'comment-1', owner: 'securitySolution', type: 'user' },
+      { comment: 'comment-2', owner: 'securitySolution', type: 'user' },
+      { comment: 'comment-3', owner: 'securitySolution', type: 'user' },
+    ],
+    user: assistantUser,
+  });
+
+  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+    caseId: 'mock-id-1',
+    attachments: [
       {
         alertId: ['alert-id-1', 'alert-id-2'],
         index: ['alert-index-1', 'alert-index-1'],
@@ -134,11 +154,9 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(4, {
     caseId: 'mock-id-2',
     attachments: [
-      { comment: 'comment-2', owner: 'securitySolution', type: 'user' },
-      { comment: 'comment-3', owner: 'securitySolution', type: 'user' },
       {
         alertId: ['alert-id-3', 'alert-id-4'],
         index: ['alert-index-2', 'alert-index-2'],
@@ -149,7 +167,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(5, {
     caseId: 'mock-id-3',
     attachments: [
       {

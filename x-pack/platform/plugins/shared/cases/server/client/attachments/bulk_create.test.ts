@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { comment, actionComment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
+import {
+  comment,
+  actionComment,
+  mockCases,
+  mockCaseComments,
+  mockCaseUnifiedAttachments,
+} from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import {
   MAX_COMMENT_LENGTH,
@@ -164,6 +170,60 @@ describe('bulkCreate', () => {
         entities: expect.arrayContaining([
           expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
         ]),
+      })
+    );
+  });
+
+  it('uses the provided internal user override for created attachment attribution', async () => {
+    const assistantUser = {
+      username: 'Assistant',
+      full_name: 'Assistant',
+      email: null,
+    };
+
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getAllAlertIds.mockResolvedValue(new Set());
+    attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.bulkCreate.mockResolvedValue({
+      saved_objects: [mockCaseComments[0]],
+    });
+
+    await expect(
+      bulkCreate({ attachments: [comment], caseId, user: assistantUser }, clientArgs)
+    ).resolves.toBeDefined();
+
+    expect(attachmentService.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              created_by: {
+                email: null,
+                full_name: 'Assistant',
+                username: 'Assistant',
+                profile_uid: undefined,
+              },
+            }),
+          }),
+        ],
+      })
+    );
+    expect(userActionService.creator.bulkCreateAttachmentCreation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user: assistantUser,
       })
     );
   });

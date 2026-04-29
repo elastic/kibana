@@ -16,6 +16,7 @@ import type {
   FindAttachmentsQueryParams,
 } from '../../../common/types/api';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
+import type { User } from '../../common/types/user';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -36,6 +37,7 @@ export interface BulkCreateArgs {
   caseId: string;
   attachments: BulkCreateAttachmentsRequestV2;
   mode?: AttachmentMode;
+  user?: User;
 }
 
 /**

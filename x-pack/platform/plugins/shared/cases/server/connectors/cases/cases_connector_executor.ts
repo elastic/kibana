@@ -44,7 +44,8 @@ import {
 } from './utils';
 import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
-import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
+import type { BulkCreateArgs as BulkCreateAttachmentsReq } from '../../client/attachments/types';
+import type { User } from '../../common/types/user';
 import { CasesConnectorError } from './cases_connector_error';
 import {
   AUTO_CREATED_TITLE,
@@ -66,6 +67,12 @@ type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
 type GroupedAlertsWithOracleRecords = GroupedAlertsWithOracleKey & { oracleRecord: OracleRecord };
 type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string };
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
+
+const ATTACK_DISCOVERY_ASSISTANT_USER: User = {
+  username: 'Assistant',
+  full_name: 'Assistant',
+  email: null,
+};
 
 export class CasesConnectorExecutor {
   private readonly logger: Logger;
@@ -1181,8 +1188,11 @@ export class CasesConnectorExecutor {
       })
     );
 
-    const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
-      ({ theCase, alerts, comments }) => {
+    const { commentRequests, alertRequests } = casesUnderAlertLimit.reduce<{
+      commentRequests: BulkCreateAttachmentsReq[];
+      alertRequests: BulkCreateAttachmentsReq[];
+    }>(
+      (acc, { theCase, alerts, comments }) => {
         const extraComments: AttachmentRequestV2[] =
           comments?.map((comment) =>
             this.isCasesAttachmentsEnabled
@@ -1197,51 +1207,83 @@ export class CasesConnectorExecutor {
                   owner: theCase.owner,
                 }
           ) ?? [];
-        return {
-          caseId: theCase.id,
-          attachments: [
-            ...extraComments,
-            {
-              type: AttachmentType.alert,
-              rule: internallyManagedAlerts
-                ? { id: null, name: null }
-                : { id: rule.id, name: rule.name },
-              /**
-               * Map traverses the array in ascending order.
-               * The order is guaranteed to be the same for
-               * both calls by the ECMA-262 spec.
-               */
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: theCase.owner,
-            },
-          ],
+
+        const alertAttachment: AttachmentRequestV2 = {
+          type: AttachmentType.alert,
+          rule: internallyManagedAlerts
+            ? { id: null, name: null }
+            : { id: rule.id, name: rule.name },
+          /**
+           * Map traverses the array in ascending order.
+           * The order is guaranteed to be the same for
+           * both calls by the ECMA-262 spec.
+           */
+          alertId: alerts.map((alert) => alert._id),
+          index: alerts.map((alert) => alert._index),
+          owner: theCase.owner,
         };
-      }
+
+        if (internallyManagedAlerts && extraComments.length > 0) {
+          acc.commentRequests.push({
+            caseId: theCase.id,
+            attachments: extraComments,
+            user: ATTACK_DISCOVERY_ASSISTANT_USER,
+          });
+          acc.alertRequests.push({
+            caseId: theCase.id,
+            attachments: [alertAttachment],
+          });
+
+          return acc;
+        }
+
+        acc.alertRequests.push({
+          caseId: theCase.id,
+          attachments: [...extraComments, alertAttachment],
+        });
+
+        return acc;
+      },
+      { commentRequests: [], alertRequests: [] }
     );
 
+    const bulkCreateAttachments = async (req: BulkCreateAttachmentsReq) => {
+      if (this.logger.isLevelEnabled('debug')) {
+        const alertIds = req.attachments.flatMap((attachment) => {
+          if ('alertId' in attachment) {
+            const { alertId } = attachment;
+            if (Array.isArray(alertId)) {
+              return alertId;
+            }
+
+            return alertId ? [alertId] : [];
+          }
+
+          return [];
+        });
+
+        this.logger.debug(
+          `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} attachments to case with ID ${req.caseId}`,
+          this.getLogMetadata(params, {
+            labels: { caseId: req.caseId },
+            tags: ['case-connector:attachAlertsToCases', req.caseId, ...alertIds],
+          })
+        );
+      }
+
+      await this.casesClient.attachments.bulkCreate(req);
+    };
+
+    await pMap(commentRequests, bulkCreateAttachments, {
+      concurrency: MAX_CONCURRENT_ES_REQUEST,
+    });
+
     await pMap(
-      bulkCreateAlertsRequest,
+      alertRequests,
       /**
        * attachments.bulkCreate throws an error on errors
        */
-      async (req: BulkCreateAlertsReq) => {
-        if (this.logger.isLevelEnabled('debug')) {
-          this.logger.debug(
-            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
-            this.getLogMetadata(params, {
-              labels: { caseId: req.caseId },
-              tags: [
-                'case-connector:attachAlertsToCases',
-                req.caseId,
-                ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
-              ],
-            })
-          );
-        }
-
-        await this.casesClient.attachments.bulkCreate(req);
-      },
+      bulkCreateAttachments,
       {
         concurrency: MAX_CONCURRENT_ES_REQUEST,
       }
