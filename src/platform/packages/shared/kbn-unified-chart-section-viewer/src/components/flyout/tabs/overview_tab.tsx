@@ -44,7 +44,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { kind: sourceKind } = useMetricSourceKind(
-    metricItem.dataStream,
+    metricItem.dataStream && !isNonLocalIndexName(metricItem.dataStream)
+      ? metricItem.dataStream
+      : undefined,
     METRIC_SOURCE_KIND.DATA_STREAM
   );
   const renderStreamFlyout = useStreamsFlyoutRenderer();
