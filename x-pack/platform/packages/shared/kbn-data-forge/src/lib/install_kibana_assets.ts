@@ -6,7 +6,7 @@
  */
 
 import fs from 'fs';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import FormData from 'form-data';
 import type { AxiosBasicCredentials } from 'axios';
 import axios from 'axios';
