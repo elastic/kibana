@@ -33,10 +33,7 @@ const listInsightsQuerySchema = z.object({
     .describe('Filter insights by status.'),
   type: z.string().optional().describe('Filter insights by type.'),
   execution_id: z.string().optional().describe('Filter insights by execution ID.'),
-  rule_ids: z
-    .string()
-    .optional()
-    .describe('Comma-separated list of rule IDs to filter by.'),
+  rule_ids: z.string().optional().describe('Comma-separated list of rule IDs to filter by.'),
 });
 
 @injectable()
