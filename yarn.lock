@@ -6906,6 +6906,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-security-automatic-migrations@link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-significant-events@link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events":
   version "0.0.0"
   uid ""
