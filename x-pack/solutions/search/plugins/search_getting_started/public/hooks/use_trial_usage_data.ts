@@ -8,26 +8,6 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
-interface StatsResponse {
-  sizeStats: { size: string; documents: number };
-}
-
-interface TrialUsageResponse {
-  trialDaysLeft: number;
-  llmTotalTokens?: number;
-  searchPowerMax?: number;
-  searchPowerMin?: number;
-  boostWindowHours?: number;
-}
-
-interface MlInfoResponse {
-  limits: { effective_max_model_memory_limit?: string };
-}
-
-interface MlNodeCountResponse {
-  count: number;
-}
-
 export interface TrialUsageData {
   trialDaysLeft: number;
   storageUsage: string;
@@ -44,27 +24,7 @@ export const useTrialUsageData = () => {
 
   return useQuery<TrialUsageData, Error>({
     queryKey: ['fetchTrialUsageData'],
-    queryFn: async () => {
-      const [trialUsage, stats, mlNodeCount, mlInfo] = await Promise.all([
-        http.get<TrialUsageResponse>('/internal/search_homepage/trial_usage'),
-        http.get<StatsResponse>('/internal/search_homepage/stats'),
-        http
-          .get<MlNodeCountResponse>('/internal/ml/ml_node_count', { version: '1' })
-          .catch(() => undefined),
-        http.get<MlInfoResponse>('/internal/ml/info', { version: '1' }).catch(() => undefined),
-      ]);
-
-      return {
-        trialDaysLeft: trialUsage.trialDaysLeft,
-        storageUsage: stats.sizeStats.size,
-        mlNodeCount: mlNodeCount?.count,
-        mlMemoryLimit: mlInfo?.limits?.effective_max_model_memory_limit,
-        llmTotalTokens: trialUsage.llmTotalTokens,
-        searchPowerMax: trialUsage.searchPowerMax,
-        searchPowerMin: trialUsage.searchPowerMin,
-        boostWindowHours: trialUsage.boostWindowHours,
-      };
-    },
+    queryFn: () => http.get<TrialUsageData>('/internal/search_homepage/trial_usage'),
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });

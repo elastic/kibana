@@ -9,20 +9,17 @@ import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { GET_TRIAL_USAGE_ROUTE } from '../../common/routes';
 import type { RouterContextData, TrialUsageResponse } from '../types';
+import { fetchSizeStats } from '../lib/size_stats';
 
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce((curr: unknown, key) => {
-    if (curr && typeof curr === 'object') {
-      return (curr as Record<string, unknown>)[key];
-    }
-    return undefined;
-  }, obj);
+function getSettingValue(allSettings: Record<string, unknown>, key: string): string | undefined {
+  const value = allSettings[key];
+  return value !== undefined ? String(value) : undefined;
 }
 
 export const registerTrialUsageRoute = (
   router: IRouter,
   _logger: Logger,
-  { trialEndDate }: RouterContextData
+  { trialEndDate, isServerless }: RouterContextData
 ): void => {
   router.get<unknown, unknown, TrialUsageResponse>(
     {
@@ -45,6 +42,37 @@ export const registerTrialUsageRoute = (
         ? Math.max(0, Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
         : 0;
 
+      // Storage usage
+      let storageUsage = '0b';
+      try {
+        const stats = await fetchSizeStats(client, isServerless);
+        storageUsage = stats.sizeStats.size;
+      } catch {
+        // storage stats may not be available
+      }
+
+      // ML nodes
+      let mlNodeCount: number | undefined;
+      let mlMemoryLimit: string | undefined;
+      try {
+        const mlInfo = await client.asCurrentUser.ml.info();
+        const limit = mlInfo.limits?.effective_max_model_memory_limit;
+        mlMemoryLimit = limit !== undefined ? String(limit) : undefined;
+
+        const nodesInfo = await client.asCurrentUser.nodes.info({
+          filter_path: 'nodes.*.attributes',
+        });
+        const nodes = nodesInfo.nodes ?? {};
+        mlNodeCount = Object.values(nodes).filter(
+          (node: any) =>
+            node.attributes?.['ml.machine_memory'] &&
+            Number(node.attributes['ml.machine_memory']) > 0
+        ).length;
+      } catch {
+        // ML may not be available
+      }
+
+      // LLM token usage
       let llmTotalTokens: number | undefined;
       try {
         const result = await client.asCurrentUser.search({
@@ -63,6 +91,7 @@ export const registerTrialUsageRoute = (
         // data stream may not exist yet
       }
 
+      // Serverless search settings
       let searchPowerMax: number | undefined;
       let searchPowerMin: number | undefined;
       let boostWindowHours: number | undefined;
@@ -72,30 +101,25 @@ export const registerTrialUsageRoute = (
           flat_settings: true,
         });
 
-        const allSettings = {
+        const allSettings: Record<string, unknown> = {
           ...((settings.defaults as Record<string, unknown>) ?? {}),
           ...((settings.persistent as Record<string, unknown>) ?? {}),
           ...((settings.transient as Record<string, unknown>) ?? {}),
         };
 
-        const powerMax = getNestedValue(allSettings, 'serverless.search.search_power_max');
-        const powerMin = getNestedValue(allSettings, 'serverless.search.search_power_min');
-        const boostWindow = getNestedValue(allSettings, 'serverless.search.boost_window');
+        const powerMax = getSettingValue(allSettings, 'serverless.search.search_power_max');
+        const powerMin = getSettingValue(allSettings, 'serverless.search.search_power_min');
+        const boostWindow = getSettingValue(allSettings, 'serverless.search.boost_window');
 
-        if (powerMax !== undefined) {
-          searchPowerMax = Number(powerMax);
-        }
-        if (powerMin !== undefined) {
-          searchPowerMin = Number(powerMin);
-        }
+        if (powerMax !== undefined) searchPowerMax = Number(powerMax);
+        if (powerMin !== undefined) searchPowerMin = Number(powerMin);
         if (boostWindow !== undefined) {
-          const bwStr = String(boostWindow);
-          if (bwStr.endsWith('d')) {
-            boostWindowHours = parseInt(bwStr, 10) * 24;
-          } else if (bwStr.endsWith('h')) {
-            boostWindowHours = parseInt(bwStr, 10);
+          if (boostWindow.endsWith('d')) {
+            boostWindowHours = parseInt(boostWindow, 10) * 24;
+          } else if (boostWindow.endsWith('h')) {
+            boostWindowHours = parseInt(boostWindow, 10);
           } else {
-            boostWindowHours = parseInt(bwStr, 10);
+            boostWindowHours = parseInt(boostWindow, 10);
           }
         }
       } catch {
@@ -106,6 +130,9 @@ export const registerTrialUsageRoute = (
         headers: { 'content-type': 'application/json' },
         body: {
           trialDaysLeft,
+          storageUsage,
+          mlNodeCount,
+          mlMemoryLimit,
           llmTotalTokens,
           searchPowerMax,
           searchPowerMin,
