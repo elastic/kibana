@@ -12,10 +12,7 @@ import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
-  // changing access control is not allowed through update endpoint
-  const { access_control, ...rest } =
-    getDashboardStateSchema(isDashboardAppRequest).getPropSchemas();
-  return schema.object(rest);
+  return getDashboardStateSchema(isDashboardAppRequest);
 }
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
