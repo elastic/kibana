@@ -8,7 +8,6 @@
  */
 
 import React, { useRef, type MouseEvent } from 'react';
-import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,6 +18,7 @@ import {
 } from '../constants';
 import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
+import { SplitButtonWithNotification } from './split_button_with_notification';
 import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
 
 type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
@@ -26,6 +26,7 @@ type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
   onCloseOverflowButton?: () => void;
+  fullWidth?: boolean;
 };
 
 export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
@@ -51,6 +52,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     onPopoverToggle,
     onPopoverClose,
     onCloseOverflowButton,
+    fullWidth,
   } = props;
 
   const itemText = upperFirst(label);
@@ -109,6 +111,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     size: 's' as const,
     iconSize: 'm' as const,
     'aria-haspopup': (hasSplitItems ? 'menu' : undefined) as 'menu' | undefined,
+    fullWidth,
   };
 
   // Target the split part of the button for popover behavior.
