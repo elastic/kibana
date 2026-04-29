@@ -277,7 +277,10 @@ export function AboutPanel() {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" onClick={() => saveDescription(descriptionValue.trim())}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    onClick={() => saveDescription(descriptionValue.trim())}
+                  >
                     {i18n.translate('xpack.streams.aboutPanel.saveButtonLabel', {
                       defaultMessage: 'Save',
                     })}
