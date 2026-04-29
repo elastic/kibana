@@ -82,6 +82,7 @@ const legacyMetricConfigMetricOptionsSchema = {
    */
   color: schema.maybe(
     schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, autoColorSchema], {
+      meta: { description: 'Color configuration based on the metric value.' },
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -102,7 +103,14 @@ export const legacyMetricConfigSchemaNoESQL = schema.object(
       'legacyMetric'
     ),
   },
-  { meta: { id: 'legacyMetricNoESQL', title: 'Legacy Metric Chart (DSL)' } }
+  {
+    meta: {
+      id: 'legacyMetricNoESQL',
+      title: 'Legacy Metric Chart (DSL)',
+      description:
+        'Legacy Metric configuration using a data view. Superseded by the Metric chart type.',
+    },
+  }
 );
 
 const esqlLegacyMetricConfig = schema.object(
@@ -121,7 +129,12 @@ const esqlLegacyMetricConfig = schema.object(
 
 // Legacy metric is not currently supported for ES|QL datasets
 export const legacyMetricConfigSchema = objectUnion([legacyMetricConfigSchemaNoESQL], {
-  meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
+  meta: {
+    id: 'legacyMetricChart',
+    title: 'Legacy Metric Chart',
+    description:
+      'A single metric value with optional coloring and formatting. Superseded by the Metric chart type.',
+  },
 });
 
 export type LegacyMetricConfig = TypeOf<typeof legacyMetricConfigSchema>;
