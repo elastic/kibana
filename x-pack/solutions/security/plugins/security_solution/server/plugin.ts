@@ -25,7 +25,6 @@ import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
-import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
@@ -131,11 +130,6 @@ import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generati
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
-import {
-  registerEntityStoreFieldRetentionEnrichTask,
-  registerEntityStoreSnapshotTask,
-  registerEntityStoreHealthTask,
-} from './lib/entity_analytics/entity_store/tasks';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
@@ -361,46 +355,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (!experimentalFeatures.entityStoreDisabled) {
       plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
       plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
-
-      registerEntityStoreFieldRetentionEnrichTask({
-        getStartServices: core.getStartServices,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-      });
-
-      registerEntityStoreDataViewRefreshTask({
-        getStartServices: core.getStartServices,
-        appClientFactory,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        entityStoreConfig: config.entityAnalytics.entityStore,
-        experimentalFeatures,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        isServerless: this.isServerless,
-      });
-
-      registerEntityStoreSnapshotTask({
-        getStartServices: core.getStartServices,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-      });
-
-      registerEntityStoreHealthTask({
-        getStartServices: core.getStartServices,
-        appClientFactory,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        entityStoreConfig: config.entityAnalytics.entityStore,
-        experimentalFeatures,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        isServerless: this.isServerless,
-      });
     }
 
     registerPrivilegeMonitoringTask({
