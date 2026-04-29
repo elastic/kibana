@@ -34,6 +34,7 @@ import type { Indicator } from '../../../../common/threat_intelligence/types/ind
 export const INDICATORS_FLYOUT_OVERVIEW_TITLE = 'tiFlyoutOverviewTitle';
 export const INDICATORS_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
 export const INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
+export const INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS_ITEM = `${INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}Item`;
 
 const highLevelFields = [
   RawIndicatorFieldId.Feed,
@@ -72,9 +73,11 @@ const IndicatorHeaderBlock = ({ indicator, field }: IndicatorHeaderBlockProps) =
         mode={CellActionsMode.HOVER_DOWN}
         triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
       >
-        <EuiText size="s">
-          <IndicatorFieldValue indicator={indicator} field={field} />
-        </EuiText>
+        <div data-test-subj={INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS_ITEM}>
+          <EuiText size="s">
+            <IndicatorFieldValue indicator={indicator} field={field} />
+          </EuiText>
+        </div>
       </SecurityCellActions>
     </FlyoutHeaderBlock>
   );
