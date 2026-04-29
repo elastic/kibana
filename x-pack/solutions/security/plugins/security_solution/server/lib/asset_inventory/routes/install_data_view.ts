@@ -75,7 +75,10 @@ export const installAssetInventoryDataViewRoute = (
                 `DataView with ID '${dataViewId}' not found. Proceeding with installation.`
               );
             } else {
-              logger.error('An unexpected error occurred while checking data view existence:', error);
+              logger.error(
+                'An unexpected error occurred while checking data view existence:',
+                error
+              );
             }
           }
 

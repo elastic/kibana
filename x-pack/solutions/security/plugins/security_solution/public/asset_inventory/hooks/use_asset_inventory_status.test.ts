@@ -54,8 +54,7 @@ jest.mock('./use_asset_inventory_routes', () => ({
   }),
 }));
 
-const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
-  'securitySolution:enableAssetInventory';
+const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory';
 const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
 const setUiSettings = ({

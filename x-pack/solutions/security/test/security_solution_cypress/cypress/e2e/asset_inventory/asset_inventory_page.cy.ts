@@ -85,9 +85,7 @@ const buildEntityDoc = (entityType: EntityType): Record<string, unknown> => {
   // Mirror the typed identifier fields the entity flyout reads ("Host ID" /
   // "Service ID" / "User ID"). Generic docs only need the entity.* shape.
   const typedIdentifier =
-    entityType === 'generic'
-      ? {}
-      : { [entityType]: { id: fixture.id, name: fixture.name } };
+    entityType === 'generic' ? {} : { [entityType]: { id: fixture.id, name: fixture.name } };
   return {
     '@timestamp': now,
     entity,
