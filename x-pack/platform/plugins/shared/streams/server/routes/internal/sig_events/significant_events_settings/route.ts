@@ -55,19 +55,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
 
     const { continuousKiExtraction } = params.body;
 
-    if (continuousKiExtractionWorkflowService) {
-      const enabled =
-        continuousKiExtraction.enabled ??
-        (await globalUiSettingsClient.get<boolean>(
-          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-        ));
-      await continuousKiExtractionWorkflowService.ensureWorkflow({
-        enabled,
-        request,
-        taskClient,
-      });
-    }
-
     const updates: Record<string, boolean | number | string> = {};
 
     if (continuousKiExtraction.enabled !== undefined) {
@@ -83,8 +70,32 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
         continuousKiExtraction.excludedStreamPatterns;
     }
 
+    const previousValues: Record<string, boolean | number | string> = {};
     if (Object.keys(updates).length > 0) {
+      for (const key of Object.keys(updates)) {
+        previousValues[key] = await globalUiSettingsClient.get<boolean | number | string>(key);
+      }
       await globalUiSettingsClient.setMany(updates);
+    }
+
+    if (continuousKiExtractionWorkflowService) {
+      const enabled =
+        continuousKiExtraction.enabled ??
+        (await globalUiSettingsClient.get<boolean>(
+          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+        ));
+      try {
+        await continuousKiExtractionWorkflowService.ensureWorkflow({
+          enabled,
+          request,
+          taskClient,
+        });
+      } catch (err) {
+        if (Object.keys(previousValues).length > 0) {
+          await globalUiSettingsClient.setMany(previousValues).catch(() => {});
+        }
+        throw err;
+      }
     }
 
     return { success: true };
