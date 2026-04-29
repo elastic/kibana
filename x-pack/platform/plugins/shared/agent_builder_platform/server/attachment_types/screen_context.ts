@@ -10,12 +10,12 @@ import {
   screenContextAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 
 /**
  * Creates the definition for the `screen_context` attachment type.
  */
-export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
+export const createScreenContextAttachmentType = (): ResolverTypeDefinition<
   AttachmentType.screenContext,
   ScreenContextAttachmentData
 > => {
@@ -29,12 +29,8 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment) => {
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: formatScreenContext(attachment.data) };
-        },
-      };
+    format: (item) => {
+      return { type: 'text', value: formatScreenContext(item.data) };
     },
     isReadonly: true,
     getTools: () => [],

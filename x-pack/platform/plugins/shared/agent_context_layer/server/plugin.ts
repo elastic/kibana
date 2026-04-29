@@ -23,6 +23,10 @@ import {
 } from './services/sml/sml_task_definitions';
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
+import {
+  createResolverTypeRegistry,
+  type ResolverTypeRegistry,
+} from './services/resolver/resolver_type_registry';
 
 export class AgentContextLayerPlugin
   implements
@@ -36,10 +40,12 @@ export class AgentContextLayerPlugin
   private logger: Logger;
   private smlServiceInstance: SmlServiceInstance;
   private smlService?: SmlService;
+  private resolverTypeRegistry: ResolverTypeRegistry;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.smlServiceInstance = createSmlService();
+    this.resolverTypeRegistry = createResolverTypeRegistry();
   }
 
   setup(
@@ -85,6 +91,7 @@ export class AgentContextLayerPlugin
 
     return {
       registerType: smlSetup.registerType,
+      registerResolverType: this.resolverTypeRegistry.register.bind(this.resolverTypeRegistry),
     };
   }
 
@@ -115,6 +122,9 @@ export class AgentContextLayerPlugin
       getDocuments: smlService.getDocuments,
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
+      getResolverType: this.resolverTypeRegistry.get.bind(this.resolverTypeRegistry),
+      hasResolverType: this.resolverTypeRegistry.has.bind(this.resolverTypeRegistry),
+      listResolverTypes: this.resolverTypeRegistry.list.bind(this.resolverTypeRegistry),
       indexAttachment: async (params) => {
         const soClient = savedObjects.getScopedClient(params.request, {
           ...(params.includedHiddenTypes?.length

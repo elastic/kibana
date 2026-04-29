@@ -50,6 +50,10 @@ import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server';
+import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
   WorkflowsServerPluginSetup,
@@ -86,6 +90,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   kql: KqlServerPluginSetup;
   share?: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   entityStore?: EntityStoreSetupContract;
@@ -115,6 +120,7 @@ export interface SecuritySolutionPluginStartDependencies {
   anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   workflowsManagement?: WorkflowsServerPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }

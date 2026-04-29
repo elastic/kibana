@@ -25,9 +25,7 @@ export type IndexSearchAttachmentBoundedTool = AttBoundToolMixin<IndexSearchTool
 export type WorkflowAttachmentBoundedTool = AttBoundToolMixin<WorkflowToolDefinition>;
 
 /**
- * Definition of a tool which is bounded to an attachment instance.
- *
- * Refer to {@link AttachmentTypeDefinition}.
+ * Definition of a tool which is bounded to an attachment instance (`ResolverTypeDefinition.getBoundedTools`).
  */
 export type AttachmentBoundedTool<RunInput extends ZodObject<any> = ZodObject<any>> =
   | BuiltinAttachmentBoundedTool<RunInput>

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { createAiInsightAttachmentType } from './ai_insight';
 import { createErrorAttachmentType } from './error';
 import { createAlertAttachmentType } from './alert';
@@ -33,7 +33,7 @@ export async function registerAttachments({
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }) {
-  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
+  const attachmentTypes: ResolverTypeDefinition<any, any>[] = [
     createAiInsightAttachmentType(),
     createErrorAttachmentType({ logger, dataRegistry }),
     createAlertAttachmentType({ core, logger }),
@@ -46,6 +46,6 @@ export async function registerAttachments({
   ];
 
   for (const attachment of attachmentTypes) {
-    plugins.agentBuilder.attachments.registerType(attachment);
+    plugins.agentContextLayer.registerResolverType(attachment);
   }
 }

@@ -24,6 +24,9 @@ const getAgentContextLayer = jest.fn(() => ({
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
   resolveSmlAttachItems: mockResolveSmlAttachItems,
+  getResolverType: jest.fn(),
+  hasResolverType: jest.fn(),
+  listResolverTypes: jest.fn(() => []),
 }));
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };

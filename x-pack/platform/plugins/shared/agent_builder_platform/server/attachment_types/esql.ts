@@ -10,12 +10,12 @@ import { z as z4 } from '@kbn/zod/v4';
 import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 
 /**
  * Creates the definition for the `text` attachment type.
  */
-export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
+export const createEsqlAttachmentType = (): ResolverTypeDefinition<
   AttachmentType.esql,
   EsqlAttachmentData
 > => {
@@ -44,12 +44,8 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
 
       return { valid: true, data: parseResult.data };
     },
-    format: (attachment) => {
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: formatEsqlAttachment(attachment.data) };
-        },
-      };
+    format: (item) => {
+      return { type: 'text', value: formatEsqlAttachment(item.data) };
     },
     getAgentDescription: () => {
       return `Represents an ES|QL query, which can be executed using the ${platformCoreTools.executeEsql} tool

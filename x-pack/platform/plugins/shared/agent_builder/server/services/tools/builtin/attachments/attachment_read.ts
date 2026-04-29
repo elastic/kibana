@@ -68,13 +68,8 @@ export const createAttachmentReadTool = ({
             },
             formatContext
           );
-          if (formatted.getRepresentation) {
-            const representation = await formatted.getRepresentation();
-            formattedData =
-              representation.type === 'text'
-                ? representation.value
-                : JSON.stringify(representation);
-          }
+          formattedData =
+            formatted.type === 'text' ? formatted.value : JSON.stringify(formatted);
         } catch {
           formattedData = versionData.data;
         }

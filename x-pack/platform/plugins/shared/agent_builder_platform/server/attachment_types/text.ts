@@ -7,12 +7,12 @@
 
 import type { TextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, textAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 
 /**
  * Creates the definition for the `text` attachment type.
  */
-export const createTextAttachmentType = (): AttachmentTypeDefinition<
+export const createTextAttachmentType = (): ResolverTypeDefinition<
   AttachmentType.text,
   TextAttachmentData
 > => {
@@ -26,12 +26,8 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment) => {
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: attachment.data.content };
-        },
-      };
+    format: (item) => {
+      return { type: 'text', value: item.data.content };
     },
     getAgentDescription: () => {
       return `A text attachment contains plain text content.

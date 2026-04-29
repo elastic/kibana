@@ -46,11 +46,11 @@ export class DashboardAgentPlugin
       return startDeps.dashboard.client;
     };
 
-    setupDeps.agentBuilder.attachments.registerType(
+    setupDeps.agentContextLayer.registerResolverType(
       createDashboardAttachmentType({
         logger: this.logger,
         getDashboardClient,
-      }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
+      })
     );
     setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
     registerSkills(setupDeps.agentBuilder);

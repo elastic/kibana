@@ -260,8 +260,11 @@ export class APMPlugin
 
     registerServiceMapEmbeddableTransforms(plugins.embeddable);
 
-    if (plugins.agentBuilder) {
-      registerServiceMapAgentBuilder({ agentBuilder: plugins.agentBuilder });
+    if (plugins.agentBuilder && plugins.agentContextLayer) {
+      registerServiceMapAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        agentContextLayer: plugins.agentContextLayer,
+      });
     }
 
     registerDeprecations({

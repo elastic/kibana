@@ -82,7 +82,7 @@ describe('createEntityAnalyticsDashboardAttachmentType', () => {
   });
 
   describe('format', () => {
-    it('getRepresentation includes attachment id and dashboard summary', async () => {
+    it('format includes attachment id and dashboard summary', async () => {
       const attachment: Attachment<
         SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
         EntityAnalyticsDashboardAttachmentData
@@ -101,11 +101,10 @@ describe('createEntityAnalyticsDashboardAttachmentType', () => {
         },
       };
 
-      const formatted = await attachmentType.format(attachment, formatContext);
+      const representation = await attachmentType.format(attachment, formatContext);
 
-      const representation = await formatted.getRepresentation?.();
-      expect(representation?.type).toBe('text');
-      if (representation?.type === 'text') {
+      expect(representation.type).toBe('text');
+      if (representation.type === 'text') {
         expect(representation.value).toContain('id: "dash-1"');
         expect(representation.value).toContain('web-1');
       }

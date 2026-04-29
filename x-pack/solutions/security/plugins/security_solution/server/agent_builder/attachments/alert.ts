@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
@@ -37,7 +36,7 @@ const isAlertAttachmentData = (data: unknown): data is AlertAttachmentData => {
 /**
  * Creates the definition for the `alert` attachment type.
  */
-export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
+export const createAlertAttachmentType = (): ResolverTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.alert,
     validate: (input) => {
@@ -48,19 +47,15 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment: Attachment<string, unknown>) => {
+    format: (item) => {
       // Extract data to allow proper type narrowing
-      const data = attachment.data;
+      const data = item.data;
       // Necessary because we cannot currently use the AttachmentType type as agent is not
       // registered with enum AttachmentType in agentBuilder attachment_types.ts
       if (!isAlertAttachmentData(data)) {
-        throw new Error(`Invalid alert attachment data for attachment ${attachment.id}`);
+        throw new Error(`Invalid alert attachment data for attachment ${item.id}`);
       }
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: formatAlertData(data) };
-        },
-      };
+      return { type: 'text', value: formatAlertData(data) };
     },
     getTools: () => [
       SECURITY_ENTITY_RISK_SCORE_TOOL_ID,

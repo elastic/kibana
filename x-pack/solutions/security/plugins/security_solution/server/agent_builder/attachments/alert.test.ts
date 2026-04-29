@@ -64,10 +64,7 @@ describe('createAlertAttachmentType', () => {
         data: { alert: 'test alert content', attachmentLabel: 'Security Alert' },
       };
 
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: attachment.data };
+      const representation = await attachmentType.format(attachment, formatContext);
 
       expect(representation.type).toBe('text');
       expect(representation.value).toBe('test alert content');

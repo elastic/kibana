@@ -14,7 +14,6 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 import type {
@@ -63,9 +62,6 @@ export interface AgentBuilderPluginSetupContract {
     // x-pack/platform/plugins/shared/agent_builder/server/services/tools/types.ts
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- any is used by the original type
     register: <RunInput extends ZodObject<any>>(tool: StaticToolRegistration<RunInput>) => void;
-  };
-  attachments: {
-    registerType: (definition: AttachmentTypeDefinition) => void;
   };
   hooks: HooksServiceSetup;
   skills: {

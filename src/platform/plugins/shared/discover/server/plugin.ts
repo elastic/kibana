@@ -15,6 +15,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
@@ -51,6 +52,7 @@ export class DiscoverServerPlugin
     core: CoreSetup,
     plugins: {
       agentBuilder?: AgentBuilderPluginSetup;
+      agentContextLayer?: AgentContextLayerPluginSetup;
       data: DataPluginSetup;
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
@@ -84,8 +86,10 @@ export class DiscoverServerPlugin
           : undefined,
     });
 
+    if (plugins.agentContextLayer) {
+      registerAttachments(plugins.agentContextLayer);
+    }
     if (plugins.agentBuilder) {
-      registerAttachments(plugins.agentBuilder);
       registerSkill(plugins.agentBuilder);
     }
 

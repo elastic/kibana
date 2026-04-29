@@ -103,7 +103,7 @@ describe('Attachment Routes', () => {
         getTypeDefinition: jest.fn().mockImplementation((type: string) => ({
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         })),
       },
     });
@@ -462,7 +462,7 @@ describe('Attachment Routes', () => {
           return {
             id: 'viz',
             validate: (input: unknown) => ({ valid: true, data: input }),
-            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            format: () => ({ type: 'text', value: '' }),
             resolve: resolveMock,
           };
         }
@@ -470,7 +470,7 @@ describe('Attachment Routes', () => {
         return {
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         };
       });
 
@@ -563,7 +563,7 @@ describe('Attachment Routes', () => {
           return {
             id: 'custom',
             validate: (input: unknown) => ({ valid: true, data: input }),
-            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            format: () => ({ type: 'text', value: '' }),
             resolve: resolveMock,
             isStale: isStaleMock,
           };
@@ -572,7 +572,7 @@ describe('Attachment Routes', () => {
         return {
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         };
       });
 

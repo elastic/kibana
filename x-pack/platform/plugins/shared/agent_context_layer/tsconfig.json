@@ -22,6 +22,7 @@
     "@kbn/security-plugin-types-server",
     "@kbn/management-settings-ids",
     "@kbn/core-plugins-browser",
+    "@kbn/agent-context-layer-common",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/core-http-server-mocks",

@@ -23,6 +23,7 @@ import type {
   SmlIndexAction,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
+import type { ResolverTypeDefinition } from './services/resolver/types';
 
 export interface AgentContextLayerSetupDependencies {
   features: FeaturesPluginSetup;
@@ -37,6 +38,9 @@ export interface AgentContextLayerStartDependencies {
 
 export interface AgentContextLayerPluginSetup {
   registerType: (definition: SmlTypeDefinition) => void;
+  registerResolverType: <T extends string = string, TContent = unknown>(
+    definition: ResolverTypeDefinition<T, TContent>
+  ) => void;
 }
 
 export interface AgentContextLayerPluginStart {
@@ -74,6 +78,9 @@ export interface AgentContextLayerPluginStart {
   }) => Promise<SmlResolvedItemResult[]>;
 
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
+  getResolverType: (typeId: string) => ResolverTypeDefinition | undefined;
+  hasResolverType: (typeId: string) => boolean;
+  listResolverTypes: () => ResolverTypeDefinition[];
 }
 
 export interface SmlIndexAttachmentParams {

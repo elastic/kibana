@@ -8,10 +8,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
 
 const columnSchema = z.object({
@@ -38,7 +37,10 @@ const isEsqlQueryResultsData = (data: unknown): data is EsqlQueryResultsData => 
   return esqlQueryResultsDataSchema.safeParse(data).success;
 };
 
-const createEsqlQueryResultsAttachmentType = (): AttachmentTypeDefinition => {
+const createEsqlQueryResultsAttachmentType = (): ResolverTypeDefinition<
+  typeof ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
+  EsqlQueryResultsData
+> => {
   return {
     id: ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
     validate: (input) => {
@@ -48,17 +50,14 @@ const createEsqlQueryResultsAttachmentType = (): AttachmentTypeDefinition => {
       }
       return { valid: false, error: parseResult.error.message };
     },
-    format: (attachment: Attachment<string, unknown>) => {
-      const data = attachment.data;
+    format: (item) => {
+      const data = item.data;
       if (!isEsqlQueryResultsData(data)) {
-        throw new Error(
-          `Invalid ES|QL query results attachment data for attachment ${attachment.id}`
-        );
+        throw new Error(`Invalid ES|QL query results attachment data for attachment ${item.id}`);
       }
       return {
-        getRepresentation: () => {
-          return { type: 'text' as const, value: formatQueryResultsData(data) };
-        },
+        type: 'text' as const,
+        value: formatQueryResultsData(data),
       };
     },
     getTools: () => [
@@ -103,6 +102,6 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
   return lines.join('\n');
 };
 
-export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
-  agentBuilder.attachments.registerType(createEsqlQueryResultsAttachmentType());
+export const registerAttachments = (agentContextLayer: AgentContextLayerPluginSetup) => {
+  agentContextLayer.registerResolverType(createEsqlQueryResultsAttachmentType());
 };

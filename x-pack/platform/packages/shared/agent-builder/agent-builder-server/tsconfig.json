@@ -19,6 +19,7 @@
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
+    "@kbn/agent-context-layer-common",
     "@kbn/agent-builder-common",
     "@kbn/inference-common",
     "@kbn/logging",

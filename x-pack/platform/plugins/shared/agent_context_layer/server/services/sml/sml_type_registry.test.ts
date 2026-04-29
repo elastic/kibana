@@ -43,18 +43,18 @@ describe('createSmlTypeRegistry', () => {
       );
     });
 
-    it.each(['', 'Has-Uppercase', '123-starts-with-number', 'has spaces', 'special!chars'])(
-      'throws on invalid id: %s',
-      (invalidId) => {
-        const def = createMockSmlTypeDefinition({ id: invalidId });
-        expect(() => registry.register(def)).toThrow(/Invalid SML type id/);
+    it('throws on empty id', () => {
+      const def = createMockSmlTypeDefinition({ id: '' });
+      expect(() => registry.register(def)).toThrow(/Invalid SML type id/);
+    });
+
+    it.each(['dashboard', 'my-type', 'lens_v2', 'a123', 'esql.query_results'])(
+      'accepts id: %s',
+      (validId) => {
+        const def = createMockSmlTypeDefinition({ id: validId });
+        expect(() => registry.register(def)).not.toThrow();
       }
     );
-
-    it.each(['dashboard', 'my-type', 'lens_v2', 'a123'])('accepts valid id: %s', (validId) => {
-      const def = createMockSmlTypeDefinition({ id: validId });
-      expect(() => registry.register(def)).not.toThrow();
-    });
   });
 
   describe('has', () => {

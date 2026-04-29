@@ -6,16 +6,17 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import { createServiceMapSkill } from './skills/service_map';
 import { createServiceMapAttachmentType } from './attachments/service_map';
 
 export const registerServiceMapAgentBuilder = ({
   agentBuilder,
+  agentContextLayer,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
 }) => {
   agentBuilder.skills.register(createServiceMapSkill());
-  agentBuilder.attachments.registerType(
-    createServiceMapAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
-  );
+  agentContextLayer.registerResolverType(createServiceMapAttachmentType());
 };

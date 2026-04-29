@@ -18,6 +18,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
+import { registerWorkflowResolverAttachmentTypes } from './agent_builder/attachments/register_workflow_resolver_attachment_types';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
@@ -161,7 +162,9 @@ export class WorkflowsPlugin
       }>('agentContextLayer')
       .then(({ agentContextLayer }) => {
         if (agentContextLayer.found) {
-          agentContextLayer.contract.registerType(createWorkflowSmlType(api));
+          const acl = agentContextLayer.contract;
+          acl.registerType(createWorkflowSmlType(api));
+          registerWorkflowResolverAttachmentTypes(acl, api);
           this.logger.debug(
             'Workflows Management: Workflow SML type registered with Agent Context Layer'
           );

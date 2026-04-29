@@ -7,34 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AttachmentTypeDefinition,
-  AttachmentFormatContext,
-  AgentFormattedAttachment,
-} from '@kbn/agent-builder-server/attachments';
+import type { ResolverFormatContext } from '@kbn/agent-context-layer-common';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
 import { registerAttachments } from './register_attachments';
 
-const createMockAgentBuilder = () => {
-  const registeredTypes: AttachmentTypeDefinition[] = [];
+const createMockAgentContextLayer = () => {
+  const registeredTypes: ResolverTypeDefinition[] = [];
   return {
     mock: {
-      attachments: {
-        registerType: jest.fn((type: AttachmentTypeDefinition) => {
-          registeredTypes.push(type);
-        }),
-      },
-      skills: { register: jest.fn() },
-    } as unknown as AgentBuilderPluginSetup,
+      registerResolverType: jest.fn((type: ResolverTypeDefinition) => {
+        registeredTypes.push(type);
+      }),
+      registerType: jest.fn(),
+    } as unknown as AgentContextLayerPluginSetup,
     getRegisteredType: () => registeredTypes[0],
   };
 };
 
-const createFormatContext = (): AttachmentFormatContext => ({
+const createFormatContext = (): ResolverFormatContext => ({
   request: httpServerMock.createKibanaRequest(),
   spaceId: 'default',
 });
@@ -45,16 +40,11 @@ const createAttachment = (data: Record<string, unknown>): Attachment => ({
   data,
 });
 
-const getFormattedText = (formatted: AgentFormattedAttachment): string => {
-  const representation = formatted.getRepresentation!();
-  return (representation as { type: 'text'; value: string }).value;
-};
-
 describe('registerAttachments', () => {
-  let attachmentType: AttachmentTypeDefinition;
+  let attachmentType: ResolverTypeDefinition;
 
   beforeAll(() => {
-    const { mock, getRegisteredType } = createMockAgentBuilder();
+    const { mock, getRegisteredType } = createMockAgentContextLayer();
     registerAttachments(mock);
     attachmentType = getRegisteredType();
   });
@@ -118,7 +108,7 @@ describe('registerAttachments', () => {
   describe('format', () => {
     const context = createFormatContext();
 
-    it('formats query results into readable text', () => {
+    it('formats query results into readable text', async () => {
       const attachment = createAttachment({
         query: 'FROM logs-* | LIMIT 10',
         columns: [
@@ -133,8 +123,13 @@ describe('registerAttachments', () => {
         timeRange: { from: 'now-24h', to: 'now' },
       });
 
-      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
-      const text = getFormattedText(formatted);
+      const formatted = await attachmentType.format(
+        { id: attachment.id, type: attachment.type, data: attachment.data },
+        context
+      );
+
+      expect(formatted.type).toBe('text');
+      const text = formatted.value;
 
       expect(text).toContain('ES|QL Query: FROM logs-* | LIMIT 10');
       expect(text).toContain('Total Results: 500');
@@ -146,7 +141,7 @@ describe('registerAttachments', () => {
       expect(text).toContain('status: error');
     });
 
-    it('truncates long values in sample rows', () => {
+    it('truncates long values in sample rows', async () => {
       const longValue = 'a'.repeat(150);
       const attachment = createAttachment({
         query: 'FROM logs-*',
@@ -155,14 +150,19 @@ describe('registerAttachments', () => {
         totalHits: 1,
       });
 
-      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
-      const text = getFormattedText(formatted);
+      const formatted = await attachmentType.format(
+        { id: attachment.id, type: attachment.type, data: attachment.data },
+        context
+      );
+
+      expect(formatted.type).toBe('text');
+      const text = formatted.value;
 
       expect(text).toContain('a'.repeat(100) + '...');
       expect(text).not.toContain(longValue);
     });
 
-    it('omits time range when not provided', () => {
+    it('omits time range when not provided', async () => {
       const attachment = createAttachment({
         query: 'FROM logs-*',
         columns: [{ name: 'status', type: 'keyword' }],
@@ -170,18 +170,24 @@ describe('registerAttachments', () => {
         totalHits: 0,
       });
 
-      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
-      const text = getFormattedText(formatted);
+      const formatted = await attachmentType.format(
+        { id: attachment.id, type: attachment.type, data: attachment.data },
+        context
+      );
 
-      expect(text).not.toContain('Time Range');
+      expect(formatted.type).toBe('text');
+      expect(formatted.value).not.toContain('Time Range');
     });
 
     it('throws for invalid attachment data', () => {
       const attachment = createAttachment({ invalid: true });
 
-      expect(() => attachmentType.format(attachment, context)).toThrow(
-        'Invalid ES|QL query results attachment data'
-      );
+      expect(() =>
+        attachmentType.format(
+          { id: attachment.id, type: attachment.type, data: attachment.data },
+          context
+        )
+      ).toThrow('Invalid ES|QL query results attachment data');
     });
   });
 

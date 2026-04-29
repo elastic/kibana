@@ -85,7 +85,7 @@ describe('convertPreviousRounds', () => {
           ({
             id: type,
             validate: (input: unknown) => ({ valid: true, data: input }),
-            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            format: () => ({ type: 'text', value: '' }),
           } as any),
       }),
       ...parts,

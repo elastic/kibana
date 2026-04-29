@@ -18,5 +18,6 @@
     "@kbn/visualization-utils",
     "@kbn/zod",
     "@kbn/core",
+    "@kbn/utility-types",
   ]
 }

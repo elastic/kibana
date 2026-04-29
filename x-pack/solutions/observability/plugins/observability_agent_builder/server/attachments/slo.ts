@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { Logger } from '@kbn/core/server';
+import type { ResolverTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import { OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
@@ -31,7 +31,7 @@ export function createSloAttachmentType({
 }: {
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID, SloAttachmentData> {
+}): ResolverTypeDefinition<typeof OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID, SloAttachmentData> {
   return {
     id: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
     validate: (input) => {
@@ -41,70 +41,42 @@ export function createSloAttachmentType({
       }
       return { valid: false, error: parsed.error.message };
     },
-    format: (attachment) => {
-      const { sloId, sloInstanceId, remoteName } = attachment.data;
+    format: (item) => ({
+      type: 'text',
+      value: `Observability SLO ID: ${item.data.sloId}. Use the ${GET_SLO_DETAILS_TOOL_ID} tool to fetch full SLO information.`,
+    }),
+    getBoundedTools: (item) => {
+      const { sloId, sloInstanceId, remoteName } = item.data;
+      return [
+        {
+          id: GET_SLO_DETAILS_TOOL_ID,
+          description: `Fetch the full details for SLO ${sloId}.`,
+          type: ToolType.builtin,
+          schema: z.object({}),
+          confirmation: { askUser: 'never' },
+          handler: async (_args, abContext) => {
+            const sloDetails = await dataRegistry.getData('sloDetails', {
+              request: abContext.request,
+              sloId,
+              sloInstanceId,
+              remoteName,
+            });
 
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: `Observability SLO ID: ${sloId}. Use the ${GET_SLO_DETAILS_TOOL_ID} tool to fetch full SLO information.`,
-        }),
-        getBoundedTools: () => [
-          {
-            id: GET_SLO_DETAILS_TOOL_ID,
-            type: ToolType.builtin,
-            description: `Fetch the full details for SLO ${sloId}.`,
-            schema: z.object({}),
-            handler: async (_args, context) => {
-              try {
-                const sloDetails = await dataRegistry.getData('sloDetails', {
-                  request: context.request,
-                  sloId,
-                  sloInstanceId,
-                  remoteName,
-                });
+            if (!sloDetails) {
+              throw new Error(`SLO details not found for ${sloId}`);
+            }
 
-                if (!sloDetails) {
-                  return {
-                    results: [
-                      {
-                        type: ToolResultType.error,
-                        data: {
-                          message: `SLO details not found for ${sloId}`,
-                        },
-                      },
-                    ],
-                  };
-                }
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.other,
-                      data: sloDetails,
-                    },
-                  ],
-                };
-              } catch (error) {
-                logger.error(`Failed to fetch SLO details for attachment: ${error?.message}`);
-                logger.debug(error);
-
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Failed to fetch SLO details: ${error.message}`,
-                        stack: error.stack,
-                      },
-                    },
-                  ],
-                };
-              }
-            },
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: sloDetails as Record<string, unknown>,
+                },
+              ],
+            };
           },
-        ],
-      };
+        },
+      ];
     },
     getTools: () => [],
     getAgentDescription: () =>

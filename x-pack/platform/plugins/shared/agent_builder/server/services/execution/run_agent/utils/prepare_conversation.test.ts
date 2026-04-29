@@ -17,8 +17,8 @@ import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type {
   AttachmentBoundedTool,
   AttachmentRepresentation,
-  AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
+import type { ResolverTypeDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import {
   createAgentHandlerContextMock,
@@ -48,16 +48,12 @@ describe('prepareConversation', () => {
     description?: string;
     repr: AttachmentRepresentation;
     boundedTools?: AttachmentBoundedTool[];
-  }): AttachmentTypeDefinition => {
+  }): ResolverTypeDefinition => {
     return {
       id,
       validate: jest.fn(),
-      format: jest.fn().mockImplementation(() => {
-        return {
-          getRepresentation: () => repr,
-          getBoundedTools: () => boundedTools,
-        };
-      }),
+      format: jest.fn().mockImplementation(() => repr),
+      getBoundedTools: boundedTools.length ? jest.fn().mockResolvedValue(boundedTools) : undefined,
       getAgentDescription: description ? () => description : undefined,
     };
   };
@@ -72,7 +68,7 @@ describe('prepareConversation', () => {
       getTypeDefinition: (type: string) => ({
         id: type,
         validate: (input: unknown) => ({ valid: true, data: input }),
-        format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        format: () => ({ type: 'text', value: '' }),
       }),
     });
 
@@ -155,7 +151,7 @@ describe('prepareConversation', () => {
         getTypeDefinition: (type: string) => ({
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         }),
       });
 
@@ -210,7 +206,7 @@ describe('prepareConversation', () => {
         getTypeDefinition: (type: string) => ({
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          format: () => ({ type: 'text', value: '' }),
         }),
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
@@ -260,8 +256,11 @@ describe('prepareConversation', () => {
         getTypeDefinition: (type: string) => ({
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          validateOrigin: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          validateOrigin: (input: unknown) => ({
+            valid: true as const,
+            data: typeof input === 'string' ? input : String(input),
+          }),
+          format: () => ({ type: 'text', value: '' }),
         }),
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
@@ -315,8 +314,11 @@ describe('prepareConversation', () => {
         getTypeDefinition: (type: string) => ({
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
-          validateOrigin: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          validateOrigin: (input: unknown) => ({
+            valid: true as const,
+            data: typeof input === 'string' ? input : String(input),
+          }),
+          format: () => ({ type: 'text', value: '' }),
         }),
       });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({

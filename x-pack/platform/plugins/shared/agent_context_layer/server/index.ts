@@ -35,6 +35,17 @@ export type {
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
 
+export type {
+  ResolverTypeDefinition,
+  ResolverBoundedToolDefinition,
+  ResolverBoundedToolItemSnapshot,
+  ResolverStaleCheckItem,
+  ResolverRepresentation,
+  ResolverFormatContext,
+  ResolverResolveContext,
+  ResolverValidationResult,
+} from './services/resolver/types';
+
 export const plugin: PluginInitializer<
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,

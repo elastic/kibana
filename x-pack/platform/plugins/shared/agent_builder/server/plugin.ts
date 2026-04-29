@@ -189,9 +189,6 @@ export class AgentBuilderPlugin
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
       },
-      attachments: {
-        registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
-      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
@@ -230,6 +227,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      agentContextLayer: startDeps.agentContextLayer,
     });
 
     const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =

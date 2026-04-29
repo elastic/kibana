@@ -18,16 +18,12 @@ export const createSmlTypeRegistry = (): SmlTypeRegistry => {
   return new SmlTypeRegistryImpl();
 };
 
-const SML_TYPE_ID_PATTERN = /^[a-z][a-z0-9_-]*$/;
-
 class SmlTypeRegistryImpl implements SmlTypeRegistry {
   private types: Map<string, SmlTypeDefinition> = new Map();
 
   register(definition: SmlTypeDefinition): void {
-    if (!SML_TYPE_ID_PATTERN.test(definition.id)) {
-      throw new Error(
-        `Invalid SML type id '${definition.id}': must match ${SML_TYPE_ID_PATTERN} (lowercase alphanumeric, hyphens, and underscores)`
-      );
+    if (typeof definition.id !== 'string' || definition.id.length === 0) {
+      throw new Error(`Invalid SML type id: expected non-empty string`);
     }
     if (this.types.has(definition.id)) {
       throw new Error(`SML type with id '${definition.id}' is already registered`);

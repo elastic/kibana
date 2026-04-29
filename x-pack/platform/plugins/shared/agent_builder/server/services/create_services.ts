@@ -78,7 +78,6 @@ export class ServiceManager {
         config: this.config,
       }),
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
-      attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
@@ -103,6 +102,7 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    agentContextLayer,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -129,6 +129,7 @@ export class ServiceManager {
     const attachments = this.services.attachments.start({
       spaces,
       savedObjects,
+      agentContextLayer,
     });
 
     const tools = this.services.tools.start({

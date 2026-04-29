@@ -42,7 +42,6 @@ import type {
 } from '@kbn/agent-context-layer-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentRegistry } from './services/agents';
-import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
 import type { ModelProviderFactoryFn } from './services/execution/runner/model_provider';
@@ -76,13 +75,6 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
-}
-
-export interface AttachmentsSetup {
-  /**
-   * Register an attachment type to be available in agentBuilder.
-   */
-  registerType: AttachmentServiceSetup['registerType'];
 }
 
 export interface SkillsSetup {
@@ -183,6 +175,11 @@ export interface PluginsSetup {
  */
 export type { TopSnippetsConfig };
 
+/**
+ * Agent Builder plugin setup contract.
+ * Server-side resolver / attachment types register via
+ * {@link AgentContextLayerPluginSetup.registerResolverType `agentContextLayer.registerResolverType()`}.
+ */
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -192,10 +189,6 @@ export interface AgentBuilderPluginSetup {
    * Tools setup contract, which can be used to register built-in tools.
    */
   tools: ToolsSetup;
-  /**
-   * Attachments setup contract, which can be used to register attachment types.
-   */
-  attachments: AttachmentsSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */
