@@ -16,9 +16,14 @@ Orchestrate bug reproduction and TDD fixing for Kibana Security Solution issues.
 
 ## Prerequisites
 
-- `gh` CLI installed and authenticated — see `README.md` for setup
+- `gh` CLI installed and authenticated (`gh auth login`)
 - Local `elastic/kibana` clone with `yarn kbn bootstrap` completed
-- Browser MCP configured — `cursor-ide-browser` (Cursor, built-in) or `@playwright/mcp` (Claude Code) — see `README.md`
+- Browser MCP for reproduction:
+  - **Cursor** — `cursor-ide-browser` is built in, no setup needed
+  - **Claude Code** — add to `~/.claude/mcp.json` and restart:
+    ```json
+    { "mcpServers": { "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] } } }
+    ```
 
 ## Knowledge Base
 
@@ -30,7 +35,9 @@ The phases run in order: 0 → 1 → 2 → 3 → 4 → 5 → 6. Each phase produ
 
 ### Phase 0: Analyze
 
-Run from the **Kibana repo root** — this is the first thing you do (no running server needed):
+Run from the **Kibana repo root** — this is the first thing you do (no running server needed).
+
+The default repo is `elastic/kibana`. If the user provides only a number (e.g. "fix bug #12345"), fetch from there. If the ticket lives in a different repo, the user must say so explicitly (e.g. "fix bug #12345 in elastic/security-team") — don't guess or search across repos.
 
 ```bash
 gh issue view <NUMBER> --repo elastic/kibana \
