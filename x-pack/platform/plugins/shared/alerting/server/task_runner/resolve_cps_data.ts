@@ -15,39 +15,40 @@ export const resolveCpsData = async (
   spaceId: string,
   logger: Logger
 ): Promise<CpsData> => {
-  const npreName = getSpaceNPRE(spaceId);
+  const npreRef = getSpaceNPRE(spaceId);
+  const npreName = npreRef.replace(/^@/, '');
 
   try {
-    const [npreResponse, tagsResponse] = await Promise.all([
-      esClient.transport
-        .request<{ expression: string }>({
-          method: 'GET',
-          path: `/_project_routing/${npreName}`,
-        })
-        .catch((error: { meta?: { statusCode?: number } }) => {
-          if (error?.meta?.statusCode === 404) {
-            return { expression: PROJECT_ROUTING_ALL };
-          }
-          throw error;
-        }),
-      esClient.transport
-        .request<ProjectTagsResponse>({
-          method: 'POST',
-          path: '/_project/tags',
-          body: { project_routing: npreName },
-        })
-        .catch(() => undefined),
-    ]);
+    const resolvedExpression = await esClient.transport
+      .request<{ [key: string]: { expression: string } }>({
+        method: 'GET',
+        path: `/_project_routing/${npreName}`,
+      })
+      .then((res) => res[npreName]?.expression ?? PROJECT_ROUTING_ALL)
+      .catch((error: { statusCode?: number }) => {
+        if (error?.statusCode === 404) {
+          return PROJECT_ROUTING_ALL;
+        }
+        throw error;
+      });
+
+    const tagsResponse = await esClient.transport
+      .request<ProjectTagsResponse>({
+        method: 'GET',
+        path: '/_project/tags',
+        body: { project_routing: resolvedExpression },
+      })
+      .catch(() => undefined);
 
     return {
-      resolvedExpression: npreResponse.expression,
+      resolvedExpression,
       linkedProjects: tagsResponse?.linked_projects
         ? Object.values(tagsResponse.linked_projects).map(
             ({ _id, _alias, _type, _organisation }) => ({
               id: _id,
               alias: _alias,
               type: _type,
-              organisation: _organisation,
+              organization: _organisation,
             })
           )
         : [],

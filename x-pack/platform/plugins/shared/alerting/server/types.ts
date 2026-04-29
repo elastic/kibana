@@ -457,7 +457,7 @@ export interface CpsLinkedProject {
   id: string;
   alias: string;
   type: string;
-  organisation: string;
+  organization: string;
 }
 
 export interface CpsData {
