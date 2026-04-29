@@ -386,6 +386,7 @@ const avgDefinition: FunctionDefinition = {
     'FROM employees\n| STATS AVG(height)',
     'FROM employees\n| STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS average = ROUND(AVG(responseTime), 4)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS average = ROUND(AVG(responseTime::tdigest), 4)',
   ],
 };
 
@@ -674,6 +675,7 @@ const countDefinition: FunctionDefinition = {
     'ROW mv = [1, 2], n = NULL, t = TRUE, f = FALSE\n| STATS COUNT(mv), COUNT(n), COUNT(t), COUNT(f)',
     'ROW n=1\n| STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS cnt = COUNT(responseTime)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS cnt = COUNT(responseTime::tdigest)',
   ],
 };
 
@@ -1384,7 +1386,7 @@ const earliestDefinition: FunctionDefinition = {
     defaultMessage:
       'An alias for `FIRST` where\nthe sort field (the second parameter) is implicit and is set to `@timestamp`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2761,7 +2763,7 @@ const latestDefinition: FunctionDefinition = {
     defaultMessage:
       'An alias for `LAST` where\nthe sort field (the second parameter) is implicit and is set to `@timestamp`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3040,6 +3042,7 @@ const maxDefinition: FunctionDefinition = {
     'FROM employees\n| STATS MAX(languages)',
     'FROM employees\n| STATS max_avg_salary_change = MAX(MV_AVG(salary_change))',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS maximum = ROUND(MAX(responseTime), 4)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS maximum = ROUND(MAX(responseTime::tdigest), 4)',
   ],
 };
 
@@ -3115,6 +3118,7 @@ const medianDefinition: FunctionDefinition = {
     'FROM employees\n| STATS MEDIAN(salary), PERCENTILE(salary, 50)',
     'FROM employees\n| STATS median_max_salary_change = MEDIAN(MV_MAX(salary_change))',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS p50 = ROUND(MEDIAN(responseTime), 4)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS p50 = ROUND(MEDIAN(responseTime::tdigest), 2)',
   ],
 };
 
@@ -3340,6 +3344,7 @@ const minDefinition: FunctionDefinition = {
     'FROM employees\n| STATS MIN(languages)',
     'FROM employees\n| STATS min_avg_salary_change = MIN(MV_AVG(salary_change))',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS minimum = ROUND(MIN(responseTime), 4)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS minimum = ROUND(MIN(responseTime::tdigest), 4)',
   ],
 };
 
@@ -3630,6 +3635,7 @@ const percentileDefinition: FunctionDefinition = {
     'FROM employees\n| STATS p0 = PERCENTILE(salary,  0)\n     , p50 = PERCENTILE(salary, 50)\n     , p99 = PERCENTILE(salary, 99)',
     'FROM employees\n| STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS p99 = ROUND(PERCENTILE(responseTime, 99), 4)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS p95 = ROUND(PERCENTILE(responseTime::tdigest, 95), 2)',
   ],
 };
 
@@ -4242,11 +4248,11 @@ const sparklineDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'aggregation',
           type: 'double',
           optional: false,
           description:
-            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -4258,8 +4264,7 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          description: 'Target number of buckets.',
         },
         {
           name: 'from',
@@ -4279,11 +4284,11 @@ const sparklineDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'aggregation',
           type: 'integer',
           optional: false,
           description:
-            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -4295,8 +4300,7 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          description: 'Target number of buckets.',
         },
         {
           name: 'from',
@@ -4316,11 +4320,11 @@ const sparklineDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'aggregation',
           type: 'long',
           optional: false,
           description:
-            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+            'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
         },
         {
           name: 'key',
@@ -4332,8 +4336,7 @@ const sparklineDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+          description: 'Target number of buckets.',
         },
         {
           name: 'from',
@@ -4625,6 +4628,7 @@ const sumDefinition: FunctionDefinition = {
     'FROM employees\n| STATS SUM(languages)',
     'FROM employees\n| STATS total_salary_changes = SUM(MV_MAX(salary_change))',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS total = ROUND(SUM(responseTime), 2)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS total = ROUND(SUM(responseTime::tdigest), 2)',
   ],
 };
 

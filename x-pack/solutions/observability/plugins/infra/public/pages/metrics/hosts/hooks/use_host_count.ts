@@ -9,6 +9,7 @@ import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo, useEffect } from 'react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
@@ -29,7 +30,7 @@ export const useHostCount = () => {
         query: buildQuery(),
         from: parsedDateRange.from,
         to: parsedDateRange.to,
-        schema: searchCriteria?.preferredSchema || 'ecs',
+        schema: searchCriteria?.preferredSchema || DEFAULT_SCHEMA,
       }),
     [buildQuery, parsedDateRange.from, parsedDateRange.to, searchCriteria?.preferredSchema]
   );
@@ -58,7 +59,7 @@ export const useHostCount = () => {
         with_query: !!searchCriteria.query.query,
         with_filters: searchCriteria.filters.length > 0 || searchCriteria.panelFilters.length > 0,
         schema_selected: schemas.length
-          ? searchCriteria?.preferredSchema || 'ecs'
+          ? searchCriteria?.preferredSchema || DEFAULT_SCHEMA
           : 'no schema available',
         schemas_available: schemas.length ? schemas : ['no schema available'],
         schema_error: timeRangeMetadataStatus === FETCH_STATUS.FAILURE,

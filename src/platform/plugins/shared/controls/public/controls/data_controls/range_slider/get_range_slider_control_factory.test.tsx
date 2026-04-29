@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { PublishesUnifiedSearch, PresentationContainer } from '@kbn/presentation-publishing';
@@ -19,7 +19,7 @@ import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import type { RangeSliderControlState } from '@kbn/controls-schemas';
+import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 
 const DEFAULT_TOTAL_RESULTS = 20;
@@ -250,6 +250,50 @@ describe('RangeSliderControlApi', () => {
       });
       const serializedState = api.serializeState() as RangeSliderControlState;
       expect(serializedState.step).toBe(1024);
+    });
+  });
+
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = rangeSliderControlSchema.validate({
+        data_view_id: 'oldDataViewId',
+        field_name: 'myFieldName',
+      });
+      const initialState = {
+        ...lastSavedState,
+        data_view_id: 'newDataViewId',
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = rangeSliderControlSchema.validate({
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
     });
   });
 });

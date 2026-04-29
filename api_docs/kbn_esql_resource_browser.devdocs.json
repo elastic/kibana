@@ -48,6 +48,7 @@
             "lineNumber": 83,
             "columnNumber": 71,
             "deprecated": false,
+            "docsReferencedTypeName": "BrowserPopoverWrapperProps",
             "trackAdoption": false,
             "isRequired": true
           }
