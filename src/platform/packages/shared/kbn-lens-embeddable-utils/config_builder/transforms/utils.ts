@@ -335,6 +335,7 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DataSourceType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
+    const layerWithSettings = config as Partial<LayerSettingsSchema>;
     const xAxisScale =
       fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const columns = getValueColumns(config, i, xAxisScale);
@@ -344,6 +345,7 @@ function buildDatasourceStatesLayer(
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
       columns,
+      ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
 
@@ -511,7 +513,8 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   if (!('columnOrder' in options)) {
     return {
       sampling: LENS_SAMPLING_DEFAULT_VALUE,
-      ignore_global_filters: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+      ignore_global_filters:
+        options.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     };
   }
   // mind this is already filled by schema validate
