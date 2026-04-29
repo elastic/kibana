@@ -8,22 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_breakdown_table';
-import { useCombinedRiskScoreKpi } from './use_combined_risk_score_kpi';
-import { useKibana, useUiSetting } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_levels_esql_query';
 import { esqlRecordsToSeverityCount, type EsqlSeverityRecord } from '../../common/utils';
-
-// Wide "all time" range used to neutralize the global date picker on the
-// Entity Analytics home page, where the picker is intentionally hidden and
-// risk levels must match the counts in the entities table.
-const ALL_TIME_RANGE = { from: 'now-100y', to: 'now' } as const;
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
@@ -43,16 +35,10 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
   const { filterManager } = useKibana().services.data.query;
-  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
 
-  const useLegacy = !isEntityStoreV2Enabled;
-
-  const combinedRiskStats = useCombinedRiskScoreKpi(!useLegacy, {
-    timerangeOverride: ALL_TIME_RANGE,
-  });
   const riskLevelsStats = useRiskLevelsEsqlQuery({
     watchlistId: watchlistId ?? '',
-    skip: useLegacy,
+    skip: false,
     spaceId: spaceId ?? '',
     // The Entity Analytics home page intentionally hides the global date
     // picker, so risk levels are shown across the entire entities-latest
@@ -60,14 +46,12 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
     applyGlobalTimeFilter: false,
   });
 
-  const severityCount = useMemo(() => {
-    if (useLegacy) {
-      return combinedRiskStats.severityCount ?? EMPTY_SEVERITY_COUNT;
-    }
-    return esqlRecordsToSeverityCount((riskLevelsStats.records ?? []) as EsqlSeverityRecord[]);
-  }, [useLegacy, combinedRiskStats.severityCount, riskLevelsStats.records]);
+  const severityCount = useMemo(
+    () => esqlRecordsToSeverityCount((riskLevelsStats.records ?? []) as EsqlSeverityRecord[]),
+    [riskLevelsStats.records]
+  );
 
-  const loading = useLegacy ? combinedRiskStats.loading : riskLevelsStats.isLoading;
+  const loading = riskLevelsStats.isLoading;
 
   const handlePartitionClick = useCallback(
     (level: RiskSeverity) => {
