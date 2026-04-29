@@ -357,6 +357,8 @@ if (window.__kbnHmrActive__ && module.hot) {
   }
 
   function connect() {
+    // TODO: as a follow up to support docker or vm development this should use window.location.hostname
+    // plus making the server bind address configurable via KBN_HMR_HOST env var
     source = new EventSource('http://localhost:' + __KBN_HMR_PORT__ + '/');
 
     source.onmessage = function (event) {
