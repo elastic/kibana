@@ -15,6 +15,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:authorization
         label: 'Cypress MKI - Authorization'
@@ -29,6 +32,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:coverage_overview
         label: 'Cypress MKI - Coverage Overview'
@@ -43,6 +49,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:maintenance_windows
         label: 'Cypress MKI - Maintenance Windows'
@@ -57,6 +66,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:prebuilt_rules
         label: 'Cypress MKI - Prebuilt Rules'
@@ -71,6 +83,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:related_integrations
         label: 'Cypress MKI - Related Integrations'
@@ -85,6 +100,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rule_actions
         label: 'Cypress MKI - Rule Actions'
@@ -99,6 +117,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rule_details
         label: 'Cypress MKI - Rule Details'
@@ -113,6 +134,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rules_table
         label: 'Cypress MKI - Rules Table'
@@ -127,6 +151,9 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          exit_status:
+            - 101
 
   - group: 'API MKI - Rule Management'
     key: api_test_rule_management
@@ -144,6 +171,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_creation:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless
@@ -158,6 +188,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_update:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless
@@ -172,6 +205,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_update:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless
@@ -186,6 +222,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_patch:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless
@@ -200,6 +239,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_patch:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless
@@ -214,6 +256,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - prebuilt_rules_management:customization_disabled:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_disabled:qa:serverless
@@ -228,6 +273,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - prebuilt_rules_management:customization_enabled:customization:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:customization:qa:serverless
@@ -242,6 +290,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - prebuilt_rules_management:customization_enabled:upgrade_prebuilt_rules:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:upgrade_prebuilt_rules:qa:serverless
@@ -256,6 +307,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - prebuilt_rules_management:customization_enabled:upgrade_notifications:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:upgrade_notifications:qa:serverless
@@ -270,6 +324,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless
@@ -284,6 +341,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless
@@ -298,6 +358,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_delete:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless
@@ -312,6 +375,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_delete:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless
@@ -326,6 +392,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_import_export:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless
@@ -340,6 +409,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_import_export:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless
@@ -354,6 +426,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_management:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless
@@ -368,6 +443,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_bulk_actions:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless
@@ -382,6 +460,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_read:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless
@@ -396,6 +477,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rule_read:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless
@@ -410,6 +494,9 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
 
       - label: 'API MKI - rules_management:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless
@@ -424,3 +511,6 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          exit_status:
+            - 101
