@@ -74,9 +74,10 @@ describe('useResolvedDefinitionName', () => {
 
   it('resolves the definition via _resolve_index when an index is provided', async () => {
     const fetchMock = jest.fn().mockResolvedValue({ stream: { name: 'logs.resolved' } });
+    const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
-        streamsRepositoryClient: buildClient(fetchMock),
+        streamsRepositoryClient,
         index: 'logs-foo-default',
       })
     );
@@ -94,9 +95,10 @@ describe('useResolvedDefinitionName', () => {
 
   it('returns the fallback name without probing when CPS is disabled', async () => {
     const fetchMock = jest.fn();
+    const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
-        streamsRepositoryClient: buildClient(fetchMock),
+        streamsRepositoryClient,
         fallbackStreamName: 'logs.fallback',
       })
     );
@@ -109,9 +111,10 @@ describe('useResolvedDefinitionName', () => {
 
   it('marks the stream as locally existing when CPS probe succeeds', async () => {
     const fetchMock = jest.fn().mockResolvedValue({});
+    const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
-        streamsRepositoryClient: buildClient(fetchMock),
+        streamsRepositoryClient,
         fallbackStreamName: 'logs.fallback',
         cpsHasLinkedProjects: true,
       })
@@ -130,9 +133,10 @@ describe('useResolvedDefinitionName', () => {
 
   it('marks the stream as remote when CPS probe fails', async () => {
     const fetchMock = jest.fn().mockRejectedValue(new Error('not found'));
+    const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
-        streamsRepositoryClient: buildClient(fetchMock),
+        streamsRepositoryClient,
         fallbackStreamName: 'logs.fallback',
         cpsHasLinkedProjects: true,
       })
@@ -145,9 +149,10 @@ describe('useResolvedDefinitionName', () => {
 
   it('returns undefined when neither index nor fallback are provided', async () => {
     const fetchMock = jest.fn();
+    const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
-        streamsRepositoryClient: buildClient(fetchMock),
+        streamsRepositoryClient,
       })
     );
 
