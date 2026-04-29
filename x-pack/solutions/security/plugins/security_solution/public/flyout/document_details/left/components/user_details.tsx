@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -65,7 +65,7 @@ import {
   HOST_IP_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
@@ -187,7 +187,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     [dispatch]
   );
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const openUserPreview = useCallback(() => {
@@ -209,13 +208,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const entityFromStoreResult = useEntityFromStore({
     entityId,
     entityType: 'user',
-    skip: !entityStoreV2Enabled || isInitializing,
+    skip: isInitializing,
   });
-  const observedUser = useObservedUser(
-    userName,
-    scopeId,
-    entityStoreV2Enabled ? entityFromStoreResult : undefined
-  );
+  const observedUser = useObservedUser(userName, scopeId, entityFromStoreResult);
 
   const filterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -226,7 +221,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     filterQuery,
     riskEntity: EntityType.user,
     timerange,
-    skip: entityStoreV2Enabled,
+    skip: true,
   });
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   // Always show observed user fields from the same indices useObservedUser queries (security
@@ -237,7 +232,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
 
   const userRiskScoreStateFromEntityStore = useMemo(
     () =>
-      entityStoreV2Enabled && observedUser.entityRecord
+      observedUser.entityRecord
         ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
             refetch: observedUser.refetchEntityStore ?? (() => {}),
             isLoading: observedUser.isLoading,
@@ -246,7 +241,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           })
         : undefined,
     [
-      entityStoreV2Enabled,
       observedUser.entityRecord,
       observedUser.refetchEntityStore,
       observedUser.isLoading,
@@ -254,10 +248,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     ]
   );
 
-  const isRiskScoreExist =
-    entityStoreV2Enabled && observedUser.entityRecord
-      ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
-      : !!userRiskData?.user?.risk;
+  const isRiskScoreExist = observedUser.entityRecord
+    ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
+    : !!userRiskData?.user?.risk;
 
   const identityFields = useMemo(
     () =>
@@ -271,16 +264,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const userIdentityFields = useMemo(() => {
     const legacyFields =
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
-    if (!entityStoreV2Enabled) {
-      return legacyFields;
-    }
     return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
-  }, [entityStoreV2Enabled, userName, identityFields]);
+  }, [userName, identityFields]);
 
   const userCspIdentityDoc = observedUser.details;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: userIdentityFields,
     })
   );
@@ -472,28 +461,16 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             endDate={to}
             narrowDateRange={narrowDateRange}
             setQuery={setQuery}
-            refetch={
-              entityStoreV2Enabled
-                ? observedUser.refetchEntityStore ?? (() => {})
-                : observedUser.refetchObservedDetails ?? (() => {})
-            }
-            inspect={
-              entityStoreV2Enabled
-                ? entityFromStoreResult?.inspect
-                : observedUser.observedDetailsInspect
-            }
+            refetch={observedUser.refetchEntityStore ?? (() => {})}
+            inspect={entityFromStoreResult?.inspect}
             userName={userName}
             indexPatterns={securityDefaultPatterns}
             jobNameById={jobNameById}
             scopeId={scopeId}
             isFlyoutOpen={true}
             riskScoreState={userRiskScoreStateFromEntityStore}
-            firstSeenFromEntityStore={
-              entityStoreV2Enabled ? observedUser.firstSeen?.date ?? undefined : undefined
-            }
-            lastSeenFromEntityStore={
-              entityStoreV2Enabled ? observedUser.lastSeen?.date ?? undefined : undefined
-            }
+            firstSeenFromEntityStore={observedUser.firstSeen?.date ?? undefined}
+            lastSeenFromEntityStore={observedUser.lastSeen?.date ?? undefined}
           />
         )}
       </AnomalyTableProvider>
