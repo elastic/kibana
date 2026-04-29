@@ -26,6 +26,11 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const VIRUSTOTAL_API_BASE_URL = 'https://www.virustotal.com/api/v3';
 const VIRUSTOTAL_RESOURCE_TYPES = ['analysis', 'url', 'domain', 'ip', 'file'] as const;
+const VIRUSTOTAL_DOMAIN_REGEX = z.regexes.domain;
+const VIRUSTOTAL_URL_SCHEMA = z.url({
+  protocol: /^https?$/,
+  hostname: VIRUSTOTAL_DOMAIN_REGEX,
+});
 
 type VirusTotalResourceType = (typeof VIRUSTOTAL_RESOURCE_TYPES)[number];
 
@@ -56,50 +61,24 @@ interface ErrorResult {
   };
 }
 
-const isAbsoluteUrl = (value: string): boolean => {
-  try {
-    const { hostname } = new URL(value);
-    return Boolean(hostname);
-  } catch {
-    return false;
-  }
-};
+const isVirusTotalUrl = (value: string): boolean => VIRUSTOTAL_URL_SCHEMA.safeParse(value).success;
 
 const normalizeDomain = (value: string): string => value.trim().toLowerCase();
 
-const isValidDomain = (value: string): boolean => {
-  const domain = normalizeDomain(value);
-
-  if (
-    domain.length === 0 ||
-    domain.length > 253 ||
-    domain.startsWith('.') ||
-    domain.endsWith('.') ||
-    domain.includes('/') ||
-    domain.includes(':') ||
-    /\s/.test(domain)
-  ) {
-    return false;
-  }
-
-  const labels = domain.split('.');
-  return (
-    labels.length > 1 &&
-    labels.every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
-  );
-};
+const isValidDomain = (value: string): boolean =>
+  VIRUSTOTAL_DOMAIN_REGEX.test(normalizeDomain(value));
 
 const urlOrDomainSchema = z
   .string()
   .trim()
-  .refine((value) => isAbsoluteUrl(value) || isValidDomain(value), {
-    message: 'Must be a valid absolute URL or bare domain',
+  .refine((value) => isVirusTotalUrl(value) || isValidDomain(value), {
+    message: 'Must be a valid HTTP(S) URL or bare domain',
   });
 
 const getVirusTotalUrlIdentifier = (urlOrId: string): string => {
   const value = urlOrId.trim();
 
-  if (!isAbsoluteUrl(value)) {
+  if (!isVirusTotalUrl(value)) {
     return encodeURIComponent(value);
   }
 

@@ -256,10 +256,16 @@ describe('VirusTotalConnector', () => {
         VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'https://example.com' }).success
       ).toBe(true);
       expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'ftp://example.com' }).success
+      ).toBe(false);
+      expect(
         VirusTotalConnector.actions.scanUrl.input.safeParse({
           url: 'acme.example',
         }).success
       ).toBe(true);
+      expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'localhost' }).success
+      ).toBe(false);
       expect(
         VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'not a domain' }).success
       ).toBe(false);
