@@ -82,10 +82,7 @@ describe('StarredFilterRenderer', () => {
       wrapper: createWrapper({ favoritesService: mockFavoritesService }),
     });
 
-    expect(screen.getByRole('button', { name: 'Starred' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    expect(screen.getByRole('button', { name: 'Starred' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('renders nothing when the favorites service is not available', () => {
