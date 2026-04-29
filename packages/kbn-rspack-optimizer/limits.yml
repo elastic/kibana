@@ -38,7 +38,7 @@ pageLoadAssetSize:
   datasetQuality: 41081
   dataUsage: 4123
   dataViewEditor: 3312
-  dataViewFieldEditor: 16263
+  dataViewFieldEditor: 16209
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
@@ -171,10 +171,10 @@ pageLoadAssetSize:
   serverlessSearch: 18261
   serverlessWorkplaceAI: 3338
   sessionView: 379
-  share: 379
+  share: 440
   shared-core: 315647
-  shared-misc: 78357
-  shared-packages: 3141411
+  shared-misc: 77817
+  shared-packages: 3079892
   shared-plugins: 10954901
   shared-solution-packages: 184340
   slo: 19696
