@@ -51,7 +51,7 @@ export class SampleTaskManagerFixturePlugin
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
 
-    const fakeRequestEnricher = core.security.getFakeRequestEnricher();
+    const fakeRequestEnricher = taskManager.enrichFakeRequest;
     const pluginSecurityStart = this.securityStart;
 
     const defaultSampleTaskConfig = {
@@ -135,16 +135,16 @@ export class SampleTaskManagerFixturePlugin
               resolvedFromTaskRequest: schema.maybe(
                 schema.nullable(
                   schema.object({
-                    username: schema.maybe(schema.string()),
                     profileUid: schema.maybe(schema.string()),
+                    usernameAccessThrew: schema.boolean(),
                   })
                 )
               ),
               resolvedFromChildRequest: schema.maybe(
                 schema.nullable(
                   schema.object({
-                    username: schema.maybe(schema.string()),
                     profileUid: schema.maybe(schema.string()),
+                    usernameAccessThrew: schema.boolean(),
                   })
                 )
               ),
@@ -164,7 +164,16 @@ export class SampleTaskManagerFixturePlugin
               if (!user) {
                 return null;
               }
-              return { username: user.username, profileUid: user.profile_uid };
+              // Reading any AuthenticatedUser field other than profile_uid
+              // off an enriched fake request must throw — capture that
+              // behavior so the FTR test can assert on it.
+              let usernameAccessThrew = false;
+              try {
+                void user.username;
+              } catch {
+                usernameAccessThrew = true;
+              }
+              return { profileUid: user.profile_uid, usernameAccessThrew };
             };
 
             const resolvedFromTaskRequest = resolveUser(fakeRequest);

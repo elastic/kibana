@@ -442,6 +442,7 @@ export class TaskManagerRunner implements TaskRunner {
             modifiedContext.taskInstance
           );
           const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
+
           const fakeRequest = this.getFakeKibanaRequest(
             apiKeyForRequest,
             modifiedContext.taskInstance.userScope?.spaceId,
@@ -450,28 +451,9 @@ export class TaskManagerRunner implements TaskRunner {
 
           const enrichFakeRequest = this.enrichFakeRequest;
           const enrichRequest: ((request: KibanaRequest) => void) | undefined =
-            fakeRequest && userProfileId && enrichFakeRequest
-              ? (request: KibanaRequest) => {
-                  try {
-                    enrichFakeRequest(request, userProfileId);
-                  } catch (err) {
-                    this.logger.warn(
-                      `Failed to enrich fake request with user profile ID "${userProfileId}" for task ${this}: ${
-                        (err as Error).message
-                      }`,
-                      { tags: ['task:enrichRequest', this.id, this.taskType] }
-                    );
-                  }
-                }
+            userProfileId && enrichFakeRequest
+              ? (request: KibanaRequest) => enrichFakeRequest(request, userProfileId)
               : undefined;
-
-          if (fakeRequest && enrichRequest) {
-            this.logger.debug(
-              `Enriching fake request with user profile ID "${userProfileId}" for task ${this}`,
-              { tags: ['task:enrichRequest', this.id, this.taskType] }
-            );
-            enrichRequest(fakeRequest);
-          }
 
           const abortController = new AbortController();
 
@@ -1063,18 +1045,23 @@ export class TaskManagerRunner implements TaskRunner {
     spaceId?: string,
     userProfileId?: string
   ): KibanaRequest | undefined {
-    if (apiKey) {
-      const requestHeaders: Headers = {};
+    if (!apiKey) return;
 
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
+    const requestHeaders: Headers = {};
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
 
-      const fakeRawRequest: FakeRawRequest = {
-        headers: requestHeaders,
-        spaceId: asSpaceId(spaceId || 'default'),
-      };
+    const fakeRawRequest: FakeRawRequest = {
+      headers: requestHeaders,
+      spaceId: asSpaceId(spaceId || 'default'),
+    };
 
-      return kibanaRequestFactory(fakeRawRequest);
+    const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+    if (userProfileId && this.enrichFakeRequest) {
+      this.enrichFakeRequest(fakeRequest, userProfileId);
     }
+
+    return fakeRequest;
   }
 
   private updateRetryAtOnIntervalForLongRunningTasks() {

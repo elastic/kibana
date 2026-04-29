@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { deepFreeze } from '@kbn/std';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { CoreSecurityDelegateContract, FakeRequestEnricher } from '@kbn/core-security-server';
@@ -14,13 +15,15 @@ import type { Logger } from '@kbn/logging';
 import type { InternalSecurityServiceStart } from '../internal_contracts';
 
 /**
- * Placeholder written into every identity field of the synthetic user
- * produced by {@link CoreFakeRequestEnrichment.enrichRequestWithUserProfile}
- * other than `profile_uid`. Surfaces any consumer that accidentally reads
- * identity fields off an enriched fake request instead of using
- * `profile_uid` for per-user lookups.
+ * Properties accessible on the synthetic user produced by
+ * {@link CoreFakeRequestEnrichment.enrichRequestWithUserProfile}. Any other
+ * string-keyed access throws so consumers cannot read placeholder identity
+ * data off an enriched fake request instead of using `profile_uid` for
+ * per-user lookups. Symbol-keyed access (e.g. `Symbol.toPrimitive`,
+ * `Symbol.toStringTag`, `util.inspect.custom`) is allowed so that JS
+ * reflection on the object does not blow up unexpectedly.
  */
-export const ENRICHED_USER_PLACEHOLDER = '__kbn_enriched_fake_request__';
+const ENRICHED_USER_ALLOWED_PROPERTIES = new Set<string>(['profile_uid']);
 
 /**
  * Internal bundle wiring the Core-owned fake-request enrichment:
@@ -51,11 +54,10 @@ export const createFakeRequestEnrichment = (logger: Logger): CoreFakeRequestEnri
 
   const enrichRequestWithUserProfile: FakeRequestEnricher = (request, userProfileId) => {
     if (!request.isFakeRequest) {
-      logger.warn(
-        `enrichRequestWithUserProfile called on a non-fake request; the enrichment will not ` +
-          `be observable via getCurrentUser (profile_uid="${userProfileId}").`
+      throw new Error(
+        `enrichRequestWithUserProfile must only be called on a fake request ` +
+          `(profile_uid="${userProfileId}").`
       );
-      return;
     }
 
     if (fakeRequestUsers.has(request)) {
@@ -67,19 +69,27 @@ export const createFakeRequestEnrichment = (logger: Logger): CoreFakeRequestEnri
     }
 
     logger.debug(`Enriching request with user profile ID "${userProfileId}".`);
-    const minimalUser: AuthenticatedUser = {
-      username: ENRICHED_USER_PLACEHOLDER,
-      roles: [],
-      enabled: true,
-      metadata: { _reserved: false },
-      authentication_realm: { name: 'background_task', type: 'background_task' },
-      lookup_realm: { name: 'background_task', type: 'background_task' },
-      authentication_type: ENRICHED_USER_PLACEHOLDER,
-      authentication_provider: { type: 'background_task', name: 'background_task' },
-      elastic_cloud_user: false,
-      profile_uid: userProfileId,
-    };
-    fakeRequestUsers.set(request, minimalUser);
+
+    // The synthetic user only exposes `profile_uid`. Reading any other
+    // {@link AuthenticatedUser} field throws to surface code paths that
+    // try to derive identity (username, roles, realms, etc.) from a fake
+    // request enriched purely on behalf of a stored task. Symbol-keyed
+    // access is allowed so the proxy plays nicely with JS reflection.
+    const enrichedUserStub: Partial<AuthenticatedUser> = { profile_uid: userProfileId };
+    const enrichedUser = deepFreeze(
+      new Proxy(enrichedUserStub as AuthenticatedUser, {
+        get: (target, prop, receiver) => {
+          if (typeof prop === 'symbol' || ENRICHED_USER_ALLOWED_PROPERTIES.has(prop)) {
+            return Reflect.get(target, prop, receiver);
+          }
+          throw new Error(
+            `Property "${String(prop)}" is not available on a fake request enriched ` +
+              `with a user profile. Use profile_uid for per-user lookups.`
+          );
+        },
+      })
+    );
+    fakeRequestUsers.set(request, enrichedUser);
   };
 
   return {

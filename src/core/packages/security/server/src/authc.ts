@@ -44,6 +44,9 @@ export interface CoreAuthenticationService {
  * setup time. See that method for the full security boundary and intended
  * use.
  *
+ * Throws if called with a non-fake request. Calling twice on the same fake
+ * request is a no-op (first-wins) and emits a warning.
+ *
  * @internal Intended for trusted orchestrators that own the fake request
  *   lifecycle (e.g. Task Manager). Not for general plugin consumption.
  */

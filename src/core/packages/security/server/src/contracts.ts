@@ -46,9 +46,14 @@ export interface SecurityServiceSetup {
    * the fake request lifecycle (e.g. Task Manager creating a fake request
    * from a stored task's API key) should consume this API.
    *
-   * Calling the returned function with a non-fake request is a no-op and
-   * emits a warning. Calling it twice on the same fake request is also a
-   * no-op (first-wins) and emits a warning.
+   * This method is one-shot: calling it more than once throws an error. It
+   * is reserved for Task Manager, which retrieves the enricher in its own
+   * `setup()` and re-exposes it on `TaskManagerSetupContract.enrichFakeRequest`
+   * for trusted Task Manager consumers (e.g. test fixtures).
+   *
+   * Calling the returned enricher with a non-fake request throws an error.
+   * Calling it twice on the same fake request is a no-op (first-wins) and
+   * emits a warning.
    *
    * @internal
    */

@@ -1817,11 +1817,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('user profile enrichment', () => {
-      // Placeholder string used by core security when building the minimal
-      // AuthenticatedUser for an enriched fake request. Kept in sync with
-      // ENRICHED_USER_PLACEHOLDER in src/core/packages/security/server-internal.
-      const ENRICHED_USER_PLACEHOLDER = '__kbn_enriched_fake_request__';
-
       function scheduleTaskForProfileTest(
         task: Partial<ConcreteTaskInstance>,
         userProfileId: string
@@ -1853,8 +1848,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         await retry.try(async () => {
           const task = await currentTask<{
-            resolvedFromTaskRequest: { username?: string; profileUid?: string } | null;
-            resolvedFromChildRequest: { username?: string; profileUid?: string } | null;
+            resolvedFromTaskRequest: { profileUid?: string; usernameAccessThrew: boolean } | null;
+            resolvedFromChildRequest: { profileUid?: string; usernameAccessThrew: boolean } | null;
             ran?: boolean;
           }>(scheduled.id);
 
@@ -1862,11 +1857,15 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(task.state.resolvedFromTaskRequest).to.be.an('object');
           expect(task.state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
-          expect(task.state.resolvedFromTaskRequest?.username).to.eql(ENRICHED_USER_PLACEHOLDER);
+          // Reading any non-profile_uid field on the enriched fake user
+          // must throw, including for the parent task's fake request.
+          expect(task.state.resolvedFromTaskRequest?.usernameAccessThrew).to.be(true);
 
           expect(task.state.resolvedFromChildRequest).to.be.an('object');
           expect(task.state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
-          expect(task.state.resolvedFromChildRequest?.username).to.eql(ENRICHED_USER_PLACEHOLDER);
+          // Same enforcement on a child fake request that was enriched via
+          // the RunContext.enrichRequest callback.
+          expect(task.state.resolvedFromChildRequest?.usernameAccessThrew).to.be(true);
 
           expect(task.userScope?.userProfileId).to.eql(testProfileUid);
         });

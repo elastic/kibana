@@ -34,6 +34,7 @@ export class SecurityService
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnrichment?: CoreFakeRequestEnrichment;
+  private fakeRequestEnricherRetrieved = false;
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -70,7 +71,15 @@ export class SecurityService
         }
         this.securityApi = api;
       },
-      getFakeRequestEnricher: () => this.fakeRequestEnrichment!.enrichRequestWithUserProfile,
+      getFakeRequestEnricher: () => {
+        if (this.fakeRequestEnricherRetrieved) {
+          throw new Error(
+            'getFakeRequestEnricher() can only be called once and is reserved for Task Manager.'
+          );
+        }
+        this.fakeRequestEnricherRetrieved = true;
+        return this.fakeRequestEnrichment!.enrichRequestWithUserProfile;
+      },
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },

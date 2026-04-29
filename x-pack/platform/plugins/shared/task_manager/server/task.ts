@@ -103,6 +103,10 @@ export interface RunContext {
    * Intended for task implementations that construct child fake requests to
    * invoke profile-keyed APIs (e.g. `userProfiles.getCurrent()` or per-user
    * credential lookups) on behalf of the same user as the enclosing task.
+   *
+   * Throws if called with a non-fake request. Calling twice on the same
+   * fake request is a no-op (first-wins) and emits a warning. Errors
+   * propagate to the calling task body.
    */
   enrichRequest?: (request: KibanaRequest) => void;
 }

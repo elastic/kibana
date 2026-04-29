@@ -8,14 +8,11 @@
  */
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { CoreFakeRequestEnrichment } from './convert_security_api';
-import {
-  ENRICHED_USER_PLACEHOLDER,
-  convertSecurityApi,
-  createFakeRequestEnrichment,
-} from './convert_security_api';
+import { convertSecurityApi, createFakeRequestEnrichment } from './convert_security_api';
 import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
 
 describe('createFakeRequestEnrichment', () => {
@@ -39,7 +36,7 @@ describe('createFakeRequestEnrichment', () => {
   });
 
   describe('enrichRequestWithUserProfile', () => {
-    it('sets a minimal user with the given profile_uid on the fake request', () => {
+    it('exposes the given profile_uid on the enriched user', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
@@ -48,32 +45,66 @@ describe('createFakeRequestEnrichment', () => {
       const user = getOverride(request);
       expect(user).toBeDefined();
       expect(user!.profile_uid).toBe('u_test_profile_123');
-      expect(user!.authentication_realm.name).toBe('background_task');
-      expect(user!.authentication_provider.name).toBe('background_task');
     });
 
-    it('sets non-profile_uid identity fields to placeholder values', () => {
+    it.each<keyof AuthenticatedUser>([
+      'username',
+      'email',
+      'full_name',
+      'roles',
+      'enabled',
+      'metadata',
+      'authentication_realm',
+      'lookup_realm',
+      'authentication_provider',
+      'authentication_type',
+      'elastic_cloud_user',
+      'operator',
+      'api_key',
+    ])('throws when reading "%s" off the enriched user', (property) => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
       enrichRequestWithUserProfile(request, 'u_test_profile_123');
 
       const user = getOverride(request)!;
-      expect(user.username).toBe(ENRICHED_USER_PLACEHOLDER);
-      expect(user.authentication_type).toBe(ENRICHED_USER_PLACEHOLDER);
-      expect(user.roles).toEqual([]);
-      expect(user.authentication_realm).toEqual({
-        name: 'background_task',
-        type: 'background_task',
-      });
-      expect(user.lookup_realm).toEqual({
-        name: 'background_task',
-        type: 'background_task',
-      });
-      expect(user.authentication_provider).toEqual({
-        type: 'background_task',
-        name: 'background_task',
-      });
+      expect(() => user[property]).toThrow(
+        new RegExp(`Property "${property}" is not available on a fake request enriched`)
+      );
+    });
+
+    it('throws on access to arbitrary string-keyed properties not in the allowlist', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      const user = getOverride(request)! as unknown as Record<string, unknown>;
+      expect(() => user.toJSON).toThrow(/not available on a fake request enriched/);
+      expect(() => user.someUnknownProp).toThrow(/not available on a fake request enriched/);
+    });
+
+    it('allows symbol-keyed access so JS reflection on the enriched user does not throw', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      const user = getOverride(request)!;
+      // Reading well-known symbol-keyed properties must not throw.
+      expect(() => (user as any)[Symbol.toPrimitive]).not.toThrow();
+      expect(() => (user as any)[Symbol.toStringTag]).not.toThrow();
+      expect(() => (user as any)[Symbol.iterator]).not.toThrow();
+    });
+
+    it('returns a frozen enriched user', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      const user = getOverride(request)!;
+      expect(Object.isFrozen(user)).toBe(true);
     });
 
     it('does not affect other fake requests', () => {
@@ -86,15 +117,16 @@ describe('createFakeRequestEnrichment', () => {
       expect(getOverride(otherRequest)).toBeUndefined();
     });
 
-    it('warns and does not populate the override when called on a real (non-fake) request', () => {
+    it('throws and does not populate the override when called on a real (non-fake) request', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const realRequest = httpServerMock.createKibanaRequest();
 
-      enrichRequestWithUserProfile(realRequest, 'u_profile_123');
+      expect(() => enrichRequestWithUserProfile(realRequest, 'u_profile_123')).toThrow(
+        /must only be called on a fake request/
+      );
 
       expect(getOverride(realRequest)).toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-fake request'));
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('warns and keeps the original enrichment when called twice on the same fake request', () => {

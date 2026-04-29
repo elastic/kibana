@@ -75,14 +75,22 @@ describe('SecurityService', function () {
     });
 
     describe('#getFakeRequestEnricher', () => {
-      it('returns a stable function across invocations', () => {
+      it('returns a function on the first call', () => {
         const setup = service.setup();
 
-        const enricherA = setup.getFakeRequestEnricher();
-        const enricherB = setup.getFakeRequestEnricher();
+        const enricher = setup.getFakeRequestEnricher();
 
-        expect(enricherA).toBe(enricherB);
-        expect(typeof enricherA).toBe('function');
+        expect(typeof enricher).toBe('function');
+      });
+
+      it('throws if called more than once (one-shot, reserved for Task Manager)', () => {
+        const setup = service.setup();
+
+        setup.getFakeRequestEnricher();
+
+        expect(() => setup.getFakeRequestEnricher()).toThrow(
+          /can only be called once and is reserved for Task Manager/
+        );
       });
     });
 
