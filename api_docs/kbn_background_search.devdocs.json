@@ -37,6 +37,7 @@
             "lineNumber": 42,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "BackgroundSearchRestoredCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }

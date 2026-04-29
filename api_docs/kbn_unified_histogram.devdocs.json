@@ -95,477 +95,6 @@
       },
       {
         "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.getBreakdownField",
-        "type": "Function",
-        "tags": [],
-        "label": "getBreakdownField",
-        "description": [
-          "\nGet the breakdown field from local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string) => string | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "lineNumber": 40,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getBreakdownField.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 41,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getBreakdownField.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 42,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.getChartHidden",
-        "type": "Function",
-        "tags": [],
-        "label": "getChartHidden",
-        "description": [
-          "\nGet the chart hidden state from local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string) => boolean | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "lineNumber": 22,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getChartHidden.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 23,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getChartHidden.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 24,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.getTopPanelHeight",
-        "type": "Function",
-        "tags": [],
-        "label": "getTopPanelHeight",
-        "description": [
-          "\nGet the top panel height from local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string) => number | \"max-content\" | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "lineNumber": 31,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getTopPanelHeight.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 32,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getTopPanelHeight.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 33,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.setBreakdownField",
-        "type": "Function",
-        "tags": [],
-        "label": "setBreakdownField",
-        "description": [
-          "\nSet the breakdown field in local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string, breakdownField: string | undefined) => false | void"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "lineNumber": 68,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setBreakdownField.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 69,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setBreakdownField.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 70,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setBreakdownField.$3",
-            "type": "string",
-            "tags": [],
-            "label": "breakdownField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 71,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.setChartHidden",
-        "type": "Function",
-        "tags": [],
-        "label": "setChartHidden",
-        "description": [
-          "\nSet the chart hidden state in local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string, chartHidden: boolean | undefined) => false | void"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "lineNumber": 50,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setChartHidden.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 51,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setChartHidden.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 52,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setChartHidden.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "chartHidden",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 53,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.setTopPanelHeight",
-        "type": "Function",
-        "tags": [],
-        "label": "setTopPanelHeight",
-        "description": [
-          "\nSet the top panel height in local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string, topPanelHeight: number | \"max-content\") => false | void"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "lineNumber": 59,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setTopPanelHeight.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 60,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setTopPanelHeight.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 61,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setTopPanelHeight.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "topPanelHeight",
-            "description": [],
-            "signature": [
-              "number | \"max-content\""
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "lineNumber": 62,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.UnifiedBreakdownFieldSelector",
         "type": "Function",
         "tags": [],
@@ -613,6 +142,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -626,7 +156,7 @@
         "label": "UnifiedHistogramChart",
         "description": [],
         "signature": [
-          "({\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderCustomChartToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}: ",
+          "({\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -637,7 +167,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-        "lineNumber": 82,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -647,7 +177,7 @@
             "id": "def-public.UnifiedHistogramChart.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderCustomChartToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}",
+            "label": "{\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}",
             "description": [],
             "signature": [
               {
@@ -659,9 +189,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 82,
+            "lineNumber": 81,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramChartProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -713,6 +244,7 @@
             "lineNumber": 64,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramLayoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -779,7 +311,7 @@
           "UseUnifiedHistogramResult"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
-        "lineNumber": 99,
+        "lineNumber": 101,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -801,9 +333,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
-            "lineNumber": 99,
+            "lineNumber": 101,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "UseUnifiedHistogramProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1120,7 +653,7 @@
         "label": "UnifiedHistogramChartProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-        "lineNumber": 53,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1133,7 +666,7 @@
             "label": "isChartAvailable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 54,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1149,7 +682,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 55,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1171,7 +704,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 56,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1187,7 +720,7 @@
               "LensVisService"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 57,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1203,7 +736,7 @@
               "LensVisServiceState"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 58,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1220,7 +753,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 59,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1237,23 +770,23 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 60,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.UnifiedHistogramChartProps.renderCustomChartToggleActions",
+            "id": "def-public.UnifiedHistogramChartProps.renderToggleActions",
             "type": "Function",
             "tags": [],
-            "label": "renderCustomChartToggleActions",
+            "label": "renderToggleActions",
             "description": [],
             "signature": [
-              "(() => React.ReactElement<any> | undefined) | undefined"
+              "() => React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 61,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1271,7 +804,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 62,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1287,7 +820,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 63,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1306,7 +839,7 @@
               "$Arguments>"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 64,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1394,7 +927,7 @@
               " | undefined; } | undefined; timeInterval: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 65,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1418,7 +951,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 66,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1441,7 +974,7 @@
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 67,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1457,7 +990,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 68,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1473,7 +1006,7 @@
               "((chartHidden: boolean) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 69,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1489,7 +1022,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-                "lineNumber": 69,
+                "lineNumber": 68,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1509,7 +1042,7 @@
               "((timeInterval: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 70,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1525,7 +1058,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-                "lineNumber": 70,
+                "lineNumber": 69,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1553,7 +1086,7 @@
               " | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 71,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1576,7 +1109,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-                "lineNumber": 71,
+                "lineNumber": 70,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1604,7 +1137,7 @@
               ", result?: number | Error | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 72,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1626,9 +1159,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-                "lineNumber": 72,
+                "lineNumber": 71,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnifiedHistogramFetchStatus",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1643,7 +1177,7 @@
                   "number | Error | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-                "lineNumber": 72,
+                "lineNumber": 71,
                 "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1671,7 +1205,7 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 73,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1693,9 +1227,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-                "lineNumber": 73,
+                "lineNumber": 72,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnifiedHistogramChartLoadEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1737,7 +1272,7 @@
               " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 74,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1761,7 +1296,7 @@
               "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 75,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1777,7 +1312,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "lineNumber": 76,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4771,7 +4306,7 @@
           "\nThe current state of the container"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-        "lineNumber": 26,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4786,7 +4321,7 @@
               "\nWhether or not the chart is hidden"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 30,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4811,7 +4346,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 34,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4837,7 +4372,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 38,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4862,7 +4397,7 @@
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 42,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4880,7 +4415,7 @@
               "number | \"max-content\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 46,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4904,7 +4439,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 50,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4922,7 +4457,7 @@
               "number | Error | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
-            "lineNumber": 54,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
