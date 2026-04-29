@@ -10,7 +10,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -32,6 +32,7 @@ import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/cons
 import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
 import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
 import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
+import { MISSING_CONNECTORS_READ_PRIVILEGE_TOOLTIP } from './header/translations';
 
 const mockConnectors: unknown[] = [
   {
@@ -117,6 +118,7 @@ const mockUseKibanaReturnValue = {
   services: {
     application: {
       capabilities: {
+        actions: { show: true },
         [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
       },
       navigateToUrl: jest.fn(),
@@ -222,6 +224,9 @@ describe('AttackDiscovery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockUseKibanaReturnValue.services.application.capabilities.actions = { show: true };
+    mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(false);
+
     (useLoadConnectors as jest.Mock).mockReturnValue({
       isFetched: true,
       data: mockConnectors,
@@ -263,6 +268,32 @@ describe('AttackDiscovery', () => {
       fireEvent.click(settingsButton);
 
       expect(screen.getByTestId('settingsFlyout')).toBeInTheDocument();
+    });
+  });
+
+  it('shows connector privilege guidance when the user cannot read connectors', async () => {
+    mockUseKibanaReturnValue.services.application.capabilities.actions = { show: false };
+
+    render(
+      <TestProviders>
+        <Router history={historyMock}>
+          <UpsellingProvider upsellingService={mockUpselling}>
+            <AttackDiscoveryPage />
+          </UpsellingProvider>
+        </Router>
+      </TestProviders>
+    );
+
+    const runButton = screen.getByTestId('run');
+
+    expect(runButton).toBeDisabled();
+
+    fireEvent.mouseOver(runButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('runTooltip')).toHaveTextContent(
+        MISSING_CONNECTORS_READ_PRIVILEGE_TOOLTIP
+      );
     });
   });
 

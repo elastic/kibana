@@ -24,6 +24,7 @@ import * as i18n from './translations';
 interface Props {
   aiConnectorsCount: number | null; // null when connectors are not configured
   attackDiscoveriesCount: number;
+  disabledTooltip?: React.ReactNode;
   isDisabled?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
@@ -32,6 +33,7 @@ interface Props {
 const EmptyPromptComponent: React.FC<Props> = ({
   aiConnectorsCount,
   attackDiscoveriesCount,
+  disabledTooltip,
   isLoading,
   isDisabled = false,
   onGenerate,
@@ -96,8 +98,15 @@ const EmptyPromptComponent: React.FC<Props> = ({
   );
 
   const actions = useMemo(() => {
-    return <Generate isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />;
-  }, [isDisabled, isLoading, onGenerate]);
+    return (
+      <Generate
+        disabledTooltip={disabledTooltip}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        onGenerate={onGenerate}
+      />
+    );
+  }, [disabledTooltip, isDisabled, isLoading, onGenerate]);
 
   if (isLoading || aiConnectorsCount == null || attackDiscoveriesCount > 0) {
     return null;

@@ -34,8 +34,10 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { CapabilitiesChecker } from '../../common/lib/capabilities';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { Actions } from './header/actions';
+import * as i18n from './header/translations';
 import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize } from './helpers';
 import { deserializeQuery } from './local_storage/deserialize_query';
 import { deserializeFilters } from './local_storage/deserialize_filters';
@@ -55,7 +57,7 @@ export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { uiSettings, settings },
+    services: { application, uiSettings, settings },
   } = useKibana();
 
   const { http } = useAssistantContext();
@@ -130,6 +132,15 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     () => getConnectorNameFromId({ aiConnectors, connectorId }),
     [aiConnectors, connectorId]
   );
+
+  const hasConnectorsReadPrivilege = useMemo(
+    () => new CapabilitiesChecker(application.capabilities).has('actions.show'),
+    [application.capabilities]
+  );
+
+  const generateButtonDisabledTooltip = hasConnectorsReadPrivilege
+    ? undefined
+    : i18n.MISSING_CONNECTORS_READ_PRIVILEGE_TOOLTIP;
 
   const { fetchAttackDiscoveries, isLoading } = useAttackDiscovery({
     connectorId,
@@ -251,10 +262,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
           <Actions
+            disabledTooltip={generateButtonDisabledTooltip}
             isLoading={isLoading}
             onGenerate={onGenerate}
             openFlyout={openFlyout}
-            isDisabled={connectorId == null}
+            isDisabled={connectorId == null || !hasConnectorsReadPrivilege}
           />
           <EuiSpacer size={'s'} />
         </HeaderPage>
@@ -270,6 +282,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
         <History
           aiConnectors={aiConnectors}
+          generateButtonDisabledTooltip={generateButtonDisabledTooltip}
           localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
           onGenerate={onGenerate}
           onToggleShowAnonymized={onToggleShowAnonymized}

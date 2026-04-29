@@ -43,4 +43,21 @@ describe('Generate Component', () => {
       expect(screen.getByText(i18n.SELECT_A_CONNECTOR)).toBeInTheDocument();
     });
   });
+
+  it('shows custom tooltip content when the button is disabled', async () => {
+    render(
+      <Generate
+        disabledTooltip="Missing connector privileges"
+        isLoading={false}
+        isDisabled={true}
+        onGenerate={jest.fn()}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByTestId('generate'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Missing connector privileges')).toBeInTheDocument();
+    });
+  });
 });

@@ -27,3 +27,11 @@ export const SETTINGS = i18n.translate(
     defaultMessage: 'Settings',
   }
 );
+
+export const MISSING_CONNECTORS_READ_PRIVILEGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.header.missingConnectorsReadPrivilegeTooltip',
+  {
+    defaultMessage:
+      'To generate Attack discoveries, you need the Management > Actions & Connectors: Read Kibana privilege.',
+  }
+);

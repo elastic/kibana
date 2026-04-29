@@ -15,13 +15,20 @@ import { Schedule } from '../schedule';
 import { Settings } from '../settings';
 
 interface Props {
+  disabledTooltip?: React.ReactNode;
   isDisabled?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   openFlyout: (tabId: string) => void;
 }
 
-const ActionsComponent: React.FC<Props> = ({ isLoading, onGenerate, openFlyout, isDisabled }) => {
+const ActionsComponent: React.FC<Props> = ({
+  disabledTooltip,
+  isLoading,
+  onGenerate,
+  openFlyout,
+  isDisabled,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const runSettingsGroup = css`
@@ -37,7 +44,12 @@ const ActionsComponent: React.FC<Props> = ({ isLoading, onGenerate, openFlyout, 
     <EuiFlexGroup alignItems="center" data-test-subj="actions" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <div css={runSettingsGroup}>
-          <Run isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />
+          <Run
+            disabledTooltip={disabledTooltip}
+            isLoading={isLoading}
+            isDisabled={isDisabled}
+            onGenerate={onGenerate}
+          />
           <Settings isLoading={isLoading} openFlyout={openFlyout} />
         </div>
       </EuiFlexItem>

@@ -47,6 +47,7 @@ const EMPTY_QUERY = '';
 
 interface Props {
   aiConnectors: AIConnector[] | undefined;
+  generateButtonDisabledTooltip?: React.ReactNode;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onToggleShowAnonymized: () => void;
@@ -55,6 +56,7 @@ interface Props {
 
 const HistoryComponent: React.FC<Props> = ({
   aiConnectors,
+  generateButtonDisabledTooltip,
   localStorageAttackDiscoveryMaxAlerts,
   onGenerate,
   onToggleShowAnonymized,
@@ -242,6 +244,7 @@ const HistoryComponent: React.FC<Props> = ({
         <EmptyPrompt
           aiConnectorsCount={aiConnectors?.length ?? null}
           attackDiscoveriesCount={data?.total ?? 0}
+          disabledTooltip={generateButtonDisabledTooltip}
           isDisabled={!aiConnectors?.length}
           isLoading={isLoading}
           onGenerate={onGenerate}

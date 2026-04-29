@@ -12,17 +12,23 @@ import * as i18n from '../empty_prompt/translations';
 import type { SettingsOverrideOptions } from '../../history/types';
 
 interface Props {
+  disabledTooltip?: React.ReactNode;
   isDisabled?: boolean;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
-const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onGenerate }) => {
+const GenerateComponent: React.FC<Props> = ({
+  disabledTooltip,
+  isLoading,
+  isDisabled = false,
+  onGenerate,
+}) => {
   const disabled = isLoading || isDisabled;
 
   return (
     <EuiToolTip
-      content={disabled ? i18n.SELECT_A_CONNECTOR : null}
+      content={disabled ? disabledTooltip ?? i18n.SELECT_A_CONNECTOR : null}
       data-test-subj="generateTooltip"
     >
       <EuiButton

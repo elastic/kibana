@@ -13,6 +13,7 @@ import type { SettingsOverrideOptions } from '../../results/history/types';
 import * as i18n from './translations';
 
 interface Props {
+  disabledTooltip?: React.ReactNode;
   isLoading: boolean;
   onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   isDisabled?: boolean;
@@ -25,9 +26,9 @@ const runButtonStyles = css`
   width: 74px;
 `;
 
-const RunComponent: React.FC<Props> = ({ isLoading, onGenerate, isDisabled }) => (
+const RunComponent: React.FC<Props> = ({ disabledTooltip, isLoading, onGenerate, isDisabled }) => (
   <EuiToolTip
-    content={isDisabled ? i18n.DISABLED_TOOLTIP : i18n.RUN_TOOLTIP}
+    content={isDisabled ? disabledTooltip ?? i18n.DISABLED_TOOLTIP : i18n.RUN_TOOLTIP}
     data-test-subj="runTooltip"
     position="bottom"
   >

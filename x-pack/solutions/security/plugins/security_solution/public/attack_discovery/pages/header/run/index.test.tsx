@@ -47,6 +47,18 @@ describe('Run', () => {
     });
   });
 
+  it('renders a custom disabled tooltip when provided', async () => {
+    render(
+      <Run {...defaultProps} disabledTooltip="Missing connector privileges" isDisabled={true} />
+    );
+
+    fireEvent.mouseOver(screen.getByTestId('run'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('runTooltip')).toHaveTextContent('Missing connector privileges');
+    });
+  });
+
   it('disables the button when isLoading is true', () => {
     render(<Run {...defaultProps} isLoading={true} />);
 
