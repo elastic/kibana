@@ -22,7 +22,10 @@ const templateUrl =
 const getExpectedUrl = (serviceName: string, environment: string) =>
   `http://scoutURLExample.com/ftw/app/apm/services/${serviceName}/transactions/view?comparisonEnabled=true&environment=${environment}`;
 
-test.describe.serial(
+// When unskipping, consider this used to be `test.describe.serial`
+// but there's no skip that preserves that. Consider not using serial.
+// Flaky: https://github.com/elastic/kibana/issues/262047
+test.describe.skip(
   'Custom links template validation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

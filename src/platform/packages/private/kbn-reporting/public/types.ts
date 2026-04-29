@@ -11,8 +11,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementStart } from '@kbn/management-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart, SharingData } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { LocatorParams } from '@kbn/reporting-common/types';
+import type { TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export interface ReportingPublicPluginStartDependencies {
   home: HomePublicPluginStart;
@@ -45,9 +49,24 @@ export interface ClientConfigType {
   statefulSettings: { enabled: boolean };
 }
 
-export interface ReportParamsGetterOptions {
+export type ReportingCSVSharingDataLocatorParams = Array<
+  LocatorParams<SerializableRecord & { timeRange: TimeRange | undefined }>
+>;
+
+export interface ReportingCSVSharingData extends SharingData {
+  locatorParams: ReportingCSVSharingDataLocatorParams;
+  isTextBased: boolean;
+  getSearchSource: (args: {
+    addGlobalTimeFilter?: boolean;
+    absoluteTime?: boolean;
+  }) => SerializedSearchSourceFields;
+  columns: string[] | undefined;
+  absoluteTimeRange: TimeRange | undefined;
+}
+
+export interface ReportParamsGetterOptions<S extends SharingData = SharingData> {
   objectType?: string;
-  sharingData: any;
+  sharingData: S;
 }
 
 export type ReportParamsGetter<
