@@ -7,7 +7,6 @@
 
 import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
 import React, { useCallback, useReducer } from 'react';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
@@ -20,10 +19,6 @@ import type { OnCompleteParams } from './types';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
-  const { uiSettings } = useKibana().services;
-  const isEntityStoreV2Enabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
-
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
   const { telemetry } = useKibana().services;
@@ -72,7 +67,6 @@ export const AssetCriticalityFileUploader: React.FC = () => {
   }, []);
 
   const validateFile = useFileValidation({
-    isEntityStoreV2Enabled,
     onError: onValidationError,
     onComplete: onValidationComplete,
   });
@@ -126,7 +120,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
     }
   }, [state, uploadAssetCriticalityFile]);
 
-  const steps = useNavigationSteps(state, isEntityStoreV2Enabled, goToFirstStep);
+  const steps = useNavigationSteps(state, goToFirstStep);
 
   return (
     <div>
@@ -138,7 +132,6 @@ export const AssetCriticalityFileUploader: React.FC = () => {
           <AssetCriticalityFilePickerStep
             onFileChange={onFileChange}
             isLoading={state.isLoading}
-            isEntityStoreV2Enabled={isEntityStoreV2Enabled}
             errorMessage={state.fileError}
           />
         )}
