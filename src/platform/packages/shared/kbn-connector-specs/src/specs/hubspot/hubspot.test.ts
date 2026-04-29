@@ -199,6 +199,125 @@ describe('HubSpotConnector', () => {
         { params: { properties: 'dealname,amount' } }
       );
     });
+
+    it('should return ticket with enriched notes when associations and notes APIs succeed', async () => {
+      const ticketRecord = { id: '600', properties: { subject: 'Broken widget' } };
+      mockClient.get.mockResolvedValue({ data: ticketRecord });
+      mockClient.post
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { results: [{ to: [{ toObjectId: '901' }, { toObjectId: '902' }] }] },
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          data: {
+            results: [
+              {
+                id: '901',
+                createdAt: '2024-01-01T00:00:00Z',
+                updatedAt: '2024-01-02T00:00:00Z',
+                archived: false,
+                properties: { hs_note_body: 'First note' },
+              },
+              {
+                id: '902',
+                createdAt: '2024-01-03T00:00:00Z',
+                updatedAt: '2024-01-04T00:00:00Z',
+                archived: false,
+                properties: { hs_note_body: 'Second note' },
+              },
+            ],
+          },
+        });
+
+      const result = (await HubSpotConnector.actions.getCrmObject.handler(mockContext, {
+        objectType: 'tickets',
+        objectId: '600',
+      })) as { id: string; notes: Array<{ id: string; body: string }> };
+
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        1,
+        'https://api.hubapi.com/crm/v4/associations/tickets/notes/batch/read',
+        { inputs: [{ id: '600' }] },
+        { validateStatus: expect.any(Function) }
+      );
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        2,
+        'https://api.hubapi.com/crm/v3/objects/notes/batch/read',
+        {
+          inputs: [{ id: '901' }, { id: '902' }],
+          properties: ['hs_note_body'],
+          propertiesWithHistory: [],
+        },
+        { validateStatus: expect.any(Function) }
+      );
+      expect(result.notes).toHaveLength(2);
+      expect(result.notes[0]).toEqual({
+        id: '901',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-02T00:00:00Z',
+        archived: false,
+        body: 'First note',
+      });
+    });
+
+    it('should return ticket with empty notes when association lookup returns no note IDs', async () => {
+      mockClient.get.mockResolvedValue({ data: { id: '601', properties: {} } });
+      mockClient.post.mockResolvedValueOnce({
+        status: 200,
+        data: { results: [{ to: [] }] },
+      });
+
+      const result = (await HubSpotConnector.actions.getCrmObject.handler(mockContext, {
+        objectType: 'tickets',
+        objectId: '601',
+      })) as { notes: unknown[] };
+
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(result.notes).toEqual([]);
+    });
+
+    it('should return ticket with empty notes when associations API returns non-200', async () => {
+      mockClient.get.mockResolvedValue({ data: { id: '602', properties: {} } });
+      mockClient.post.mockResolvedValueOnce({ status: 403, data: {} });
+
+      const result = (await HubSpotConnector.actions.getCrmObject.handler(mockContext, {
+        objectType: 'tickets',
+        objectId: '602',
+      })) as { notes: unknown[] };
+
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(result.notes).toEqual([]);
+    });
+
+    it('should return ticket with empty notes when notes batch read returns non-200', async () => {
+      mockClient.get.mockResolvedValue({ data: { id: '603', properties: {} } });
+      mockClient.post
+        .mockResolvedValueOnce({
+          status: 200,
+          data: { results: [{ to: [{ toObjectId: '910' }] }] },
+        })
+        .mockResolvedValueOnce({ status: 403, data: {} });
+
+      const result = (await HubSpotConnector.actions.getCrmObject.handler(mockContext, {
+        objectType: 'tickets',
+        objectId: '603',
+      })) as { notes: unknown[] };
+
+      expect(result.notes).toEqual([]);
+    });
+
+    it('should return ticket with empty notes when associations API throws', async () => {
+      mockClient.get.mockResolvedValue({ data: { id: '604', properties: {} } });
+      mockClient.post.mockRejectedValueOnce(new Error('Network error'));
+
+      const result = (await HubSpotConnector.actions.getCrmObject.handler(mockContext, {
+        objectType: 'tickets',
+        objectId: '604',
+      })) as { notes: unknown[] };
+
+      expect(result.notes).toEqual([]);
+    });
   });
 
   describe('listOwners action', () => {
@@ -212,6 +331,61 @@ describe('HubSpotConnector', () => {
         params: { limit: 20 },
       });
       expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should forward the after cursor for pagination', async () => {
+      mockClient.get.mockResolvedValue({ data: { results: [] } });
+
+      await HubSpotConnector.actions.listOwners.handler(mockContext, { after: 'cursor-abc' });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.hubapi.com/crm/v3/owners', {
+        params: { limit: 20, after: 'cursor-abc' },
+      });
+    });
+  });
+
+  describe('pagination (after cursor)', () => {
+    it('searchCrmObjects list path should include after cursor in params', async () => {
+      mockClient.get.mockResolvedValue({ data: { results: [] } });
+
+      await HubSpotConnector.actions.searchCrmObjects.handler(mockContext, {
+        objectType: 'contacts',
+        after: 'page2',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.hubapi.com/crm/v3/objects/contacts',
+        { params: { limit: 10, after: 'page2' } }
+      );
+    });
+
+    it('searchCrmObjects search path should include after cursor in body', async () => {
+      mockClient.post.mockResolvedValue({ data: { results: [] } });
+
+      await HubSpotConnector.actions.searchCrmObjects.handler(mockContext, {
+        objectType: 'deals',
+        query: 'Acme',
+        after: 'page3',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.hubapi.com/crm/v3/objects/deals/search',
+        { limit: 10, query: 'Acme', after: 'page3' }
+      );
+    });
+
+    it('searchDeals should include after cursor in body', async () => {
+      mockClient.post.mockResolvedValue({ data: { results: [] } });
+
+      await HubSpotConnector.actions.searchDeals.handler(mockContext, {
+        query: 'Enterprise',
+        after: 'page4',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.hubapi.com/crm/v3/objects/deals/search',
+        { limit: 10, query: 'Enterprise', after: 'page4' }
+      );
     });
   });
 
@@ -343,6 +517,39 @@ describe('HubSpotConnector', () => {
       const result = await test.handler(mockContext);
 
       expect(result.ok).toBe(false);
+    });
+
+    it('should return not ok when contacts endpoint returns 403 (missing scope)', async () => {
+      mockClient.get.mockResolvedValue({ status: 403 });
+
+      const test = HubSpotConnector.test;
+      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
+      const result = await test.handler(mockContext);
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toContain('403');
+    });
+
+    it('should return not ok when contacts endpoint returns 429 (rate limited)', async () => {
+      mockClient.get.mockResolvedValue({ status: 429 });
+
+      const test = HubSpotConnector.test;
+      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
+      const result = await test.handler(mockContext);
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toContain('429');
+    });
+
+    it('should return not ok when request throws', async () => {
+      mockClient.get.mockRejectedValue(new Error('ECONNREFUSED'));
+
+      const test = HubSpotConnector.test;
+      if (!test) throw new Error('Expected HubSpotConnector.test to be defined');
+      const result = await test.handler(mockContext);
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toBe('ECONNREFUSED');
     });
   });
 });
