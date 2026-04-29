@@ -10,29 +10,29 @@
 import { esql } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 
-type ComposerParamValue = string | number | boolean | Array<string | number | boolean>;
+type ComposerParamValue = string | number | Array<string | number>;
 
-/**
- * Whether a TIME_LITERAL variable can be spliced verbatim into the query string.
- * Composer would quote the value (turning `15m` into `"15m"`), breaking duration
- * arithmetic, so these variables bypass Composer entirely. Any non-empty string
- * value is accepted; format validation is the control's responsibility.
- */
-export function esqlTimeLiteralIsDirectlySubstitutable(v: ESQLControlVariable): boolean {
-  return (
-    v.type === ESQLVariableType.TIME_LITERAL &&
-    typeof v.value === 'string' &&
-    (v.value as string).length > 0
-  );
+export interface InlineEsqlVariablesResult {
+  /** Query with all resolvable `?param` / `??param` tokens substituted. */
+  query: string;
+  /**
+   * Tokens (with their `?` / `??` prefix) that remain in the output query
+   * because no Control resolved them, the value was unsubstitutable, or
+   * Composer rejected the substitution.
+   */
+  unresolved: string[];
 }
 
+export const esqlTimeLiteralIsDirectlySubstitutable = (v: ESQLControlVariable): boolean =>
+  v.type === ESQLVariableType.TIME_LITERAL && typeof v.value === 'string' && v.value.length > 0;
+
 /**
- * Composer's `inlineParam` supports: string / number / boolean / homogeneous
- * non-empty arrays of those (emitted as list literals, e.g. `("a", "b")`) /
- * identifiers via `??`. `time_literal` is excluded because Composer has no
- * duration-aware mode — a string value gets quoted and breaks the query.
+ * Composer's `inlineParam` supports: string / number / homogeneous non-empty
+ * arrays of those (emitted as list literals, e.g. `("a", "b")`) / identifiers
+ * via `??`. `time_literal` is excluded because Composer has no duration-aware
+ * mode — a string value gets quoted and breaks the query.
  */
-export function esqlControlVariableIsComposerInlinable(v: ESQLControlVariable): boolean {
+export const esqlControlVariableIsComposerInlinable = (v: ESQLControlVariable): boolean => {
   switch (v.type) {
     case ESQLVariableType.TIME_LITERAL:
       return false;
@@ -46,25 +46,60 @@ export function esqlControlVariableIsComposerInlinable(v: ESQLControlVariable): 
       );
     }
     case ESQLVariableType.VALUES:
-      return (
-        typeof v.value === 'string' || typeof v.value === 'number' || typeof v.value === 'boolean'
-      );
+      return typeof v.value === 'string' || typeof v.value === 'number';
     case ESQLVariableType.FIELDS:
     case ESQLVariableType.FUNCTIONS:
       return typeof v.value === 'string';
     default:
       return false;
   }
-}
+};
 
+const PLACEHOLDER_RE = /\?\??[A-Za-z_]\w*/g;
+
+const findPlaceholderTokens = (query: string): string[] => [
+  ...new Set(query.match(PLACEHOLDER_RE) ?? []),
+];
+
+type PlaceholderShape = 'value' | 'identifier';
+
+const naturalPlaceholderShape = (v: ESQLControlVariable): PlaceholderShape => {
+  switch (v.type) {
+    case ESQLVariableType.FIELDS:
+    case ESQLVariableType.FUNCTIONS:
+      return 'identifier';
+    default:
+      return 'value';
+  }
+};
+
+const collectPlaceholderShapesByName = (query: string): Map<string, Set<PlaceholderShape>> => {
+  const byName = new Map<string, Set<PlaceholderShape>>();
+  for (const token of query.match(PLACEHOLDER_RE) ?? []) {
+    const name = token.replace(/^\?\??/, '');
+    const shape: PlaceholderShape = token.startsWith('??') ? 'identifier' : 'value';
+    let shapes = byName.get(name);
+    if (!shapes) {
+      shapes = new Set();
+      byName.set(name, shapes);
+    }
+    shapes.add(shape);
+  }
+  return byName;
+};
+
+/**
+ * Inline `?param` / `??param` Control bindings into an ES|QL query.
+ */
 export const inlineEsqlVariables = (
   query: string,
   esqlVariables: ESQLControlVariable[] | undefined
-): string => {
+): InlineEsqlVariablesResult => {
   if (!esqlVariables || esqlVariables.length === 0) {
-    return query;
+    return { query, unresolved: findPlaceholderTokens(query) };
   }
 
+  // Step 1: TIME_LITERAL — direct substitution (Composer would quote the value).
   let processedQuery = query;
   for (const v of esqlVariables) {
     if (esqlTimeLiteralIsDirectlySubstitutable(v)) {
@@ -76,47 +111,31 @@ export const inlineEsqlVariables = (
     }
   }
 
+  // Step 2: Composer — value/identifier inlining for everything else.
+  const shapesByName = collectPlaceholderShapesByName(processedQuery);
   const params = esqlVariables.reduce<Record<string, ComposerParamValue>>((acc, v) => {
-    if (esqlControlVariableIsComposerInlinable(v)) {
-      acc[v.key] = v.value as ComposerParamValue;
+    if (!esqlControlVariableIsComposerInlinable(v)) {
+      return acc;
     }
+    const seenShapes = shapesByName.get(v.key);
+    if (!seenShapes || seenShapes.size !== 1) {
+      return acc;
+    }
+    if (!seenShapes.has(naturalPlaceholderShape(v))) {
+      return acc;
+    }
+    acc[v.key] = v.value as ComposerParamValue;
     return acc;
   }, {});
-  if (Object.keys(params).length === 0) {
-    return processedQuery;
-  }
-  try {
-    return esql(processedQuery, params).inlineParams().print('basic');
-  } catch {
-    return processedQuery;
-  }
-};
 
-const PLACEHOLDER_RE = /\?\??[A-Za-z_]\w*/g;
-
-/**
- * Names of `?param` / `??param` tokens in `query` that cannot be resolved:
- * no matching Control, an empty/mixed-type `multi_values`, or any variable that
- * is neither Composer-inlinable nor directly substitutable.
- */
-export const findUnresolvedVariables = (
-  query: string,
-  esqlVariables: ESQLControlVariable[] | undefined
-): string[] => {
-  const tokens = query.match(PLACEHOLDER_RE);
-  if (!tokens || tokens.length === 0) return [];
-  const byKey = new Map((esqlVariables ?? []).map((v) => [v.key, v]));
-  const unresolved = new Set<string>();
-  for (const token of tokens) {
-    const name = token.replace(/^\?\??/, '');
-    const variable = byKey.get(name);
-    if (
-      !variable ||
-      (!esqlControlVariableIsComposerInlinable(variable) &&
-        !esqlTimeLiteralIsDirectlySubstitutable(variable))
-    ) {
-      unresolved.add(token);
+  let inlinedQuery = processedQuery;
+  if (Object.keys(params).length > 0) {
+    try {
+      inlinedQuery = esql(processedQuery, params).inlineParams().print('basic');
+    } catch (err) {
+      inlinedQuery = processedQuery;
     }
   }
-  return [...unresolved];
+
+  return { query: inlinedQuery, unresolved: findPlaceholderTokens(inlinedQuery) };
 };

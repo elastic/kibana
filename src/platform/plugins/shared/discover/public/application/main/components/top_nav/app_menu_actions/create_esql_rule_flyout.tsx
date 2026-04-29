@@ -14,7 +14,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { DiscoverServices } from '../../../../../build_services';
-import { inlineEsqlVariables, findUnresolvedVariables } from './esql_rule_utils';
+import { inlineEsqlVariables } from './esql_rule_utils';
 
 const getEsqlQuery = (getState: () => DiscoverInternalState, tabId: string): string | null => {
   const { query } = selectTab(getState(), tabId).appState;
@@ -48,13 +48,8 @@ export function CreateESQLRuleFlyout({
   const query = useSyncExternalStore(subscribe, getQuery);
   const esqlVariables = useSyncExternalStore(subscribe, getVariables);
 
-  const inlinedQuery = useMemo(
+  const inlineResult = useMemo(
     () => (query === null ? null : inlineEsqlVariables(query, esqlVariables)),
-    [query, esqlVariables]
-  );
-
-  const validationErrors = useMemo(
-    () => (query === null ? [] : findUnresolvedVariables(query, esqlVariables)),
     [query, esqlVariables]
   );
 
@@ -96,15 +91,15 @@ export function CreateESQLRuleFlyout({
     };
   }, [history, core.application.currentAppId$]);
 
-  if (query === null) {
+  if (query === null || inlineResult === null) {
     return null;
   }
 
   return (
     <RuleFormFlyout
-      query={inlinedQuery ?? query}
+      query={inlineResult.query}
       onClose={onClose}
-      validationErrors={validationErrors}
+      validationErrors={inlineResult.unresolved}
     />
   );
 }
