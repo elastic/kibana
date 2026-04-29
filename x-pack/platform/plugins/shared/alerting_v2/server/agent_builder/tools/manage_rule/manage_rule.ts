@@ -35,9 +35,10 @@ export const manageRuleTool = (): BuiltinSkillBoundedTool<typeof manageRuleSchem
   type: ToolType.builtin,
   description: `Create or update an alerting V2 rule in the conversation.
 
-This tool executes ordered operations against a rule attachment in conversation context.
-The tool only manages the in-memory attachment — it never persists changes to Elasticsearch.
-Direct the user to the rendered attachment's action buttons (Save, Update, Delete, Enable/Disable) for persistence.
+This tool only mutates the rule attachment shown in the conversation. It does
+NOT create or modify the underlying Alerting V2 rule (saved object) — for that,
+direct the user to the "Create rule" or "Update Rule" button in the rendered
+attachment.
 
 Use operations[] to:
 1. set_metadata — set name, description, and tags
