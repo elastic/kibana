@@ -52,6 +52,10 @@ export class RuleFormPage {
     return this.page.testSubj.locator('ruleV2FlyoutSaveButton');
   }
 
+  flyoutValidationCallout() {
+    return this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
+  }
+
   cancelButton() {
     return this.page.testSubj.locator('ruleV2FormCancelButton');
   }

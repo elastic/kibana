@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { DiscoverServices } from '../../../../../build_services';
+import { inlineEsqlVariables, findUnresolvedVariables } from './esql_rule_utils';
 
 const getEsqlQuery = (getState: () => DiscoverInternalState, tabId: string): string | null => {
   const { query } = selectTab(getState(), tabId).appState;
@@ -21,6 +23,11 @@ const getEsqlQuery = (getState: () => DiscoverInternalState, tabId: string): str
   }
   return query.esql;
 };
+
+const getEsqlVariables = (
+  getState: () => DiscoverInternalState,
+  tabId: string
+): ESQLControlVariable[] | undefined => selectTab(getState(), tabId).esqlVariables;
 
 export function CreateESQLRuleFlyout({
   services,
@@ -36,8 +43,20 @@ export function CreateESQLRuleFlyout({
   onClose: () => void;
 }) {
   const getQuery = useCallback(() => getEsqlQuery(getState, tabId), [getState, tabId]);
+  const getVariables = useCallback(() => getEsqlVariables(getState, tabId), [getState, tabId]);
 
   const query = useSyncExternalStore(subscribe, getQuery);
+  const esqlVariables = useSyncExternalStore(subscribe, getVariables);
+
+  const inlinedQuery = useMemo(
+    () => (query === null ? null : inlineEsqlVariables(query, esqlVariables)),
+    [query, esqlVariables]
+  );
+
+  const validationErrors = useMemo(
+    () => (query === null ? [] : findUnresolvedVariables(query, esqlVariables)),
+    [query, esqlVariables]
+  );
 
   const { history, core, alertingVTwo } = services;
   const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
@@ -81,5 +100,11 @@ export function CreateESQLRuleFlyout({
     return null;
   }
 
-  return <RuleFormFlyout query={query} onClose={onClose} />;
+  return (
+    <RuleFormFlyout
+      query={inlinedQuery ?? query}
+      onClose={onClose}
+      validationErrors={validationErrors}
+    />
+  );
 }

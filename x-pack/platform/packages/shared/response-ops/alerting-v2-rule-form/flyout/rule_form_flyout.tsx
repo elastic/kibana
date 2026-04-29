@@ -26,6 +26,7 @@ export interface RuleFormFlyoutProps {
   push?: boolean;
   onClose?: () => void;
   isLoading?: boolean;
+  isSaveDisabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -46,6 +47,7 @@ export const RuleFormFlyout = ({
   push = true,
   onClose,
   isLoading = false,
+  isSaveDisabled = false,
   children,
 }: RuleFormFlyoutProps) => {
   const clickedRef = useRef(false);
@@ -110,6 +112,7 @@ export const RuleFormFlyout = ({
               <EuiButton
                 fill
                 isLoading={isLoading}
+                isDisabled={isSaveDisabled}
                 form={RULE_FORM_ID}
                 type="submit"
                 data-test-subj="ruleV2FlyoutSaveButton"

@@ -6,6 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RuleFormFlyout } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
@@ -22,6 +25,13 @@ export interface DynamicRuleFormFlyoutProps {
   query: string;
   /** Required services */
   services: RuleFormServices;
+  /**
+   * Caller-supplied validation errors. When non-empty, the flyout renders a
+   * blocking callout above the form and disables the Save button. Each entry
+   * is shown verbatim — callers should include any prefix needed for clarity
+   * (e.g. `?foo`, `??bar`).
+   */
+  validationErrors?: string[];
 }
 
 /**
@@ -39,6 +49,7 @@ const DynamicRuleFormFlyoutInner = ({
   onClose,
   query,
   services,
+  validationErrors,
 }: DynamicRuleFormFlyoutProps) => {
   const { createRule, isLoading } = useCreateRule({
     http: services.http,
@@ -49,8 +60,37 @@ const DynamicRuleFormFlyoutInner = ({
     createRule(values, { onSuccess: onClose });
   };
 
+  const hasValidationErrors = (validationErrors?.length ?? 0) > 0;
+
   return (
-    <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
+    <RuleFormFlyout
+      push={push}
+      onClose={onClose}
+      isLoading={isLoading}
+      isSaveDisabled={hasValidationErrors}
+    >
+      {hasValidationErrors && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="alert"
+            data-test-subj="ruleV2FlyoutValidationErrors"
+            title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
+              defaultMessage: 'Resolve issues before saving',
+            })}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleForm.validationErrors.description"
+                defaultMessage="The following items must be resolved before this rule can be saved: {names}"
+                values={{ names: (validationErrors ?? []).join(', ') }}
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <DynamicRuleForm
         onSubmit={handleSubmit}
         isSubmitting={isLoading}

@@ -14,6 +14,7 @@ export interface CreateRuleFormFlyoutProps {
   query: string;
   onClose?: () => void;
   push?: boolean;
+  validationErrors?: string[];
 }
 
 export const DynamicRuleFormFlyout = (props: CreateRuleFormFlyoutProps) => {
