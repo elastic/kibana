@@ -52,7 +52,7 @@ function mapRemoteToListItem(remote: RemoteMonitorListItem): MonitorListItem {
     [ConfigKey.MONITOR_TYPE]: remote.type,
     [ConfigKey.TAGS]: remote.tags ?? [],
     [ConfigKey.LOCATIONS]: [],
-    [ConfigKey.ENABLED]: true,
+    [ConfigKey.ENABLED]: remote.enabled ?? true,
     [ConfigKey.SCHEDULE]: { number: '', unit: '' },
     [ConfigKey.ALERT_CONFIG]: undefined,
     [ConfigKey.PROJECT_ID]: '',

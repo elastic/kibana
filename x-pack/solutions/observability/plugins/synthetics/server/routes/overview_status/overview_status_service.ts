@@ -557,10 +557,16 @@ export class OverviewStatusService {
 
           const configId = locData.configId || monitorId;
           const status = locData.status;
+          // Mirror local-monitor handling: only attach `error` / `downSince`
+          // for currently-down locations to avoid surfacing stale failure
+          // text from a previous run.
+          const isDown = status === MONITOR_STATUS_ENUM.DOWN;
           const location = {
             id: locData.locationId,
             label: locData.locationId,
             status,
+            ...(isDown && locData.error ? { error: locData.error } : {}),
+            ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
           };
           const meta: OverviewStatusMetaData = {
             monitorQueryId: monitorId,
