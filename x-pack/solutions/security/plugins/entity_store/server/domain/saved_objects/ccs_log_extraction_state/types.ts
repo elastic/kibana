@@ -9,7 +9,7 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-export const CcsLogExtractionStateTypeName = 'entity-ccs-log-extraction-state';
+export const CcsLogExtractionStateTypeName = 'entity-store-ccs-state';
 
 const stateSchemaV1 = schema.object({
   checkpointTimestamp: schema.nullable(schema.string()),

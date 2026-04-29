@@ -1476,7 +1476,7 @@
       }
     }
   },
-  "entity-ccs-log-extraction-state": {
+  "entity-store-ccs-state": {
     "dynamic": false,
     "properties": {}
   },

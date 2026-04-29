@@ -72,11 +72,16 @@ export async function createRequestHandlerContext({
     esClient,
     namespace,
   });
+  const ccsLogExtractionStateClient = new CcsLogExtractionStateClient(
+    core.savedObjects.client,
+    namespace,
+    logger
+  );
   const ccsLogsExtractionClient = new CcsLogsExtractionClient(
     logger,
     esClient,
     namespace,
-    new CcsLogExtractionStateClient(core.savedObjects.client, namespace, logger)
+    ccsLogExtractionStateClient
   );
   const logsExtractionClient = new LogsExtractionClient({
     logger,
@@ -104,6 +109,7 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       engineDescriptorClient,
       globalStateClient,
+      ccsLogExtractionStateClient,
       namespace,
       isServerless,
       logsExtractionClient,

@@ -53,6 +53,15 @@ export class CcsLogExtractionStateClient {
     await this.update(entityType, { paginationRecoveryId: null });
   }
 
+  async delete(entityType: EntityType): Promise<void> {
+    const id = this.getSavedObjectId(entityType);
+    await this.soClient.delete(CcsLogExtractionStateTypeName, id).catch((err) => {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw err;
+      }
+    });
+  }
+
   private getSavedObjectId(entityType: EntityType): string {
     return `${CcsLogExtractionStateTypeName}-${entityType}-${this.namespace}`;
   }

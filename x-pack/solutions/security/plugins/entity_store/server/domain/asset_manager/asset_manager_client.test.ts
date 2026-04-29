@@ -131,6 +131,9 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      ccsLogExtractionStateClient: {
+        delete: jest.fn().mockResolvedValue(undefined),
+      } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,

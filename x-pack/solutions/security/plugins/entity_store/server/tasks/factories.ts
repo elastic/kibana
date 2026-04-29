@@ -94,6 +94,7 @@ export async function createAssetManagerClient({
   const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
   const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
   const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+  const ccsLogExtractionStateClient = new CcsLogExtractionStateClient(soClient, namespace, logger);
   const { logsExtractionClient } = await createLogsExtractionClient({
     core,
     fakeRequest,
@@ -109,6 +110,7 @@ export async function createAssetManagerClient({
       taskManager: pluginsStart.taskManager,
       engineDescriptorClient,
       globalStateClient,
+      ccsLogExtractionStateClient,
       namespace,
       isServerless,
       logsExtractionClient,
