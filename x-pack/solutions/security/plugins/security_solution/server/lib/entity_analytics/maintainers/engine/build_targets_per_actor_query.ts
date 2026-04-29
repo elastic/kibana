@@ -15,6 +15,7 @@ const DEFAULT_FREQUENCY_THRESHOLD = 4;
 
 function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace: string): string {
   const indexPattern = config.indexPattern(namespace);
+  // TODO(follow-up): 'user' hardcoded for actor — thread actorEntityType through config.
   const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');

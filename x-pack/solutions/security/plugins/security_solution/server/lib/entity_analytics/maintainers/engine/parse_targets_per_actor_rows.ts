@@ -32,6 +32,7 @@ export const parseTargetsPerActorRows = (
 
     const actorUserId = record.actorUserId != null ? String(record.actorUserId) : null;
 
+    // TODO(follow-up): entityType hardcoded to 'user' — use actorEntityType from config.
     if (config.enableFrequencyClassification) {
       return {
         entityId: actorUserId,

@@ -66,6 +66,7 @@ export const writeEntityIds = async (
       }
     }
     if (Object.keys(relationships).length > 0) {
+      // TODO(follow-up): entity type hardcoded to 'user' — use actorEntityType from config.
       objects.push({
         type: 'user',
         doc: {
