@@ -265,15 +265,15 @@ processors:
           - pipeline:
               name: global@custom
               ignore_missing_pipeline: true
-              description: '[Fleet] Global pipeline for all data streams'
+              description: \\"[Fleet] Global pipeline for all data streams\\"
           - pipeline:
               name: logs@custom
               ignore_missing_pipeline: true
-              description: '[Fleet] Pipeline for all data streams of type \`logs\`'
+              description: \\"[Fleet] Pipeline for all data streams of type \`logs\`\\"
           - pipeline:
               name: logs-test.access@custom
               ignore_missing_pipeline: true
-              description: '[Fleet] Pipeline for the \`test.access\` dataset'
+              description: \\"[Fleet] Pipeline for the \`test.access\` dataset\\"
           - reroute:
               tag: test.access
               dataset: test.reroute

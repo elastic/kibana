@@ -138,7 +138,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
     );
     return {
       ...pipeline,
-      contentForInstallation: `---\n${toYaml(parsedPipelineContent, { singleQuote: true })}`,
+      contentForInstallation: `---\n${toYaml(parsedPipelineContent)}`,
     };
   }
 
