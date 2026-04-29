@@ -18,6 +18,7 @@ import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/p
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { getSignificantEventsResponse } from '../../../../oas_examples';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
@@ -133,6 +134,13 @@ const readStreamSignificantEventsRoute = createServerRoute({
       responses: {
         200: {
           description: 'Significant events for the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                significantEvents: { value: getSignificantEventsResponse },
+              },
+            },
+          },
         },
       },
     }),

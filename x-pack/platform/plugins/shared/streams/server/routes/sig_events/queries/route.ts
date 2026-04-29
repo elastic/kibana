@@ -14,7 +14,11 @@ import {
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
-import { upsertStreamQueryRequest, bulkStreamQueriesRequest } from '../../../oas_examples';
+import {
+  upsertStreamQueryRequest,
+  bulkStreamQueriesRequest,
+  listStreamQueriesResponse,
+} from '../../../oas_examples';
 import {
   EsqlQueryValidationError,
   validateEsqlQueryForStreamOrThrow,
@@ -51,6 +55,13 @@ const listQueriesRoute = createServerRoute({
       responses: {
         200: {
           description: 'List of queries linked to the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                listQueries: { value: listStreamQueriesResponse },
+              },
+            },
+          },
         },
       },
     }),
