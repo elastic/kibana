@@ -33,4 +33,19 @@ describe('isSelectionConfig', () => {
   it('returns true when only `selectableMessage` is provided', () => {
     expect(isSelectionConfig({ selectableMessage: () => undefined })).toBe(true);
   });
+
+  it('returns false for an array', () => {
+    // Arrays are objects but not valid SelectionConfig.
+    expect(isSelectionConfig([] as unknown as boolean)).toBe(false);
+  });
+
+  it('returns false when `selectable` is not a function', () => {
+    expect(isSelectionConfig({ selectable: true } as unknown as boolean)).toBe(false);
+  });
+
+  it('returns false when `selectableMessage` is not a function', () => {
+    expect(isSelectionConfig({ selectableMessage: 'not a function' } as unknown as boolean)).toBe(
+      false
+    );
+  });
 });
