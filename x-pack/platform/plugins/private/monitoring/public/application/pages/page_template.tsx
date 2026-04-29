@@ -10,8 +10,9 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useGlobalUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
+import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
@@ -127,13 +128,15 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
 
   const { supported, enabled } = getSetupModeState();
 
+  const hideAnnouncements = useGlobalUiSetting<boolean>(HIDE_ANNOUNCEMENTS_ID, false);
   const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
   const shouldShowAutoOpsPromotion =
     showAutoOpsPromotion &&
     !Legacy.shims.isCloud &&
     !Legacy.shims.isAirGapped &&
     !cloudConnectStatus.isLoading &&
-    !cloudConnectStatus.isCloudConnectAutoopsEnabled;
+    !cloudConnectStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
 
   return (
     <EuiPageTemplate

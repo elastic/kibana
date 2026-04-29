@@ -155,5 +155,21 @@ describe('Landing Page', () => {
 
       expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
+
+    test('Hides AutoOps callout when hideAnnouncements is true', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.settings.globalClient.get.mockImplementation(
+        (key: string, defaultVal: unknown) => (key === 'hideAnnouncements' ? true : defaultVal)
+      );
+
+      await renderLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: false },
+        coreStart,
+      });
+
+      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
+    });
   });
 });

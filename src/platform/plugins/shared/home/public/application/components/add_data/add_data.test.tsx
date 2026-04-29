@@ -30,6 +30,10 @@ jest.mock('../../kibana_services', () => ({
   }),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useGlobalUiSetting: jest.fn().mockReturnValue(false),
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
 });
@@ -39,6 +43,10 @@ const applicationStartMock = {
 } as unknown as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+
+const applicationWithCloudConnectMock = {
+  capabilities: { navLinks: { integrations: true }, cloudConnect: { show: true } },
+} as unknown as ApplicationStart;
 
 describe('AddData', () => {
   test('render', () => {
@@ -51,5 +59,19 @@ describe('AddData', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  test('hides SetupCloudConnect when hideAnnouncements is true', () => {
+    jest.requireMock('@kbn/kibana-react-plugin/public').useGlobalUiSetting.mockReturnValueOnce(true);
+    const component = shallowWithIntl(
+      <AddData
+        addBasePath={addBasePathMock}
+        application={applicationWithCloudConnectMock}
+        isDarkMode={false}
+        isCloudEnabled={false}
+      />
+    );
+    expect(component.find('SetupCloudConnect')).toHaveLength(0);
+    expect(component.find('MoveData')).toHaveLength(1);
   });
 });
