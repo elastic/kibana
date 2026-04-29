@@ -259,9 +259,8 @@ export const ReviewApproveModal: React.FC<{
 
     const selected = savedIds
       .map((id) => categoryOptions.find((opt) => String(opt.value) === id))
-      .filter(
-        (opt): opt is EuiComboBoxOptionOption =>
-          Boolean(opt && typeof opt.value === 'string' && opt.value.length > 0)
+      .filter((opt): opt is EuiComboBoxOptionOption =>
+        Boolean(opt && typeof opt.value === 'string' && opt.value.length > 0)
       );
 
     if (selected.length > 0) {

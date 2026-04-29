@@ -237,9 +237,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await pageObjects.manageIntegrationsTable.openActionsMenu('Completed Integration');
     await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
-    await expect(
-      pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()
-    ).toBeEnabled();
+    await expect(pageObjects.manageIntegrationsTable.getReviewApproveInstallButton()).toBeEnabled();
   });
 
   test('Approve button is disabled until version and category are filled', async ({
