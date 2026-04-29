@@ -14,7 +14,7 @@ import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 
 const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
 
-export const buildCompositeAgg = (
+export const buildActorDiscoveryQuery = (
   config: RelationshipIntegrationConfig,
   afterKey: CompositeAfterKey | undefined
 ): Record<string, unknown> => {
@@ -51,7 +51,7 @@ export const buildCompositeAgg = (
   };
 };
 
-export const buildBucketFilter = (
+export const buildActorPageFilter = (
   config: RelationshipIntegrationConfig,
   buckets: CompositeBucket[]
 ): QueryDslQueryContainer => {

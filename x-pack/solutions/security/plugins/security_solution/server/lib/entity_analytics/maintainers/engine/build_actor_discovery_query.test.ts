@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildCompositeAgg, buildBucketFilter } from './build_composite_agg';
+import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
 import type { RelationshipIntegrationConfig, CompositeBucket } from './types';
 
 const accessesConfig: RelationshipIntegrationConfig = {
@@ -26,9 +26,9 @@ const communicatesConfig: RelationshipIntegrationConfig = {
   esqlWhereClause: 'event.action == "user.lifecycle.create"',
 };
 
-describe('buildCompositeAgg', () => {
+describe('buildActorDiscoveryQuery (actor discovery)', () => {
   it('includes timestamp range filter', () => {
-    const result = buildCompositeAgg(accessesConfig, undefined);
+    const result = buildActorDiscoveryQuery(accessesConfig, undefined);
     const filters = (result as { query: { bool: { filter: Array<Record<string, unknown>> } } })
       .query.bool.filter;
     const hasRange = filters.some(
@@ -38,21 +38,21 @@ describe('buildCompositeAgg', () => {
   });
 
   it('includes user identity filter', () => {
-    const result = buildCompositeAgg(accessesConfig, undefined);
+    const result = buildActorDiscoveryQuery(accessesConfig, undefined);
     const queryStr = JSON.stringify(result);
     // euid.dsl.getEuidDocumentsContainsIdFilter('user') adds a user.* existence check
     expect(queryStr).toContain('user');
   });
 
   it('includes event.outcome:success filter for accesses', () => {
-    const result = buildCompositeAgg(accessesConfig, undefined);
+    const result = buildActorDiscoveryQuery(accessesConfig, undefined);
     const queryStr = JSON.stringify(result);
     expect(queryStr).toContain('event.outcome');
     expect(queryStr).toContain('success');
   });
 
   it('does NOT include event.outcome:success filter for communicates_with', () => {
-    const result = buildCompositeAgg(communicatesConfig, undefined);
+    const result = buildActorDiscoveryQuery(communicatesConfig, undefined);
     const queryStr = JSON.stringify(result);
     expect(queryStr).not.toContain('"success"');
   });
@@ -62,7 +62,7 @@ describe('buildCompositeAgg', () => {
       ...accessesConfig,
       actorFields: ['custom.actor.field'],
     };
-    const result = buildCompositeAgg(config, undefined);
+    const result = buildActorDiscoveryQuery(config, undefined);
     expect(JSON.stringify(result)).toContain('custom.actor.field');
   });
 
@@ -72,14 +72,14 @@ describe('buildCompositeAgg', () => {
       actorFields: ['custom.actor.field'],
     };
     const buckets: CompositeBucket[] = [{ key: { 'custom.actor.field': 'alice' }, doc_count: 1 }];
-    const result = buildBucketFilter(config, buckets);
+    const result = buildActorPageFilter(config, buckets);
     expect(JSON.stringify(result)).toContain('custom.actor.field');
     expect(JSON.stringify(result)).toContain('alice');
   });
 
   it('includes afterKey in composite sources when provided', () => {
     const afterKey = { 'user.name': 'alice', 'user.email': null };
-    const result = buildCompositeAgg(accessesConfig, afterKey);
+    const result = buildActorDiscoveryQuery(accessesConfig, afterKey);
     expect(JSON.stringify(result)).toContain('alice');
   });
 
@@ -88,30 +88,30 @@ describe('buildCompositeAgg', () => {
       ...accessesConfig,
       compositeAggAdditionalFilters: [{ term: { 'event.action': 'log_on' } }],
     };
-    const result = buildCompositeAgg(config, undefined);
+    const result = buildActorDiscoveryQuery(config, undefined);
     const queryStr = JSON.stringify(result);
     expect(queryStr).toContain('event.action');
     expect(queryStr).toContain('log_on');
   });
 
   it('does NOT include extra event filters when compositeAggAdditionalFilters is absent', () => {
-    const result = buildCompositeAgg(accessesConfig, undefined);
+    const result = buildActorDiscoveryQuery(accessesConfig, undefined);
     const queryStr = JSON.stringify(result);
     expect(queryStr).not.toContain('log_on');
   });
 });
 
-describe('buildBucketFilter', () => {
+describe('buildActorPageFilter (page filter)', () => {
   it('returns a bool/should filter for user identity fields', () => {
     const buckets: CompositeBucket[] = [
       { key: { 'user.email': 'alice@corp', 'user.name': null }, doc_count: 2 },
     ];
-    const result = buildBucketFilter(accessesConfig, buckets);
+    const result = buildActorPageFilter(accessesConfig, buckets);
     expect(JSON.stringify(result)).toContain('alice@corp');
   });
 
   it('returns a match_none filter when buckets is empty', () => {
-    const result = buildBucketFilter(accessesConfig, []);
+    const result = buildActorPageFilter(accessesConfig, []);
     expect(JSON.stringify(result)).toContain('must_not');
   });
 });

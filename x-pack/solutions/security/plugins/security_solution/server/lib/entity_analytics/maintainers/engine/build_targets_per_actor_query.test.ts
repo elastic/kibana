@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsqlQuery } from './build_esql_query';
+import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import type { RelationshipIntegrationConfig } from './types';
 
 const accessesConfig: RelationshipIntegrationConfig = {
@@ -38,71 +38,71 @@ const commWithUserConfig: RelationshipIntegrationConfig = {
   additionalTargetFilter: 'AND targetEntityId != "user:@okta"',
 };
 
-describe('buildEsqlQuery', () => {
+describe('buildTargetsPerActorQuery (targets per actor)', () => {
   it('uses esqlQueryOverride when provided', () => {
     const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
-    buildEsqlQuery({ ...accessesConfig, esqlQueryOverride: override }, 'default');
+    buildTargetsPerActorQuery({ ...accessesConfig, esqlQueryOverride: override }, 'default');
     expect(override).toHaveBeenCalledWith('default');
   });
 
   describe('accesses template', () => {
     it('uses the namespace-derived index pattern', () => {
-      expect(buildEsqlQuery(accessesConfig, 'prod')).toContain(
+      expect(buildTargetsPerActorQuery(accessesConfig, 'prod')).toContain(
         'logs-endpoint.events.security-prod'
       );
     });
 
     it('includes the integration esqlWhereClause', () => {
-      expect(buildEsqlQuery(accessesConfig, 'default')).toContain('event.action == "log_on"');
+      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain('event.action == "log_on"');
     });
 
     it('adds event.outcome == "success" filter', () => {
-      expect(buildEsqlQuery(accessesConfig, 'default')).toContain('event.outcome == "success"');
+      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain('event.outcome == "success"');
     });
 
     it('produces accesses_frequently and accesses_infrequently STATS columns', () => {
-      const query = buildEsqlQuery(accessesConfig, 'default');
+      const query = buildTargetsPerActorQuery(accessesConfig, 'default');
       expect(query).toContain('accesses_frequently');
       expect(query).toContain('accesses_infrequently');
     });
 
     it('uses the default frequencyThreshold of 4', () => {
-      expect(buildEsqlQuery(accessesConfig, 'default')).toContain('>= 4');
+      expect(buildTargetsPerActorQuery(accessesConfig, 'default')).toContain('>= 4');
     });
 
     it('uses a custom frequencyThreshold when provided', () => {
-      expect(buildEsqlQuery({ ...accessesConfig, frequencyThreshold: 10 }, 'default')).toContain(
+      expect(buildTargetsPerActorQuery({ ...accessesConfig, frequencyThreshold: 10 }, 'default')).toContain(
         '>= 10'
       );
     });
 
     it('uses actorEvalOverride when provided', () => {
       const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
-      const query = buildEsqlQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
+      const query = buildTargetsPerActorQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
       expect(query).toContain(override);
     });
 
     it('skips entity.namespace field evals when actorEvalOverride is set', () => {
       const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
-      const query = buildEsqlQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
+      const query = buildTargetsPerActorQuery({ ...accessesConfig, actorEvalOverride: override }, 'default');
       expect(query).not.toContain('entity.namespace');
       expect(query).not.toContain('_src_entity_namespace');
     });
 
     it('includes entity.namespace field evals when actorEvalOverride is not set', () => {
-      const query = buildEsqlQuery(accessesConfig, 'default');
+      const query = buildTargetsPerActorQuery(accessesConfig, 'default');
       expect(query).toContain('entity.namespace');
     });
   });
 
   describe('communicates_with template', () => {
     it('produces a communicates_with STATS column', () => {
-      expect(buildEsqlQuery(commWithHostConfig, 'default')).toContain('communicates_with');
+      expect(buildTargetsPerActorQuery(commWithHostConfig, 'default')).toContain('communicates_with');
     });
 
     it('does not have explicit event.outcome filter line like accesses does', () => {
-      const commWithHostQuery = buildEsqlQuery(commWithHostConfig, 'default');
-      const accessesQuery = buildEsqlQuery(accessesConfig, 'default');
+      const commWithHostQuery = buildTargetsPerActorQuery(commWithHostConfig, 'default');
+      const accessesQuery = buildTargetsPerActorQuery(accessesConfig, 'default');
 
       // Accesses should have explicit "AND event.outcome == "success"" on its own line
       expect(accessesQuery).toMatch(/\n\s*AND event\.outcome == "success"/);
@@ -112,12 +112,12 @@ describe('buildEsqlQuery', () => {
     });
 
     it('includes host ID filter when targetEntityType is host', () => {
-      const query = buildEsqlQuery(commWithHostConfig, 'default');
+      const query = buildTargetsPerActorQuery(commWithHostConfig, 'default');
       expect(query.toLowerCase()).toContain('host');
     });
 
     it('does NOT include host ID filter when targetEntityType is user', () => {
-      const query = buildEsqlQuery(commWithUserConfig, 'default');
+      const query = buildTargetsPerActorQuery(commWithUserConfig, 'default');
       expect(query).toContain('communicates_with');
       // host ID filter line should not be present for user targets
       // The host filter would be "AND (`host.id` IS NOT NULL..." on a new line after userIdFilter
@@ -125,11 +125,11 @@ describe('buildEsqlQuery', () => {
     });
 
     it('uses targetEvalOverride when provided', () => {
-      expect(buildEsqlQuery(commWithUserConfig, 'default')).toContain('@okta');
+      expect(buildTargetsPerActorQuery(commWithUserConfig, 'default')).toContain('@okta');
     });
 
     it('appends additionalTargetFilter when provided', () => {
-      expect(buildEsqlQuery(commWithUserConfig, 'default')).toContain('"user:@okta"');
+      expect(buildTargetsPerActorQuery(commWithUserConfig, 'default')).toContain('"user:@okta"');
     });
   });
 });

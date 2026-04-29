@@ -15,9 +15,9 @@ import type {
   CompositeBucket,
   ProcessedEngineRecord,
 } from './types';
-import { buildCompositeAgg, buildBucketFilter } from './build_composite_agg';
-import { buildEsqlQuery } from './build_esql_query';
-import { postprocessEsqlResults } from './postprocess_records';
+import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
+import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds } from './update_entities';
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 
@@ -105,7 +105,7 @@ export const runGenericMaintainer = async ({
         aggResult = await esClient.search(
           {
             index: config.indexPattern(namespace),
-            ...buildCompositeAgg(config, afterKey),
+            ...buildActorDiscoveryQuery(config, afterKey),
           },
           transportOpts
         );
@@ -129,14 +129,14 @@ export const runGenericMaintainer = async ({
 
       if (buckets.length === 0) break;
 
-      const bucketFilter = buildBucketFilter(config, buckets);
+      const bucketFilter = buildActorPageFilter(config, buckets);
       const esqlFilter = {
         bool: {
           filter: [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }, bucketFilter],
         },
       };
 
-      const esqlQuery = buildEsqlQuery(config, namespace);
+      const esqlQuery = buildTargetsPerActorQuery(config, namespace);
 
       let esqlResult;
       try {
@@ -151,7 +151,7 @@ export const runGenericMaintainer = async ({
 
       const { columns, values } = esqlResult as unknown as EsqlQueryResult;
       if (columns && values) {
-        const records = postprocessEsqlResults(columns, values, config.relationshipType);
+        const records = parseTargetsPerActorRows(columns, values, config.relationshipType);
         totalRecords += records.length;
         allRecords.push(...records);
         logger.debug(`[${config.id}] Produced ${records.length} records`);

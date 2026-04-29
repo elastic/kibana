@@ -96,7 +96,7 @@ ${hostIdFilterLine}${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
  * Builds the ES|QL query for the given integration config.
  * If esqlQueryOverride is provided, delegates to it directly (azure_auditlogs uses this).
  */
-export const buildEsqlQuery = (
+export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
   namespace: string
 ): string => {

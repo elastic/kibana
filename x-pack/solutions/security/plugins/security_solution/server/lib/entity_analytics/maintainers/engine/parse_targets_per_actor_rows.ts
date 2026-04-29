@@ -19,7 +19,7 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
-export const postprocessEsqlResults = (
+export const parseTargetsPerActorRows = (
   columns: EsqlColumn[],
   values: unknown[][],
   relationshipType: RelationshipType

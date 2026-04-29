@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { postprocessEsqlResults } from './postprocess_records';
+import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 
 const ACCESSES_COLUMNS = [
   { name: 'actorUserId', type: 'keyword' },
@@ -18,18 +18,18 @@ const COMM_COLUMNS = [
   { name: 'communicates_with', type: 'keyword' },
 ];
 
-describe('postprocessEsqlResults (accesses)', () => {
+describe('parseTargetsPerActorRows — accesses', () => {
   it('returns [] for empty values', () => {
-    expect(postprocessEsqlResults(ACCESSES_COLUMNS, [], 'accesses')).toEqual([]);
+    expect(parseTargetsPerActorRows(ACCESSES_COLUMNS, [], 'accesses')).toEqual([]);
   });
 
   it('sets entityId to null when actorUserId is null', () => {
-    const [rec] = postprocessEsqlResults(ACCESSES_COLUMNS, [[null, null, null]], 'accesses');
+    const [rec] = parseTargetsPerActorRows(ACCESSES_COLUMNS, [[null, null, null]], 'accesses');
     expect(rec.entityId).toBeNull();
   });
 
   it('uses actorUserId directly as entityId', () => {
-    const [rec] = postprocessEsqlResults(
+    const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, null]],
       'accesses'
@@ -38,7 +38,7 @@ describe('postprocessEsqlResults (accesses)', () => {
   });
 
   it('puts accesses_frequently target EUIDs in flat array', () => {
-    const [rec] = postprocessEsqlResults(
+    const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', ['host:D3F5C9B9-web-01', 'host:D3F5C9B9-web-02'], null]],
       'accesses'
@@ -50,7 +50,7 @@ describe('postprocessEsqlResults (accesses)', () => {
   });
 
   it('puts accesses_infrequently target EUIDs in flat array', () => {
-    const [rec] = postprocessEsqlResults(
+    const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, 'host:D3F5C9B9-db-01']],
       'accesses'
@@ -59,7 +59,7 @@ describe('postprocessEsqlResults (accesses)', () => {
   });
 
   it('wraps null columns as empty arrays', () => {
-    const [rec] = postprocessEsqlResults(
+    const [rec] = parseTargetsPerActorRows(
       ACCESSES_COLUMNS,
       [['user:alice@corp', null, null]],
       'accesses'
@@ -69,9 +69,9 @@ describe('postprocessEsqlResults (accesses)', () => {
   });
 });
 
-describe('postprocessEsqlResults (communicates_with)', () => {
+describe('parseTargetsPerActorRows — communicates_with', () => {
   it('puts communicates_with target EUIDs in flat array', () => {
-    const [rec] = postprocessEsqlResults(
+    const [rec] = parseTargetsPerActorRows(
       COMM_COLUMNS,
       [['user:alice@okta', ['user:bob@okta', 'user:carol@okta']]],
       'communicates_with'
@@ -80,7 +80,7 @@ describe('postprocessEsqlResults (communicates_with)', () => {
   });
 
   it('uses actorUserId directly as entityId', () => {
-    const [rec] = postprocessEsqlResults(
+    const [rec] = parseTargetsPerActorRows(
       COMM_COLUMNS,
       [['user:alice@okta', null]],
       'communicates_with'
