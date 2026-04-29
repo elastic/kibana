@@ -88,27 +88,31 @@ If any labels need user input, **wait for the reply**, then re-validate any new 
 
 ## Step 8 — Show the draft and confirm
 
-Display the complete proposed issue (title + labels + body) and ask the user to confirm or request changes. **End your response and wait for explicit confirmation before filing.**
+Display the complete issue preview using this format:
+
+> **Title:** `<title>`
+> **Labels:** `<label1>`, `<label2>`, ...
+>
+> ---
+> \<issue body\>
+> ---
+
+Ask the user to confirm or request changes.
 
 **End your response and wait for explicit confirmation before filing.**
 
 ## Step 9 — Create the issue
 
-After the user confirms, create the issue:
-
 ```bash
-LABEL_ARGS=""
-for label in "<label1>" "<label2>" "..."; do
-  LABEL_ARGS="$LABEL_ARGS --label \"$label\""
-done
-
-ISSUE_BODY=$(cat <<'EOF'
+gh issue create --repo elastic/kibana \
+  --title "<TITLE>" \
+  --label "<label1>" --label "<label2>" --label "<labelN>" \
+  --body "$(cat <<'EOF'
 <formatted body here>
 EOF
-)
-gh issue create --repo elastic/kibana --title "<TITLE>" --body "$ISSUE_BODY" $LABEL_ARGS
+)"
 ```
 
-Always include the type label (`bug` for bug reports, `enhancement` for feature requests) plus any validated team and additional labels.
+Add one `--label` flag per label.
 
-Report the new issue URL to the user when done.
+Always include the type label (`bug` or `enhancement`) plus all validated labels. Report the new issue URL to the user when done.
