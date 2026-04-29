@@ -34,9 +34,14 @@ export const useActionDetailRenderer = (sourceApp: string): InboxActionDetailRen
 
   useEffect(() => {
     let cancelled = false;
+    // Clear any previously-resolved renderer up-front. Without this the
+    // hook would briefly render the *previous* sourceApp's component
+    // against the *new* action while the new loader is in-flight, causing
+    // a sourceApp/action mismatch (e.g. `evals` renderer paired with a
+    // `workflows` action).
+    setComponent(null);
     const loader = renderers.get(sourceApp);
     if (!loader) {
-      setComponent(null);
       return;
     }
     loader()
@@ -46,8 +51,8 @@ export const useActionDetailRenderer = (sourceApp: string): InboxActionDetailRen
       .catch((error) => {
         // Swallow chunk-load or module-init failures so a broken
         // third-party renderer doesn't break the whole flyout — we simply
-        // fall back to the default HITL form. The upstream error still
-        // surfaces in the browser console via the default console handler.
+        // fall back to the default schema-driven form. The upstream error
+        // still surfaces via the explicit console.error below.
         if (!cancelled) setComponent(null);
         // eslint-disable-next-line no-console
         console.error(`[inbox] failed to load detail renderer for sourceApp="${sourceApp}"`, error);

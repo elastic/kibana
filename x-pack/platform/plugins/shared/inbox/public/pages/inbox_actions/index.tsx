@@ -181,7 +181,16 @@ export const InboxActionsPage: React.FC = () => {
         />
       )}
       {activeAction ? (
-        <RespondFlyout action={activeAction} onClose={() => setActiveAction(null)} />
+        <RespondFlyout
+          action={activeAction}
+          onClose={() => setActiveAction(null)}
+          // The respond mutation already invalidates the inbox actions
+          // query, which v4 refetches automatically — this `onSuccess` is
+          // a belt-and-suspenders signal that also covers the (rare) case
+          // where the mutation cache is bypassed (e.g. via a different
+          // QueryClient in tests).
+          onSuccess={refetch}
+        />
       ) : null}
     </EuiPageSection>
   );

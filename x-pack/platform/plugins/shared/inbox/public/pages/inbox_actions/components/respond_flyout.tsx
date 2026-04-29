@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -51,10 +51,23 @@ export const RespondFlyout: React.FC<RespondFlyoutProps> = ({ action, onClose, o
     setErrors({});
   }, [action.id, defaults]);
 
+  // Track whether we're still mounted so a long-running respond mutation
+  // can't call `onSuccess` / `onClose` after the user has closed the flyout
+  // (or worse, after they've reopened it for a *different* action — the
+  // stale `onClose` would set `activeAction` back to null and unexpectedly
+  // dismiss the new flyout).
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const isTimedOut = action.response_mode === 'timed_out';
   const submitDisabled = mutation.isLoading || isTimedOut;
 
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     const validationErrors = validateSchemaValues(schema, values);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
@@ -65,12 +78,13 @@ export const RespondFlyout: React.FC<RespondFlyoutProps> = ({ action, onClose, o
         sourceId: action.source_id,
         input: values,
       });
+      if (!mountedRef.current) return;
       onSuccess?.();
       onClose();
     } catch {
       // mutation.error is surfaced in the body below
     }
-  };
+  }, [schema, values, mutation, action.source_app, action.source_id, onSuccess, onClose]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby="inbox-respond-flyout-title" size="m">

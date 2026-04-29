@@ -26,7 +26,6 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 interface SeedConfig {
   kibanaUrl: string;
@@ -42,7 +41,7 @@ const CONFIG: SeedConfig = {
   spaceId: process.env.KIBANA_SPACE_ID ?? 'default',
 };
 
-const WORKFLOWS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'workflows');
+const WORKFLOWS_DIR = path.resolve(__dirname, 'workflows');
 
 const authHeader = (config: SeedConfig) =>
   `Basic ${Buffer.from(`${config.username}:${config.password}`).toString('base64')}`;
