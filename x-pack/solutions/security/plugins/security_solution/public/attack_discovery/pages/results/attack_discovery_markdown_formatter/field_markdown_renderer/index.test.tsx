@@ -13,6 +13,21 @@ import { TestProviders } from '../../../../../common/mock';
 import { getFieldMarkdownRenderer } from '.';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+
+  return {
+    ...actual,
+    EuiToolTip: jest.fn(({ children, content, 'data-test-subj': dataTestSubj }) =>
+      ReactActual.createElement(
+        'span',
+        { 'data-test-subj': dataTestSubj, 'data-tooltip-content': content },
+        children
+      )
+    ),
+  };
+});
 jest.mock('@kbn/expandable-flyout');
 
 describe('getFieldMarkdownRenderer', () => {
@@ -66,6 +81,21 @@ describe('getFieldMarkdownRenderer', () => {
     expect(mockOpenRightPanel).toHaveBeenCalledTimes(1);
   });
 
+  it('does NOT wrap interactive field actions with the field name tooltip', () => {
+    const FieldMarkdownRenderer = getFieldMarkdownRenderer(false);
+    const icon = 'user';
+    const name = 'user.name';
+    const value = 'some.user';
+
+    render(
+      <TestProviders>
+        <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('fieldMarkdownRendererToolTip')).not.toBeInTheDocument();
+  });
+
   it('does NOT render the entity button when flyoutPanelProps is null', () => {
     const FieldMarkdownRenderer = getFieldMarkdownRenderer(false);
     const icon = '';
@@ -98,5 +128,9 @@ describe('getFieldMarkdownRenderer', () => {
     const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
 
     expect(disabledActionsBadge).toBeInTheDocument();
+    expect(screen.getByTestId('fieldMarkdownRendererToolTip')).toHaveAttribute(
+      'data-tooltip-content',
+      name
+    );
   });
 });

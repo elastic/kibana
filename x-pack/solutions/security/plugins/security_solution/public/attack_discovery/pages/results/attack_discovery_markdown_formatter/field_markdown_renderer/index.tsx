@@ -51,26 +51,24 @@ export const getFieldMarkdownRenderer = (disableActions: boolean, scopeId?: stri
       [euiTheme.font.scale.s, flyoutPanelProps, onEntityClick, value]
     );
 
-    return (
+    return disableActions ? (
       <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
-        {disableActions ? (
-          <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
-            {value}
-          </EuiBadge>
-        ) : (
-          <DraggableBadge
-            contextId="fieldMarkdownRenderer"
-            scopeId={scopeId}
-            eventId=""
-            iconType={icon}
-            isAggregatable={false}
-            field={name}
-            value={value}
-          >
-            {entityButton}
-          </DraggableBadge>
-        )}
+        <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon} tabIndex={0}>
+          {value}
+        </EuiBadge>
       </EuiToolTip>
+    ) : (
+      <DraggableBadge
+        contextId="fieldMarkdownRenderer"
+        scopeId={scopeId}
+        eventId=""
+        iconType={icon}
+        isAggregatable={false}
+        field={name}
+        value={value}
+      >
+        {entityButton}
+      </DraggableBadge>
     );
   };
 
