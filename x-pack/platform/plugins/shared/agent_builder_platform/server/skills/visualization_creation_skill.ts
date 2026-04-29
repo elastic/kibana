@@ -69,7 +69,7 @@ Do **not** use this skill when:
 
 4. **Interpret output and preserve artifacts**
    - Save successful \`data.attachment_id\` values for follow-up operations.
-   - If the tool returns \`data.attachment_id\`, include that ID in your response so the visualization attachment can be rendered in the conversation.
+   - If the tool returns \`data.attachment_id\`, render that visualization inline with \`<render_attachment id="ATTACHMENT_ID"/>\` when the user should see the chart immediately.
    - If \`attachment_id\` is missing, report that persistence failed and treat the result as non-reusable.
 
 ## Inline Rendering Guidelines
