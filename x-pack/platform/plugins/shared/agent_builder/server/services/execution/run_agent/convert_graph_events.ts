@@ -56,12 +56,14 @@ export const convertGraphEvents = ({
   pendingRound,
   logger,
   startTime,
+  structuredOutput,
 }: {
   graphName: string;
   toolManager: ToolManager;
   pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
+  structuredOutput: boolean;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();

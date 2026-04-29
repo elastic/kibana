@@ -85,6 +85,7 @@ describe('convertGraphEvents', () => {
         pendingRound: undefined,
         logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
         startTime: new Date(),
+        structuredOutput: false,
       }),
       toArray()
     );
