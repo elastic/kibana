@@ -7,10 +7,27 @@
 
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
-import { getIndexPattern as oktaIndexPattern, OKTA_USER_ADMIN_EVENT_ACTIONS } from './integrations/okta/constants';
-import { getIndexPattern as jamfProIndexPattern } from './integrations/jamf_pro/constants';
-import { getIndexPattern as awsCloudtrailCommunicatesWithIndexPattern, HUMAN_IAM_IDENTITY_TYPES } from './integrations/aws_cloudtrail/constants';
-import { getIndexPattern as azureAuditlogsIndexPattern } from './integrations/azure_auditlogs/constants';
+
+const OKTA_USER_ADMIN_EVENT_ACTIONS = [
+  'user.lifecycle.create',
+  'user.lifecycle.activate',
+  'user.lifecycle.deactivate',
+  'user.lifecycle.suspend',
+  'user.lifecycle.unsuspend',
+  'group.user_membership.add',
+  'group.user_membership.remove',
+  'application.user_membership.add',
+  'application.user_membership.remove',
+  'application.user_membership.change_username',
+];
+
+const HUMAN_IAM_IDENTITY_TYPES = [
+  'IAMUser',
+  'AssumedRole',
+  'Root',
+  'FederatedUser',
+  'IdentityCenterUser',
+];
 
 const AZURE_AUDITLOGS_ACTOR_UPN_FIELD =
   'azure.auditlogs.properties.initiated_by.user.userPrincipalName';
@@ -29,7 +46,7 @@ function buildAzureEsqlQuery(namespace: string): string {
   const tDisplayName = `\`${AZURE_AUDITLOGS_TARGET_DISPLAY_NAME_FIELD}\``;
 
   return `SET unmapped_fields="nullify";
-FROM ${azureAuditlogsIndexPattern(namespace)}
+FROM logs-azure.auditlogs-${namespace}
 | WHERE ${AZURE_AUDITLOGS_ACTOR_UPN_FIELD} IS NOT NULL
     AND (
       (${tType} == "User" AND ${tUpn} IS NOT NULL)
@@ -52,7 +69,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'okta',
     name: 'Okta',
-    indexPattern: oktaIndexPattern,
+    indexPattern: (ns) => `logs-okta.system-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
     esqlWhereClause: `event.action IN (${OKTA_USER_ADMIN_EVENT_ACTIONS.map((a) => `"${a}"`).join(
@@ -65,7 +82,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'jamf_pro',
     name: 'Jamf Pro',
-    indexPattern: jamfProIndexPattern,
+    indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
     esqlWhereClause: `user.name IS NOT NULL`,
@@ -73,7 +90,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
-    indexPattern: awsCloudtrailCommunicatesWithIndexPattern,
+    indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
     esqlWhereClause: `aws.cloudtrail.user_identity.type IN (${HUMAN_IAM_IDENTITY_TYPES.map(
@@ -85,7 +102,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'azure_auditlogs',
     name: 'Azure Audit Logs',
-    indexPattern: azureAuditlogsIndexPattern,
+    indexPattern: (ns) => `logs-azure.auditlogs-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
     esqlWhereClause: '',
