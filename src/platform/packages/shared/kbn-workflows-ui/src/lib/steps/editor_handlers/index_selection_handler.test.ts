@@ -186,6 +186,13 @@ describe('getIndexSelectionHandler', () => {
         expect(dataViews.getIndices).toHaveBeenCalledWith(
           expect.objectContaining({ showAllIndices: false })
         );
+
+        dataViews.getIndices.mockClear();
+        await handler.resolve('logs-app-1', EMPTY_CONTEXT);
+
+        expect(dataViews.getIndices).toHaveBeenCalledWith(
+          expect.objectContaining({ showAllIndices: false })
+        );
       });
 
       it('forwards showAllIndices: true to getIndices when configured', async () => {
@@ -194,6 +201,13 @@ describe('getIndexSelectionHandler', () => {
 
         const handler = getIndexSelectionHandler(services, { showAllIndices: true });
         await handler.search('.internal', EMPTY_CONTEXT);
+
+        expect(dataViews.getIndices).toHaveBeenCalledWith(
+          expect.objectContaining({ showAllIndices: true })
+        );
+
+        dataViews.getIndices.mockClear();
+        await handler.resolve('.internal', EMPTY_CONTEXT);
 
         expect(dataViews.getIndices).toHaveBeenCalledWith(
           expect.objectContaining({ showAllIndices: true })

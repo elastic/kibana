@@ -129,7 +129,7 @@ export const getIndexSelectionHandler = (
       try {
         const matches = await dataViews.getIndices({
           pattern: value,
-          showAllIndices: false,
+          showAllIndices,
           isRollupIndex: () => false,
         });
         if (matches.length === 0) {
