@@ -29,7 +29,11 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowPartialDetailDto,
+  WorkflowTriggerEventTraceResponseDto,
+} from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -515,6 +519,13 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
+  public async getTriggerEventTrace(
+    executionId: string,
+    spaceId: string
+  ): Promise<WorkflowTriggerEventTraceResponseDto | null> {
+    return this.workflowsService.getTriggerEventTrace(executionId, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {

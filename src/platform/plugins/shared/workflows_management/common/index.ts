@@ -13,6 +13,8 @@ export const PLUGIN_NAME = 'Workflows';
 export const WORKFLOWS_INDEX = '.workflows-workflows';
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+/** Internal audit data stream for event-driven trigger dispatches (matches server trigger-events log). */
+export const WORKFLOWS_EVENTS_INDEX = '.workflows-events';
 
 export const WORKFLOWS_DOCUMENTATION_URL = 'https://ela.st/workflows-docs';
 

@@ -43,6 +43,7 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     resumeExecution: jest.fn(),
     getExecutionLogs: jest.fn(),
     getChildrenExecutions: jest.fn(),
+    getTriggerEventTrace: jest.fn(),
 
     getConfig: jest.fn(),
   } as unknown as MockWorkflowApi);

@@ -699,6 +699,52 @@ export interface GetAvailableConnectorsResponse {
   totalConnectors: number;
 }
 
+/** One row from the internal `.workflows-events` audit stream (event-driven dispatch). */
+export interface WorkflowTriggerEventDispatchDto {
+  '@timestamp': string;
+  eventId: string;
+  triggerId: string;
+  spaceId: string;
+  subscriptions: string[];
+  sourceExecutionId?: string;
+  payload: Record<string, unknown>;
+}
+
+/** One hop in the upstream causal chain (root → current execution). */
+export interface WorkflowTriggerEventChainLinkDto {
+  dispatch: WorkflowTriggerEventDispatchDto;
+  /** The workflow run this dispatch scheduled along the path to the viewed execution. */
+  triggeredExecutionId: string;
+  triggeredWorkflowId: string;
+  /** Resolved workflow title when available (for trace UI). */
+  triggeredWorkflowName?: string;
+  /** When set, the workflow run that emitted this event (nested emit). */
+  emittedByExecution?: { workflowId: string; executionId: string; workflowName?: string };
+}
+
+/** API response for the execution trigger-event trace viewer (event-driven runs). */
+export interface WorkflowTriggerEventTraceResponseDto {
+  /** False when the execution was not started by an event-driven trigger id. */
+  eligible: boolean;
+  /** Dispatch id from execution (`dispatchEventId` or `context.metadata.eventId`), when present. */
+  dispatchEventId: string | null;
+  /** Audit document for the dispatch that scheduled this execution, when logging found a match. */
+  dispatch: WorkflowTriggerEventDispatchDto | null;
+  /**
+   * Ordered root → current: each dispatch that led to this run, with the execution it scheduled
+   * on this path. Built by walking `sourceExecutionId` and parent dispatch ids.
+   */
+  eventCausalChain: WorkflowTriggerEventChainLinkDto[];
+  /** Dispatches emitted during this execution (child event chain), newest first. */
+  downstreamDispatches: WorkflowTriggerEventDispatchDto[];
+  /** When the dispatch was caused by another workflow run, link targets for navigation. */
+  parentExecution?: { workflowId: string; executionId: string };
+  /** True when the execution is event-driven but no dispatch id was stored (e.g. older runs or logging off). */
+  missingDispatchEventId?: boolean;
+  /** Set when Elasticsearch search for audit documents failed. */
+  fetchError?: string;
+}
+
 export interface ChildWorkflowExecutionItem {
   parentStepExecutionId: string;
   workflowId: string;

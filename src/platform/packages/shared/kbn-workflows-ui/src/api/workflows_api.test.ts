@@ -390,4 +390,15 @@ describe('WorkflowApi', () => {
       });
     });
   });
+
+  describe('getTriggerEventTrace', () => {
+    it('should call GET /api/workflows/executions/{executionId}/trigger_event_trace', async () => {
+      await api.getTriggerEventTrace('exec-1');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/api/workflows/executions/exec-1/trigger_event_trace',
+        { version: VERSION }
+      );
+    });
+  });
 });

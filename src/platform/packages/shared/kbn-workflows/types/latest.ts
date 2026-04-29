@@ -44,6 +44,9 @@ export type {
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
+  WorkflowTriggerEventChainLinkDto,
+  WorkflowTriggerEventDispatchDto,
+  WorkflowTriggerEventTraceResponseDto,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,

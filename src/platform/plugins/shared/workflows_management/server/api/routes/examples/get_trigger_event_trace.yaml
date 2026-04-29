@@ -1,0 +1,50 @@
+responses:
+  200:
+    description: 'Trigger event trace for an execution (event-driven runs)'
+    content:
+      application/json:
+        examples:
+          triggerEventTraceExample:
+            description: 'Dispatch that started the run plus downstream emits from this execution'
+            value:
+              eligible: true
+              dispatchEventId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+              dispatch:
+                '@timestamp': '2025-11-20T12:00:00.000Z'
+                eventId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+                triggerId: cases.caseCreated
+                spaceId: default
+                subscriptions:
+                  - workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                payload:
+                  id: case-1
+              eventCausalChain:
+                - triggeredExecutionId: current-exec-id
+                  triggeredWorkflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                  triggeredWorkflowName: On case created
+                  emittedByExecution:
+                    workflowId: parent-workflow-id
+                    executionId: parent-exec-id
+                    workflowName: Parent workflow
+                  dispatch:
+                    '@timestamp': '2025-11-20T12:00:00.000Z'
+                    eventId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+                    triggerId: cases.caseCreated
+                    spaceId: default
+                    subscriptions:
+                      - workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                    payload:
+                      id: case-1
+              downstreamDispatches: []
+              parentExecution:
+                workflowId: parent-workflow-id
+                executionId: parent-exec-id
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/trigger_event_trace" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions/{executionId}/trigger_event_trace

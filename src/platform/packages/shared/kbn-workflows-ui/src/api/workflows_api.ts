@@ -27,6 +27,7 @@ import type {
   WorkflowsSearchParams,
   WorkflowStatsDto,
   WorkflowStepExecutionListDto,
+  WorkflowTriggerEventTraceResponseDto,
 } from '@kbn/workflows';
 
 import type { z } from '@kbn/zod/v4';
@@ -281,6 +282,13 @@ export class WorkflowApi {
     return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/children`, {
       version: API_VERSION,
     });
+  }
+
+  async getTriggerEventTrace(executionId: string): Promise<WorkflowTriggerEventTraceResponseDto> {
+    return this.http.get(
+      `${BASE}/executions/${encodeURIComponent(executionId)}/trigger_event_trace`,
+      { version: API_VERSION }
+    );
   }
 
   // ---------------------------------------------------------------------------

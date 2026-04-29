@@ -26,17 +26,18 @@ export function NextExecutionTime({ triggers, history, children }: NextExecution
   const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
   const getFormattedDateTime = useGetFormattedDateTime();
 
+  if (!nextExecutionTime) {
+    return children;
+  }
+
   return (
     <EuiToolTip
-      content={
-        nextExecutionTime &&
-        i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
-          defaultMessage: 'Next execution: {date}',
-          values: {
-            date: getFormattedDateTime(nextExecutionTime),
-          },
-        })
-      }
+      content={i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
+        defaultMessage: 'Next execution: {date}',
+        values: {
+          date: getFormattedDateTime(nextExecutionTime),
+        },
+      })}
       anchorProps={{
         css: css`
           max-width: 100%;

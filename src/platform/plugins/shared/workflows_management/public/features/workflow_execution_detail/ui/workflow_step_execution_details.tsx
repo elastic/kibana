@@ -29,6 +29,7 @@ import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/w
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { TriggerEventTracePanel } from './trigger_event_trace_panel';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -48,6 +49,101 @@ interface WorkflowStepExecutionDetailsProps {
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
   parentWorkflowExecution?: WorkflowExecutionLinkInfo;
 }
+
+interface StepExecutionTabPanelProps {
+  workflowExecutionId: string;
+  stepExecution: WorkflowStepExecutionDto;
+  selectedTabId: string;
+  isTriggerPseudoStep: boolean;
+  isLoadingStepData: boolean;
+  isWaitingForInput: boolean;
+  triggerType: string | undefined;
+  resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
+  shouldAutoResume: boolean;
+}
+
+const StepExecutionTabPanel = React.memo<StepExecutionTabPanelProps>(
+  ({
+    workflowExecutionId,
+    stepExecution,
+    selectedTabId,
+    isTriggerPseudoStep,
+    isLoadingStepData,
+    isWaitingForInput,
+    triggerType,
+    resumeMessage,
+    resumeSchema,
+    shouldAutoResume,
+  }) => {
+    if (selectedTabId === 'event_trace') {
+      return <TriggerEventTracePanel executionId={workflowExecutionId} />;
+    }
+
+    if (isLoadingStepData) {
+      return (
+        <EuiPanel hasShadow={false} paddingSize="m">
+          <EuiSkeletonText lines={4} />
+        </EuiPanel>
+      );
+    }
+
+    return (
+      <>
+        {selectedTabId === 'output' && (
+          <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+        )}
+        {selectedTabId === 'input' && (
+          <>
+            {isWaitingForInput && (
+              <>
+                <ResumeExecutionButton
+                  executionId={workflowExecutionId}
+                  resumeMessage={resumeMessage}
+                  resumeSchema={resumeSchema}
+                  autoOpen={shouldAutoResume}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
+            {isTriggerPseudoStep && (
+              <>
+                <EuiCallOut
+                  size="s"
+                  title={i18n.translate(
+                    'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                    {
+                      defaultMessage: 'Access this data in your workflow',
+                    }
+                  )}
+                  iconType="info"
+                  announceOnMount={false}
+                >
+                  <FormattedMessage
+                    id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
+                    defaultMessage="You can reference these values using {code}"
+                    values={{
+                      code: (
+                        <strong>
+                          {triggerType === 'manual'
+                            ? `{{ inputs.<field> }}`
+                            : `{{ event.<field> }}`}
+                        </strong>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+          </>
+        )}
+      </>
+    );
+  }
+);
+StepExecutionTabPanel.displayName = 'StepExecutionTabPanel';
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
   ({
@@ -144,6 +240,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
             name: 'Output',
           });
         }
+        if (triggerType === 'event') {
+          pseudoTabs.push({
+            id: 'event_trace',
+            name: i18n.translate('workflowsManagement.stepExecutionDetails.eventTraceTab', {
+              defaultMessage: 'Event trace',
+            }),
+          });
+        }
         return pseudoTabs;
       }
       return [
@@ -156,7 +260,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Input',
         },
       ];
-    }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
+    }, [hasInput, hasOutput, hasError, isTriggerPseudoStep, triggerType]);
 
     const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
@@ -261,65 +365,29 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ))}
             </EuiTabs>
           </EuiFlexItem>
-          {isFinished ? (
-            <EuiFlexItem css={{ overflowY: 'auto' }}>
-              {isLoadingStepData ? (
-                <EuiPanel hasShadow={false} paddingSize="m">
-                  <EuiSkeletonText lines={4} />
-                </EuiPanel>
-              ) : (
-                <>
-                  {selectedTabId === 'output' && (
-                    <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-                  )}
-                  {selectedTabId === 'input' && (
-                    <>
-                      {isWaitingForInput && (
-                        <>
-                          <ResumeExecutionButton
-                            executionId={workflowExecutionId}
-                            resumeMessage={resumeMessage}
-                            resumeSchema={resumeSchema}
-                            autoOpen={shouldAutoResume}
-                          />
-                          <EuiSpacer size="m" />
-                        </>
-                      )}
-                      {isTriggerPseudoStep && (
-                        <>
-                          <EuiCallOut
-                            size="s"
-                            title={i18n.translate(
-                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
-                              {
-                                defaultMessage: 'Access this data in your workflow',
-                              }
-                            )}
-                            iconType="info"
-                            announceOnMount={false}
-                          >
-                            <FormattedMessage
-                              id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
-                              defaultMessage="You can reference these values using {code}"
-                              values={{
-                                code: (
-                                  <strong>
-                                    {triggerType === 'manual'
-                                      ? `{{ inputs.<field> }}`
-                                      : `{{ event.<field> }}`}
-                                  </strong>
-                                ),
-                              }}
-                            />
-                          </EuiCallOut>
-                          <EuiSpacer size="m" />
-                        </>
-                      )}
-                      <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-                    </>
-                  )}
-                </>
-              )}
+          {isFinished || (isTriggerPseudoStep && selectedTabId === 'event_trace') ? (
+            <EuiFlexItem
+              grow
+              css={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <StepExecutionTabPanel
+                workflowExecutionId={workflowExecutionId}
+                stepExecution={stepExecution}
+                selectedTabId={selectedTabId}
+                isTriggerPseudoStep={isTriggerPseudoStep}
+                isLoadingStepData={isLoadingStepData}
+                isWaitingForInput={isWaitingForInput}
+                triggerType={triggerType}
+                resumeMessage={resumeMessage}
+                resumeSchema={resumeSchema}
+                shouldAutoResume={shouldAutoResume}
+              />
             </EuiFlexItem>
           ) : (
             <EuiLoadingSpinner size="m" />

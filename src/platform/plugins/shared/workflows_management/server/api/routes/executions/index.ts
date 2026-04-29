@@ -13,6 +13,7 @@ import { registerGetChildrenExecutionsRoute } from './get_children_executions';
 import { registerGetExecutionRoute } from './get_execution';
 import { registerGetExecutionLogsRoute } from './get_execution_logs';
 import { registerGetStepExecutionRoute } from './get_step_execution';
+import { registerGetTriggerEventTraceRoute } from './get_trigger_event_trace';
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowStepExecutionsRoute } from './get_workflow_step_executions';
 import { registerResumeExecutionRoute } from './resume_execution';
@@ -28,6 +29,7 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowStepExecutionsRoute(deps);
   registerGetExecutionRoute(deps);
+  registerGetTriggerEventTraceRoute(deps);
   registerGetExecutionLogsRoute(deps);
   registerCancelExecutionRoute(deps);
   registerCancelWorkflowExecutionsRoute(deps);

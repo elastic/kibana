@@ -84,6 +84,7 @@ describe('Execution Routes', () => {
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
+      getTriggerEventTrace: jest.fn(),
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
@@ -647,6 +648,42 @@ describe('Execution Routes', () => {
 
       expect(mockApi.getChildWorkflowExecutions).toHaveBeenCalledWith('ex-1', 'default');
       expect(result).toEqual({ type: 'ok', body: children });
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/trigger_event_trace (get_trigger_event_trace)', () => {
+    const path = '/api/workflows/executions/{executionId}/trigger_event_trace';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should return 404 when trace is null', async () => {
+      mockApi.getTriggerEventTrace.mockResolvedValue(null);
+      const h = handler('GET', path)!;
+      const request = { params: { executionId: 'ex-missing' } };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getTriggerEventTrace).toHaveBeenCalledWith('ex-missing', 'default');
+      expect(result).toEqual({ type: 'notFound' });
+    });
+
+    it('should return trace body when found', async () => {
+      const traceBody = {
+        eligible: false,
+        dispatchEventId: null,
+        dispatch: null,
+        eventCausalChain: [],
+        downstreamDispatches: [],
+      };
+      mockApi.getTriggerEventTrace.mockResolvedValue(traceBody);
+      const h = handler('GET', path)!;
+      const request = { params: { executionId: 'ex-1' } };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toEqual({ type: 'ok', body: traceBody });
     });
   });
 });
