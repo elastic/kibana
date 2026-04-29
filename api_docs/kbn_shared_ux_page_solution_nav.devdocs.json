@@ -88,6 +88,7 @@
             "lineNumber": 37,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -111,7 +112,7 @@
         "signature": [
           "Omit<",
           "EuiSideNavProps",
-          "<{}>, \"children\" | \"heading\" | \"items\"> & { name: string; icon?: ",
+          "<{}>, \"children\" | \"items\" | \"heading\"> & { name: string; icon?: ",
           "IconType",
           " | undefined; items?: ",
           "EuiSideNavItemType",

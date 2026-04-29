@@ -70,6 +70,7 @@
                 "lineNumber": 18,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceTracingLangfuseExportConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -178,6 +179,7 @@
                 "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceTracingPhoenixExportConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -292,6 +294,7 @@
                 "lineNumber": 29,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Span",
                 "trackAdoption": false
               }
             ]
@@ -306,7 +309,15 @@
         "tags": [],
         "label": "withChatCompleteSpan",
         "description": [
-          "\nWrapper around {@link withActiveInferenceSpan} that sets the right attributes for a chat operation span."
+          "\nWrapper around ",
+          {
+            "pluginId": "@kbn/inference-tracing",
+            "scope": "server",
+            "docId": "kibKbnInferenceTracingPluginApi",
+            "section": "def-server.withActiveInferenceSpan",
+            "text": "withActiveInferenceSpan"
+          },
+          " that sets the right attributes for a chat operation span."
         ],
         "signature": [
           "(options: InferenceGenerationOptions, cb: (span?: ",
@@ -333,6 +344,7 @@
             "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceGenerationOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -407,6 +419,7 @@
             "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceGenerationOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -448,7 +461,15 @@
         "tags": [],
         "label": "withExecuteToolSpan",
         "description": [
-          "\nWrapper around {@link withActiveInferenceSpan} that sets the right attributes for a execute_tool operation span."
+          "\nWrapper around ",
+          {
+            "pluginId": "@kbn/inference-tracing",
+            "scope": "server",
+            "docId": "kibKbnInferenceTracingPluginApi",
+            "section": "def-server.withActiveInferenceSpan",
+            "text": "withActiveInferenceSpan"
+          },
+          " that sets the right attributes for a execute_tool operation span."
         ],
         "signature": [
           "(toolName: string, options: ",
