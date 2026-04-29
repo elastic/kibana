@@ -140,7 +140,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
                   {
-                    defaultMessage: 'Find Elastic Inference Service models',
+                    defaultMessage: 'Search models',
                   }
                 )}
                 data-test-subj="eisModelsSearchBar"
