@@ -21,6 +21,7 @@ import { defineAuthorizationRoutes } from './authorization';
 import { defineDeprecationsRoutes } from './deprecations';
 import { defineSecurityFeatureRoutes } from './feature_check';
 import { defineIndicesRoutes } from './indices';
+import { defineOAuthRoutes } from './oauth';
 import { defineOAuthMetadataRoutes } from './oauth_metadata';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
@@ -69,6 +70,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
   defineOAuthMetadataRoutes(params);
+  defineOAuthRoutes(params);
   defineSessionManagementRoutes(params);
   defineUserProfileRoutes(params);
   defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)
