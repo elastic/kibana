@@ -14,6 +14,7 @@ import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
+import { KibanaServices } from '../../common/lib/kibana';
 import { renderHook, screen } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -748,6 +749,43 @@ describe('useCasesColumns ', () => {
         "rowHeader": "title",
       }
     `);
+  });
+
+  describe('extended fields column', () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    beforeEach(() => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('includes the extended fields column when selected and templates are enabled', () => {
+      const { result } = renderHook(
+        () =>
+          useCasesColumns({
+            ...useCasesColumnsProps,
+            selectedColumns: [
+              ...DEFAULT_SELECTED_COLUMNS,
+              { field: 'extendedFields', name: 'Extended fields', isChecked: true },
+            ],
+          }),
+        {
+          wrapper: (props) => <TestProviders {...props} license={license} />,
+        }
+      );
+
+      const extendedColumn = result.current.columns.find((col) => col.name === 'Extended fields');
+
+      expect(extendedColumn).toBeDefined();
+      expect(extendedColumn?.name).toBe('Extended fields');
+    });
   });
 
   describe('ExternalServiceColumn ', () => {

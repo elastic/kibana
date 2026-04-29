@@ -539,6 +539,7 @@
                 "lineNumber": 45,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldForStats",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -11763,6 +11763,7 @@
                 "lineNumber": 81,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientCreateRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11838,6 +11839,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientSearchRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11856,6 +11858,7 @@
                 "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TransportRequestOptionsWithOutMeta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -22599,6 +22602,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataStreamDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }

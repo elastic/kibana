@@ -101,7 +101,15 @@
         "tags": [],
         "label": "getRequestValidation",
         "description": [
-          "\nExtracts {@link RouteValidatorFullConfigRequest} from the validation container.\nThis utility is intended to be used by code introspecting router validation configuration."
+          "\nExtracts ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidatorFullConfigRequest",
+            "text": "RouteValidatorFullConfigRequest"
+          },
+          " from the validation container.\nThis utility is intended to be used by code introspecting router validation configuration."
         ],
         "signature": [
           "(value: ",
@@ -149,7 +157,15 @@
         "tags": [],
         "label": "getResponseValidation",
         "description": [
-          "\nExtracts {@link RouteValidatorFullConfigRequest} from the validation container.\nThis utility is intended to be used by code introspecting router validation configuration."
+          "\nExtracts ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidatorFullConfigRequest",
+            "text": "RouteValidatorFullConfigRequest"
+          },
+          " from the validation container.\nThis utility is intended to be used by code introspecting router validation configuration."
         ],
         "signature": [
           "(value: ",
@@ -197,7 +213,23 @@
         "tags": [],
         "label": "isFullValidatorContainer",
         "description": [
-          "\n{@link RouteValidator} is a union type of all possible ways that validation\nconfiguration can be registered. This helper utility narrows down the type\nby indicating whether it is {@link RouteValidatorRequestAndResponses} or not."
+          "\n",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidator",
+            "text": "RouteValidator"
+          },
+          " is a union type of all possible ways that validation\nconfiguration can be registered. This helper utility narrows down the type\nby indicating whether it is ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidatorRequestAndResponses",
+            "text": "RouteValidatorRequestAndResponses"
+          },
+          " or not."
         ],
         "signature": [
           "(value: AnyRouteValidator) => boolean"
@@ -222,6 +254,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AnyRouteValidator",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -259,6 +292,7 @@
             "lineNumber": 61,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -837,6 +871,7 @@
                 "lineNumber": 84,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "AuthResultParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1440,7 +1475,14 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nGets authentication state for a request. Returned by `auth` interceptor.\n{@link GetAuthState}"
+              "\nGets authentication state for a request. Returned by `auth` interceptor.\n",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.GetAuthState",
+                "text": "GetAuthState"
+              }
             ],
             "signature": [
               "<T = unknown>(request: ",
@@ -1471,6 +1513,7 @@
                 "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -1482,7 +1525,14 @@
             "tags": [],
             "label": "isAuthenticated",
             "description": [
-              "\nReturns authentication status for a request.\n{@link IsAuthenticated}"
+              "\nReturns authentication status for a request.\n",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IsAuthenticated",
+                "text": "IsAuthenticated"
+              }
             ],
             "signature": [
               "(request: ",
@@ -1511,6 +1561,7 @@
                 "lineNumber": 45,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -1602,7 +1653,15 @@
         "tags": [],
         "label": "HttpServerInfo",
         "description": [
-          "\nInformation about what hostname, port, and protocol the server process is\nrunning on. Note that this may not match the URL that end-users access\nKibana at. For the public URL, see {@link BasePath.publicBaseUrl}."
+          "\nInformation about what hostname, port, and protocol the server process is\nrunning on. Note that this may not match the URL that end-users access\nKibana at. For the public URL, see ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.BasePath.publicBaseUrl",
+            "text": "BasePath.publicBaseUrl"
+          },
+          "."
         ],
         "path": "src/core/packages/http/server/src/http_contract.ts",
         "lineNumber": 399,
@@ -1702,7 +1761,15 @@
             "tags": [],
             "label": "registerRoutes",
             "description": [
-              "\nProvides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler\nfunctions for any number of nested routes.\n"
+              "\nProvides ability to acquire `preboot` ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IRouter",
+                "text": "IRouter"
+              },
+              " instance for a particular top-level path and register handler\nfunctions for any number of nested routes.\n"
             ],
             "signature": [
               "<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(path: string, callback: (router: ",
@@ -1761,7 +1828,15 @@
             "tags": [],
             "label": "basePath",
             "description": [
-              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
+              "\nAccess or manipulate the Kibana base path\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IBasePath",
+                "text": "IBasePath"
+              },
+              "."
             ],
             "signature": [
               "IBasePath"
@@ -1779,7 +1854,15 @@
             "tags": [],
             "label": "getServerInfo",
             "description": [
-              "\nProvides common {@link HttpServerInfo | information} about the running preboot http server."
+              "\nProvides common ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.HttpServerInfo",
+                "text": "information"
+              },
+              " about the running preboot http server."
             ],
             "signature": [
               "() => ",
@@ -1822,7 +1905,14 @@
             "tags": [],
             "label": "createCookieSessionStorageFactory",
             "description": [
-              "\nCreates cookie based session storage factory {@link SessionStorageFactory}"
+              "\nCreates cookie based session storage factory ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.SessionStorageFactory",
+                "text": "SessionStorageFactory"
+              }
             ],
             "signature": [
               "<T extends object>(cookieOptions: ",
@@ -1854,6 +1944,7 @@
                 "lineNumber": 224,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SessionStorageCookieOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1896,6 +1987,7 @@
                 "lineNumber": 237,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "OnPreRoutingHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1938,6 +2030,7 @@
                 "lineNumber": 249,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "OnPreAuthHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1980,6 +2073,7 @@
                 "lineNumber": 261,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "AuthenticationHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2022,6 +2116,7 @@
                 "lineNumber": 273,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "OnPostAuthHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2064,6 +2159,7 @@
                 "lineNumber": 285,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OnPreResponseHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2077,7 +2173,15 @@
             "tags": [],
             "label": "basePath",
             "description": [
-              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
+              "\nAccess or manipulate the Kibana base path\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IBasePath",
+                "text": "IBasePath"
+              },
+              "."
             ],
             "signature": [
               "IBasePath"
@@ -2095,7 +2199,14 @@
             "tags": [],
             "label": "staticAssets",
             "description": [
-              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+              "\nAPIs for creating hrefs to static assets.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IStaticAssets",
+                "text": "IStaticAssets"
+              }
             ],
             "signature": [
               "IStaticAssets"
@@ -2181,6 +2292,7 @@
                 "lineNumber": 355,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContextName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2199,6 +2311,7 @@
                 "lineNumber": 356,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IContextProvider",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2212,7 +2325,15 @@
             "tags": [],
             "label": "getServerInfo",
             "description": [
-              "\nProvides common {@link HttpServerInfo | information} about the running http server."
+              "\nProvides common ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.HttpServerInfo",
+                "text": "information"
+              },
+              " about the running http server."
             ],
             "signature": [
               "() => ",
@@ -2233,7 +2354,15 @@
             "tags": [],
             "label": "getDeprecatedRoutes",
             "description": [
-              "\nProvides a list of all registered deprecated routes {{@link RouterDeprecatedApiDetails | information}}.\nThe routers will be evaluated everytime this function gets called to\naccommodate for any late route registrations"
+              "\nProvides a list of all registered deprecated routes {",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouterDeprecatedApiDetails",
+                "text": "information"
+              },
+              "}.\nThe routers will be evaluated everytime this function gets called to\naccommodate for any late route registrations"
             ],
             "signature": [
               "() => ",
@@ -2271,7 +2400,15 @@
             "tags": [],
             "label": "basePath",
             "description": [
-              "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
+              "\nAccess or manipulate the Kibana base path\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IBasePath",
+                "text": "IBasePath"
+              },
+              "."
             ],
             "signature": [
               "IBasePath"
@@ -2289,7 +2426,14 @@
             "tags": [],
             "label": "staticAssets",
             "description": [
-              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+              "\nAPIs for creating hrefs to static assets.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IStaticAssets",
+                "text": "IStaticAssets"
+              }
             ],
             "signature": [
               "IStaticAssets"
@@ -2307,7 +2451,14 @@
             "tags": [],
             "label": "auth",
             "description": [
-              "\nAuth status.\nSee {@link HttpAuth}"
+              "\nAuth status.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.HttpAuth",
+                "text": "HttpAuth"
+              }
             ],
             "signature": [
               "HttpAuth"
@@ -2325,7 +2476,15 @@
             "tags": [],
             "label": "getServerInfo",
             "description": [
-              "\nProvides common {@link HttpServerInfo | information} about the running http server."
+              "\nProvides common ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.HttpServerInfo",
+                "text": "information"
+              },
+              " about the running http server."
             ],
             "signature": [
               "() => ",
@@ -2391,6 +2550,7 @@
                 "lineNumber": 22,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               },
               {
@@ -2407,6 +2567,7 @@
                 "lineNumber": 22,
                 "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "AuthHeaders",
                 "trackAdoption": false
               }
             ]
@@ -2447,6 +2608,7 @@
                 "lineNumber": 19,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -2476,7 +2638,15 @@
             "tags": [],
             "label": "serverBasePath",
             "description": [
-              "\nreturns the server's basePath.\n\nSee {@link IBasePath.get} for getting the basePath value for a specific request"
+              "\nreturns the server's basePath.\n\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IBasePath.get",
+                "text": "IBasePath.get"
+              },
+              " for getting the basePath value for a specific request"
             ],
             "path": "src/core/packages/http/server/src/base_path.ts",
             "lineNumber": 18,
@@ -2491,7 +2661,15 @@
             "tags": [],
             "label": "publicBaseUrl",
             "description": [
-              "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link IBasePath.serverBasePath}.\n"
+              "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IBasePath.serverBasePath",
+                "text": "IBasePath.serverBasePath"
+              },
+              ".\n"
             ],
             "signature": [
               "string | undefined"
@@ -2537,6 +2715,7 @@
                 "lineNumber": 37,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2578,6 +2757,7 @@
                 "lineNumber": 42,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2733,6 +2913,7 @@
                 "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginOpaqueId",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2752,6 +2933,7 @@
                 "lineNumber": 102,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContextName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2772,12 +2954,21 @@
                 "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IContextProvider",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "The {@link IContextContainer } for method chaining."
+              "The ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IContextContainer",
+                "text": "IContextContainer"
+              },
+              " for method chaining."
             ]
           },
           {
@@ -2826,6 +3017,7 @@
                 "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginOpaqueId",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2850,6 +3042,7 @@
                 "lineNumber": 116,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3047,7 +3240,15 @@
         "tags": [],
         "label": "IKibanaResponse",
         "description": [
-          "\nA response data object, expected to returned as a result of {@link RequestHandler} execution"
+          "\nA response data object, expected to returned as a result of ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
+          " execution"
         ],
         "signature": [
           "IKibanaResponse",
@@ -3417,7 +3618,23 @@
         "tags": [],
         "label": "IRouter",
         "description": [
-          "\nRegisters route handlers for specified resource path and method.\nSee {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.\n"
+          "\nRegisters route handlers for specified resource path and method.\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteConfig",
+            "text": "RouteConfig"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
+          " for more information about arguments to route registrations.\n"
         ],
         "signature": [
           "IRouter",
@@ -3997,6 +4214,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/inference_endpoints.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -5097,10 +5318,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
-              },
-              {
-                "plugin": "workplaceAIApp",
-                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/get_inference_endpoints.ts"
               },
               {
                 "plugin": "apmDataAccess",
@@ -6548,7 +6765,14 @@
                 "tags": [],
                 "label": "route",
                 "description": [
-                  "{@link RouteConfig } - a route configuration."
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  " - a route configuration."
                 ],
                 "signature": [
                   "RouteConfig",
@@ -6558,6 +6782,7 @@
                 "lineNumber": 29,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteConfig",
                 "trackAdoption": false
               },
               {
@@ -6567,7 +6792,14 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link RequestHandler } - a function to call to respond to an incoming request"
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  " - a function to call to respond to an incoming request"
                 ],
                 "signature": [
                   "(context: Context, request: ",
@@ -6584,6 +6816,7 @@
                 "lineNumber": 30,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -6601,6 +6834,7 @@
                     "lineNumber": 60,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Context",
                     "trackAdoption": false
                   },
                   {
@@ -6618,6 +6852,7 @@
                     "lineNumber": 61,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "KibanaRequest",
                     "trackAdoption": false
                   },
                   {
@@ -6634,6 +6869,7 @@
                     "lineNumber": 62,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ResponseFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -9564,7 +9800,14 @@
                 "tags": [],
                 "label": "route",
                 "description": [
-                  "{@link RouteConfig } - a route configuration."
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  " - a route configuration."
                 ],
                 "signature": [
                   "RouteConfig",
@@ -9574,6 +9817,7 @@
                 "lineNumber": 29,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteConfig",
                 "trackAdoption": false
               },
               {
@@ -9583,7 +9827,14 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link RequestHandler } - a function to call to respond to an incoming request"
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  " - a function to call to respond to an incoming request"
                 ],
                 "signature": [
                   "(context: Context, request: ",
@@ -9600,6 +9851,7 @@
                 "lineNumber": 30,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -9617,6 +9869,7 @@
                     "lineNumber": 60,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Context",
                     "trackAdoption": false
                   },
                   {
@@ -9634,6 +9887,7 @@
                     "lineNumber": 61,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "KibanaRequest",
                     "trackAdoption": false
                   },
                   {
@@ -9650,6 +9904,7 @@
                     "lineNumber": 62,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ResponseFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -10172,7 +10427,14 @@
                 "tags": [],
                 "label": "route",
                 "description": [
-                  "{@link RouteConfig } - a route configuration."
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  " - a route configuration."
                 ],
                 "signature": [
                   "RouteConfig",
@@ -10182,6 +10444,7 @@
                 "lineNumber": 29,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteConfig",
                 "trackAdoption": false
               },
               {
@@ -10191,7 +10454,14 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link RequestHandler } - a function to call to respond to an incoming request"
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  " - a function to call to respond to an incoming request"
                 ],
                 "signature": [
                   "(context: Context, request: ",
@@ -10208,6 +10478,7 @@
                 "lineNumber": 30,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -10225,6 +10496,7 @@
                     "lineNumber": 60,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Context",
                     "trackAdoption": false
                   },
                   {
@@ -10242,6 +10514,7 @@
                     "lineNumber": 61,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "KibanaRequest",
                     "trackAdoption": false
                   },
                   {
@@ -10258,6 +10531,7 @@
                     "lineNumber": 62,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ResponseFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -10464,7 +10738,14 @@
                 "tags": [],
                 "label": "route",
                 "description": [
-                  "{@link RouteConfig } - a route configuration."
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  " - a route configuration."
                 ],
                 "signature": [
                   "RouteConfig",
@@ -10474,6 +10755,7 @@
                 "lineNumber": 29,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteConfig",
                 "trackAdoption": false
               },
               {
@@ -10483,7 +10765,14 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link RequestHandler } - a function to call to respond to an incoming request"
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  " - a function to call to respond to an incoming request"
                 ],
                 "signature": [
                   "(context: Context, request: ",
@@ -10500,6 +10789,7 @@
                 "lineNumber": 30,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -10517,6 +10807,7 @@
                     "lineNumber": 60,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Context",
                     "trackAdoption": false
                   },
                   {
@@ -10534,6 +10825,7 @@
                     "lineNumber": 61,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "KibanaRequest",
                     "trackAdoption": false
                   },
                   {
@@ -10550,6 +10842,7 @@
                     "lineNumber": 62,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ResponseFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -11016,7 +11309,14 @@
                 "tags": [],
                 "label": "route",
                 "description": [
-                  "{@link RouteConfig } - a route configuration."
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  " - a route configuration."
                 ],
                 "signature": [
                   "RouteConfig",
@@ -11026,6 +11326,7 @@
                 "lineNumber": 29,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteConfig",
                 "trackAdoption": false
               },
               {
@@ -11035,7 +11336,14 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link RequestHandler } - a function to call to respond to an incoming request"
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  " - a function to call to respond to an incoming request"
                 ],
                 "signature": [
                   "(context: Context, request: ",
@@ -11052,6 +11360,7 @@
                 "lineNumber": 30,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -11069,6 +11378,7 @@
                     "lineNumber": 60,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Context",
                     "trackAdoption": false
                   },
                   {
@@ -11086,6 +11396,7 @@
                     "lineNumber": 61,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "KibanaRequest",
                     "trackAdoption": false
                   },
                   {
@@ -11102,6 +11413,7 @@
                     "lineNumber": 62,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ResponseFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -11148,7 +11460,14 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link RequestHandler } - a route handler to wrap"
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  " - a route handler to wrap"
                 ],
                 "signature": [
                   "(context: Context, request: ",
@@ -11163,6 +11482,7 @@
                 "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -11180,6 +11500,7 @@
                     "lineNumber": 60,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Context",
                     "trackAdoption": false
                   },
                   {
@@ -11197,6 +11518,7 @@
                     "lineNumber": 61,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "KibanaRequest",
                     "trackAdoption": false
                   },
                   {
@@ -11213,6 +11535,7 @@
                     "lineNumber": 62,
                     "columnNumber": 3,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ResponseFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -11228,7 +11551,15 @@
             ],
             "label": "versioned",
             "description": [
-              "\nAn instance very similar to {@link IRouter} that can be used for versioning HTTP routes\nfollowing the Elastic versioning specification.\n"
+              "\nAn instance very similar to ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IRouter",
+                "text": "IRouter"
+              },
+              " that can be used for versioning HTTP routes\nfollowing the Elastic versioning specification.\n"
             ],
             "signature": [
               "VersionedRouter",
@@ -11391,6 +11722,7 @@
                 "lineNumber": 101,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11436,6 +11768,7 @@
                 "lineNumber": 108,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11481,6 +11814,7 @@
                 "lineNumber": 115,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11526,6 +11860,7 @@
                 "lineNumber": 122,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11571,6 +11906,7 @@
                 "lineNumber": 129,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11616,6 +11952,7 @@
                 "lineNumber": 136,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11665,6 +12002,7 @@
                 "lineNumber": 142,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11726,6 +12064,7 @@
                 "lineNumber": 89,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11786,6 +12125,7 @@
                 "lineNumber": 77,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "RedirectResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11938,7 +12278,15 @@
             "tags": [],
             "label": "isFakeRequest",
             "description": [
-              "\nAllows identifying requests that were created using a {@link FakeRawRequest}\nEven if the API facade is the same, fake requests have some stubbed functionalities."
+              "\nAllows identifying requests that were created using a ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.FakeRawRequest",
+                "text": "FakeRawRequest"
+              },
+              "\nEven if the API facade is the same, fake requests have some stubbed functionalities."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
             "lineNumber": 170,
@@ -12021,7 +12369,15 @@
             "tags": [],
             "label": "socket",
             "description": [
-              "\nThe socket associated with this request.\nSee {@link IKibanaSocket}."
+              "\nThe socket associated with this request.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaSocket",
+                "text": "IKibanaSocket"
+              },
+              "."
             ],
             "signature": [
               "IKibanaSocket"
@@ -12039,7 +12395,15 @@
             "tags": [],
             "label": "events",
             "description": [
-              "\nAllow to listen to events bound to this request.\nSee {@link KibanaRequestEvents}."
+              "\nAllow to listen to events bound to this request.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequestEvents",
+                "text": "KibanaRequestEvents"
+              },
+              "."
             ],
             "signature": [
               "KibanaRequestEvents"
@@ -12057,7 +12421,15 @@
             "tags": [],
             "label": "auth",
             "description": [
-              "\nThe auth status of this request.\nSee {@link KibanaRequestAuth}."
+              "\nThe auth status of this request.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequestAuth",
+                "text": "KibanaRequestAuth"
+              },
+              "."
             ],
             "signature": [
               "KibanaRequestAuth"
@@ -12541,6 +12913,7 @@
                 "lineNumber": 62,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "OTelSpan",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -12752,6 +13125,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -12801,6 +13175,7 @@
                 "lineNumber": 40,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -12850,6 +13225,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -12895,6 +13271,7 @@
                 "lineNumber": 57,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -12940,6 +13317,7 @@
                 "lineNumber": 64,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -13096,6 +13474,7 @@
                 "lineNumber": 47,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -13476,6 +13855,7 @@
                 "lineNumber": 78,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "OnPreResponseRender",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -13518,6 +13898,7 @@
                 "lineNumber": 80,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "OnPreResponseExtensions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -14098,7 +14479,15 @@
             "tags": [],
             "label": "options",
             "description": [
-              "\nAdditional route options {@link RouteConfigOptions}."
+              "\nAdditional route options ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteConfigOptions",
+                "text": "RouteConfigOptions"
+              },
+              "."
             ],
             "signature": [
               "RouteConfigOptions",
@@ -14194,7 +14583,15 @@
             "tags": [],
             "label": "body",
             "description": [
-              "\nAdditional body options {@link RouteConfigOptionsBody}."
+              "\nAdditional body options ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteConfigOptionsBody",
+                "text": "RouteConfigOptionsBody"
+              },
+              "."
             ],
             "signature": [
               "(Method extends \"get\" | \"options\" ? undefined : ",
@@ -14289,7 +14686,15 @@
             ],
             "label": "oasOperationObject",
             "description": [
-              "\nFilepath to a YAML file or a partial {@link OpenAPIV3.OperationObject} to\nbe merged with the code generated for this endpoint.\n"
+              "\nFilepath to a YAML file or a partial ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.OpenAPIV3.OperationObject",
+                "text": "OpenAPIV3.OperationObject"
+              },
+              " to\nbe merged with the code generated for this endpoint.\n"
             ],
             "signature": [
               "(() => string | ",
@@ -14924,6 +15329,7 @@
                 "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Request",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -14941,6 +15347,7 @@
                 "lineNumber": 140,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ResponseToolkit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15076,7 +15483,15 @@
         "tags": [],
         "label": "RouteValidationResultFactory",
         "description": [
-          "\nValidation result factory to be used in the custom validation function to return the valid data or validation errors\n\nSee {@link RouteValidationFunction}.\n"
+          "\nValidation result factory to be used in the custom validation function to return the valid data or validation errors\n\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidationFunction",
+            "text": "RouteValidationFunction"
+          },
+          ".\n"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
         "lineNumber": 27,
@@ -15114,6 +15529,7 @@
                 "lineNumber": 35,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15533,6 +15949,7 @@
                 "lineNumber": 42,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15553,6 +15970,7 @@
                 "lineNumber": 42,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "SessionStorageSetOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -15760,6 +16178,7 @@
                 "lineNumber": 54,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15997,6 +16416,7 @@
                 "lineNumber": 376,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AddVersionOpts",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16107,6 +16527,7 @@
                 "lineNumber": 66,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteValidationResultFactory",
                 "trackAdoption": false
               }
             ]
@@ -16121,7 +16542,23 @@
         "tags": [],
         "label": "VersionedRouter",
         "description": [
-          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead\n"
+          "\nA router, very similar to ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IRouter",
+            "text": "IRouter"
+          },
+          " that will return an ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "\ninstead\n"
         ],
         "signature": [
           "VersionedRouter",
@@ -16545,46 +16982,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
@@ -16610,6 +17007,46 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -16830,6 +17267,10 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/tracing/get_project_traces.ts"
+              },
+              {
+                "plugin": "inbox",
+                "path": "x-pack/platform/plugins/shared/inbox/server/routes/actions/list_actions.ts"
               },
               {
                 "plugin": "inferenceEndpoint",
@@ -17716,6 +18157,14 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/resolve.test.ts"
               },
               {
+                "plugin": "inbox",
+                "path": "x-pack/platform/plugins/shared/inbox/server/routes/actions/list_actions.test.ts"
+              },
+              {
+                "plugin": "inbox",
+                "path": "x-pack/platform/plugins/shared/inbox/server/routes/actions/list_actions.test.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
@@ -17784,6 +18233,7 @@
                 "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -17936,10 +18386,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
@@ -17953,6 +18399,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -18207,6 +18657,7 @@
                 "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -18375,7 +18826,7 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/internal/disable_all_workflows.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/internal/disable.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -18615,34 +19066,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
@@ -18656,6 +19079,34 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -19251,6 +19702,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/search_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/import_rules/route.ts"
               },
               {
@@ -19806,6 +20261,7 @@
                 "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -19937,6 +20393,7 @@
                 "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -20081,10 +20538,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
@@ -20094,6 +20547,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -20324,6 +20781,7 @@
                 "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -20748,7 +21206,15 @@
         "tags": [],
         "label": "AuthenticationHandler",
         "description": [
-          "\nSee {@link AuthToolkit}."
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.AuthToolkit",
+            "text": "AuthToolkit"
+          },
+          "."
         ],
         "signature": [
           "(request: ",
@@ -20789,6 +21255,7 @@
             "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -20807,6 +21274,7 @@
             "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LifecycleResponseFactory",
             "trackAdoption": false
           },
           {
@@ -20823,6 +21291,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AuthToolkit",
             "trackAdoption": false
           }
         ],
@@ -20909,7 +21378,15 @@
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
-          "authentication headers {@link AuthHeaders } for - an incoming request."
+          "authentication headers ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.AuthHeaders",
+            "text": "AuthHeaders"
+          },
+          " for - an incoming request."
         ],
         "children": [
           {
@@ -20919,7 +21396,14 @@
             "tags": [],
             "label": "request",
             "description": [
-              "{@link KibanaRequest } - an incoming request."
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              " - an incoming request."
             ],
             "signature": [
               "KibanaRequest",
@@ -20929,6 +21413,7 @@
             "lineNumber": 19,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -20964,7 +21449,14 @@
             "tags": [],
             "label": "request",
             "description": [
-              "{@link KibanaRequest } - an incoming request."
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              " - an incoming request."
             ],
             "signature": [
               "KibanaRequest",
@@ -20974,6 +21466,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -20986,7 +21479,15 @@
         "tags": [],
         "label": "HandlerContextType",
         "description": [
-          "\nExtracts the type of the first argument of a {@link HandlerFunction} to represent the type of the context.\n"
+          "\nExtracts the type of the first argument of a ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.HandlerFunction",
+            "text": "HandlerFunction"
+          },
+          " to represent the type of the context.\n"
         ],
         "signature": [
           "T extends ",
@@ -21007,7 +21508,15 @@
         "tags": [],
         "label": "HandlerFunction",
         "description": [
-          "\nA function that accepts a context object and an optional number of additional arguments. Used for the generic types\nin {@link IContextContainer}\n"
+          "\nA function that accepts a context object and an optional number of additional arguments. Used for the generic types\nin ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IContextContainer",
+            "text": "IContextContainer"
+          },
+          "\n"
         ],
         "signature": [
           "(context: T, ...args: any[]) => any"
@@ -21033,6 +21542,7 @@
             "lineNumber": 42,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           },
           {
@@ -21061,7 +21571,23 @@
         "tags": [],
         "label": "HandlerParameters",
         "description": [
-          "\nExtracts the types of the additional arguments of a {@link HandlerFunction}, excluding the\n{@link HandlerContextType}.\n"
+          "\nExtracts the types of the additional arguments of a ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.HandlerFunction",
+            "text": "HandlerFunction"
+          },
+          ", excluding the\n",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.HandlerContextType",
+            "text": "HandlerContextType"
+          },
+          ".\n"
         ],
         "signature": [
           "T extends (context: any, ...args: infer U) => any ? U : never"
@@ -21181,6 +21707,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false
           },
           {
@@ -21203,6 +21730,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HandlerParameters",
             "trackAdoption": false
           }
         ],
@@ -21255,7 +21783,14 @@
             "tags": [],
             "label": "request",
             "description": [
-              "{@link KibanaRequest } - an incoming request."
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              " - an incoming request."
             ],
             "signature": [
               "KibanaRequest",
@@ -21265,6 +21800,7 @@
             "lineNumber": 45,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -21302,7 +21838,15 @@
         "tags": [],
         "label": "KibanaResponseFactory",
         "description": [
-          "\nSet of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.\nShould be returned as a result of {@link RequestHandler} execution.\n"
+          "\nSet of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.\nShould be returned as a result of ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
+          " execution.\n"
         ],
         "signature": [
           "KibanaSuccessResponseFactory",
@@ -21443,7 +21987,15 @@
         "tags": [],
         "label": "OnPostAuthHandler",
         "description": [
-          "\nSee {@link OnPostAuthToolkit}."
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.OnPostAuthToolkit",
+            "text": "OnPostAuthToolkit"
+          },
+          "."
         ],
         "signature": [
           "(request: ",
@@ -21484,6 +22036,7 @@
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -21502,6 +22055,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LifecycleResponseFactory",
             "trackAdoption": false
           },
           {
@@ -21518,6 +22072,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OnPostAuthToolkit",
             "trackAdoption": false
           }
         ],
@@ -21549,7 +22104,15 @@
         "tags": [],
         "label": "OnPreAuthHandler",
         "description": [
-          "\nSee {@link OnPreAuthToolkit}."
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.OnPreAuthToolkit",
+            "text": "OnPreAuthToolkit"
+          },
+          "."
         ],
         "signature": [
           "(request: ",
@@ -21590,6 +22153,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -21608,6 +22172,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LifecycleResponseFactory",
             "trackAdoption": false
           },
           {
@@ -21624,6 +22189,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OnPreAuthToolkit",
             "trackAdoption": false
           }
         ],
@@ -21667,7 +22233,15 @@
         "tags": [],
         "label": "OnPreResponseHandler",
         "description": [
-          "\nSee {@link OnPreResponseToolkit}."
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.OnPreResponseToolkit",
+            "text": "OnPreResponseToolkit"
+          },
+          "."
         ],
         "signature": [
           "(request: ",
@@ -21704,6 +22278,7 @@
             "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -21720,6 +22295,7 @@
             "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OnPreResponseInfo",
             "trackAdoption": false
           },
           {
@@ -21736,6 +22312,7 @@
             "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OnPreResponseToolkit",
             "trackAdoption": false
           }
         ],
@@ -21767,7 +22344,15 @@
         "tags": [],
         "label": "OnPreRoutingHandler",
         "description": [
-          "\nSee {@link OnPreRoutingToolkit}."
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.OnPreRoutingToolkit",
+            "text": "OnPreRoutingToolkit"
+          },
+          "."
         ],
         "signature": [
           "(request: ",
@@ -21808,6 +22393,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -21826,6 +22412,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LifecycleResponseFactory",
             "trackAdoption": false
           },
           {
@@ -21842,6 +22429,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OnPreRoutingToolkit",
             "trackAdoption": false
           }
         ],
@@ -21933,7 +22521,15 @@
         "tags": [],
         "label": "RequestHandler",
         "description": [
-          "\nA function executed when route path matched requested resource path.\nRequest handler is expected to return a result of one of {@link KibanaResponseFactory} functions.\nIf anything else is returned, or an error is thrown, the HTTP service will automatically log the error\nand respond `500 - Internal Server Error`."
+          "\nA function executed when route path matched requested resource path.\nRequest handler is expected to return a result of one of ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
+          " functions.\nIf anything else is returned, or an error is thrown, the HTTP service will automatically log the error\nand respond `500 - Internal Server Error`."
         ],
         "signature": [
           "(context: Context, request: ",
@@ -21958,7 +22554,14 @@
             "tags": [],
             "label": "context",
             "description": [
-              "{@link RequestHandlerContext } - the core context exposed for this request."
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              " - the core context exposed for this request."
             ],
             "signature": [
               "Context"
@@ -21967,6 +22570,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Context",
             "trackAdoption": false
           },
           {
@@ -21976,7 +22580,14 @@
             "tags": [],
             "label": "request",
             "description": [
-              "{@link KibanaRequest } - object containing information about requested resource,\nsuch as path, method, headers, parameters, query, body, etc."
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              " - object containing information about requested resource,\nsuch as path, method, headers, parameters, query, body, etc."
             ],
             "signature": [
               "KibanaRequest",
@@ -21986,6 +22597,7 @@
             "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -21995,7 +22607,14 @@
             "tags": [],
             "label": "response",
             "description": [
-              "{@link KibanaResponseFactory } - a set of helper functions used to respond to a request."
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
+              " - a set of helper functions used to respond to a request."
             ],
             "signature": [
               "ResponseFactory"
@@ -22004,6 +22623,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ResponseFactory",
             "trackAdoption": false
           }
         ],
@@ -22016,7 +22636,15 @@
         "tags": [],
         "label": "RequestHandlerWrapper",
         "description": [
-          "\nType-safe wrapper for {@link RequestHandler} function."
+          "\nType-safe wrapper for ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
+          " function."
         ],
         "signature": [
           "<P, Q, B, Context extends ",
@@ -22062,6 +22690,7 @@
             "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandler",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -22079,6 +22708,7 @@
                 "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false
               },
               {
@@ -22096,6 +22726,7 @@
                 "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               },
               {
@@ -22112,6 +22743,7 @@
                 "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ResponseFactory",
                 "trackAdoption": false
               }
             ]
@@ -22325,6 +22957,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteConfig",
             "trackAdoption": false
           },
           {
@@ -22349,6 +22982,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandler",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -22366,6 +23000,7 @@
                 "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false
               },
               {
@@ -22383,6 +23018,7 @@
                 "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               },
               {
@@ -22399,6 +23035,7 @@
                 "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ResponseFactory",
                 "trackAdoption": false
               }
             ]
@@ -22501,6 +23138,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteValidationResultFactory",
             "trackAdoption": false
           }
         ],
@@ -22513,7 +23151,15 @@
         "tags": [],
         "label": "RouteValidationSpec",
         "description": [
-          "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
+          "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidationFunction",
+            "text": "RouteValidationFunction"
+          },
+          " for custom validation.\n"
         ],
         "signature": [
           {
@@ -22644,6 +23290,7 @@
             "lineNumber": 22,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -22660,6 +23307,7 @@
             "lineNumber": 22,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "AuthHeaders",
             "trackAdoption": false
           }
         ],
@@ -22737,7 +23385,15 @@
         "tags": [],
         "label": "VersionedRouteRegistrar",
         "description": [
-          "\nCreate an {@link VersionedRoute | versioned route}.\n"
+          "\nCreate an ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.VersionedRoute",
+            "text": "versioned route"
+          },
+          ".\n"
         ],
         "signature": [
           "(config: ",
@@ -22779,6 +23435,7 @@
             "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VersionedRouteConfig",
             "trackAdoption": false
           }
         ],
