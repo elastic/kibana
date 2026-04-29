@@ -17,7 +17,6 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/experimental_features';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
