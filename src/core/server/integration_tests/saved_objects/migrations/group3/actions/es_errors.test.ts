@@ -97,7 +97,6 @@ describe('Elasticsearch Errors', () => {
 
     it('correctly identify errors from bulk index operations', async () => {
       const res = await client.bulk({
-        refresh: 'wait_for',
         operations: [
           {
             index: {
@@ -118,7 +117,6 @@ describe('Elasticsearch Errors', () => {
 
     it('correctly identify errors from bulk create operations', async () => {
       const res = await client.bulk({
-        refresh: 'wait_for',
         operations: [
           {
             create: {
