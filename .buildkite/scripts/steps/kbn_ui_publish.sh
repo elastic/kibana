@@ -96,10 +96,9 @@ if [[ "${DRY_RUN:-}" == "1" ]]; then
 fi
 
 report_step "Fetching Artifactory credentials"
-# TODO: confirm secret layout. Expected fields at
-# `secret/ci/elastic-kibana/kbn-ui-artifactory`:
+# Secret layout at `secret/ci/elastic-kibana/kbn-ui-artifactory`:
 #   registry   - full npm registry URL
-#   npm_token  - auth token (bearer / basic, whatever the registry expects)
+#   npm_token  - auth token
 NPM_REGISTRY="$(vault_get kbn-ui-artifactory registry)"
 NPM_TOKEN="$(vault_get kbn-ui-artifactory npm_token)"
 if [[ -z "$NPM_REGISTRY" || -z "$NPM_TOKEN" ]]; then
@@ -119,7 +118,7 @@ always-auth=true
 EOF
 
 for tarball in "${built_tarballs[@]}"; do
-  target_dir="$(dirname "$tarball")"
+  target_dir="$(cd "$(dirname "$tarball")" && pwd)"
   pkg_manifest="$target_dir/package.json"
 
   # The workspace manifest marks the package `"private": true` to prevent
@@ -144,7 +143,7 @@ for tarball in "${built_tarballs[@]}"; do
   # A 409 (already published with this version) is the expected no-op
   # for a content-hash-versioned artifact that hasn't changed. Convert
   # that into a success; anything else is still fatal.
-  npm publish "$new_tarball" --userconfig "$NPMRC" || {
+  npm publish "$new_tarball" --tag ci --userconfig "$NPMRC" || {
     publish_rc=$?
     if npm view "$(node -p "require('$pkg_manifest').name")@$(node -p "require('$pkg_manifest').version")" \
          --userconfig "$NPMRC" >/dev/null 2>&1; then
