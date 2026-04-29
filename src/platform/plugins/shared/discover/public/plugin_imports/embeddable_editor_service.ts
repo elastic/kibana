@@ -66,10 +66,11 @@ type CombinedTransferOptions = ByValueTransferOptions | ByReferenceTransferOptio
 
 type DiscoverTransferSerializedState =
   | ControlPanelState<OptionsListESQLControlState>
-  | SearchEmbeddablePanelApiState;
+  | SearchEmbeddablePanelApiState
+  | {};
 
 interface GetSerializedStateResult {
-  serializedState: SearchEmbeddablePanelApiState | undefined;
+  serializedState: SearchEmbeddablePanelApiState | {};
   controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
 }
 
@@ -138,16 +139,17 @@ export class EmbeddableEditorService {
         app,
         {
           path,
-          state: serializedState
-            ? [
-                ...controlPackages,
-                {
-                  type: SEARCH_EMBEDDABLE_TYPE,
-                  serializedState,
-                  embeddableId: this.embeddableState?.embeddableId,
-                },
-              ]
-            : [],
+          state:
+            action !== TransferAction.Cancel
+              ? [
+                  ...controlPackages,
+                  {
+                    type: SEARCH_EMBEDDABLE_TYPE,
+                    serializedState,
+                    embeddableId: this.embeddableState?.embeddableId,
+                  },
+                ]
+              : [],
         }
       );
     }
@@ -176,7 +178,7 @@ export class EmbeddableEditorService {
       };
     }
 
-    return { serializedState: undefined, controlGroupState: {} };
+    return { serializedState: {}, controlGroupState: {} };
   }
 
   private getByValueInput(): DiscoverSessionByValueInput {
