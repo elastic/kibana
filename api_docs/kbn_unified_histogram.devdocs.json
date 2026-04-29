@@ -139,6 +139,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -209,6 +210,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -279,6 +281,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -349,6 +352,7 @@
             "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -436,6 +440,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -523,6 +528,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -557,6 +563,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramTopPanelHeightContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -613,6 +620,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -662,6 +670,7 @@
             "lineNumber": 82,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramChartProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -713,6 +722,7 @@
             "lineNumber": 64,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramLayoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -804,6 +814,7 @@
             "lineNumber": 99,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "UseUnifiedHistogramProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1629,6 +1640,7 @@
                 "lineNumber": 72,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnifiedHistogramFetchStatus",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1696,6 +1708,7 @@
                 "lineNumber": 73,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnifiedHistogramChartLoadEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }

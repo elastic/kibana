@@ -699,6 +699,7 @@ src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizati
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
+src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
@@ -1018,6 +1019,7 @@ x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-t
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-pds-deployment @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra @elastic/search-inference-team
 x-pack/platform/packages/shared/kbn-inference-connectors @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/search-kibana
@@ -1045,10 +1047,12 @@ x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
+x-pack/platform/packages/shared/ml/common-types @elastic/ml-ui
 x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
+x-pack/platform/packages/shared/ml/server-schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
@@ -1146,6 +1150,7 @@ x-pack/platform/plugins/shared/fields_metadata @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
+x-pack/platform/plugins/shared/inbox @elastic/security-pds-deployment @elastic/security-generative-ai
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/search-kibana
 x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
@@ -2507,6 +2512,9 @@ src/platform/plugins/shared/workflows_management/test/connector_workflows @elast
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group10/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 
+# Change tracking inside alerting framework is managed by security-detection-rule-management team.
+/x-pack/platform/plugins/shared/alerting/server/rules_client/lib/change_tracking @elastic/security-detection-rule-management
+
 # Enterprise Search
 # search
 /x-pack/platform/test/fixtures/es_archives/data/search_sessions @elastic/search-kibana
@@ -2769,7 +2777,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 /x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting
@@ -2792,7 +2799,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting
@@ -3323,6 +3329,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
 /.agents/skills/ @elastic/kibana-tech-leads
+/.github/agents/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
@@ -3358,6 +3365,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /src/cli/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
+/.github/aw/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /moon.yml @elastic/kibana-operations
 /.coderabbit.yml @elastic/kibana-operations
