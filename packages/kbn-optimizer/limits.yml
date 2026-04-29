@@ -6,7 +6,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 47881
+  alertingVTwo: 76778
   apm: 26000
   apmSourcesAccess: 2278
   automaticImport: 18629
@@ -98,9 +98,9 @@ pageLoadAssetSize:
   interactiveSetup: 36524
   intercepts: 21066
   kibanaOverview: 6339
-  kibanaReact: 21499
+  kibanaReact: 21495
   kibanaUsageCollection: 1736
-  kibanaUtils: 54161
+  kibanaUtils: 54084
   kql: 15428
   kubernetesSecurity: 6807
   lens: 90000
@@ -132,7 +132,7 @@ pageLoadAssetSize:
   observabilityShared: 75115
   osquery: 47422
   painlessLab: 6299
-  presentationPanel: 10936
+  presentationPanel: 10886
   presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
@@ -171,7 +171,7 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
-  share: 64618
+  share: 64066
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
