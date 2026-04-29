@@ -23,7 +23,14 @@ engine:
   model: llm-gateway/gpt-5.4
   args:
     - -c
+    - model=llm-gateway/gpt-5.4
+    - -c
     - model_context_window=1050000
+    # Disable plugins and apps to remove context bloat
+    - -c
+    - features.plugins=false
+    - -c
+    - features.apps=false
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
@@ -102,6 +109,7 @@ network:
   allowed:
     - defaults
     - github
+    - chatgpt.com
     - elastic.litellm-prod.ai
 jobs:
   prefetch_pr_context:
