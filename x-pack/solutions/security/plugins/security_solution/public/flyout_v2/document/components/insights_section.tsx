@@ -31,6 +31,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
+import { ChildLink } from '../../shared/components/child_link';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
@@ -181,7 +182,7 @@ export const InsightsSection = memo(
               hit={hit}
               investigationFields={investigationFields}
               scopeId={''}
-              columns={getColumns(renderCellActions, isInSecurityApp, '')}
+              columns={getColumns(renderCellActions, isInSecurityApp, '', ChildLink)}
             />
           ),
         }),
