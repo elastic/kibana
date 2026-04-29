@@ -9,7 +9,6 @@ import { useDispatch } from 'react-redux';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../../common/store/inputs';
@@ -81,24 +80,31 @@ export const useEntityURLState = ({
   } = useKibana().services;
   const dispatch = useDispatch();
 
-  // Track current URL filters in a render-phase ref so the subscription below
-  // can detect whether a filterManager update was triggered by us (URL → filterManager)
-  // or by the user (e.g. removing a filter pill).
-  const urlFiltersRef = useRef<Filter[]>([]);
-  urlFiltersRef.current = urlQuery.filters || [];
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const reduxQuery = useDeepEqualSelector(getGlobalQuerySelector);
 
-  // URL state → Redux global query: keeps the search bar's KQL input in sync
-  // with the query decoded from the `cspq` URL param, mirroring the filter sync
-  // pattern below.  Without this, `SiemSearchBar` (which reads from Redux) would
-  // show an empty query even though data is filtered via `cspq`.
-  const lastAppliedQueryRef = useRef<Query | null>(null);
+  // Bidirectional sync between the `cspq` URL state and Redux/`filterManager`
+  // is driven by intent flags rather than value comparisons.  When this hook
+  // initiates a write to one side, it records that intent so the inverse
+  // effect can ignore the resulting echo.  This avoids the cycles (and the
+  // deep-equal cascade) that arise when both sides treat every change as
+  // user-initiated.
+  const skipNextUrlToReduxQuery = useRef(false);
+  const skipNextReduxToUrlQuery = useRef(false);
+  const skipNextUrlToFilterManager = useRef(false);
+  const skipNextFilterManagerToUrl = useRef(false);
+
+  // URL → Redux global query: keeps `SiemSearchBar`'s KQL input in sync with
+  // the query decoded from `cspq`. Without this, the search bar appears empty
+  // even though data is actively filtered via the URL.
   useEffect(() => {
-    const nextQuery = urlQuery.query;
-    if (!nextQuery) return;
-    if (lastAppliedQueryRef.current !== null && deepEqual(lastAppliedQueryRef.current, nextQuery)) {
+    if (skipNextUrlToReduxQuery.current) {
+      skipNextUrlToReduxQuery.current = false;
       return;
     }
-    lastAppliedQueryRef.current = nextQuery;
+    const nextQuery = urlQuery.query;
+    if (!nextQuery) return;
+    skipNextReduxToUrlQuery.current = true;
     dispatch(
       inputsActions.setFilterQuery({
         id: InputsModelId.global,
@@ -108,55 +114,56 @@ export const useEntityURLState = ({
     );
   }, [dispatch, urlQuery.query]);
 
-  // Redux → URL state: syncs search-bar changes back to the `cspq` URL param.
-  // Without this, edits in the `SiemSearchBar` would update Redux but leave the
-  // URL param stale, causing the Refresh button to re-apply the old query.
-  // The first run is skipped because both effects fire in the same commit on
-  // mount: the forward sync above dispatches to Redux, but `reduxQuery` still
-  // holds the pre-dispatch value (DEFAULT_QUERY) until the store update triggers
-  // a re-render.
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const reduxQuery = useDeepEqualSelector(getGlobalQuerySelector);
-  const reverseSyncReadyRef = useRef(false);
-
+  // Redux → URL: pushes search-bar edits back to `cspq` so the URL stays
+  // authoritative (e.g. for the Refresh button and shareable URLs).
+  // The string compare on `query`/`language` short-circuits redundant pushes
+  // when this effect re-fires due to `setUrlQuery` getting a new identity
+  // after an unrelated URL change.
   useEffect(() => {
-    if (!reduxQuery) return;
-    if (!reverseSyncReadyRef.current) {
-      reverseSyncReadyRef.current = true;
+    if (skipNextReduxToUrlQuery.current) {
+      skipNextReduxToUrlQuery.current = false;
       return;
     }
-    if (deepEqual(reduxQuery, lastAppliedQueryRef.current)) return;
-    if (deepEqual(reduxQuery, urlQuery.query)) return;
-    setUrlQuery({ query: reduxQuery });
-  }, [reduxQuery, urlQuery.query, setUrlQuery]);
-
-  // URL state → filterManager: keeps filter pills visible in the filter bar.
-  // The deepEqual guard defends against reference churn from unrelated URL updates
-  // (like `flyout` params), preventing a redundant filterManager emission that would
-  // cascade into filter-bar re-renders.
-  const lastAppliedFiltersRef = useRef<Filter[] | null>(null);
-  useEffect(() => {
-    const nextFilters = urlQuery.filters || [];
+    if (!reduxQuery) return;
+    const currentUrlQuery = urlQuery.query as Query | undefined;
     if (
-      lastAppliedFiltersRef.current !== null &&
-      deepEqual(lastAppliedFiltersRef.current, nextFilters)
+      currentUrlQuery &&
+      currentUrlQuery.query === reduxQuery.query &&
+      currentUrlQuery.language === reduxQuery.language
     ) {
       return;
     }
-    lastAppliedFiltersRef.current = nextFilters;
+    skipNextUrlToReduxQuery.current = true;
+    setUrlQuery({ query: reduxQuery });
+  }, [reduxQuery, urlQuery.query, setUrlQuery]);
+
+  // URL → filterManager: keeps filter pills visible in the filter bar.
+  useEffect(() => {
+    if (skipNextUrlToFilterManager.current) {
+      skipNextUrlToFilterManager.current = false;
+      return;
+    }
+    const nextFilters = urlQuery.filters || [];
+    skipNextFilterManagerToUrl.current = true;
     filterManager.setAppFilters(nextFilters);
+    // If `setAppFilters` decides nothing actually changed it will not emit on
+    // `getUpdates$`, leaving the flag set forever.  Reset it on a microtask so
+    // the synchronous emit (if any) has already been consumed by then.
+    Promise.resolve().then(() => {
+      skipNextFilterManagerToUrl.current = false;
+    });
   }, [filterManager, urlQuery.filters]);
 
-  // filterManager → URL state: syncs removals made via the filter bar back to URL state.
-  // The deepEqual guard prevents a circular update when setAppFilters above causes
-  // filterManager to emit, since at that point urlFiltersRef already reflects the
-  // new URL state.
+  // filterManager → URL: syncs filter-bar interactions (adding/removing pills)
+  // back to the `cspq` URL.
   useEffect(() => {
     const subscription = filterManager.getUpdates$().subscribe(() => {
-      const appFilters = filterManager.getAppFilters();
-      if (!deepEqual(appFilters, urlFiltersRef.current)) {
-        setUrlQuery({ filters: appFilters });
+      if (skipNextFilterManagerToUrl.current) {
+        skipNextFilterManagerToUrl.current = false;
+        return;
       }
+      skipNextUrlToFilterManager.current = true;
+      setUrlQuery({ filters: filterManager.getAppFilters() });
     });
     return () => subscription.unsubscribe();
   }, [filterManager, setUrlQuery]);
@@ -173,14 +180,20 @@ export const useEntityURLState = ({
   );
 
   const onResetFilters = useCallback(() => {
-    setUrlQuery({
-      pageIndex: 0,
-      filters: [],
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-    });
+    // We are about to drive every side of the sync ourselves: URL, Redux, and
+    // filterManager.  Pre-mark the intent flags so the URL/Redux/filterManager
+    // effects ignore the echoes from these writes instead of bouncing them
+    // back and re-introducing the filters we just cleared.
+    skipNextUrlToReduxQuery.current = true;
+    skipNextReduxToUrlQuery.current = true;
+    skipNextUrlToFilterManager.current = true;
+    skipNextFilterManagerToUrl.current = true;
+
+    // Clear `filterManager` directly so any pinned/app filter pills are
+    // removed immediately rather than relying on the URL → filterManager
+    // effect (which would otherwise race with `useSyncGlobalQueryString`
+    // re-pushing the previous `filters` URL param and reviving the pill).
+    filterManager.setAppFilters([]);
 
     dispatch(
       inputsActions.setFilterQuery({
@@ -196,7 +209,16 @@ export const useEntityURLState = ({
         savedQuery: undefined,
       })
     );
-  }, [setUrlQuery, dispatch]);
+
+    setUrlQuery({
+      pageIndex: 0,
+      filters: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  }, [filterManager, setUrlQuery, dispatch]);
 
   const onChangePage = useCallback(
     (newPageIndex: number) => {
