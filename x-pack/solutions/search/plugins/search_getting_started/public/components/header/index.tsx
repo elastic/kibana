@@ -15,11 +15,7 @@ import {
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaVersionBadge,
-  TrialUsageBadge,
-  TRIAL_USAGE_BADGE_ENABLED_ID,
-} from '@kbn/search-shared-ui';
+import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
 
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
@@ -29,10 +25,9 @@ import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_deta
 export const SearchGettingStartedHeader: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const {
-    services: { cloud, kibanaVersion, uiSettings },
+    services: { cloud, kibanaVersion },
   } = useKibana();
 
-  const isTrialBadgeEnabled = uiSettings.get<boolean>(TRIAL_USAGE_BADGE_ENABLED_ID, false);
   const { data: trialUsageData } = useTrialUsageData();
 
   const [billingUrl, setBillingUrl] = useState<string>('');

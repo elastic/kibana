@@ -10,35 +10,21 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  KibanaVersionBadge,
-  TrialUsageBadge,
-  TRIAL_USAGE_BADGE_ENABLED_ID,
-} from '@kbn/search-shared-ui';
+import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { SearchHomepageBody } from './search_homepage_body';
 import { docLinks } from '../../../common/doc_links';
-import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useTrialUsageData } from '../../hooks/api/use_trial_usage_data';
 
 export const SearchHomepagePage = () => {
   const {
-    services: {
-      console: consolePlugin,
-      history,
-      searchNavigation,
-      cloud,
-      kibanaVersion,
-      uiSettings,
-    },
+    services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
 
   const { user } = useAuthenticatedUser();
-  const { isTrial } = useGetLicenseInfo();
-  const isTrialBadgeEnabled = uiSettings.get<boolean>(TRIAL_USAGE_BADGE_ENABLED_ID, false);
   const { data: trialUsageData } = useTrialUsageData();
 
   const [billingUrl, setBillingUrl] = useState<string>('');
