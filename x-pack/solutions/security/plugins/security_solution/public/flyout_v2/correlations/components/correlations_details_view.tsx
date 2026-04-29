@@ -46,6 +46,10 @@ export interface CorrelationsDetailsViewProps {
    * // TODO make required once we have an attack flyout in the new flyout system
    */
   onShowAttack?: (id: string, indexName: string) => void;
+  /**
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
+   */
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -53,7 +57,14 @@ export interface CorrelationsDetailsViewProps {
  * so it can be used both inside a flyout body and inline in a tab panel.
  */
 export const CorrelationsDetailsView = memo(
-  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsViewProps) => {
+  ({
+    hit,
+    scopeId,
+    isRulePreview,
+    onShowAlert,
+    onShowAttack,
+    useLegacyExpandableFlyout,
+  }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
       () => ({
@@ -111,6 +122,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -121,6 +133,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -130,6 +143,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}

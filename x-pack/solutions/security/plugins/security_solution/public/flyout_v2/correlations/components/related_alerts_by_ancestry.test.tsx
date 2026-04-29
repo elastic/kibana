@@ -58,6 +58,7 @@ const renderRelatedAlertsByAncestry = () =>
           documentId={documentId}
           scopeId={scopeId}
           onShowAlert={mockOnShowAlert}
+          useLegacyExpandableFlyout={false}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>

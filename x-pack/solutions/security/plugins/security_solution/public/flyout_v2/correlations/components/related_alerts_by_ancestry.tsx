@@ -29,6 +29,10 @@ export interface RelatedAlertsByAncestryProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string) => void;
+  /**
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
+   */
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -38,9 +42,8 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   documentId,
   scopeId,
   onShowAlert,
+  useLegacyExpandableFlyout,
 }) => {
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
-  const useLegacyExpandableFlyout = !newFlyoutSystemEnabled;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
     useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];

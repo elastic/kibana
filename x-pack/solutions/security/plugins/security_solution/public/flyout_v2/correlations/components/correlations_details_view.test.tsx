@@ -72,6 +72,7 @@ const renderCorrelationsDetailsView = ({
         scopeId="test-scope"
         isRulePreview={isRulePreview}
         onShowAlert={mockOnShowAlert}
+        useLegacyExpandableFlyout={false}
       />
     </TestProviders>
   );

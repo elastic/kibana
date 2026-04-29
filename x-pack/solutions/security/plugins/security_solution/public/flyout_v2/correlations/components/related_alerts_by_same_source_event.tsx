@@ -11,7 +11,6 @@ import { useFetchRelatedAlertsBySameSourceEvent } from '../../document/hooks/use
 import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { getColumns } from '../utils/get_columns';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface RelatedAlertsBySameSourceEventProps {
   /**
@@ -30,6 +29,10 @@ export interface RelatedAlertsBySameSourceEventProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string) => void;
+  /**
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
+   */
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -40,9 +43,8 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   scopeId,
   eventId,
   onShowAlert,
+  useLegacyExpandableFlyout,
 }) => {
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
-  const useLegacyExpandableFlyout = !newFlyoutSystemEnabled;
   const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
     scopeId,

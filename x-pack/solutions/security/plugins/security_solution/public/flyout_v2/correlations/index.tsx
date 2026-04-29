@@ -67,6 +67,7 @@ export const CorrelationsDetails = memo(
             isRulePreview={isRulePreview}
             onShowAlert={onShowAlert}
             onShowAttack={onShowAttack}
+            useLegacyExpandableFlyout={false}
           />
         </EuiFlyoutBody>
       </>
