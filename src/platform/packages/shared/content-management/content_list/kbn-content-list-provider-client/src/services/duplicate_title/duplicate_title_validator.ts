@@ -50,7 +50,7 @@ export interface DuplicateTitleValidatorOptions {
 }
 
 const defaultDuplicateTitleWarning = (value: string): string =>
-  i18n.translate('contentListProviderClient.duplicateTitleValidator.warning', {
+  i18n.translate('contentManagement.contentListProviderClient.duplicateTitleValidator.warning', {
     defaultMessage: 'Saving "{value}" creates a duplicate title.',
     values: { value },
   });

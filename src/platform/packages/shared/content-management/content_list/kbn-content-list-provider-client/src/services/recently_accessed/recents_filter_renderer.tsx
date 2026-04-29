@@ -15,7 +15,7 @@ import type { RecentlyAccessedHistorySource } from './types';
 export const RECENT_FIELD = 'recent';
 
 const defaultLabel = i18n.translate(
-  'contentListProviderClient.recentlyAccessed.recentsFilter.label',
+  'contentManagement.contentListProviderClient.recentlyAccessed.recentsFilter.label',
   { defaultMessage: 'Recent' }
 );
 
