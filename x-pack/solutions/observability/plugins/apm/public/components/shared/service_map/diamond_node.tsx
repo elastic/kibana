@@ -122,24 +122,17 @@ export const DiamondNode = memo(
       visibility: hidden;
     `;
 
-    const diamondBackground = isSearchMatch
-      ? euiTheme.colors.backgroundBaseHighlighted
-      : euiTheme.colors.backgroundBasePlain;
-
-    const activeMatchBoxShadow = isActiveSearchMatch
-      ? `0 0 0 3px ${transparentize(euiTheme.colors.primary, 0.3)}`
-      : `0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.backgroundBaseSubdued}`;
-
     const diamondStyles = css`
       width: ${DEPENDENCY_NODE_DIAMOND_SIZE}px;
       height: ${DEPENDENCY_NODE_DIAMOND_SIZE}px;
       transform: rotate(45deg);
       border: ${diamondBorderWidth} solid ${borderColor};
-      background: ${diamondBackground};
+      background: ${euiTheme.colors.backgroundBasePlain};
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: ${activeMatchBoxShadow};
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs}
+        ${euiTheme.colors.backgroundBaseSubdued};
       box-sizing: border-box;
       cursor: pointer;
       pointer-events: all;
@@ -171,21 +164,33 @@ export const DiamondNode = memo(
       display: block;
     `;
 
+    const highlightBackground = transparentize(euiTheme.colors.primary, 0.1);
+    const searchHighlightStyles = isActiveSearchMatch
+      ? css`
+          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.size.m};
+          border-radius: ${euiTheme.border.radius.medium};
+          box-shadow: 0 0 0 100vmax ${highlightBackground} inset,
+            0 0 0 ${euiTheme.size.m} ${highlightBackground};
+        `
+      : undefined;
+
     return (
       <EuiFlexGroup
         direction="column"
         alignItems="center"
         gutterSize="s"
         responsive={false}
+        css={searchHighlightStyles}
         data-test-subj={`serviceMapNode-${testSubjPrefix}-${id}`}
+        data-search-match={isSearchMatch || undefined}
+        data-search-active-match={isActiveSearchMatch || undefined}
       >
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           {badge}
           <div
             data-test-subj="serviceMapNodeDiamondHit"
-            data-search-match={isSearchMatch || undefined}
-            data-search-active-match={isActiveSearchMatch || undefined}
             css={diamondStyles}
             role="button"
             tabIndex={0}

@@ -241,9 +241,9 @@ describe('ServiceNode', () => {
 
     it('does not set search data attributes when there is no search match', () => {
       renderServiceNode();
-      const circle = screen.getByTestId('serviceMapNodeServiceCircle');
-      expect(circle).not.toHaveAttribute('data-search-match');
-      expect(circle).not.toHaveAttribute('data-search-active-match');
+      const node = screen.getByTestId('serviceMapNode-service-test-service');
+      expect(node).not.toHaveAttribute('data-search-match');
+      expect(node).not.toHaveAttribute('data-search-active-match');
     });
 
     it('sets data-search-match when the node is an inactive search match', () => {
@@ -252,9 +252,9 @@ describe('ServiceNode', () => {
         isActiveSearchMatch: false,
       });
       renderServiceNode();
-      const circle = screen.getByTestId('serviceMapNodeServiceCircle');
-      expect(circle).toHaveAttribute('data-search-match', 'true');
-      expect(circle).not.toHaveAttribute('data-search-active-match');
+      const node = screen.getByTestId('serviceMapNode-service-test-service');
+      expect(node).toHaveAttribute('data-search-match', 'true');
+      expect(node).not.toHaveAttribute('data-search-active-match');
     });
 
     it('sets both data attributes when the node is the active search match', () => {
@@ -263,9 +263,9 @@ describe('ServiceNode', () => {
         isActiveSearchMatch: true,
       });
       renderServiceNode();
-      const circle = screen.getByTestId('serviceMapNodeServiceCircle');
-      expect(circle).toHaveAttribute('data-search-match', 'true');
-      expect(circle).toHaveAttribute('data-search-active-match', 'true');
+      const node = screen.getByTestId('serviceMapNode-service-test-service');
+      expect(node).toHaveAttribute('data-search-match', 'true');
+      expect(node).toHaveAttribute('data-search-active-match', 'true');
     });
   });
 });

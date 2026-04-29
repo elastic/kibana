@@ -122,24 +122,17 @@ export const ServiceNode = memo(
       visibility: hidden;
     `;
 
-    const circleBackground = isSearchMatch
-      ? euiTheme.colors.backgroundBaseHighlighted
-      : euiTheme.colors.backgroundBasePlain;
-
-    const activeMatchBoxShadow = isActiveSearchMatch
-      ? `0 0 0 3px ${transparentize(euiTheme.colors.primary, 0.4)}`
-      : `0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.backgroundBaseSubdued}`;
-
     const circleStyles = css`
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
       height: ${SERVICE_NODE_CIRCLE_SIZE}px;
       border-radius: 50%;
       border: ${borderWidth} ${borderStyle} ${borderColor};
-      background: ${circleBackground};
+      background: ${euiTheme.colors.backgroundBasePlain};
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: ${activeMatchBoxShadow};
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs}
+        ${euiTheme.colors.backgroundBaseSubdued};
       cursor: pointer;
       pointer-events: all;
 
@@ -180,6 +173,17 @@ export const ServiceNode = memo(
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
+    const highlightBackground = transparentize(euiTheme.colors.primary, 0.1);
+    const searchHighlightStyles = isActiveSearchMatch
+      ? css`
+          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.size.m};
+          border-radius: ${euiTheme.border.radius.medium};
+          box-shadow: 0 0 0 100vmax ${highlightBackground} inset,
+            0 0 0 ${euiTheme.size.m} ${highlightBackground};
+        `
+      : undefined;
+
     const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
       defaultMessage:
         '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
@@ -192,14 +196,15 @@ export const ServiceNode = memo(
         alignItems="center"
         gutterSize="xs"
         responsive={false}
+        css={searchHighlightStyles}
         data-test-subj={`serviceMapNode-service-${data.id}`}
+        data-search-match={isSearchMatch || undefined}
+        data-search-active-match={isActiveSearchMatch || undefined}
       >
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           <div
             data-test-subj="serviceMapNodeServiceCircle"
-            data-search-match={isSearchMatch || undefined}
-            data-search-active-match={isActiveSearchMatch || undefined}
             css={circleStyles}
             role="button"
             tabIndex={0}

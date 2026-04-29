@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -14,10 +14,8 @@ import { ServiceNode } from '../service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import {
-  ServiceMapSearchProvider,
-  useServiceMapSearchContext,
-} from '../service_map_search_context';
+import { ServiceMapSearchProvider } from '../service_map_search_context';
+import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -254,43 +252,6 @@ export const OpenTelemetryAgents: StoryObj = {
     );
   },
 };
-
-/**
- * Wraps children in a fresh `ServiceMapSearchProvider` pre-configured with the given highlight state.
- */
-function WithSearchHighlight({
-  matchNodeIds,
-  activeMatchNodeId,
-  children,
-}: {
-  matchNodeIds: Set<string>;
-  activeMatchNodeId: string | null;
-  children: React.ReactNode;
-}) {
-  return (
-    <ServiceMapSearchProvider>
-      <SearchHighlightInit matchNodeIds={matchNodeIds} activeMatchNodeId={activeMatchNodeId}>
-        {children}
-      </SearchHighlightInit>
-    </ServiceMapSearchProvider>
-  );
-}
-
-function SearchHighlightInit({
-  matchNodeIds,
-  activeMatchNodeId,
-  children,
-}: {
-  matchNodeIds: Set<string>;
-  activeMatchNodeId: string | null;
-  children: React.ReactNode;
-}) {
-  const { setSearchHighlight } = useServiceMapSearchContext();
-  useEffect(() => {
-    setSearchHighlight({ matchNodeIds, activeMatchNodeId });
-  }, [matchNodeIds, activeMatchNodeId, setSearchHighlight]);
-  return <>{children}</>;
-}
 
 export const SearchHighlight: StoryObj = {
   render: () => (
