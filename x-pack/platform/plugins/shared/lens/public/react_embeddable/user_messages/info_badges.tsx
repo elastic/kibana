@@ -45,6 +45,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
   }
   return (
     <EuiPopover
+      aria-label={iconTitle}
       panelPaddingSize="none"
       button={
         <EuiToolTip content={iconTitle}>

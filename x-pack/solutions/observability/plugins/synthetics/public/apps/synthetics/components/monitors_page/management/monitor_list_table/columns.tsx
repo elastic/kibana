@@ -200,20 +200,16 @@ export function useMonitorListColumns({
             })
           );
           return remoteLocations.length > 0 ? (
-            <MonitorLocations
-              monitorId={monitor[ConfigKey.CONFIG_ID]}
-              locations={remoteLocations}
-              overviewStatus={overviewStatus}
-            />
+            <MonitorLocations configId={monitor[ConfigKey.CONFIG_ID]} locations={remoteLocations} />
           ) : (
             <EuiText size="s">{DASH}</EuiText>
           );
         }
         return locations ? (
           <MonitorLocations
-            monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
+            configId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations as ServiceLocations}
-            overviewStatus={overviewStatus}
+            spaces={monitor.spaces}
           />
         ) : null;
       },
