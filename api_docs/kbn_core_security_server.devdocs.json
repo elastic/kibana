@@ -440,6 +440,7 @@
                 "lineNumber": 35,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopeableRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -757,6 +758,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1202,7 +1204,15 @@
             "tags": [],
             "label": "log",
             "description": [
-              "\nLogs an {@link AuditEvent} and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
+              "\nLogs an ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditEvent",
+                "text": "AuditEvent"
+              },
+              " and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
             ],
             "signature": [
               "(event: ",
@@ -1681,7 +1691,15 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates an {@link AuditLogger} scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
+              "\nCreates an ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
             ],
             "signature": [
               "(request: ",
@@ -1710,6 +1728,7 @@
                 "lineNumber": 27,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1723,7 +1742,15 @@
             "tags": [],
             "label": "withoutRequest",
             "description": [
-              "\n{@link AuditLogger} for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
+              "\n",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
             ],
             "signature": [
               "AuditLogger"
@@ -1791,6 +1818,7 @@
                 "lineNumber": 26,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1834,6 +1862,7 @@
                 "lineNumber": 34,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2803,6 +2832,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2822,6 +2852,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2869,6 +2900,7 @@
                 "lineNumber": 57,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2888,6 +2920,7 @@
                 "lineNumber": 58,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2937,6 +2970,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3000,6 +3034,7 @@
                 "lineNumber": 75,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3047,6 +3082,7 @@
                 "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3066,6 +3102,7 @@
                 "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3110,6 +3147,7 @@
                 "lineNumber": 91,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3192,6 +3230,7 @@
                 "lineNumber": 41,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3236,6 +3275,7 @@
                 "lineNumber": 52,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3278,6 +3318,7 @@
                 "lineNumber": 58,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3322,6 +3363,7 @@
                 "lineNumber": 64,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3428,6 +3470,7 @@
                 "lineNumber": 25,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSecurityDelegateContract",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3441,7 +3484,14 @@
             "tags": [],
             "label": "fips",
             "description": [
-              "\nThe {@link CoreFipsService | FIPS service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CoreFipsService",
+                "text": "FIPS service"
+              }
             ],
             "signature": [
               "CoreFipsService"
@@ -3477,7 +3527,14 @@
             "tags": [],
             "label": "authc",
             "description": [
-              "\nThe {@link CoreAuthenticationService | authentication service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CoreAuthenticationService",
+                "text": "authentication service"
+              }
             ],
             "signature": [
               "CoreAuthenticationService"
@@ -3495,7 +3552,14 @@
             "tags": [],
             "label": "audit",
             "description": [
-              "\nThe {@link CoreAuditService | audit service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CoreAuditService",
+                "text": "audit service"
+              }
             ],
             "signature": [
               "CoreAuditService"
@@ -3567,6 +3631,7 @@
                 "lineNumber": 27,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3586,6 +3651,7 @@
                 "lineNumber": 27,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrantUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3637,6 +3703,7 @@
                 "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3656,6 +3723,7 @@
                 "lineNumber": 39,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3766,6 +3834,7 @@
                 "lineNumber": 30,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrantUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3814,6 +3883,7 @@
                 "lineNumber": 39,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4387,6 +4457,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4406,6 +4477,7 @@
                 "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateUiamOAuthClientParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4451,6 +4523,7 @@
                 "lineNumber": 92,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4517,6 +4590,7 @@
                 "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4555,6 +4629,7 @@
                 "lineNumber": 105,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateUiamOAuthClientParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4600,6 +4675,7 @@
                 "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4683,6 +4759,7 @@
                 "lineNumber": 127,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4768,6 +4845,7 @@
                 "lineNumber": 140,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4825,6 +4903,7 @@
                 "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateUiamOAuthConnectionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4870,6 +4949,7 @@
                 "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
