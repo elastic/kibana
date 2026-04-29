@@ -13,7 +13,6 @@ import { AboutPanel } from './about_panel';
 import { DataQualityCard } from './data_quality_card';
 import { IngestRateChart } from './ingest_rate_chart';
 import { OverviewTimeFilter } from './overview_time_filter';
-import { AttachedAssetsPanel } from './attached_assets_panel';
 
 interface OverviewSection {
   id: string;
@@ -49,7 +48,6 @@ export function StreamOverview() {
   const sidebarSections: OverviewSection[] = [
     { id: 'time-filter', node: <OverviewTimeFilter />, show: true },
     { id: 'about', node: <AboutPanel />, show: true },
-    { id: 'suggestions', node: <AttachedAssetsPanel />, show: true },
   ];
 
   return (
