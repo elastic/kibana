@@ -54,6 +54,7 @@
             "lineNumber": 47,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -141,6 +142,7 @@
             "lineNumber": 24,
             "columnNumber": 66,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -399,6 +401,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -458,6 +461,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -498,6 +502,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewsContract",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -515,6 +520,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -567,6 +573,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedDataTableRenderCustomToolbarProps",
             "trackAdoption": false
           }
         ],
@@ -616,6 +623,7 @@
             "lineNumber": 40,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "RowHeightSettingsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -995,6 +1003,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -1159,6 +1168,7 @@
             "lineNumber": 33,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "UseColumnsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1227,7 +1237,7 @@
           "EuiDataGridRefProps"
         ],
         "path": "node_modules/@elastic/eui/eui.d.ts",
-        "lineNumber": 23562,
+        "lineNumber": 23564,
         "columnNumber": 2,
         "deprecated": false,
         "trackAdoption": false,
@@ -1245,7 +1255,7 @@
               "(isFullScreen: boolean) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 23563,
+            "lineNumber": 23565,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1261,7 +1271,7 @@
                   "boolean"
                 ],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 23566,
+                "lineNumber": 23568,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1283,7 +1293,7 @@
               "(cell: { rowIndex: number; colIndex: number; }) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 23567,
+            "lineNumber": 23569,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1296,7 +1306,7 @@
                 "label": "cell",
                 "description": [],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 23574,
+                "lineNumber": 23576,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1309,7 +1319,7 @@
                     "label": "rowIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 23575,
+                    "lineNumber": 23577,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1322,7 +1332,7 @@
                     "label": "colIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 23576,
+                    "lineNumber": 23578,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1345,7 +1355,7 @@
               "(cell: { rowIndex: number; colIndex: number; }) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 23578,
+            "lineNumber": 23580,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1358,7 +1368,7 @@
                 "label": "cell",
                 "description": [],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 23581,
+                "lineNumber": 23583,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1371,7 +1381,7 @@
                     "label": "rowIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 23582,
+                    "lineNumber": 23584,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1384,7 +1394,7 @@
                     "label": "colIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 23583,
+                    "lineNumber": 23585,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1407,7 +1417,7 @@
               "() => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 23585,
+            "lineNumber": 23587,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1427,7 +1437,7 @@
               "((params: { scrollLeft?: number | undefined; scrollTop?: number | undefined; }) => void) | undefined"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 23589,
+            "lineNumber": 23591,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
@@ -1447,7 +1457,7 @@
               " | undefined; columnIndex?: number | undefined; rowIndex?: number | undefined; }) => void) | undefined"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 23593,
+            "lineNumber": 23595,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
@@ -2596,6 +2606,7 @@
             "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false
           },
           {
@@ -2658,6 +2669,7 @@
             "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableColumnsMeta",
             "trackAdoption": false
           }
         ],
@@ -2808,6 +2820,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedDataTableRenderCustomToolbarProps",
             "trackAdoption": false
           }
         ],
