@@ -210,6 +210,10 @@ export function LoadingState() {
 function DetailFlyoutStatusHistory({ configId, location }: { configId: string; location: string }) {
   return (
     <EuiPageSection bottomBorder="extended">
+      <EuiTitle size="xs">
+        <h3>{DOWNTIME_HISTORY_LABEL}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <MonitorStatusPanel
         from="now-24h"
         to="now"
@@ -545,6 +549,10 @@ const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
     defaultMessage: 'Previous period',
   }
 );
+
+const DOWNTIME_HISTORY_LABEL = i18n.translate('xpack.synthetics.flyout.downtimeHistoryLabel', {
+  defaultMessage: 'Downtime history',
+});
 
 const LAST_24H_TEXT = i18n.translate('xpack.synthetics.flyout.last24hCaption', {
   defaultMessage: 'Last 24 hours',

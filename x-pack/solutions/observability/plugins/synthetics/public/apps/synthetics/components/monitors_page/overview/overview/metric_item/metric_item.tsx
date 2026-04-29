@@ -250,7 +250,10 @@ export const MetricItem = ({
                       onMouseUp={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
-                        if (!target.closest('a, button, [role="button"], .euiBadge')) {
+                        const closestInteractive = target.closest(
+                          'a, button, [role="button"], .euiBadge'
+                        );
+                        if (!closestInteractive || closestInteractive === e.currentTarget) {
                           onClick({
                             locationId,
                             configId: monitor.configId,
