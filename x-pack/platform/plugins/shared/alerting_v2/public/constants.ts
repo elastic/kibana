@@ -23,6 +23,7 @@ export const MANAGEMENT_APP_ID = 'management';
 export {
   ALERTING_V2_RULE_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
 } from '@kbn/alerting-v2-constants';
 
 export const paths = {

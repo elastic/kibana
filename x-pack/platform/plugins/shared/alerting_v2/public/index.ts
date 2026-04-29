@@ -23,6 +23,7 @@ import {
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
 } from './constants';
 import { ActionPoliciesApi } from './services/action_policies_api';
+import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
@@ -35,6 +36,7 @@ export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
+  bind(ExecutionHistoryApi).toSelf().inSingletonScope();
   bind(WorkflowsApi).toSelf().inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,

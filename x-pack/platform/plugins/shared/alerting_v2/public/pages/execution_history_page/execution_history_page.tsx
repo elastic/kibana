@@ -5,13 +5,130 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useFetchExecutionHistory } from '../../hooks/use_fetch_execution_history';
+import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
+
+const POLICIES_TAB_ID = 'policies';
+const RULES_TAB_ID = 'rules';
+
+type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
+
+const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
+  {
+    field: '@timestamp',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.timestamp', {
+      defaultMessage: 'Timestamp',
+    }),
+  },
+  {
+    field: 'policy.name',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
+      defaultMessage: 'Policy',
+    }),
+  },
+  {
+    field: 'outcome',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.outcome', {
+      defaultMessage: 'Outcome',
+    }),
+  },
+  {
+    field: 'episode_count',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.episodes', {
+      defaultMessage: 'Episodes',
+    }),
+  },
+  {
+    field: 'rule_count',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.rules', {
+      defaultMessage: 'Rules',
+    }),
+  },
+  {
+    field: 'action_group_count',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.actionGroups', {
+      defaultMessage: 'Action groups',
+    }),
+  },
+  {
+    field: 'workflow_ids',
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.workflows', {
+      defaultMessage: 'Workflows',
+    }),
+  },
+];
+
+const policiesEmptyState = (
+  <EuiEmptyPrompt
+    iconType="clock"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.emptyTitle"
+          defaultMessage="No policy execution activity in the last 24 hours."
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.emptyBody"
+          defaultMessage="Summary events appear here after the dispatcher evaluates episodes against a policy."
+        />
+      </p>
+    }
+  />
+);
+
+const rulesPlaceholder = (
+  <EuiEmptyPrompt
+    iconType="visGauge"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.alertingV2.executionHistory.rulesTab.placeholderTitle"
+          defaultMessage="Rules execution history is not available yet."
+        />
+      </h2>
+    }
+  />
+);
 
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
+
+  const [selectedTabId, setSelectedTabId] = useState<TabId>(POLICIES_TAB_ID);
+
+  const { data, isFetching } = useFetchExecutionHistory();
+  const items = data?.items ?? [];
+
+  const tabs: Array<{ id: TabId; label: string }> = [
+    {
+      id: POLICIES_TAB_ID,
+      label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
+        defaultMessage: 'Policies',
+      }),
+    },
+    // {
+    //   id: RULES_TAB_ID,
+    //   label: i18n.translate('xpack.alertingV2.executionHistory.tabs.rulesLabel', {
+    //     defaultMessage: 'Rules',
+    //   }),
+    // },
+  ];
 
   return (
     <>
@@ -24,6 +141,28 @@ export const ExecutionHistoryPage = () => {
         }
       />
       <EuiSpacer size="l" />
+      <EuiTabs>
+        {tabs.map((tab) => (
+          <EuiTab
+            key={tab.id}
+            isSelected={tab.id === selectedTabId}
+            onClick={() => setSelectedTabId(tab.id)}
+          >
+            {tab.label}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {selectedTabId === POLICIES_TAB_ID ? (
+        <EuiBasicTable<PolicyExecutionHistoryItem>
+          items={items}
+          columns={columns}
+          loading={isFetching}
+          noItemsMessage={policiesEmptyState}
+        />
+      ) : (
+        rulesPlaceholder
+      )}
     </>
   );
 };

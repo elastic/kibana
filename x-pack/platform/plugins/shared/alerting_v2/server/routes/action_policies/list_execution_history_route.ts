@@ -11,8 +11,7 @@ import { injectable, inject } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-
-const LIST_EXECUTION_HISTORY_API_PATH = '/internal/alerting/v2/action_policies/execution_history';
+import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
 
 const listExecutionHistoryResponseSchema = z.object({
   items: z.array(z.unknown()),
@@ -23,7 +22,7 @@ const listExecutionHistoryResponseSchema = z.object({
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = LIST_EXECUTION_HISTORY_API_PATH;
+  static path = ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
