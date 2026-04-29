@@ -6,10 +6,7 @@
  */
 
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
-import {
-  transformSentinelMitreMapping,
-  transformSentinelRuleToOriginalRule,
-} from './transforms';
+import { transformSentinelMitreMapping, transformSentinelRuleToOriginalRule } from './transforms';
 
 const baseSentinelRule: SentinelRule = {
   id: 'rule-id-1',
