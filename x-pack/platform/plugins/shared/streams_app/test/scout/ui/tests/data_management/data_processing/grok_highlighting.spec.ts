@@ -14,12 +14,12 @@ test.describe(
   'Stream data processing - grok highlighting',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ browserAuth, logsSynthtraceEsClient }) => {
+      await browserAuth.loginAsAdmin();
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+    test.beforeEach(async ({ apiServices, pageObjects }) => {
       // Clear existing processors before each test
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 

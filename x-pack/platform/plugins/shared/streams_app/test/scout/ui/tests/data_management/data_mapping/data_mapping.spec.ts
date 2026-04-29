@@ -19,7 +19,8 @@ test.describe(
   'Stream data mapping - schema editor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ apiServices, browserAuth, logsSynthtraceEsClient }) => {
+      await browserAuth.loginAsAdmin();
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
@@ -31,8 +32,7 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+    test.beforeEach(async ({ apiServices, pageObjects }) => {
       // Clear existing mappings before each test
       await apiServices.streams.clearStreamMappings('logs.otel.info');
 
