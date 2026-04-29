@@ -27,10 +27,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Ping } from '../../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../../contexts';
 import type { ClientPluginsStart } from '../../../../../../plugin';
-import {
-  parseBadgeStatus,
-  StatusBadge,
-} from '../../../common/monitor_test_result/status_badge';
+import { parseBadgeStatus, StatusBadge } from '../../../common/monitor_test_result/status_badge';
 import { getErrorDetailsUrl } from '../../../monitor_details/monitor_errors/errors_list';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { useMonitorSummaryStats } from '../../../../hooks/use_monitor_summary_stats';
@@ -183,7 +180,11 @@ export const FlyoutSummaryKPIs = ({
   });
 
   const availabilityColor =
-    data && data.availability < 99 ? 'danger' : data && data.availability < 99.9 ? 'warning' : 'success';
+    data && data.availability < 99
+      ? 'danger'
+      : data && data.availability < 99.9
+      ? 'warning'
+      : 'success';
 
   return (
     <EuiPageSection bottomBorder="extended">
@@ -377,52 +378,42 @@ export const FlyoutAlerts = ({
   );
 };
 
-const LAST_TEST_RUN_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.lastTestRunTitle',
-  { defaultMessage: 'Last test run' }
-);
+const LAST_TEST_RUN_LABEL = i18n.translate('xpack.synthetics.flyout.lastTestRunTitle', {
+  defaultMessage: 'Last test run',
+});
 
-const VIEW_ERROR_DETAILS_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.viewErrorDetails',
-  { defaultMessage: 'View error details' }
-);
+const VIEW_ERROR_DETAILS_LABEL = i18n.translate('xpack.synthetics.flyout.viewErrorDetails', {
+  defaultMessage: 'View error details',
+});
 
-const SUMMARY_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.summaryLabel',
-  { defaultMessage: 'Summary' }
-);
+const SUMMARY_LABEL = i18n.translate('xpack.synthetics.flyout.summaryLabel', {
+  defaultMessage: 'Summary',
+});
 
-const AVAILABILITY_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.availabilityLabel',
-  { defaultMessage: 'Availability' }
-);
+const AVAILABILITY_LABEL = i18n.translate('xpack.synthetics.flyout.availabilityLabel', {
+  defaultMessage: 'Availability',
+});
 
-const DURATION_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.durationLabel',
-  { defaultMessage: 'Duration (median)' }
-);
+const DURATION_LABEL = i18n.translate('xpack.synthetics.flyout.durationLabel', {
+  defaultMessage: 'Duration (median)',
+});
 
-const ERRORS_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.errorsLabel',
-  { defaultMessage: 'Errors' }
-);
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.flyout.errorsLabel', {
+  defaultMessage: 'Errors',
+});
 
-const ALERTS_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.alertsLabel',
-  { defaultMessage: 'Alerts' }
-);
+const ALERTS_LABEL = i18n.translate('xpack.synthetics.flyout.alertsLabel', {
+  defaultMessage: 'Alerts',
+});
 
-const ACTIVE_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.alerts.active',
-  { defaultMessage: 'Active' }
-);
+const ACTIVE_LABEL = i18n.translate('xpack.synthetics.flyout.alerts.active', {
+  defaultMessage: 'Active',
+});
 
-const RECOVERED_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.alerts.recovered',
-  { defaultMessage: 'Recovered' }
-);
+const RECOVERED_LABEL = i18n.translate('xpack.synthetics.flyout.alerts.recovered', {
+  defaultMessage: 'Recovered',
+});
 
-const WAITING_FOR_FIRST_RUN_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.waitingForFirstRun',
-  { defaultMessage: 'Monitor is waiting for its first test run or may be stalled.' }
-);
+const WAITING_FOR_FIRST_RUN_LABEL = i18n.translate('xpack.synthetics.flyout.waitingForFirstRun', {
+  defaultMessage: 'Monitor is waiting for its first test run or may be stalled.',
+});

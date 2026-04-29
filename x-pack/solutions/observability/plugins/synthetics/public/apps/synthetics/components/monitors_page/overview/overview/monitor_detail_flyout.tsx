@@ -282,7 +282,6 @@ export function MonitorDetailFlyout(props: Props) {
 
   const monitorDetail = useMonitorDetail(configId, props.location);
 
-
   const getColor = useMonitorHealthColor();
 
   useMonitorAttachmentConfigWithMonitor(
@@ -295,9 +294,7 @@ export function MonitorDetailFlyout(props: Props) {
     isLoading
   );
 
-  const [isPush, setIsPush] = useState(
-    () => localStorage.getItem(FLYOUT_MODE_KEY) === 'push'
-  );
+  const [isPush, setIsPush] = useState(() => localStorage.getItem(FLYOUT_MODE_KEY) === 'push');
 
   const toggleFlyoutMode = useCallback(() => {
     setIsPush((prev) => {
@@ -383,9 +380,7 @@ export function MonitorDetailFlyout(props: Props) {
                           cursor: isSelected ? 'default' : 'pointer',
                           textDecoration: isSelected ? 'underline' : 'none',
                         }}
-                        onClick={
-                          !isSelected ? () => setLocation(loc.id, loc.label) : undefined
-                        }
+                        onClick={!isSelected ? () => setLocation(loc.id, loc.label) : undefined}
                         data-test-subj={`syntheticsFlyoutLocationHealth-${loc.id}`}
                       >
                         {loc.label}
@@ -419,13 +414,13 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               locationId={locationId}
             />
-        <FlyoutSummaryKPIs
-          monitorId={id}
-          locationLabel={props.location}
-          from="now-30d"
-          to="now"
-          dateLabel={LAST_30_DAYS_LABEL}
-        />
+            <FlyoutSummaryKPIs
+              monitorId={id}
+              locationLabel={props.location}
+              from="now-30d"
+              to="now"
+              dateLabel={LAST_30_DAYS_LABEL}
+            />
             <DetailFlyoutStatusHistory configId={configId} location={props.location} />
           </>
         )}
@@ -436,8 +431,8 @@ export function MonitorDetailFlyout(props: Props) {
             allLocations={monitor?.locations ?? []}
           />
         )}
-        {selectedTab === 'details' && (
-          monitorObject ? (
+        {selectedTab === 'details' &&
+          (monitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
               latestPing={monitorDetail.data}
@@ -454,8 +449,7 @@ export function MonitorDetailFlyout(props: Props) {
                 <EuiLoadingSpinner size="l" />
               </EuiFlexItem>
             </EuiFlexGroup>
-          )
-        )}
+          ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
