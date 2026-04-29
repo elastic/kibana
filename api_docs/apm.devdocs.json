@@ -150,7 +150,7 @@
           "section": "def-common.NonEmptyStringBrand",
           "text": "NonEmptyStringBrand"
         },
-        ">; }; }) | ({ serviceName: string; } & { dashboardId?: undefined; } & { serviceOverviewTab?: \"metrics\" | \"errors\" | \"traces\" | \"logs\" | \"transactions\" | undefined; } & { query: { environment: string | ",
+        ">; }; }) | ({ serviceName: string; } & { dashboardId?: undefined; } & { serviceOverviewTab?: \"metrics\" | \"errors\" | \"traces\" | \"logs\" | \"transactions\" | undefined; errorGroupId?: string | undefined; } & { query: { environment: string | ",
         "Branded",
         "<string, ",
         {
@@ -163,7 +163,7 @@
         ">; } & { kuery?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }; })>; }"
       ],
       "path": "x-pack/solutions/observability/plugins/apm/public/plugin.ts",
-      "lineNumber": 111,
+      "lineNumber": 112,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -181,7 +181,7 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/apm/public/plugin.ts",
-      "lineNumber": 112,
+      "lineNumber": 113,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -223,7 +223,7 @@
           ">"
         ],
         "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-        "lineNumber": 56,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -239,7 +239,7 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 62,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -256,9 +256,10 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 62,
+                "lineNumber": 64,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -286,7 +287,7 @@
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 66,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -305,9 +306,10 @@
                   ", unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 66,
+                "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -322,9 +324,10 @@
                   "APMPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 66,
+                "lineNumber": 68,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMPluginSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -346,7 +349,7 @@
               ") => void"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 270,
+            "lineNumber": 278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -362,9 +365,10 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 270,
+                "lineNumber": 278,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -379,9 +383,10 @@
                   "APMPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 270,
+                "lineNumber": 278,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "APMPluginStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -399,7 +404,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 294,
+            "lineNumber": 302,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5681,9 +5686,7 @@
           "IntersectionC",
           "<[",
           "TypeC",
-          "<{ transactionType: ",
-          "StringC",
-          "; latencyAggregationType: ",
+          "<{ latencyAggregationType: ",
           "UnionC",
           "<[",
           "LiteralC",
@@ -5703,7 +5706,9 @@
           "Type",
           "<boolean, boolean, unknown>; }>, ",
           "PartialC",
-          "<{ transactionName: ",
+          "<{ transactionType: ",
+          "StringC",
+          "; transactionName: ",
           "StringC",
           "; filters: ",
           "Type",
@@ -7211,13 +7216,13 @@
           "IntersectionC",
           "<[",
           "TypeC",
-          "<{ transactionType: ",
-          "StringC",
-          "; bucketSizeInSeconds: ",
+          "<{ bucketSizeInSeconds: ",
           "Type",
           "<number, number, unknown>; }>, ",
           "PartialC",
-          "<{ transactionName: ",
+          "<{ transactionType: ",
+          "StringC",
+          "; transactionName: ",
           "StringC",
           "; filters: ",
           "Type",
@@ -9073,7 +9078,11 @@
           "PartialC",
           "<{ groupId: ",
           "StringC",
-          "; }>, ",
+          "; transactionName: ",
+          "StringC",
+          "; bucketSizeInSeconds: ",
+          "Type",
+          "<number, number, unknown>; }>, ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -9510,7 +9519,7 @@
       "label": "APMPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/apm/server/types.ts",
-      "lineNumber": 70,
+      "lineNumber": 71,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -9529,7 +9538,7 @@
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>"
           ],
           "path": "x-pack/solutions/observability/plugins/apm/server/types.ts",
-          "lineNumber": 71,
+          "lineNumber": 72,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

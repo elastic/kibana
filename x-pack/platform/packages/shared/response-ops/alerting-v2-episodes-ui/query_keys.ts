@@ -27,4 +27,7 @@ export const queryKeys = {
   tagOptions: (timeRange?: { from: string; to: string } | null) =>
     [...queryKeys.tagOptionsAll(), timeRange] as const,
   tagSuggestions: () => [...queryKeys.all, 'tag-suggestions'] as const,
+  assigneeSuggestions: (searchTerm: string) =>
+    [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
+  bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
 };

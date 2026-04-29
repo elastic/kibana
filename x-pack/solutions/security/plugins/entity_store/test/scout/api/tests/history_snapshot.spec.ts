@@ -19,11 +19,9 @@ import {
   clearEntityStoreIndices,
   forceLogExtraction,
   normalizeKeywordList,
-  waitForScheduledHistorySnapshot,
 } from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/256862
-apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
@@ -48,8 +46,6 @@ apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS 
       body: { historySnapshot: { frequency: '24h' } },
     });
     expect(installResponse.statusCode).toBe(201);
-
-    await waitForScheduledHistorySnapshot(kbnClient);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'

@@ -63,6 +63,7 @@
             "lineNumber": 14,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckGlobalAccessControlPrivilegeDependencies",
             "trackAdoption": false,
             "isRequired": true
           }

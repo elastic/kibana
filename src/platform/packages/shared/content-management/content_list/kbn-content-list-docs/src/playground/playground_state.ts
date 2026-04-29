@@ -21,7 +21,7 @@ export interface ActiveColumn {
   actions: ActiveAction[];
 }
 
-export type ActionType = 'edit' | 'delete' | 'export';
+export type ActionType = 'edit' | 'delete' | 'inspect' | 'export';
 
 export interface ActiveAction {
   instanceId: string;
@@ -55,6 +55,7 @@ export interface PlaygroundState {
     getEditUrl: boolean;
     onEdit: boolean;
     onDelete: boolean;
+    onInspect: boolean;
   };
   table: {
     columns: ActiveColumn[];
@@ -163,6 +164,7 @@ export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
   { type: 'edit', label: 'Action.Edit' },
+  { type: 'inspect', label: 'Action.Inspect' },
   { type: 'delete', label: 'Action.Delete' },
   { type: 'export', label: 'Action (Export)' },
 ];
@@ -222,6 +224,7 @@ export const INITIAL_STATE: PlaygroundState = {
     getEditUrl: false,
     onEdit: false,
     onDelete: false,
+    onInspect: false,
   },
   table: {
     columns: [],

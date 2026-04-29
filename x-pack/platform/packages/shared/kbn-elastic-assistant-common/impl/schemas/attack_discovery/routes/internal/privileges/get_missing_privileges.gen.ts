@@ -14,26 +14,28 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AttackDiscoveryMissingPrivileges = lazySchema(() =>
+  z.object({
+    /**
+     * The index name of the privilege missing
+     */
+    index_name: z.string(),
+    /**
+     * The index privileges level missing
+     */
+    privileges: z.array(z.string()),
+  })
+);
 export type AttackDiscoveryMissingPrivileges = z.infer<typeof AttackDiscoveryMissingPrivileges>;
-export const AttackDiscoveryMissingPrivileges = z.object({
-  /**
-   * The index name of the privilege missing
-   */
-  index_name: z.string(),
-  /**
-   * The index privileges level missing
-   */
-  privileges: z.array(z.string()),
-});
 
 /**
  * The missing index privileges required for Attack discovery
  */
+export const GetAttackDiscoveryMissingPrivilegesInternalResponse = lazySchema(() =>
+  z.array(AttackDiscoveryMissingPrivileges)
+);
 export type GetAttackDiscoveryMissingPrivilegesInternalResponse = z.infer<
   typeof GetAttackDiscoveryMissingPrivilegesInternalResponse
 >;
-export const GetAttackDiscoveryMissingPrivilegesInternalResponse = z.array(
-  AttackDiscoveryMissingPrivileges
-);

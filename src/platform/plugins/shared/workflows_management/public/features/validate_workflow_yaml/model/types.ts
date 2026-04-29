@@ -31,6 +31,8 @@ export interface VariableItem extends BaseItem {
 
 export interface CustomPropertyItem extends BaseItem {
   type: 'custom-property';
+  /** Stable step instance id from the workflow lookup (used for validation-outcome caching). */
+  stepId: string;
   scope: 'config' | 'input';
   stepType: string;
   propertyKey: string;

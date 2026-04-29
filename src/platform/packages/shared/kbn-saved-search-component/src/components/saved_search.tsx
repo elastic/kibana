@@ -160,6 +160,7 @@ const SavedSearchComponentTable: React.FC<
     dependencies: { dataViews },
     initialSerializedState,
     filters,
+    nonHighlightingFilters,
     query,
     timeRange,
     timestampField,
@@ -218,6 +219,26 @@ const SavedSearchComponentTable: React.FC<
       embeddableApi.current.setQuery(query);
     },
     [query]
+  );
+
+  useEffect(
+    function syncNonHighlightingFilters() {
+      if (!embeddableApi.current) return;
+
+      const applyNonHighlightingFilters = (savedSearch: SavedSearch) => {
+        savedSearch.searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
+      };
+
+      applyNonHighlightingFilters(embeddableApi.current.savedSearch$.getValue());
+      const subscription = embeddableApi.current.savedSearch$.subscribe(
+        applyNonHighlightingFilters
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [nonHighlightingFilters, isEmbeddableApiAvailable]
   );
 
   useEffect(

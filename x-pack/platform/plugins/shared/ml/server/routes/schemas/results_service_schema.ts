@@ -20,13 +20,14 @@ const severityThresholdSchema = schema.object({
 });
 
 export const anomaliesTableDataSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
-  criteriaFields: schema.arrayOf(criteriaFieldSchema),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+  criteriaFields: schema.arrayOf(criteriaFieldSchema, { maxSize: 10000 }),
   influencers: schema.arrayOf(
-    schema.maybe(schema.object({ fieldName: schema.string(), fieldValue: schema.any() }))
+    schema.maybe(schema.object({ fieldName: schema.string(), fieldValue: schema.any() })),
+    { maxSize: 10000 }
   ),
   aggregationInterval: schema.string(),
-  threshold: schema.arrayOf(severityThresholdSchema),
+  threshold: schema.arrayOf(severityThresholdSchema, { maxSize: 10000 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   dateFormatTz: schema.string(),
@@ -42,19 +43,19 @@ export const categoryDefinitionSchema = schema.object({
 });
 
 export const maxAnomalyScoreSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   earliestMs: schema.maybe(schema.number()),
   latestMs: schema.maybe(schema.number()),
 });
 
 export const categoryExamplesSchema = schema.object({
   jobId: schema.string(),
-  categoryIds: schema.arrayOf(schema.string()),
+  categoryIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   maxExamples: schema.number(),
 });
 
 export const anomalySearchSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   query: schema.any(),
 });
 
@@ -73,7 +74,7 @@ const fieldConfig = schema.maybe(
 export const partitionFieldValuesSchema = schema.object({
   jobId: schema.string(),
   searchTerm: schema.maybe(schema.any()),
-  criteriaFields: schema.arrayOf(criteriaFieldSchema),
+  criteriaFields: schema.arrayOf(criteriaFieldSchema, { maxSize: 10000 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   fieldsConfig: schema.maybe(
@@ -101,6 +102,7 @@ export const getCategorizerStatsSchema = schema.object({
 
 export const getCategorizerStoppedPartitionsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string(), {
+    maxSize: 10000,
     meta: { description: 'List of jobIds to fetch the categorizer partitions for' },
   }),
   fieldToBucket: schema.maybe(
@@ -119,9 +121,9 @@ export const getDatafeedResultsChartDataSchema = schema.object({
 });
 
 export const getAnomalyChartsSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
-  influencers: schema.arrayOf(schema.any()),
-  threshold: schema.arrayOf(severityThresholdSchema),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+  influencers: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+  threshold: schema.arrayOf(severityThresholdSchema, { maxSize: 10000 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   maxResults: schema.number({
@@ -141,44 +143,48 @@ export const getAnomalyChartsSchema = schema.object({
 });
 
 export const getAnomalyRecordsSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   threshold: schema.number({ defaultValue: 0, min: 0, max: 99 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
-  criteriaFields: schema.arrayOf(schema.any()),
+  criteriaFields: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   interval: schema.string(),
   functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
 
 export const getTopInfluencersSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   maxFieldValues: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
   page: schema.maybe(schema.number()),
   influencers: schema.maybe(
-    schema.arrayOf(schema.object({ fieldName: schema.string(), fieldValue: schema.string() }))
+    schema.arrayOf(schema.object({ fieldName: schema.string(), fieldValue: schema.string() }), {
+      maxSize: 10000,
+    })
   ),
   influencersFilterQuery: schema.maybe(schema.any()),
 });
 
 export const getScoresByBucketSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   intervalMs: schema.number(),
   perPage: schema.maybe(schema.number()),
   fromPage: schema.maybe(schema.number()),
   swimLaneSeverity: schema.maybe(
-    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }))
+    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }), {
+      maxSize: 10000,
+    })
   ),
 });
 
 export const getInfluencerValueMaxScoreByTimeSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   influencerFieldName: schema.string(),
-  influencerFieldValues: schema.maybe(schema.arrayOf(schema.string())),
+  influencerFieldValues: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   intervalMs: schema.number(),
@@ -187,6 +193,8 @@ export const getInfluencerValueMaxScoreByTimeSchema = schema.object({
   fromPage: schema.maybe(schema.number()),
   influencersFilterQuery: schema.maybe(schema.any()),
   swimLaneSeverity: schema.maybe(
-    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }))
+    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }), {
+      maxSize: 10000,
+    })
   ),
 });

@@ -174,6 +174,21 @@ export const ENTITY_ANALYTICS_TOGGLE_ERROR = i18n.translate(
   }
 );
 
+export const ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.entityStore.prebuiltWatchlistsWarningTitle',
+  {
+    defaultMessage: 'Prebuilt watchlists were not installed',
+  }
+);
+
+export const ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT = i18n.translate(
+  'xpack.securitySolution.entityStore.prebuiltWatchlistsWarningText',
+  {
+    defaultMessage:
+      'Entity Store was installed, but standard watchlists could not be provisioned. You can retry later or check Kibana server logs.',
+  }
+);
+
 export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.engineRunSuccess',
   {

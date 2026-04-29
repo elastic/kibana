@@ -98,7 +98,7 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
       illustrationSrc={skillsIllustration}
       title={labels.agentSkills.emptyStateTitle}
       description={description}
-      learnMoreHref={docLinksService.agentBuilderAgents}
+      learnMoreHref={docLinksService.agentBuilderSkills}
       learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
       learnMoreSuffix={labels.agentSkills.emptyStateLearnMoreSuffix}
       footer={footer}
