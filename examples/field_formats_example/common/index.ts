@@ -8,3 +8,4 @@
  */
 
 export { ExampleCurrencyFormat } from './example_currency_format';
+export { ExampleHtmlTestFormat } from './example_html_test_format';

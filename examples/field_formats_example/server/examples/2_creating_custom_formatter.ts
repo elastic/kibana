@@ -11,10 +11,11 @@
 
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
 
-import { ExampleCurrencyFormat } from '../../common';
+import { ExampleCurrencyFormat, ExampleHtmlTestFormat } from '../../common';
 
 // When registering a field formatter, be sure to also register it server-side.
 // This would be needed, for example, for CSV generation, as reports are generated server-side.
 export function registerExampleFormat(fieldFormats: FieldFormatsSetup) {
   fieldFormats.register(ExampleCurrencyFormat);
+  fieldFormats.register(ExampleHtmlTestFormat);
 }

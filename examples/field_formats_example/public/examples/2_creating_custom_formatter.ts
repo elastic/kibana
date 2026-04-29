@@ -10,11 +10,11 @@
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-import { ExampleCurrencyFormat } from '../../common';
+import { ExampleCurrencyFormat, ExampleHtmlTestFormat } from '../../common';
 
 export function registerExampleFormat(fieldFormats: FieldFormatsSetup) {
   // 5.1 Register a field format. This should happen in setup plugin lifecycle phase.
-  fieldFormats.register([ExampleCurrencyFormat]);
+  fieldFormats.register([ExampleCurrencyFormat, ExampleHtmlTestFormat]);
 }
 
 // 5.2 also register a field formatter with the same `formatId` server-side.
