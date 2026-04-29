@@ -13,6 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
+import { setChartHidden, setTableHidden } from '@kbn/discover-utils';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
 import {
@@ -20,6 +21,7 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../application/main/state_management/redux';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const disabledCollapsingTooltip = i18n.translate(
   'discover.panelsToggle.atLeastOnePanelMustRemain',
@@ -131,6 +133,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   omitTableButton = false,
   dataTestSubjSuffix,
 }) => {
+  const { storage } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
@@ -140,12 +143,16 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const onToggleChart = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
-  }, [dispatch, isChartHidden, updateAppState]);
+    const hideChart = !isChartHidden;
+    setChartHidden(storage, 'discover', hideChart);
+    dispatch(updateAppState({ appState: { hideChart } }));
+  }, [dispatch, isChartHidden, storage, updateAppState]);
 
   const onToggleTable = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideTable: !isTableHidden } }));
-  }, [dispatch, isTableHidden, updateAppState]);
+    const hideTable = !isTableHidden;
+    setTableHidden(storage, 'discover', hideTable);
+    dispatch(updateAppState({ appState: { hideTable } }));
+  }, [dispatch, isTableHidden, storage, updateAppState]);
 
   const onToggleSidebar = useCallback(() => {
     sidebarToggleState.toggle?.(!isSidebarHidden);
