@@ -10,7 +10,7 @@
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { PresentationContainer, PublishesPhaseEvents } from '@kbn/presentation-publishing';
+import type { PublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import {
   clearPerformanceTrackersByType,
@@ -22,12 +22,14 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
+import { getDashboardUserActivityService } from '../../services/user_activity_service';
+import type { DashboardApi } from '../types';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
 export interface PerformanceState {
   firstLoad: boolean;
-  creationStartTime?: number;
+  creationStartTime?: PerformanceMark;
   creationEndTime?: number;
   lastLoadStartTime?: number;
 }
@@ -41,7 +43,7 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
 };
 
 export function startQueryPerformanceTracking(
-  dashboard: PresentationContainer,
+  dashboard: DashboardApi,
   performanceState: PerformanceState
 ) {
   return dashboard.children$
@@ -106,7 +108,16 @@ export function startQueryPerformanceTracking(
       if (queryHasFinished) {
         const timeToData = now - (performanceState.lastLoadStartTime ?? now);
         const completeLoadDuration =
-          (performanceState.creationEndTime ?? now) - (performanceState.creationStartTime ?? now);
+          (performanceState.creationEndTime ?? now) -
+          (performanceState.creationStartTime?.startTime ?? now);
+
+        if (loadType === 'dashboardSubsequentLoad') {
+          getDashboardUserActivityService(dashboard).logDashboardRefresh(
+            performanceState.creationStartTime?.detail.date,
+            performanceState.creationStartTime?.detail.date + timeToData
+          );
+        }
+
         reportPerformanceMetrics({
           timeToData,
           panelCount,

@@ -16,9 +16,10 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
   const router = http.createRouter();
   router.post(
     {
-      path: '/internal/dashboard/user_activity/view/{id}',
+      path: '/internal/dashboard/user_activity/{type}/{id}',
       validate: {
         params: schema.object({
+          type: schema.oneOf([schema.literal('view'), schema.literal('refresh')]),
           id: schema.string(),
         }),
         body: schema.object({
@@ -38,22 +39,22 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
       const user = (await ctx.core).security.authc.getCurrentUser();
       const duration = req.body.start !== undefined ? req.body.end - req.body.start : 0;
       coreServices.userActivity.trackUserAction({
-        message: `User ${
-          user ? `"${user.username}" (id: ${user.profile_uid})` : ''
-        } viewed dashboard "${req.body.title}" (id: ${req.id}).`,
+        message: `User ${user ? `"${user.username}" (id: ${user.profile_uid})` : ''} ${
+          req.params.type === 'view' ? 'viewed' : 'manually refreshed'
+        } dashboard "${req.body.title}" (id: ${req.id}).`,
         event: {
-          action: 'dashboard_view',
+          action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_manual_refresh',
           type: 'access',
-          start: new Date(req.body.start ?? 0).toString(),
-          end: new Date(req.body.end).toString(),
+          start: new Date(req.body.start ?? 0).toISOString(),
+          end: new Date(req.body.end).toISOString(),
           duration,
         },
         object: await getUserActivityObject({ id: req.id, data: req.body }, req),
         metadata: {
-          userId: user?.profile_uid,
+          user_id: user?.profile_uid,
           username: user?.username,
-          dashboardId: req.id,
-          dashboardTitle: req.body.title,
+          dashboard_id: req.id,
+          dashboard_title: req.body.title,
           duration,
         },
       });
