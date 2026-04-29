@@ -134,7 +134,12 @@ describe('migrateStreamVars', () => {
     });
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
-    const result = migrateStreamVars(newStream, oldStream, undefined, varDefs);
+    const result = migrateStreamVars(
+      newStream as unknown as InputsOverride,
+      oldStream,
+      undefined,
+      varDefs
+    );
 
     expect(result.vars?.url?.value).toBe('https://user.example.com');
   });
@@ -144,7 +149,12 @@ describe('migrateStreamVars', () => {
     const oldStream = makeStream({ request_url: { type: 'text', value: null } });
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
-    const result = migrateStreamVars(newStream, oldStream, undefined, varDefs);
+    const result = migrateStreamVars(
+      newStream as unknown as InputsOverride,
+      oldStream,
+      undefined,
+      varDefs
+    );
 
     expect(result.vars?.url?.value).toBe('https://default.example.com');
   });
@@ -154,7 +164,12 @@ describe('migrateStreamVars', () => {
     const oldStream = makeStream({});
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
-    const result = migrateStreamVars(newStream, oldStream, undefined, varDefs);
+    const result = migrateStreamVars(
+      newStream as unknown as InputsOverride,
+      oldStream,
+      undefined,
+      varDefs
+    );
 
     expect(result.vars?.url?.value).toBe('https://default.example.com');
   });
@@ -168,7 +183,12 @@ describe('migrateStreamVars', () => {
     });
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
-    const result = migrateStreamVars(newStream, oldStream, undefined, varDefs);
+    const result = migrateStreamVars(
+      newStream as unknown as InputsOverride,
+      oldStream,
+      undefined,
+      varDefs
+    );
 
     expect(result.vars?.url?.value).toBe('https://direct.example.com');
   });
@@ -180,7 +200,12 @@ describe('migrateStreamVars', () => {
     });
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
-    const result = migrateStreamVars(newStream, oldStream, undefined, varDefs);
+    const result = migrateStreamVars(
+      newStream as unknown as InputsOverride,
+      oldStream,
+      undefined,
+      varDefs
+    );
 
     expect(result.vars).not.toHaveProperty('request_url');
   });
@@ -193,7 +218,12 @@ describe('migrateStreamVars', () => {
     };
     const varDefs = [{ name: 'url', type: 'text' as const, migrate_from: 'request_url' }];
 
-    const result = migrateStreamVars(newStream, oldStream, oldInputVars, varDefs);
+    const result = migrateStreamVars(
+      newStream as unknown as InputsOverride,
+      oldStream,
+      oldInputVars,
+      varDefs
+    );
 
     expect(result.vars?.url?.value).toBe('https://input-level.example.com');
   });
