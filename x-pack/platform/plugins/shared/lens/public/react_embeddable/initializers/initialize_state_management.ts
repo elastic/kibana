@@ -22,6 +22,7 @@ import type {
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
 
 export interface StateManagementConfig {
@@ -48,14 +49,13 @@ export function initializeStateManagement(
 ): StateManagementConfig {
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
-  type ComparatorState = Partial<Pick<LensSerializedState, 'attributes' | 'ref_id'>>;
 
   const resolveAttributes = (
     value: LensSerializedState['attributes'] | undefined,
-    state?: ComparatorState
+    state?: LensSerializedAPIConfig
   ) => {
-    if (value) return value;
-    if (state?.attributes) {
+    if (value !== undefined) return value;
+    if (state && 'attributes' in state && state.attributes) {
       return state.attributes;
     }
     if (state && isFlattenedAPIConfig(state)) {

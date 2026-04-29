@@ -46,11 +46,7 @@ export function isByRefLensConfig(
 }
 
 export function isFlattenedAPIConfig(
-  config:
-    | FlattenedLensByValuePanelSchema
-    | LensSerializedAPIConfig
-    | LensByValueSerializedState
-    | Partial<LensSerializedState>
+  config: FlattenedLensByValuePanelSchema | LensSerializedAPIConfig | LensByValueSerializedState
 ): config is FlattenedLensByValuePanelSchema {
   return (
     typeof config === 'object' && config !== null && 'type' in config && !('attributes' in config)
