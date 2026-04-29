@@ -192,6 +192,40 @@ processors:
     );
   });
 
+  it('serializes multi-line Painless scripts as literal block scalars (source: |)', () => {
+    // yaml.stringify() was producing source: > (folded block) for scripts whose lines
+    // approach the default lineWidth (80 chars), which Elasticsearch's Jackson YAML parser rejects.
+    const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
+      contentForInstallation: `processors:
+  - script:
+      lang: painless
+      source: |
+        def splitUnquoted(String input, String sep) {
+          def tokens = [];
+          def startPosition = 0;
+          def isInQuotes = false;
+          char quote = (char)"\\"";
+          for (def currentPosition = 0; currentPosition < input.length(); currentPosition++) {
+            if (input.charAt(currentPosition) == quote) {
+              isInQuotes = !isInQuotes;
+            }
+          }
+          return tokens;
+        }
+`,
+      extension: 'yml',
+      nameForInstallation: 'logs-test-1.0.0',
+      shouldInstallCustomPipelines: true,
+      dataStream: {
+        type: 'logs',
+        dataset: 'test',
+      } as any,
+    });
+
+    expect(pipelineInstall.contentForInstallation).toMatch(/source: \|/);
+    expect(pipelineInstall.contentForInstallation).not.toMatch(/source: >/);
+  });
+
   describe('with local routing rules', () => {
     it('add reroute processor after custom pipeline processor for yaml pipeline', () => {
       const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
