@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiTabbedContent, type EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MainCategories } from '@kbn/siem-readiness';
+import { css } from '@emotion/react';
 import type { VisibilityTabId } from './visibility_section_boxes';
 import { CoverageTab } from './tabs/coverage_tab/coverage_tab';
 import { QualityTab } from './tabs/quality/quality_tab';
@@ -65,6 +66,14 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       tabs={tabs}
       selectedTab={selectedTab}
       onTabClick={(tab) => onTabSelect(tab.id as VisibilityTabId)}
+      // hides the tabs element as we are using the EuiTabbedContent component just for its content switching logic, and not for the actual tab UI
+      // users can still click on the cards to switch between them
+      css={css`
+        .euiTabs[role='tablist'] {
+          height: 0;
+          overflow: hidden;
+        }
+      `}
     />
   );
 };
