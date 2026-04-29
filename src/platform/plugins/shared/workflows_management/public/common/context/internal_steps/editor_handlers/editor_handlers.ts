@@ -31,23 +31,31 @@ export class InternalStepsEditorHandlers {
   private createStepsEditorHandlers = (
     services: WorkflowsServices
   ): Record<string, EditorHandlers> => {
-    const indexSelectionHandlerWithWildcard = getIndexSelectionHandler(services, {
+    const searchIndexSelectionHandler = getIndexSelectionHandler(services, {
       allowWildcard: true,
+      showAllIndices: true,
     });
-    const indexSelectionHandler = getIndexSelectionHandler(services);
+    const writeIndexSelectionHandler = getIndexSelectionHandler(services, {
+      allowWildcard: false,
+      showAllIndices: true,
+    });
+    const deleteIndexSelectionHandler = getIndexSelectionHandler(services, {
+      allowWildcard: false,
+      showAllIndices: false,
+    });
 
     return {
       'elasticsearch.search': {
-        input: { index: { selection: indexSelectionHandlerWithWildcard } },
+        input: { index: { selection: searchIndexSelectionHandler } },
       },
       'elasticsearch.update': {
-        input: { index: { selection: indexSelectionHandler } },
+        input: { index: { selection: writeIndexSelectionHandler } },
       },
       'elasticsearch.index': {
-        input: { index: { selection: indexSelectionHandler } },
+        input: { index: { selection: writeIndexSelectionHandler } },
       },
       'elasticsearch.indices.delete': {
-        input: { index: { selection: indexSelectionHandler } },
+        input: { index: { selection: deleteIndexSelectionHandler } },
       },
     };
   };

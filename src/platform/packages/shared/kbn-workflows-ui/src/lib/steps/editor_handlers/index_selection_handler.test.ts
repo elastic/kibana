@@ -110,9 +110,17 @@ describe('getIndexSelectionHandler', () => {
       const options = await handler.search('metrics', EMPTY_CONTEXT);
 
       const byValue = Object.fromEntries(options.map((o) => [o.value, o.description]));
-      expect(byValue['metrics-index']).toBe('Index');
-      expect(byValue['metrics-alias']).toBe('Alias');
-      expect(byValue['metrics-stream']).toBe('Data stream');
+      expect(byValue['metrics-index']).toBe('Type: Index');
+      expect(byValue['metrics-alias']).toBe('Type: Alias');
+      expect(byValue['metrics-stream']).toBe('Type: Data stream');
+    });
+
+    it('returns an empty list and swallows errors from getIndices', async () => {
+      const { services, dataViews } = createServices();
+      dataViews.getIndices.mockRejectedValue(new Error('boom'));
+
+      const handler = getIndexSelectionHandler(services);
+      await expect(handler.search('logs-', EMPTY_CONTEXT)).resolves.toEqual([]);
     });
 
     describe('allowWildcard option', () => {
@@ -164,6 +172,32 @@ describe('getIndexSelectionHandler', () => {
         const options = await handler.search('logs-*', EMPTY_CONTEXT);
 
         expect(options.map((o) => o.value)).toEqual(['logs-app-1', 'logs-app-2']);
+      });
+    });
+
+    describe('showAllIndices option', () => {
+      it('forwards showAllIndices: false to getIndices by default', async () => {
+        const { services, dataViews } = createServices();
+        dataViews.getIndices.mockResolvedValue([buildMatchedItem('logs-app-1')]);
+
+        const handler = getIndexSelectionHandler(services);
+        await handler.search('logs-', EMPTY_CONTEXT);
+
+        expect(dataViews.getIndices).toHaveBeenCalledWith(
+          expect.objectContaining({ showAllIndices: false })
+        );
+      });
+
+      it('forwards showAllIndices: true to getIndices when configured', async () => {
+        const { services, dataViews } = createServices();
+        dataViews.getIndices.mockResolvedValue([buildMatchedItem('.internal-index')]);
+
+        const handler = getIndexSelectionHandler(services, { showAllIndices: true });
+        await handler.search('.internal', EMPTY_CONTEXT);
+
+        expect(dataViews.getIndices).toHaveBeenCalledWith(
+          expect.objectContaining({ showAllIndices: true })
+        );
       });
     });
 
@@ -227,7 +261,7 @@ describe('getIndexSelectionHandler', () => {
       expect(dataViews.getIndices).toHaveBeenCalledWith(
         expect.objectContaining({ pattern: '.alerts-default', showAllIndices: false })
       );
-      expect(result).toEqual({ value: '.alerts-default', description: 'Index' });
+      expect(result).toEqual({ value: '.alerts-default', description: 'Type: Index' });
     });
 
     it('returns null when the pattern does not match anything', async () => {
@@ -279,7 +313,7 @@ describe('getIndexSelectionHandler', () => {
         const handler = getIndexSelectionHandler(services, { allowWildcard: true });
         const result = await handler.resolve('logs-*', EMPTY_CONTEXT);
 
-        expect(result).toEqual({ value: 'logs-app-1', description: 'Index' });
+        expect(result).toEqual({ value: 'logs-app-1', description: 'Type: Index' });
       });
     });
   });
@@ -291,7 +325,7 @@ describe('getIndexSelectionHandler', () => {
 
       const details = await handler.getDetails('logs-app-1', EMPTY_CONTEXT, {
         value: 'logs-app-1',
-        description: 'Index',
+        description: 'Type: Index',
       });
 
       expect(details.message).toContain('logs-app-1');

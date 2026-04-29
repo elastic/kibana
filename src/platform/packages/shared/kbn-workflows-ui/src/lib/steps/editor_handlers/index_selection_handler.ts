@@ -17,14 +17,17 @@ export interface IndexSelectionHandlerServices {
   application: ApplicationStart;
 }
 export interface IndexSelectionHandlerOptions {
-  /* Maximum number of results to return from the search API. Defaults to 20. */
+  /** Maximum number of results to return from the search API. Defaults to 20. */
   maxResults?: number;
-  /* Whether to allow wildcard patterns in the resolution API. Defaults to false. */
+  /** Whether to allow wildcard patterns in the index selection handler. Defaults to false. */
   allowWildcard?: boolean;
+  /** Whether to show all indices, including hidden and internal ones. Defaults to false. */
+  showAllIndices?: boolean;
 }
 const DEFAULT_OPTIONS: Required<IndexSelectionHandlerOptions> = {
   maxResults: 20,
   allowWildcard: false,
+  showAllIndices: false,
 };
 
 const indexLabel = i18n.translate('workflows.indexSelection.kindIndex', {
@@ -56,7 +59,10 @@ function getKindFromTags(item: MatchedItem): string {
 function toSelectionOption(item: MatchedItem): SelectionOption<string> {
   return {
     value: item.name,
-    description: getKindFromTags(item),
+    description: i18n.translate('workflows.indexSelection.kind', {
+      defaultMessage: 'Type: {kind}',
+      values: { kind: getKindFromTags(item) },
+    }),
   };
 }
 
@@ -75,7 +81,7 @@ export const getIndexSelectionHandler = (
   options: IndexSelectionHandlerOptions = {}
 ): PropertySelectionHandler<string> => {
   const { dataViews, application } = services;
-  const { maxResults, allowWildcard } = { ...DEFAULT_OPTIONS, ...options };
+  const { maxResults, allowWildcard, showAllIndices } = { ...DEFAULT_OPTIONS, ...options };
 
   return {
     search: async (rawInput) => {
@@ -83,27 +89,30 @@ export const getIndexSelectionHandler = (
       if (!input) {
         return [];
       }
-
-      const endsWithWildcard = input.endsWith('*');
-      const pattern = endsWithWildcard ? input : `${input}*`;
-      const matches = await dataViews.getIndices({
-        pattern,
-        showAllIndices: false,
-        isRollupIndex: () => false,
-      });
       const results: Array<SelectionOption<string>> = [];
+      try {
+        const endsWithWildcard = input.endsWith('*');
+        const pattern = endsWithWildcard ? input : `${input}*`;
+        const matches = await dataViews.getIndices({
+          pattern,
+          showAllIndices,
+          isRollupIndex: () => false,
+        });
 
-      // Suggest a wildcard pattern when the user hasn't typed one yet and there
-      // are multiple matches under it. Surfaced first so it's easy to pick.
-      if (allowWildcard && !endsWithWildcard && matches.length > 1) {
-        results.push(toPatternSelectionOption(pattern, matches.length));
-      }
-
-      for (const item of matches) {
-        if (results.length >= maxResults) {
-          break;
+        // Suggest a wildcard pattern when the user hasn't typed one yet and there
+        // are multiple matches under it. Surfaced first so it's easy to pick.
+        if (allowWildcard && !endsWithWildcard && matches.length > 1) {
+          results.push(toPatternSelectionOption(pattern, matches.length));
         }
-        results.push(toSelectionOption(item));
+
+        for (const item of matches) {
+          if (results.length >= maxResults) {
+            break;
+          }
+          results.push(toSelectionOption(item));
+        }
+      } catch {
+        return [];
       }
 
       return results;
