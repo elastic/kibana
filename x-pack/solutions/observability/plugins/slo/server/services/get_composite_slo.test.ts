@@ -52,7 +52,7 @@ const readContext = { spaceId: 'default', esClient: {} as ElasticsearchClient };
 function mockPersistedCompositeSummary(compositeId: string, summary: CompositeSLOSummary) {
   return jest
     .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
-    .mockResolvedValue(new Map([[compositeId, summary]]));
+    .mockResolvedValue(new Map([[compositeId, { summary }]]));
 }
 
 describe('GetCompositeSLO', () => {
@@ -507,7 +507,7 @@ describe('GetCompositeSLO', () => {
 
     const fetchSpy = jest
       .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
-      .mockResolvedValue(new Map([[composite.id, indexSummary]]));
+      .mockResolvedValue(new Map([[composite.id, { summary: indexSummary }]]));
 
     const result = await getCompositeSLO.execute(composite.id, {
       spaceId: 'default',

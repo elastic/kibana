@@ -6,34 +6,42 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { CompositeSLOSummary } from '@kbn/slo-schema';
+import type { CompositeSLOMemberSummary, CompositeSLOSummary } from '@kbn/slo-schema';
 import { compositeSloSummaryIndexSummaryFieldsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
+
+export interface PersistedCompositeSummary {
+  summary: CompositeSLOSummary;
+  members?: CompositeSLOMemberSummary[];
+}
 
 export function buildCompositeSloSummaryDocId(spaceId: string, compositeId: string): string {
   return `${spaceId}:${compositeId}`;
 }
 
-export function mapCompositeSummaryIndexSourceToSummary(
+export function mapCompositeSummaryIndexSource(
   source: unknown
-): CompositeSLOSummary | undefined {
+): PersistedCompositeSummary | undefined {
   const decoded = compositeSloSummaryIndexSummaryFieldsSchema.safeParse(source);
   if (!decoded.success) {
     return undefined;
   }
   const f = decoded.data;
   return {
-    sliValue: f.sliValue,
-    status: f.status,
-    errorBudget: {
-      initial: f.errorBudgetInitial,
-      consumed: f.errorBudgetConsumed,
-      remaining: f.errorBudgetRemaining,
-      isEstimated: f.errorBudgetIsEstimated,
+    summary: {
+      sliValue: f.sliValue,
+      status: f.status,
+      errorBudget: {
+        initial: f.errorBudgetInitial,
+        consumed: f.errorBudgetConsumed,
+        remaining: f.errorBudgetRemaining,
+        isEstimated: f.errorBudgetIsEstimated,
+      },
+      fiveMinuteBurnRate: f.fiveMinuteBurnRate,
+      oneHourBurnRate: f.oneHourBurnRate,
+      oneDayBurnRate: f.oneDayBurnRate,
     },
-    fiveMinuteBurnRate: f.fiveMinuteBurnRate,
-    oneHourBurnRate: f.oneHourBurnRate,
-    oneDayBurnRate: f.oneDayBurnRate,
+    members: f.members,
   };
 }
 
@@ -41,8 +49,8 @@ export async function fetchCompositeSloSummariesFromIndex(
   esClient: ElasticsearchClient,
   spaceId: string,
   compositeIds: readonly string[]
-): Promise<Map<string, CompositeSLOSummary>> {
-  const result = new Map<string, CompositeSLOSummary>();
+): Promise<Map<string, PersistedCompositeSummary>> {
+  const result = new Map<string, PersistedCompositeSummary>();
   if (compositeIds.length === 0) {
     return result;
   }
@@ -64,9 +72,9 @@ export async function fetchCompositeSloSummariesFromIndex(
     const compositeId = compositeIds[i];
     const doc = response.docs[i];
     if ('found' in doc && doc.found && doc._source) {
-      const summary = mapCompositeSummaryIndexSourceToSummary(doc._source);
-      if (summary) {
-        result.set(compositeId, summary);
+      const persisted = mapCompositeSummaryIndexSource(doc._source);
+      if (persisted) {
+        result.set(compositeId, persisted);
       }
     }
   }

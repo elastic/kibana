@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
+import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
 import { chunk, merge } from 'lodash';
@@ -298,11 +299,16 @@ function buildBulkOps(
           );
         }
 
-        const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
+        const { compositeSummary, members } = computeCompositeSummary(
+          compositeSlo,
+          memberSummaries
+        );
         bulkOps.push({
           index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `${spaceId}:${compositeSlo.id}` },
         });
-        bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId, unresolvedMemberIds));
+        bulkOps.push(
+          buildSummaryDoc(compositeSlo, compositeSummary, members, spaceId, unresolvedMemberIds)
+        );
       } catch (err) {
         stats.computeErrors++;
         logger.warn(
@@ -414,11 +420,13 @@ interface CompositeSummaryDoc {
   oneHourBurnRate: number;
   oneDayBurnRate: number;
   unresolvedMemberIds: string[];
+  members: CompositeSLOMemberSummary[];
 }
 
 function buildSummaryDoc(
   compositeSlo: CompositeSLODefinition,
   summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
+  members: CompositeSLOMemberSummary[],
   spaceId: string,
   unresolvedMemberIds: string[]
 ): CompositeSummaryDoc {
@@ -449,5 +457,6 @@ function buildSummaryDoc(
     oneHourBurnRate: summary.oneHourBurnRate,
     oneDayBurnRate: summary.oneDayBurnRate,
     unresolvedMemberIds,
+    members,
   };
 }

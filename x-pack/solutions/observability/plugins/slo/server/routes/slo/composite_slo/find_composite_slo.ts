@@ -50,8 +50,8 @@ async function findFilteredByStatus({
   );
 
   const filtered = allResults.results.filter((r) => {
-    const summary = summariesById.get(r.id);
-    return summary !== undefined && statusFilter.includes(summary.status);
+    const persisted = summariesById.get(r.id);
+    return persisted !== undefined && statusFilter.includes(persisted.summary.status);
   });
 
   const start = (page - 1) * perPage;

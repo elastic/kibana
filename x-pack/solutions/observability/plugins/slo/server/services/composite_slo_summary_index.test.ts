@@ -9,7 +9,7 @@ import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
 import {
   buildCompositeSloSummaryDocId,
   fetchCompositeSloSummariesFromIndex,
-  mapCompositeSummaryIndexSourceToSummary,
+  mapCompositeSummaryIndexSource,
 } from './composite_slo_summary_index';
 
 describe('composite_slo_summary_index', () => {
@@ -19,9 +19,9 @@ describe('composite_slo_summary_index', () => {
     });
   });
 
-  describe('mapCompositeSummaryIndexSourceToSummary', () => {
+  describe('mapCompositeSummaryIndexSource', () => {
     it('maps stored summary fields to API summary shape', () => {
-      const summary = mapCompositeSummaryIndexSourceToSummary({
+      const persisted = mapCompositeSummaryIndexSource({
         sliValue: 0.99,
         status: 'HEALTHY',
         errorBudgetInitial: 0.01,
@@ -32,7 +32,7 @@ describe('composite_slo_summary_index', () => {
         oneHourBurnRate: 0.2,
         oneDayBurnRate: 0.3,
       });
-      expect(summary).toEqual({
+      expect(persisted?.summary).toEqual({
         sliValue: 0.99,
         status: 'HEALTHY',
         errorBudget: {
@@ -45,10 +45,38 @@ describe('composite_slo_summary_index', () => {
         oneHourBurnRate: 0.2,
         oneDayBurnRate: 0.3,
       });
+      expect(persisted?.members).toBeUndefined();
+    });
+
+    it('extracts members when present', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        sliValue: 0.99,
+        status: 'HEALTHY',
+        errorBudgetInitial: 0.01,
+        errorBudgetConsumed: 0.2,
+        errorBudgetRemaining: 0.8,
+        errorBudgetIsEstimated: false,
+        fiveMinuteBurnRate: 0.1,
+        oneHourBurnRate: 0.2,
+        oneDayBurnRate: 0.3,
+        members: [
+          {
+            id: 'slo-a',
+            name: 'Service A',
+            weight: 6,
+            normalisedWeight: 0.6,
+            sliValue: 0.995,
+            contribution: 0.597,
+            status: 'HEALTHY',
+          },
+        ],
+      });
+      expect(persisted?.members).toHaveLength(1);
+      expect(persisted?.members?.[0].id).toBe('slo-a');
     });
 
     it('ignores extra keys on the index document', () => {
-      const summary = mapCompositeSummaryIndexSourceToSummary({
+      const persisted = mapCompositeSummaryIndexSource({
         spaceId: 'default',
         summaryUpdatedAt: '2026-01-01T00:00:00.000Z',
         sliValue: 0.99,
@@ -61,12 +89,12 @@ describe('composite_slo_summary_index', () => {
         oneHourBurnRate: 0.2,
         oneDayBurnRate: 0.3,
       });
-      expect(summary?.sliValue).toBe(0.99);
+      expect(persisted?.summary.sliValue).toBe(0.99);
     });
 
     it('returns undefined when a field is missing', () => {
       expect(
-        mapCompositeSummaryIndexSourceToSummary({
+        mapCompositeSummaryIndexSource({
           sliValue: 0.99,
           status: 'HEALTHY',
         })
@@ -75,7 +103,7 @@ describe('composite_slo_summary_index', () => {
 
     it('returns undefined for invalid status', () => {
       expect(
-        mapCompositeSummaryIndexSourceToSummary({
+        mapCompositeSummaryIndexSource({
           sliValue: 0.99,
           status: 'UNKNOWN',
           errorBudgetInitial: 0.01,
@@ -123,7 +151,7 @@ describe('composite_slo_summary_index', () => {
         ids: ['default:comp-a', 'default:comp-b'],
       });
       expect(map.size).toBe(1);
-      expect(map.get('comp-a')?.sliValue).toBe(0.99);
+      expect(map.get('comp-a')?.summary.sliValue).toBe(0.99);
       expect(map.get('comp-b')).toBeUndefined();
     });
   });

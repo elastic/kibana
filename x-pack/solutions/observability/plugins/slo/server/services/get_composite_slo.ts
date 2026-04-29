@@ -11,14 +11,13 @@ import {
   batchGetCompositeSLOResponseSchema,
   getCompositeSLOResponseSchema,
 } from '@kbn/slo-schema';
-import type {
-  BatchGetCompositeSLOResponse,
-  CompositeSLOSummary,
-  GetCompositeSLOResponse,
-} from '@kbn/slo-schema';
+import type { BatchGetCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
 import { toRichRollingTimeWindow } from '../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
-import { fetchCompositeSloSummariesFromIndex } from './composite_slo_summary_index';
+import {
+  fetchCompositeSloSummariesFromIndex,
+  type PersistedCompositeSummary,
+} from './composite_slo_summary_index';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
 import {
@@ -60,7 +59,7 @@ export class GetCompositeSLO {
   private async loadPersistedSummaries(
     ids: string[],
     summaryReadContext?: GetCompositeSloSummaryReadContext
-  ): Promise<Map<string, CompositeSLOSummary>> {
+  ): Promise<Map<string, PersistedCompositeSummary>> {
     if (!summaryReadContext || ids.length === 0) {
       return new Map();
     }
@@ -71,8 +70,21 @@ export class GetCompositeSLO {
     );
   }
 
-  private async executeOne(id: string, persistedSummaryById: Map<string, CompositeSLOSummary>) {
+  private async executeOne(
+    id: string,
+    persistedSummaryById: Map<string, PersistedCompositeSummary>
+  ) {
     const compositeSlo = await this.compositeSloRepository.findById(id);
+    const persisted = persistedSummaryById.get(id);
+
+    if (persisted?.members) {
+      return {
+        ...compositeSlo,
+        summary: persisted.summary,
+        members: persisted.members,
+      };
+    }
+
     const memberSloIds = compositeSlo.members.map((m) => m.sloId);
     const memberDefinitions = await this.sloDefinitionRepository.findAllByIds(memberSloIds);
 
@@ -106,8 +118,7 @@ export class GetCompositeSLO {
     }));
 
     const { members } = computeCompositeSummary(compositeSlo, memberSummaries);
-    const persistedSummary = persistedSummaryById.get(id);
-    const summary = persistedSummary ?? buildNoDataSummary();
+    const summary = persisted?.summary ?? buildNoDataSummary();
 
     return {
       ...compositeSlo,
