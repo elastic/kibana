@@ -23,6 +23,8 @@ engine:
   model: gpt-5.4
   args:
     - -c
+    - model=llm-gateway/gpt-5.4
+    - -c
     - model_context_window=1050000
     # Disable plugins and apps to remove context bloat
     - -c
