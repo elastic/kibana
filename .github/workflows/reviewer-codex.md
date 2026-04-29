@@ -31,6 +31,16 @@ engine:
     - features.plugins=false
     - -c
     - features.apps=false
+    # Codex disables settings for unrecognized model names like the llm-gateway/ prefix.
+    # Force reasoning on
+    - -c
+    - model_supports_reasoning_summaries=true
+    # Reasoning effort: minimal | low | medium | high.
+    - -c
+    - model_reasoning_effort=medium
+    # Reasoning summary verbosity: auto | concise | detailed | none.
+    - -c
+    - model_reasoning_summary=auto
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
