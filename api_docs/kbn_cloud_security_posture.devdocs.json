@@ -1062,7 +1062,7 @@
         "signature": [
           "<T>({ grouping, pageSize, testSubjects, }: Pick<",
           "GroupWrapperProps",
-          "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">) => React.JSX.Element"
+          "<T>, \"grouping\" | \"pageSize\" | \"testSubjects\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
         "lineNumber": 21,
@@ -1080,7 +1080,7 @@
             "signature": [
               "Pick<",
               "GroupWrapperProps",
-              "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">"
+              "<T>, \"grouping\" | \"pageSize\" | \"testSubjects\">"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
             "lineNumber": 21,

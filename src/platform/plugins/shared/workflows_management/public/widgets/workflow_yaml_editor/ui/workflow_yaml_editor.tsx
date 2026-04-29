@@ -127,6 +127,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   fontSize: 14,
   lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
+  roundedSelection: false,
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
