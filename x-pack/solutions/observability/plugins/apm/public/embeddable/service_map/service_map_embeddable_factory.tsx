@@ -185,7 +185,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             core: coreStart,
             parentApi,
             flyoutProps: {
-              type: 'overlay',
               size: 'm',
               'data-test-subj': 'apmServiceMapEditorFlyout',
               focusedPanelId: uuid,

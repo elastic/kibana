@@ -97,7 +97,8 @@
     "@kbn/kbn-client",
     "@kbn/rule-data-utils",
     "@kbn/inbox-plugin",
-    "@kbn/inbox-common"
+    "@kbn/inbox-common",
+    "@kbn/core-saved-objects-common"
   ],
   "exclude": ["target/**/*"]
 }

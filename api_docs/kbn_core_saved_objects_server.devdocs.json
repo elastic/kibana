@@ -11872,24 +11872,24 @@
                 "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
               {
                 "plugin": "share",

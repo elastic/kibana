@@ -100,6 +100,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/inbox-plugin'
   - '@kbn/inbox-common'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod

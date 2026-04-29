@@ -1,5 +1,5 @@
 {
-  "sha1": "c61c3e7aded349fa68e4f788b71a60d2b6302402",
+  "sha1": "1561b2d3fc67ffe7257f9001bb486f9be4f63fb9",
   "tests": [
     {
       "id": "7d659b2da63538a-85f1c7853cd9e1b",
@@ -58,8 +58,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-1ffc5a96414cd09",
-      "title": "Search rules across all fields should find rules by name prefix",
+      "id": "c54256d5fae7766-a41bda64b59ff23",
+      "title": "Search rules by name and description should find rules by name prefix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -72,8 +72,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-17a591acd081538",
-      "title": "Search rules across all fields should find rules by description prefix",
+      "id": "c54256d5fae7766-9b60bc16fe20e1a",
+      "title": "Search rules by name and description should find rules by description prefix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -86,8 +86,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-ea09193c15d2484",
-      "title": "Search rules across all fields should find rules by tag prefix",
+      "id": "c54256d5fae7766-b3c19ceb2d2b713",
+      "title": "Search rules by name and description should AND multiple search terms together",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -100,8 +100,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-ba60b9b8326389f",
-      "title": "Search rules across all fields should find rules by grouping field prefix",
+      "id": "c54256d5fae7766-51e3dc1672dd5ab",
+      "title": "Search rules by name and description should return empty results when no fields match",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -109,35 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 128,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-10c2565fff624c3",
-      "title": "Search rules across all fields should AND multiple search terms together",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 168,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-705cb40b3eb7c20",
-      "title": "Search rules across all fields should return empty results when no fields match",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 203,
+        "line": 124,
         "column": 10
       }
     }
