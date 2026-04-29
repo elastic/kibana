@@ -1,5 +1,5 @@
 {
-  "sha1": "f2e92329c9196e2894197cfc12de20e9f0a29802",
+  "sha1": "0d8c1ce48ad32642c53726ddabd11e932181ead9",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -79,28 +79,28 @@
     {
       "id": "ca5617d2526fece-4f1df209bb20bf0",
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 38,
+        "line": 37,
         "column": 7
       }
     },
     {
       "id": "ca5617d2526fece-6a2b3b1f642b875",
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 79,
+        "line": 78,
         "column": 7
       }
     },
@@ -116,7 +116,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
-        "line": 29,
+        "line": 34,
         "column": 9
       }
     },
@@ -132,7 +132,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
-        "line": 41,
+        "line": 45,
         "column": 9
       }
     },
@@ -148,7 +148,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
-        "line": 53,
+        "line": 56,
         "column": 9
       }
     },
