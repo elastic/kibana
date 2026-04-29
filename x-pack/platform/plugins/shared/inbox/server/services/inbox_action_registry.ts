@@ -41,6 +41,43 @@ const createUnknownInboxSourceAppError = (sourceApp: string): UnknownInboxSource
 };
 
 /**
+ * Signals that an inbox action exists in our addressing scheme but is no
+ * longer in a state that can accept a response — the underlying resource
+ * (e.g. a workflow step) has already been advanced, cancelled, or
+ * claimed by another responder.
+ *
+ * Provider implementations throw this so the framework can surface a
+ * stable HTTP 409 Conflict back to the caller instead of a generic 500.
+ * That, in turn, lets clients (UI, MCP, evals) distinguish "the action
+ * is gone, refresh your inbox" from a real server error.
+ *
+ * Modeled as an `interface` + factory + type guard (rather than a
+ * subclass) to mirror the colocated `UnknownInboxSourceAppError` and
+ * keep this file under the `max-classes-per-file` lint cap.
+ */
+export interface InboxActionConflictError extends Error {
+  readonly sourceApp: string;
+  readonly sourceId: string;
+}
+
+export const isInboxActionConflictError = (error: unknown): error is InboxActionConflictError =>
+  error instanceof Error && error.name === 'InboxActionConflictError';
+
+export const createInboxActionConflictError = (
+  sourceApp: string,
+  sourceId: string,
+  reason: string
+): InboxActionConflictError => {
+  const error = new Error(
+    `Inbox action ${sourceApp}/${sourceId} can no longer accept a response: ${reason}`
+  ) as InboxActionConflictError;
+  error.name = 'InboxActionConflictError';
+  (error as { sourceApp: string }).sourceApp = sourceApp;
+  (error as { sourceId: string }).sourceId = sourceId;
+  return error;
+};
+
+/**
  * Fan-out + merge-sort + paginate registry. Each registered provider owns a
  * `sourceApp` namespace and handles its own storage. The registry is
  * deliberately dumb — it does not persist actions itself; it's a routing

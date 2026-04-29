@@ -8,13 +8,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type {
-  InboxActionProvider,
-  InboxActionProviderListParams,
-  InboxActionProviderListResult,
-  InboxRequestContext,
+import {
+  createInboxActionConflictError,
+  type InboxActionProvider,
+  type InboxActionProviderListParams,
+  type InboxActionProviderListResult,
+  type InboxRequestContext,
 } from '@kbn/inbox-plugin/server';
-import { parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
+import { ExecutionStatus } from '@kbn/workflows';
+import { buildWorkflowSourceId, parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 
 export const WORKFLOWS_INBOX_SOURCE_APP = 'workflows' as const;
@@ -81,6 +83,43 @@ export const createWorkflowsInboxProvider = ({
       if (!parsed) {
         throw new InvalidWorkflowSourceIdError(sourceId);
       }
+
+      // The engine's `resumeWorkflowExecution` only validates the
+      // execution-level status, not which step is currently waiting. That
+      // is unsafe in two ways:
+      //   1. A response composed against a stale inbox listing can land
+      //      after the originally-targeted step has been advanced and a
+      //      *later* `waitForInput` is now blocking — the engine would
+      //      silently apply the input to that unrelated later step.
+      //   2. Two near-simultaneous responses to the same step both pass
+      //      the workflow-level check; one input gets dropped on the
+      //      floor with no error surfaced to either client.
+      // We mitigate (1) here by re-reading the targeted step doc and
+      // refusing to forward unless it is still the one waiting. (2)
+      // requires server-side optimistic concurrency on the workflows
+      // execution doc — tracked as a follow-up against the workflows
+      // team since it lives outside our ownership boundary.
+      const stepExecution = await api.getStepExecution(
+        { executionId: parsed.executionId, id: parsed.stepExecutionId },
+        ctx.spaceId
+      );
+
+      if (!stepExecution) {
+        throw createInboxActionConflictError(
+          WORKFLOWS_INBOX_SOURCE_APP,
+          sourceId,
+          `step execution ${parsed.stepExecutionId} not found in space ${ctx.spaceId}`
+        );
+      }
+
+      if (stepExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+        throw createInboxActionConflictError(
+          WORKFLOWS_INBOX_SOURCE_APP,
+          buildWorkflowSourceId(stepExecution),
+          `step execution ${parsed.stepExecutionId} is in status "${stepExecution.status}", expected "${ExecutionStatus.WAITING_FOR_INPUT}"`
+        );
+      }
+
       logger.debug(
         `Workflows inbox provider resuming execution ${parsed.executionId} (workflow ${parsed.workflowId})`
       );

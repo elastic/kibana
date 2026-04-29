@@ -16,7 +16,10 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { INBOX_API_PRIVILEGE_RESPOND } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { isUnknownInboxSourceAppError } from '../../services/inbox_action_registry';
+import {
+  isInboxActionConflictError,
+  isUnknownInboxSourceAppError,
+} from '../../services/inbox_action_registry';
 
 export const registerRespondToActionRoute = ({
   router,
@@ -57,6 +60,15 @@ export const registerRespondToActionRoute = ({
         } catch (error) {
           if (isUnknownInboxSourceAppError(error)) {
             return response.notFound({
+              body: { message: error.message },
+            });
+          }
+          if (isInboxActionConflictError(error)) {
+            // The action exists in our addressing scheme but the underlying
+            // resource (e.g. a workflow step) is no longer in a state that
+            // can accept a response. Surface as 409 so clients can refresh
+            // their inbox instead of treating it like a server error.
+            return response.conflict({
               body: { message: error.message },
             });
           }

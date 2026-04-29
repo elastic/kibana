@@ -14,7 +14,10 @@ import {
   buildRespondToActionUrl,
 } from '@kbn/inbox-common';
 import { registerRespondToActionRoute } from './respond_to_action';
-import { InboxActionRegistry } from '../../services/inbox_action_registry';
+import {
+  createInboxActionConflictError,
+  InboxActionRegistry,
+} from '../../services/inbox_action_registry';
 import type { InboxActionProvider } from '../../services/inbox_action_provider';
 import { INBOX_API_PRIVILEGE_RESPOND } from '../../../common';
 
@@ -156,6 +159,32 @@ describe('POST /internal/inbox/actions/{source_app}/{source_id}/respond', () => 
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 500 })
       );
+    });
+
+    it('returns 409 Conflict when the provider throws InboxActionConflictError', async () => {
+      // Providers throw this when an action is no longer responseable
+      // — for the workflows provider, that happens when the targeted
+      // step has already been advanced or claimed. Surfacing as 409
+      // (rather than 500) lets clients refresh their inbox without
+      // tripping generic error handling.
+      const workflows = fakeProvider('workflows');
+      workflows.respond.mockRejectedValueOnce(
+        createInboxActionConflictError('workflows', 'wf:run:step', 'step is no longer waiting')
+      );
+      registry.register(workflows);
+
+      const response = await invokeHandler(router, 'workflows', 'wf:run:step', {
+        approved: true,
+      });
+
+      expect(response.conflict).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('step is no longer waiting'),
+          }),
+        })
+      );
+      expect(response.customError).not.toHaveBeenCalled();
     });
   });
 });

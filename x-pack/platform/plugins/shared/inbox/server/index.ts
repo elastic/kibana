@@ -24,6 +24,12 @@ export type {
   InboxRequestContext,
 } from './types';
 
+export type { InboxActionConflictError } from './services/inbox_action_registry';
+export {
+  createInboxActionConflictError,
+  isInboxActionConflictError,
+} from './services/inbox_action_registry';
+
 export const plugin: PluginInitializer<
   InboxPluginSetup,
   InboxPluginStart,

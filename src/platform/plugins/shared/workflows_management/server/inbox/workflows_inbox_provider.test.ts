@@ -8,6 +8,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { isInboxActionConflictError } from '@kbn/inbox-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -51,6 +52,9 @@ const fakeApi = () => {
   const api: Partial<WorkflowsManagementApi> = {
     listWaitingForInputSteps: jest.fn(async () => ({ results: [buildStep()], total: 1 })),
     resumeWorkflowExecution: jest.fn(async () => {}),
+    // Default to "step is still waiting" so existing happy-path tests
+    // remain unchanged after we added pre-resume verification.
+    getStepExecution: jest.fn(async () => buildStep()),
   };
   return api as jest.Mocked<WorkflowsManagementApi>;
 };
@@ -115,6 +119,63 @@ describe('createWorkflowsInboxProvider', () => {
       );
     });
 
+    it('verifies the targeted step is still waiting before forwarding to the engine', async () => {
+      // Regression coverage for the inbox/workflows resume race:
+      // the workflow-level status check inside the execution engine
+      // does not distinguish *which* step is waiting, so a stale
+      // response could silently advance an unrelated later HITL step.
+      // The provider closes the cross-step leak by re-reading the step
+      // doc keyed by `stepExecutionId` before forwarding.
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, ctx());
+
+      expect(api.getStepExecution).toHaveBeenCalledWith(
+        { executionId: 'run-1', id: 'step-exec-1' },
+        'default'
+      );
+      // Verify the lookup happens before the resume call so a stale
+      // response cannot race past the check.
+      const lookupOrder = (api.getStepExecution as jest.Mock).mock.invocationCallOrder[0];
+      const resumeOrder = (api.resumeWorkflowExecution as jest.Mock).mock.invocationCallOrder[0];
+      expect(lookupOrder).toBeLessThan(resumeOrder);
+    });
+
+    it('throws InboxActionConflictError when the step execution is not found', async () => {
+      const api = fakeApi();
+      (api.getStepExecution as jest.Mock).mockResolvedValueOnce(null);
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const err = await provider
+        .respond('wf-1:run-1:missing-step', { approved: true }, ctx())
+        .catch((e: unknown) => e);
+
+      expect(isInboxActionConflictError(err)).toBe(true);
+      expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('throws InboxActionConflictError when the step is no longer in WAITING_FOR_INPUT status', async () => {
+      // This is the dangerous case the check exists to prevent: the
+      // first responder has already advanced the step (status flips off
+      // `waiting_for_input`), but the second responder is racing to
+      // submit input that — without this guard — would silently apply
+      // to a *later* HITL step in the same workflow execution.
+      const api = fakeApi();
+      (api.getStepExecution as jest.Mock).mockResolvedValueOnce(
+        buildStep({ status: ExecutionStatus.COMPLETED })
+      );
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const err = await provider
+        .respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
+        .catch((e: unknown) => e);
+
+      expect(isInboxActionConflictError(err)).toBe(true);
+      expect((err as Error).message).toMatch(/completed/);
+      expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
     it('throws InvalidWorkflowSourceIdError when source_id is malformed', async () => {
       const provider = createWorkflowsInboxProvider({
         api: fakeApi(),
@@ -124,6 +185,19 @@ describe('createWorkflowsInboxProvider', () => {
       await expect(provider.respond('invalid', {}, ctx())).rejects.toBeInstanceOf(
         InvalidWorkflowSourceIdError
       );
+    });
+
+    it('does not perform the step lookup when source_id is malformed', async () => {
+      // Defensive: a malformed id has no addressable step, so we must
+      // surface the `InvalidWorkflowSourceIdError` synchronously without
+      // an extra ES round-trip.
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      await provider.respond('invalid', {}, ctx()).catch(() => undefined);
+
+      expect(api.getStepExecution).not.toHaveBeenCalled();
+      expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 });
