@@ -4,8 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo "--- Clean up cached images to free up space"
-clean_cached_images
+echo "--- Clean up cached images to free up space (running in background)"
+clean_cached_images >/dev/null 2>&1 &
+cleanup_pid=$!
 
 export KBN_NP_PLUGINS_BUILT=true
 
@@ -21,11 +22,11 @@ is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
 
+# Ensure docker cleanup finished before archiving
+wait $cleanup_pid || true
+
 echo "--- Archive Kibana Distribution"
 version="$(jq -r '.version' package.json)"
 linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.zst"
-installDir="$KIBANA_DIR/install/kibana"
-mkdir -p "$installDir"
-tar -xf "$linuxBuild" -I zstd -C "$installDir" --strip=1
 mkdir -p "$KIBANA_BUILD_LOCATION"
-cp -pR install/kibana/. "$KIBANA_BUILD_LOCATION/"
+tar -xf "$linuxBuild" -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
