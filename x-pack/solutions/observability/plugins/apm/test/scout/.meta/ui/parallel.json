@@ -1,5 +1,5 @@
 {
-  "sha1": "5afe718d9ae4d10e7b98c54a33937c177a7b3cc8",
+  "sha1": "23092b575354e0bbc4c629f085a278260b33bd7c",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 25,
+        "line": 26,
         "column": 1
       }
     },
@@ -890,6 +890,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
         "line": 151,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab0e55ecb54392-b5d9e6a756e8940",
+      "title": "Service map embeddable adds Service map panel with service name, environment and KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 44,
         "column": 9
       }
     },
@@ -1906,7 +1922,7 @@
     {
       "id": "b1d9732f2022f52-1d041dd11a76a98",
       "title": "Custom links template validation Create custom link with template URL and filters",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1915,14 +1931,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 33,
+        "line": 36,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-244e245a602c0a7",
       "title": "Custom links template validation Verify template variables are populated correctly in custom link URLs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1931,14 +1947,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-8c63ceeb998a13d",
       "title": "Custom links template validation Delete custom link with template URL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1947,14 +1963,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 92,
+        "line": 95,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-ac6bad5f389c557",
       "title": "Custom links template validation Open transaction and validate the default url when creating a custom link",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1963,14 +1979,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 112,
+        "line": 115,
         "column": 9
       }
     },
     {
       "id": "b1d9732f2022f52-5f08fd317b97702",
       "title": "Custom links template validation Delete custom link created from transaction details",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1979,7 +1995,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 186,
+        "line": 189,
         "column": 9
       }
     },

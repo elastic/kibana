@@ -96,6 +96,7 @@
                 "lineNumber": 66,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Props",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -174,6 +175,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaPrivileges",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -197,6 +199,7 @@
                 "lineNumber": 21,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "Role",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -686,6 +689,7 @@
                 "lineNumber": 171,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SubFeaturePrivilegeGroup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -942,6 +946,7 @@
             "lineNumber": 19,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -314,6 +314,7 @@
             "lineNumber": 22,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "AsApiContract",
             "trackAdoption": false
           }
         ],
@@ -366,6 +367,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],

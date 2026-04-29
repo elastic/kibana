@@ -6,11 +6,9 @@
  */
 
 import moment from 'moment';
-import type {
-  DataRecognizerConfigResponse,
-  JobExistResult,
-  MlCapabilitiesResponse,
-} from '@kbn/ml-plugin/public';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
+import type { DataRecognizerConfigResponse } from '@kbn/ml-common-types/modules';
+import type { JobExistResult } from '@kbn/ml-common-types/data_recognizer';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { apiService } from './utils';
 import type { AnomalyRecords, AnomalyRecordsParams } from '../actions';

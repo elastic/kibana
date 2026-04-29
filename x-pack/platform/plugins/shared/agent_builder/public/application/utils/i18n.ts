@@ -1670,6 +1670,16 @@ export const labels = {
         defaultMessage: 'Click to authorize via OAuth',
       }
     ),
+    statusEarsDisabled: i18n.translate('xpack.agentBuilder.connectors.status.earsDisabled', {
+      defaultMessage: 'Disabled',
+    }),
+    statusEarsDisabledTooltip: i18n.translate(
+      'xpack.agentBuilder.connectors.status.earsDisabledTooltip',
+      {
+        defaultMessage:
+          'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+      }
+    ),
     statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {
       defaultMessage: 'Status',
     }),
