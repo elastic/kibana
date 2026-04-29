@@ -199,3 +199,21 @@ export interface DispatcherStep {
   readonly name: string;
   execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput>;
 }
+
+/**
+ * A group of steps that may run concurrently because none of them depend
+ * on state produced by another member of the group. See
+ * `execution_pipeline.ts` for the precise group semantics.
+ */
+export interface DispatcherParallelGroup {
+  readonly kind: 'parallel';
+  readonly steps: readonly DispatcherStep[];
+}
+
+/**
+ * A pipeline entry is either a single step (executed serially) or a
+ * parallel group of steps (executed concurrently). Single-step bindings
+ * are the default; parallel groups are an opt-in optimization for steps
+ * proven to have no in-tick dependencies on one another.
+ */
+export type DispatcherPipelineEntry = DispatcherStep | DispatcherParallelGroup;
