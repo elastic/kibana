@@ -1476,6 +1476,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
