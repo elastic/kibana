@@ -400,7 +400,7 @@ describe('Transform: Common', () => {
   test('getCreateTransformSettingsRequestBody() skips default settings', () => {
     const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: null,
-      transformSettingsMaxPageSearchSize: 500,
+      transformSettingsMaxPageSearchSize: 5000,
     };
 
     const request = getCreateTransformSettingsRequestBody(transformDetailsState);
