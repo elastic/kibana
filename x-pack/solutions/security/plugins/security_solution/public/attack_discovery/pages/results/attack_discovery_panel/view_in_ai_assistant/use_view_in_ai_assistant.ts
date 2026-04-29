@@ -25,7 +25,8 @@ export const useViewInAiAssistant = ({
   attackDiscovery: AttackDiscovery | undefined;
   replacements?: Replacements;
 }) => {
-  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
+    useAssistantAvailability();
 
   // the prompt context for this insight:
   const getPromptContext = useCallback(
