@@ -19,7 +19,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
-import { UNIFIED_ALERT_TYPES, isAlertAttachmentType } from '../../../common/utils/attachments';
+import {
+  UNIFIED_ALERT_TYPES_ARRAY,
+  isAlertAttachmentType,
+} from '../../../common/utils/attachments';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
   UnifiedAttachmentAttributesRt,
@@ -215,7 +218,7 @@ export class AttachmentService {
     if (isCasesAttachmentsEnabled) {
       typeFilters.push(
         buildFilter({
-          filters: [...UNIFIED_ALERT_TYPES],
+          filters: UNIFIED_ALERT_TYPES_ARRAY,
           field: 'type',
           operator: 'or',
           type: CASE_ATTACHMENT_SAVED_OBJECT,

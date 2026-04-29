@@ -39,7 +39,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import { UNIFIED_ALERT_TYPES } from '../../../common/utils/attachments';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
@@ -214,7 +214,7 @@ export class CasesService {
         soType: CASE_ATTACHMENT_SAVED_OBJECT,
         alertIdField: 'attachmentId',
         extraFilter: buildFilter({
-          filters: [...UNIFIED_ALERT_TYPES],
+          filters: UNIFIED_ALERT_TYPES_ARRAY,
           field: 'type',
           operator: 'or',
           type: CASE_ATTACHMENT_SAVED_OBJECT,

@@ -117,7 +117,7 @@ export const createUnifiedAlertRequests = (
   numberOfRequests: number,
   attachmentIds: string | string[]
 ): UnifiedReferenceAttachmentPayload[] => {
-  return [...Array(numberOfRequests).keys()].map((value) => ({
+  return Array.from({ length: numberOfRequests }, (_, value) => ({
     type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: attachmentIds,
     owner: `${value}`,

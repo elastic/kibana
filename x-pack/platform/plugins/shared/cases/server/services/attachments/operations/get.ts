@@ -9,7 +9,10 @@ import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import { toUnifiedAttachmentType, UNIFIED_ALERT_TYPES } from '../../../../common/utils/attachments';
+import {
+  toUnifiedAttachmentType,
+  UNIFIED_ALERT_TYPES_ARRAY,
+} from '../../../../common/utils/attachments';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -352,7 +355,7 @@ export class AttachmentGetter {
 
       if (isCasesAttachmentsEnabled) {
         const unifiedAlertFilter = buildFilter({
-          filters: [...UNIFIED_ALERT_TYPES],
+          filters: UNIFIED_ALERT_TYPES_ARRAY,
           field: 'type',
           operator: 'or',
           type: CASE_ATTACHMENT_SAVED_OBJECT,
@@ -615,7 +618,7 @@ export class AttachmentGetter {
         };
       };
     }
-    const alertTypeFilters = [...UNIFIED_ALERT_TYPES].reduce<
+    const alertTypeFilters = UNIFIED_ALERT_TYPES_ARRAY.reduce<
       Record<string, { term: Record<string, string> }>
     >((acc, alertType) => {
       acc[alertType] = {

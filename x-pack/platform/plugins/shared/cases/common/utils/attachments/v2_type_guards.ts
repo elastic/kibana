@@ -77,11 +77,12 @@ export const isUnifiedEventAttachment = (
   isUnifiedReferenceAttachmentRequest(attachment) && isEventAttachmentType(attachment.type);
 
 // ------ Alert -------
-export const UNIFIED_ALERT_TYPES = new Set([
+export const UNIFIED_ALERT_TYPES_ARRAY: string[] = [
   SECURITY_ALERT_ATTACHMENT_TYPE,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
-]);
+];
+export const UNIFIED_ALERT_TYPES = new Set<string>(UNIFIED_ALERT_TYPES_ARRAY);
 
 export const isAlertAttachmentType = (type: string): boolean =>
   type === AttachmentType.alert || UNIFIED_ALERT_TYPES.has(type);

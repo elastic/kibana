@@ -16,6 +16,7 @@ import {
 } from '../../../../common/utils/attachments';
 import { isCommentRequestTypeAlert } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
+import { toStringArray } from '../../../../common/utils/attachments/string_utils';
 
 export class AlertLimiter extends BaseLimiter {
   constructor(private readonly attachmentService: AttachmentService) {
@@ -32,23 +33,19 @@ export class AlertLimiter extends BaseLimiter {
   }
 
   public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
-    const legacyRequests = requests.filter(isLegacyAttachmentRequest);
-    const legacyAlertCount = legacyRequests
-      .filter<AlertAttachmentPayload>(isCommentRequestTypeAlert)
-      .reduce((count, attachment) => {
-        const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
+    return requests.reduce((count, attachment) => {
+      if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)) {
+        const legacyAlert = attachment as AlertAttachmentPayload;
+        const ids = toStringArray(legacyAlert.alertId);
         return count + ids.length;
-      }, 0);
-
-    const unifiedAlertCount = requests
-      .filter(isUnifiedAlertAttachment)
-      .reduce((count, attachment) => {
+      }
+      if (isUnifiedAlertAttachment(attachment)) {
         const ids = Array.isArray(attachment.attachmentId)
           ? attachment.attachmentId
           : [attachment.attachmentId];
         return count + ids.length;
-      }, 0);
-
-    return legacyAlertCount + unifiedAlertCount;
+      }
+      return count;
+    }, 0);
   }
 }

@@ -31,7 +31,7 @@ export const AlertTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseDa
   //  https://github.com/elastic/kibana/issues/218741
   const EASE = capabilities[SECURITY_FEATURE_ID].configurations;
 
-  const alertIds = getManualAlertIds(caseData.comments);
+  const alertIds = useMemo(() => getManualAlertIds(caseData.comments), [caseData.comments]);
   const alertIdsQuery = useMemo(
     () => ({
       ids: { values: alertIds },

@@ -21,12 +21,17 @@ export const StackAlertTabContent = ({ caseData }: CommonAttachmentTabViewProps)
   const { data, http, notifications, fieldFormats, application, licensing, settings } =
     services as SetRequired<typeof services, 'licensing'>;
 
-  const alertIds = getManualAlertIds(caseData.comments);
+  const alertIds = useMemo(() => getManualAlertIds(caseData.comments), [caseData.comments]);
   const alertIdsQuery = useMemo(
     (): NonNullable<QueryDslQueryContainer> => ({
       ids: { values: alertIds },
     }),
     [alertIds]
+  );
+
+  const alertsTableServices = useMemo(
+    () => ({ data, http, notifications, fieldFormats, application, settings, licensing }),
+    [data, http, notifications, fieldFormats, application, settings, licensing]
   );
 
   const { isLoading, data: alertData } = useGetFeatureIds(alertIds, true);
@@ -65,7 +70,7 @@ export const StackAlertTabContent = ({ caseData }: CommonAttachmentTabViewProps)
         consumers={alertData?.featureIds}
         query={alertIdsQuery}
         showAlertStatusWithFlapping
-        services={{ data, http, notifications, fieldFormats, application, settings, licensing }}
+        services={alertsTableServices}
       />
     </EuiFlexItem>
   );

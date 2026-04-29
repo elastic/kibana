@@ -123,5 +123,12 @@ export const processCase = async (
     filter: combineFilters([legacyFilter, unifiedFilter], 'or' as const),
   });
 
-  return documentIds.size === documentsForCase.length ? caseId : null;
+  // Combine document ids from cases-comments and cases-attachments for deduplication
+  const returnedDocumentIds = new Set(documentsForCase.map((document) => document.id));
+  for (const requestedId of documentIds) {
+    if (!returnedDocumentIds.has(requestedId)) {
+      return null;
+    }
+  }
+  return caseId;
 };

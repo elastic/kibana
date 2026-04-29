@@ -15,15 +15,15 @@ import { toStringArray } from './string_utils';
  * and unified alert attachments. Used by solution alert tabs to drive the
  * alerts table.
  */
-export const getManualAlertIds = (comments: AttachmentUIV2[]): string[] => {
-  const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUIV2) => {
-    if (comment.type === AttachmentType.alert && 'alertId' in comment) {
-      const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+export const getManualAlertIds = (attachments: AttachmentUIV2[]): string[] => {
+  const dedupedAlertIds = attachments.reduce((alertIds, attachment) => {
+    if (attachment.type === AttachmentType.alert && 'alertId' in attachment) {
+      const ids = toStringArray(attachment.alertId);
       ids.forEach((id) => alertIds.add(id));
-    } else if (isUnifiedAlertAttachment(comment)) {
-      toStringArray(comment.attachmentId).forEach((id) => alertIds.add(id));
+    } else if (isUnifiedAlertAttachment(attachment)) {
+      toStringArray(attachment.attachmentId).forEach((id) => alertIds.add(id));
     }
     return alertIds;
   }, new Set<string>());
-  return Array.from(dedupeAlerts);
+  return Array.from(dedupedAlertIds);
 };

@@ -19,7 +19,7 @@ export function AlertTabContent({ caseData }: CommonAttachmentTabViewProps) {
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
 
-  const alertIds = getManualAlertIds(caseData.comments);
+  const alertIds = useMemo(() => getManualAlertIds(caseData.comments), [caseData.comments]);
   const alertIdsQuery = useMemo(
     (): NonNullable<QueryDslQueryContainer> => ({
       ids: {
@@ -27,6 +27,20 @@ export function AlertTabContent({ caseData }: CommonAttachmentTabViewProps) {
       },
     }),
     [alertIds]
+  );
+
+  const alertsTableServices = useMemo(
+    () => ({
+      data,
+      http,
+      notifications,
+      fieldFormats,
+      application,
+      licensing: licensing!,
+      cases,
+      settings,
+    }),
+    [data, http, notifications, fieldFormats, application, licensing, cases, settings]
   );
 
   if (alertIdsQuery.ids?.values?.length === 0) {
@@ -52,16 +66,7 @@ export function AlertTabContent({ caseData }: CommonAttachmentTabViewProps) {
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         query={alertIdsQuery}
         showAlertStatusWithFlapping
-        services={{
-          data,
-          http,
-          notifications,
-          fieldFormats,
-          application,
-          licensing: licensing!,
-          cases,
-          settings,
-        }}
+        services={alertsTableServices}
       />
     </EuiFlexItem>
   );
