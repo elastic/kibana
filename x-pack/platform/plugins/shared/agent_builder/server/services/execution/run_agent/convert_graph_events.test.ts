@@ -42,11 +42,13 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
 }));
 
 jest.mock('./actions', () => ({
-  isAnswerAction: jest.fn(() => false),
+  isBackgroundExecutionCompleteAction: jest.fn(() => false),
   isExecuteToolAction: jest.fn(() => false),
-  isStructuredAnswerAction: jest.fn(() => false),
   isToolPromptAction: jest.fn(() => false),
-  isToolCallAction: jest.fn((action: any) => action.kind === 'tool_call_action'),
+  isToolCallAction: jest.fn(
+    (action: any) => action.kind === 'tool_call_action' || action.type === 'tool_call'
+  ),
+  isHandoverAction: jest.fn((action: any) => action?.type === 'hand_over'),
 }));
 
 describe('convertGraphEvents', () => {
@@ -205,6 +207,187 @@ describe('convertGraphEvents', () => {
           structured_output: structuredAnswer,
         }),
       })
+    );
+  });
+
+  it('emits thinkingCompleteEvent backdated to first chunk of terminal research turn', async () => {
+    const { createThinkingCompleteEvent, hasTag, extractTextContent } = jest.requireMock(
+      '@kbn/agent-builder-genai-utils/langchain'
+    );
+    hasTag.mockImplementation((event: any, tag: string) => event.tags?.includes(tag));
+    extractTextContent.mockImplementation((chunk: any) => chunk?.content ?? '');
+    createThinkingCompleteEvent.mockImplementation((time: number) => ({
+      type: 'thinking_complete',
+      data: { time_to_first_token: time },
+    }));
+
+    const startTime = new Date(1000);
+    const events: any[] = [
+      {
+        event: 'on_chain_start',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+      },
+      {
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        tags: ['agent', 'research-agent'],
+        metadata: { graphName: 'test-graph' },
+        data: { chunk: { content: 'hello' } },
+      },
+      {
+        event: 'on_chain_end',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+        data: {
+          output: {
+            mainActions: [{ type: 'hand_over', message: 'final answer' }],
+          },
+        },
+      },
+    ];
+
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(2500);
+
+    try {
+      const converted = await lastValueFrom(
+        of(...events).pipe(
+          convertGraphEvents({
+            graphName: 'test-graph',
+            toolManager: {
+              getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+              getToolOrigin: jest.fn(),
+            } as any,
+            pendingRound: undefined,
+            logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+            startTime,
+            structuredOutput: false,
+          }),
+          toArray()
+        )
+      );
+
+      expect(converted).toContainEqual(
+        expect.objectContaining({
+          type: 'thinking_complete',
+          data: expect.objectContaining({ time_to_first_token: 1500 }),
+        })
+      );
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('does not emit thinkingCompleteEvent when research turn ends in tool calls', async () => {
+    const { hasTag, extractTextContent } = jest.requireMock(
+      '@kbn/agent-builder-genai-utils/langchain'
+    );
+    hasTag.mockImplementation((event: any, tag: string) => event.tags?.includes(tag));
+    extractTextContent.mockImplementation((chunk: any) => chunk?.content ?? '');
+
+    const events: any[] = [
+      {
+        event: 'on_chain_start',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+      },
+      {
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        tags: ['agent', 'research-agent'],
+        metadata: { graphName: 'test-graph' },
+        data: { chunk: { content: 'searching...' } },
+      },
+      {
+        event: 'on_chain_end',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+        data: {
+          output: {
+            mainActions: [
+              {
+                type: 'tool_call',
+                tool_calls: [{ toolCallId: 'c1', args: {} }],
+              },
+            ],
+          },
+        },
+      },
+    ];
+
+    const converted = await lastValueFrom(
+      of(...events).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolOrigin: jest.fn(),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: false,
+        }),
+        toArray()
+      )
+    );
+
+    expect(converted).not.toContainEqual(
+      expect.objectContaining({ type: 'thinking_complete' })
+    );
+  });
+
+  it('does not emit thinkingCompleteEvent in structured mode', async () => {
+    const { hasTag, extractTextContent } = jest.requireMock(
+      '@kbn/agent-builder-genai-utils/langchain'
+    );
+    hasTag.mockImplementation((event: any, tag: string) => event.tags?.includes(tag));
+    extractTextContent.mockImplementation((chunk: any) => chunk?.content ?? '');
+
+    const events: any[] = [
+      {
+        event: 'on_chain_start',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+      },
+      {
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        tags: ['agent', 'research-agent'],
+        metadata: { graphName: 'test-graph' },
+        data: { chunk: { content: 'hello' } },
+      },
+      {
+        event: 'on_chain_end',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+        data: {
+          output: {
+            mainActions: [{ type: 'hand_over', message: 'draft' }],
+          },
+        },
+      },
+    ];
+
+    const converted = await lastValueFrom(
+      of(...events).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolOrigin: jest.fn(),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: true,
+        }),
+        toArray()
+      )
+    );
+
+    expect(converted).not.toContainEqual(
+      expect.objectContaining({ type: 'thinking_complete' })
     );
   });
 });

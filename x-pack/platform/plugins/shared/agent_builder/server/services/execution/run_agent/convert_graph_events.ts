@@ -19,6 +19,7 @@ import {
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
+  createThinkingCompleteEvent,
   createBackgroundAgentCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
@@ -40,6 +41,7 @@ import type { ToolCallResult } from './actions';
 import {
   isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
+  isHandoverAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -76,11 +78,21 @@ export const convertGraphEvents = ({
     // TODO: fix, need a new ID per cycle
     const messageId = uuidv4();
 
-    // let isThinkingComplete = false;
+    // Tracks the timestamp of the first text chunk of the current research turn.
+    // Used to backdate `thinkingCompleteEvent` to the first chunk of the terminal
+    // turn (the turn ending in a HandoverAction). Reset on each researchAgent
+    // on_chain_start. Only relevant in non-structured mode.
+    let currentTurnFirstChunkAt: number | undefined;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
         if (!matchGraphName(event, graphName)) {
+          return EMPTY;
+        }
+
+        // reset per-turn first-chunk tracker at the start of each research turn
+        if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+          currentTurnFirstChunkAt = undefined;
           return EMPTY;
         }
 
@@ -92,16 +104,14 @@ export const convertGraphEvents = ({
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            const events: ConvertedEvents[] = [];
-
-            // TODO: fix - thinking complete not possible without answer step - https://github.com/elastic/kibana/pull/241681
-            /* if (!isThinkingComplete) {
-              // Emit thinking complete event when first chunk arrives
-              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
-              isThinkingComplete = true;
-            }*/
-            events.push(createTextChunkEvent(textContent, { messageId }));
-            return of(...events);
+            if (
+              !structuredOutput &&
+              hasTag(event, tags.researchAgent) &&
+              currentTurnFirstChunkAt === undefined
+            ) {
+              currentTurnFirstChunkAt = Date.now();
+            }
+            return of(createTextChunkEvent(textContent, { messageId }));
           }
         }
 
@@ -154,6 +164,18 @@ export const convertGraphEvents = ({
                 }
               }
             }
+          }
+
+          // Backdated thinking-complete: when the research agent's terminal turn
+          // produces a HandoverAction in non-structured mode, emit
+          // thinkingCompleteEvent with the timestamp of the first chunk of that
+          // turn. Falls back to "now" if no chunk timestamp was captured.
+          if (!structuredOutput && isHandoverAction(nextAction)) {
+            const firstChunkOffset =
+              currentTurnFirstChunkAt !== undefined
+                ? currentTurnFirstChunkAt - startTime.getTime()
+                : Date.now() - startTime.getTime();
+            events.push(createThinkingCompleteEvent(firstChunkOffset));
           }
 
           return of(...events);
