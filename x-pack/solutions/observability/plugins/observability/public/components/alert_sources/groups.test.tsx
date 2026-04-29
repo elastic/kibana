@@ -72,7 +72,7 @@ describe('Groups', () => {
     expect(links).toHaveLength(4);
     links.forEach((link) => {
       expect(link).toHaveAttribute('data-ebt-action', 'openInApm');
-      expect(link).toHaveAttribute('data-ebt-element', 'alertDetails');
+      expect(link).toHaveAttribute('data-ebt-element', 'alertDetailsSources');
       expect(link).toHaveAttribute('data-ebt-detail', APM_RULE_TYPE_ID);
     });
   });
@@ -95,7 +95,7 @@ describe('Groups', () => {
     expect(links).toHaveLength(2);
     links.forEach((link) => {
       expect(link).toHaveAttribute('data-ebt-action', 'openInInfra');
-      expect(link).toHaveAttribute('data-ebt-element', 'alertFlyout');
+      expect(link).toHaveAttribute('data-ebt-element', 'alertFlyoutSources');
       expect(link).toHaveAttribute('data-ebt-detail', 'metrics.alert.threshold');
     });
   });
