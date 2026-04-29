@@ -11,7 +11,7 @@ import {
   getFieldsForTerms,
   toSanitizedFieldType,
   getMultiFieldLabel,
-  createCachedFieldValueFormatter,
+  createCachedTextFieldValueFormatter,
   createCachedReactFieldValueFormatter,
 } from './fields_utils';
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -123,7 +123,7 @@ describe('fields_utils', () => {
     });
   });
 
-  describe('createCachedFieldValueFormatter and createCachedReactFieldValueFormatter', () => {
+  describe('createCachedTextFieldValueFormatter and createCachedReactFieldValueFormatter', () => {
     let dataView: DataView;
     let getFormatterForFieldSpy: jest.SpyInstance;
 
@@ -137,7 +137,7 @@ describe('fields_utils', () => {
     });
 
     test('should use data view formatters and cache them', () => {
-      const textCache = createCachedFieldValueFormatter(dataView);
+      const textCache = createCachedTextFieldValueFormatter(dataView);
       const reactCache = createCachedReactFieldValueFormatter(dataView);
 
       textCache('bytes', '10001');
@@ -160,7 +160,7 @@ describe('fields_utils', () => {
         getDefaultInstance: jest.fn().mockReturnValue(new StringFormat()),
       } as unknown as FieldFormatsRegistry;
 
-      const textCache = createCachedFieldValueFormatter(
+      const textCache = createCachedTextFieldValueFormatter(
         null,
         [{ name: 'field', label: 'Label', type: KBN_FIELD_TYPES.STRING }],
         textFieldFormatServiceMock

@@ -115,7 +115,7 @@ const getOrSetFormatter = (
   return undefined;
 };
 
-export const createCachedFieldValueFormatter = (
+export const createCachedTextFieldValueFormatter = (
   dataView?: DataView | null,
   fields?: SanitizedFieldType[],
   fieldFormatService?: FieldFormatsRegistry,
