@@ -35,12 +35,12 @@ import { mapKeys, snakeCase } from 'lodash/fp';
 
 import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
 import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
+import type { CpsData } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import type { CommonAlertFields870, SuppressionFields870 } from '../../common/schemas';
-import type { CpsData } from '@kbn/alerting-plugin/server';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -81,9 +81,15 @@ const augmentAlerts = async <T>({
   const currentDate = new Date();
   const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
 
-  const maintenanceWindowIdsField = maintenanceWindowIds.length ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds } : {};
-  const cpsResolvedExpression = cpsData.resolvedExpression ? { [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression } : {};
-  const cpsLinkedProjects = cpsData.linkedProjects.length ? { [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects } : {};
+  const maintenanceWindowIdsField = maintenanceWindowIds.length
+    ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
+    : {};
+  const cpsResolvedExpression = cpsData.resolvedExpression
+    ? { [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression }
+    : {};
+  const cpsLinkedProjects = cpsData.linkedProjects.length
+    ? { [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects }
+    : {};
   return alerts.map((alert) => {
     return {
       ...alert,

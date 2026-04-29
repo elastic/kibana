@@ -8,6 +8,7 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import type { CpsData } from '@kbn/alerting-plugin/server/types';
 import type {
   LogLevel,
   RuleExecutionMetrics,
@@ -41,6 +42,7 @@ export interface RuleInfo {
   ruleType: string;
   spaceId: string;
   executionId: string;
+  cpsData?: CpsData;
 }
 
 export interface MessageArgs {
@@ -72,6 +74,16 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
 
   let sequence = 0;
 
+  const getCpsFields = (ruleInfo: RuleInfo) =>
+    ruleInfo.cpsData
+      ? {
+          cps_scope_expression: ruleInfo.cpsData.resolvedExpression,
+          cps_scope_linked_projects: ruleInfo.cpsData.linkedProjects.length
+            ? ruleInfo.cpsData.linkedProjects
+            : undefined,
+        }
+      : {};
+
   return {
     logMessage: (args: MessageArgs): void => {
       eventLogger.logEvent({
@@ -101,6 +113,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               revision: args.ruleInfo.ruleRevision,
             },
           },
+          ...getCpsFields(args.ruleInfo),
           space_ids: [args.ruleInfo.spaceId],
           saved_objects: [
             {
@@ -145,6 +158,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               revision: args.ruleInfo.ruleRevision,
             },
           },
+          ...getCpsFields(args.ruleInfo),
           space_ids: [args.ruleInfo.spaceId],
           saved_objects: [
             {
@@ -187,6 +201,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               revision: args.ruleInfo.ruleRevision,
             },
           },
+          ...getCpsFields(args.ruleInfo),
           space_ids: [args.ruleInfo.spaceId],
           saved_objects: [
             {
