@@ -42,7 +42,8 @@ if: >-
     github.event_name == 'workflow_dispatch' ||
     (
       github.event.sender.type != 'Bot' &&
-      !contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:skip-ai') &&
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
+      !contains(github.event.issue.labels.*.name, 'reviewer:skip-ai') &&
       (
         (
           github.event_name == 'pull_request_target' &&
@@ -59,7 +60,10 @@ if: >-
         ) ||
         (
           contains(github.event.comment.body, '@claude') &&
-          contains((github.event.pull_request.labels.*.name || github.event.issue.labels.*.name), 'reviewer:claude') &&
+          (
+            contains(github.event.pull_request.labels.*.name, 'reviewer:claude') ||
+            contains(github.event.issue.labels.*.name, 'reviewer:claude')
+          ) &&
           (
             github.event_name == 'pull_request_review_comment' ||
             (
