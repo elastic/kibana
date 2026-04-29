@@ -32,12 +32,6 @@ export interface FavoritesServiceOptions<Metadata extends object | void = void> 
   userProfile: UserProfileServiceStart;
   /** Optional usage collection start, used to record click events. */
   usageCollection?: UsageCollectionStart;
-  /**
-   * Generic metadata phantom — pass when the upstream client is parameterized
-   * with metadata for `addFavorite`. Defaults to `void`, matching the most
-   * common case.
-   */
-  metadata?: Metadata;
 }
 
 /**
@@ -65,7 +59,7 @@ export const createFavoritesService = <Metadata extends object | void = void>({
   http,
   userProfile,
   usageCollection,
-}: Omit<FavoritesServiceOptions<Metadata>, 'metadata'>): FavoritesClientPublic<Metadata> =>
+}: FavoritesServiceOptions<Metadata>): FavoritesClientPublic<Metadata> =>
   new FavoritesClient<Metadata>(appId, savedObjectType, {
     http,
     userProfile,

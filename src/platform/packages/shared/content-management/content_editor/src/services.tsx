@@ -17,20 +17,20 @@ import {
 import { QueryClient, QueryClientProvider, useQueryClient } from '@kbn/react-query';
 
 /**
- * Module-level React Query client for content-editor flows.
+ * Create a React Query client for a single content-editor provider instance.
  *
- * Self-provided by {@link ContentEditorKibanaProvider} so consumers don't have
- * to wrap separately. The same instance is forwarded into the system flyout the
- * editor opens, so user-profile queries inside the flyout share cache with
- * queries made by the editor body.
+ * Called inside a `useMemo` so each mounted {@link ContentEditorKibanaProvider}
+ * gets its own client that can be garbage-collected on unmount, avoiding
+ * unbounded cache growth when multiple instances are mounted across the app.
  */
-const contentEditorQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
+const createContentEditorQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
-  },
-});
+  });
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -158,13 +158,20 @@ export interface ContentEditorKibanaDependencies {
  */
 export const ContentEditorKibanaProvider: FC<
   PropsWithChildren<ContentEditorKibanaDependencies>
-> = ({ children, ...services }) => (
-  <QueryClientProvider client={contentEditorQueryClient}>
-    <UserProfilesKibanaProvider core={services.core}>
-      <ContentEditorKibanaProviderInner {...services}>{children}</ContentEditorKibanaProviderInner>
-    </UserProfilesKibanaProvider>
-  </QueryClientProvider>
-);
+> = ({ children, ...services }) => {
+  // Create a per-instance QueryClient so the cache is released when this
+  // provider unmounts, preventing unbounded memory growth across multiple
+  // mounted ContentEditorKibanaProvider trees.
+  const queryClient = useMemo(() => createContentEditorQueryClient(), []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <UserProfilesKibanaProvider core={services.core}>
+        <ContentEditorKibanaProviderInner {...services}>{children}</ContentEditorKibanaProviderInner>
+      </UserProfilesKibanaProvider>
+    </QueryClientProvider>
+  );
+};
 
 /**
  * Inner body of {@link ContentEditorKibanaProvider}.
