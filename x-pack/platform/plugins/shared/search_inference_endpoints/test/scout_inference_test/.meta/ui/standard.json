@@ -1,5 +1,5 @@
 {
-  "sha1": "73e752bf7fd7b69711327a38cb0b4e1942164c85",
+  "sha1": "c4d1b0837e3f07a14bfd6c4f32f9b94468591a04",
   "tests": [
     {
       "id": "42293a2b206815f-21f4f530da45d0c",
@@ -88,6 +88,216 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
         "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "0800ced816f1c80-f468bd0e4108677",
+      "title": "External Inference - empty state renders prompt, add button, and documentation link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_empty_state.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "0800ced816f1c80-ddda8fa424ca3a2",
+      "title": "External Inference - empty state opens and closes the add inference flyout from the empty prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_empty_state.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "ecea7281f793e5f-9211ff0fc6c186b",
+      "title": "External Inference - group by supports switching group-by between Service and None",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_group_by.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "ecea7281f793e5f-92c4b87160eab72",
+      "title": "External Inference - group by expand all and collapse all toggle every group accordion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_group_by.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "df98cef484c61df-e10e39d10f44007",
+      "title": "External Inference - header renders the header with api documentation and add endpoint button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_header.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "df98cef484c61df-03674d93c8118ac",
+      "title": "External Inference - header opens and closes the add inference flyout from the header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_header.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "8dc1b555bb63e06-80dd6e8247f11bc",
+      "title": "External Inference - row actions opens the edit inference flyout from the view endpoint row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_row_actions.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "8dc1b555bb63e06-adcff333706e83c",
+      "title": "External Inference - row actions opens and cancels the delete confirm modal for a user-defined endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_row_actions.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "8dc1b555bb63e06-4343da6acaa58b7",
+      "title": "External Inference - row actions copy endpoint id action shows a confirmation toast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_row_actions.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "911b7503131fb5d-26ac442bb097b57",
+      "title": "External Inference - table renders the tabular view with every external endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "911b7503131fb5d-906ff6387fe1a9d",
+      "title": "External Inference - table filters the table when typing in the search field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "911b7503131fb5d-b9fe5bc0edec6f2",
+      "title": "External Inference - table filters the table by service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "911b7503131fb5d-a33a65d82862a13",
+      "title": "External Inference - table filters the table by task type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "911b7503131fb5d-4c6e8abdcac2e97",
+      "title": "External Inference - table endpoint stats update when the table is filtered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
+        "line": 111,
         "column": 9
       }
     },
