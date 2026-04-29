@@ -34,7 +34,10 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       .cookieHeader;
     otherPrivilegedRoleCookieHeader = (
       await samlAuth.asInteractiveUser({
-        kibana: [{ base: ['all'], spaces: ['*'] }],
+        elasticsearch: {
+          cluster: [],
+        },
+        kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
       })
     ).cookieHeader;
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
@@ -92,7 +95,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('user profile ID');
+      expect(response.body.message).toContain('currentUserProfile is undefined');
       const after = await apiClient.get(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
         headers: {
           ...COMMON_HEADERS,
@@ -322,7 +325,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(forbidden).toHaveStatusCode(400);
-      expect(forbidden.body.message).toContain('user profile ID');
+      expect(forbidden.body.message).toContain('currentUserProfile is undefined');
 
       const after = await apiClient.get(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
         headers: {

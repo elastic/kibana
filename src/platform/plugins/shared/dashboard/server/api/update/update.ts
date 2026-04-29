@@ -41,7 +41,7 @@ export async function update(
       DASHBOARD_SAVED_OBJECT_TYPE,
       id
     );
-    existingAccessMode = resolved.saved_object.accessControl?.accessMode ?? 'default';
+    existingAccessMode = resolved.saved_object.accessControl?.accessMode;
   } catch (resolveError) {
     if (resolveError.isBoom && resolveError.output.statusCode === 404) {
       isCreateRequest = true;
@@ -88,7 +88,7 @@ export async function update(
           DASHBOARD_SAVED_OBJECT_TYPE,
           id
         );
-        existingAccessMode = resolved.saved_object.accessControl?.accessMode ?? 'default';
+        existingAccessMode = resolved.saved_object.accessControl?.accessMode;
         isCreateRequest = false;
       } else {
         throw e;
@@ -102,16 +102,26 @@ export async function update(
     desiredAccessMode !== undefined && desiredAccessMode !== currentAccessMode;
 
   if (shouldChangeAccessMode) {
-    const changeAccessModeResponse = await core.savedObjects.client.changeAccessMode(
-      [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
-      {
-        accessMode: desiredAccessMode,
-      }
-    );
+    try {
+      const changeAccessModeResponse = await core.savedObjects.client.changeAccessMode(
+        [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
+        {
+          accessMode: desiredAccessMode,
+        }
+      );
 
-    const [result] = changeAccessModeResponse.objects;
-    if (result?.error) {
-      throw result.error;
+      const [result] = changeAccessModeResponse.objects;
+      if (result?.error) {
+        throw result.error;
+      }
+    } catch (e) {
+      const statusCode = (e as any)?.statusCode;
+      const message = (e as any)?.message ?? (e instanceof Error ? e.message : undefined);
+      if (typeof statusCode === 'number' && statusCode >= 400 && !(e as any)?.isBoom) {
+        const error = e instanceof Error ? e : new Error(message ?? 'Unexpected error');
+        throw Boom.boomify(error, { statusCode });
+      }
+      throw e;
     }
   }
 
