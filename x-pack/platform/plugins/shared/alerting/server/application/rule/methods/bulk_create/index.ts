@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export type {
-  BulkCreateRulesParams,
-  BulkCreateRulesResult,
-  BulkCreateRulesItem,
-} from './types';
+export type { BulkCreateRulesParams, BulkCreateRulesResult, BulkCreateRulesItem } from './types';
 export { bulkCreateRules } from './bulk_create_rules';

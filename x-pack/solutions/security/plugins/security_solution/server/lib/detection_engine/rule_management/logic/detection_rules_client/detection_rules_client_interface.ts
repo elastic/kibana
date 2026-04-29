@@ -37,6 +37,7 @@ export interface IDetectionRulesClient {
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  bulkImportRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
 }
 
 export interface CreateCustomRuleArgs {

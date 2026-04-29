@@ -36,6 +36,7 @@ import type {
 import { createRule } from './methods/create_rule';
 import { bulkCreateRules } from './methods/bulk_create_rules';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
+import { bulkImportRules } from './methods/bulk_import_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
@@ -214,6 +215,21 @@ export const createDetectionRulesClient = ({
         return importRules({
           ...args,
           detectionRulesClient: this,
+          savedObjectsClient,
+        });
+      });
+    },
+
+    async bulkImportRules(
+      args: ImportRulesArgs
+    ): Promise<Array<RuleResponse | RuleImportErrorObject>> {
+      return withSecuritySpan('DetectionRulesClient.bulkImportRules', async () => {
+        return bulkImportRules({
+          ...args,
+          actionsClient,
+          rulesClient,
+          detectionRulesClient: this,
+          mlAuthz,
           savedObjectsClient,
         });
       });

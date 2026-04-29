@@ -22,6 +22,7 @@ const createDetectionRulesClientMock = () => {
     revertPrebuiltRule: jest.fn(),
     importRule: jest.fn(),
     importRules: jest.fn(),
+    bulkImportRules: jest.fn().mockResolvedValue([]),
     getRuleCustomizationStatus: jest.fn(),
   };
   return mocked;

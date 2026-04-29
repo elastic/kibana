@@ -248,7 +248,7 @@ describe('bulkCreateRules', () => {
         category: 'test',
         producer: 'alerts',
         solution: 'stack',
-        validate: { params: { validate: (p: unknown) => p } },
+        validate: { params: { validate: (params) => params } },
         validLegacyConsumers: [],
       }));
 

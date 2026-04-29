@@ -39,11 +39,7 @@ import {
 import { ruleDomainSchema } from '../../schemas';
 import { createRuleDataSchema } from '../create/schemas';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import type {
-  BulkCreateRulesParams,
-  BulkCreateRulesResult,
-  BulkCreateRulesItem,
-} from './types';
+import type { BulkCreateRulesParams, BulkCreateRulesResult, BulkCreateRulesItem } from './types';
 
 export const ENABLED_RULE_REJECTION_MESSAGE =
   'bulkCreateRules only supports disabled rules; use bulkEnableRules to enable rules after creation';
@@ -158,9 +154,9 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         `Error validating bulk created rule domain object for id: ${so.id}, ${e}`
       );
     }
-    rules.push(transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true }) as SanitizedRule<
-      Params
-    >);
+    rules.push(
+      transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true }) as SanitizedRule<Params>
+    );
   });
 
   return { rules, errors, total };

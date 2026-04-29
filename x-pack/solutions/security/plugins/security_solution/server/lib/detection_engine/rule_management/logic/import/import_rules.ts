@@ -18,6 +18,7 @@ import { isRuleConflictError, isRuleImportError } from './errors';
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
+ * @param bulkCreate {boolean} - uses bulk create functionality where available.
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
@@ -26,12 +27,14 @@ export const importRules = async ({
   detectionRulesClient,
   ruleSourceImporter,
   allowMissingConnectorSecrets,
+  bulkCreate = false,
 }: {
   ruleChunks: RuleToImport[][];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
+  bulkCreate?: boolean;
 }): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
@@ -40,12 +43,19 @@ export const importRules = async ({
   }
 
   for (const rules of ruleChunks) {
-    const importedRulesResponse = await detectionRulesClient.importRules({
-      allowMissingConnectorSecrets,
-      overwriteRules,
-      ruleSourceImporter,
-      rules,
-    });
+    const importedRulesResponse = bulkCreate
+      ? await detectionRulesClient.bulkImportRules({
+          allowMissingConnectorSecrets,
+          overwriteRules,
+          ruleSourceImporter,
+          rules,
+        })
+      : await detectionRulesClient.importRules({
+          allowMissingConnectorSecrets,
+          overwriteRules,
+          ruleSourceImporter,
+          rules,
+        });
 
     const importResponses = importedRulesResponse.map((rule) => {
       if (isRuleImportError(rule)) {
