@@ -67,9 +67,7 @@ export function buildCcsLogsExtractionEsqlQuery({
   parts.push(`SET unmapped_fields="nullify";`);
 
   // FROM and WHERE
-  parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
-  );
+  parts.push(buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO }));
 
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {

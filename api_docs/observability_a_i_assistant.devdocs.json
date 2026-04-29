@@ -246,6 +246,7 @@
                     "lineNumber": 34,
                     "columnNumber": 21,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Feedback",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -365,6 +366,7 @@
             "lineNumber": 38,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSelectorBaseProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -562,6 +564,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TActionDefinition",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -579,6 +582,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TRespondFunction",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -804,6 +808,7 @@
             "lineNumber": 24,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "FeedbackButtonsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -843,6 +848,7 @@
             "lineNumber": 10,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -880,6 +886,7 @@
             "lineNumber": 120,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -919,6 +926,7 @@
             "lineNumber": 14,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "ApplicationStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -958,6 +966,7 @@
             "lineNumber": 10,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "ApplicationStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -995,6 +1004,7 @@
             "lineNumber": 21,
             "columnNumber": 61,
             "deprecated": false,
+            "docsReferencedTypeName": "FlyoutStateProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1194,6 +1204,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticLlmCalloutKey",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1988,6 +1999,7 @@
                 "lineNumber": 50,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "TelemetryEventTypeWithPayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2819,6 +2831,7 @@
                 "lineNumber": 88,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChatActionClickHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5068,6 +5081,7 @@
                 "lineNumber": 264,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEndpoint",
                 "trackAdoption": false
               },
               {
@@ -5115,6 +5129,7 @@
                 "lineNumber": 265,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MaybeOptionalArgs",
                 "trackAdoption": false
               }
             ]
@@ -5227,6 +5242,7 @@
                 "lineNumber": 110,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChatRegistrationRenderFunction",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5265,6 +5281,7 @@
                 "lineNumber": 111,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityAIAssistantScreenContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7233,6 +7250,7 @@
             "lineNumber": 27,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatActionClickPayload",
             "trackAdoption": false
           }
         ],
@@ -8718,6 +8736,7 @@
             "lineNumber": 129,
             "columnNumber": 20,
             "deprecated": false,
+            "docsReferencedTypeName": "RenderFunction",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -9172,6 +9191,7 @@
               "lineNumber": 293,
               "columnNumber": 25,
               "deprecated": false,
+              "docsReferencedTypeName": "UseChatProps",
               "trackAdoption": false
             }
           ]
@@ -9281,6 +9301,7 @@
               "lineNumber": 23,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "TActionDefinition",
               "trackAdoption": false
             },
             {
@@ -9297,6 +9318,7 @@
               "lineNumber": 24,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "TRespondFunction",
               "trackAdoption": false,
               "returnComment": [],
               "children": [
@@ -9305,7 +9327,7 @@
                   "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2.$1",
                   "type": "Object",
                   "tags": [],
-                  "label": "__0",
+                  "label": "{}",
                   "description": [],
                   "signature": [
                     "{ args: TArguments; signal: AbortSignal; connectorId: string; client: Pick<",
@@ -10489,6 +10511,7 @@
                 "lineNumber": 622,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConversationUpdateRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10533,6 +10556,7 @@
                 "lineNumber": 650,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConversationCreateRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -12479,6 +12503,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -13989,7 +14014,7 @@
             "id": "def-server.RegistrationCallback.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{}",
             "description": [],
             "signature": [
               "{ signal: AbortSignal; resources: ",
@@ -14221,6 +14246,7 @@
                 "lineNumber": 130,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -14587,6 +14613,7 @@
             "lineNumber": 185,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -14624,6 +14651,7 @@
             "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
