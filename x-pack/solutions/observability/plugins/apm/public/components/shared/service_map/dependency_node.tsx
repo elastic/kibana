@@ -9,11 +9,14 @@ import React, { memo } from 'react';
 import type { Node, NodeProps } from '@xyflow/react';
 import type { DependencyNodeData } from '../../../../common/service_map';
 import { DiamondNode } from './diamond_node';
+import { useServiceMapSearchHighlight } from '../../app/service_map/service_map_search_context';
 
 type DependencyNodeType = Node<DependencyNodeData, 'dependency'>;
 
 export const DependencyNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<DependencyNodeType>) => {
+    const { isSearchMatch, isActiveSearchMatch } = useServiceMapSearchHighlight(data.id);
+
     return (
       <DiamondNode
         id={data.id}
@@ -25,6 +28,8 @@ export const DependencyNode = memo(
         targetPosition={targetPosition}
         testSubjPrefix="dependency"
         iconAltFallback="dependency"
+        isSearchMatch={isSearchMatch}
+        isActiveSearchMatch={isActiveSearchMatch}
       />
     );
   }

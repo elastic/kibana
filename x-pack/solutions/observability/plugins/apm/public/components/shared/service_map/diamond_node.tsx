@@ -7,7 +7,7 @@
 
 import React, { useMemo, memo, type ReactNode } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, transparentize } from '@elastic/eui';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,8 @@ interface DiamondNodeProps {
   badge?: ReactNode;
   ariaLabel?: string;
   groupedCount?: number;
+  isSearchMatch?: boolean;
+  isActiveSearchMatch?: boolean;
 }
 
 export const DiamondNode = memo(
@@ -48,6 +50,8 @@ export const DiamondNode = memo(
     badge,
     ariaLabel: customAriaLabel,
     groupedCount,
+    isSearchMatch = false,
+    isActiveSearchMatch = false,
   }: DiamondNodeProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -118,16 +122,24 @@ export const DiamondNode = memo(
       visibility: hidden;
     `;
 
+    const diamondBackground = isSearchMatch
+      ? euiTheme.colors.backgroundBaseHighlighted
+      : euiTheme.colors.backgroundBasePlain;
+
+    const activeMatchBoxShadow = isActiveSearchMatch
+      ? `0 0 0 3px ${transparentize(euiTheme.colors.primary, 0.3)}`
+      : `0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.backgroundBaseSubdued}`;
+
     const diamondStyles = css`
       width: ${DEPENDENCY_NODE_DIAMOND_SIZE}px;
       height: ${DEPENDENCY_NODE_DIAMOND_SIZE}px;
       transform: rotate(45deg);
       border: ${diamondBorderWidth} solid ${borderColor};
-      background: ${euiTheme.colors.backgroundBasePlain};
+      background: ${diamondBackground};
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
+      box-shadow: ${activeMatchBoxShadow};
       box-sizing: border-box;
       cursor: pointer;
       pointer-events: all;
@@ -172,6 +184,8 @@ export const DiamondNode = memo(
           {badge}
           <div
             data-test-subj="serviceMapNodeDiamondHit"
+            data-search-match={isSearchMatch || undefined}
+            data-search-active-match={isActiveSearchMatch || undefined}
             css={diamondStyles}
             role="button"
             tabIndex={0}

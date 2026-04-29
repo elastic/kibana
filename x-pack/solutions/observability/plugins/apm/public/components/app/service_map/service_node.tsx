@@ -7,7 +7,14 @@
 
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  transparentize,
+} from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +34,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
+import { useServiceMapSearchHighlight } from './service_map_search_context';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -39,6 +47,7 @@ export const ServiceNode = memo(
     const { onSloBadgeClick } = useServiceMapSloFlyout();
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
+    const { isSearchMatch, isActiveSearchMatch } = useServiceMapSearchHighlight(data.id);
 
     const borderColor = useMemo(() => {
       if (data.serviceAnomalyStats?.healthStatus) {
@@ -113,16 +122,24 @@ export const ServiceNode = memo(
       visibility: hidden;
     `;
 
+    const circleBackground = isSearchMatch
+      ? euiTheme.colors.backgroundBaseHighlighted
+      : euiTheme.colors.backgroundBasePlain;
+
+    const activeMatchBoxShadow = isActiveSearchMatch
+      ? `0 0 0 3px ${transparentize(euiTheme.colors.primary, 0.4)}`
+      : `0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.backgroundBaseSubdued}`;
+
     const circleStyles = css`
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
       height: ${SERVICE_NODE_CIRCLE_SIZE}px;
       border-radius: 50%;
       border: ${borderWidth} ${borderStyle} ${borderColor};
-      background: ${euiTheme.colors.backgroundBasePlain};
+      background: ${circleBackground};
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
+      box-shadow: ${activeMatchBoxShadow};
       cursor: pointer;
       pointer-events: all;
 
@@ -181,6 +198,8 @@ export const ServiceNode = memo(
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           <div
             data-test-subj="serviceMapNodeServiceCircle"
+            data-search-match={isSearchMatch || undefined}
+            data-search-active-match={isActiveSearchMatch || undefined}
             css={circleStyles}
             role="button"
             tabIndex={0}

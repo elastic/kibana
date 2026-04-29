@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -14,6 +14,10 @@ import { ServiceNode } from '../service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import {
+  ServiceMapSearchProvider,
+  useServiceMapSearchContext,
+} from '../service_map_search_context';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -29,9 +33,11 @@ const meta: Meta<typeof ServiceNode> = {
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
-          <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
-            <Story />
-          </div>
+          <ServiceMapSearchProvider>
+            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+              <Story />
+            </div>
+          </ServiceMapSearchProvider>
         </ReactFlowProvider>
       </MockApmPluginStorybook>
     ),
@@ -247,4 +253,154 @@ export const OpenTelemetryAgents: StoryObj = {
       </div>
     );
   },
+};
+
+/**
+ * Wraps children in a fresh `ServiceMapSearchProvider` pre-configured with the given highlight state.
+ */
+function WithSearchHighlight({
+  matchNodeIds,
+  activeMatchNodeId,
+  children,
+}: {
+  matchNodeIds: Set<string>;
+  activeMatchNodeId: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <ServiceMapSearchProvider>
+      <SearchHighlightInit matchNodeIds={matchNodeIds} activeMatchNodeId={activeMatchNodeId}>
+        {children}
+      </SearchHighlightInit>
+    </ServiceMapSearchProvider>
+  );
+}
+
+function SearchHighlightInit({
+  matchNodeIds,
+  activeMatchNodeId,
+  children,
+}: {
+  matchNodeIds: Set<string>;
+  activeMatchNodeId: string | null;
+  children: React.ReactNode;
+}) {
+  const { setSearchHighlight } = useServiceMapSearchContext();
+  useEffect(() => {
+    setSearchHighlight({ matchNodeIds, activeMatchNodeId });
+  }, [matchNodeIds, activeMatchNodeId, setSearchHighlight]);
+  return <>{children}</>;
+}
+
+export const SearchHighlight: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'no-highlight',
+            label: 'no-highlight',
+            isService: true,
+            agentName: 'java',
+          })}
+        />
+        <LabelText>No highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight matchNodeIds={new Set(['match-only'])} activeMatchNodeId={null}>
+          <ServiceNode
+            {...createNodeProps({
+              id: 'match-only',
+              label: 'match-only',
+              isService: true,
+              agentName: 'nodejs',
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Search match (inactive)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['active-match'])}
+          activeMatchNodeId="active-match"
+        >
+          <ServiceNode
+            {...createNodeProps({
+              id: 'active-match',
+              label: 'active-match',
+              isService: true,
+              agentName: 'go',
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Active search match</LabelText>
+      </div>
+    </div>
+  ),
+};
+
+export const SearchHighlightWithAnomalyBorder: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['warning-match'])}
+          activeMatchNodeId="warning-match"
+        >
+          <ServiceNode
+            {...createNodeProps({
+              id: 'warning-match',
+              label: 'warning-match',
+              isService: true,
+              agentName: 'python',
+              serviceAnomalyStats: {
+                healthStatus: ServiceHealthStatus.warning,
+                transactionType: 'request',
+                anomalyScore: 50,
+              },
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Active match + Warning border</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['critical-match'])}
+          activeMatchNodeId="critical-match"
+        >
+          <ServiceNode
+            {...createNodeProps({
+              id: 'critical-match',
+              label: 'critical-match',
+              isService: true,
+              agentName: 'ruby',
+              serviceAnomalyStats: {
+                healthStatus: ServiceHealthStatus.critical,
+                transactionType: 'request',
+                anomalyScore: 85,
+              },
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Active match + Critical border</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight matchNodeIds={new Set(['healthy-match'])} activeMatchNodeId={null}>
+          <ServiceNode
+            {...createNodeProps({
+              id: 'healthy-match',
+              label: 'healthy-match',
+              isService: true,
+              agentName: 'java',
+              serviceAnomalyStats: {
+                healthStatus: ServiceHealthStatus.healthy,
+                transactionType: 'request',
+              },
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Inactive match + Healthy border</LabelText>
+      </div>
+    </div>
+  ),
 };
