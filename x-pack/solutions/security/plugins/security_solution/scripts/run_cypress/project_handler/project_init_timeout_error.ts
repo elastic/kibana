@@ -33,11 +33,8 @@ export interface ProjectInitTimeoutErrorOptions {
  */
 export class ProjectInitTimeoutError extends Error {
   readonly projectId: string;
-
   readonly lastPhase: string | undefined;
-
   readonly attempts: number;
-
   /** The last error rejected by p-retry before giving up. */
   readonly exhaustedCause: Error;
 
