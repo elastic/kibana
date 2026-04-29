@@ -71,7 +71,11 @@ export function registerAgentBuilderTools({
   const streamsTools = [
     // Read tools
     createInspectStreamsTool({ getScopedClients, isServerless: server.isServerless }),
-    createDiagnoseStreamTool({ getScopedClients, isServerless: server.isServerless }),
+    createDiagnoseStreamTool({
+      getScopedClients,
+      isServerless: server.isServerless,
+      logger: logger.get('diagnose_stream'),
+    }),
     createQueryDocumentsTool({ getScopedClients }),
     createDesignPipelineTool({ getScopedClients }),
 

@@ -18,6 +18,34 @@ export interface FieldConstraints {
   [key: string]: unknown;
 }
 
+/**
+ * Subset of ES mapping parameters surfaced to the agent for degraded-field diagnosis.
+ * Kept intentionally narrow to avoid bloating tool responses when many fields are
+ * returned across multiple streams.
+ *
+ * Full parameter reference:
+ * https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-parameters
+ *
+ * Included:
+ *  type             – field data type (always needed for context)
+ *  ignore_above     – keyword length limit; exceeding it causes _ignored (degradation)
+ *  ignore_malformed – when true, malformed values are stored but not indexed (_ignored)
+ *  format           – date/number format constraints that trigger malformed rejections
+ *  coerce           – whether numeric type coercion is enabled
+ *  null_value       – replacement value for explicit nulls
+ *  enabled          – if false, the field is skipped entirely during indexing
+ *  index            – if false, field is stored in _source but not searchable
+ *  doc_values       – if false, field cannot be sorted or aggregated
+ *  dynamic          – sub-field auto-mapping behavior for object fields
+ *  normalizer       – keyword normalization that can affect indexing behavior
+ *  analyzer         – text analysis pipeline that can affect indexing behavior
+ *  scaling_factor   – scaled_float precision; relevant for coercion/rounding issues
+ *
+ * Excluded (not relevant for degradation diagnosis):
+ *  copy_to, eager_global_ordinals, fielddata, fields, index_options, index_phrases,
+ *  index_prefixes, meta, norms, position_increment_gap, properties, search_analyzer,
+ *  similarity, subobjects, store, term_vector
+ */
 const CONSTRAINT_KEYS = new Set([
   'type',
   'ignore_above',
@@ -25,6 +53,13 @@ const CONSTRAINT_KEYS = new Set([
   'format',
   'coerce',
   'null_value',
+  'enabled',
+  'index',
+  'doc_values',
+  'dynamic',
+  'normalizer',
+  'analyzer',
+  'scaling_factor',
 ]);
 
 const extractConstraints = (mappingObj: Record<string, unknown>): FieldConstraints | undefined => {

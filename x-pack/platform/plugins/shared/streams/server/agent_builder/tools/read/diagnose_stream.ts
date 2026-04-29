@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -51,9 +51,11 @@ const diagnoseStreamSchema = z.object({
 export const createDiagnoseStreamTool = ({
   getScopedClients,
   isServerless,
+  logger,
 }: {
   getScopedClients: GetScopedClients;
   isServerless: boolean;
+  logger: Logger;
 }): BuiltinToolDefinition<typeof diagnoseStreamSchema> => ({
   id: DIAGNOSE_STREAM,
   type: ToolType.builtin,
@@ -202,8 +204,12 @@ export const createDiagnoseStreamTool = ({
                 entry.mapping = constraints;
               }
             }
-          } catch {
-            // Mapping lookup is best-effort; degrade gracefully
+          } catch (err) {
+            logger.warn(
+              `Failed to look up field mapping constraints for stream "${name}": ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
           }
           const convention = getStreamConvention(definition);
           result.degraded_fields = degradedFields;

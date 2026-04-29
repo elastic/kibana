@@ -8,6 +8,7 @@
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import type { Streams, FieldDefinition } from '@kbn/streams-schema';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createDiagnoseStreamTool } from './diagnose_stream';
 import {
   createMockGetScopedClients,
@@ -98,7 +99,11 @@ describe('createDiagnoseStreamTool handler', () => {
   const setup = () => {
     const { getScopedClients, streamsClient, esClient, scopedClusterClient } =
       createMockGetScopedClients();
-    const tool = createDiagnoseStreamTool({ getScopedClients, isServerless: false });
+    const tool = createDiagnoseStreamTool({
+      getScopedClients,
+      isServerless: false,
+      logger: loggingSystemMock.createLogger(),
+    });
     const context = createMockToolContext();
     return { tool, context, streamsClient, esClient, scopedClusterClient };
   };
