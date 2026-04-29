@@ -73,9 +73,11 @@ export const MetricsGrid = ({
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
 
-  const userSource = useMemo(() => {
+  const userSource = useMemo<string | undefined>(() => {
     const userEsql = getEsqlQuery(fetchParams.query);
-    return userEsql ? getIndexPatternFromESQLQuery(userEsql) : undefined;
+    if (!userEsql) return undefined;
+    const pattern = getIndexPatternFromESQLQuery(userEsql);
+    return pattern || undefined;
   }, [fetchParams.query]);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
