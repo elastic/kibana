@@ -145,4 +145,3 @@ export const getResponseWithMostSevereStatusCode = (
       .pop();
   }
 };
-

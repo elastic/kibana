@@ -211,5 +211,4 @@ describe('Utils class', () => {
 
     expect(utils.getResponseWithMostSevereStatusCode(undefined)).toBe(undefined);
   });
-
 });
