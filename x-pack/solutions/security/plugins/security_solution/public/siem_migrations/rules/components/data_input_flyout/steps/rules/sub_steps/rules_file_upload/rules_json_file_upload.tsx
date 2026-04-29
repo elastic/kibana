@@ -101,7 +101,7 @@ export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploa
 
     const showLoader = isParsing || isLoading;
     const isDisabled = !migrationName || showLoader || isCreated;
-    const isButtonDisabled = isDisabled || resourcesToUpload == null;
+    const isButtonDisabled = isDisabled || resourcesToUpload === undefined;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">

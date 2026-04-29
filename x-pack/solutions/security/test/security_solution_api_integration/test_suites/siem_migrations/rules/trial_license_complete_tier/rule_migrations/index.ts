@@ -24,6 +24,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rules/update'));
     loadTestFile(require.resolve('./rules/enhance'));
     loadTestFile(require.resolve('./rules/qradar_create'));
-    loadTestFile(require.resolve('./rules/sentinel_create'));
+    // TODO: Uncomment this when Sentinel rule creation feature flag is enabled
+    // loadTestFile(require.resolve('./rules/sentinel_create'));
   });
 }

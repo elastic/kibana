@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       migrationId = response.body.migration_id;
     });
 
-    describe('Happy path', () => {
+    describe('Expected behavior', () => {
       it('should create Sentinel migrations and identify watchlists as missing resources', async () => {
         await migrationRulesRoutes.addSentinelRulesToMigration({
           migrationId,

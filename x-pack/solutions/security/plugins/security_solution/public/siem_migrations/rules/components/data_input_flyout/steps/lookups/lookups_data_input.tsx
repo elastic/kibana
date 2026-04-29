@@ -28,8 +28,7 @@ import * as i18n from './translations';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
 import type { MigrationStepProps } from '../../../../../common/types';
-import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
-import { SentinelDataInputStep } from '../../types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -38,34 +37,19 @@ interface LookupsDataInputSubStepsProps {
 }
 
 export const LookupsDataInput = React.memo<MigrationStepProps>(
-  ({ dataInputStep, migrationSource, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
+  ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
     const missingLookups = useMemo(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
     );
 
-    const dataInputNumber = useMemo(
-      () =>
-        migrationSource === MigrationSource.SENTINEL
-          ? SentinelDataInputStep.Watchlists
-          : SplunkDataInputStep.Lookups,
-      [migrationSource]
-    );
-    const dataInputEnd = useMemo(
-      () =>
-        migrationSource === MigrationSource.SENTINEL
-          ? SentinelDataInputStep.End
-          : SplunkDataInputStep.End,
-      [migrationSource]
-    );
-
     const onAllLookupsCreated = useCallback(() => {
-      setDataInputStep(dataInputEnd);
-    }, [setDataInputStep, dataInputEnd]);
+      setDataInputStep(SplunkDataInputStep.End);
+    }, [setDataInputStep]);
 
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(dataInputNumber, dataInputStep),
-      [dataInputStep, dataInputNumber]
+      () => getEuiStepStatus(SplunkDataInputStep.Lookups, dataInputStep),
+      [dataInputStep]
     );
 
     return (
@@ -77,7 +61,7 @@ export const LookupsDataInput = React.memo<MigrationStepProps>(
                 <EuiStepNumber
                   data-test-subj="lookupsUploadStepNumber"
                   titleSize="xs"
-                  number={dataInputNumber}
+                  number={SplunkDataInputStep.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>

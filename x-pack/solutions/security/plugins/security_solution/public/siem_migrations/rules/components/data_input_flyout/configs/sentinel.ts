@@ -7,10 +7,10 @@
 
 import type { Steps } from '../../../../common/types';
 import { RulesDataInput } from '../steps/rules/rules_data_input';
-import { LookupsDataInput } from '../steps/lookups/lookups_data_input';
+import { WatchlistsDataInput } from '../steps/watchlists/watchlists_data_input';
 import { SentinelDataInputStepId } from '../types';
 
 export const SENTINEL_MIGRATION_STEPS: Steps = [
   { id: SentinelDataInputStepId.Rules, Component: RulesDataInput },
-  { id: SentinelDataInputStepId.Watchlists, Component: LookupsDataInput },
+  { id: SentinelDataInputStepId.Watchlists, Component: WatchlistsDataInput },
 ] as const;
