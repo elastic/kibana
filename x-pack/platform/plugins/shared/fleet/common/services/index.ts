@@ -131,6 +131,8 @@ export {
 // Cloud Connector accessor module
 export * from './cloud_connectors';
 
+export { validateSslCertPath } from './ssl_validators';
+
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';
 export {

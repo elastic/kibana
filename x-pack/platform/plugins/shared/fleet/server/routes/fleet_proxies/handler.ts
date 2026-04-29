@@ -14,6 +14,8 @@ import {
 import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
 
+import Boom from '@hapi/boom';
+
 import {
   listFleetProxies,
   createFleetProxy,
@@ -32,6 +34,15 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../../services';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
+import { validateSslCertPath } from '../../../common/services';
+
+function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
+  for (const p of paths) {
+    if (!p) continue;
+    const err = validateSslCertPath(p);
+    if (err) throw Boom.badRequest(err);
+  }
+}
 
 async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,
@@ -81,6 +92,7 @@ export const postFleetProxyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const { id, ...data } = request.body;
+  throwIfSslPathInvalid([data.certificate_authorities, data.certificate, data.certificate_key]);
   const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
 
   const body = {
@@ -101,6 +113,11 @@ export const putFleetProxyHandler: RequestHandler<
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
+    throwIfSslPathInvalid([
+      request.body.certificate_authorities,
+      request.body.certificate,
+      request.body.certificate_key,
+    ]);
     const item = await updateFleetProxy(soClient, proxyId, request.body);
     const body = {
       item,

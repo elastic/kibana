@@ -77,6 +77,7 @@ import {
   validateDynamicKafkaTopics,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateSslPathsCombo,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -418,7 +419,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     output?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isSSLEditable
   );
   const sslCertificateInput = useInput(
@@ -491,7 +492,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const kafkaSslCertificateAuthoritiesInput = useComboInput(
     'kafkaSslCertificateAuthoritiesComboBox',
     kafkaOutput?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isSSLEditable
   );
   const kafkaSslCertificateInput = useInput(

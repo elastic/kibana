@@ -20,6 +20,7 @@ import {
 import { useYaml } from '../../../../../../services';
 
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
+import { validateSslPathInput } from '../edit_output_flyout/ssl_form_validators';
 import type { FleetProxy } from '../../../../types';
 import { PROXY_URL_REGEX } from '../../../../../../../common/constants';
 
@@ -118,13 +119,17 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
   );
   const certificateAuthoritiesInput = useInput(
     fleetProxy?.certificate_authorities ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
-  const certificateInput = useInput(fleetProxy?.certificate ?? '', () => undefined, isEditDisabled);
+  const certificateInput = useInput(
+    fleetProxy?.certificate ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
   const certificateKeyInput = useInput(
     fleetProxy?.certificate_key ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
 

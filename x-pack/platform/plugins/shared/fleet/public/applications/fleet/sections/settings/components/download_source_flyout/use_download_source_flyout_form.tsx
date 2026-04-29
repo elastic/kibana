@@ -23,6 +23,11 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import type { DownloadSourceBase } from '../../../../../../../common/types';
 
+import {
+  validateSslPathInput,
+  validateSslPathsCombo,
+} from '../edit_output_flyout/ssl_form_validators';
+
 import { confirmUpdate } from './confirm_update';
 
 export type AuthType = 'none' | 'username_password' | 'api_key';
@@ -77,15 +82,15 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     downloadSource?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     undefined
   );
   const sslCertificateInput = useInput(
     downloadSource?.ssl?.certificate ?? '',
-    undefined,
+    validateSslPathInput,
     undefined
   );
-  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', undefined, undefined);
+  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', validateSslPathInput, undefined);
 
   const sslKeySecretInput = useSecretInput(
     (downloadSource as DownloadSourceBase)?.secrets?.ssl?.key,

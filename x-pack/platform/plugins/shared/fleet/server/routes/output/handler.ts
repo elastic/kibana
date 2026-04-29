@@ -32,6 +32,23 @@ import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { validateSslCertPath } from '../../../common/services';
+
+function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
+  for (const p of paths) {
+    if (!p) continue;
+    const err = validateSslCertPath(p);
+    if (err) throw Boom.badRequest(err);
+  }
+}
+
+function validateOutputSslPaths(output: Partial<Output>) {
+  throwIfSslPathInvalid([
+    ...(output.ssl?.certificate_authorities ?? []),
+    output.ssl?.certificate,
+    output.ssl?.key,
+  ]);
+}
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
@@ -93,6 +110,7 @@ export const putOutputHandler: RequestHandler<
   const outputUpdate = request.body;
   try {
     await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
+    validateOutputSslPaths(outputUpdate);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(request.params.outputId);
@@ -128,6 +146,7 @@ export const postOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { id, ...newOutput } = request.body;
   await validateOutputServerless(newOutput, soClient);
+  validateOutputSslPaths(newOutput);
   ensureNoDuplicateSecrets(newOutput);
   const output = await outputService.create(soClient, esClient, newOutput, { id });
   if (output.is_default || output.is_default_monitoring) {

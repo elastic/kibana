@@ -25,6 +25,7 @@ import type {
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
+import { validateSslCertPath } from '../../../common/services';
 
 // Support clearing auth via PUT requests
 export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
@@ -41,7 +42,21 @@ export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
  * - auth: null (to clear all auth data)
  * - auth: undefined (no changes to auth)
  */
+function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
+  for (const p of paths) {
+    if (!p) continue;
+    const err = validateSslCertPath(p);
+    if (err) throw Boom.badRequest(err);
+  }
+}
+
 export function validateDownloadSource(downloadSource: DownloadSourceWithNullableAuth) {
+  throwIfSslPathInvalid([
+    ...(downloadSource.ssl?.certificate_authorities ?? []),
+    downloadSource.ssl?.certificate,
+    downloadSource.ssl?.key,
+  ]);
+
   // For settings that can be stored as secrets, only allow either plain text or secret reference.
   if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
