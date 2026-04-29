@@ -8,45 +8,9 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
-import type { Streams } from '@kbn/streams-schema';
+import type { StreamSummary } from '../../common';
 import type { StreamsRepositoryClient } from '../api';
 import { createStreamsSourceEnricher, STREAMS_CACHE_TTL_MS } from './esql_source_enricher';
-
-const NOW = '2024-01-01T00:00:00.000Z';
-
-const wiredStreamDefinition: Streams.WiredStream.Definition = {
-  name: 'logs',
-  type: 'wired',
-  description: 'All logs',
-  updated_at: NOW,
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: { steps: [], updated_at: NOW },
-    settings: {},
-    failure_store: { inherit: {} },
-    wired: { fields: {}, routing: [] },
-  },
-};
-
-const classicStreamDefinition: Streams.ClassicStream.Definition = {
-  name: 'classic-logs',
-  type: 'classic',
-  description: 'Classic log stream',
-  updated_at: NOW,
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: { steps: [], updated_at: NOW },
-    settings: {},
-    failure_store: { inherit: {} },
-    classic: {},
-  },
-};
-
-const wiredStreamNoDescription: Streams.WiredStream.Definition = {
-  ...wiredStreamDefinition,
-  name: 'no-desc-stream',
-  description: '',
-};
 
 const makeSource = (name: string, extra: Partial<ESQLSourceResult> = {}): ESQLSourceResult => ({
   name,
@@ -54,11 +18,9 @@ const makeSource = (name: string, extra: Partial<ESQLSourceResult> = {}): ESQLSo
   ...extra,
 });
 
-const makeRepositoryClient = (
-  streams: Streams.all.Definition[]
-): jest.Mocked<StreamsRepositoryClient> =>
+const makeRepositoryClient = (summaries: StreamSummary[]): jest.Mocked<StreamsRepositoryClient> =>
   ({
-    fetch: jest.fn().mockResolvedValue({ streams }),
+    fetch: jest.fn().mockResolvedValue({ summaries }),
   } as unknown as jest.Mocked<StreamsRepositoryClient>);
 
 const makeApplication = (
@@ -70,7 +32,7 @@ const makeApplication = (
 describe('createStreamsSourceEnricher', () => {
   it('returns sources unchanged when none match a stream', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([wiredStreamDefinition]),
+      makeRepositoryClient([{ name: 'logs', type: 'wired', description: 'All logs' }]),
       makeApplication()
     );
     const sources = [makeSource('unrelated-index')];
@@ -82,7 +44,7 @@ describe('createStreamsSourceEnricher', () => {
 
   it('enriches a source matching a wired stream with type, description, and link', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([wiredStreamDefinition]),
+      makeRepositoryClient([{ name: 'logs', type: 'wired', description: 'All logs' }]),
       makeApplication()
     );
     const sources = [makeSource('logs')];
@@ -98,7 +60,9 @@ describe('createStreamsSourceEnricher', () => {
 
   it('enriches a source matching a classic stream with type, description, and link', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([classicStreamDefinition]),
+      makeRepositoryClient([
+        { name: 'classic-logs', type: 'classic', description: 'Classic log stream' },
+      ]),
       makeApplication()
     );
     const sources = [makeSource('classic-logs')];
@@ -113,7 +77,7 @@ describe('createStreamsSourceEnricher', () => {
 
   it('sets description to undefined when the stream has an empty description', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([wiredStreamNoDescription]),
+      makeRepositoryClient([{ name: 'no-desc-stream', type: 'wired', description: '' }]),
       makeApplication()
     );
     const sources = [makeSource('no-desc-stream')];
@@ -125,7 +89,10 @@ describe('createStreamsSourceEnricher', () => {
 
   it('enriches only matching sources in a mixed list', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([wiredStreamDefinition, classicStreamDefinition]),
+      makeRepositoryClient([
+        { name: 'logs', type: 'wired', description: 'All logs' },
+        { name: 'classic-logs', type: 'classic', description: 'Classic' },
+      ]),
       makeApplication()
     );
     const sources = [makeSource('logs'), makeSource('other-index'), makeSource('classic-logs')];
@@ -139,7 +106,7 @@ describe('createStreamsSourceEnricher', () => {
 
   it('preserves existing source fields when enriching', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([wiredStreamDefinition]),
+      makeRepositoryClient([{ name: 'logs', type: 'wired', description: 'All logs' }]),
       makeApplication()
     );
     const source = makeSource('logs', { hidden: true, title: 'Logs title' });
@@ -174,7 +141,7 @@ describe('createStreamsSourceEnricher', () => {
 
   it('returns an empty array when sources is empty', async () => {
     const enricher = createStreamsSourceEnricher(
-      makeRepositoryClient([wiredStreamDefinition]),
+      makeRepositoryClient([{ name: 'logs', type: 'wired', description: 'All logs' }]),
       makeApplication()
     );
 
@@ -183,14 +150,71 @@ describe('createStreamsSourceEnricher', () => {
     expect(result).toEqual([]);
   });
 
+  it('does not call the API when sources is empty', async () => {
+    const client = makeRepositoryClient([]);
+    const enricher = createStreamsSourceEnricher(client, makeApplication());
+
+    await enricher([]);
+
+    expect(client.fetch).not.toHaveBeenCalled();
+  });
+
+  it('only fetches names that are not yet cached', async () => {
+    const client = makeRepositoryClient([
+      { name: 'logs', type: 'wired', description: 'All logs' },
+      { name: 'metrics', type: 'classic', description: 'Metrics' },
+    ]);
+    const enricher = createStreamsSourceEnricher(client, makeApplication());
+
+    // First call: both are cache misses
+    await enricher([makeSource('logs'), makeSource('metrics')]);
+    expect(client.fetch).toHaveBeenCalledTimes(1);
+    expect(client.fetch).toHaveBeenCalledWith(
+      'POST /internal/streams/_bulk_get_summaries',
+      expect.objectContaining({
+        params: { body: { names: expect.arrayContaining(['logs', 'metrics']) } },
+      })
+    );
+
+    client.fetch.mockClear();
+
+    // Second call: both are cache hits — no fetch
+    await enricher([makeSource('logs'), makeSource('metrics')]);
+    expect(client.fetch).not.toHaveBeenCalled();
+  });
+
+  it('only fetches new names when some are cached and some are not', async () => {
+    const client = makeRepositoryClient([{ name: 'logs', type: 'wired', description: 'All logs' }]);
+    const enricher = createStreamsSourceEnricher(client, makeApplication());
+
+    // Prime the cache with 'logs'
+    await enricher([makeSource('logs')]);
+    client.fetch.mockClear();
+
+    // Second call adds a new source 'metrics'
+    client.fetch.mockResolvedValue({
+      streams: [{ name: 'metrics', type: 'classic', description: 'Metrics' }],
+    });
+    await enricher([makeSource('logs'), makeSource('metrics')]);
+
+    expect(client.fetch).toHaveBeenCalledTimes(1);
+    expect(client.fetch).toHaveBeenCalledWith(
+      'POST /internal/streams/_bulk_get_summaries',
+      expect.objectContaining({ params: { body: { names: ['metrics'] } } })
+    );
+  });
+
   describe('caching', () => {
     const makeFakePerf = () => {
-      let now = 0;
+      // Start at 1 rather than 0: LRUCache uses !!starts[index] to detect whether a TTL
+      // start was recorded, so a start value of 0 would cause entries to never be
+      // considered stale. In practice performance.now() always returns a value > 0.
+      let now = 1;
       return { now: () => now, tick: (ms: number) => (now += ms) };
     };
 
     it('calls the streams API only once across multiple enricher invocations within the TTL', async () => {
-      const client = makeRepositoryClient([wiredStreamDefinition]);
+      const client = makeRepositoryClient([{ name: 'logs', type: 'wired', description: '' }]);
       const enricher = createStreamsSourceEnricher(client, makeApplication(), makeFakePerf());
 
       await enricher([makeSource('logs')]);
@@ -200,7 +224,7 @@ describe('createStreamsSourceEnricher', () => {
     });
 
     it('re-fetches streams from the API after the cache TTL expires', async () => {
-      const client = makeRepositoryClient([wiredStreamDefinition]);
+      const client = makeRepositoryClient([{ name: 'logs', type: 'wired', description: '' }]);
       const perf = makeFakePerf();
       const enricher = createStreamsSourceEnricher(client, makeApplication(), perf);
 
@@ -214,25 +238,142 @@ describe('createStreamsSourceEnricher', () => {
     });
 
     it('reflects updated stream data after the cache TTL expires', async () => {
-      const updatedStream: Streams.WiredStream.Definition = {
-        ...wiredStreamDefinition,
-        description: 'Updated description',
-      };
-
-      const client = makeRepositoryClient([wiredStreamDefinition]);
+      const client = makeRepositoryClient([
+        { name: 'logs', type: 'wired', description: 'All logs' },
+      ]);
       const perf = makeFakePerf();
       const enricher = createStreamsSourceEnricher(client, makeApplication(), perf);
 
       const [firstResult] = await enricher([makeSource('logs')]);
       expect(firstResult.description).toBe('All logs');
 
-      client.fetch.mockResolvedValue({ streams: [updatedStream] });
+      client.fetch.mockResolvedValue({
+        summaries: [{ name: 'logs', type: 'wired', description: 'Updated description' }],
+      });
 
       perf.tick(STREAMS_CACHE_TTL_MS + 1);
 
       const [secondResult] = await enricher([makeSource('logs')]);
       expect(secondResult.description).toBe('Updated description');
       expect(client.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('caches absent names so unmanaged indices do not trigger repeated API calls', async () => {
+      const client = makeRepositoryClient([]);
+      const enricher = createStreamsSourceEnricher(client, makeApplication());
+      const sources = [makeSource('unmanaged-index')];
+
+      const first = await enricher(sources);
+      const second = await enricher(sources);
+
+      // Both calls should leave the source unchanged.
+      expect(first).toEqual(sources);
+      expect(second).toEqual(sources);
+      // The API should only have been hit once — the second call is a cache hit.
+      expect(client.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-fetches absent names after the cache TTL expires', async () => {
+      const client = makeRepositoryClient([]);
+      const perf = makeFakePerf();
+      const enricher = createStreamsSourceEnricher(client, makeApplication(), perf);
+      const sources = [makeSource('unmanaged-index')];
+
+      await enricher(sources);
+
+      perf.tick(STREAMS_CACHE_TTL_MS + 1);
+
+      await enricher(sources);
+
+      expect(client.fetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('concurrent requests', () => {
+    it('deduplicates concurrent requests for the same sources', async () => {
+      const client = makeRepositoryClient([{ name: 'logs', type: 'wired', description: '' }]);
+      const enricher = createStreamsSourceEnricher(client, makeApplication());
+
+      const [result1, result2] = await Promise.all([
+        enricher([makeSource('logs')]),
+        enricher([makeSource('logs')]),
+      ]);
+
+      expect(client.fetch).toHaveBeenCalledTimes(1);
+      expect(result1[0].type).toBe(SOURCES_TYPES.WIRED_STREAM);
+      expect(result2[0].type).toBe(SOURCES_TYPES.WIRED_STREAM);
+    });
+
+    it('batches cache misses from concurrent calls into a single API request', async () => {
+      const client = makeRepositoryClient([
+        { name: 'logs', type: 'wired', description: '' },
+        { name: 'metrics', type: 'classic', description: '' },
+        { name: 'traces', type: 'wired', description: '' },
+      ]);
+      const enricher = createStreamsSourceEnricher(client, makeApplication());
+
+      await Promise.all([
+        enricher([makeSource('logs'), makeSource('metrics')]),
+        enricher([makeSource('metrics'), makeSource('traces')]),
+      ]);
+
+      expect(client.fetch).toHaveBeenCalledTimes(1);
+      expect(client.fetch).toHaveBeenCalledWith(
+        'POST /internal/streams/_bulk_get_summaries',
+        expect.objectContaining({
+          params: { body: { names: expect.arrayContaining(['logs', 'metrics', 'traces']) } },
+        })
+      );
+    });
+
+    it('handles overlapping source sets across separate async calls correctly', async () => {
+      const client = {
+        fetch: jest
+          .fn()
+          .mockResolvedValueOnce({
+            summaries: [
+              { name: 'logs', type: 'wired', description: '' },
+              { name: 'metrics', type: 'classic', description: '' },
+            ],
+          })
+          .mockResolvedValueOnce({
+            summaries: [{ name: 'traces', type: 'wired', description: '' }],
+          }),
+      } as unknown as jest.Mocked<StreamsRepositoryClient>;
+      const enricher = createStreamsSourceEnricher(client, makeApplication());
+
+      const promise1 = enricher([makeSource('logs'), makeSource('metrics')]);
+
+      // Yield to the microtask queue so the first enricher call's API request
+      // goes in-flight before the second enricher call starts.
+      await Promise.resolve();
+
+      // Second call overlaps: 'metrics' is already in-flight (deduplicated),
+      // 'traces' is new and triggers a separate API request.
+      const promise2 = enricher([makeSource('metrics'), makeSource('traces')]);
+
+      const [result1, result2] = await Promise.all([promise1, promise2]);
+
+      // 'metrics' is shared across calls but fetched only once; 'traces' requires
+      // its own API call because it wasn't part of the first request.
+      expect(client.fetch).toHaveBeenCalledTimes(2);
+      expect(client.fetch).toHaveBeenNthCalledWith(
+        1,
+        'POST /internal/streams/_bulk_get_summaries',
+        expect.objectContaining({
+          params: { body: { names: expect.arrayContaining(['logs', 'metrics']) } },
+        })
+      );
+      expect(client.fetch).toHaveBeenNthCalledWith(
+        2,
+        'POST /internal/streams/_bulk_get_summaries',
+        expect.objectContaining({ params: { body: { names: ['traces'] } } })
+      );
+
+      expect(result1[0].type).toBe(SOURCES_TYPES.WIRED_STREAM); // logs
+      expect(result1[1].type).toBe(SOURCES_TYPES.CLASSIC_STREAM); // metrics
+      expect(result2[0].type).toBe(SOURCES_TYPES.CLASSIC_STREAM); // metrics (deduplicated)
+      expect(result2[1].type).toBe(SOURCES_TYPES.WIRED_STREAM); // traces
     });
   });
 });
