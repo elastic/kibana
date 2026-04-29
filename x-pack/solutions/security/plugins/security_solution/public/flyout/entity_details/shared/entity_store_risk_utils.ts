@@ -140,7 +140,7 @@ function buildMinimalRiskStats(
 }
 
 /**
- * Build RiskScoreState for the flyout from an entity store record (when FF_ENABLE_ENTITY_STORE_V2).
+ * Build RiskScoreState for the flyout from an entity store record.
  * When inspect is provided (e.g. from entity store API response), the Risk Summary inspect button will be enabled.
  */
 export function buildRiskScoreStateFromEntityRecord<T extends EntityType>(
