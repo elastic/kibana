@@ -72,7 +72,7 @@ const augmentAlerts = async <T>({
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
-  cpsData: CpsData;
+  cpsData?: CpsData;
 }) => {
   const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
@@ -84,8 +84,10 @@ const augmentAlerts = async <T>({
   const maintenanceWindowIdsField = maintenanceWindowIds.length
     ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
     : {};
-  const cpsResolvedExpression = { [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression ?? null };
-  const cpsLinkedProjects = { [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects };
+  const cpsFields = {
+    [CPS_SCOPE_EXPRESSION]: cpsData?.resolvedExpression ?? null,
+    [CPS_SCOPE_LINKED_PROJECTS]: cpsData?.linkedProjects ?? null,
+  };
   return alerts.map((alert) => {
     return {
       ...alert,
@@ -95,8 +97,7 @@ const augmentAlerts = async <T>({
         [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
         ...maintenanceWindowIdsField,
-        ...cpsResolvedExpression,
-        ...cpsLinkedProjects,
+        ...cpsFields,
         ...commonRuleFields,
         ...alert._source,
       },
@@ -272,7 +273,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
     return {
       ...type,
       executor: async (options) => {
-        const cpsData: CpsData = options.cpsData ?? { linkedProjects: [] };
+        const cpsData = options.cpsData;
         const result = await type.executor({
           ...options,
           services: {
