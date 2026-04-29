@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PRIVMON_PRIVILEGE_CHECK_API } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 import { WATCHLISTS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
 import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
@@ -82,21 +81,6 @@ describe(
 
     beforeEach(() => {
       login();
-      cy.intercept('GET', PRIVMON_PRIVILEGE_CHECK_API, {
-        statusCode: 200,
-        body: {
-          has_all_required: true,
-          has_read_permissions: true,
-          has_write_permissions: true,
-          privileges: {
-            elasticsearch: {
-              cluster: {},
-              index: {},
-            },
-            kibana: {},
-          },
-        },
-      }).as('watchlistsPrivileges');
       cy.intercept('GET', `${WATCHLISTS_URL}/*/entity_source/list`, {
         statusCode: 200,
         body: { sources: [] },

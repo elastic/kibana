@@ -1,5 +1,5 @@
 {
-  "sha1": "bc9d51b45677f41e7153da001143202a2ea3dadd",
+  "sha1": "1a63ed85454c941c8642d749ee06356c929df4f6",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -786,8 +786,8 @@
       }
     },
     {
-      "id": "0cdf5c38d17a5a2-76fd94c32cfaf0d",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-asset-azure-user-name\"",
+      "id": "0cdf5c38d17a5a2-118a71963586d15",
+      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"non-idp-asset-azure-user-name\"",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1261,7 +1261,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 301,
+        "line": 304,
         "column": 10
       }
     },
@@ -1277,7 +1277,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 316,
+        "line": 319,
         "column": 10
       }
     },
@@ -1309,7 +1309,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction_paginated.spec.ts",
-        "line": 109,
+        "line": 108,
         "column": 12
       }
     },
@@ -1714,6 +1714,22 @@
       }
     },
     {
+      "id": "5384aa0c0712e1f-bbd3312f425bf1f",
+      "title": "Entity Store logs extraction broken mapping should collect new field values on subsequent extractions when entity already exists and field has multi-field sub-fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 368,
+        "column": 10
+      }
+    },
+    {
       "id": "5384aa0c0712e1f-2c4ad9aaffd3713",
       "title": "Entity Store logs extraction broken mapping should extract users successfully when source index has conflicting field mappings (IDP + local id / filters)",
       "expectedStatus": "passed",
@@ -1725,7 +1741,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 368,
+        "line": 456,
         "column": 10
       }
     },
@@ -1741,7 +1757,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 10
       }
     },
@@ -1757,7 +1773,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 10
       }
     },
@@ -1773,7 +1789,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 161,
+        "line": 152,
         "column": 10
       }
     },
@@ -1789,7 +1805,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 197,
+        "line": 184,
         "column": 10
       }
     },
@@ -1805,7 +1821,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 233,
+        "line": 216,
         "column": 10
       }
     },
@@ -1821,7 +1837,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 434,
+        "line": 417,
         "column": 10
       }
     },
@@ -1837,7 +1853,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 566,
+        "line": 549,
         "column": 10
       }
     },
@@ -1854,7 +1870,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 645,
+        "line": 628,
         "column": 10
       }
     },
@@ -1870,7 +1886,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 681,
+        "line": 664,
         "column": 10
       }
     },
@@ -1886,7 +1902,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 718,
+        "line": 701,
         "column": 10
       }
     },
@@ -1902,7 +1918,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 806,
+        "line": 789,
         "column": 10
       }
     },
@@ -1918,7 +1934,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 871,
+        "line": 854,
         "column": 10
       }
     },
@@ -1934,7 +1950,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 993,
+        "line": 976,
         "column": 10
       }
     },
@@ -1950,7 +1966,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 1052,
+        "line": 1034,
         "column": 10
       }
     },
@@ -1966,7 +1982,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 1088,
+        "line": 1070,
         "column": 10
       }
     },
@@ -2099,8 +2115,8 @@
       }
     },
     {
-      "id": "519a3ae85face73-3abdfee42541c68",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-azure-user-name",
+      "id": "519a3ae85face73-e514b7c673e635c",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for non-idp-asset-azure-user-name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2805,7 +2821,7 @@
     {
       "id": "3f42f5552bb7860-c5bc8c37cddfe39",
       "title": "Entity Store Status API tests Should return status \"running\" with all 4 engine types \"started\" after a full install",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2814,14 +2830,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 10
       }
     },
     {
       "id": "3f42f5552bb7860-1d1c1e9c8f31ccc",
       "title": "Entity Store Status API tests Should return status \"not_installed\" and an empty engines array when the store is uninstalled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2830,14 +2846,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 10
       }
     },
     {
       "id": "3f42f5552bb7860-0ad307183e734d5",
       "title": "Entity Store Status API tests Should return overall status \"running\" when 3 engines are \"started\" and 1 is \"stopped\"",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2846,14 +2862,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 10
       }
     },
     {
       "id": "3f42f5552bb7860-d7d0ca0ad16f60f",
       "title": "Entity Store Status API tests Should return overall status \"stopped\" when all 4 engines are stopped",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2862,14 +2878,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-28713530a997c3b",
       "title": "Entity Store Stop API tests Should stop all engines when entityTypes is omitted",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2878,14 +2894,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-aa33d601f385a4b",
       "title": "Entity Store Stop API tests Should stop a single entity type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2894,14 +2910,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-a0aa63d27758325",
       "title": "Entity Store Stop API tests Should return 200 when stopping an entity type that is already stopped",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2910,14 +2926,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-ab6423bd19e4ff9",
       "title": "Entity Store Stop API tests Should return 200 when stopping on an uninstalled store",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2926,7 +2942,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 10
       }
     },

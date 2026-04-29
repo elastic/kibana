@@ -8,6 +8,7 @@
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
 import { getKnowledgeIndicatorStreamName } from './get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorType } from './get_knowledge_indicator_type';
 
 export interface KnowledgeIndicatorFilterCriteria {
   statusFilter?: 'active' | 'excluded';
@@ -30,8 +31,7 @@ export const matchesKnowledgeIndicatorFilters = (
   if (statusFilter === 'excluded' && isActive(ki)) return false;
 
   if (selectedTypes?.length) {
-    const type = ki.kind === 'feature' ? ki.feature.type : 'query';
-    if (!selectedTypes.includes(type)) return false;
+    if (!selectedTypes.includes(getKnowledgeIndicatorType(ki))) return false;
   }
 
   if (selectedStreams?.length) {

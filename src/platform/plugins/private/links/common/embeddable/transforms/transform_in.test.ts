@@ -18,7 +18,7 @@ describe('transformIn', () => {
   test('should extract saved object reference from "by reference" state', () => {
     const byReferenceState = {
       title: 'Custom title',
-      savedObjectId: '123',
+      ref_id: '123',
     };
     expect(transformIn(byReferenceState)).toMatchInlineSnapshot(`
       Object {

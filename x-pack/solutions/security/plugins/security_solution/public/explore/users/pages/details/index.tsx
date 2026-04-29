@@ -224,7 +224,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const userStoreIdentityFields = useMemo(() => {
     if (entityId) {
@@ -284,8 +284,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     endDate: to,
     startDate: from,
     userName: detailName,
+    entityId: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord?.entity?.id : undefined,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
+    skip: selectedPatterns.length === 0,
   });
 
   const userDetailsForOverview = entityStoreV2Enabled ? observedUser.details : userOverview;
@@ -498,15 +499,21 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               {!noEntityInStore && (
                 <>
                   <AnomalyTableProvider
-                    criteriaFields={getCriteriaFromUsersType(
-                      UsersType.details,
-                      detailName,
-                      resolvedIdentityFields,
-                      euidApi?.euid
-                    )}
+                    criteriaFields={getCriteriaFromUsersType({
+                      type: UsersType.details,
+                      userName: detailName,
+                      identityFields: resolvedIdentityFields,
+                      euid: euidApi?.euid,
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
+                    })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
                       euid: euidApi?.euid,
                       entityType: 'user',
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
                       isScopedToEntity: true,
                       identityFields: resolvedIdentityFields,
                       fallbackDisplayName: detailName,

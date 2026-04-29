@@ -131,8 +131,7 @@ export async function runMaintainer({
       };
 
       const esqlQuery = integration.buildEsqlQuery(namespace);
-      logger.info(`[${integration.id}] Running ES|QL query:\n${esqlQuery}`);
-      logger.info(`[${integration.id}] Bucket user filter: ${JSON.stringify(bucketFilter)}`);
+      logger.debug(`[${integration.id}] Bucket user filter: ${JSON.stringify(bucketFilter)}`);
 
       let esqlResult;
       try {

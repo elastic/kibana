@@ -28,6 +28,8 @@ import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -37,12 +39,15 @@ export const ModelSettings: React.FC = () => {
     assignments,
     sections,
     invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
     save: saveFeatures,
     resetSection,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
+  const globalDefaultId = defaultModelSettings.savedState.defaultModelId;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
     services: { application, http },
@@ -75,6 +80,8 @@ export const ModelSettings: React.FC = () => {
     };
   }, [isDirty, history]);
 
+  const usageTracker = useUsageTracker();
+
   const handleSave = useCallback(async () => {
     if (isFeatureDirty) {
       saveFeatures();
@@ -82,7 +89,8 @@ export const ModelSettings: React.FC = () => {
     if (defaultModelSettings.isDirty) {
       await defaultModelSettings.save();
     }
-  }, [isFeatureDirty, saveFeatures, defaultModelSettings]);
+    usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
+  }, [isFeatureDirty, saveFeatures, defaultModelSettings, usageTracker]);
 
   const handleDiscardAndLeave = useCallback(() => {
     defaultModelSettings.reset();
@@ -235,12 +243,15 @@ export const ModelSettings: React.FC = () => {
                     features={section.children.map((f) => ({
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                       feature: f,
+                      hasSavedObject: hasSavedObject[f.featureId] ?? false,
+                      isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
                     onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
+                    globalDefaultId={globalDefaultId}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>

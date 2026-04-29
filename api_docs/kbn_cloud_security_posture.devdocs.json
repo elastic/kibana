@@ -33,6 +33,7 @@
             "lineNumber": 39,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionableBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -262,6 +263,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -297,6 +299,7 @@
             "lineNumber": 24,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -334,6 +337,7 @@
             "lineNumber": 27,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "CVSScoreBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -518,6 +522,7 @@
             "lineNumber": 14,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ECSField",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -558,6 +563,7 @@
             "lineNumber": 17,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "GenericGroupRendererProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -615,6 +621,7 @@
             "lineNumber": 30,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -671,6 +678,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RawBucket",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -741,6 +749,7 @@
             "lineNumber": 43,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "CspVulnerabilityFinding",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -835,6 +844,7 @@
             "lineNumber": 15,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -886,6 +896,7 @@
             "lineNumber": 11,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "VulnSeverity",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -931,6 +942,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VulnerabilityCounts",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1030,6 +1042,7 @@
             "lineNumber": 46,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GroupWrapperProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1049,7 +1062,7 @@
         "signature": [
           "<T>({ grouping, pageSize, testSubjects, }: Pick<",
           "GroupWrapperProps",
-          "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">) => React.JSX.Element"
+          "<T>, \"grouping\" | \"pageSize\" | \"testSubjects\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
         "lineNumber": 21,
@@ -1067,12 +1080,13 @@
             "signature": [
               "Pick<",
               "GroupWrapperProps",
-              "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">"
+              "<T>, \"grouping\" | \"pageSize\" | \"testSubjects\">"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
             "lineNumber": 21,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1110,6 +1124,7 @@
             "lineNumber": 31,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "VulnerabilityCounts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1214,7 +1229,7 @@
             "id": "def-public.MultiValueCellPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  items,\n  field,\n  object,\n  renderItem,\n  firstItemRenderer,\n}",
             "description": [],
             "signature": [
               "MultiValueCellPopoverProps<T, K>"
@@ -1223,6 +1238,7 @@
             "lineNumber": 35,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "MultiValueCellPopoverProps",
             "trackAdoption": false
           }
         ],
@@ -1260,6 +1276,7 @@
             "lineNumber": 14,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "NullGroupProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1299,6 +1316,7 @@
             "lineNumber": 32,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "CspRadioGroupProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1336,6 +1354,7 @@
             "lineNumber": 66,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "SeverityStatusBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1485,6 +1504,7 @@
             "lineNumber": 11,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "UseCspOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1534,6 +1554,7 @@
             "lineNumber": 65,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "UseCspOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2294,6 +2315,7 @@
                 "lineNumber": 120,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2372,6 +2394,7 @@
                 "lineNumber": 115,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2923,6 +2946,7 @@
                 "lineNumber": 142,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3145,6 +3169,7 @@
                 "lineNumber": 147,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
