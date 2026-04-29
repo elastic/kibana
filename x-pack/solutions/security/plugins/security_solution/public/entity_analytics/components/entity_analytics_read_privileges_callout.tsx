@@ -60,7 +60,6 @@ const getEntityStoreMissingReadPrivileges = (
   if (!privileges) return [];
 
   return Object.entries(privileges.privileges.elasticsearch.index ?? {})
-    .filter(([, privs]) => privs.read === false)
     .map(
       ([indexName, privs]): MissingIndexPrivileges => [
         indexName,

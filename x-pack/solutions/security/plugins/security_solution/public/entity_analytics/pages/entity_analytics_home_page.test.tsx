@@ -14,6 +14,8 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -117,6 +119,20 @@ jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   })),
 }));
 
+jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
+  useMissingRiskEnginePrivileges: jest.fn(() => ({
+    isLoading: false,
+    hasAllRequiredPrivileges: true,
+  })),
+}));
+
+jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: jest.fn(() => ({
+    isLoading: false,
+    data: { has_read_permissions: true, privileges: { elasticsearch: { index: {} }, kibana: [] } },
+  })),
+}));
+
 // useEntityURLState is already mocked inside the entities_table mock above
 
 jest.mock('../../common/hooks/use_space_id', () => ({
@@ -133,6 +149,8 @@ const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockUseDataView = useDataView as jest.Mock;
 const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
+const mockUseMissingRiskEnginePrivileges = useMissingRiskEnginePrivileges as jest.Mock;
+const mockUseEntityEnginePrivileges = useEntityEnginePrivileges as jest.Mock;
 
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
@@ -156,6 +174,19 @@ describe('EntityAnalyticsHomePage', () => {
 
     mockUseEntityStoreStatus.mockReturnValue({
       data: { status: 'running', engines: [] },
+    });
+
+    mockUseMissingRiskEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: true,
+    });
+
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      data: {
+        has_read_permissions: true,
+        privileges: { elasticsearch: { index: {} }, kibana: [] },
+      },
     });
   });
 
@@ -353,6 +384,77 @@ describe('EntityAnalyticsHomePage', () => {
     expect(docsLink).toBeInTheDocument();
     expect(docsLink).toHaveAttribute('href', expect.stringContaining('entity-risk-scoring'));
     expect(docsLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders full-page loader when entity engine privileges are loading', () => {
+    mockUseEntityEnginePrivileges.mockReturnValue({ isLoading: true, data: undefined });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+  });
+
+  it('renders full-page loader when risk engine privileges are loading', () => {
+    mockUseMissingRiskEnginePrivileges.mockReturnValue({ isLoading: true });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+  });
+
+  it('renders NoPrivileges when user lacks entity engine read permissions', () => {
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      data: {
+        has_read_permissions: false,
+        privileges: { elasticsearch: { index: {} }, kibana: [] },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dynamic-risk-level-panel')).not.toBeInTheDocument();
+  });
+
+  it('renders Priviles Callout when user lacks risk engine read permissions', () => {
+    mockUseMissingRiskEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [['risk-score-index-pattern', ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
+    expect(screen.queryByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
   });
 
   it('indicesExist=false still wins over entity store disabled state', () => {
