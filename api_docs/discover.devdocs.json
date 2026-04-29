@@ -89,7 +89,7 @@
           "DataMsg"
         ],
         "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-        "lineNumber": 75,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -112,7 +112,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 76,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -135,7 +135,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 77,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -151,7 +151,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 78,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -168,7 +168,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 79,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -617,6 +617,7 @@
                 "lineNumber": 19,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverCustomization",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -669,6 +670,7 @@
                 "lineNumber": 21,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TCustomizationId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -723,6 +725,7 @@
                 "lineNumber": 24,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TCustomizationId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -759,6 +762,7 @@
                 "lineNumber": 26,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverCustomizationId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -795,6 +799,7 @@
                 "lineNumber": 27,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverCustomizationId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1714,6 +1719,7 @@
                 "lineNumber": 137,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiCounterMetricType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2492,6 +2498,7 @@
                     "lineNumber": 57,
                     "columnNumber": 64,
                     "deprecated": false,
+                    "docsReferencedTypeName": "TPayload",
                     "trackAdoption": false
                   }
                 ]
@@ -2650,6 +2657,7 @@
                 "lineNumber": 57,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedSearch",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3414,6 +3422,7 @@
             "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CustomizationCallbackContext",
             "trackAdoption": false
           }
         ],
@@ -4088,6 +4097,7 @@
                 "lineNumber": 35,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4193,6 +4203,7 @@
                 "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppLocatorParams",
                 "trackAdoption": false
               }
             ]
@@ -4250,6 +4261,7 @@
                 "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppLocatorParams",
                 "trackAdoption": false
               }
             ]
@@ -4299,6 +4311,7 @@
                 "lineNumber": 26,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppLocatorParams",
                 "trackAdoption": false
               }
             ]
@@ -4364,6 +4377,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppLocatorParams",
                 "trackAdoption": false
               }
             ]
@@ -4421,6 +4435,7 @@
                 "lineNumber": 21,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppLocatorParams",
                 "trackAdoption": false
               }
             ]
@@ -4470,6 +4485,7 @@
                 "lineNumber": 21,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppLocatorParams",
                 "trackAdoption": false
               }
             ]

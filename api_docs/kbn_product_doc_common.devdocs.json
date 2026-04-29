@@ -184,6 +184,7 @@
             "lineNumber": 14,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductName",
             "trackAdoption": false,
             "isRequired": true
           },

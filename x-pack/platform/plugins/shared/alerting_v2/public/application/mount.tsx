@@ -29,7 +29,8 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RulesApp } from './rules_app';
-import { NotificationPoliciesApp } from './notification_policies_app';
+import { RuleDoctorApp } from './rule_doctor_app';
+import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
@@ -61,6 +62,39 @@ export const mountAlertingV2App = async ({
             <I18nProvider>
               <Router history={history}>
                 <RulesApp />
+              </Router>
+            </I18nProvider>
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+export const mountRuleDoctorApp = async ({
+  params,
+  container,
+  coreStart,
+}: {
+  params: AlertingV2MountParams;
+  container: Container;
+  coreStart: CoreStart;
+}): Promise<AppUnmount> => {
+  const { element, history, setBreadcrumbs } = params;
+
+  const queryClient = new QueryClient();
+
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+            <I18nProvider>
+              <Router history={history}>
+                <RuleDoctorApp />
               </Router>
             </I18nProvider>
           </BreadcrumbProvider>
@@ -137,7 +171,7 @@ export const mountEpisodesApp = async ({
   };
 };
 
-export const mountNotificationPoliciesApp = async ({
+export const mountActionPoliciesApp = async ({
   params,
   container,
   coreStart,
@@ -157,7 +191,7 @@ export const mountNotificationPoliciesApp = async ({
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <I18nProvider>
               <Router history={history}>
-                <NotificationPoliciesApp />
+                <ActionPoliciesApp />
               </Router>
             </I18nProvider>
           </BreadcrumbProvider>

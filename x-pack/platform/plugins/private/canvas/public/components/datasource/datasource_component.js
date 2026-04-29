@@ -203,7 +203,7 @@ export class DatasourceComponent extends PureComponent {
               </EuiFlexGroup>
             </>
           ) : (
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount={false} color="warning">
               <p>{strings.getExpressionArgDescription()}</p>
             </EuiCallOut>
           )}
