@@ -425,7 +425,12 @@ if (window.__kbnHmrActive__ && module.hot) {
                 : '';
             console.log(LOG_PREFIX + ' ' + prefix + 'Updated' + timeLabel + moduleCount);
             if (!upToDate()) {
-              module.hot.check({ ignoreDeclined: true, ignoreUnaccepted: true });
+              module.hot
+                .check({ ignoreDeclined: true, ignoreUnaccepted: true })
+                .catch(function (err) {
+                  console.warn(LOG_PREFIX + ' Follow-up update failed, reloading page:', err);
+                  window.location.reload();
+                });
             }
           })
           .catch(function (err) {
