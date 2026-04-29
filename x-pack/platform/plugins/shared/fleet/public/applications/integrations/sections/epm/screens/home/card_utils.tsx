@@ -23,7 +23,7 @@ import type {
 } from '@kbn/custom-integrations-plugin/common';
 
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
-import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {
@@ -141,9 +141,8 @@ export const mapToCard = ({
     uiInternalPathUrl = url;
   }
 
-  const integration = 'integration' in item ? item.integration || '' : '';
-
   const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
+
   let extraLabelsBadges: React.ReactNode[] | undefined;
   if (item.type === 'integration' || item.type === 'content') {
     extraLabelsBadges = getIntegrationLabels(item);
@@ -156,7 +155,7 @@ export const mapToCard = ({
     title: item.title,
     url: uiInternalPathUrl,
     fromIntegrations: selectedCategory,
-    integration,
+    integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name : item.id,
     version,
     type: item.type,

@@ -22,8 +22,6 @@ export function useBrowseIntegrationHook({
 }) {
   const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
   const setUrlCategory = useSetUrlCategory();
-  const urlFilters = useUrlFilters();
-
   const {
     initialSelectedCategory,
     allCategories,
@@ -35,6 +33,8 @@ export function useBrowseIntegrationHook({
     eprCategoryLoadingError,
     filteredCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+
+  const urlFilters = useUrlFilters();
 
   const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
   const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;

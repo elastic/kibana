@@ -212,6 +212,7 @@ export const useAvailablePackages = ({
 
   const cards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
+
     return (
       eprAndCustomPackages
         // If only showing agentless integrations, filter out non-agentless ones
@@ -228,7 +229,6 @@ export const useAvailablePackages = ({
             item,
             addBasePath,
             packageVerificationKeyId,
-            selectedCategory,
           });
         })
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -238,11 +238,10 @@ export const useAvailablePackages = ({
     appendCustomIntegrations,
     getAbsolutePath,
     getHref,
-    isAgentlessEnabled,
     mergedEprPackages,
     onlyAgentlessFilter,
+    isAgentlessEnabled,
     packageVerificationKeyId,
-    selectedCategory,
   ]);
 
   // Packages to show
