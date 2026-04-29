@@ -8,12 +8,16 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { EntityAnalyticsPrivileges } from '../../../../../../common/api/entity_analytics';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { WATCHLISTS_PRIVILEGES_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { getIndexForWatchlist } from '../../entities/utils';
-import { _formatPrivileges, hasReadWritePermissions } from '../../../utils/check_and_format_privileges';
+import {
+  _formatPrivileges,
+  hasReadWritePermissions,
+} from '../../../utils/check_and_format_privileges';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const watchlistsPrivilegesRoute = (
@@ -44,6 +48,7 @@ export const watchlistsPrivilegesRoute = (
             const namespace = secSol.getSpaceId();
             const [_, { security }] = await getStartServices();
             const watchlistsIndex = getIndexForWatchlist(namespace);
+            const entityStoreIndex = getEntitiesAlias(ENTITY_LATEST, namespace);
 
             const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
             const { privileges, hasAllRequested } = await checkPrivileges({
@@ -51,6 +56,7 @@ export const watchlistsPrivilegesRoute = (
                 cluster: [],
                 index: {
                   [watchlistsIndex]: ['read', 'write'],
+                  [entityStoreIndex]: ['read', 'write'],
                 },
               },
             });
