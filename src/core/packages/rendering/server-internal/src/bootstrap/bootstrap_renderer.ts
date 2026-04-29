@@ -106,7 +106,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   // webpack bundles that must not be loaded separately.
   const externalPluginIds = new Set<string>();
   if (useRspack) {
-    const externalPluginsDir = fromRoot('plugins');
+    const externalPluginsDir = fromRoot('plugins') + Path.sep;
     for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
       if (!publicTargetDir.startsWith(externalPluginsDir)) {
         continue;

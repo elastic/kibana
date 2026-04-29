@@ -100,7 +100,7 @@ export function registerBundleRoutes({
     // built by kbn-plugin-helpers. Only check that directory — internal plugins are
     // compiled into kibana.bundle.js and their directories may contain leftover
     // webpack bundles that must not be loaded separately.
-    const externalPluginsDir = fromRoot('plugins');
+    const externalPluginsDir = fromRoot('plugins') + Path.sep;
     [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
       if (!publicTargetDir.startsWith(externalPluginsDir)) {
         return;
