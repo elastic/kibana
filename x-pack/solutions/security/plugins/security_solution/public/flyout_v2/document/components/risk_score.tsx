@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { FlyoutHeaderBlock } from '../../shared/components/flyout_header_block';
 import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 
 export interface RiskScoreProps {
@@ -36,7 +36,7 @@ export const RiskScore = memo(({ hit }: RiskScoreProps) => {
   }, [hit]);
 
   return (
-    <AlertHeaderBlock
+    <FlyoutHeaderBlock
       hasBorder
       title={
         <FormattedMessage
@@ -47,7 +47,7 @@ export const RiskScore = memo(({ hit }: RiskScoreProps) => {
       data-test-subj={RISK_SCORE_TITLE_TEST_ID}
     >
       <span data-test-subj={RISK_SCORE_VALUE_TEST_ID}>{riskScore}</span>
-    </AlertHeaderBlock>
+    </FlyoutHeaderBlock>
   );
 });
 

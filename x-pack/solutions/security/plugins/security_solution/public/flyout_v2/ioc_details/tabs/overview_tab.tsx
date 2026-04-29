@@ -16,11 +16,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
-import { IndicatorEmptyPrompt } from '../components/empty_prompt';
+import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
 import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
-import { IndicatorBlock } from '../components/block';
+import { IndicatorFieldLabel } from '../../../threat_intelligence/modules/indicators/components/common/field_label';
+import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
+import {
+  FlyoutHeaderBlock,
+  flyoutHeaderBlockStyles,
+} from '../../shared/components/flyout_header_block';
 import { HighlightedValuesTable } from '../components/highlighted_values_table';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 
@@ -33,7 +40,7 @@ const highLevelFields = [
   RawIndicatorFieldId.Type,
   RawIndicatorFieldId.MarkingTLP,
   RawIndicatorFieldId.Confidence,
-];
+] as const;
 
 export interface OverviewTabProps {
   /**
@@ -46,6 +53,33 @@ export interface OverviewTabProps {
   onViewAllFieldsInTable?: () => void;
 }
 
+interface IndicatorHeaderBlockProps {
+  indicator: Indicator;
+  field: string;
+}
+
+const IndicatorHeaderBlock = ({ indicator, field }: IndicatorHeaderBlockProps) => {
+  const { key, value } = getIndicatorFieldAndValue(indicator, field);
+
+  return (
+    <FlyoutHeaderBlock
+      hasBorder
+      title={<IndicatorFieldLabel field={field} />}
+      data-test-subj={`${INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}-${field}`}
+    >
+      <SecurityCellActions
+        data={{ field: key, value }}
+        mode={CellActionsMode.HOVER_DOWN}
+        triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+      >
+        <EuiText size="s">
+          <IndicatorFieldValue indicator={indicator} field={field} />
+        </EuiText>
+      </SecurityCellActions>
+    </FlyoutHeaderBlock>
+  );
+};
+
 /**
  * Overview view displayed in the ioc details flyout
  */
@@ -54,16 +88,33 @@ export const OverviewTab = memo(({ indicator, onViewAllFieldsInTable }: Overview
 
   const highLevelBlocks = useMemo(
     () => (
-      <EuiFlexGroup data-test-subj={INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}>
-        {highLevelFields.map((field) => (
-          <EuiFlexItem key={field}>
-            <IndicatorBlock
-              indicator={indicator}
-              field={field}
-              data-test-subj={INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}
-            />
-          </EuiFlexItem>
-        ))}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        responsive={false}
+        wrap
+        data-test-subj={INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}
+      >
+        <EuiFlexItem css={flyoutHeaderBlockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <IndicatorHeaderBlock indicator={indicator} field={highLevelFields[0]} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <IndicatorHeaderBlock indicator={indicator} field={highLevelFields[1]} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={flyoutHeaderBlockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <IndicatorHeaderBlock indicator={indicator} field={highLevelFields[2]} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <IndicatorHeaderBlock indicator={indicator} field={highLevelFields[3]} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     [indicator]
@@ -78,7 +129,7 @@ export const OverviewTab = memo(({ indicator, onViewAllFieldsInTable }: Overview
   const title: string | null = getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value;
 
   if (!indicatorType) {
-    return <IndicatorEmptyPrompt />;
+    return <FlyoutError />;
   }
 
   return (

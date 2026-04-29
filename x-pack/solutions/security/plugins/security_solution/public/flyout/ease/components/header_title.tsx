@@ -15,7 +15,7 @@ import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { DocumentSeverity } from '../../../flyout_v2/document/components/severity';
 import { RiskScore } from '../../../flyout_v2/document/components/risk_score';
-import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
+import { FlyoutHeaderBlock } from '../../../flyout_v2/shared/components/flyout_header_block';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { getAlertTitle } from '../../../flyout_v2/document/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
@@ -58,7 +58,7 @@ export const HeaderTitle = memo(() => {
       >
         <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <AlertHeaderBlock
+            <FlyoutHeaderBlock
               data-test-subj={HEADER_SEVERITY_TITLE_TEST_ID}
               title={
                 <FormattedMessage
@@ -68,10 +68,10 @@ export const HeaderTitle = memo(() => {
               }
             >
               <DocumentSeverity hit={hit} />
-            </AlertHeaderBlock>
+            </FlyoutHeaderBlock>
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertHeaderBlock
+            <FlyoutHeaderBlock
               data-test-subj={HEADER_RISK_SCORE_TITLE_TEST_ID}
               title={
                 <FormattedMessage
@@ -81,10 +81,10 @@ export const HeaderTitle = memo(() => {
               }
             >
               <RiskScore hit={hit} />
-            </AlertHeaderBlock>
+            </FlyoutHeaderBlock>
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertHeaderBlock
+            <FlyoutHeaderBlock
               data-test-subj={HEADER_INTEGRATION_TITLE_TEST_ID}
               title={
                 <FormattedMessage
@@ -94,7 +94,7 @@ export const HeaderTitle = memo(() => {
               }
             >
               <IntegrationIcon integrationName={integrationName} />
-            </AlertHeaderBlock>
+            </FlyoutHeaderBlock>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

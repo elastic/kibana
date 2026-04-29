@@ -7,18 +7,18 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { flyoutHeaderBlockStyles } from './constants/styles';
+import { EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
+import { flyoutHeaderBlockStyles } from '../shared/components/flyout_header_block';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
 import { Title } from './components/title';
 import { Status } from './components/status';
 import { Notes } from '../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
-import { Timestamp } from './components/timestamp';
+import { Timestamp } from '../shared/components/timestamp';
 import { RiskScore } from './components/risk_score';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
@@ -56,15 +56,21 @@ export const Header: FC<HeaderProps> = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
     return (
       <>
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>
-        <Timestamp hit={hit}>
-          <EuiSpacer size="xs" />
-        </Timestamp>
+        {timestamp && (
+          <>
+            <EuiText size="s">
+              <Timestamp date={timestamp} />
+            </EuiText>
+            <EuiSpacer size="xs" />
+          </>
+        )}
         <Title hit={hit} hideLink={!canReadRules} />
         {isAlert && (
           <>

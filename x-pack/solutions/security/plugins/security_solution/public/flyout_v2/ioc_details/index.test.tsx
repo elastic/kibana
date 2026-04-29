@@ -29,7 +29,7 @@ describe('<IOCDetails />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId(IOC_DETAILS_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(`${IOC_DETAILS_TITLE_TEST_ID}Text`)).toBeInTheDocument();
     expect(getByTestId(IOC_DETAILS_FOOTER_TEST_ID)).toBeInTheDocument();
   });
 });

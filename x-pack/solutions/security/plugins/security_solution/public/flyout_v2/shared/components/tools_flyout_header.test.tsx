@@ -22,13 +22,15 @@ jest.mock('../../document/components/severity', () => ({
   DocumentSeverity: () => <div data-test-subj="mockDocumentSeverity" />,
 }));
 
-jest.mock('../../document/components/timestamp', () => ({
-  Timestamp: ({ size }: { size?: string }) => (
-    <div data-test-subj="mockTimestamp" data-size={size} />
+jest.mock('./timestamp', () => ({
+  Timestamp: ({ date }: { date?: string }) => (
+    <div data-test-subj="mockTimestamp" data-date={date} />
   ),
 }));
 
-const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
+const createMockHit = (
+  flattened: DataTableRecord['flattened'] = { '@timestamp': '2024-01-15T10:30:00.000Z' }
+): DataTableRecord =>
   ({
     id: 'hit-1',
     raw: {},
@@ -69,10 +71,21 @@ describe('<ToolsFlyoutHeader />', () => {
   it('should render the document timestamp', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId('mockTimestamp')).toBeInTheDocument();
+    expect(getByTestId('mockTimestamp')).toHaveAttribute('data-date', '2024-01-15T10:30:00.000Z');
   });
 
-  it('should pass size="xs" to Timestamp', () => {
-    const { getByTestId } = renderHeader();
-    expect(getByTestId('mockTimestamp')).toHaveAttribute('data-size', 'xs');
+  it('should not render the document timestamp when @timestamp is missing', () => {
+    const hit = {
+      id: 'hit-1',
+      raw: {},
+      flattened: {},
+      isAnchor: false,
+    } as DataTableRecord;
+    const { queryByTestId } = render(
+      <IntlProvider locale="en">
+        <ToolsFlyoutHeader hit={hit} title={<span>{'Correlations'}</span>} />
+      </IntlProvider>
+    );
+    expect(queryByTestId('mockTimestamp')).not.toBeInTheDocument();
   });
 });

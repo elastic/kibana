@@ -28,6 +28,8 @@ export const TITLE_LINK_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj
 
 export const ALERT_SUMMARY_PANEL_TEST_ID = `${PREFIX}HeaderAlertSummaryPanel` as const;
 
+export const TIMESTAMP_TEST_ID = `${PREFIX}HeaderTimestamp` as const;
+
 export const NOTES_TITLE_TEST_ID = `${PREFIX}HeaderNotesTitle` as const;
 export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${PREFIX}HeaderNotesAddNoteButton` as const;
 export const NOTES_VIEW_NOTES_BUTTON_TEST_ID = `${PREFIX}HeaderNotesViewNotesButton` as const;

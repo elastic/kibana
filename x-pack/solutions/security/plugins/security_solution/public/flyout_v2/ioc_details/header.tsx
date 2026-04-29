@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FlyoutTitle } from '../shared/components/flyout_title';
+import { Timestamp } from '../shared/components/timestamp';
 import { unwrapValue } from '../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../common/threat_intelligence/types/indicator';
-import { DateFormatter } from '../../threat_intelligence/components/date_formatter';
 import type { RightPanelTabType, RightPanelPaths } from './tabs';
 import { IOC_DETAILS_TITLE_TEST_ID, IOC_DETAILS_SUBTITLE_TEST_ID } from './test_ids';
 
@@ -64,21 +66,19 @@ export const Header: FC<HeaderProps> = memo(
 
     return (
       <>
-        <EuiTitle>
-          <h2 data-test-subj={IOC_DETAILS_TITLE_TEST_ID}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.iocDetails.panelTitle"
-              defaultMessage="Indicator details"
-            />
-          </h2>
-        </EuiTitle>
+        <FlyoutTitle
+          title={i18n.translate('xpack.securitySolution.flyout.iocDetails.panelTitle', {
+            defaultMessage: 'Indicator details',
+          })}
+          data-test-subj={IOC_DETAILS_TITLE_TEST_ID}
+        />
         <EuiText size={'xs'}>
           <p data-test-subj={IOC_DETAILS_SUBTITLE_TEST_ID}>
             <FormattedMessage
               id="xpack.securitySolution.flyout.iocDetails.panelSubTitle"
               defaultMessage="First seen: "
             />
-            <DateFormatter date={firstSeen} />
+            <Timestamp date={firstSeen} />
           </p>
         </EuiText>
         <EuiSpacer size="m" />

@@ -10,7 +10,15 @@ import React, { memo } from 'react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
-export interface AlertHeaderBlockProps {
+/**
+ * minWidth for each block rendered in the flyout header.
+ * Allows switching from a 1-row 4-block layout to 2 rows with 2 blocks each.
+ */
+export const flyoutHeaderBlockStyles = {
+  minWidth: 280,
+};
+
+export interface FlyoutHeaderBlockProps {
   /**
    * React component to render as the value
    */
@@ -38,14 +46,14 @@ export interface AlertHeaderBlockProps {
 /**
  * Reusable component for rendering a block with rounded edges, show a title and value below one another
  */
-export const AlertHeaderBlock = memo(
+export const FlyoutHeaderBlock = memo(
   ({
     children,
     gutterSize = 's',
     hasBorder = false,
     title,
     'data-test-subj': dataTestSubj,
-  }: AlertHeaderBlockProps) => (
+  }: FlyoutHeaderBlockProps) => (
     <EuiPanel hasShadow={false} hasBorder={hasBorder} paddingSize="s">
       <EuiFlexGroup
         direction="column"
@@ -64,4 +72,4 @@ export const AlertHeaderBlock = memo(
   )
 );
 
-AlertHeaderBlock.displayName = 'AlertHeaderBlock';
+FlyoutHeaderBlock.displayName = 'FlyoutHeaderBlock';

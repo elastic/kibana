@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
 import { JsonTab as SharedJsonTab } from '../../../flyout/shared/components/json_tab';
-import { IndicatorEmptyPrompt } from '../components/empty_prompt';
 
 export const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
 
@@ -25,7 +25,7 @@ export interface JsonTabProps {
  */
 export const JsonTab = memo(({ indicator }: JsonTabProps) => {
   return Object.keys(indicator).length === 0 ? (
-    <IndicatorEmptyPrompt />
+    <FlyoutError />
   ) : (
     <SharedJsonTab
       value={indicator as unknown as Record<string, unknown>}

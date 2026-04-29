@@ -6,10 +6,11 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { Timestamp } from '../../document/components/timestamp';
+import React, { memo, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { Timestamp } from './timestamp';
 import { DocumentSeverity } from '../../document/components/severity';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
@@ -43,6 +44,7 @@ export interface ToolsFlyoutHeaderProps {
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
+    const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -72,9 +74,13 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <Timestamp hit={hit} size="xs" />
-            </EuiFlexItem>
+            {timestamp && (
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <Timestamp date={timestamp} />
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

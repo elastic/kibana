@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
-import { IndicatorEmptyPrompt } from '../components/empty_prompt';
+import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
 import { IndicatorFieldsTable } from '../components/fields_table';
 
 export const FLYOUT_TABLE_TEST_ID = 'tiFlyoutTable';
@@ -26,7 +26,7 @@ export const TableTab = memo(({ indicator }: TableTabProps) => {
   const items: string[] = Object.keys(indicator.fields);
 
   return items.length === 0 ? (
-    <IndicatorEmptyPrompt />
+    <FlyoutError />
   ) : (
     <IndicatorFieldsTable
       data-test-subj={FLYOUT_TABLE_TEST_ID}
