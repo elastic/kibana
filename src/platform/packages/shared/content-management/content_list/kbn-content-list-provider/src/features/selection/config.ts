@@ -40,9 +40,21 @@ export interface SelectionConfig {
 /**
  * Type guard for {@link SelectionConfig}.
  *
- * Returns `true` only for plain objects (the predicate path); `boolean`
+ * Returns `true` only for plain, non-array objects whose `selectable` and
+ * `selectableMessage` properties (when present) are functions. `boolean`
  * values follow the legacy on/off behavior.
  */
 export const isSelectionConfig = (
   selection: boolean | SelectionConfig | undefined
-): selection is SelectionConfig => typeof selection === 'object' && selection !== null;
+): selection is SelectionConfig => {
+  if (typeof selection !== 'object' || selection === null || Array.isArray(selection)) {
+    return false;
+  }
+
+  const { selectable, selectableMessage } = selection as Record<string, unknown>;
+
+  return (
+    (selectable === undefined || typeof selectable === 'function') &&
+    (selectableMessage === undefined || typeof selectableMessage === 'function')
+  );
+};
