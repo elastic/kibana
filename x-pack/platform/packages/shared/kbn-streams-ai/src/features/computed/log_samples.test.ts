@@ -53,7 +53,7 @@ describe('logSamplesGenerator', () => {
       index: stream.name,
       start: 100,
       end: 200,
-      size: 5,
+      sampleSize: 5,
     });
     expect(result).toEqual({
       samples: [{ 'service.name': 'checkout', message: 'checkout succeeded' }],

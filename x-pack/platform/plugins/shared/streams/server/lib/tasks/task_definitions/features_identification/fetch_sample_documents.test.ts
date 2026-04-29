@@ -164,7 +164,7 @@ describe('fetchSampleDocuments', () => {
         index: 'logs.test-default',
         start: 100,
         end: 200,
-        size: 4,
+        sampleSize: 4,
         loadUnmappedFields: true,
       })
     );

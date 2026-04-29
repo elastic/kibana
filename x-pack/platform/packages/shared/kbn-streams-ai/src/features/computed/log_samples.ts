@@ -28,7 +28,7 @@ This is useful for understanding the format of logs, identifying patterns, and s
       index: stream.name,
       start,
       end,
-      size: SAMPLE_SIZE,
+      sampleSize: SAMPLE_SIZE,
     });
 
     return {

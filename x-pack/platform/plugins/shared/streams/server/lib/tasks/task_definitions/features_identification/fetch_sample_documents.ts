@@ -112,7 +112,7 @@ export async function fetchSampleDocuments({
         index,
         start,
         end,
-        size: entityFilteredSize,
+        sampleSize: entityFilteredSize,
         whereCondition,
         loadUnmappedFields: true,
       }).catch((err) => {

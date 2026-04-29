@@ -53,7 +53,7 @@ describe('errorLogsGenerator', () => {
       index: stream.name,
       start: 100,
       end: 200,
-      size: 5,
+      sampleSize: 5,
       kql: 'log.level:"error" OR message:"error" OR message:"exception" OR body.text:"error" OR body.text:"exception"',
     });
     expect(result).toEqual({

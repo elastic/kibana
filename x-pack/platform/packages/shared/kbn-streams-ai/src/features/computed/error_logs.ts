@@ -38,7 +38,7 @@ This is useful for understanding error patterns, identifying recurring issues, a
       index: stream.name,
       start,
       end,
-      size: SAMPLE_SIZE,
+      sampleSize: SAMPLE_SIZE,
       kql: ERROR_KQL,
     });
 
