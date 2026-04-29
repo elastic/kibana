@@ -423,6 +423,10 @@ export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDown
   return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
 }
 
+export function isSearchOnlyModel(item: TrainedModelUIItem): boolean {
+  return isRerankModelItem(item);
+}
+
 /**
  * Identifies rerank (text_similarity) trained models.
  */

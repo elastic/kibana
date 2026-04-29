@@ -40,7 +40,7 @@ const baseConfig: DeploymentParamsUI = {
 };
 
 function renderDeploymentSetup(props: {
-  isRerank?: boolean;
+  isSearchOnly?: boolean;
   showNodeInfo?: boolean;
   config?: DeploymentParamsUI;
   onConfigChange?: (c: DeploymentParamsUI) => void;
@@ -57,7 +57,7 @@ function renderDeploymentSetup(props: {
         cloudInfo={cloudInfo}
         showNodeInfo={props.showNodeInfo ?? true}
         deploymentParamsMapper={deploymentParamsMapper}
-        isRerank={props.isRerank}
+        isSearchOnly={props.isSearchOnly}
       />
     </IntlProvider>
   );
@@ -65,7 +65,7 @@ function renderDeploymentSetup(props: {
 
 describe('DeploymentSetup', () => {
   it('shows ingest/search optimization when not rerank', () => {
-    renderDeploymentSetup({ isRerank: false });
+    renderDeploymentSetup({ isSearchOnly: false });
 
     expect(
       screen.getByText('Optimize this model deployment for your use case:')
@@ -81,8 +81,8 @@ describe('DeploymentSetup', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('hides optimization and shows rerank memory warning when isRerank', () => {
-    renderDeploymentSetup({ isRerank: true });
+  it('hides optimization and shows rerank memory warning when isSearchOnly', () => {
+    renderDeploymentSetup({ isSearchOnly: true });
 
     expect(
       screen.queryByText('Optimize this model deployment for your use case:')
@@ -94,16 +94,16 @@ describe('DeploymentSetup', () => {
     expect(screen.getByText(RERANK_WARNING_DESCRIPTION)).toBeInTheDocument();
   });
 
-  it('shows serverless rerank warning when isRerank and showNodeInfo is false', () => {
-    renderDeploymentSetup({ isRerank: true, showNodeInfo: false });
+  it('shows serverless rerank warning when isSearchOnly and showNodeInfo is false', () => {
+    renderDeploymentSetup({ isSearchOnly: true, showNodeInfo: false });
 
     expect(screen.getByTestId('mlModelsStartDeploymentModalRerankWarning')).toBeInTheDocument();
     expect(screen.getByText(RERANK_WARNING_SERVERLESS_DESCRIPTION)).toBeInTheDocument();
     expect(screen.queryByText(RERANK_WARNING_DESCRIPTION)).not.toBeInTheDocument();
   });
 
-  it('keeps vCPU slider available when isRerank', () => {
-    renderDeploymentSetup({ isRerank: true });
+  it('keeps vCPU slider available when isSearchOnly', () => {
+    renderDeploymentSetup({ isSearchOnly: true });
 
     expect(screen.getByTestId('mlModelsStartDeploymentModalVCPULevel')).toBeInTheDocument();
     expect(

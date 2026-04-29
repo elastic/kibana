@@ -49,7 +49,7 @@ import useObservable from 'react-use/lib/useObservable';
 import {
   isModelDownloadItem,
   isNLPModelItem,
-  isRerankModelItem,
+  isSearchOnlyModel,
   type TrainedModelDeploymentStatsResponse,
 } from '@kbn/ml-common-types/trained_models';
 import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
@@ -81,7 +81,7 @@ interface DeploymentSetupProps {
   disableAdaptiveResourcesControl?: boolean;
   deploymentParamsMapper: DeploymentParamsMapper;
   /** When true, hides ingest/search optimization (always search-optimized) and shows rerank warnings */
-  isRerank?: boolean;
+  isSearchOnly?: boolean;
 }
 
 /**
@@ -168,7 +168,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   deploymentParamsMapper,
   cloudInfo,
   showNodeInfo,
-  isRerank = false,
+  isSearchOnly = false,
 }) => {
   const deploymentIdUpdated = useRef(false);
 
@@ -508,7 +508,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!isRerank ? (
+      {!isSearchOnly ? (
         <EuiFormRow hasChildLabel={true} fullWidth>
           <EuiFormFieldset
             legend={{
@@ -563,7 +563,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         </EuiFormRow>
       ) : null}
 
-      {isRerank ? (
+      {isSearchOnly ? (
         <>
           <EuiCallOut
             announceOnMount
@@ -754,7 +754,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isModelNotDownloaded = model ? isModelDownloadItem(model) : true;
 
-  const isRerank = model ? isRerankModelItem(model) : undefined;
+  const isSearchOnly = model ? isSearchOnlyModel(model) : undefined;
 
   const getDefaultParams = useCallback((): DeploymentParamsUI => {
     const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
@@ -772,10 +772,10 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       optimized: 'optimizedForSearch',
     } as const;
 
-    // model observable hasn't resolved yet; will update config once isRerank is known.
-    if (isRerank === undefined) return defaultParams;
+    // model observable hasn't resolved yet; will update config once isSearchOnly is known.
+    if (isSearchOnly === undefined) return defaultParams;
 
-    if (isRerank) return searchParams;
+    if (isSearchOnly) return searchParams;
 
     if (isModelNotDownloaded) return defaultParams;
 
@@ -788,7 +788,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     return uiParams.some((v) => v.optimized === 'optimizedForIngest')
       ? searchParams
       : defaultParams;
-  }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo, isRerank]);
+  }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo, isSearchOnly]);
 
   const modalTitleId = useGeneratedHtmlId();
 
@@ -798,13 +798,13 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   useEffect(
     function syncResolvedModelDefaults() {
-      if (initialParams !== undefined || model === undefined || isRerank !== true) {
+      if (initialParams !== undefined || model === undefined || isSearchOnly !== true) {
         return;
       }
 
       setConfig(getDefaultParams());
     },
-    [initialParams, model, isRerank, getDefaultParams]
+    [initialParams, model, isSearchOnly, getDefaultParams]
   );
 
   const deploymentIdValidator = useMemo(() => {
@@ -895,7 +895,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
-          isRerank={isRerank}
+          isSearchOnly={isSearchOnly}
           disableAdaptiveResourcesControl={
             !showNodeInfo || nlpSettings.modelDeployment?.allowStaticAllocations === false
           }
@@ -961,7 +961,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           form={'startDeploymentForm'}
           onClick={onConfigChange.bind(null, config)}
           fill
-          disabled={Object.keys(errors).length > 0 || (!isUpdate && isRerank === undefined)}
+          disabled={Object.keys(errors).length > 0 || (!isUpdate && isSearchOnly === undefined)}
           data-test-subj={'mlModelsStartDeploymentModalStartButton'}
         >
           {isUpdate ? (
