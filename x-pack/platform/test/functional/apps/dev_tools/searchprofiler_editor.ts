@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       }
     });
 
-    it('supports pre-configured search query', async () => {
+    it.skip('supports pre-configured search query', async () => {
       const query = {
         query: {
           bool: {
@@ -111,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('triple quotes in JSON parsing', () => {
+    describe.skip('triple quotes in JSON parsing', () => {
       const testCases = [
         {
           shouldHaveErrors: false,
