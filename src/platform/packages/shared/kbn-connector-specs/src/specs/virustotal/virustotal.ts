@@ -27,6 +27,7 @@ import type { ConnectorSpec } from '../../connector_spec';
 const VIRUSTOTAL_API_BASE_URL = 'https://www.virustotal.com/api/v3';
 const VIRUSTOTAL_RESOURCE_TYPES = ['analysis', 'url', 'domain', 'ip', 'file'] as const;
 const VIRUSTOTAL_DOMAIN_REGEX = z.regexes.domain;
+const VIRUSTOTAL_DOMAIN_SCHEMA = z.string().regex(VIRUSTOTAL_DOMAIN_REGEX);
 const VIRUSTOTAL_URL_SCHEMA = z.url({
   protocol: /^https?$/,
   hostname: VIRUSTOTAL_DOMAIN_REGEX,
@@ -66,14 +67,9 @@ const isVirusTotalUrl = (value: string): boolean => VIRUSTOTAL_URL_SCHEMA.safePa
 const normalizeDomain = (value: string): string => value.trim().toLowerCase();
 
 const isValidDomain = (value: string): boolean =>
-  VIRUSTOTAL_DOMAIN_REGEX.test(normalizeDomain(value));
+  VIRUSTOTAL_DOMAIN_SCHEMA.safeParse(normalizeDomain(value)).success;
 
-const urlOrDomainSchema = z
-  .string()
-  .trim()
-  .refine((value) => isVirusTotalUrl(value) || isValidDomain(value), {
-    message: 'Must be a valid HTTP(S) URL or bare domain',
-  });
+const urlOrDomainSchema = z.xor([VIRUSTOTAL_URL_SCHEMA, VIRUSTOTAL_DOMAIN_SCHEMA]);
 
 const getVirusTotalUrlIdentifier = (urlOrId: string): string => {
   const value = urlOrId.trim();
