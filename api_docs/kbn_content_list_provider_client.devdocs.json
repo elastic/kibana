@@ -49,6 +49,7 @@
             "lineNumber": 179,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentListClientProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -63,7 +64,15 @@
         "tags": [],
         "label": "createClientStrategy",
         "description": [
-          "\nCreates a client strategy that wraps a `TableListView`-style `findItems` function.\n\nThe strategy caches the server response keyed by `searchQuery`. When filters,\nsort, or page change without a new search query, the cached items are reused\nand only the client-side transforms are reapplied — no server fetch occurs.\n\nThe core provider calls {@link ClientStrategy.onInvalidate} before any\nexplicit refetch (e.g. after a delete) to force the next `findItems` call\nto hit the server.\n"
+          "\nCreates a client strategy that wraps a `TableListView`-style `findItems` function.\n\nThe strategy caches the server response keyed by `searchQuery`. When filters,\nsort, or page change without a new search query, the cached items are reused\nand only the client-side transforms are reapplied — no server fetch occurs.\n\nThe core provider calls ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ClientStrategy.onInvalidate",
+            "text": "ClientStrategy.onInvalidate"
+          },
+          " before any\nexplicit refetch (e.g. after a delete) to force the next `findItems` call\nto hit the server.\n"
         ],
         "signature": [
           "(tableListViewFindItems: ",
@@ -113,6 +122,7 @@
             "lineNumber": 317,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TableListViewFindItemsFn",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -133,12 +143,21 @@
             "lineNumber": 318,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ItemDecorator",
             "trackAdoption": false,
             "isRequired": false
           }
         ],
         "returnComment": [
-          "A {@link ClientStrategy } with `findItems`, `onInvalidate`, `onRefresh`, and `getItems`."
+          "A ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ClientStrategy",
+            "text": "ClientStrategy"
+          },
+          " with `findItems`, `onInvalidate`, `onRefresh`, and `getItems`."
         ],
         "initialIsOpen": false
       }
@@ -151,7 +170,15 @@
         "tags": [],
         "label": "ClientStrategy",
         "description": [
-          "\nReturn type from {@link createClientStrategy}."
+          "\nReturn type from ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.createClientStrategy",
+            "text": "createClientStrategy"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
         "lineNumber": 48,
@@ -166,7 +193,15 @@
             "tags": [],
             "label": "findItems",
             "description": [
-              "\nFetches items and applies client-side filtering, sorting, and pagination.\n\nInternally caches the server response keyed by `searchQuery`. Calls to\n`findItems` with the same `searchQuery` reuse the cache and only\nrecompute the client-side transforms. A new `searchQuery` triggers a\nfresh server fetch.\n\nThe core provider calls {@link ClientStrategy.onInvalidate} before\nrefetching after mutations so the next call always hits the server."
+              "\nFetches items and applies client-side filtering, sorting, and pagination.\n\nInternally caches the server response keyed by `searchQuery`. Calls to\n`findItems` with the same `searchQuery` reuse the cache and only\nrecompute the client-side transforms. A new `searchQuery` triggers a\nfresh server fetch.\n\nThe core provider calls ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.ClientStrategy.onInvalidate",
+                "text": "ClientStrategy.onInvalidate"
+              },
+              " before\nrefetching after mutations so the next call always hits the server."
             ],
             "signature": [
               "(params: ",
@@ -214,6 +249,7 @@
                 "lineNumber": 134,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindItemsParams",
                 "trackAdoption": false
               }
             ]
@@ -350,6 +386,7 @@
                 "lineNumber": 30,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "OpenContentEditorParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -540,6 +577,7 @@
                 "lineNumber": 54,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -891,6 +929,7 @@
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AbortSignal",
             "trackAdoption": false
           }
         ],
