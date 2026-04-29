@@ -182,6 +182,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
           const params: ESQLSearchParams = {
             query: fixedQuery,
+            // here for KQL() function with timestamp epoch search.
+            // safest approach without breaking other functions (e.g. date functions that rely on the timezone)
+            // injecting { "time_zone": "UTC" } for the specific case of epoch search through KQL()
             time_zone: esQueryConfigs.dateFormatTZ
               ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
               : 'UTC',

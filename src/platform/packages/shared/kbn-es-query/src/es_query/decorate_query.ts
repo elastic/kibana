@@ -37,6 +37,7 @@ export function decorateQuery(
 
     extend(query.query_string, queryStringOptions);
     if (dateFormatTZ) {
+      // condition here for lucene mode in Discover.
       defaults(query.query_string, {
         time_zone: getTimeZoneFromSettings(dateFormatTZ),
       });
