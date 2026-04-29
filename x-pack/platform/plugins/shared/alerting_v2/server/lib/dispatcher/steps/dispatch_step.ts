@@ -20,14 +20,14 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  NotificationGroup,
-  NotificationPolicyId,
-  NotificationPolicy,
-  NotificationPolicyWorkflowPayload,
+  ActionGroup,
+  ActionPolicyId,
+  ActionPolicy,
+  ActionPolicyWorkflowPayload,
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
-const NOTIFICATION_POLICY_TRIGGER = 'notification_policy';
+const ACTION_POLICY_TRIGGER = 'action_policy';
 const MAX_CONCURRENT_DISPATCHES = 3;
 
 @injectable()
@@ -53,8 +53,8 @@ export class DispatchStep implements DispatcherStep {
   }
 
   private async dispatchGroup(
-    group: NotificationGroup,
-    policies?: Map<NotificationPolicyId, NotificationPolicy>
+    group: ActionGroup,
+    policies?: Map<ActionPolicyId, ActionPolicy>
   ): Promise<void> {
     try {
       const policy = policies?.get(group.policyId);
@@ -116,7 +116,7 @@ export class DispatchStep implements DispatcherStep {
   }
 
   private async dispatchWorkflow(
-    group: NotificationGroup,
+    group: ActionGroup,
     workflowId: string,
     request: KibanaRequest
   ): Promise<void> {
@@ -145,7 +145,7 @@ export class DispatchStep implements DispatcherStep {
       yaml: workflow.yaml,
     };
 
-    const payload: NotificationPolicyWorkflowPayload = {
+    const payload: ActionPolicyWorkflowPayload = {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
@@ -154,7 +154,7 @@ export class DispatchStep implements DispatcherStep {
 
     this.logger.debug({
       message: () =>
-        `Dispatching notification group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
+        `Dispatching action group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
     });
 
     const executionId = await this.workflowsManagement.scheduleWorkflow(
@@ -162,7 +162,7 @@ export class DispatchStep implements DispatcherStep {
       group.spaceId,
       payload,
       request,
-      NOTIFICATION_POLICY_TRIGGER
+      ACTION_POLICY_TRIGGER
     );
 
     this.logger.debug({

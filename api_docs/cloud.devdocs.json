@@ -916,6 +916,7 @@
               "lineNumber": 206,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "FC",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1060,6 +1061,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {
@@ -1283,6 +1285,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false,
             "isRequired": true
           }
