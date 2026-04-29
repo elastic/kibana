@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CriteriaField } from '../../services/results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 /**
  * Criteria fields for ML results APIs (e.g. getAnomaliesTableData).

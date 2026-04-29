@@ -9,9 +9,10 @@ import { get, has } from 'lodash';
 import { map, type Observable } from 'rxjs';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 
+import type { CriteriaField } from '@kbn/ml-common-types/results';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
-import type { Job } from '../../../../common/types/anomaly_detection_jobs';
-import type { CriteriaField } from '../../services/results_service';
 import type { MlApi } from '../../services/ml_api_service';
 import { normalizeSeverityThresholdForApi } from './normalize_table_severity';
 

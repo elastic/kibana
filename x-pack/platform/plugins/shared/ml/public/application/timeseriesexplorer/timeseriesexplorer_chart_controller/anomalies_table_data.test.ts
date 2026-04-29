@@ -9,7 +9,7 @@ import { firstValueFrom, of } from 'rxjs';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
-import type { CriteriaField } from '../../services/results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 import type { MlApi } from '../../services/ml_api_service';
 import { fetchAnomaliesTableData$ } from './anomalies_table_data';
 

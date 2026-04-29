@@ -9,15 +9,15 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { Duration, Moment } from 'moment';
 import { lastValueFrom } from 'rxjs';
 
-import type { CriteriaField } from '../../services/results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
   mlFunctionToESAggregation,
 } from '../../../../common/util/job_utils';
-import type { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { isMetricDetector } from '../get_function_description';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer_constants';
 import type { TimeSeriesExplorerZoomState } from './resolve_context_finish_focus_range';

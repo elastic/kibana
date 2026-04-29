@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SeverityThreshold } from '../../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 
 /**
  * Normalizes `tableSeverity` from SMV page vs embeddable vs dashboard into `SeverityThreshold[]`
