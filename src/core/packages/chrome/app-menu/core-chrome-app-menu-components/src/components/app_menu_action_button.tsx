@@ -10,7 +10,6 @@
 import React, { useRef, type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -59,7 +58,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const showTooltip = Boolean(content || title);
 
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
-  const colorProp = 'color' in props ? props.color : undefined;
 
   const {
     items: splitButtonItems,
@@ -129,7 +127,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const buttonCss = css`
     background-color: ${isPopoverOpen
       ? getIsSelectedColor({
-          color: colorProp as EuiButtonColor,
+          color: 'text',
           euiTheme,
           isFilled: false,
         })
@@ -163,7 +161,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         iconSide="left"
         isSelected={isPopoverOpen}
         css={buttonCss}
-        color={colorProp}
+        color="text"
       >
         {itemText}
       </EuiButton>
