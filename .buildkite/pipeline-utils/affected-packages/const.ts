@@ -9,7 +9,8 @@
 
 export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 
-export const SELECTIVE_TESTS_LABEL = 'ci:use-selective-testing';
+/** PR label: force full Jest unit/integration runs (skip affected-package filtering). */
+export const PREVENT_SELECTIVE_TESTS_LABEL = 'ci:prevent-selective-testing';
 
 // Changes here skip affected-package filtering for Jest (full run).
 // Keep narrow: global test harness, transforms, CI selection.
