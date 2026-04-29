@@ -16,6 +16,11 @@ import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_b
 import { useKibana } from '../../../common/lib/kibana';
 import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_levels_esql_query';
 import { esqlRecordsToSeverityCount, type EsqlSeverityRecord } from '../../common/utils';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
+
+const ENTITY_RISK_LEVEL_QUERY_ID = 'entity-risk-level-query';
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
@@ -35,6 +40,7 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
   const { filterManager } = useKibana().services.data.query;
+  const { setQuery, deleteQuery } = useGlobalTime();
 
   const riskLevelsStats = useRiskLevelsEsqlQuery({
     watchlistId: watchlistId ?? '',
@@ -53,6 +59,15 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 
   const loading = riskLevelsStats.isLoading;
 
+  useQueryInspector({
+    queryId: ENTITY_RISK_LEVEL_QUERY_ID,
+    inspect: riskLevelsStats.inspect,
+    loading,
+    refetch: riskLevelsStats.refetch,
+    setQuery,
+    deleteQuery,
+  });
+
   const handlePartitionClick = useCallback(
     (level: RiskSeverity) => {
       filterManager.addFilters([
@@ -69,48 +84,53 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
     [filterManager]
   );
 
+  const title = hasWatchlist ? (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
+      defaultMessage="{watchlistName} risk levels"
+      values={{ watchlistName: watchlistName ?? watchlistId }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
+      defaultMessage="Entity risk levels"
+    />
+  );
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" css={{ minHeight: 40 }}>
-          <EuiTitle size="s">
-            <h3>
-              {hasWatchlist ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
-                  defaultMessage="{watchlistName} risk levels"
-                  values={{
-                    watchlistName: watchlistName ?? watchlistId,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
-                  defaultMessage="Entity risk levels"
-                />
-              )}
-            </h3>
-          </EuiTitle>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={3}>
-            <RiskLevelBreakdownTable
-              severityCount={severityCount}
-              loading={loading}
-              entityDataView={entityDataView}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <RiskScoreDonutChart
-              showLegend={false}
-              severityCount={severityCount}
-              onPartitionClick={handlePartitionClick}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <InspectButtonContainer>
+      <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" css={{ minHeight: 40 }}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <InspectButton queryId={ENTITY_RISK_LEVEL_QUERY_ID} title={title} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={3}>
+              <RiskLevelBreakdownTable
+                severityCount={severityCount}
+                loading={loading}
+                entityDataView={entityDataView}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <RiskScoreDonutChart
+                showLegend={false}
+                severityCount={severityCount}
+                onPartitionClick={handlePartitionClick}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </InspectButtonContainer>
   );
 };
