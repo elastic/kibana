@@ -15,12 +15,14 @@ import {
   signalIndexNameSelector,
   signalIndexOutdatedSelector,
 } from '../../../../data_view_manager/redux/selectors';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../../../../timelines/components/timeline/tabs/esql');
 jest.mock('../../../../data_view_manager/redux/selectors');
+jest.mock('../../../../common/hooks/use_space_id');
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -29,6 +31,7 @@ describe('useSignalIndex', () => {
     jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.mocked(useSpaceId).mockReturnValue('default');
     jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
@@ -156,11 +159,11 @@ describe('useSignalIndex', () => {
     const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex');
     jest
       .spyOn(sourcererSelectors, 'signalIndexName')
-      .mockReturnValue('mock-signal-index-from-sourcerer');
+      .mockReturnValue('.alerts-security.alerts-default');
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
     jest.mocked(signalIndexOutdatedSelector).mockReturnValue(false);
-    jest.mocked(signalIndexNameSelector).mockReturnValue('mock-signal-index-from-sourcerer');
+    jest.mocked(signalIndexNameSelector).mockReturnValue('.alerts-security.alerts-default');
 
     const { result } = renderHook(() => useSignalIndex(), {
       wrapper: TestProvidersWithPrivileges,
@@ -172,7 +175,36 @@ describe('useSignalIndex', () => {
         createDeSignalIndex: result.current.createDeSignalIndex,
         loading: false,
         signalIndexExists: true,
-        signalIndexName: 'mock-signal-index-from-sourcerer',
+        signalIndexName: '.alerts-security.alerts-default',
+        signalIndexMappingOutdated: false,
+      });
+    });
+  });
+
+  test('fetches alerts info when the cached signal index belongs to a different space', async () => {
+    const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex').mockResolvedValue({
+      name: '.alerts-security.alerts-custom-space',
+      index_mapping_outdated: false,
+    });
+    jest.mocked(useSpaceId).mockReturnValue('custom-space');
+    jest
+      .spyOn(sourcererSelectors, 'signalIndexName')
+      .mockReturnValue('.alerts-security.alerts-default');
+    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
+    jest.mocked(signalIndexOutdatedSelector).mockReturnValue(false);
+    jest.mocked(signalIndexNameSelector).mockReturnValue('.alerts-security.alerts-default');
+
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
+
+    await waitFor(() => {
+      expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(1);
+      expect(result.current).toEqual({
+        createDeSignalIndex: result.current.createDeSignalIndex,
+        loading: false,
+        signalIndexExists: true,
+        signalIndexName: '.alerts-security.alerts-custom-space',
         signalIndexMappingOutdated: false,
       });
     });

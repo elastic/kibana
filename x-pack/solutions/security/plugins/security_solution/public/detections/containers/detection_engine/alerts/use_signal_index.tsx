@@ -18,6 +18,8 @@ import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 import { sourcererSelectors } from '../../../../common/store';
 import type { State } from '../../../../common/store';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 
 type Func = () => Promise<void>;
 
@@ -42,6 +44,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   });
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
+  const spaceId = useSpaceId();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -59,9 +62,15 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   });
   const experimentalSignalIndexName = useSignalIndexName();
 
-  const signalIndexName = newDataViewPickerEnabled
+  const cachedSignalIndexName = newDataViewPickerEnabled
     ? experimentalSignalIndexName
     : oldSignalIndexName;
+  const signalIndexName =
+    cachedSignalIndexName != null &&
+    spaceId != null &&
+    cachedSignalIndexName === getAlertsIndex(spaceId)
+      ? cachedSignalIndexName
+      : null;
 
   useEffect(() => {
     let isSubscribed = true;
