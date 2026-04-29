@@ -52,7 +52,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     }));
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
-    
+
     uiSettingsSetup.registerGlobal(alertingV2UiSettings);
     uiSettingsSetup.registerGlobal(experimentalFeaturesUiSettings);
 
