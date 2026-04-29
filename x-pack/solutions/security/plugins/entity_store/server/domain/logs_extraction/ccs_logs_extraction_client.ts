@@ -146,41 +146,34 @@ export class CcsLogsExtractionClient {
     abortController,
     windowOverride,
   }: CcsExtractToUpdatesParams): Promise<CcsExtractToUpdatesResult> {
-    const onAbort = () => this.logger.debug('Aborting CCS logs extraction');
-    abortController?.signal.addEventListener('abort', onAbort);
+    const { effectiveFromDateISO, toDateISO, recoveryId, isOverride } =
+      await this.resolveExtractionWindow(type, lookbackPeriod, delay, windowOverride);
 
-    try {
-      const { effectiveFromDateISO, toDateISO, recoveryId, isOverride } =
-        await this.resolveExtractionWindow(type, lookbackPeriod, delay, windowOverride);
-
-      if (effectiveFromDateISO >= toDateISO) {
-        this.logger.error(
-          `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${toDateISO}), skipping`
-        );
-        return { count: 0, pages: 0 };
-      }
-
-      const result = await this.runLogsPaginationOuterLoop({
-        type,
-        remoteIndexPatterns,
-        toDateISO,
-        docsLimit,
-        maxLogsPerPage,
-        entityDefinition,
-        abortController,
-        effectiveFromDateISO,
-        recoveryId,
-        skipStateUpdates: isOverride,
-      });
-
-      if (!isOverride && result.count === 0) {
-        await this.ccsStateClient.clearRecoveryId(type);
-      }
-
-      return result;
-    } finally {
-      abortController?.signal.removeEventListener('abort', onAbort);
+    if (effectiveFromDateISO >= toDateISO) {
+      this.logger.error(
+        `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${toDateISO}), skipping`
+      );
+      return { count: 0, pages: 0 };
     }
+
+    const result = await this.runLogsPaginationOuterLoop({
+      type,
+      remoteIndexPatterns,
+      toDateISO,
+      docsLimit,
+      maxLogsPerPage,
+      entityDefinition,
+      abortController,
+      effectiveFromDateISO,
+      recoveryId,
+      skipStateUpdates: isOverride,
+    });
+
+    if (!isOverride && result.count === 0) {
+      await this.ccsStateClient.clearRecoveryId(type);
+    }
+
+    return result;
   }
 
   /**
@@ -214,6 +207,13 @@ export class CcsLogsExtractionClient {
   }): Promise<CcsExtractToUpdatesResult> {
     let totalCount = 0;
     let totalPages = 0;
+
+    const onAbort = () => {
+      this.logger.info(
+        `Aborting CCS logs extraction, CCS entities extracted until abort: ${totalCount}, in ${totalPages} pages`
+      );
+    };
+    abortController?.signal.addEventListener('abort', onAbort);
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
@@ -270,6 +270,8 @@ export class CcsLogsExtractionClient {
         });
       }
     } while (!isLastLogsPage);
+
+    this.logger.info(`CCS entities extracted: ${totalCount}, in ${totalPages} pages`);
 
     return { count: totalCount, pages: totalPages };
   }
@@ -412,7 +414,7 @@ export class CcsLogsExtractionClient {
           logger: this.logger,
           abortController,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-          transformDocument: this.buildTransformDocument(type, toDateISO),
+          transformDocument: this.buildTransformDocument(type),
         });
       }
 
@@ -429,15 +431,15 @@ export class CcsLogsExtractionClient {
 
   /**
    * Returns a document transformer that rewrites `@timestamp` to a synthetic value
-   * just after `toDateISO` (incrementing by 1ms per doc) so the next local extraction
+   * just of now, incrementing by 1ms per doc, so the next local extraction
    * run picks up CCS-written updates in the correct order.
+   * This should be picked up in time because of the delay implemented in the main extraction
    */
-  private buildTransformDocument(type: EntityType, toDateISO: string) {
-    const momentToDate = moment.utc(toDateISO);
-    let timestampIncrement = 0;
+  private buildTransformDocument(type: EntityType) {
+    let timestampIncrement = 1;
     return (doc: Record<string, unknown>) => {
       timestampIncrement++;
-      const timestamp = momentToDate.add(timestampIncrement, 'ms').toISOString();
+      const timestamp = moment().utc().add(timestampIncrement, 'ms').toISOString();
       return this.transformDocForCcsUpsert(type, doc, timestamp);
     };
   }

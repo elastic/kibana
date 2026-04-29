@@ -50,8 +50,6 @@ const emptyProbeResponse: ESQLSearchResponse = { columns: [], values: [] };
 
 // Fixed clock so moment()-based timestamps are deterministic across tests
 const FIXED_NOW = new Date('2026-01-01T12:00:00.000Z');
-// '1m' delay → toDateISO = FIXED_NOW - 60 000 ms
-const EXPECTED_TO_DATE_ISO = '2026-01-01T11:59:00.000Z';
 // '3h' lookbackPeriod → fresh fromDateISO = FIXED_NOW - 10 800 000 ms
 const EXPECTED_FROM_DATE_ISO = '2026-01-01T09:00:00.000Z';
 
@@ -175,11 +173,11 @@ describe('CcsLogsExtractionClient', () => {
     expect(doc.user).toBeDefined();
     expect((doc as { event?: { kind?: string } }).event?.kind).toBe('asset');
     expect(doc['@timestamp']).toBeDefined();
-    // @timestamp is rewritten to toDateISO + increment (1ms per doc)
-    const toDateMs = new Date(EXPECTED_TO_DATE_ISO).getTime();
+    // @timestamp is rewritten to now + increment (1ms per doc) so it is always in the future
+    const nowMs = FIXED_NOW.getTime();
     const ts = new Date(doc['@timestamp'] as string).getTime();
-    expect(ts).toBeGreaterThanOrEqual(toDateMs);
-    expect(ts).toBeLessThanOrEqual(toDateMs + 10001);
+    expect(ts).toBeGreaterThanOrEqual(nowMs);
+    expect(ts).toBeLessThanOrEqual(nowMs + 10001);
   });
 
   it('should paginate (inner loop) when entity page is full', async () => {

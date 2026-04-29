@@ -23,7 +23,8 @@ const DOCS_LIMIT = 2;
 const CCS_TEST_LOGS_INDEX = 'ccs-test-logs';
 const FROM_DATE = '2026-02-25T10:00:00Z';
 const TO_DATE = '2026-02-25T12:00:00Z';
-const MAX_DATE_OF_UPDATES = '2026-02-25T12:10:01Z';
+// CCS writes entities with @timestamp = now + Nms; use a future date so local extraction picks them up
+const MAX_DATE_OF_UPDATES = new Date(Date.now() + 5 * 60_000).toISOString();
 
 async function createCcsTestLogsIndex(esClient: EsClient) {
   await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
