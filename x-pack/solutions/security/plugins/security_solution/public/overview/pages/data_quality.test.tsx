@@ -12,7 +12,7 @@ import type { HttpFetchOptions } from '@kbn/core-http-browser';
 
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
-import { DataQuality } from './data_quality';
+import { DataQuality, mergeDataQualityPatterns } from './data_quality';
 import { useKibana } from '../../common/lib/kibana';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
@@ -71,6 +71,35 @@ const mockUseSignalIndex = jest.fn(() => defaultUseSignalIndexReturn);
 jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
   useSignalIndex: () => mockUseSignalIndex(),
 }));
+
+describe('mergeDataQualityPatterns', () => {
+  const alertsIndex = '.alerts-security.alerts-default';
+
+  it('dedupes when the signal index is also listed in selectedPatterns', () => {
+    const selectedPatterns = ['logs-*', alertsIndex, 'auditbeat-*'];
+
+    expect(mergeDataQualityPatterns(alertsIndex, selectedPatterns)).toEqual([
+      alertsIndex,
+      'logs-*',
+      'auditbeat-*',
+    ]);
+  });
+
+  it('dedupes duplicate entries in selectedPatterns when signalIndexName is null', () => {
+    expect(mergeDataQualityPatterns(null, ['packetbeat-*', 'logs-*', 'packetbeat-*'])).toEqual([
+      'packetbeat-*',
+      'logs-*',
+    ]);
+  });
+
+  it('prepends signal index once when it is not in selectedPatterns', () => {
+    expect(mergeDataQualityPatterns(alertsIndex, ['logs-*', 'auditbeat-*'])).toEqual([
+      alertsIndex,
+      'logs-*',
+      'auditbeat-*',
+    ]);
+  });
+});
 
 describe('DataQuality', () => {
   const defaultIlmPhases = 'hotwarmunmanaged';
