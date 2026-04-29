@@ -28,7 +28,7 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 - **Look for:** `await Promise.all([...])` whose entries are Playwright actions, locator `waitFor`s, or `expect()` assertions.
 - **Why:** Each parallel wait starts its timeout at the same wall-clock moment. When the UI fans out to backend work, the requests contend for the same Kibana/ES resources — they don't finish faster, they race each other, and the slowest one runs out of budget, producing flake that looks random.
 - **Scout approach:** Serialize the awaits, or iterate with a `for` loop.
-- **Exception:** the official `Promise.all([page.waitForEvent('popup'), action.click()])` listener-then-trigger pair — fine, the listener must register before the trigger (or use the callback form `page.waitForEvent('popup', () => action.click())`).
+- **Exception:** the official `Promise.all([page.waitForEvent('popup'), action.click()])` listener-then-trigger pair — fine, the listener must register before the trigger.
 
 ### Force interactions
 

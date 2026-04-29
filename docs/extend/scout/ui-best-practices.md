@@ -112,7 +112,7 @@ for (const panel of [panelA, panelB, panelC]) {
 :::::
 
 ::::::{tip}
-**Exception — listener-then-trigger pairs.** The official Playwright pattern `Promise.all([page.waitForEvent('popup'), action.click()])` is intentional: the event listener must be registered _before_ the action that fires it. Use it as documented (or prefer the callback form: `await page.waitForEvent('popup', () => action.click())`).
+**Exception — listener-then-trigger pairs.** The official Playwright pattern `Promise.all([page.waitForEvent('popup'), action.click()])` is intentional: the event listener must be registered _before_ the action that fires it.
 ::::::
 
 ::::::{note}
