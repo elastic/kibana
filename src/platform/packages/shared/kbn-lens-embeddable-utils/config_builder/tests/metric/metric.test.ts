@@ -33,7 +33,7 @@ import {
 describe('Metric', () => {
   describe('state transform validation', () => {
     it('should convert a simple metric', () => {
-      validator.metric.fromState(simpleMetricAttributes, true);
+      validator.metric.fromState(simpleMetricAttributes);
     });
 
     it('should convert a complex metric', () => {
