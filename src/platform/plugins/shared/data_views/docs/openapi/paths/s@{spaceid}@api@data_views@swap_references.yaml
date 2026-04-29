@@ -58,3 +58,6 @@ post:
                     type:
                       type: string
                       description: The saved object type.
+          examples:
+            swapDataViewResponse:
+              $ref: '../components/examples/swap_data_view_response.yaml'
