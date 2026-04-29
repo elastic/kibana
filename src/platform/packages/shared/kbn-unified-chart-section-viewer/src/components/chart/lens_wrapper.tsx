@@ -13,7 +13,11 @@ import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plu
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
-import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_VIEW_DETAILS,
+} from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
@@ -108,11 +112,41 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
+  /*
+   * The visible quick-action row for metrics-grid panels (issue #236787).
+   *
+   * The list is prop-keyed: View details and Copy to dashboard are promoted to
+   * the visible row only when the parent wired their handlers. The traces grid
+   * (latency / throughput / error_rate) does not pass these handlers, so its
+   * visible row remains [Explore, Inspect] unchanged.
+   *
+   * Inspect ('openInspector') stays in the visible row here even though the
+   * desired end-state is to demote it to the popover. Lens auto-injects Inspect
+   * into the default action set, and the public LensRenderer contract (see
+   * x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx:142-157)
+   * only *appends* extraActions to defaults; it offers no way to suppress or
+   * replace a default by id. Demoting Inspect, and adding dividers between
+   * groupings, requires a follow-up from @elastic/kibana-visualizations.
+   */
+  // The context typing expects an 8-slot tuple of optional strings
+  // (PresentationPanelQuickActionIds.view -> QuickActionIds). The type isn't
+  // re-exported from the plugin's public entry, and we know our list never
+  // exceeds 4 ids, so we cast through a tuple shape here.
+  const quickActionView = useMemo(() => {
+    const ids: Array<string | undefined> = [ACTION_EXPLORE_IN_DISCOVER_TAB];
+    if (onViewDetails) {
+      ids.push(ACTION_VIEW_DETAILS);
+    }
+    if (onCopyToDashboard) {
+      ids.push(ACTION_COPY_TO_DASHBOARD);
+    }
+    ids.push('openInspector');
+    return ids as [string?, string?, string?, string?, string?, string?, string?, string?];
+  }, [onViewDetails, onCopyToDashboard]);
+
   return (
     <div css={chartCss}>
-      <PresentationPanelQuickActionContext.Provider
-        value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
-      >
+      <PresentationPanelQuickActionContext.Provider value={{ view: quickActionView }}>
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}

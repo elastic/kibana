@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import '@testing-library/jest-dom';
 import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_VIEW_DETAILS,
+} from '../../common/constants';
 
 // Mock the EmbeddableComponent
 const mockEmbeddableComponent = jest.fn((props) => (
@@ -200,6 +206,63 @@ describe('LensWrapper', () => {
 
       // The component should be wrapped in the context provider
       expect(getByTestId('embeddable-component')).toBeInTheDocument();
+    });
+  });
+
+  describe('quick-action view list (prop-keyed)', () => {
+    /**
+     * The wrapper builds the `view` quick-action list dynamically based on which
+     * handler props the parent wired. We snoop on the value of
+     * `PresentationPanelQuickActionContext` from a child rendered inside the
+     * provider. This locks in the behavior that promotes View details / Copy to
+     * dashboard onto the visible quick-action row only when their handlers are
+     * present (so the traces grid, which never wires those handlers, stays
+     * unchanged).
+     */
+    function renderAndCaptureViewList(props: Partial<LensWrapperProps>): string[] | undefined {
+      let captured: string[] | undefined;
+      function ContextSnoop() {
+        const value = useContext(PresentationPanelQuickActionContext);
+        captured = value?.view as string[] | undefined;
+        return null;
+      }
+
+      // Stub EmbeddableComponent to render our snoop child so it sits inside the provider.
+      mockEmbeddableComponent.mockImplementationOnce(() => <ContextSnoop />);
+
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} {...props} />
+        </EuiThemeProvider>
+      );
+
+      return captured;
+    }
+
+    it('promotes View details and Copy to dashboard when both handlers are wired', () => {
+      const view = renderAndCaptureViewList({
+        onViewDetails: jest.fn(),
+        onCopyToDashboard: jest.fn(),
+      });
+
+      expect(view).toEqual([
+        ACTION_EXPLORE_IN_DISCOVER_TAB,
+        ACTION_VIEW_DETAILS,
+        ACTION_COPY_TO_DASHBOARD,
+        'openInspector',
+      ]);
+    });
+
+    it('preserves the traces-grid contract when neither metrics handler is wired', () => {
+      const view = renderAndCaptureViewList({});
+
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector']);
+    });
+
+    it('only promotes View details when onViewDetails is wired alone', () => {
+      const view = renderAndCaptureViewList({ onViewDetails: jest.fn() });
+
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_VIEW_DETAILS, 'openInspector']);
     });
   });
 
