@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
 import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
@@ -45,8 +46,18 @@ function formatLabelWithScore(label: string, score?: number): string {
   return `${label} (${Math.round(score)})`;
 }
 
+const anomaliesBadgeCss = css`
+  align-items: center;
+`;
+
+const anomaliesBadgeHealthCss = css`
+  line-height: inherit;
+  display: flex;
+  align-items: center;
+`;
+
 export function AnomaliesBadge({ score }: { score?: number }) {
-  const severity = useMemo(() => getSeverity(score), [score]);
+  const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
   const tooltipContent =
@@ -61,11 +72,11 @@ export function AnomaliesBadge({ score }: { score?: number }) {
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
-      <EuiBadge tabIndex={0} color="hollow" style={{ alignItems: 'center' }}>
+      <EuiBadge tabIndex={0} color="hollow" css={anomaliesBadgeCss}>
         <EuiHealth
           textSize="inherit"
           color={score === undefined ? 'subdued' : getSeverityColor(score)}
-          style={{ lineHeight: 'inherit', display: 'flex', alignItems: 'center' }}
+          css={anomaliesBadgeHealthCss}
         >
           {text}
         </EuiHealth>
