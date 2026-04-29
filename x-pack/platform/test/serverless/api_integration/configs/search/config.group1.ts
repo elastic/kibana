@@ -22,7 +22,6 @@ export default createTestConfig({
     require.resolve('../../test_suites/scripts_tests'),
     require.resolve('../../test_suites/search_oss'),
     require.resolve('../../test_suites/search_profiler'),
-    require.resolve('../../test_suites/search_xpack'),
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/console'),
     require.resolve('../../test_suites/saved_objects_management'),

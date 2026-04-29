@@ -23,15 +23,20 @@ import {
   getAffectedPackages,
   listChangedFiles,
   filterFilesByPackages,
-  SELECTIVE_TESTS_LABEL,
+  PREVENT_SELECTIVE_TESTS_LABEL,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   touchedCriticalFiles,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
 } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
-// TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
-const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
+const prLabels =
+  process.env.GITHUB_PR_LABELS?.split(',')
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+const isPrBuild = Boolean(process.env.GITHUB_PR_NUMBER);
+const preventSelectiveTesting = prLabels.includes(PREVENT_SELECTIVE_TESTS_LABEL);
+const USE_SELECTIVE_TESTING = isPrBuild && !preventSelectiveTesting;
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -440,17 +445,13 @@ export async function pickTestGroupRunOrder() {
 
   // Register cancelable child keys before uploading so a concurrent gate failure
   // can discover and short-circuit these jobs immediately.
-  if (unit.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest', 'true');
-  }
-  if (integration.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest-integration', 'true');
-  }
-  // Register child step keys (not the group key) because `buildkite-agent step cancel`
+  // Child step keys (not group keys) are registered because `buildkite-agent step cancel`
   // does not work on group keys.
-  for (const fg of functionalGroups) {
-    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
-  }
+  const cancelKeys: string[] = [];
+  if (unit.count > 0) cancelKeys.push('jest');
+  if (integration.count > 0) cancelKeys.push('jest-integration');
+  for (const fg of functionalGroups) cancelKeys.push(fg.key);
+  bk.setMetadata('cancel_on_gate_failure_batch:test_groups', JSON.stringify(cancelKeys));
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);

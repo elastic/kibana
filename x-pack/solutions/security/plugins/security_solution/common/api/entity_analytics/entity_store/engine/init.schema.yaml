@@ -23,6 +23,16 @@ paths:
         required: true
         content:
           application/json:
+            examples:
+              initEntityEngineRequest:
+                summary: Initialize a host engine with default settings
+                value:
+                  fieldHistoryLength: 10
+                  indexPattern: ''
+                  timestampField: '@timestamp'
+                  lookbackPeriod: '3h'
+                  frequency: '1m'
+                  delay: '1m'
             schema:
               type: object
               properties:
