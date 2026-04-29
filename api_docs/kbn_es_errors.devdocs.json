@@ -100,7 +100,14 @@
         "tags": [],
         "label": "isRequestAbortedError",
         "description": [
-          "\nChecks if the provided `error` is an {@link errors.RequestAbortedError | elasticsearch request aborted error}"
+          "\nChecks if the provided `error` is an ",
+          {
+            "pluginId": "@kbn/es-errors",
+            "scope": "common",
+            "docId": "kibKbnEsErrorsPluginApi",
+            "section": "def-common.errors.RequestAbortedError",
+            "text": "elasticsearch request aborted error"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -139,7 +146,14 @@
         "tags": [],
         "label": "isResponseError",
         "description": [
-          "\nChecks if the provided `error` is an {@link errors.ResponseError | elasticsearch response error}"
+          "\nChecks if the provided `error` is an ",
+          {
+            "pluginId": "@kbn/es-errors",
+            "scope": "common",
+            "docId": "kibKbnEsErrorsPluginApi",
+            "section": "def-common.errors.ResponseError",
+            "text": "elasticsearch response error"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
@@ -178,7 +192,14 @@
         "tags": [],
         "label": "isUnauthorizedError",
         "description": [
-          "\nChecks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}"
+          "\nChecks if the provided `error` is an ",
+          {
+            "pluginId": "@kbn/es-errors",
+            "scope": "common",
+            "docId": "kibKbnEsErrorsPluginApi",
+            "section": "def-common.UnauthorizedError",
+            "text": "elasticsearch unauthorized error"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
