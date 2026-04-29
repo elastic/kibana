@@ -12,6 +12,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { WatchlistsFlyoutKey } from '../../../flyout/entity_details/shared/constants';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
+import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { Watchlists } from '.';
 
 export const WatchlistsTab: React.FC = () => {
@@ -20,6 +21,7 @@ export const WatchlistsTab: React.FC = () => {
   const { data: privileges, error, isLoading } = useWatchlistsPrivileges();
   const canRead = privileges?.has_read_permissions ?? false;
   const canWrite = privileges?.has_write_permissions ?? false;
+  const hasAllRequired = privileges?.has_all_required ?? false;
 
   const handleCreateClick = () => {
     openFlyout({
@@ -42,7 +44,7 @@ export const WatchlistsTab: React.FC = () => {
             iconType="plusInCircle"
             fill
             onClick={handleCreateClick}
-            isDisabled={isLoading || !!error || !canWrite}
+            isDisabled={isLoading || !!error || !hasAllRequired}
             data-test-subj="watchlistsTabCreateButton"
           >
             <FormattedMessage
@@ -52,6 +54,20 @@ export const WatchlistsTab: React.FC = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {privileges && canRead && !hasAllRequired && (
+        <>
+          <EuiSpacer size="m" />
+          <MissingPrivilegesCallout
+            privileges={privileges}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.tab.missingPrivilegesCreateOrDelete.title"
+                defaultMessage="Insufficient privileges to create or delete watchlists"
+              />
+            }
+          />
+        </>
+      )}
       <EuiSpacer size="m" />
       <Watchlists
         privileges={privileges}
