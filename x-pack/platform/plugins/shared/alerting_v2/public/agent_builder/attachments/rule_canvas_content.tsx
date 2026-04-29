@@ -71,7 +71,7 @@ export const RuleCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           handler: async () => {
             const created = await rulesApi.createRule({
-              kind: data.kind,              
+              kind: data.kind,
               ...buildRuleCommonPayload(data),
             });
             await updateOrigin(created.id);
