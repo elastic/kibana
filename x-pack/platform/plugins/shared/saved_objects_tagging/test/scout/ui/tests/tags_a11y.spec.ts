@@ -56,7 +56,7 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
       const { violations: flyoutViolations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(flyoutViolations).toStrictEqual([]);
       await page.testSubj.click('euiFlyoutCloseButton');
-      await pageObjects.tagManagement.getAssignFlyout().waitFor({ state: 'hidden' });
+      await pageObjects.tagManagement.getAssignFlyoutCloseButton().waitFor({ state: 'hidden' });
       const { violations: pageViolations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(pageViolations).toStrictEqual([]);
     });

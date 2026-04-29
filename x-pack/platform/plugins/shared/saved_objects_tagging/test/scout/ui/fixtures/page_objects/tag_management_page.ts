@@ -69,11 +69,7 @@ export class TagManagementPage {
   }
 
   async openBulkActionMenu() {
-    const menuBtn = this.page.testSubj.locator('actionBar-contextMenuButton');
-    const isOpen = await this.page.testSubj.isVisible('actionBar-contextMenu');
-    if (!isOpen) {
-      await menuBtn.click();
-    }
+    await this.page.testSubj.click('actionBar-contextMenuButton');
   }
 
   async selectAllTags() {
@@ -84,7 +80,7 @@ export class TagManagementPage {
     return this.page.testSubj.locator('tagModalForm');
   }
 
-  getAssignFlyout() {
+  getAssignFlyoutCloseButton() {
     return this.page.testSubj.locator('euiFlyoutCloseButton');
   }
 }
