@@ -303,7 +303,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       }
       fetchBody = fd;
     } else {
-      fetchBody = body ? JSON.stringify(body) : undefined;
+      fetchBody = body != null ? JSON.stringify(body) : undefined;
     }
 
     // Build fetch options
