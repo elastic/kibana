@@ -811,6 +811,7 @@ groups:
         description: |
           Sets the maximum number of new cases the Cases connector can open in one detection rule run when the rule includes a Cases action. Values must be between 1 and 1000. Very high values can add load on {{kib}} and {{es}}. `20` by default.
         datatype: number
+        default: 20
         applies_to:
           stack: ga 9.4
           ech: ga
