@@ -8,11 +8,9 @@
 import { fetch$ } from '@kbn/presentation-publishing';
 import { type TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { SingleMetricViewerEmbeddableUserInput } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { combineLatest, BehaviorSubject } from 'rxjs';
-import type {
-  SingleMetricViewerEmbeddableApi,
-  SingleMetricViewerEmbeddableUserInput,
-} from '../types';
+import type { SingleMetricViewerEmbeddableApi } from '../types';
 
 interface SingleMetricViewerData {
   /**
