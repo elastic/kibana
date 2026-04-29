@@ -63,9 +63,9 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Identifies the `ad` service as the primary source of latency, supported by evidence (e.g., elevated CPU usage, slow spans, or runtime metrics), rather than attributing the issue to unrelated services',
-                  'Explains the causal chain from user symptom (slow product pages) → ad-related requests → degradation in the `ad` service (e.g., CPU-bound processing)',
+                  'Explains the causal chain from user symptom (slow product pages)',
                   'Uses concrete observability signals (e.g., service metrics, trace latency, runtime/host CPU) to support conclusions, not speculation alone',
-                  'Frames the issue as compute/resource saturation within the `ad` service, not as a downstream outage, network issue, or error-driven failure',
+                  'Frames the issue as compute/resource saturation within the `ad` service',
                   'Correctly treats increased latency in upstream services (e.g., frontend, recommendation) as symptoms of the `ad` service slowdown when supported by traces or topology',
                   'Does not attribute the issue to unrelated domains (e.g., checkout, payment, cart) without supporting evidence',
                 ],
