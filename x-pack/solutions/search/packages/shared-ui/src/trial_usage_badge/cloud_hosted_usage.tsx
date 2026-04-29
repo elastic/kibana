@@ -33,10 +33,10 @@ export const CloudHostedUsage: React.FC<CloudHostedUsageProps> = ({
     <>
       {storageUsage !== undefined && (
         <UsageMetricRow
-          label={i18n.translate('xpack.searchSharedUi.trialUsageBadge.storageLabel', {
+          label={i18n.translate('xpack.searchSharedUI.trialUsageBadge.storageLabel', {
             defaultMessage: 'Storage',
           })}
-          tooltip={i18n.translate('xpack.searchSharedUi.trialUsageBadge.storageTooltip', {
+          tooltip={i18n.translate('xpack.searchSharedUI.trialUsageBadge.storageTooltip', {
             defaultMessage: 'The size of your deployment as specified in the hardware profile.',
           })}
           value={storageUsage}
@@ -45,10 +45,10 @@ export const CloudHostedUsage: React.FC<CloudHostedUsageProps> = ({
       )}
       {mlNodeCount !== undefined && mlMemoryLimit !== undefined && (
         <UsageMetricRow
-          label={i18n.translate('xpack.searchSharedUi.trialUsageBadge.mlNodesLabel', {
+          label={i18n.translate('xpack.searchSharedUI.trialUsageBadge.mlNodesLabel', {
             defaultMessage: 'ML Nodes',
           })}
-          tooltip={i18n.translate('xpack.searchSharedUi.trialUsageBadge.mlNodesTooltip', {
+          tooltip={i18n.translate('xpack.searchSharedUI.trialUsageBadge.mlNodesTooltip', {
             defaultMessage:
               'The size of your Machine Learning node as specified in the hardware profile.',
           })}
@@ -58,10 +58,10 @@ export const CloudHostedUsage: React.FC<CloudHostedUsageProps> = ({
       )}
       {llmTotalTokens !== undefined && (
         <UsageMetricRow
-          label={i18n.translate('xpack.searchSharedUi.trialUsageBadge.llmUsageLabel', {
+          label={i18n.translate('xpack.searchSharedUI.trialUsageBadge.llmUsageLabel', {
             defaultMessage: 'LLM Usage',
           })}
-          tooltip={i18n.translate('xpack.searchSharedUi.trialUsageBadge.llmUsageTooltip', {
+          tooltip={i18n.translate('xpack.searchSharedUI.trialUsageBadge.llmUsageTooltip', {
             defaultMessage: 'Token usage of Elastic Managed LLMs.',
           })}
           value={formatTokens(llmTotalTokens)}

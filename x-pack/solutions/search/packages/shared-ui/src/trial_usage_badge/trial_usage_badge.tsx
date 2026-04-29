@@ -54,14 +54,14 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const title = isServerless
-    ? i18n.translate('xpack.searchSharedUi.trialUsageBadge.serverlessTitle', {
+    ? i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
         defaultMessage: 'Elasticsearch Serverless',
       })
-    : i18n.translate('xpack.searchSharedUi.trialUsageBadge.cloudHostedTitle', {
+    : i18n.translate('xpack.searchSharedUI.trialUsageBadge.cloudHostedTitle', {
         defaultMessage: 'Elastic Cloud Hosted',
       });
 
-  const daysLabel = i18n.translate('xpack.searchSharedUi.trialUsageBadge.daysLeft', {
+  const daysLabel = i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysLeft', {
     defaultMessage: '{days} days',
     values: { days: trialDaysLeft },
   });
@@ -97,7 +97,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
             padding: `0 ${euiTheme.size.s}`,
           })}
         >
-          {i18n.translate('xpack.searchSharedUi.trialUsageBadge.trialLabel', {
+          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
             defaultMessage: 'TRIAL',
           })}
         </EuiBadge>
@@ -115,7 +115,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
             minHeight: 0,
           })}
         >
-          {i18n.translate('xpack.searchSharedUi.trialUsageBadge.usageLabel', {
+          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.usageLabel', {
             defaultMessage: 'Usage',
           })}
         </EuiButtonEmpty>
@@ -175,7 +175,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
               iconType="popout"
               iconSide="right"
             >
-              {i18n.translate('xpack.searchSharedUi.trialUsageBadge.viewSubscriptionPlans', {
+              {i18n.translate('xpack.searchSharedUI.trialUsageBadge.viewSubscriptionPlans', {
                 defaultMessage: 'View subscription plans',
               })}
             </EuiButton>
@@ -189,7 +189,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
               size="xs"
               iconType="documents"
             >
-              {i18n.translate('xpack.searchSharedUi.trialUsageBadge.documentation', {
+              {i18n.translate('xpack.searchSharedUI.trialUsageBadge.documentation', {
                 defaultMessage: 'Documentation',
               })}
             </EuiButtonEmpty>
