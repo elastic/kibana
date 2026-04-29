@@ -160,7 +160,9 @@ describe('YamlRuleForm component', () => {
   });
 
   it('disables editor when isSubmitting is true', () => {
-    render(<StatefulYamlRuleForm {...defaultProps} isSubmitting />, { wrapper: createFormWrapper() });
+    render(<StatefulYamlRuleForm {...defaultProps} isSubmitting />, {
+      wrapper: createFormWrapper(),
+    });
 
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
     expect(editor).toBeDisabled();
