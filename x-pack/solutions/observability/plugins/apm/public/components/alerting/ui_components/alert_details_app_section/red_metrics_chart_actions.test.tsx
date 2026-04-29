@@ -24,6 +24,7 @@ const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
 const { useFetcher } = jest.requireMock('../../../../hooks/use_fetcher');
 
 const MOCK_TRACES_INDEX = 'traces-apm-*';
+const MOCK_ERROR_INDEX = 'logs-apm.error-*';
 
 const mockApmGetRedirectUrl = jest.fn().mockReturnValue('http://test-apm-url');
 const mockDiscoverGetRedirectUrl = jest.fn().mockReturnValue('http://test-discover-url');
@@ -80,6 +81,7 @@ const setupMocks = ({
             savedValue: MOCK_TRACES_INDEX,
             defaultValue: 'traces-otel-*',
           },
+          { configurationName: 'error', defaultValue: MOCK_ERROR_INDEX },
         ],
       },
       status: FETCH_STATUS.SUCCESS,
@@ -152,6 +154,7 @@ describe('RedMetricsChartActions', () => {
       expect(mockApmGetRedirectUrl).toHaveBeenCalledWith({
         serviceName: 'testService',
         serviceOverviewTab: 'transactions',
+        errorGroupId: undefined,
         query: {
           environment: 'testEnvironment',
           rangeFrom: 'now-15m',
@@ -179,6 +182,53 @@ describe('RedMetricsChartActions', () => {
       expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           serviceOverviewTab: undefined,
+        })
+      );
+    });
+
+    it('passes errorGroupId to the locator when indexType is "error" and errorGroupId is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          indexType="error"
+          queryParams={{
+            serviceName: 'testService',
+            environment: 'testEnvironment',
+            transactionName: 'testTransaction',
+            errorGroupId: 'testGroupId',
+          }}
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          ruleTypeId="apm.error_rate"
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceOverviewTab: 'errors',
+          errorGroupId: 'testGroupId',
+        })
+      );
+    });
+
+    it('falls back to the errors tab when indexType is "error" but no errorGroupId is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          indexType="error"
+          queryParams={{
+            serviceName: 'testService',
+            environment: 'testEnvironment',
+            transactionName: 'testTransaction',
+          }}
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          ruleTypeId="apm.error_rate"
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceOverviewTab: 'errors',
+          errorGroupId: undefined,
         })
       );
     });

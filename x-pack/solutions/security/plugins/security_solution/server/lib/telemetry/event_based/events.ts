@@ -1849,13 +1849,123 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
 
 export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
   insightId: string;
+  insightType: string;
 }> = {
   eventType: 'endpoint_workflow_insights_remediated_event',
   schema: {
     insightId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID of the action that was sent to the endpoint',
+        description: 'The ID of the workflow insight that was remediated',
+        optional: false,
+      },
+    },
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The type of the workflow insight (e.g. incompatible_antivirus, policy_response_failure)',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT: EventTypeOpts<{
+  insightTypes: string[];
+  endpointCount: number;
+  hasConnectorId: boolean;
+  newExecutions: number;
+  deduplicatedExecutions: number;
+  failures: number;
+}> = {
+  eventType: 'endpoint_workflow_insights_scan_triggered_event',
+  schema: {
+    insightTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'An insight type requested in the scan',
+          optional: false,
+        },
+      },
+      _meta: {
+        description: 'The insight types requested in the scan',
+        optional: false,
+      },
+    },
+    endpointCount: {
+      type: 'long',
+      _meta: {
+        description: 'Number of endpoints targeted by the scan',
+        optional: false,
+      },
+    },
+    hasConnectorId: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a specific connector was selected for the scan',
+        optional: false,
+      },
+    },
+    newExecutions: {
+      type: 'long',
+      _meta: {
+        description: 'Number of new agent executions created',
+        optional: false,
+      },
+    },
+    deduplicatedExecutions: {
+      type: 'long',
+      _meta: {
+        description: 'Number of executions skipped because they were already in-flight',
+        optional: false,
+      },
+    },
+    failures: {
+      type: 'long',
+      _meta: {
+        description: 'Number of executions that failed to start',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT: EventTypeOpts<{
+  insightType: string;
+  count: number;
+}> = {
+  eventType: 'endpoint_workflow_insights_created_event',
+  schema: {
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of insights created',
+        optional: false,
+      },
+    },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'Number of insights created in this batch',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT: EventTypeOpts<{
+  insightType: string;
+}> = {
+  eventType: 'endpoint_workflow_insights_dismissed_event',
+  schema: {
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The type of the workflow insight (e.g. incompatible_antivirus, policy_response_failure)',
         optional: false,
       },
     },
@@ -1961,6 +2071,9 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
