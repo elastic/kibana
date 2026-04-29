@@ -91,14 +91,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
       }>((resolve, reject) => {
         const onSave = async ({
           newTitle,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
         }: OnSaveProps): Promise<SaveResult> => {
-          await embeddable.checkForDuplicateTitle(
-            newTitle,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate
-          );
           try {
             const libraryId = await embeddable.saveToLibrary(newTitle);
             const byReferenceState = embeddable.getSerializedStateByReference(libraryId);
@@ -117,6 +110,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
         };
         showSaveModal(
           <SavedObjectSaveModalWithSaveResult
+            hasLibraryItemWithTitle={embeddable.hasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
             title={lastTitle ?? ''}
