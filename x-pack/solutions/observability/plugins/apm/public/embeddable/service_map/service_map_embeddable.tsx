@@ -84,12 +84,10 @@ export function ServiceMapEmbeddable({
     }
   }, [license, hasValidLicense, isServiceMapEnabled, onBlockingError]);
 
-  const { start: resolvedStart, end: resolvedEnd } = useMemo(
-    () => getDateRange({ rangeFrom, rangeTo }),
-    [rangeFrom, rangeTo]
-  );
-  const start = resolvedStart ?? rangeFrom;
-  const end = resolvedEnd ?? rangeTo;
+  const { start, end } = useMemo(() => {
+    const { start: parsedStart, end: parsedEnd } = getDateRange({ rangeFrom, rangeTo });
+    return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
+  }, [rangeFrom, rangeTo]);
 
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();

@@ -70,7 +70,7 @@ export function useServiceMapBadges({
 
   const { data: badgesData, status: badgesStatus } = useFetcher(
     (callApmApi) => {
-      if (!enabled || serviceNamesForBadges.length === 0) {
+      if (!enabled) {
         return;
       }
       return callApmApi('POST /internal/apm/service-map/service_badges', {

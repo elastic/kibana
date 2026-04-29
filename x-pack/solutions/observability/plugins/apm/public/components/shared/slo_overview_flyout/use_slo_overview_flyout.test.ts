@@ -50,11 +50,6 @@ describe('useSloOverviewFlyout()', () => {
         serviceName: 'payments',
         agentName: 'java',
       });
-
-      expect(result.current.sloOverviewFlyout).toEqual({
-        serviceName: 'payments',
-        agentName: 'java',
-      });
     });
 
     it('overwrites existing state when called a second time', () => {

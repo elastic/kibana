@@ -59,11 +59,10 @@ import {
   APM_SLO_INDICATOR_TYPES,
   type ApmIndicatorType,
 } from '../../../../../common/slo_indicator_types';
-import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { listMetricColumnPreset } from '../../../../utils/column_presets';
-import { useSloOverviewFlyout } from '../../../shared/slo_overview_flyout/use_slo_overview_flyout';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
