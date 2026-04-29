@@ -31,11 +31,11 @@ engine:
     - features.plugins=false
     - -c
     - features.apps=false
-    # Azure-backed LiteLLM strictly validates tool response ordering.
+    # Force the Chat Completions wire so the model's "assistant text + tool_call"
+    # turns serialize into a single assistant message and Azure-backed LiteLLM
+    # stops rejecting them as orphan tool_calls.
     - -c
-    - mcp_servers.github.supports_parallel_tool_calls=false
-    - -c
-    - mcp_servers.safeoutputs.supports_parallel_tool_calls=false
+    - model_providers.openai-proxy.wire_api="chat"
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
