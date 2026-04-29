@@ -90,7 +90,7 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
 }) => ({
   workflowRuntime: options.workflowRuntime,
   stepExecutionRuntimeFactory: {},
-  workflowExecutionState: {},
+  workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
   workflowLogger: {},
   nodesFactory: {},

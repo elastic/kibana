@@ -65,6 +65,7 @@
             "lineNumber": 159,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -126,6 +127,7 @@
             "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -157,7 +159,15 @@
         "tags": [],
         "label": "createRootWithSettings",
         "description": [
-          "\nCreates a test {@link Root} instance with the given configuration overrides.\n"
+          "\nCreates a test ",
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "server",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-server.Root",
+            "text": "Root"
+          },
+          " instance with the given configuration overrides.\n"
         ],
         "signature": [
           "(settings: Record<string, any>, cliArgs: Partial<",
@@ -187,6 +197,7 @@
             "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -208,6 +219,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -286,6 +298,7 @@
             "lineNumber": 267,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -302,7 +315,15 @@
         ],
         "label": "createTestServerlessInstances",
         "description": [
-          "\nSee docs in {@link TestUtils}. This function provides the same utilities but\nconfigured for serverless.\n"
+          "\nSee docs in ",
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "server",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-server.TestUtils",
+            "text": "TestUtils"
+          },
+          ". This function provides the same utilities but\nconfigured for serverless.\n"
         ],
         "signature": [
           "({\n  adjustTimeout,\n  kibana = {},\n  enableCPS = false,\n  esArgs = [],\n  projectType = DEFAULT_PROJECT_TYPE,\n  kibanaUrl = DEFAULT_KIBANA_URL,\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
@@ -612,6 +633,7 @@
             "lineNumber": 143,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Root",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -629,6 +651,7 @@
             "lineNumber": 143,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpMethod",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -894,6 +917,7 @@
                 "lineNumber": 250,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
