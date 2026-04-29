@@ -87,7 +87,7 @@ const NewLiveQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.newLiveQuery.pageTitle"
-                defaultMessage="New live query"
+                defaultMessage="Run query"
               />
             </h1>
           </EuiText>
