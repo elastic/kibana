@@ -230,25 +230,24 @@ export function validateDeploymentModesForInputs(
   });
 }
 
-/**
- * Returns the agentless-specific release status for a given integration.
- * Returns `undefined` when agentless is not enabled for the integration, or when the package
- * consists of a single only-agentless template (package semver is the maturity indicator, per spec).
- * Returns `AgentlessDeploymentReleaseStatus.GA` as-is — callers decide whether to defer to package semver instead.
- * An absent `release` field defaults to `AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT`.
- */
-const knownReleases = new Set(Object.values(AgentlessDeploymentReleaseStatus));
+const knownReleases = new Set<string>(Object.values(AgentlessDeploymentReleaseStatus));
 const leastMature = Object.values(AgentlessDeploymentReleaseStatus)[0];
 
 /** The default agentless release when no `release` field is present. Flip to GA when agentless GAs platform-wide. */
 export const AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT = AgentlessDeploymentReleaseStatus.Beta;
 
-const coerceRelease = (r?: AgentlessDeploymentReleaseStatus) => {
+const lookupRelease = (r?: AgentlessDeploymentReleaseStatus) => {
   if (r === undefined) return AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT;
   // Unknown/invalid values always fall to Beta regardless of the platform-wide default flip.
-  return knownReleases.has(r) ? r : leastMature;
+  return knownReleases.has(r.toLowerCase()) ? r : leastMature;
 };
 
+/**
+ * Returns the release label for the agentless deployment of a given integration, or `undefined`
+ * when agentless is not applicable (not enabled for this integration).
+ * Single only-agentless templates defer to package semver per spec (no `release` field allowed).
+ * An absent `release` field on other agentless templates defaults to `AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT`.
+ */
 export const getAgentlessRelease = (
   packageInfo: Pick<PackageInfo, 'name' | 'version' | 'policy_templates'>,
   integrationToEnable: string
@@ -270,7 +269,7 @@ export const getAgentlessRelease = (
   ) {
     return AgentlessDeploymentReleaseStatus.GA;
   }
-  return coerceRelease(release);
+  return lookupRelease(release);
 };
 
 /**
