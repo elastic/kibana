@@ -194,7 +194,12 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
+import {
+  installAssetsForInputPackagePolicy,
+  installAssetsForIntegrationPackagePolicyCustomDatasets,
+  removeAssetsForIntegrationPackagePolicyCustomDatasets,
+  getCustomDatasetStreams,
+} from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
@@ -698,6 +703,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (pkgInfo.type === 'input') {
       await installAssetsForInputPackagePolicy({
+        soClient,
+        esClient,
+        pkgInfo,
+        packagePolicy: enrichedPackagePolicy,
+        force: !!options?.force,
+        logger,
+      });
+    }
+
+    if (pkgInfo.type === 'integration') {
+      await installAssetsForIntegrationPackagePolicyCustomDatasets({
         soClient,
         esClient,
         pkgInfo,
@@ -2099,6 +2115,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
+        if (
+          pkgInfo &&
+          pkgInfo.type === 'integration' &&
+          oldPackagePolicy.package &&
+          oldPackagePolicy.package.version !== pkgInfo.version
+        ) {
+          assetsToInstallFn.push(async () => {
+            const updatedPackagePolicy = await this.get(soClient, id);
+
+            if (!updatedPackagePolicy) {
+              return;
+            }
+
+            const customStreams = getCustomDatasetStreams(updatedPackagePolicy, pkgInfo);
+            if (customStreams.length === 0) return;
+
+            await installAssetsForIntegrationPackagePolicyCustomDatasets({
+              logger,
+              soClient,
+              esClient,
+              pkgInfo,
+              packagePolicy: updatedPackagePolicy,
+              force: true,
+            });
+          });
+        }
+
         if (!options?.fromBulkUpgrade) {
           // Handle component template/mappings updates for experimental features, e.g. synthetic source
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -2457,6 +2500,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         .catch((error) => logger.error(`Error deleting previous versions: ${error}`));
       logger.debug(`Attempted to delete previous versions ${JSON.stringify(response)}`);
 
+      const integrationAssetCleanupPromises: Array<Promise<void>> = [];
+
       statuses.forEach(({ id, success, error }) => {
         const packagePolicy = packagePolicies.find((p) => p.id === id);
         if (success && packagePolicy) {
@@ -2485,6 +2530,30 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               );
             }
           }
+
+          if (packagePolicy.package?.name && packagePolicy.package?.version) {
+            integrationAssetCleanupPromises.push(
+              getPackageInfo({
+                savedObjectsClient: soClient,
+                pkgName: packagePolicy.package.name,
+                pkgVersion: packagePolicy.package.version,
+              })
+                .then((pkgInfo) =>
+                  removeAssetsForIntegrationPackagePolicyCustomDatasets({
+                    packageInfo: pkgInfo,
+                    packagePolicy,
+                    esClient,
+                    soClient,
+                    logger,
+                  })
+                )
+                .catch((err) =>
+                  logger.error(
+                    `Failed to remove custom dataset assets for policy ${id}: ${err.message}`
+                  )
+                )
+            );
+          }
         } else if (!success && error) {
           result.push({
             id,
@@ -2496,6 +2565,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         }
       });
+
+      await Promise.all(integrationAssetCleanupPromises);
     }
 
     if (!options?.skipUnassignFromAgentPolicies) {
@@ -4377,17 +4448,20 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 }) {
   const { pkgInfo, oldPackagePolicy, packagePolicyUpdate } = opts;
 
-  if (pkgInfo.type !== 'input') return;
-
   const { namespace, inputs } = packagePolicyUpdate;
-  if (namespace && namespace !== oldPackagePolicy.namespace) {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.updatePackagePolicy.namespaceCannotBeModified', {
-        defaultMessage:
-          'Package policy namespace cannot be modified for input only packages, please create a new package policy.',
-      })
-    );
+
+  if (pkgInfo.type === 'input') {
+    if (namespace && namespace !== oldPackagePolicy.namespace) {
+      throw new PackagePolicyValidationError(
+        i18n.translate('xpack.fleet.updatePackagePolicy.namespaceCannotBeModified', {
+          defaultMessage:
+            'Package policy namespace cannot be modified for input only packages, please create a new package policy.',
+        })
+      );
+    }
   }
+
+  if (pkgInfo.type !== 'input' && pkgInfo.type !== 'integration') return;
 
   if (inputs) {
     for (const input of inputs) {
@@ -4422,6 +4496,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           }
 
           if (
+            pkgInfo.type === 'input' &&
             oldStream &&
             oldStream?.vars?.[DATA_STREAM_TYPE_VAR_NAME] &&
             oldStream?.vars[DATA_STREAM_TYPE_VAR_NAME]?.value !==

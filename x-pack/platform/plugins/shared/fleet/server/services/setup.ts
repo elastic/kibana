@@ -64,7 +64,10 @@ import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_co
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
-import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+import {
+  ensureFleetGlobalEsAssets,
+  ensureCustomDatasetTemplatesForIntegrationPolicies,
+} from './setup/ensure_fleet_global_es_assets';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -192,6 +195,15 @@ async function createSetupSideEffects(
     }
   );
   stepSpan?.end();
+
+  if (appContextService.getExperimentalFeatures().enableCustomDatasetTemplateMigration) {
+    stepSpan = apm.startSpan(
+      'Migrate custom dataset templates for integration policies',
+      'preconfiguration'
+    );
+    await ensureCustomDatasetTemplatesForIntegrationPolicies({ soClient, esClient, logger });
+    stepSpan?.end();
+  }
 
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));

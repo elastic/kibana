@@ -23,6 +23,8 @@ import {
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
+import { packagePolicyService } from '../..';
+
 import { dataStreamService } from '../..';
 
 import * as Registry from '../registry';
@@ -331,6 +333,289 @@ export async function removeAssetsForInputPackagePolicy(opts: {
         `Failed to remove assets for input package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
       );
     }
+  }
+}
+
+/**
+ * Returns the subset of streams in an integration package policy where the user has
+ * overridden `data_stream.dataset` with a custom value different from the package default.
+ */
+export function getCustomDatasetStreams(
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  pkgInfo: PackageInfo
+): Array<{ originalDataStream: RegistryDataStream; customDatasetName: string }> {
+  const results: Array<{ originalDataStream: RegistryDataStream; customDatasetName: string }> = [];
+  for (const input of packagePolicy.inputs) {
+    for (const stream of input.streams ?? []) {
+      const customVal = stream.vars?.[DATASET_VAR_NAME]?.value;
+      if (!customVal || customVal === stream.data_stream.dataset) continue;
+      const originalDataStream = pkgInfo.data_streams?.find(
+        (ds) => ds.dataset === stream.data_stream.dataset
+      );
+      if (originalDataStream) {
+        results.push({ originalDataStream, customDatasetName: customVal });
+      }
+    }
+  }
+  return results;
+}
+
+/**
+ * Installs index templates and pipelines for integration package policies that override
+ * `data_stream.dataset`. Mirrors the behavior of `installAssetsForInputPackagePolicy` but
+ * synthesizes a custom RegistryDataStream from the original rather than building one from scratch.
+ */
+export async function installAssetsForIntegrationPackagePolicyCustomDatasets(opts: {
+  pkgInfo: PackageInfo;
+  logger: Logger;
+  packagePolicy: NewPackagePolicy | PackagePolicy;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  force: boolean;
+}) {
+  const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
+
+  if (pkgInfo.type !== 'integration') return;
+
+  const customStreams = getCustomDatasetStreams(packagePolicy, pkgInfo);
+  if (customStreams.length === 0) return;
+
+  for (const { originalDataStream, customDatasetName } of customStreams) {
+    const customDataStream: RegistryDataStream = {
+      ...originalDataStream,
+      dataset: customDatasetName,
+      path: customDatasetName,
+    };
+
+    const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+      type: customDataStream.type,
+      dataset: customDatasetName,
+    });
+
+    if (existingDataStreams.length) {
+      const fromDifferentPackage = checkExistingDataStreamsAreFromDifferentPackage(
+        pkgInfo,
+        existingDataStreams
+      );
+      if (fromDifferentPackage && !force) {
+        const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
+          type: customDataStream.type,
+          dataset: customDatasetName,
+        });
+        throw new PackagePolicyValidationError(
+          `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
+        );
+      }
+      if (fromDifferentPackage && force) {
+        logger.info(
+          `Data stream for dataset ${customDatasetName} already exists, but is managed by a different package, skipping index template creation`
+        );
+        continue;
+      }
+      if (!force) {
+        logger.info(
+          `Data stream for dataset ${customDatasetName} already exists, skipping index template creation`
+        );
+        continue;
+      }
+    }
+
+    const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
+      type: customDataStream.type,
+      dataset: customDatasetName,
+    });
+
+    if (existingIndexTemplate) {
+      const ownedByDifferentPackage =
+        existingIndexTemplate._meta?.package?.name &&
+        existingIndexTemplate._meta.package.name !== pkgInfo.name;
+      if (ownedByDifferentPackage && !force) {
+        throw new PackagePolicyValidationError(
+          `Index template "${customDataStream.type}-${customDatasetName}" already exist and is not managed by this package, force flag is required`
+        );
+      }
+      if (ownedByDifferentPackage && force) {
+        logger.info(
+          `Index template "${customDataStream.type}-${customDatasetName}" already exists, but is managed by a different package, skipping index template creation`
+        );
+        continue;
+      }
+      if (!force) {
+        logger.info(
+          `Index template "${customDataStream.type}-${customDatasetName}" already exists, skipping index template creation`
+        );
+        continue;
+      }
+    }
+
+    const installedPkgWithAssets = await getInstalledPackageWithAssets({
+      savedObjectsClient: soClient,
+      pkgName: pkgInfo.name,
+      logger,
+    });
+
+    if (!installedPkgWithAssets) {
+      throw new PackageNotFoundError(
+        `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
+      );
+    }
+
+    try {
+      let packageInstallContext: import('../../../../common/types').PackageInstallContext;
+      if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
+        const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
+          ignoreUnverified: force,
+        });
+        const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
+        packageInstallContext = {
+          packageInfo: pkg.packageInfo,
+          paths: pkg.paths,
+          archiveIterator,
+        };
+      } else {
+        const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
+        packageInstallContext = {
+          packageInfo: installedPkgWithAssets.packageInfo,
+          paths: installedPkgWithAssets.paths,
+          archiveIterator,
+        };
+      }
+
+      await installIndexTemplatesAndPipelines({
+        installedPkg: installedPkgWithAssets.installation,
+        packageInstallContext,
+        esReferences: installedPkgWithAssets.installation.installed_es || [],
+        savedObjectsClient: soClient,
+        esClient,
+        logger,
+        onlyForDataStreams: [customDataStream],
+      });
+
+      await optimisticallyAddEsAssetReferences(
+        soClient,
+        installedPkgWithAssets.installation.name,
+        [],
+        generateESIndexPatterns([customDataStream])
+      );
+    } catch (error) {
+      logger.warn(`installAssetsForIntegrationPackagePolicyCustomDatasets error: ${error}`);
+    }
+  }
+}
+
+/**
+ * Removes index templates and pipelines installed for a custom `data_stream.dataset` on an
+ * integration package policy, but only when no other policy for the same package still uses
+ * the same custom dataset name for the same data stream type.
+ */
+export async function removeAssetsForIntegrationPackagePolicyCustomDatasets(opts: {
+  packageInfo: PackageInfo;
+  packagePolicy: PackagePolicy;
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  const { packageInfo, packagePolicy, logger, esClient, soClient } = opts;
+
+  if (packageInfo.type !== 'integration' || packageInfo.status !== 'installed') return;
+
+  const customStreams = getCustomDatasetStreams(packagePolicy, packageInfo);
+  if (customStreams.length === 0) return;
+
+  logger.info(
+    `Removing custom dataset assets for integration package ${packageInfo.name}:${packageInfo.version}`
+  );
+
+  try {
+    const installation = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: packageInfo.name,
+    });
+
+    if (!installation) {
+      logger.warn(`${packageInfo.name} is not installed, skipping custom dataset asset removal`);
+      return;
+    }
+
+    // Load all other policies for the same package to check if the custom dataset is still in use
+    const { items: allPolicies } = await packagePolicyService.list(soClient, {
+      kuery: `ingest-package-policies.package.name: "${packageInfo.name}"`,
+      perPage: 10000,
+    });
+
+    const {
+      installed_es: installedEs,
+      installed_kibana: installedKibana,
+      es_index_patterns: esIndexPatterns,
+    } = installation;
+
+    for (const { originalDataStream, customDatasetName } of customStreams) {
+      // Check if any OTHER policy for the same package still uses this custom dataset
+      // for the same data stream type. Exact match (not regex) to avoid prefix collisions.
+      const stillInUse = allPolicies
+        .filter((p) => p.id !== packagePolicy.id)
+        .some((p) =>
+          getCustomDatasetStreams(p, packageInfo).some(
+            (s) =>
+              s.customDatasetName === customDatasetName &&
+              s.originalDataStream.type === originalDataStream.type
+          )
+        );
+
+      if (stillInUse) {
+        logger.info(
+          `Custom dataset "${customDatasetName}" is still used by another policy, skipping asset removal`
+        );
+        continue;
+      }
+
+      // Use exact string match (not word-boundary regex) to avoid collisions between
+      // dataset names that share a prefix (e.g. "nginx" vs "nginx_extra").
+      const filteredInstalledEs = installedEs.filter((asset) => {
+        const parts = asset.id.split('-');
+        // Index template IDs have the form "{type}-{dataset}" — match the dataset part exactly
+        return parts.length >= 2 && parts.slice(1).join('-') === customDatasetName;
+      });
+      const filteredInstalledKibana = installedKibana.filter((asset) => {
+        const parts = asset.id.split('-');
+        return parts.length >= 2 && parts.slice(1).join('-') === customDatasetName;
+      });
+      const filteredEsIndexPatterns: Record<string, string> = {};
+      if (esIndexPatterns?.[customDatasetName]) {
+        filteredEsIndexPatterns[customDatasetName] = esIndexPatterns[customDatasetName];
+      }
+
+      if (
+        filteredInstalledEs.length === 0 &&
+        filteredInstalledKibana.length === 0 &&
+        Object.keys(filteredEsIndexPatterns).length === 0
+      ) {
+        logger.info(
+          `No tracked assets found for custom dataset "${customDatasetName}", skipping cleanup`
+        );
+        continue;
+      }
+
+      const installationToDelete = {
+        ...installation,
+        installed_es: filteredInstalledEs,
+        installed_kibana: filteredInstalledKibana,
+        es_index_patterns: filteredEsIndexPatterns,
+        package_assets: [],
+      };
+
+      await cleanupAssets(
+        customDatasetName,
+        installationToDelete,
+        installation,
+        esClient,
+        soClient
+      );
+    }
+  } catch (error) {
+    logger.error(
+      `Failed to remove custom dataset assets for integration package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
+    );
   }
 }
 
