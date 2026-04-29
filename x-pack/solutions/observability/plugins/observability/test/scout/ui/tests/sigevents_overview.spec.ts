@@ -23,7 +23,6 @@ const SIGEVENTS_FEATURE_FLAG = 'observability.sigeventsOverviewEnabled';
 const sigEventsFeatureFlagInitalValue = true;
 
 const SIGEVENTS_EVENTS_INDEX = 'sigevents-events-ms';
-const SIGEVENTS_VERDICTS_INDEX = 'sigevents-verdicts-ms';
 const SIGEVENTS_DETECTIONS_INDEX = 'sigevents-detections-ms';
 
 test.describe(
@@ -105,7 +104,7 @@ test.describe(
             ],
             criticality: 85,
             recommended_action: 'escalate',
-            impact: 'critical',
+            impact: 'high',
             recommendations: ['Scale up database connection pool', 'Investigate slow queries'],
             verdict_id: 'scout-verdict-promoted-1',
             last_reviewed_at: timestamp,
@@ -170,7 +169,7 @@ test.describe(
         await esClient.bulk({
           refresh: 'wait_for',
           operations: verdictDocs.flatMap((doc) => [
-            { index: { _index: SIGEVENTS_VERDICTS_INDEX } },
+            { index: { _index: SIGEVENTS_EVENTS_INDEX } },
             doc,
           ]),
         });
@@ -288,7 +287,7 @@ test.describe(
           query: { term: { event_id: 'scout-smoke-event-1' } },
         });
         await esClient.deleteByQuery({
-          index: SIGEVENTS_VERDICTS_INDEX,
+          index: SIGEVENTS_EVENTS_INDEX,
           refresh: true,
           query: { prefix: { verdict_id: 'scout-verdict-' } },
         });

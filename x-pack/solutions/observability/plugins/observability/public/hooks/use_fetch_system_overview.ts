@@ -13,7 +13,7 @@ import { useKibana } from '../utils/kibana_react';
 
 const TRACES_INDEX = 'traces-*';
 const LOGS_INDEX = 'logs-*';
-const VERDICTS_INDEX = 'sigevents-verdicts-ms';
+const VERDICTS_INDEX = 'sigevents-events-ms';
 const DETECTIONS_INDEX = 'sigevents-detections-ms';
 
 export interface VerdictDocument {
@@ -29,7 +29,7 @@ export interface VerdictDocument {
   stream_names: string[];
   criticality: number;
   confidence: number;
-  impact: 'critical' | 'high' | 'medium' | 'low';
+  impact: 'high' | 'medium' | 'low';
   recommendations?: string[];
   recommended_action: 'escalate' | 'monitor' | 'resolve';
   verdict_summary: string;
@@ -39,7 +39,6 @@ export interface SystemOverviewData {
   services: Array<{ name: string; traceCount: number; logCount: number }>;
   verdicts: VerdictDocument[];
   detectionCount: number;
-  criticalCount: number;
   highCount: number;
   mediumCount: number;
   lowCount: number;
@@ -173,16 +172,12 @@ export function useFetchSystemOverview(): {
           ? detectionsResp.rawResponse.hits.total.value
           : detectionsResp.rawResponse.hits.total ?? 0;
 
-      let criticalCount = 0;
       let highCount = 0;
       let mediumCount = 0;
       let lowCount = 0;
 
       for (const v of verdicts) {
         switch (v.impact) {
-          case 'critical':
-            criticalCount++;
-            break;
           case 'high':
             highCount++;
             break;
@@ -199,7 +194,6 @@ export function useFetchSystemOverview(): {
         services: servicesList,
         verdicts,
         detectionCount,
-        criticalCount,
         highCount,
         mediumCount,
         lowCount,

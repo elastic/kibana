@@ -124,7 +124,6 @@ export function SigeventsOverviewPage() {
     `;
 
     const serviceCount = overviewData.services.length;
-    const lowPriorityCount = overviewData.lowCount + overviewData.mediumCount;
 
     const getRiskCardStyling = (count: number) => {
       const hasValue = count > 0;
@@ -137,9 +136,9 @@ export function SigeventsOverviewPage() {
       };
     };
 
-    const criticalStyling = getRiskCardStyling(overviewData.criticalCount);
     const highStyling = getRiskCardStyling(overviewData.highCount);
-    const lowMedStyling = getRiskCardStyling(lowPriorityCount);
+    const mediumStyling = getRiskCardStyling(overviewData.mediumCount);
+    const lowStyling = getRiskCardStyling(overviewData.lowCount);
 
     return [
       {
@@ -163,16 +162,6 @@ export function SigeventsOverviewPage() {
         iconColor: euiTheme.colors.textParagraph,
       },
       {
-        id: 'criticalRisk',
-        label: i18n.translate('xpack.observability.sigeventsOverviewPage.critical', {
-          defaultMessage: 'Critical',
-        }),
-        value: <span css={criticalStyling.valueCss}>{overviewData.criticalCount}</span>,
-        iconType: 'radar',
-        iconBackground: criticalStyling.iconBackground,
-        iconColor: criticalStyling.iconColor,
-      },
-      {
         id: 'highRisk',
         label: i18n.translate('xpack.observability.sigeventsOverviewPage.high', {
           defaultMessage: 'High',
@@ -183,14 +172,24 @@ export function SigeventsOverviewPage() {
         iconColor: highStyling.iconColor,
       },
       {
-        id: 'lowerPriority',
-        label: i18n.translate('xpack.observability.sigeventsOverviewPage.lowMed', {
-          defaultMessage: 'Low / Med',
+        id: 'mediumRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.medium', {
+          defaultMessage: 'Medium',
         }),
-        value: <span css={lowMedStyling.valueCss}>{lowPriorityCount}</span>,
+        value: <span css={mediumStyling.valueCss}>{overviewData.mediumCount}</span>,
+        iconType: 'warning',
+        iconBackground: mediumStyling.iconBackground,
+        iconColor: mediumStyling.iconColor,
+      },
+      {
+        id: 'lowRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.low', {
+          defaultMessage: 'Low',
+        }),
+        value: <span css={lowStyling.valueCss}>{overviewData.lowCount}</span>,
         iconType: 'eye',
-        iconBackground: lowMedStyling.iconBackground,
-        iconColor: lowMedStyling.iconColor,
+        iconBackground: lowStyling.iconBackground,
+        iconColor: lowStyling.iconColor,
       },
     ];
   }, [overviewData, euiTheme]);
