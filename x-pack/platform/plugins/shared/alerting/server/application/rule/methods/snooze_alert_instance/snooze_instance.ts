@@ -83,7 +83,7 @@ async function snoozeAlertInstanceWithOCC(
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
       consumer: attributes.consumer,
-      operation: WriteOperations.MuteAlert,
+      operation: WriteOperations.snoozeAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
 

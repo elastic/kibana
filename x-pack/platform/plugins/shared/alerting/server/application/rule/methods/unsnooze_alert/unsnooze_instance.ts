@@ -49,7 +49,7 @@ async function unsnoozeInstanceWithOCC(
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
       consumer: attributes.consumer,
-      operation: WriteOperations.Unsnooze,
+      operation: WriteOperations.unsnoozeAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
