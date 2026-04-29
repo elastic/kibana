@@ -20,17 +20,17 @@ imports:
 engine:
   id: claude
   version: "2.1.111"
-  model: llm-gateway/claude-opus-4-6
+  model: opus[1m]
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
     ENABLE_PROMPT_CACHING_1H: "1"
-    # These need to be set for 1M context window
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-6
+    # Route Claude Code's 1M Opus alias through LiteLLM.
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6 
-    CLAUDE_CODE_SUBAGENT_MODEL: llm-gateway/claude-opus-4-6
+    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
