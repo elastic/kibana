@@ -33,13 +33,7 @@ describe('DataConditionPanel', () => {
   });
 
   it('renders editable inputs when the entry is not confirmed', () => {
-    render(
-      <DataConditionPanel
-        entry={createEntry()}
-        onChange={onChangeMock}
-      />,
-      { wrapper }
-    );
+    render(<DataConditionPanel entry={createEntry()} onChange={onChangeMock} />, { wrapper });
 
     expect(screen.getByTestId('dataConditionType-dc-1')).toBeTruthy();
     expect(screen.getByTestId('dataConditionField-dc-1')).toBeTruthy();
@@ -47,13 +41,7 @@ describe('DataConditionPanel', () => {
   });
 
   it('calls onChange with entry updates from the form fields', () => {
-    render(
-      <DataConditionPanel
-        entry={createEntry()}
-        onChange={onChangeMock}
-      />,
-      { wrapper }
-    );
+    render(<DataConditionPanel entry={createEntry()} onChange={onChangeMock} />, { wrapper });
 
     fireEvent.change(screen.getByTestId('dataConditionType-dc-1'), {
       target: { value: DataConditionType.SEVERITY_EQUALS },
@@ -95,13 +83,7 @@ describe('DataConditionPanel', () => {
   });
 
   it('removes the entry from edit mode', () => {
-    render(
-      <DataConditionPanel
-        entry={createEntry()}
-        onChange={onChangeMock}
-      />,
-      { wrapper }
-    );
+    render(<DataConditionPanel entry={createEntry()} onChange={onChangeMock} />, { wrapper });
 
     fireEvent.click(screen.getByTestId('removeDataCondition-dc-1'));
 

@@ -27,21 +27,13 @@ export enum DataConditionType {
   SEVERITY_EQUALS = 'severity_equals',
 }
 
-/**
- * Temporary UI-facing condition model aligned with the current Figma design.
- * This does not yet reflect the final per-alert snooze API contract.
- */
 export type SnoozeCondition =
   | { type: DataConditionType.SEVERITY_CHANGE }
   | { type: DataConditionType.SEVERITY_EQUALS; value: AlertSeverityLevel }
-  | { type: DataConditionType.FIELD_CHANGE; field: string }
-  | { type: 'field_equals'; field: string; value: string; negate?: boolean };
+  | { type: DataConditionType.FIELD_CHANGE; field: string };
 
-/**
- * Temporary conditional snooze schedule shape used by the current UI.
- */
 export interface ConditionalSnoozeSchedule {
-  expires_at?: string | null;
+  expiresAt?: string | null;
   conditions?: SnoozeCondition[];
-  condition_operator?: 'any' | 'all';
+  conditionOperator?: 'any' | 'all';
 }

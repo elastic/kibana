@@ -46,14 +46,14 @@ const newEntry = (id: string): DataConditionEntry => ({
 });
 
 const toSnoozeCondition = ({ type, field, value }: DataConditionEntry): SnoozeCondition => {
-  if (type === DataConditionType.SEVERITY_CHANGE) return { type: DataConditionType.SEVERITY_CHANGE };
-  if (type === DataConditionType.SEVERITY_EQUALS) return { type: DataConditionType.SEVERITY_EQUALS, value };
+  if (type === DataConditionType.SEVERITY_CHANGE)
+    return { type: DataConditionType.SEVERITY_CHANGE };
+  if (type === DataConditionType.SEVERITY_EQUALS)
+    return { type: DataConditionType.SEVERITY_EQUALS, value };
   return { type: DataConditionType.FIELD_CHANGE, field };
 };
 
-export const ConditionalSnoozePanel = ({
-  onScheduleChange,
-}: ConditionalSnoozePanelProps) => {
+export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePanelProps) => {
   const idCounterRef = useRef(0);
 
   const [timeCondition, setTimeCondition] = useState<TimeConditionState | null>(null);
@@ -169,12 +169,12 @@ export const ConditionalSnoozePanel = ({
     const schedule: ConditionalSnoozeSchedule = {};
 
     if (isConfirmed && timeEndDate) {
-      schedule.expires_at = timeEndDate;
+      schedule.expiresAt = timeEndDate;
     }
 
     if (confirmedDataConditions.length > 0) {
       schedule.conditions = confirmedDataConditions.map(toSnoozeCondition);
-      schedule.condition_operator = conditionOperator;
+      schedule.conditionOperator = conditionOperator;
     }
 
     return schedule;

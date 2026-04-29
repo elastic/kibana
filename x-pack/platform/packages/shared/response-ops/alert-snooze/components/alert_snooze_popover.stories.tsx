@@ -7,32 +7,32 @@
 
 import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
-import { EuiText, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ConditionalSnoozePanel, type ConditionalSnoozeSchedule } from './conditional_snooze_panel';
+import { AlertSnoozePopover, type AlertSnoozePayload } from './alert_snooze_popover';
 
 const meta = {
-  title: 'ResponseOps/AlertSnooze/ConditionalSnoozePanel',
+  title: 'ResponseOps/AlertSnooze/AlertSnoozePopover',
 };
 
 export default meta;
 
 const DefaultStory = () => {
-  const [schedule, setSchedule] = useState<ConditionalSnoozeSchedule | undefined>(undefined);
+  const [lastPayload, setLastPayload] = useState<AlertSnoozePayload | undefined>(undefined);
 
   return (
     <IntlProvider locale="en">
-      <div style={{ maxWidth: 440, padding: 16, border: '1px solid #D3DAE6', borderRadius: 6 }}>
-        <ConditionalSnoozePanel onScheduleChange={setSchedule} />
+      <div style={{ padding: 16 }}>
+        <AlertSnoozePopover onApply={setLastPayload} />
       </div>
       <EuiSpacer size="m" />
       <div style={{ maxWidth: 440 }}>
         <EuiText size="s">
-          <strong>Emitted Schedule:</strong>
+          <strong>Last applied payload:</strong>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-          {JSON.stringify(schedule, null, 2)}
+          {JSON.stringify(lastPayload ?? null, null, 2)}
         </EuiCodeBlock>
       </div>
     </IntlProvider>

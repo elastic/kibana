@@ -71,7 +71,9 @@ export interface DataConditionPanelProps {
 
 export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataConditionPanelProps) => {
   const typeOptions = disabledTypes?.length
-    ? TYPE_OPTIONS.filter((o) => o.value === entry.type || !disabledTypes.includes(o.value as DataConditionType))
+    ? TYPE_OPTIONS.filter(
+        (o) => o.value === entry.type || !disabledTypes.includes(o.value as DataConditionType)
+      )
     : TYPE_OPTIONS;
   const isComplete = () => {
     if (entry.type === DataConditionType.SEVERITY_CHANGE) return true;
@@ -85,7 +87,7 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
       return (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{i18n.CONDITION_TYPE_SEVERITY_CHANGE}</EuiBadge>
+            <EuiBadge>{i18n.CONDITION_TYPE_SEVERITY_CHANGE}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -96,7 +98,7 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
       return (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{i18n.CONDITION_TYPE_SEVERITY_EQUALS}</EuiBadge>
+            <EuiBadge>{i18n.CONDITION_TYPE_SEVERITY_EQUALS}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color={color as any}>{label}</EuiBadge>
@@ -108,7 +110,7 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
       return (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{i18n.CONDITION_TYPE_FIELD_CHANGE}</EuiBadge>
+            <EuiBadge>{i18n.CONDITION_TYPE_FIELD_CHANGE}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{entry.field}</EuiBadge>
@@ -192,14 +194,11 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
               <EuiSelect
                 options={typeOptions}
                 value={entry.type}
-                onChange={(e) =>
-                  onChange({ ...entry, type: e.target.value as DataConditionType })
-                }
+                onChange={(e) => onChange({ ...entry, type: e.target.value as DataConditionType })}
                 aria-label={i18n.CONDITION_FIELD_ARIA_LABEL}
                 data-test-subj={`dataConditionType-${entry.id}`}
               />
             </EuiFlexItem>
-            
             {entry.type === DataConditionType.SEVERITY_EQUALS && (
               <EuiFlexItem>
                 <EuiSelect

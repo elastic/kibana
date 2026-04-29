@@ -85,7 +85,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId('confirmTimeCondition'));
 
       expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
-        expires_at: moment(MOCKED_NOW).add(1, 'h').toISOString(),
+        expiresAt: moment(MOCKED_NOW).add(1, 'h').toISOString(),
       });
     });
 
@@ -109,17 +109,14 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId('confirmTimeCondition'));
 
       expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
-        expires_at: moment(MOCKED_NOW).add(2, 'h').toISOString(),
+        expiresAt: moment(MOCKED_NOW).add(2, 'h').toISOString(),
       });
     });
   });
 
   describe('single data condition', () => {
     it('renders the data condition form', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
 
@@ -128,10 +125,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('"Add data condition" button persists after adding a condition', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
 
@@ -139,10 +133,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('confirm button is disabled when field or value is empty', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
 
@@ -151,10 +142,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('reports undefined schedule when a data condition is added but not confirmed', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
 
@@ -162,10 +150,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('shows chip view and reports a valid schedule after confirming a data condition', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -178,15 +163,12 @@ describe('ConditionalSnoozePanel', () => {
       expect(await screen.findByTestId(`deleteDataCondition-dc-1`)).toBeInTheDocument();
       expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
         conditions: [{ type: DataConditionType.SEVERITY_CHANGE }],
-        condition_operator: 'any',
+        conditionOperator: 'any',
       });
     });
 
     it('shows preview text after confirming a data condition', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -200,10 +182,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('goes back to edit correctly', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -216,10 +195,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('removes the condition and reports undefined schedule when delete is clicked', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -235,10 +211,7 @@ describe('ConditionalSnoozePanel', () => {
 
   describe('multiple data conditions', () => {
     it('shows ANY separator button between two conditions', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.click(await screen.findByTestId('addDataCondition'));
@@ -249,10 +222,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('toggles separator from ANY & ALL when clicked', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.click(await screen.findByTestId('addDataCondition'));
@@ -267,10 +237,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('shows preview text combining multiple confirmed conditions with ANY', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -290,10 +257,7 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('updates preview text to ALL when separator is toggled', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -314,11 +278,8 @@ describe('ConditionalSnoozePanel', () => {
       );
     });
 
-    it('reports schedule with condition_operator all when ALL separator is used', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+    it('reports schedule with conditionOperator all when ALL separator is used', async () => {
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -339,15 +300,12 @@ describe('ConditionalSnoozePanel', () => {
           { type: DataConditionType.SEVERITY_CHANGE },
           { type: DataConditionType.FIELD_CHANGE, field: 'status' },
         ],
-        condition_operator: 'all',
+        conditionOperator: 'all',
       });
     });
 
     it('renders text instead of a button for the second separator', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.click(await screen.findByTestId('addDataCondition'));
@@ -355,7 +313,7 @@ describe('ConditionalSnoozePanel', () => {
 
       // The first separator should be a button
       expect(await screen.findByTestId('logicalOperator')).toBeInTheDocument();
-      
+
       // The second separator should just be text (so we'd find ANY twice, once inside button, once inside text)
       const anyTexts = await screen.findAllByText('ANY');
       expect(anyTexts).toHaveLength(2);
@@ -363,11 +321,8 @@ describe('ConditionalSnoozePanel', () => {
   });
 
   describe('combined time + data conditions', () => {
-    it('reports schedule with both expires_at and conditions when both are confirmed', async () => {
-      render(
-        <ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />,
-        { wrapper }
-      );
+    it('reports schedule with both expiresAt and conditions when both are confirmed', async () => {
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
 
       fireEvent.click(await screen.findByTestId('addTimeCondition'));
       fireEvent.click(await screen.findByTestId('confirmTimeCondition'));
@@ -377,21 +332,19 @@ describe('ConditionalSnoozePanel', () => {
         target: { value: DataConditionType.SEVERITY_CHANGE },
       });
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
-      
+
       const expiresAt = moment(MOCKED_NOW).add(1, 'h').toISOString();
       const expiresAtFormatted = moment(expiresAt).format(SNOOZE_DATE_DISPLAY_FORMAT);
-      
+
       expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
-        expires_at: expiresAt,
+        expiresAt,
         conditions: [{ type: DataConditionType.SEVERITY_CHANGE }],
-        condition_operator: 'any',
+        conditionOperator: 'any',
       });
 
       const previewEl = await screen.findByTestId('conditionsPreviewText');
       expect(previewEl).toHaveTextContent('Alert will unsnooze if severity is changed.');
-      expect(previewEl).toHaveTextContent(
-        `Alert will also unsnooze after ${expiresAtFormatted}.`
-      );
+      expect(previewEl).toHaveTextContent(`Alert will also unsnooze after ${expiresAtFormatted}.`);
     });
   });
 });

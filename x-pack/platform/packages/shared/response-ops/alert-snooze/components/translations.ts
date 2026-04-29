@@ -256,5 +256,13 @@ export const QUICK_SNOOZE_TAB = i18n.translate('responseOpsAlertSnooze.alertSnoo
 });
 export const CONDITIONAL_SNOOZE_TAB = i18n.translate(
   'responseOpsAlertSnooze.alertSnoozePanel.conditionalTab',
-  { defaultMessage: 'Conditional Snooze' }
+  { defaultMessage: 'Condition based' }
+);
+export const APPLY_BUTTON = i18n.translate(
+  'responseOpsAlertSnooze.alertSnoozePopover.applyButton',
+  { defaultMessage: 'Apply' }
+);
+export const SNOOZE_TRIGGER_BUTTON = i18n.translate(
+  'responseOpsAlertSnooze.alertSnoozePopover.triggerButton',
+  { defaultMessage: 'Snooze alert' }
 );
