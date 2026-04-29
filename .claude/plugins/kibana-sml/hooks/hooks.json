@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/sml_session_init.py\"",
+            "command": "printf \"## Kibana SML Memory\\n\\nYou have access to two MCP tools for retrieving past context and memories stored in Kibana's Semantic Metadata Layer (SML):\\n\\n- **platform_core_sml_search** — search for relevant past conversations, workflows, dashboards, and other Kibana assets using natural-language queries. Use this proactively at the start of a task to find related prior work or context.\\n- **platform_core_sml_read** — fetch the full content of a result when \\`has_more=true\\`.\\n\\n**When to use sml_search:**\\n- At the start of a new task or question, search for relevant past conversations or context before answering.\\n- When the user references something that may have been discussed before.\\n- When background context would improve the quality of your response.\\n\\nSearch with a short natural-language description of the current task. Filter by \\`type: \\\"conversation\\\"\\` for past chat history.\\n\"",
             "timeout": 5
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/sml_recall.py\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/sml_recall.mjs\"",
             "timeout": 8
           }
         ]
