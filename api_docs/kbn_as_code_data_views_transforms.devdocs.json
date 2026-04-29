@@ -240,6 +240,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFieldSettings",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -277,6 +278,7 @@
             "lineNumber": 31,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeFieldSettings",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -291,7 +293,15 @@
         "tags": [],
         "label": "toStoredDataView",
         "description": [
-          "\nConvert an as-code data view back to a stored search-source `index` value\n(string id for a referenced data view, or inline {@link DataViewSpec} fields).\n"
+          "\nConvert an as-code data view back to a stored search-source `index` value\n(string id for a referenced data view, or inline ",
+          {
+            "pluginId": "@kbn/as-code-data-views-transforms",
+            "scope": "common",
+            "docId": "kibKbnAsCodeDataViewsTransformsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          " fields).\n"
         ],
         "signature": [
           "(dataView: Readonly<{} & { type: \"data_view_reference\"; ref_id: string; }> | Readonly<{ time_field?: string | undefined; field_settings?: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined; } & { type: \"data_view_spec\"; index_pattern: string; }>) => string | ",
@@ -325,6 +335,7 @@
             "lineNumber": 28,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "AsCodeDataView",
             "trackAdoption": false,
             "isRequired": true
           }
