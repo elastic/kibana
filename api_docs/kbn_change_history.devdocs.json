@@ -1810,6 +1810,40 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.FLAGS",
+        "type": "Object",
+        "tags": [],
+        "label": "FLAGS",
+        "description": [
+          "\nActs like a feature flag for this package as it prevents initialization.\nRemove this after General Availability"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/constants.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.FLAGS.FEATURE_ENABLED",
+            "type": "boolean",
+            "tags": [],
+            "label": "FEATURE_ENABLED",
+            "description": [
+              "\nActs like a feature flag for this package as it prevents initialization.\nRemove this after General Availability"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/constants.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }
