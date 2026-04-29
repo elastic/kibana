@@ -51,6 +51,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LiteralValue",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -130,6 +131,7 @@
             "lineNumber": 20,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "Type",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -170,6 +172,7 @@
             "lineNumber": 52,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "Type",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -187,6 +190,7 @@
             "lineNumber": 53,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorFactory",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -224,6 +228,7 @@
             "lineNumber": 16,
             "columnNumber": 68,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -537,6 +542,7 @@
             "lineNumber": 35,
             "columnNumber": 61,
             "deprecated": false,
+            "docsReferencedTypeName": "T1",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -554,6 +560,7 @@
             "lineNumber": 35,
             "columnNumber": 68,
             "deprecated": false,
+            "docsReferencedTypeName": "T2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -641,6 +648,7 @@
             "lineNumber": 136,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -680,6 +688,7 @@
             "lineNumber": 46,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorFactory",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -61,6 +61,7 @@
                 "lineNumber": 16,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AgentStatsProvider",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -264,6 +265,7 @@
                 "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "OsMetricsCollectorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -504,6 +506,7 @@
                 "lineNumber": 31,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HapiServer",
                 "trackAdoption": false,
                 "isRequired": true
               }

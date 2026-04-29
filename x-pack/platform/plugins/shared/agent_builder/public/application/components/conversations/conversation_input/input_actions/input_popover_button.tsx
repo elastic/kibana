@@ -26,7 +26,7 @@ export const InputPopoverButton: React.FC<
     disabled: boolean;
     iconType: IconType;
     onClick: () => void;
-    'aria-labelledby'?: string;
+    'aria-label'?: string;
     'data-test-subj'?: string;
   }>
 > = ({
@@ -35,7 +35,7 @@ export const InputPopoverButton: React.FC<
   iconType,
   onClick,
   children,
-  'aria-labelledby': ariaLabelledBy,
+  'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
 }) => {
   const openStyles = css`
@@ -55,7 +55,7 @@ export const InputPopoverButton: React.FC<
       }}
       disabled={disabled}
       aria-haspopup="menu"
-      aria-labelledby={ariaLabelledBy}
+      aria-label={ariaLabel}
       data-test-subj={dataTestSubj}
     >
       {children}
