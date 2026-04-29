@@ -39,8 +39,8 @@ const renderWithProvider = (
   );
 
 describe('ContentList', () => {
-  afterEach(() => {
-    contentListQueryClient.cancelQueries();
+  afterEach(async () => {
+    await contentListQueryClient.cancelQueries();
     contentListQueryClient.clear();
   });
 

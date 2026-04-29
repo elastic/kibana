@@ -155,11 +155,13 @@ export const DashboardListingEmptyPromptMock = ({
   inProgress = false,
 }: {
   inProgress?: boolean;
-}) => (
+}) => {
+  const headingId = useGeneratedHtmlId({ prefix: 'dashboardListingHeading' });
+  return (
   <EuiEmptyPrompt
     iconType="dashboardApp"
     title={
-      <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
+      <h1 id={headingId} data-test-subj="emptyListPrompt">
         {inProgress ? 'Dashboard in progress' : 'Create your first dashboard'}
       </h1>
     }
@@ -197,7 +199,8 @@ export const DashboardListingEmptyPromptMock = ({
       )
     }
   />
-);
+  );
+};
 
 // =============================================================================
 // Generic listing headers
