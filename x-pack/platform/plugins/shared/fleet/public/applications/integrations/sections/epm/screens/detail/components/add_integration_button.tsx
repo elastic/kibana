@@ -12,6 +12,7 @@ import { EuiButtonWithTooltip } from '../../../../../components';
 
 interface AddIntegrationButtonProps {
   userCanInstallPackages?: boolean;
+  isViewingOlderVersion?: boolean;
   missingSecurityConfiguration: boolean;
   packageName: string;
   href: string;
@@ -19,10 +20,27 @@ interface AddIntegrationButtonProps {
 }
 
 export function AddIntegrationButton(props: AddIntegrationButtonProps) {
-  const { userCanInstallPackages, missingSecurityConfiguration, packageName, href, onClick } =
-    props;
+  const {
+    userCanInstallPackages,
+    isViewingOlderVersion,
+    missingSecurityConfiguration,
+    packageName,
+    href,
+    onClick,
+  } = props;
 
-  const tooltip = !userCanInstallPackages
+  const isDisabled = !userCanInstallPackages || isViewingOlderVersion;
+
+  const tooltip = isViewingOlderVersion
+    ? {
+        content: (
+          <FormattedMessage
+            id="xpack.fleet.epm.addPackagePolicyButtonOlderVersionTooltip"
+            defaultMessage="This version is outdated. Visit the Settings tab to find the installed or latest version."
+          />
+        ),
+      }
+    : !userCanInstallPackages
     ? {
         content: missingSecurityConfiguration ? (
           <FormattedMessage
@@ -41,7 +59,7 @@ export function AddIntegrationButton(props: AddIntegrationButtonProps) {
   return (
     <EuiButtonWithTooltip
       fill
-      isDisabled={!userCanInstallPackages}
+      isDisabled={isDisabled}
       iconType="plusCircle"
       href={href}
       onClick={(e) => onClick(e)}

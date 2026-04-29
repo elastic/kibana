@@ -196,6 +196,18 @@ export function Detail() {
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
+  const isViewingOldPackage =
+    packageInfo && semverLt(packageInfo.version, packageInfo.latestVersion);
+
+  const isOlderThanInstalledVersion =
+    isInstalled &&
+    packageInfo?.installationInfo?.version &&
+    semverLt(packageInfo.version, packageInfo.installationInfo.version);
+
+  const isViewingOlderVersion = Boolean(
+    isOlderThanInstalledVersion || (!isInstalled && isViewingOldPackage)
+  );
+
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
   >();
@@ -599,6 +611,7 @@ export function Detail() {
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
                               userCanInstallPackages={userCanInstallPackages}
+                              isViewingOlderVersion={isViewingOlderVersion}
                               href={getHref('add_integration_to_policy', {
                                 pkgkey,
                                 ...(integration ? { integration } : {}),
@@ -650,6 +663,7 @@ export function Detail() {
       integration,
       agentPolicyIdFromContext,
       missingSecurityConfiguration,
+      isViewingOlderVersion,
       integrationInfo,
       handleAddIntegrationPolicyClick,
       onVersionChange,
