@@ -108,6 +108,23 @@ export function getSampleDocuments({
     }));
 }
 
+/**
+ * ES|QL-native companion to `getSampleDocuments` for callers that must sample
+ * from remote clusters or external data sources where classic search APIs are
+ * not available. The helper returns `_source`-backed hits instead of `fields`
+ * hits, which keeps downstream document formatting compatible while avoiding
+ * Query DSL.
+ *
+ * When `sampleSize` is provided, ES|QL has no `random_score` equivalent, and
+ * `SAMPLE p | LIMIT n` returns sampled rows in storage order. To preserve the
+ * old random-sampling behavior, this first counts the matching population,
+ * oversamples with `SAMPLE`, shuffles the returned rows client-side, then trims
+ * to the requested size.
+ *
+ * `loadUnmappedFields` emits `SET unmapped_fields="LOAD"` so ES|QL predicates
+ * can evaluate source-only fields. This replaces the older fieldCaps +
+ * runtime_mappings path used for entity-filtered Significant Events sampling.
+ */
 export async function getSampleDocumentsEsql({
   esClient,
   index,
