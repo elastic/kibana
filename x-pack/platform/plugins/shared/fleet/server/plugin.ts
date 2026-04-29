@@ -162,6 +162,10 @@ import {
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
 import {
+  registerVerifierPolicyCleanupTask,
+  scheduleVerifierPolicyCleanupTask,
+} from './tasks/agentless/verifier_policy_cleanup_task';
+import {
   registerVerifyPermissionsTask,
   scheduleVerifyPermissionsTask,
 } from './tasks/agentless/verify_permissions_task';
@@ -703,6 +707,7 @@ export class FleetPlugin
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
     registerVerifyPermissionsTask(deps.taskManager);
+    registerVerifierPolicyCleanupTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
     registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
@@ -870,6 +875,7 @@ export class FleetPlugin
       this.configInitialValue as FleetConfigType
     ).catch(() => {});
     scheduleVerifyPermissionsTask(plugins.taskManager).catch(() => {});
+    scheduleVerifierPolicyCleanupTask(plugins.taskManager).catch((error) => {});
     this.fleetPolicyRevisionsCleanupTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});

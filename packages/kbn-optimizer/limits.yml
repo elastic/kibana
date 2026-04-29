@@ -50,7 +50,7 @@ pageLoadAssetSize:
   elasticAssistant: 301540
   elasticAssistantSharedState: 4881
   elasticConsole: 4451
-  embeddable: 16634
+  embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
@@ -132,7 +132,6 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 47422
   painlessLab: 6299
-  presentationPanel: 10936
   presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
@@ -171,13 +170,13 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
-  share: 58677
+  share: 64618
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 15433
+  streams: 32595
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755

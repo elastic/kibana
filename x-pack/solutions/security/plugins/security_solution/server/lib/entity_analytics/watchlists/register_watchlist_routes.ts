@@ -11,6 +11,7 @@ import {
   deleteWatchlistRoute,
   getWatchlistRoute,
   listWatchlistsRoute,
+  watchlistsPrivilegesRoute,
   searchWatchlistIndicesRoute,
   updateWatchlistRoute,
 } from './management/routes';
@@ -30,6 +31,7 @@ export const registerWatchlistRoutes = ({
   createWatchlistRoute(router, logger, telemetrySender);
   deleteWatchlistRoute(router, logger);
   getWatchlistRoute(router, logger);
+  watchlistsPrivilegesRoute(router, logger, getStartServices);
   listWatchlistsRoute(router, logger);
   searchWatchlistIndicesRoute(router, logger);
   updateWatchlistRoute(router, logger, telemetrySender);
