@@ -24,6 +24,13 @@ import type { EsqlServerPluginStart } from '../types';
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
+/**
+ * Appended to the default `generateEsql` system instructions. The shared
+ * `getEsqlInstructions` template defaults to adding LIMIT for unbounded queries; for the
+ * editor route we prefer not to unless the user asks for a bounded result.
+ */
+const NL_TO_ESQL_EDITOR_ADDITIONAL_INSTRUCTIONS = `When generating from the ES|QL editor's natural-language box, do not add a LIMIT clause unless the user clearly asks to cap rows (e.g. "top 10", "first 5", "only 20 rows"). If the user does not request a limit, omit LIMIT from the query.`;
+
 const createScopedModel = async ({
   inference,
   request,
@@ -130,6 +137,7 @@ export const registerNLtoESQLRoute = (
           logger,
           nlQuery: nlInstruction,
           additionalContext,
+          additionalInstructions: NL_TO_ESQL_EDITOR_ADDITIONAL_INSTRUCTIONS,
           executeQuery: false,
         });
 

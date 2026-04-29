@@ -106,6 +106,30 @@ Once done, documents with embeddings will be cached and re-used on subsequent da
 
 For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
 
+### ES|QL evals (`evals/esql`, `evals/kibana_sample_data`)
+
+There are two suites, targeting different entry points:
+
+- **`evals/esql/esql.spec.ts`** — NL → ES|QL through the Agent Builder **`generate_esql`** tool (same as historical behavior over synthetic `users` / `projects` / `error_rate_daily` indices; load the team snapshot/ETL dataset as in “Load AgentBuilder Datasets” above).
+- **`evals/kibana_sample_data/kibana_sample_data.spec.ts`** — **`POST /internal/esql/nl_to_esql`**, the same API as the ES|QL editor’s natural-language box, for **Kibana sample data** (`kibana_sample_data_flights` / `_ecommerce` / `_logs`).
+
+### ES|QL: Kibana sample data (optional)
+
+Use this when you want to demo or measure NL → ES|QL on **Kibana’s sample datasets** (`kibana_sample_data_flights`, `kibana_sample_data_ecommerce`, `kibana_sample_data_logs`).
+
+1. In Kibana, install **all three** sample data sets: **Add sample data** (Home) or **Stack Management** → the entries for *Sample flight data*, *eCommerce orders*, and *Web logs* (wording can vary by version).
+2. Run only this suite (separate Playwright project so the synthetic `evals/esql` set does not depend on them):
+
+```bash
+EVALUATION_CONNECTOR_ID=<judge-connector> \
+  node scripts/playwright test \
+  --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/kibana_sample_data.playwright.config.ts
+```
+
+The spec is `evals/kibana_sample_data/kibana_sample_data.spec.ts`. Goldens follow field names from the sample data definitions in `src/platform/plugins/shared/home/server/services/sample_data/`.
+
+To run the synthetic `evals/esql/esql.spec.ts` suite only, use `esql.playwright.config.ts` in the same package.
+
 ### Run Evaluations
 
 Then run the evaluations:
