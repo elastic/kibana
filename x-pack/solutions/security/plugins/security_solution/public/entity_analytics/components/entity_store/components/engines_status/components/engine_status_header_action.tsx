@@ -10,19 +10,16 @@ import { EuiLoadingSpinner, EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
 import type { GetEntityStoreStatusResponse } from '../../../../../../../common/api/entity_analytics/entity_store/status.gen';
-import type { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { isEngineLoading } from '../helpers';
 
 export function EngineStatusHeaderAction({
   engine,
-  type,
 }: {
   engine: GetEntityStoreStatusResponse['engines'][0] | undefined;
-  type: EntityType;
 }) {
   const installEntityStoreMutation = useInstallEntityStoreMutation();
   const installEntityStore = () => {
-    installEntityStoreMutation.mutate({ entityTypes: [type] });
+    installEntityStoreMutation.mutate();
   };
   const hasUninstalledComponent = engine?.components?.some(({ installed }) => !installed);
 

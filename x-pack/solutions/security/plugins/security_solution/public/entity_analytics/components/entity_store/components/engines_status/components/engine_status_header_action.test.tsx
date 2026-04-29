@@ -52,14 +52,14 @@ describe('EngineStatusHeaderAction', () => {
       isLoading: true,
     });
 
-    render(<EngineStatusHeaderAction engine={undefined} type={EntityType.user} />, {
+    render(<EngineStatusHeaderAction engine={undefined} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('renders install button when engine is undefined', () => {
-    render(<EngineStatusHeaderAction engine={undefined} type={EntityType.user} />, {
+    render(<EngineStatusHeaderAction engine={undefined} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByText('Install')).toBeInTheDocument();
@@ -72,11 +72,11 @@ describe('EngineStatusHeaderAction', () => {
       isLoading: false,
     });
 
-    render(<EngineStatusHeaderAction engine={undefined} type={EntityType.user} />, {
+    render(<EngineStatusHeaderAction engine={undefined} />, {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText('Install'));
-    expect(mutate).toHaveBeenCalledWith({ entityTypes: [EntityType.user] });
+    expect(mutate).toHaveBeenCalledWith();
   });
 
   it('calls installEntityStore when reinstall button is clicked', () => {
@@ -90,11 +90,11 @@ describe('EngineStatusHeaderAction', () => {
       isLoading: false,
     });
 
-    render(<EngineStatusHeaderAction engine={engine} type={EntityType.user} />, {
+    render(<EngineStatusHeaderAction engine={engine} />, {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText('Reinstall'));
-    expect(mutate).toHaveBeenCalledWith({ entityTypes: [EntityType.user] });
+    expect(mutate).toHaveBeenCalledWith();
   });
 
   it('renders reinstall button and tooltip when a component is not installed', () => {
@@ -103,14 +103,14 @@ describe('EngineStatusHeaderAction', () => {
       components: [{ ...defaultComponent, installed: false }],
     };
 
-    render(<EngineStatusHeaderAction engine={engine} type={EntityType.user} />, {
+    render(<EngineStatusHeaderAction engine={engine} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByText('Reinstall')).toBeInTheDocument();
   });
 
   it('renders not action when engine is defined and no error', () => {
-    render(<EngineStatusHeaderAction engine={defaultEngineResponse} type={EntityType.user} />, {
+    render(<EngineStatusHeaderAction engine={defaultEngineResponse} />, {
       wrapper: TestProviders,
     });
     expect(screen.queryByText('Install')).not.toBeInTheDocument();
