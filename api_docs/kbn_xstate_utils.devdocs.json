@@ -120,6 +120,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ImplementationFactory",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -221,6 +222,7 @@
                 "lineNumber": 34,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionFunction",
                 "trackAdoption": false,
                 "isRequired": true
               }

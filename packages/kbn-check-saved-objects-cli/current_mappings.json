@@ -284,6 +284,18 @@
         },
         "type": "nested"
       },
+      "snoozedInstances": {
+        "properties": {
+          "instanceId": {
+            "type": "keyword"
+          },
+          "snoozeSnapshot": {
+            "dynamic": false,
+            "type": "object"
+          }
+        },
+        "type": "nested"
+      },
       "tags": {
         "type": "keyword"
       },
@@ -301,21 +313,7 @@
       }
     }
   },
-  "alerting_api_key_pending_invalidation": {
-    "dynamic": false,
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "uiamApiKey": {
-        "type": "binary"
-      }
-    }
-  },
-  "alerting_notification_policy": {
+  "alerting_action_policy": {
     "dynamic": false,
     "properties": {
       "auth": {
@@ -401,6 +399,20 @@
       },
       "updatedByUsername": {
         "type": "keyword"
+      }
+    }
+  },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -1463,6 +1475,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-definition": {
     "dynamic": false,

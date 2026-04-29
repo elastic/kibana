@@ -98,7 +98,111 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-server.BulkScheduleWorkflowItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkScheduleWorkflowItem",
+        "description": [],
+        "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.workflow",
+            "type": "Object",
+            "tags": [],
+            "label": "workflow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionEngineModel",
+                "text": "WorkflowExecutionEngineModel"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.triggeredBy",
+            "type": "string",
+            "tags": [],
+            "label": "triggeredBy",
+            "description": [],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionEventDispatchMetadata",
+                "text": "WorkflowExecutionEventDispatchMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -110,7 +214,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 44,
+      "lineNumber": 47,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -126,7 +230,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 45,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -138,18 +242,16 @@
     "start": {
       "parentPluginId": "workflowsManagement",
       "id": "def-server.WorkflowsServerPluginStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "WorkflowsServerPluginStart",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 48,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }

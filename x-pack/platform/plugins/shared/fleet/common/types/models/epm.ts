@@ -591,6 +591,7 @@ export enum RegistryVarsEntryKeys {
   max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
   section = 'section',
 }
 
@@ -619,6 +620,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
   [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
+  [RegistryVarsEntryKeys.migrate_from]?: string;
   [RegistryVarsEntryKeys.section]?: string;
 }
 
