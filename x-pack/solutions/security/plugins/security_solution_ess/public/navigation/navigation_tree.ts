@@ -32,6 +32,10 @@ export const createNavigationTree = (
         title: SOLUTION_NAME,
       },
       {
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'email',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },
@@ -207,7 +211,7 @@ export const createNavigationTree = (
                   children: [
                     { link: 'management:rules' as const },
                     { link: 'management:episodes' as const },
-                    { link: 'management:notification_policies' as const },
+                    { link: 'management:action_policies' as const },
                   ],
                 },
               ]
