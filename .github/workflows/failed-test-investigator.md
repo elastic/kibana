@@ -26,11 +26,12 @@ concurrency:
   cancel-in-progress: true
 
 engine:
-  id: codex
-  version: '0.104.0'
-  model: gpt-5.4
+  id: opencode
+  version: '1.2.14'
+  model: openai/gpt-5.4
   env:
-    RUST_LOG: warn
+    OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
 
 tools:
   github:
@@ -47,6 +48,7 @@ network:
     - github.com
     - api.github.com
     - chatgpt.com
+    - elastic.litellm-prod.ai
 sandbox:
   agent: awf  # Migrated from deprecated network setting
 safe-outputs:
@@ -57,7 +59,7 @@ safe-outputs:
     target: "*"
     hide-older-comments: true
 
-strict: true
+strict: false
 timeout-minutes: 20
 ---
 
@@ -68,7 +70,7 @@ Investigate a failed-test issue selected by the trigger.
 ## Target Issue Selection
 
 - If triggered by `issues`, use the triggering issue. This path should only run for non-PR issues labeled `failed-test`.
-- If triggered by `workflow_dispatch`, use the issue number from the `$GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER` environment variable in the current repository as the target issue.
+- If triggered by `workflow_dispatch`, use issue number `${{ github.event.inputs.issue_number }}` in the current repository as the target issue.
 - In manual mode, fetch that issue explicitly with GitHub tools before doing any analysis.
 - In manual mode, post the final comment back to that selected issue, not to the workflow run or any other issue.
 
@@ -164,4 +166,4 @@ List the key issue comments, file paths, commits, or links that drove the conclu
 - Be explicit when evidence is missing or inaccessible.
 - Do not speculate beyond the evidence you collected.
 - Use GitHub links for repository files and commits wherever you cite concrete code evidence.
-- If manually dispatched, ensure the final safe-output comment targets the issue number from `$GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER` in the current repository.
+- If manually dispatched, ensure the final safe-output comment targets issue `${{ github.event.inputs.issue_number }}` in the current repository.
