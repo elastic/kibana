@@ -688,6 +688,7 @@
                 "lineNumber": 126,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseExceptionListItemsSuccess",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -823,6 +824,7 @@
                 "lineNumber": 139,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Filter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -958,6 +960,7 @@
                 "lineNumber": 132,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Filter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1039,6 +1042,7 @@
                 "lineNumber": 81,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1127,6 +1131,7 @@
                 "lineNumber": 37,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1163,6 +1168,7 @@
                 "lineNumber": 38,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExceptionListSchema",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1270,6 +1276,7 @@
                 "lineNumber": 93,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1306,6 +1313,7 @@
                 "lineNumber": 94,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Blob",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2122,6 +2130,7 @@
                 "lineNumber": 215,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2572,6 +2581,7 @@
                 "lineNumber": 69,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseExceptionListItemsSuccess",
                 "trackAdoption": false,
                 "isRequired": true
               }

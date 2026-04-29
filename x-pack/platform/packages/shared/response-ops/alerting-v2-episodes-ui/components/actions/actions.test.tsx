@@ -71,6 +71,8 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -91,6 +93,8 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -133,11 +137,53 @@ describe('AlertEpisodeActionsCell', () => {
           lastSnoozeAction: null,
           snoozeExpiry: null,
           tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
         }}
       />
     );
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(screen.getByTestId('alertingEpisodeActionsTagsButton')).toBeInTheDocument();
     expect(screen.getByText('Edit Tags')).toBeInTheDocument();
+  });
+
+  it('shows Edit assignee when episodeId and groupHash are set', async () => {
+    const user = userEvent.setup();
+    render(
+      <AlertEpisodeActions
+        http={mockHttp}
+        expressions={mockExpressions}
+        episodeId="ep-1"
+        groupHash="gh-1"
+      />
+    );
+    await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
+    expect(screen.getByTestId('alertingEpisodeActionsEditAssigneeButton')).toBeInTheDocument();
+    expect(screen.getByText('Edit assignee')).toBeInTheDocument();
+  });
+
+  it('does not show Edit assignee without episodeId and groupHash', async () => {
+    const user = userEvent.setup();
+    render(
+      <AlertEpisodeActions
+        http={mockHttp}
+        expressions={mockExpressions}
+        episodeId="ep-1"
+        groupAction={{
+          groupHash: 'g1',
+          ruleId: 'r1',
+          lastDeactivateAction: null,
+          lastSnoozeAction: null,
+          snoozeExpiry: null,
+          tags: [],
+          lastSnoozeActor: null,
+          lastDeactivateActor: null,
+        }}
+      />
+    );
+    await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
+    expect(
+      screen.queryByTestId('alertingEpisodeActionsEditAssigneeButton')
+    ).not.toBeInTheDocument();
   });
 });
