@@ -38,7 +38,7 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { reportMetricsGridError } from '../../observability/metrics/utils/report_metrics_grid_error';
+import { reportChartSectionError } from '../utils/report_chart_section_error';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -93,7 +93,7 @@ export const useLensProps = ({
   // throws a new Error instance every retry, so without dedup the
   // `setBuildError` below would change `effectiveError`'s reference each
   // time, re-fire the useEffect on line 100, kick off another build via
-  // `chartConfigUpdates$`, and loop forever — spamming APM/EBT and
+  // `chartConfigUpdates$`, and loop forever — spamming APM and
   // re-rendering. Keying on name+message keeps repeat emissions of the
   // same logical failure quiet while still surfacing distinct ones.
   const lastBuildErrorKeyRef = useRef<string | null>(null);
@@ -207,7 +207,7 @@ export const useLensProps = ({
               return of(null);
             }
             lastBuildErrorKeyRef.current = errorKey;
-            reportMetricsGridError({
+            reportChartSectionError({
               error: buildErr,
               source: 'useLensProps',
             });

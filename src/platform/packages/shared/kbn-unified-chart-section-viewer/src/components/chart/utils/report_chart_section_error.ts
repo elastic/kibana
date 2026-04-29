@@ -12,26 +12,35 @@ import { EsqlResponseError } from './esql_response_error';
 import { isSuppressedFetchError } from './is_suppressed_fetch_error';
 
 /**
- * Identifies which metrics-grid code path produced a non-render error.
+ * Identifies which chart-section code path produced a non-render error.
  * Used as an APM label so failures can be split by origin in dashboards.
+ *
+ * The shared chart hook (`useLensProps`) is consumed by both the metrics
+ * grid and the traces grid, so the source enum mixes a chart-shared
+ * value with grid-specific values. Add new entries here when a new
+ * grid-specific call site needs to report through this util.
  */
-export type MetricsGridErrorSource = 'useFetchMetricsData' | 'useLensProps';
+export type ChartSectionErrorSource = 'useFetchMetricsData' | 'useLensProps';
 
 /**
- * APM label value used to distinguish metrics-grid non-render error
+ * APM label value used to distinguish chart-section non-render error
  * captures from the existing React `SectionFatalReactError` /
  * `PageFatalReactError` taxonomy emitted by
  * `@kbn/shared-ux-error-boundary`.
+ *
+ * Named `ChartSection` (not `MetricsGrid`) because `useLensProps` —
+ * one of the call sites — is shared across the metrics grid and the
+ * traces grid; a metrics-grid-only label would mislabel trace failures.
  */
-export const METRICS_GRID_ERROR_TYPE_LABEL = 'MetricsGridNonRenderError';
+export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
 
-interface ReportMetricsGridErrorArgs {
+interface ReportChartSectionErrorArgs {
   error: unknown;
-  source: MetricsGridErrorSource;
+  source: ChartSectionErrorSource;
 }
 
 /**
- * Reports a non-render metrics-grid error to APM. Per guidance from the
+ * Reports a non-render chart-section error to APM. Per guidance from the
  * Observability/EBT stakeholders (see PR #265380 review feedback), EBT is
  * intended for product-usage analytics rather than observability /
  * monitoring, so monitoring-style error reporting goes through APM (or
@@ -43,7 +52,7 @@ interface ReportMetricsGridErrorArgs {
  *
  * This util is intentionally side-effect-only and does not re-throw.
  */
-export const reportMetricsGridError = ({ error, source }: ReportMetricsGridErrorArgs): void => {
+export const reportChartSectionError = ({ error, source }: ReportChartSectionErrorArgs): void => {
   if (isSuppressedFetchError(error)) {
     return;
   }
@@ -52,8 +61,8 @@ export const reportMetricsGridError = ({ error, source }: ReportMetricsGridError
   }
 
   const labels: Record<string, string> = {
-    error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-    metrics_grid_source: source,
+    error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+    chart_section_source: source,
   };
   if (error instanceof EsqlResponseError) {
     if (error.type) {
@@ -74,7 +83,7 @@ export const reportMetricsGridError = ({ error, source }: ReportMetricsGridError
   // fall back to a plain capture so the error is never dropped.
   const transaction = apm.getCurrentTransaction();
   if (transaction) {
-    const span = transaction.startSpan('metrics-grid-non-render-error', 'metrics-grid');
+    const span = transaction.startSpan('chart-section-non-render-error', 'chart-section');
     if (span) {
       span.addLabels(labels);
       apm.captureError(error, { labels });

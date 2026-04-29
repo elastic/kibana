@@ -45,8 +45,8 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
     trackRequest: mockTrackRequest,
   }),
 }));
-jest.mock('../utils/report_metrics_grid_error', () => ({
-  reportMetricsGridError: jest.fn(),
+jest.mock('../../../chart/utils/report_chart_section_error', () => ({
+  reportChartSectionError: jest.fn(),
 }));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -57,15 +57,15 @@ import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
-import { reportMetricsGridError } from '../utils/report_metrics_grid_error';
+import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
   typeof parseMetricsWithTelemetry
 >;
-const mockReportMetricsGridError = reportMetricsGridError as jest.MockedFunction<
-  typeof reportMetricsGridError
+const mockReportChartSectionError = reportChartSectionError as jest.MockedFunction<
+  typeof reportChartSectionError
 >;
 
 const createDimension = (name: string): Dimension => ({ name });
@@ -486,7 +486,7 @@ describe('useFetchMetricsData', () => {
       expect(result.current.activeDimensions).toEqual([]);
     });
 
-    it('reports landed fetch errors via reportMetricsGridError', async () => {
+    it('reports landed fetch errors via reportChartSectionError', async () => {
       const fetchError = new Error('boom');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);
 
@@ -498,8 +498,8 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
-      expect(mockReportMetricsGridError).toHaveBeenCalledWith({
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: fetchError,
         source: 'useFetchMetricsData',
       });
@@ -519,9 +519,9 @@ describe('useFetchMetricsData', () => {
       });
 
       // The wiring always forwards to the reporter; AbortError suppression
-      // lives inside reportMetricsGridError (covered by its own unit test).
-      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
-      expect(mockReportMetricsGridError).toHaveBeenCalledWith({
+      // lives inside reportChartSectionError (covered by its own unit test).
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: abortError,
         source: 'useFetchMetricsData',
       });
@@ -541,12 +541,12 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
 
       rerender(params);
       rerender(params);
 
-      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
     });
   });
 

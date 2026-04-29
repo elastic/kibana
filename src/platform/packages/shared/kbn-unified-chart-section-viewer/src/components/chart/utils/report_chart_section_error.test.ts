@@ -9,7 +9,10 @@
 
 import { apm } from '@elastic/apm-rum';
 import { EsqlResponseError } from './esql_response_error';
-import { METRICS_GRID_ERROR_TYPE_LABEL, reportMetricsGridError } from './report_metrics_grid_error';
+import {
+  CHART_SECTION_ERROR_TYPE_LABEL,
+  reportChartSectionError,
+} from './report_chart_section_error';
 
 jest.mock('@elastic/apm-rum', () => ({
   apm: {
@@ -42,7 +45,7 @@ const createMockTransaction = (span: MockSpan | undefined): MockTransaction => (
   startSpan: jest.fn().mockReturnValue(span),
 });
 
-describe('reportMetricsGridError', () => {
+describe('reportChartSectionError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default: no active transaction. Tests that exercise the span path
@@ -52,7 +55,7 @@ describe('reportMetricsGridError', () => {
   });
 
   it('is a no-op when error is undefined', () => {
-    reportMetricsGridError({
+    reportChartSectionError({
       error: undefined,
       source: 'useFetchMetricsData',
     });
@@ -61,7 +64,7 @@ describe('reportMetricsGridError', () => {
   });
 
   it('is a no-op when error is a non-Error value', () => {
-    reportMetricsGridError({
+    reportChartSectionError({
       error: 'plain string',
       source: 'useFetchMetricsData',
     });
@@ -73,7 +76,7 @@ describe('reportMetricsGridError', () => {
     const abortError = new Error('aborted');
     abortError.name = 'AbortError';
 
-    reportMetricsGridError({
+    reportChartSectionError({
       error: abortError,
       source: 'useFetchMetricsData',
     });
@@ -84,7 +87,7 @@ describe('reportMetricsGridError', () => {
   it('reports a plain Error to APM', () => {
     const plainError = new Error('network blew up');
 
-    reportMetricsGridError({
+    reportChartSectionError({
       error: plainError,
       source: 'useFetchMetricsData',
     });
@@ -92,8 +95,8 @@ describe('reportMetricsGridError', () => {
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
-        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-        metrics_grid_source: 'useFetchMetricsData',
+        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        chart_section_source: 'useFetchMetricsData',
       },
     });
   });
@@ -108,7 +111,7 @@ describe('reportMetricsGridError', () => {
       { status: 400 }
     );
 
-    reportMetricsGridError({
+    reportChartSectionError({
       error: esqlError,
       source: 'useLensProps',
     });
@@ -116,8 +119,8 @@ describe('reportMetricsGridError', () => {
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
       labels: {
-        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-        metrics_grid_source: 'useLensProps',
+        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        chart_section_source: 'useLensProps',
         esql_error_type: 'verification_exception',
         esql_status: '400',
       },
@@ -127,15 +130,15 @@ describe('reportMetricsGridError', () => {
   it('omits esql labels when EsqlResponseError fields are absent', () => {
     const esqlError = new EsqlResponseError({ reason: 'no type, no status' });
 
-    reportMetricsGridError({
+    reportChartSectionError({
       error: esqlError,
       source: 'useLensProps',
     });
 
     expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
       labels: {
-        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-        metrics_grid_source: 'useLensProps',
+        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        chart_section_source: 'useLensProps',
       },
     });
   });
@@ -149,26 +152,26 @@ describe('reportMetricsGridError', () => {
 
     const plainError = new Error('build failed');
 
-    reportMetricsGridError({
+    reportChartSectionError({
       error: plainError,
       source: 'useLensProps',
     });
 
     expect(transaction.startSpan).toHaveBeenCalledTimes(1);
     expect(transaction.startSpan).toHaveBeenCalledWith(
-      'metrics-grid-non-render-error',
-      'metrics-grid'
+      'chart-section-non-render-error',
+      'chart-section'
     );
     expect(span.addLabels).toHaveBeenCalledWith({
-      error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-      metrics_grid_source: 'useLensProps',
+      error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+      chart_section_source: 'useLensProps',
     });
     // captureError must run inside the span lifecycle so the RUM agent
     // associates the captured error with the failed span.
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
-        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-        metrics_grid_source: 'useLensProps',
+        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        chart_section_source: 'useLensProps',
       },
     });
     expect(span.outcome).toBe('failure');
@@ -183,7 +186,7 @@ describe('reportMetricsGridError', () => {
 
     const plainError = new Error('build failed');
 
-    reportMetricsGridError({
+    reportChartSectionError({
       error: plainError,
       source: 'useLensProps',
     });
@@ -192,8 +195,8 @@ describe('reportMetricsGridError', () => {
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
-        error_type: METRICS_GRID_ERROR_TYPE_LABEL,
-        metrics_grid_source: 'useLensProps',
+        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        chart_section_source: 'useLensProps',
       },
     });
   });

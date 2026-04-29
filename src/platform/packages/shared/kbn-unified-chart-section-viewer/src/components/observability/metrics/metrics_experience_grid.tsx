@@ -21,7 +21,7 @@ import { MetricsExperienceGridContent } from './metrics_experience_grid_content'
 import { MetricsInfoError } from './metrics_info_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
-import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
+import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,

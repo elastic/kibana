@@ -24,13 +24,13 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils');
-jest.mock('../../observability/metrics/utils/report_metrics_grid_error', () => ({
-  reportMetricsGridError: jest.fn(),
+jest.mock('../utils/report_chart_section_error', () => ({
+  reportChartSectionError: jest.fn(),
 }));
 
-const { reportMetricsGridError: mockReportMetricsGridError } = jest.requireMock(
-  '../../observability/metrics/utils/report_metrics_grid_error'
-) as { reportMetricsGridError: jest.Mock };
+const { reportChartSectionError: mockReportChartSectionError } = jest.requireMock(
+  '../utils/report_chart_section_error'
+) as { reportChartSectionError: jest.Mock };
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
@@ -365,10 +365,10 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+        expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
       });
 
-      expect(mockReportMetricsGridError).toHaveBeenCalledWith({
+      expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: builderError,
         source: 'useLensProps',
       });
@@ -411,7 +411,7 @@ describe('useLensProps', () => {
 
       // First pass: build rejects, error is reported, effectiveError latches.
       await waitFor(() => {
-        expect(mockReportMetricsGridError).toHaveBeenCalled();
+        expect(mockReportChartSectionError).toHaveBeenCalled();
       });
 
       // Resolve the error-branch rebuild that setBuildError triggers so the
@@ -469,7 +469,7 @@ describe('useLensProps', () => {
 
       // First failure surfaces.
       await waitFor(() => {
-        expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+        expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
       });
 
       // Drive several additional triggers; without dedup these would each
@@ -482,7 +482,7 @@ describe('useLensProps', () => {
       }
 
       // Still only one report — the same logical failure was suppressed.
-      expect(mockReportMetricsGridError).toHaveBeenCalledTimes(1);
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
     });
 
     it('reports again after a recovery when the same failure resurfaces', async () => {
@@ -524,7 +524,7 @@ describe('useLensProps', () => {
       // both should be reported. Without the on-success ref clear, only
       // the first would land and the second would be wrongly suppressed.
       await waitFor(() => {
-        expect(mockReportMetricsGridError).toHaveBeenCalledTimes(2);
+        expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -551,7 +551,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportMetricsGridError).toHaveBeenCalled();
+        expect(mockReportChartSectionError).toHaveBeenCalled();
       });
 
       // Next external trigger should produce defined lensProps — the

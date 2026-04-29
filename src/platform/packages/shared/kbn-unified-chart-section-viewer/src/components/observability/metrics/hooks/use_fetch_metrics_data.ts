@@ -18,7 +18,7 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
-import { reportMetricsGridError } from '../utils/report_metrics_grid_error';
+import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -163,7 +163,7 @@ export function useFetchMetricsData({
       return;
     }
     lastReportedErrorRef.current = error;
-    reportMetricsGridError({
+    reportChartSectionError({
       error,
       source: 'useFetchMetricsData',
     });
