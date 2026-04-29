@@ -110,6 +110,12 @@ export interface RedTeamConfig {
   targetContext?: TargetContext;
   /** Max number of adversarial examples to run in parallel for multi-turn strategies. Defaults to 3. */
   exampleConcurrency?: number;
+  /**
+   * Minimum overall pass rate (percentage 0-100) required for the red-team run to be
+   * considered successful. Suites use this to fail the test when the AI assistant
+   * regresses below the agreed security baseline.
+   */
+  minPassRate?: number;
 }
 
 export interface ModuleReport {
