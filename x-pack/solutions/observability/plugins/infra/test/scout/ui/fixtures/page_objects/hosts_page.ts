@@ -34,6 +34,7 @@ export class HostsPage {
   public readonly selectedHostsFilterButton: Locator;
   public readonly addFilterButton: Locator;
   public readonly noDataPage: Locator;
+  public readonly noDataPageActionButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
@@ -59,6 +60,7 @@ export class HostsPage {
     this.selectedHostsFilterButton = this.page.getByTestId('hostsViewTableSelectHostsFilterButton');
     this.addFilterButton = this.page.getByTestId('hostsViewTableAddFilterButton');
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
+    this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
   }
 
   private async waitForTableToLoad() {
@@ -100,9 +102,16 @@ export class HostsPage {
     }
   }
 
-  public async goToHostsPage() {
+  public async goToHostsPage(opts: { skipLoadWait?: boolean } = {}) {
     const baseUrl = this.kbnUrl.app('metrics');
     await this.page.goto(`${baseUrl}/hosts`);
+    if (!opts.skipLoadWait) {
+      await this.waitForTableToLoad();
+    }
+  }
+
+  public async clickNoDataPageAddDataButton() {
+    await this.noDataPageActionButton.click();
   }
 
   public getHostRow(hostName: string) {

@@ -8,34 +8,33 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import {
-  DATE_WITH_HOSTS_DATA_FROM,
-  DATE_WITH_HOSTS_DATA_TO,
-  EXTENDED_TIMEOUT,
-} from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
   'Hosts Page - Empty State',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
+      await browserAuth.loginAsViewer();
+      await hostsPage.goToHostsPage({ skipLoadWait: true });
+    });
+
     test('should show onboarding page when no data is present', async ({
-      browserAuth,
+      page,
       pageObjects: { hostsPage },
     }) => {
-      await browserAuth.loginAsViewer();
-
-      await test.step('navigate to hosts view with filters that return no rows', async () => {
-        await hostsPage.goToPage({
-          from: DATE_WITH_HOSTS_DATA_FROM,
-          to: DATE_WITH_HOSTS_DATA_TO,
-          preferredSchema: 'ecs',
+      await test.step('display empty state', async () => {
+        await expect(hostsPage.noDataPage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+        await expect(hostsPage.noDataPageActionButton).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
         });
-        await hostsPage.filterByQueryBar('host.name: "__scout_hosts_empty_state_no_such_host__"');
       });
 
-      await test.step('verify the table empty state is shown', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(0);
-        await expect(hostsPage.tableNoData).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await test.step('redirect to onboarding page when clicking on the add data button', async () => {
+        await hostsPage.clickNoDataPageAddDataButton();
+        await expect(page.getByTestId('obltOnboardingHomeTitle')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     });
   }

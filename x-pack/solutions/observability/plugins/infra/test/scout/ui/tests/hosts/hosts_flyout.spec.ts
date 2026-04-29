@@ -17,6 +17,10 @@ import {
   EXTENDED_TIMEOUT,
   KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
+import {
+  cleanHostsFlyoutSynthtraceData,
+  ingestHostsFlyoutSynthtraceData,
+} from '../../fixtures/sequential_hosts_synthtrace';
 
 const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
 
@@ -24,6 +28,11 @@ test.describe(
   'Hosts Page - Flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeAll(async ({ esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: ingesting ECS hosts + logs + APM services for flyout tests');
+      await ingestHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       // Flyout suites open Lens + elastic-charts in the host overview tab.
       // Under CI contention the cumulative cost of navigation, flyout init,
@@ -44,6 +53,11 @@ test.describe(
       // Reset the custom-dashboards setting after every test so cleanup runs
       // even if the test times out. No-op for tests that didn't toggle it.
       await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: false });
+    });
+
+    test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: cleaning synthtrace data for flyout tests');
+      await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
     });
 
     test('Overview Tab - KPI charts and collapsible sections', async ({

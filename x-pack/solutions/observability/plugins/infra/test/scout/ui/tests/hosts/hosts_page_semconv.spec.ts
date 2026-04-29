@@ -15,11 +15,20 @@ import {
   DATE_WITH_SEMCONV_DATA_TO,
   KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
+import {
+  cleanSemconvHostsSynthtraceData,
+  ingestSemconvHostsSynthtraceData,
+} from '../../fixtures/sequential_hosts_synthtrace';
 
 test.describe(
   'Hosts Page - OTel Semconv Data',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeAll(async ({ esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: ingesting semconv host metrics');
+      await ingestSemconvHostsSynthtraceData({ esClient, kbnUrl, log, config });
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       // Semconv KPI + flyout suites rely on Lens + elastic-charts rendering
       // on top of the OTel data stream; first-load timing in CI exceeds
@@ -33,6 +42,15 @@ test.describe(
         preferredSchema: 'semconv',
       });
       await expect(hostsPage.tableRows).toHaveCount(SEMCONV_HOSTS.length);
+    });
+
+    test.afterEach(() => {
+      // `playwright/prefer-hooks-in-order`: `afterEach` before `afterAll`.
+    });
+
+    test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: cleaning semconv host metrics');
+      await cleanSemconvHostsSynthtraceData({ esClient, kbnUrl, log, config });
     });
 
     test('should display semconv hosts in the table', async ({ pageObjects: { hostsPage } }) => {
@@ -56,7 +74,10 @@ test.describe(
 
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI tile has a value`, async () => {
-          await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute('title', /.+/);
+          await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
+            'title',
+            /.+/
+          );
         });
       }
     });
@@ -106,4 +127,3 @@ test.describe(
     });
   }
 );
-
