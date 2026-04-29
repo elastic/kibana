@@ -41236,7 +41236,6 @@
     "xpack.securitySolution.alertSummary.prompt3Prompt": "基于此警报，请制定全面的修复计划，包括立即遏制措施、调查行动及长期缓解策略，以防止类似事件发生。",
     "xpack.securitySolution.alertSummary.prompt3Title": "告警处置策略",
     "xpack.securitySolution.alertSummary.recommendedActions": "建议操作",
-    "xpack.securitySolution.alertSummary.regenerate": "重塑见解",
     "xpack.securitySolution.alertSummary.suggestedPromptsContextTooltip": "将此告警添加为上下文。",
     "xpack.securitySolution.alertSummary.suggestedPromptsSection.title": "建议提示",
     "xpack.securitySolution.alertSummary.table.attachToCaseAriaLabel": "将告警附加到案例",

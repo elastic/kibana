@@ -40992,7 +40992,6 @@
     "xpack.securitySolution.alertSummary.prompt3Prompt": "Sur la base de cette alerte, veuillez élaborer un plan de remédiation complet incluant des mesures de confinement immédiat, des actions d’enquête et des stratégies d’atténuation à long terme pour prévenir des incidents similaires.",
     "xpack.securitySolution.alertSummary.prompt3Title": "Stratégie de remédiation des alertes",
     "xpack.securitySolution.alertSummary.recommendedActions": "Actions recommandées",
-    "xpack.securitySolution.alertSummary.regenerate": "Générer à nouveau les informations",
     "xpack.securitySolution.alertSummary.suggestedPromptsContextTooltip": "Ajoutez cette alerte comme contexte.",
     "xpack.securitySolution.alertSummary.suggestedPromptsSection.title": "Suggestions d'invites",
     "xpack.securitySolution.alertSummary.table.attachToCaseAriaLabel": "Attacher l'alerte au cas",

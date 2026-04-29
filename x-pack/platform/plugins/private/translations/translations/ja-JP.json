@@ -41222,7 +41222,6 @@
     "xpack.securitySolution.alertSummary.prompt3Prompt": "このアラートに基づき、即時の封じ込め手順、調査アクション、同様のインシデントを防御するための長期的な軽減戦略を含む包括的な修復計画を概説してください。",
     "xpack.securitySolution.alertSummary.prompt3Title": "アラート修復戦略",
     "xpack.securitySolution.alertSummary.recommendedActions": "推奨されるアクション",
-    "xpack.securitySolution.alertSummary.regenerate": "洞察を再生成",
     "xpack.securitySolution.alertSummary.suggestedPromptsContextTooltip": "このアラートをコンテキストとして追加します。",
     "xpack.securitySolution.alertSummary.suggestedPromptsSection.title": "提案されたプロンプト",
     "xpack.securitySolution.alertSummary.table.attachToCaseAriaLabel": "アラートをケースに関連付ける",

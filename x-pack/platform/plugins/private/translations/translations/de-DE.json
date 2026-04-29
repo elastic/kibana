@@ -41110,7 +41110,6 @@
     "xpack.securitySolution.alertSummary.prompt3Prompt": "Bitte skizzieren Sie auf der Grundlage dieser Warnung einen umfassenden Sanierungsplan, der sofortige Schritte zur Eindämmung des Problems, Untersuchungsmaßnahmen und langfristige Strategien zum Verhindern ähnlicher Vorfälle umfasst.",
     "xpack.securitySolution.alertSummary.prompt3Title": "Strategie zur Behebung von Warnmeldungen",
     "xpack.securitySolution.alertSummary.recommendedActions": "Empfohlene Maßnahmen",
-    "xpack.securitySolution.alertSummary.regenerate": "Einblicke neu generieren",
     "xpack.securitySolution.alertSummary.suggestedPromptsContextTooltip": "Diese Warnung als Kontext hinzufügen.",
     "xpack.securitySolution.alertSummary.suggestedPromptsSection.title": "Vorgeschlagene Prompts",
     "xpack.securitySolution.alertSummary.table.attachToCaseAriaLabel": "Warnmeldung an Ticket anhängen",
