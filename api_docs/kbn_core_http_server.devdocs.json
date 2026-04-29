@@ -16982,46 +16982,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
@@ -17047,6 +17007,46 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -17267,6 +17267,10 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/tracing/get_project_traces.ts"
+              },
+              {
+                "plugin": "inbox",
+                "path": "x-pack/platform/plugins/shared/inbox/server/routes/actions/list_actions.ts"
               },
               {
                 "plugin": "inferenceEndpoint",
@@ -18153,6 +18157,14 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/resolve.test.ts"
               },
               {
+                "plugin": "inbox",
+                "path": "x-pack/platform/plugins/shared/inbox/server/routes/actions/list_actions.test.ts"
+              },
+              {
+                "plugin": "inbox",
+                "path": "x-pack/platform/plugins/shared/inbox/server/routes/actions/list_actions.test.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
@@ -18374,10 +18386,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
@@ -18391,6 +18399,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -19054,34 +19066,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
@@ -19095,6 +19079,34 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -19687,6 +19699,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/export_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/search_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -20522,10 +20538,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
@@ -20535,6 +20547,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",

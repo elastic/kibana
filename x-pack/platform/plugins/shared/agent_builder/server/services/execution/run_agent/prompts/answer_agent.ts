@@ -21,7 +21,7 @@ type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimePar
 export const getAnswerAgentPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, answerActions, processedConversation, resultTransformer } = params;
+  const { actions, cycleLimit, answerActions, processedConversation, resultTransformer } = params;
 
   // Generate messages from the conversation's rounds, with optional compaction summary
   // sourced from processedConversation.compactionSummary (set during compaction phase).
@@ -34,7 +34,7 @@ export const getAnswerAgentPrompt = async (
   return [
     ['system', getAnswerSystemMessage(params)],
     ...previousRoundsAsMessages,
-    ...formatResearcherActionHistory({ actions }),
+    ...formatResearcherActionHistory({ actions, cycleLimit }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };
@@ -109,6 +109,7 @@ export const getStructuredAnswerPrompt = async (
     answerActions,
     capabilities,
     processedConversation,
+    cycleLimit,
     resultTransformer,
   } = params;
   const { attachmentTypes, versionedAttachmentPresentation } = processedConversation;
@@ -170,7 +171,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
     ...previousRoundsAsMessages,
-    ...formatResearcherActionHistory({ actions }),
+    ...formatResearcherActionHistory({ actions, cycleLimit }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };
