@@ -53,26 +53,17 @@ const createMockStorageClient = () => ({
 const createFeatureClient = ({
   storageClient = createMockStorageClient(),
   logger = createMockLogger(),
-  config,
 }: {
   storageClient?: ReturnType<typeof createMockStorageClient>;
   logger?: ReturnType<typeof createMockLogger>;
-  config?: {
-    feature_ttl_days: number;
-    semantic_min_score: number;
-    rrf_rank_constant: number;
-  };
 } = {}) => {
-  const client = new FeatureClient(
-    {
-      storageClient: storageClient as unknown as IStorageClient<
-        FeatureStorageSettings,
-        StoredFeature
-      >,
-      logger: logger as unknown as Logger,
-    },
-    config
-  );
+  const client = new FeatureClient({
+    storageClient: storageClient as unknown as IStorageClient<
+      FeatureStorageSettings,
+      StoredFeature
+    >,
+    logger: logger as unknown as Logger,
+  });
   return { client, storageClient, logger };
 };
 
