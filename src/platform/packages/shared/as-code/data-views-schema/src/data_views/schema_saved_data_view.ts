@@ -8,7 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { indexPatternSchema, timeFieldSchema } from './common';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import { fieldSettingsFieldNameSchema, indexPatternSchema, timeFieldSchema } from './common';
 import {
   savedCompositeRuntimeFieldSchema,
   savedPrimitiveRuntimeFieldSchema,
@@ -33,17 +34,11 @@ export const savedFieldSettingsSchema = schema.oneOf(
 
 export const savedDataViewSpecSchema = schema.object(
   {
-    id: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'Kibana provides a unique identifier for each data view, or you can create your own.',
-        },
-      })
-    ),
+    id: schema.maybe(asCodeIdSchema),
     name: schema.maybe(
       schema.string({
         meta: {
+          title: 'Data view name',
           description: 'The name of the data view. Example: "Sample data view".',
         },
       })
@@ -51,15 +46,23 @@ export const savedDataViewSpecSchema = schema.object(
     allow_hidden_indices: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Allow hidden and system indices.',
+          title: 'Allow hidden and system indices',
+          description: 'When `true`, allows the data view to match hidden indices.',
         },
       })
     ),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     field_settings: schema.maybe(
-      schema.recordOf(schema.string({ minLength: 1 }), savedFieldSettingsSchema)
+      schema.recordOf(fieldSettingsFieldNameSchema, savedFieldSettingsSchema)
     ),
   },
-  { meta: { id: 'kbn-saved-data-view-spec-schema', title: 'Saved data view spec' } }
+  {
+    meta: {
+      id: 'kbn-saved-data-view-spec-schema',
+      title: 'Saved data view spec',
+      description:
+        'Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.',
+    },
+  }
 );

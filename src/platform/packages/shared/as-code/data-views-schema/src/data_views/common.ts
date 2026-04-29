@@ -11,6 +11,8 @@ import { schema } from '@kbn/config-schema';
 
 export const indexPatternSchema = schema.string({
   meta: {
+    id: 'kbn-index-pattern-schema',
+    title: 'Index pattern',
     description:
       'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".',
   },
@@ -19,8 +21,20 @@ export const indexPatternSchema = schema.string({
 export const timeFieldSchema = schema.maybe(
   schema.string({
     meta: {
+      id: 'kbn-time-field-schema',
+      title: 'Time field',
       description:
         'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
     },
   })
 );
+
+export const fieldSettingsFieldNameSchema = schema.string({
+  minLength: 1,
+  meta: {
+    id: 'kbn-field-settings-field-name-schema',
+    title: 'Field name',
+    description:
+      'Field name this entry applies to. Use a field from the backing indices for display overrides, or the runtime field name when the entry defines a runtime field. Example: "user.name".',
+  },
+});

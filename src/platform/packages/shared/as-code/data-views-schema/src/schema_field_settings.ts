@@ -79,7 +79,7 @@ export const fieldSettingsWithPopularitySchema = fieldSettingsBaseSchema.extends
   {
     meta: {
       id: 'kbn-field-settings-with-popularity',
-      title: 'Field settings with popularity',
+      title: 'Field settings',
       description:
         'Display overrides for a field. These settings can define a custom label, description, format and popularity.',
     },
