@@ -7,19 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EsWorkflow } from '../..';
+import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { WORKFLOW_INDEX_NAME } from '../constants';
 
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
-  indexName?: string;
+  indexName: string;
 }
 
+export type WorkflowRepositoryParams = Omit<WorkflowRepositoryOptions, 'indexName'> & {
+  indexName?: string;
+};
+
 export class WorkflowRepository {
-  constructor(private options: WorkflowRepositoryOptions) {
-    this.options.indexName = this.options.indexName || WORKFLOW_INDEX_NAME;
+  private options: WorkflowRepositoryOptions;
+
+  constructor(params: WorkflowRepositoryParams) {
+    this.options = { ...params, indexName: params.indexName || WORKFLOW_INDEX_NAME };
   }
 
   /**
@@ -158,5 +165,115 @@ export class WorkflowRepository {
     }
 
     return result;
+  }
+
+  /**
+   * Returns all enabled, non-deleted workflows in the space that are subscribed to the given trigger type.
+   * Uses PIT-based pagination to handle large result sets.
+   */
+  async getWorkflowsSubscribedToTrigger(
+    triggerId: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
+    const pageSize = 1000;
+    const MAX_PAGES = 50;
+    const keepAlive = '1m';
+    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const query = {
+      bool: {
+        must: [
+          { term: { spaceId } },
+          { term: { enabled: true } },
+          { term: { triggerTypes: triggerId } },
+        ],
+        must_not: [{ exists: { field: 'deleted_at' } }],
+      },
+    };
+    const _source = [
+      'name',
+      'description',
+      'enabled',
+      'yaml',
+      'definition',
+      'createdBy',
+      'lastUpdatedBy',
+      'valid',
+      'createdAt',
+      'lastUpdatedAt',
+    ];
+
+    const pitResponse = await this.options.esClient.openPointInTime({
+      index: this.options.indexName,
+      keep_alive: keepAlive,
+      ignore_unavailable: true,
+    });
+    const pitId = pitResponse.id;
+
+    try {
+      const allHits: Array<{ _id: string; _source: Record<string, unknown> }> = [];
+      let searchAfter: estypes.SearchHit['sort'] | undefined;
+      let hasMore = true;
+      let pageCount = 0;
+
+      while (hasMore && pageCount < MAX_PAGES) {
+        pageCount++;
+        const searchResponse = await this.options.esClient.search({
+          pit: { id: pitId, keep_alive: keepAlive },
+          size: pageSize,
+          _source,
+          query,
+          sort,
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+        });
+
+        const hits = searchResponse.hits.hits;
+        for (const hit of hits) {
+          if (hit._source && hit._id) {
+            allHits.push({ _id: hit._id, _source: hit._source as Record<string, unknown> });
+          }
+        }
+
+        hasMore = hits.length >= pageSize;
+        if (hasMore) {
+          const lastHit = hits[hits.length - 1];
+          if (!lastHit.sort) {
+            throw new Error(
+              `Missing sort value on last hit (required for search_after). Last hit: ${JSON.stringify(
+                lastHit
+              )}`
+            );
+          }
+          searchAfter = lastHit.sort;
+        }
+      }
+
+      if (hasMore && pageCount >= MAX_PAGES) {
+        this.options.logger.warn(
+          `getWorkflowsSubscribedToTrigger truncated at ${MAX_PAGES} pages (${
+            pageCount * pageSize
+          } workflows) for trigger ${triggerId} in space ${spaceId}`
+        );
+      }
+
+      return allHits.map(({ _id, _source: source }) => ({
+        id: _id,
+        name: source.name as string,
+        description: source.description as string | undefined,
+        enabled: source.enabled as boolean,
+        yaml: source.yaml as string,
+        definition: source.definition as WorkflowDetailDto['definition'],
+        createdBy: source.createdBy as string,
+        lastUpdatedBy: source.lastUpdatedBy as string,
+        valid: source.valid as boolean,
+        createdAt: source.createdAt as string,
+        lastUpdatedAt: source.lastUpdatedAt as string,
+      }));
+    } finally {
+      try {
+        await this.options.esClient.closePointInTime({ id: pitId });
+      } catch (closeErr) {
+        this.options.logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
+      }
+    }
   }
 }

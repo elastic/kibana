@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 
 import mockFareQuoteCardinality from './__mocks__/mock_farequote_cardinality.json';
 import mockFieldCaps from './__mocks__/mock_field_caps.json';

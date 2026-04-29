@@ -17,6 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/ml-is-populated-object",
-    "@kbn/core-http-browser",
+    "@kbn/ml-common-types",
   ]
 }
