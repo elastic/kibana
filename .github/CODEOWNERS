@@ -790,7 +790,6 @@ src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
-src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/private/vis_default_editor @elastic/kibana-visualizations
 src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation

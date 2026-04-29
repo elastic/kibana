@@ -8154,10 +8154,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-panel-plugin@link:src/platform/plugins/private/presentation_panel":
-  version "0.0.0"
-  uid ""
-
 "@kbn/presentation-publishing-schemas@link:src/platform/packages/shared/presentation/presentation_publishing_schemas":
   version "0.0.0"
   uid ""
