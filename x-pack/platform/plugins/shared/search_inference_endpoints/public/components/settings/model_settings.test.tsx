@@ -72,6 +72,8 @@ const defaultFormState = {
     },
   ],
   invalidEndpointIds: new Set<string>(),
+  hasSavedObject: { child_1: false },
+  dirtyFeatureIds: new Set<string>(),
   updateEndpoints: jest.fn(),
   save: jest.fn(),
   resetSection: jest.fn(),
@@ -377,26 +379,20 @@ describe('ModelSettings', () => {
       </Router>
     );
 
-    // Trigger navigation while dirty to invoke the history block
     act(() => {
       history.push('/some-other-page');
     });
 
-    // The unsaved changes modal should appear
     await waitFor(() => {
       expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
     });
 
-    // Click "Discard changes"
     fireEvent.click(screen.getByText('Discard changes'));
 
-    // defaultModelSettings.reset should be called
     expect(resetDefaultModel).toHaveBeenCalledTimes(1);
 
-    // navigateToUrl should be called with the pending destination
     expect(mockNavigateToUrl).toHaveBeenCalledWith('/some-other-page', expect.any(Object));
 
-    // Modal should be closed
     await waitFor(() => {
       expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
     });
@@ -425,7 +421,6 @@ describe('ModelSettings', () => {
       expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
     });
 
-    // Click "Cancel"
     fireEvent.click(screen.getByText('Cancel'));
 
     expect(mockNavigateToUrl).not.toHaveBeenCalled();

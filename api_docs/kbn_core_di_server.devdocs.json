@@ -18,7 +18,15 @@
         "tags": [],
         "label": "CoreSetup",
         "description": [
-          "\nThe service identifier of {@link CoreSetupContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDiServerPluginApi",
+            "section": "def-server.CoreSetupContext",
+            "text": "CoreSetupContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -52,6 +60,7 @@
             "lineNumber": 24,
             "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -64,7 +73,15 @@
         "tags": [],
         "label": "CoreStart",
         "description": [
-          "\nThe service identifier of {@link CoreStartContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDiServerPluginApi",
+            "section": "def-server.CoreStartContext",
+            "text": "CoreStartContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -98,6 +115,7 @@
             "lineNumber": 24,
             "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -110,7 +128,15 @@
         "tags": [],
         "label": "PluginInitializer",
         "description": [
-          "\nThe service identifier of {@link PluginInitializerContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDiServerPluginApi",
+            "section": "def-server.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -144,6 +170,7 @@
             "lineNumber": 24,
             "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -239,7 +266,23 @@
             "tags": [],
             "label": "handle",
             "description": [
-              "\nThe handler function that will be called when the route is matched.\nThe request and response objects can be injected using {@link Request} and {@link Response}."
+              "\nThe handler function that will be called when the route is matched.\nThe request and response objects can be injected using ",
+              {
+                "pluginId": "@kbn/core-di-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDiServerPluginApi",
+                "section": "def-server.Request",
+                "text": "Request"
+              },
+              " and ",
+              {
+                "pluginId": "@kbn/core-di-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDiServerPluginApi",
+                "section": "def-server.Response",
+                "text": "Response"
+              },
+              "."
             ],
             "signature": [
               "() => ",
@@ -332,6 +375,7 @@
             "lineNumber": 1,
             "columnNumber": 72,
             "deprecated": false,
+            "docsReferencedTypeName": "TArgs",
             "trackAdoption": false
           }
         ],

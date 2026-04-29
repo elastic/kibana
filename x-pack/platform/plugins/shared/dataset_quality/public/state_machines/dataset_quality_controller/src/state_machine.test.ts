@@ -292,6 +292,34 @@ describe('DatasetQualityControllerStateMachine', () => {
         actor.stop();
       });
 
+      it('should not forward filters.query to stats/degraded/failed fetches', async () => {
+        const { machine, dataStreamStatsClient } = buildStateMachine({
+          initialContext: {
+            ...DEFAULT_CONTEXT,
+            filters: {
+              ...DEFAULT_CONTEXT.filters,
+              query: 'synth',
+            },
+          },
+        });
+        const actor = createActor(machine);
+        actor.start();
+
+        await waitForState(actor, 'main.stats.datasets.loaded');
+
+        expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalledWith(
+          expect.not.objectContaining({ datasetQuery: expect.anything() })
+        );
+        expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenCalledWith(
+          expect.not.objectContaining({ datasetQuery: expect.anything() })
+        );
+        expect(dataStreamStatsClient.getDataStreamsFailedStats).toHaveBeenCalledWith(
+          expect.not.objectContaining({ datasetQuery: expect.anything() })
+        );
+
+        actor.stop();
+      });
+
       it('should transition datasets to loaded on success', async () => {
         const { machine } = buildStateMachine();
         const actor = createActor(machine);

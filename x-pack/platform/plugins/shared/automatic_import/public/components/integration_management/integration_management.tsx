@@ -59,6 +59,9 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   const [isDeleteIntegrationModalVisible, setIsDeleteIntegrationModalVisible] = useState(false);
   const deleteIntegrationModalTitleId = useGeneratedHtmlId();
   const { reportCancelButtonClicked, reportDoneButtonClicked } = useTelemetry();
+  // Reanalysis updates data streams on the server but not integration form fields, so
+  // useFormIsModified stays false; allow Done so the user can leave after scheduling reanalysis.
+  const [reanalysisJustScheduled, setReanalysisJustScheduled] = useState(false);
 
   const performCancelNavigation = useCallback(() => {
     reportCancelButtonClicked({ integrationId });
@@ -99,13 +102,21 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
     submit();
   }, [integrationId, reportDoneButtonClicked, submit]);
 
+  const handleDataStreamReanalyzeSuccess = useCallback(() => {
+    setReanalysisJustScheduled(true);
+  }, []);
+
+  useEffect(() => {
+    setReanalysisJustScheduled(false);
+  }, [integrationId]);
+
   return (
     <>
       <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
         <KibanaPageTemplate.Header pageTitle={i18n.PAGE_TITLE_NEW_INTEGRATION} />
         <KibanaPageTemplate.Section>
           <ConnectorSelector />
-          <ManagementContents />
+          <ManagementContents onDataStreamReanalyzeSuccess={handleDataStreamReanalyzeSuccess} />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
       <ButtonsFooter
@@ -113,7 +124,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
         isActionDisabled={
           !hasDataStreams ||
           isDeletingDataStream ||
-          (Boolean(integrationId) && !isNewlyCreated && !isFormModified)
+          (Boolean(integrationId) && !isNewlyCreated && !isFormModified && !reanalysisJustScheduled)
         }
         isCancelDisabled={isDeletingDataStream}
         onCancel={handleCancel}

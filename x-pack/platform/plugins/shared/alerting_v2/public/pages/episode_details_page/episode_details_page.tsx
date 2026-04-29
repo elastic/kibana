@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -19,24 +18,23 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  logicalCSS,
+  useEuiMinBreakpoint,
+  useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
-import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
-import { RelatedAlertEpisode } from '@kbn/alerting-v2-episodes-ui/components/related/related_alert_episode';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { useFetchRelatedAlertEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query';
 import {
   getEpisodeDurationMs,
   getGroupHashFromEpisodeRows,
@@ -44,67 +42,23 @@ import {
   getRuleIdFromEpisodeRows,
   getTriggeredTimestamp,
 } from '@kbn/alerting-v2-episodes-ui/utils/episode_series_derived';
-import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import { AlertEpisodeGroupingFields } from '@kbn/alerting-v2-episodes-ui/components/grouping/grouping_fields';
 import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
-
-const EpisodeLifecycleHeatmap = React.lazy(() =>
-  import('./components/episode_lifecycle_heatmap').then((module) => ({
-    default: module.EpisodeLifecycleHeatmap,
-  }))
-);
-
-const episodeDetailsBreadcrumbFallback = i18n.translate(
-  'xpack.alertingV2.breadcrumbs.episodeDetailsFallback',
-  {
-    defaultMessage: 'Episode',
-  }
-);
-
-function formatDurationMs(ms: number): string {
-  if (ms < 1000) {
-    return i18n.translate('xpack.alertingV2.episodeDetails.durationMs', {
-      defaultMessage: '{ms} ms',
-      values: { ms: Math.round(ms) },
-    });
-  }
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  if (days > 0) {
-    return i18n.translate('xpack.alertingV2.episodeDetails.durationDays', {
-      defaultMessage: '{days} d',
-      values: { days },
-    });
-  }
-  if (hours > 0) {
-    return i18n.translate('xpack.alertingV2.episodeDetails.durationHours', {
-      defaultMessage: '{hours} h',
-      values: { hours },
-    });
-  }
-  if (minutes > 0) {
-    return i18n.translate('xpack.alertingV2.episodeDetails.durationMinutes', {
-      defaultMessage: '{minutes} min',
-      values: { minutes },
-    });
-  }
-  return i18n.translate('xpack.alertingV2.episodeDetails.durationSeconds', {
-    defaultMessage: '{seconds} s',
-    values: { seconds },
-  });
-}
+import { EpisodeMetadataTab } from './components/episode_metadata_tab';
+import { EpisodeOverviewTab } from './components/episode_overview_tab';
+import { EpisodeAssigneeCell } from '../alert_episodes_list_page/components/episode_assignee_cell';
+import * as i18n from './translations';
 
 function formatRuleEvaluationEsql(rule: RuleResponse): string {
   return rule.evaluation.query.base;
@@ -116,12 +70,16 @@ interface EpisodeRouteParams {
 
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
+type EpisodeDetailsMainPanel = 'overview' | 'metadata';
+
 export function EpisodeDetailsPage() {
+  const { euiTheme } = useEuiTheme();
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
+  const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
+
   const { services } = useKibana<AlertEpisodesKibanaServices>();
-  const { euiTheme } = useEuiTheme();
-  const { data, notifications, http, expressions } = services;
+  const { data, http, expressions } = services;
   const history = useHistory();
 
   const {
@@ -148,47 +106,14 @@ export function EpisodeDetailsPage() {
     services,
   });
 
-  const { data: relatedEpisodeRows = [], isLoading: isLoadingRelatedEpisodes } =
-    useFetchRelatedAlertEpisodesQuery({
-      ruleId,
-      excludeEpisodeId: episodeId,
-      pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
-      services: { ...services, expressions },
-      toastDanger: (message) => notifications.toasts.addDanger(message),
-    });
-
-  const relatedEpisodeIds = useMemo(
-    () => relatedEpisodeRows.map((row) => row['episode.id']).filter(Boolean),
-    [relatedEpisodeRows]
-  );
-
-  const relatedGroupHashes = useMemo(
-    () => [
-      ...new Set(
-        relatedEpisodeRows
-          .map((row) => row.group_hash)
-          .filter((hash): hash is string => Boolean(hash))
-      ),
-    ],
-    [relatedEpisodeRows]
-  );
-
-  const { data: relatedEpisodeActionsMap } = useFetchEpisodeActions({
-    episodeIds: relatedEpisodeIds,
-    services: { expressions },
-  });
-
-  const { data: relatedGroupActionsMap } = useFetchGroupActions({
-    groupHashes: relatedGroupHashes,
-    services: { expressions },
-  });
-
   const episodeBreadcrumbTitle =
     rule?.metadata.name != null && rule.metadata.name.length > 0
       ? rule.metadata.name
-      : episodeDetailsBreadcrumbFallback;
+      : i18n.BREADCRUMB_EPISODE_DETAILS_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
+  const smallMediaQuery = useEuiMaxBreakpoint('s');
+  const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
@@ -197,6 +122,14 @@ export function EpisodeDetailsPage() {
   const lastStatus = useMemo(() => getLastEpisodeStatus(eventRows), [eventRows]);
   const triggeredAt = useMemo(() => getTriggeredTimestamp(eventRows), [eventRows]);
   const durationMs = useMemo(() => getEpisodeDurationMs(eventRows), [eventRows]);
+
+  const hasNoActors = useMemo(
+    () =>
+      episodeAction?.lastAckAction !== ALERT_EPISODE_ACTION_TYPE.ACK &&
+      groupAction?.lastSnoozeAction !== ALERT_EPISODE_ACTION_TYPE.SNOOZE &&
+      groupAction?.lastDeactivateAction !== ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    [episodeAction, groupAction]
+  );
 
   const episodeIsoTimestamp = triggeredAt ?? eventRows[0]?.['@timestamp'];
 
@@ -226,14 +159,7 @@ export function EpisodeDetailsPage() {
     services.uiSettings,
   ]);
 
-  const ruleKindLabel =
-    rule?.kind === 'signal'
-      ? i18n.translate('xpack.alertingV2.episodeDetails.ruleKindSignal', {
-          defaultMessage: 'Signal',
-        })
-      : i18n.translate('xpack.alertingV2.episodeDetails.ruleKindAlerting', {
-          defaultMessage: 'Alerting',
-        });
+  const ruleKindLabel = rule?.kind === 'signal' ? i18n.RULE_KIND_SIGNAL : i18n.RULE_KIND_ALERTING;
 
   const isLoading = isLoadingEvents || (Boolean(ruleId) && isLoadingRule);
   const episodeNotFound = !isLoading && eventRows.length === 0;
@@ -243,21 +169,8 @@ export function EpisodeDetailsPage() {
       <EuiEmptyPrompt
         iconType="warning"
         color="danger"
-        title={
-          <h2>
-            {i18n.translate('xpack.alertingV2.episodes.episodeNotFoundTitle', {
-              defaultMessage: 'Unable to load episode',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.alertingV2.episodes.episodeNotFoundBody', {
-              defaultMessage:
-                'The alert episode could not be found or an error occurred while loading it.',
-            })}
-          </p>
-        }
+        title={<h2>{i18n.EPISODE_NOT_FOUND_TITLE}</h2>}
+        body={<p>{i18n.EPISODE_NOT_FOUND_BODY}</p>}
         actions={[
           <EuiButton
             color="primary"
@@ -265,9 +178,7 @@ export function EpisodeDetailsPage() {
             onClick={() => history.push('/')}
             data-test-subj="episodeDetailsErrorBackButton"
           >
-            {i18n.translate('xpack.alertingV2.episodes.backToEpisodes', {
-              defaultMessage: 'Back to alert episodes',
-            })}
+            {i18n.BACK_TO_ALERT_EPISODES}
           </EuiButton>,
         ]}
         data-test-subj="episodeDetailsErrorPrompt"
@@ -276,14 +187,11 @@ export function EpisodeDetailsPage() {
   }
 
   const pageTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={true} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="l">
           <h1 data-test-subj="alertingV2EpisodeDetailsRuleTitle">
-            {rule?.metadata.name ??
-              i18n.translate('xpack.alertingV2.episodeDetails.loadingRuleTitle', {
-                defaultMessage: 'Episode details',
-              })}
+            {rule?.metadata.name ?? i18n.LOADING_RULE_TITLE}
           </h1>
         </EuiTitle>
       </EuiFlexItem>
@@ -322,19 +230,10 @@ export function EpisodeDetailsPage() {
       </>
     ) : undefined;
 
-  const episodeDetailsSidebarTitle = i18n.translate(
-    'xpack.alertingV2.episodeDetails.sidebarTitle',
-    {
-      defaultMessage: 'Episode details',
-    }
-  );
-
-  const runbookSidebarTitle = i18n.translate('xpack.alertingV2.episodeDetails.runbookTitle', {
-    defaultMessage: 'Runbook',
-  });
-
   const sidebarHeaderTitle =
-    sidebarPanel === 'episode_details' ? episodeDetailsSidebarTitle : runbookSidebarTitle;
+    sidebarPanel === 'episode_details'
+      ? i18n.SIDEBAR_TITLE_EPISODE_DETAILS
+      : i18n.SIDEBAR_TITLE_RUNBOOK;
 
   const sidebar = (
     <>
@@ -345,7 +244,9 @@ export function EpisodeDetailsPage() {
         gutterSize="s"
         css={css`
           flex-grow: 0;
-          padding: ${euiTheme.size.l};
+          ${largeMediaQuery} {
+            padding: ${euiTheme.size.l};
+          }
         `}
       >
         <EuiFlexItem grow={false}>
@@ -355,9 +256,7 @@ export function EpisodeDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend={i18n.translate('xpack.alertingV2.episodeDetails.sidebarViewLegend', {
-              defaultMessage: 'Sidebar section',
-            })}
+            legend={i18n.SIDEBAR_VIEW_LEGEND}
             type="single"
             buttonSize="compressed"
             idSelected={sidebarPanel}
@@ -366,14 +265,12 @@ export function EpisodeDetailsPage() {
               {
                 id: 'episode_details',
                 'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
-                label: i18n.translate('xpack.alertingV2.episodeDetails.sidebarTabTitle', {
-                  defaultMessage: 'Details',
-                }),
+                label: i18n.SIDEBAR_TAB_DETAILS,
               },
               {
                 id: 'runbook',
                 'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabRunbook',
-                label: runbookSidebarTitle,
+                label: i18n.SIDEBAR_TITLE_RUNBOOK,
               },
             ]}
           />
@@ -381,17 +278,22 @@ export function EpisodeDetailsPage() {
       </EuiFlexGroup>
       <EuiHorizontalRule
         css={css`
-          margin-block: 0;
-          margin-inline: ${euiTheme.size.l};
+          ${largeMediaQuery} {
+            margin-block: 0;
+            margin-inline: ${euiTheme.size.l};
+          }
           inline-size: unset;
         `}
       />
       <div
         css={css`
-          flex: 1;
           min-height: 0;
-          overflow-y: auto;
-          padding: ${euiTheme.size.l};
+
+          ${largeMediaQuery} {
+            flex: 1;
+            overflow-y: auto;
+            padding: ${euiTheme.size.l};
+          }
         `}
         data-test-subj="alertingV2EpisodeDetailsSidebarBody"
       >
@@ -402,21 +304,15 @@ export function EpisodeDetailsPage() {
               type="responsiveColumn"
               listItems={[
                 {
-                  title: i18n.translate('xpack.alertingV2.episodeDetails.episodeIdLabel', {
-                    defaultMessage: 'Alert episode id',
-                  }),
+                  title: i18n.LABEL_EPISODE_ID,
                   description: episodeId ?? '—',
                 },
                 {
-                  title: i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
-                    defaultMessage: 'Grouping',
-                  }),
+                  title: i18n.LABEL_GROUPING,
                   description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
                 },
                 {
-                  title: i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
-                    defaultMessage: 'Triggered',
-                  }),
+                  title: i18n.LABEL_TRIGGERED,
                   description: triggeredAt
                     ? new Date(triggeredAt).toLocaleString(undefined, {
                         dateStyle: 'medium',
@@ -425,13 +321,91 @@ export function EpisodeDetailsPage() {
                     : '—',
                 },
                 {
-                  title: i18n.translate('xpack.alertingV2.episodeDetails.durationLabel', {
-                    defaultMessage: 'Duration',
-                  }),
-                  description: durationMs != null ? formatDurationMs(durationMs) : '—',
+                  title: i18n.LABEL_DURATION,
+                  description: durationMs != null ? i18n.formatDurationMs(durationMs) : '—',
+                },
+                {
+                  title: i18n.LABEL_ASSIGNEE,
+                  description: (
+                    <EpisodeAssigneeCell
+                      assigneeUid={episodeAction?.lastAssigneeUid}
+                      userProfile={services.userProfile}
+                    />
+                  ),
                 },
               ]}
             />
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h3 data-test-subj="alertingV2EpisodeDetailsActionsOverviewHeading">
+                {i18n.ACTIONS_OVERVIEW_TITLE}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            {hasNoActors ? (
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="alertingV2EpisodeDetailsActionsOverviewEmpty"
+              >
+                {i18n.ACTIONS_OVERVIEW_EMPTY}
+              </EuiText>
+            ) : (
+              <EuiDescriptionList
+                compressed
+                type="responsiveColumn"
+                listItems={[
+                  ...(episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK
+                    ? [
+                        {
+                          title: i18n.LABEL_ACKNOWLEDGED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={episodeAction.lastAckActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+                    ? [
+                        {
+                          title: i18n.LABEL_RESOLVED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={groupAction.lastDeactivateActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE
+                    ? [
+                        {
+                          title: i18n.LABEL_SNOOZED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={groupAction.lastSnoozeActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                        {
+                          title: i18n.LABEL_SNOOZED_UNTIL,
+                          description: groupAction.snoozeExpiry
+                            ? new Date(groupAction.snoozeExpiry).toLocaleString(undefined, {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              })
+                            : '—',
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            )}
             {rule ? (
               <>
                 <EuiSpacer size="l" />
@@ -442,11 +416,9 @@ export function EpisodeDetailsPage() {
                   gutterSize="s"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xs">
                       <h3 data-test-subj="alertingV2EpisodeDetailsRuleOverviewHeading">
-                        {i18n.translate('xpack.alertingV2.episodeDetails.ruleOverviewTitle', {
-                          defaultMessage: 'Rule overview',
-                        })}
+                        {i18n.RULE_OVERVIEW_TITLE}
                       </h3>
                     </EuiTitle>
                   </EuiFlexItem>
@@ -458,9 +430,7 @@ export function EpisodeDetailsPage() {
                       href={http.basePath.prepend(paths.ruleDetails(rule.id))}
                       data-test-subj="alertingV2EpisodeDetailsViewRuleDetailsButton"
                     >
-                      {i18n.translate('xpack.alertingV2.episodeDetails.viewRuleDetails', {
-                        defaultMessage: 'View rule details',
-                      })}
+                      {i18n.VIEW_RULE_DETAILS}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -470,7 +440,7 @@ export function EpisodeDetailsPage() {
                   paddingSize="m"
                   data-test-subj="alertingV2EpisodeDetailsRuleOverviewPanel"
                 >
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={true} wrap>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
                         <strong>{rule.metadata.name}</strong>
@@ -503,13 +473,7 @@ export function EpisodeDetailsPage() {
                         color={rule.enabled ? 'success' : 'default'}
                         data-test-subj="alertingV2EpisodeDetailsRuleStatusBadge"
                       >
-                        {rule.enabled
-                          ? i18n.translate('xpack.alertingV2.episodeDetails.ruleStatusEnabled', {
-                              defaultMessage: 'Enabled',
-                            })
-                          : i18n.translate('xpack.alertingV2.episodeDetails.ruleStatusDisabled', {
-                              defaultMessage: 'Disabled',
-                            })}
+                        {rule.enabled ? i18n.RULE_STATUS_ENABLED : i18n.RULE_STATUS_DISABLED}
                       </EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -540,13 +504,36 @@ export function EpisodeDetailsPage() {
           </EuiMarkdownFormat>
         ) : (
           <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeDetailsRunbookEmpty">
-            {i18n.translate('xpack.alertingV2.episodeDetails.runbookEmpty', {
-              defaultMessage: 'No runbook has been added to this rule.',
-            })}
+            {i18n.RUNBOOK_EMPTY}
           </EuiText>
         )}
       </div>
     </>
+  );
+
+  const sidebarPanelInner = (
+    <EuiSplitPanel.Inner
+      grow={false}
+      paddingSize="none"
+      css={css`
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        ${logicalCSS('padding-top', euiTheme.size.l)}
+
+        ${largeMediaQuery} {
+          ${logicalCSS('padding-top', '0')}
+          flex-shrink: 0;
+          flex-basis: 400px;
+          min-width: 40px;
+          max-width: 500px;
+          border-left: ${euiTheme.border.thin};
+        }
+      `}
+      data-test-subj="alertingV2EpisodeDetailsSidebar"
+    >
+      {sidebar}
+    </EuiSplitPanel.Inner>
   );
 
   return (
@@ -554,134 +541,115 @@ export function EpisodeDetailsPage() {
       paddingSize="none"
       bottomBorder={false}
       data-test-subj="alertingV2EpisodeDetailsPage"
+      minHeight={0}
+      grow={false}
+      css={css`
+        ${largeMediaQuery} {
+          block-size: calc(var(--kbn-application--content-height, 100vh) - ${euiTheme.size.l} * 2);
+        }
+      `}
+      pageHeader={{
+        pageTitle,
+        description: headerDescription,
+        bottomBorder: true,
+        restrictWidth: false,
+        paddingSize: 'none',
+        rightSideItems: [
+          <AlertEpisodeActions
+            key="alertingV2EpisodeHeaderActions"
+            episodeId={episodeId}
+            groupHash={groupHash}
+            episodeAction={episodeAction}
+            groupAction={groupAction}
+            http={http}
+            openInDiscoverHref={openInDiscoverHref}
+            lastAssigneeUid={episodeAction?.lastAssigneeUid}
+            expressions={expressions}
+            buttonsOutlined={false}
+          />,
+        ],
+        rightSideGroupProps: { gutterSize: 's' },
+        tabs: [
+          {
+            id: 'overview',
+            'data-test-subj': 'alertingV2EpisodeDetailsMainTabOverview',
+            label: i18n.OVERVIEW_TAB_TITLE,
+            isSelected: mainPanel === 'overview',
+            onClick: () => setMainPanel('overview'),
+          },
+          {
+            id: 'metadata',
+            'data-test-subj': 'alertingV2EpisodeDetailsMainTabMetadata',
+            label: i18n.METADATA_TAB_TITLE,
+            isSelected: mainPanel === 'metadata',
+            onClick: () => setMainPanel('metadata'),
+          },
+        ],
+      }}
     >
       {isLoading ? (
         <KibanaPageTemplate.Section grow>
           <CenterJustifiedSpinner />
         </KibanaPageTemplate.Section>
       ) : (
-        <>
-          <KibanaPageTemplate.Header
-            pageTitle={pageTitle}
-            description={headerDescription}
-            bottomBorder
-            rightSideItems={[
-              <AlertEpisodeActions
-                key="alertingV2EpisodeHeaderActions"
-                episodeId={episodeId}
-                groupHash={groupHash}
-                episodeAction={episodeAction}
-                groupAction={groupAction}
-                http={http}
-                openInDiscoverHref={openInDiscoverHref}
-                expressions={expressions}
-                buttonsOutlined={false}
-              />,
-            ]}
-            rightSideGroupProps={{ gutterSize: 's' }}
-          />
-          <KibanaPageTemplate.Section paddingSize="none" grow>
-            <EuiSplitPanel.Outer direction="row" hasBorder={false} hasShadow={false} grow>
-              <EuiSplitPanel.Inner grow paddingSize="l">
-                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                  <EpisodeLifecycleHeatmap eventRows={eventRows} />
-                </Suspense>
-                <EuiSpacer size="l" />
-                {rule ? (
-                  <EuiAccordion
-                    id="alertingV2RelatedAlertEpisodes"
-                    paddingSize="none"
-                    buttonProps={{
-                      paddingSize: 'm',
-                      css: css`
-                        .euiAccordion__buttonContent {
-                          width: 100%;
-                        }
-                      `,
-                    }}
-                    buttonContent={
-                      <EuiText>
-                        <h3>
-                          {i18n.translate('xpack.alertingV2.episodeDetails.relatedEpisodesTitle', {
-                            defaultMessage: 'Related alert episodes',
-                          })}
-                        </h3>
-                      </EuiText>
+        <KibanaPageTemplate.Section
+          paddingSize="none"
+          grow
+          restrictWidth={false}
+          css={css`
+            min-height: 0;
+          `}
+          contentProps={{
+            css: css`
+              flex: 1 1;
+              min-height: 0;
+            `,
+          }}
+        >
+          <EuiSplitPanel.Outer
+            direction="row"
+            hasBorder={false}
+            hasShadow={false}
+            css={css`
+              ${largeMediaQuery} {
+                height: 100%;
+              }
+            `}
+          >
+            <EuiSplitPanel.Inner
+              grow
+              paddingSize="none"
+              css={css`
+                ${smallMediaQuery} {
+                  [class*='InternalDocViewerTable'] {
+                    display: block;
+                    height: unset;
+                  }
+                }
+
+                ${largeMediaQuery} {
+                  // The docs viewer uses a fixed height behavior by default, so
+                  // we need set the height to 100% to make sure it fills the panel
+                  [class*='InternalDocViewerTable'] {
+                    height: 100%;
+
+                    & > :nth-child(2),
+                    & > :nth-child(4) {
+                      padding-right: ${euiTheme.size.s};
                     }
-                    initialIsOpen
-                    data-test-subj="alertingV2RelatedAlertEpisodesAccordion"
-                  >
-                    {isLoadingRelatedEpisodes ? (
-                      <EuiFlexGroup justifyContent="center">
-                        <EuiFlexItem grow={false}>
-                          <EuiLoadingSpinner size="l" />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    ) : relatedEpisodeRows.length === 0 ? (
-                      <EuiPanel
-                        color="subdued"
-                        hasShadow={false}
-                        paddingSize="m"
-                        data-test-subj="alertingV2RelatedEpisodesEmpty"
-                      >
-                        <EuiFlexGroup justifyContent="center" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s" color="subdued" textAlign="center">
-                              {i18n.translate(
-                                'xpack.alertingV2.episodeDetails.relatedEpisodesEmpty',
-                                {
-                                  defaultMessage: 'No related episodes found.',
-                                }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                    ) : (
-                      <EuiFlexGroup direction="column" gutterSize="s">
-                        {relatedEpisodeRows.map((row) => {
-                          const relatedId = row['episode.id'];
-                          const relatedGroupHash = row.group_hash;
-                          return (
-                            <RelatedAlertEpisode
-                              key={relatedId}
-                              episode={row}
-                              rule={rule}
-                              episodeAction={relatedEpisodeActionsMap?.get(relatedId)}
-                              groupAction={
-                                relatedGroupHash
-                                  ? relatedGroupActionsMap?.get(relatedGroupHash)
-                                  : undefined
-                              }
-                              href={http.basePath.prepend(paths.alertEpisodeDetails(relatedId))}
-                            />
-                          );
-                        })}
-                      </EuiFlexGroup>
-                    )}
-                  </EuiAccordion>
-                ) : null}
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner
-                grow={false}
-                paddingSize="none"
-                css={css`
-                  flex-shrink: 0;
-                  flex-basis: 400px;
-                  min-width: 40px;
-                  max-width: 500px;
-                  border-left: ${euiTheme.border.thin};
-                  display: flex;
-                  flex-direction: column;
-                  min-height: 0;
-                `}
-                data-test-subj="alertingV2EpisodeDetailsSidebar"
-              >
-                {sidebar}
-              </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
-          </KibanaPageTemplate.Section>
-        </>
+                  }
+                }
+              `}
+            >
+              {mainPanel === 'metadata' ? (
+                <EpisodeMetadataTab episodeId={episodeId} ruleQuery={rule?.evaluation.query.base} />
+              ) : (
+                <EpisodeOverviewTab episodeId={episodeId} eventRows={eventRows} rule={rule} />
+              )}
+            </EuiSplitPanel.Inner>
+            {sidebarPanelInner}
+          </EuiSplitPanel.Outer>
+        </KibanaPageTemplate.Section>
       )}
     </KibanaPageTemplate>
   );
