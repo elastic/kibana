@@ -32,8 +32,6 @@ export const useCreateOrUpdateArtifact = (
   const addOrUpdateArtifactRef = useRef<CreateOrUpdateArtifactsFunction | null>(null);
 
   useEffect(() => {
-    const abortCtrl = new AbortController();
-
     const onCreateOrUpdateArtifact: CreateOrUpdateArtifactsFunction = async (
       item,
       additionalEntriesGroups
@@ -86,7 +84,6 @@ export const useCreateOrUpdateArtifact = (
 
     return (): void => {
       setIsLoading(false);
-      abortCtrl.abort();
     };
   }, [apiClient]);
 
