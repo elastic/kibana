@@ -207,7 +207,6 @@ export const createUpdateStreamTool = ({
                   ...updatedIngest.processing,
                   steps:
                     changes.processing as unknown as Streams.ingest.all.Definition['ingest']['processing']['steps'],
-                  updated_at: new Date().toISOString(),
                 },
               };
               applied.push('processing');
