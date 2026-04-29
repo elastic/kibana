@@ -71,6 +71,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ICluster",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -128,6 +129,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -180,6 +182,7 @@
             "lineNumber": 31,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "EsClientForTestingOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -225,6 +228,7 @@
             "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -90,7 +90,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { navigateTo } = useNavigateTo();
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
@@ -145,18 +145,20 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 
   const openHostFlyout = useCallback(
     (hostName: string, entityId: string) => {
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          entityId,
-          contextID: tableType,
-          scopeId: tableType,
-          isPreviewMode: false,
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            entityId,
+            contextID: tableType,
+            scopeId: tableType,
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [openRightPanel]
+    [openFlyout]
   );
 
   const dispatchSeverityUpdate = useCallback(
