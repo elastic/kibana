@@ -32,7 +32,5 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
     registerWatchlistRoutes(routeDeps);
   }
 
-  if (!routeDeps.config.experimentalFeatures.entityStoreDisabled) {
-    registerEntityResolutionRoutes(routeDeps);
-  }
+  registerEntityResolutionRoutes(routeDeps);
 };

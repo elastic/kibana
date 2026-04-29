@@ -352,10 +352,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
-    if (!experimentalFeatures.entityStoreDisabled) {
-      plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
-      plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
-    }
+    plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
 
     registerPrivilegeMonitoringTask({
       getStartServices: core.getStartServices,
