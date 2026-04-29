@@ -74,13 +74,13 @@ export const registerUpdateRoute = ({
         }
 
         // Resume follower
-        const body = removeEmptyFields(
+        const resumeParams = removeEmptyFields(
           serializeAdvancedSettings(request.body as FollowerIndexAdvancedSettings)
         );
 
         const responseBody = await client.asCurrentUser.ccr.resumeFollow({
           index: id,
-          body,
+          ...resumeParams,
         });
 
         return response.ok({
