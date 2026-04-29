@@ -534,61 +534,61 @@ export const SettingsPage: React.FC<Props> = memo(
                 </div>
               )}
               {hideInstallOptions && !isUpdating && (
+                <div>
+                  <EuiSpacer size="s" />
                   <div>
+                    <EuiTitle>
+                      <h4>
+                        {installedVersion ? (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageManageTitle"
+                            defaultMessage="Manage {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageInstallTitle"
+                            defaultMessage="Install {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        )}
+                      </h4>
+                    </EuiTitle>
                     <EuiSpacer size="s" />
-                    <div>
-                      <EuiTitle>
-                        <h4>
-                          {installedVersion ? (
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageManageTitle"
-                              defaultMessage="Manage {title}"
-                              values={{
-                                title,
-                              }}
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageInstallTitle"
-                              defaultMessage="Install {title}"
-                              values={{
-                                title,
-                              }}
-                            />
-                          )}
-                        </h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <p>
-                        <EuiText color="subdued">
-                          {installedVersion ? (
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageSettingsDifferentVersionMessage"
-                              defaultMessage="Version {version} is different from the currently installed version. Navigate to the {installedVersionLink} to add or manage this integration."
-                              values={{
-                                version,
-                                installedVersionLink: (
-                                  <InstalledVersionLink name={name} version={installedVersion} />
-                                ),
-                              }}
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
-                              defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
-                              values={{
-                                version,
-                                latestVersion: (
-                                  <LatestVersionLink name={name} version={latestVersion} />
-                                ),
-                              }}
-                            />
-                          )}
-                        </EuiText>
-                      </p>
-                    </div>
+                    <p>
+                      <EuiText color="subdued">
+                        {installedVersion ? (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageSettingsDifferentVersionMessage"
+                            defaultMessage="Version {version} is different from the currently installed version. Navigate to the {installedVersionLink} to add or manage this integration."
+                            values={{
+                              version,
+                              installedVersionLink: (
+                                <InstalledVersionLink name={name} version={installedVersion} />
+                              ),
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
+                            defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
+                            values={{
+                              version,
+                              latestVersion: (
+                                <LatestVersionLink name={name} version={latestVersion} />
+                              ),
+                            }}
+                          />
+                        )}
+                      </EuiText>
+                    </p>
                   </div>
-                )}
+                </div>
+              )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
