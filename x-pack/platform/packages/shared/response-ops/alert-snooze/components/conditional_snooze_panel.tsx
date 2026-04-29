@@ -9,13 +9,14 @@ import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import moment from 'moment';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { ConditionalSnoozeSchedule, SnoozeCondition } from './types';
+import { DataConditionType, type ConditionalSnoozeSchedule, type SnoozeCondition } from './types';
 import { SNOOZE_DATE_DISPLAY_FORMAT, SNOOZE_UNIT_OPTIONS } from './constants';
 import { validateDuration, computeEndDate } from '../utils/duration_validation';
 import { TimeConditionPanel } from './time_condition_panel';
@@ -34,33 +35,30 @@ export interface ConditionalSnoozePanelProps {
    * `undefined` means no valid conditions are confirmed (button should be disabled).
    */
   onScheduleChange: (schedule: ConditionalSnoozeSchedule | undefined) => void;
-  fieldOptions?: Array<{ value: string; text: string }>;
 }
 
 const newEntry = (id: string): DataConditionEntry => ({
   id,
+  type: DataConditionType.FIELD_CHANGE,
   field: '',
-  operator: 'is',
-  value: '',
+  value: 'critical',
   confirmed: false,
-  logicalOperator: 'and',
 });
 
-const toSnoozeCondition = ({ field, operator, value }: DataConditionEntry): SnoozeCondition => ({
-  type: 'field_equals',
-  field,
-  value,
-  negate: operator === 'is_not',
-});
+const toSnoozeCondition = ({ type, field, value }: DataConditionEntry): SnoozeCondition => {
+  if (type === DataConditionType.SEVERITY_CHANGE) return { type: DataConditionType.SEVERITY_CHANGE };
+  if (type === DataConditionType.SEVERITY_EQUALS) return { type: DataConditionType.SEVERITY_EQUALS, value };
+  return { type: DataConditionType.FIELD_CHANGE, field };
+};
 
 export const ConditionalSnoozePanel = ({
   onScheduleChange,
-  fieldOptions = [],
 }: ConditionalSnoozePanelProps) => {
   const idCounterRef = useRef(0);
 
   const [timeCondition, setTimeCondition] = useState<TimeConditionState | null>(null);
   const [dataConditions, setDataConditions] = useState<DataConditionEntry[]>([]);
+  const [conditionOperator, setConditionOperator] = useState<'any' | 'all'>('any');
 
   const isConfirmed = timeCondition?.status === 'confirmed';
 
@@ -72,10 +70,7 @@ export const ConditionalSnoozePanel = ({
   const isTimeConditionInvalid = isTimeDurationInvalid || isPastDateTime || isDateTimeMissing;
 
   const confirmedDataConditions = useMemo(
-    () =>
-      dataConditions.filter(
-        (condition) => condition.confirmed && condition.field && condition.value
-      ),
+    () => dataConditions.filter((condition) => condition.confirmed),
     [dataConditions]
   );
 
@@ -97,40 +92,57 @@ export const ConditionalSnoozePanel = ({
     return i18n.getAfterDurationLabel(timeCondition.value, unitText);
   }, [timeCondition]);
 
-  const previewText = useMemo<string>(() => {
+  const disabledDataConditionTypes = useMemo<readonly DataConditionType[]>(() => {
+    const hasSeverityChange = dataConditions.some(
+      (c) => c.type === DataConditionType.SEVERITY_CHANGE
+    );
+    return hasSeverityChange ? [DataConditionType.SEVERITY_CHANGE] : [];
+  }, [dataConditions]);
+
+  const hasConflictingSeverityEquals = useMemo(() => {
+    if (conditionOperator !== 'all') return false;
+    const severityEqualsValues = confirmedDataConditions
+      .filter((c) => c.type === DataConditionType.SEVERITY_EQUALS)
+      .map((c) => c.value);
+    return new Set(severityEqualsValues).size > 1;
+  }, [confirmedDataConditions, conditionOperator]);
+
+  const previewSentences = useMemo<string[]>(() => {
     const formattedTimeDate =
       isConfirmed && timeEndDate ? moment(timeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT) : null;
+
+    const dataConnector =
+      conditionOperator === 'all' ? i18n.PREVIEW_CONNECTOR_AND : i18n.PREVIEW_CONNECTOR_OR;
 
     const dataPreviewPart =
       confirmedDataConditions.length > 0
         ? confirmedDataConditions
-            .map(
-              ({ field, operator, value }) =>
-                `${field} ${i18n.CONDITIONAL_OPERATOR(operator)} ${value}`
-            )
-            .reduce(
-              (acc, part, index) =>
-                `${acc} ${i18n.LOGICAL_SEPARATOR(
-                  confirmedDataConditions[index - 1].logicalOperator
-                )} ${part}`
-            )
+            .map((c) => {
+              if (c.type === DataConditionType.SEVERITY_CHANGE) return i18n.PREVIEW_SEVERITY_CHANGE;
+              if (c.type === DataConditionType.SEVERITY_EQUALS)
+                return i18n.getPreviewSeverityEquals(c.value);
+              return i18n.getPreviewFieldChange(c.field);
+            })
+            .reduce((acc, part) => `${acc} ${dataConnector} ${part}`)
         : null;
 
     if (!formattedTimeDate && !dataPreviewPart) {
-      return i18n.CONDITIONS_FOOTER_HINT;
+      return [i18n.CONDITIONS_FOOTER_HINT];
     }
 
     if (formattedTimeDate && !dataPreviewPart) {
-      return i18n.getUnsnoozeOnDateMessage(formattedTimeDate);
+      return [i18n.getUnsnoozeOnDateMessage(formattedTimeDate)];
     }
 
-    const parts = [
-      dataPreviewPart,
-      formattedTimeDate ? `it is after ${formattedTimeDate}` : null,
-    ].filter((p): p is string => p !== null);
+    if (dataPreviewPart && !formattedTimeDate) {
+      return [i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart)];
+    }
 
-    return i18n.getUnsnoozeIfConditionsMessage(parts.join(` ${i18n.LOGICAL_SEPARATOR('or')} `));
-  }, [isConfirmed, timeEndDate, confirmedDataConditions]);
+    return [
+      i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart as string),
+      i18n.getUnsnoozeAlsoAfterMessage(formattedTimeDate as string),
+    ];
+  }, [isConfirmed, timeEndDate, confirmedDataConditions, conditionOperator]);
 
   const addDataCondition = useCallback(() => {
     setDataConditions((prev) => [...prev, newEntry(`dc-${++idCounterRef.current}`)]);
@@ -147,12 +159,8 @@ export const ConditionalSnoozePanel = ({
     []
   );
 
-  const toggleLogicalOperator = useCallback((id: string) => {
-    setDataConditions((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, logicalOperator: c.logicalOperator === 'and' ? 'or' : 'and' } : c
-      )
-    );
+  const toggleLogicalOperator = useCallback(() => {
+    setConditionOperator((prev) => (prev === 'any' ? 'all' : 'any'));
   }, []);
 
   const snoozeSchedule = useMemo<ConditionalSnoozeSchedule | undefined>(() => {
@@ -166,14 +174,11 @@ export const ConditionalSnoozePanel = ({
 
     if (confirmedDataConditions.length > 0) {
       schedule.conditions = confirmedDataConditions.map(toSnoozeCondition);
-      const hasOrOperator = confirmedDataConditions
-        .slice(0, -1)
-        .some((c) => c.logicalOperator === 'or');
-      schedule.condition_operator = hasOrOperator ? 'any' : 'all';
+      schedule.condition_operator = conditionOperator;
     }
 
     return schedule;
-  }, [isSnoozeDisabled, isConfirmed, timeEndDate, confirmedDataConditions]);
+  }, [isSnoozeDisabled, isConfirmed, timeEndDate, confirmedDataConditions, conditionOperator]);
 
   useEffect(() => {
     onScheduleChange(snoozeSchedule);
@@ -224,15 +229,21 @@ export const ConditionalSnoozePanel = ({
                 <EuiHorizontalRule margin="none" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="text"
-                  style={{ borderRadius: '999px', minWidth: 'unset' }}
-                  onClick={() => toggleLogicalOperator(dataConditions[index - 1].id)}
-                  data-test-subj={`logicalOperator-${dataConditions[index - 1].id}`}
-                >
-                  {i18n.LOGICAL_SEPARATOR(dataConditions[index - 1].logicalOperator)}
-                </EuiButton>
+                {index === 1 ? (
+                  <EuiButton
+                    size="s"
+                    color="text"
+                    style={{ borderRadius: '999px', minWidth: 'unset' }}
+                    onClick={toggleLogicalOperator}
+                    data-test-subj="logicalOperator"
+                  >
+                    {i18n.LOGICAL_SEPARATOR(conditionOperator)}
+                  </EuiButton>
+                ) : (
+                  <EuiText size="xs" color="subdued" style={{ padding: '0 8px' }}>
+                    {i18n.LOGICAL_SEPARATOR(conditionOperator)}
+                  </EuiText>
+                )}
               </EuiFlexItem>
               <EuiFlexItem style={{ alignSelf: 'center' }}>
                 <EuiHorizontalRule margin="none" />
@@ -242,8 +253,8 @@ export const ConditionalSnoozePanel = ({
 
           <DataConditionPanel
             entry={entry}
-            fieldOptions={fieldOptions}
             onChange={(newEntryDetails) => handleDataConditionChange(entry.id, newEntryDetails)}
+            disabledTypes={disabledDataConditionTypes}
           />
         </React.Fragment>
       ))}
@@ -261,8 +272,23 @@ export const ConditionalSnoozePanel = ({
 
       <EuiHorizontalRule margin="m" />
 
+      {hasConflictingSeverityEquals && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            data-test-subj="conflictingSeverityEqualsWarning"
+            title={i18n.CONFLICTING_SEVERITY_EQUALS_WARNING}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       <EuiText size="s" color="subdued" data-test-subj="conditionsPreviewText">
-        <p>{previewText}</p>
+        {previewSentences.map((sentence, i) => (
+          <p key={i}>{sentence}</p>
+        ))}
       </EuiText>
       <EuiSpacer size="m" />
     </>

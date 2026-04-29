@@ -54,12 +54,7 @@ export const TimeConditionPanel = ({
 }: TimeConditionPanelProps) => {
   if (value?.status === 'confirmed') {
     return (
-      <EuiPanel
-        hasBorder={false}
-        color="subdued"
-        paddingSize="s"
-        data-test-subj="timeConditionChip"
-      >
+      <EuiPanel hasBorder={true} color="subdued" paddingSize="s" data-test-subj="timeConditionChip">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type="clock" color="subdued" />
@@ -70,7 +65,7 @@ export const TimeConditionPanel = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="neutral">{chipLabel}</EuiBadge>
+            <EuiBadge color="hollow">{chipLabel}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon

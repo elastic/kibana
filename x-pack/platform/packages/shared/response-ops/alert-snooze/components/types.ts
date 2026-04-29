@@ -19,16 +19,22 @@ export interface CustomDurationState {
   dateTime: Moment | null;
 }
 
-export type AlertSeverityLevel = 'critical' | 'high' | 'medium' | 'low';
+export type AlertSeverityLevel = 'critical' | 'high' | 'medium' | 'low' | 'info';
+
+export enum DataConditionType {
+  FIELD_CHANGE = 'field_change',
+  SEVERITY_CHANGE = 'severity_change',
+  SEVERITY_EQUALS = 'severity_equals',
+}
 
 /**
  * Temporary UI-facing condition model aligned with the current Figma design.
  * This does not yet reflect the final per-alert snooze API contract.
  */
 export type SnoozeCondition =
-  | { type: 'severity_change' }
-  | { type: 'severity_equals'; value: AlertSeverityLevel }
-  | { type: 'field_change'; field: string }
+  | { type: DataConditionType.SEVERITY_CHANGE }
+  | { type: DataConditionType.SEVERITY_EQUALS; value: AlertSeverityLevel }
+  | { type: DataConditionType.FIELD_CHANGE; field: string }
   | { type: 'field_equals'; field: string; value: string; negate?: boolean };
 
 /**

@@ -10,23 +10,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DataConditionPanel } from './data_condition_panel';
 import type { DataConditionEntry } from './data_condition_panel';
+import { DataConditionType } from './types';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 
-const fieldOptions = [
-  { value: 'severity', text: 'severity' },
-  { value: 'status', text: 'status' },
-];
-
 const createEntry = (overrides: Partial<DataConditionEntry> = {}): DataConditionEntry => ({
   id: 'dc-1',
+  type: DataConditionType.FIELD_CHANGE,
   field: '',
-  operator: 'is',
-  value: '',
+  value: 'critical',
   confirmed: false,
-  logicalOperator: 'and',
   ...overrides,
 });
 
@@ -41,26 +36,32 @@ describe('DataConditionPanel', () => {
     render(
       <DataConditionPanel
         entry={createEntry()}
-        fieldOptions={fieldOptions}
         onChange={onChangeMock}
       />,
       { wrapper }
     );
 
-    expect(screen.getByTestId('dataConditionField-dc-1')).toBeInTheDocument();
-    expect(screen.getByTestId('dataConditionOperator-dc-1')).toBeInTheDocument();
-    expect(screen.getByTestId('dataConditionValue-dc-1')).toBeInTheDocument();
-    expect(screen.getByTestId('confirmDataCondition-dc-1')).toBeDisabled();
+    expect(screen.getByTestId('dataConditionType-dc-1')).toBeTruthy();
+    expect(screen.getByTestId('dataConditionField-dc-1')).toBeTruthy();
+    expect(screen.getByTestId('confirmDataCondition-dc-1').closest('button')?.disabled).toBe(true);
   });
 
   it('calls onChange with entry updates from the form fields', () => {
     render(
       <DataConditionPanel
         entry={createEntry()}
-        fieldOptions={fieldOptions}
         onChange={onChangeMock}
       />,
       { wrapper }
+    );
+
+    fireEvent.change(screen.getByTestId('dataConditionType-dc-1'), {
+      target: { value: DataConditionType.SEVERITY_EQUALS },
+    });
+    expect(onChangeMock).toHaveBeenLastCalledWith(
+      createEntry({
+        type: DataConditionType.SEVERITY_EQUALS,
+      })
     );
 
     fireEvent.change(screen.getByTestId('dataConditionField-dc-1'), {
@@ -71,31 +72,12 @@ describe('DataConditionPanel', () => {
         field: 'severity',
       })
     );
-
-    fireEvent.change(screen.getByTestId('dataConditionOperator-dc-1'), {
-      target: { value: 'is_not' },
-    });
-    expect(onChangeMock).toHaveBeenLastCalledWith(
-      createEntry({
-        operator: 'is_not',
-      })
-    );
-
-    fireEvent.change(screen.getByTestId('dataConditionValue-dc-1'), {
-      target: { value: 'high' },
-    });
-    expect(onChangeMock).toHaveBeenLastCalledWith(
-      createEntry({
-        value: 'high',
-      })
-    );
   });
 
   it('confirms the entry once the condition is complete', () => {
     render(
       <DataConditionPanel
-        entry={createEntry({ field: 'severity', value: 'high' })}
-        fieldOptions={fieldOptions}
+        entry={createEntry({ type: DataConditionType.FIELD_CHANGE, field: 'severity' })}
         onChange={onChangeMock}
       />,
       { wrapper }
@@ -105,8 +87,8 @@ describe('DataConditionPanel', () => {
 
     expect(onChangeMock).toHaveBeenCalledWith(
       createEntry({
+        type: DataConditionType.FIELD_CHANGE,
         field: 'severity',
-        value: 'high',
         confirmed: true,
       })
     );
@@ -116,7 +98,6 @@ describe('DataConditionPanel', () => {
     render(
       <DataConditionPanel
         entry={createEntry()}
-        fieldOptions={fieldOptions}
         onChange={onChangeMock}
       />,
       { wrapper }
@@ -131,29 +112,25 @@ describe('DataConditionPanel', () => {
     render(
       <DataConditionPanel
         entry={createEntry({
+          type: DataConditionType.FIELD_CHANGE,
           field: 'severity',
-          operator: 'is_not',
-          value: 'low',
           confirmed: true,
         })}
-        fieldOptions={fieldOptions}
         onChange={onChangeMock}
       />,
       { wrapper }
     );
 
-    expect(screen.getByTestId('dataConditionChip-dc-1')).toBeInTheDocument();
-    expect(screen.getByText('severity')).toBeInTheDocument();
-    expect(screen.getByText('is_not')).toBeInTheDocument();
-    expect(screen.getByText('low')).toBeInTheDocument();
+    expect(screen.getByTestId('dataConditionChip-dc-1')).toBeTruthy();
+    expect(screen.getByText('Field change')).toBeTruthy();
+    expect(screen.getByText('severity')).toBeTruthy();
 
     fireEvent.click(screen.getByTestId('editDataCondition-dc-1'));
 
     expect(onChangeMock).toHaveBeenCalledWith(
       createEntry({
+        type: DataConditionType.FIELD_CHANGE,
         field: 'severity',
-        operator: 'is_not',
-        value: 'low',
         confirmed: false,
       })
     );
@@ -163,11 +140,10 @@ describe('DataConditionPanel', () => {
     render(
       <DataConditionPanel
         entry={createEntry({
+          type: DataConditionType.FIELD_CHANGE,
           field: 'severity',
-          value: 'high',
           confirmed: true,
         })}
-        fieldOptions={fieldOptions}
         onChange={onChangeMock}
       />,
       { wrapper }

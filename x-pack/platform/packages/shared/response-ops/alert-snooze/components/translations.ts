@@ -156,6 +156,38 @@ export const CONDITION_VALUE_ARIA_LABEL = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValueAriaLabel',
   { defaultMessage: 'Condition value' }
 );
+export const CONDITION_TYPE_FIELD_CHANGE = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.conditionTypeFieldChange',
+  { defaultMessage: 'Field change' }
+);
+export const CONDITION_TYPE_SEVERITY_CHANGE = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.conditionTypeSeverityChange',
+  { defaultMessage: 'Severity change' }
+);
+export const CONDITION_TYPE_SEVERITY_EQUALS = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.conditionTypeSeverityEquals',
+  { defaultMessage: 'Severity equals' }
+);
+export const SEVERITY_CRITICAL = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityCritical',
+  { defaultMessage: 'Critical' }
+);
+export const SEVERITY_HIGH = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityHigh',
+  { defaultMessage: 'High' }
+);
+export const SEVERITY_MEDIUM = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMedium',
+  { defaultMessage: 'Medium' }
+);
+export const SEVERITY_LOW = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityLow',
+  { defaultMessage: 'Low' }
+);
+export const SEVERITY_INFO = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityInfo',
+  { defaultMessage: 'Info' }
+);
 export const CONDITIONAL_OPERATOR = (operator: string) =>
   i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.operator', {
     defaultMessage: operator,
@@ -164,11 +196,50 @@ export const LOGICAL_SEPARATOR = (separator: string) =>
   i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.logicalSeparator', {
     defaultMessage: separator.toUpperCase(),
   });
+export const PREVIEW_CONNECTOR_OR = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.previewConnectorOr',
+  { defaultMessage: 'or' }
+);
+export const PREVIEW_CONNECTOR_AND = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.previewConnectorAnd',
+  { defaultMessage: 'and' }
+);
+export const getPreviewFieldChange = (field: string) =>
+  i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.previewFieldChange', {
+    defaultMessage: 'field "{field}" is changed',
+    values: { field },
+  });
+export const PREVIEW_SEVERITY_CHANGE = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.previewSeverityChange',
+  { defaultMessage: 'severity is changed' }
+);
+export const getPreviewSeverityEquals = (value: string) =>
+  i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.previewSeverityEquals', {
+    defaultMessage: 'severity equals {value}',
+    values: { value },
+  });
+export const getPreviewAfterDate = (date: string) =>
+  i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.previewAfterDate', {
+    defaultMessage: 'it is after {date}',
+    values: { date },
+  });
 export const getUnsnoozeIfConditionsMessage = (conditions: string) =>
   i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.unsnoozeIfConditionsMessage', {
     defaultMessage: 'Alert will unsnooze if {conditions}.',
     values: { conditions },
   });
+export const getUnsnoozeAlsoAfterMessage = (date: string) =>
+  i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.unsnoozeAlsoAfterMessage', {
+    defaultMessage: 'Alert will also unsnooze after {date}.',
+    values: { date },
+  });
+export const CONFLICTING_SEVERITY_EQUALS_WARNING = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.conflictingSeverityEqualsWarning',
+  {
+    defaultMessage:
+      'Multiple "Severity equals" conditions with ALL can never be true at the same time. Switch to ANY or remove the duplicates.',
+  }
+);
 
 export const PANEL_TITLE = i18n.translate('responseOpsAlertSnooze.alertSnoozePanel.title', {
   defaultMessage: 'Snooze notifications',
