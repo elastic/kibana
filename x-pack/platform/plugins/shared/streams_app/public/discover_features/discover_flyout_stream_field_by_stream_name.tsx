@@ -26,7 +26,7 @@ export function DiscoverFlyoutStreamFieldByStreamName(
   return (
     <ContentFrameworkSection
       id="discoverFlyoutStreamFieldByStreamName"
-      title={i18n.translate('xpack.streams.discoverFlyoutStreamField.title', {
+      title={i18n.translate('xpack.streams.discoverFlyoutStreamFieldByStreamName.title', {
         defaultMessage: 'Stream',
       })}
     >

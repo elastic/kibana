@@ -282,5 +282,23 @@ describe('Metric Flyout Overview Tab', () => {
         'metrics-plain-index'
       );
     });
+
+    it('non-local data_stream (CCS) + streams feature on -> renders Data stream metadata row, no link', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
+      const renderFn = linkRenderer();
+      const metricItem = createMockMetric({
+        dataStream: 'remote_cluster:metrics-activemq.broker-default',
+      });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
+
+      // The streams flyout cannot resolve cross-cluster / cross-project names,
+      // so we fall back to the metadata row instead of rendering a broken link.
+      expect(renderFn).not.toHaveBeenCalled();
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
+        'remote_cluster:metrics-activemq.broker-default'
+      );
+    });
   });
 });

@@ -34,8 +34,7 @@ export interface UseMetricSourceKindResult {
  * Best-effort: returns `fallbackKind` whenever the kind cannot be determined
  * (missing `dataViews`, missing `name`, request in flight, fetch error, or
  * source not found in the response). Only flips when the response confirms a
- * different kind. The caller owns the optimistic default, which keeps this
- * hook a pure classifier and avoids flicker.
+ * different kind.
  */
 export const useMetricSourceKind = (
   name: string | undefined,

@@ -22,11 +22,12 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
-import { StreamFieldSection } from './stream_field_section';
+import { StreamFieldSection } from '../components/stream_field_section';
 import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
 import { useStreamsFlyoutRenderer } from '../hooks/use_streams_flyout_renderer';
 
@@ -49,7 +50,10 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const renderStreamFlyout = useStreamsFlyoutRenderer();
 
   const showStreamSection = Boolean(
-    metricItem.dataStream && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamFlyout
+    metricItem.dataStream &&
+      sourceKind === METRIC_SOURCE_KIND.DATA_STREAM &&
+      renderStreamFlyout &&
+      !isNonLocalIndexName(metricItem.dataStream)
   );
 
   // Sort dimensions alphabetically by name
