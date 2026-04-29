@@ -93,18 +93,17 @@ describe('useAgentCount', () => {
       });
     });
 
-    it('should not fetch data and return undefined values with isError true', async () => {
+    it('should not fetch data and return undefined values when disabled', async () => {
       const { result } = renderHook(() => useAgentCount(), { wrapper });
 
-      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
       expect(result.current.agents).toBeUndefined();
       expect(result.current.tools).toBeUndefined();
-      expect(result.current.isError).toBe(true);
+      expect(result.current.isError).toBe(false);
       expect(mockAgentsService.list).not.toHaveBeenCalled();
       expect(mockToolsService.list).not.toHaveBeenCalled();
     });
 
-    it('should return isError true for platinum license', async () => {
+    it('should not fetch data for platinum license (not enterprise)', async () => {
       mockUseGetLicenseInfo.mockReturnValue({
         hasEnterpriseLicense: false,
         isTrial: false,
@@ -112,8 +111,11 @@ describe('useAgentCount', () => {
       });
       const { result } = renderHook(() => useAgentCount(), { wrapper });
 
-      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
-      expect(result.current.isError).toBe(true);
+      expect(result.current.agents).toBeUndefined();
+      expect(result.current.tools).toBeUndefined();
+      expect(result.current.isError).toBe(false);
+      expect(mockAgentsService.list).not.toHaveBeenCalled();
+      expect(mockToolsService.list).not.toHaveBeenCalled();
     });
   });
 
