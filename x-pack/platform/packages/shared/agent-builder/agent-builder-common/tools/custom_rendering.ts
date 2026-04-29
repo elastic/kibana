@@ -9,8 +9,8 @@ import type { ChartType } from '@kbn/visualization-utils';
 
 /**
  * @deprecated Legacy renderer attributes for the `<visualization />` tag.
- * New visualization rendering should create a `visualization` attachment and
- * render it with `<render_attachment />`.
+ * New ES|QL result visualization rendering should create an
+ * `esqlVisualizationInput` attachment and render it with `<render_attachment />`.
  */
 export interface VisualizationElementAttributes {
   toolResultId?: string;
@@ -19,8 +19,8 @@ export interface VisualizationElementAttributes {
 
 /**
  * @deprecated Legacy `<visualization />` custom-rendering tag.
- * New visualization rendering should create a `visualization` attachment and
- * render it with `renderAttachmentElement`.
+ * New ES|QL result visualization rendering should create an
+ * `esqlVisualizationInput` attachment and render it with `renderAttachmentElement`.
  */
 export const visualizationElement = {
   tagName: 'visualization',

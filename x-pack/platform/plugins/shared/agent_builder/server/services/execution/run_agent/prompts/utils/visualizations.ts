@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
+import { attachmentTools, ToolResultType } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -16,22 +17,23 @@ export const renderVisualizationPrompt = () => {
     .map((chartType) => `\`${chartType}\``)
     .join(', ');
 
-  return `### RENDERING VISUALIZATION ATTACHMENTS
-      When a tool call returns a result of type "${esqlResults}", you may render a visualization in the UI by creating a visualization attachment and emitting a custom XML element for that attachment:
+  return `### RENDERING ES|QL VISUALIZATION ATTACHMENTS
+      When a tool call returns a result of type "${esqlResults}", you may render a visualization in the UI by using a lightweight \`${AttachmentType.esqlVisualizationInput}\` attachment and emitting a custom XML element for that attachment:
 
       <${tagName} ${attributes.attachmentId}="ATTACHMENT_ID_HERE" />
 
-      Use \`${platformCoreTools.createVisualization}\` to create the visualization attachment from the ES|QL result. Pass the ES|QL query from the tool result to \`${platformCoreTools.createVisualization}\` using its \`esql\` parameter. After \`${platformCoreTools.createVisualization}\` returns \`data.attachment_id\`, copy that attachment ID into the \`${attributes.attachmentId}\` attribute.
+      The attachment should be created from the "${esqlResults}" tool result with \`${attachmentTools.add}\` and type \`${AttachmentType.esqlVisualizationInput}\`. Copy the ES|QL \`query\`, returned \`columns\`, optional \`time_range\`, and optional preferred \`chart_type\` into the attachment data. Do not include result \`values\`; they are not needed for rendering.
 
       **Rules**
       * This rendering flow must only be used to render tool results of type \`${esqlResults}\`.
-      * Do not render \`${esqlResults}\` results directly with a custom visualization tag; render the visualization attachment with \`<${tagName}>\`.
-      * You can specify an optional chart type in the \`${platformCoreTools.createVisualization}\` call using one of the following values: ${chartTypeNames}.
-      * If the user does NOT specify a chart type in their message, omit \`chartType\`. The tool will choose an appropriate chart type automatically.
-      * You must copy the \`attachment_id\` from the \`${platformCoreTools.createVisualization}\` response into the \`${attributes.attachmentId}\` element attribute verbatim.
+      * Do not render \`${esqlResults}\` results directly with the legacy \`<visualization />\` tag; render the \`${AttachmentType.esqlVisualizationInput}\` attachment with \`<${tagName}>\`.
+      * Do not call \`create_visualization\` for this ES|QL result rendering flow.
+      * You can specify an optional \`chart_type\` in the attachment data using one of the following values: ${chartTypeNames}.
+      * If the user does NOT specify a chart type in their message, omit \`chart_type\`. The frontend will choose an appropriate chart type automatically.
+      * You must copy the \`attachment_id\` from the \`${attachmentTools.add}\` response into the \`${attributes.attachmentId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`attachment_id\`. You must use the exact id provided in the tool response.
       * You must not include any other attributes or content within the \`<${tagName}>\` element.
-      * If \`${platformCoreTools.createVisualization}\` does not return \`data.attachment_id\`, do not render an inline visualization; explain that the visualization could not be persisted as an attachment.
+      * If no \`${AttachmentType.esqlVisualizationInput}\` attachment was created for the ES|QL result, do not render an inline visualization.
 
       **Example Usage:**
 
@@ -46,17 +48,21 @@ export const renderVisualizationPrompt = () => {
         }
       }
 
-      First call \`${platformCoreTools.createVisualization}\`:
+      First call \`${attachmentTools.add}\`:
       {
-        "query": "Show count over time",
-        "esql": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)"
+        "type": "${AttachmentType.esqlVisualizationInput}",
+        "data": {
+          "query": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)",
+          "columns": [...]
+        }
       }
 
-      The \`${platformCoreTools.createVisualization}\` response includes:
+      The \`${attachmentTools.add}\` response includes:
       {
-        "type": "visualization",
+        "type": "other",
         "data": {
           "attachment_id": "LiDoF1",
+          "type": "${AttachmentType.esqlVisualizationInput}",
           "version": 1
         }
       }

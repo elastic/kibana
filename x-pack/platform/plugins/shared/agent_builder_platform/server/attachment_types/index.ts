@@ -9,6 +9,7 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
+import { createEsqlVisualizationInputAttachmentType } from './esql_visualization_input';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationAttachmentType } from './visualization';
 import { createGraphAttachmentType } from './graph';
@@ -32,6 +33,7 @@ export const registerAttachmentTypes = ({
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
+    createEsqlVisualizationInputAttachmentType(),
     createVisualizationAttachmentType(),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),

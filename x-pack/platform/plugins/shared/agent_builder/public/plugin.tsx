@@ -13,7 +13,7 @@ import {
   type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -65,6 +65,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import { createEsqlVisualizationInputAttachmentDefinition } from './application/components/attachments/esql_visualization_input_attachment';
 
 export class AgentBuilderPlugin
   implements
@@ -146,8 +147,12 @@ export class AgentBuilderPlugin
     const attachmentsService = new AttachmentsService({ http });
 
     attachmentsService.addAttachmentType(
-      'visualization',
+      AttachmentType.visualization,
       createVisualizationAttachmentDefinition({ startDependencies })
+    );
+    attachmentsService.addAttachmentType(
+      AttachmentType.esqlVisualizationInput,
+      createEsqlVisualizationInputAttachmentDefinition({ startDependencies })
     );
 
     const eventsService = new EventsService();

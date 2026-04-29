@@ -24,8 +24,8 @@ import { createTagParser, findToolResult } from './utils';
 
 /**
  * @deprecated Supports legacy `<visualization />` tags in existing conversations.
- * New visualization rendering should use `create_visualization` to create a
- * visualization attachment, then render it with `<render_attachment />`.
+ * New ES|QL result visualization rendering should create an
+ * `esqlVisualizationInput` attachment, then render it with `<render_attachment />`.
  */
 export const visualizationTagParser = createTagParser({
   tagName: visualizationElement.tagName,
@@ -49,8 +49,8 @@ export const visualizationTagParser = createTagParser({
 
 /**
  * @deprecated Supports legacy `<visualization />` tags in existing conversations.
- * New visualization rendering should use visualization attachments rendered via
- * `<render_attachment />`.
+ * New ES|QL result visualization rendering should use `esqlVisualizationInput`
+ * attachments rendered via `<render_attachment />`.
  */
 export function createVisualizationRenderer({
   startDependencies,

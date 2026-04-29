@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * List of internal / built-in attachment types.
@@ -16,12 +17,14 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
+  esqlVisualizationInput = 'esqlVisualizationInput',
   visualization = 'visualization',
   connector = 'connector',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
+  [AttachmentType.esqlVisualizationInput]: EsqlVisualizationInputAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
@@ -43,6 +46,13 @@ export interface EsqlAttachmentData {
   description?: string;
 }
 
+const esqlVisualizationInputColumnSchema = z
+  .object({
+    name: z.string(),
+    type: z.string(),
+  })
+  .passthrough();
+
 export const textAttachmentDataSchema = z.object({
   content: z.string(),
 });
@@ -63,6 +73,29 @@ export const screenContextTimeRangeSchema = z.object({
 export interface TimeRange {
   from: string;
   to: string;
+}
+
+export const esqlVisualizationInputAttachmentDataSchema = z.object({
+  query: z.string(),
+  columns: z.array(esqlVisualizationInputColumnSchema),
+  chart_type: z.string().optional(),
+  time_range: screenContextTimeRangeSchema.optional(),
+});
+
+/**
+ * Lightweight input for rendering an ES|QL result visualization.
+ * It intentionally stores only the fields needed by the frontend to rebuild
+ * the same Lens suggestion previously rendered through the legacy tag.
+ */
+export interface EsqlVisualizationInputAttachmentData {
+  /** The ES|QL query used to build the visualization */
+  query: string;
+  /** Column metadata returned by execute_esql */
+  columns: EsqlEsqlColumnInfo[];
+  /** Optional preferred chart type for Lens suggestions */
+  chart_type?: string;
+  /** Optional time range used when executing the ES|QL query */
+  time_range?: TimeRange;
 }
 
 export const screenContextAttachmentDataSchema = z
