@@ -46,7 +46,6 @@ function getExpectedDiscoverPluginIds(projectType: string | undefined): string[]
     'kql',
     'lens',
     'maps',
-    'presentationPanel',
     ...(projectType === 'security' ? ['securitySolution'] : []),
     'unifiedSearch',
   ];
