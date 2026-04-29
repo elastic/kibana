@@ -268,9 +268,7 @@ async function createNamespaceTemplatesForPackage({
     if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
       throw err;
     }
-    logger.debug(
-      `[${logContext}] no existing data streams to update for new namespace templates`
-    );
+    logger.debug(`[${logContext}] no existing data streams to update for new namespace templates`);
   }
 
   const freshInstallation = await getInstallation({
