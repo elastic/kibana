@@ -107,7 +107,7 @@
         "label": "BulkScheduleWorkflowItem",
         "description": [],
         "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-        "lineNumber": 141,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -129,7 +129,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 142,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -142,7 +142,7 @@
             "label": "spaceId",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 143,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -158,7 +158,7 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 144,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -171,7 +171,7 @@
             "label": "triggeredBy",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 145,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -194,7 +194,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 146,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -214,7 +214,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 44,
+      "lineNumber": 47,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -230,7 +230,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 45,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -242,18 +242,16 @@
     "start": {
       "parentPluginId": "workflowsManagement",
       "id": "def-server.WorkflowsServerPluginStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "WorkflowsServerPluginStart",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 48,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
