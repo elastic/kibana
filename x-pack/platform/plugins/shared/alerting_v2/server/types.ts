@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -20,9 +22,15 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { RulesClient } from './lib/rules_client';
+
+export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type AlertingServerSetup = void;
-export type AlertingServerStart = void;
+
+export interface AlertingServerStart {
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+}
 
 export interface AlertingServerSetupDependencies {
   taskManager: TaskManagerSetupContract;
