@@ -60,6 +60,33 @@ describe('Settings application', () => {
     });
   });
 
+  it('calls addUrlToHistory once per change event when typing, not once per character', async () => {
+    const services: SettingsApplicationServices = createSettingsApplicationServicesMock();
+
+    const { getByTestId } = render(wrap(<SettingsApplication />, services));
+
+    const searchBar = getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
+
+    // Simulate typing characters one at a time, as a user would
+    const characters = ['t', 'te', 'tes', 'test'];
+    for (const value of characters) {
+      act(() => {
+        fireEvent.change(searchBar, { target: { value } });
+      });
+    }
+
+    await waitFor(() => {
+      // addUrlToHistory must have been called exactly once per change event (one per character typed),
+      // never more — confirming we're replacing the history entry rather than pushing new ones.
+      expect(services.addUrlToHistory).toHaveBeenCalledTimes(characters.length);
+      // Each call should reflect the full current query at that point, not accumulate
+      expect(services.addUrlToHistory).toHaveBeenNthCalledWith(1, '?query=t');
+      expect(services.addUrlToHistory).toHaveBeenNthCalledWith(2, '?query=te');
+      expect(services.addUrlToHistory).toHaveBeenNthCalledWith(3, '?query=tes');
+      expect(services.addUrlToHistory).toHaveBeenNthCalledWith(4, '?query=test');
+    });
+  });
+
   it('renders the empty state when no settings match the query', async () => {
     const { getByTestId } = render(wrap(<SettingsApplication />));
 
