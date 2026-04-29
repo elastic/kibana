@@ -6,11 +6,3103 @@
 # in the parent required array. Each fix below uses remove + update because
 # the Bump overlay engine appends arrays on 'update' alone rather than replacing them.
 #
-# 0 schema(s) affected.
+# 294 schema(s) affected.
 
 overlay: 1.0.0
 info:
   title: Required-field fixes (auto-generated)
   version: 0.0.1
 actions:
+  - target: "$.paths['/api/dashboards'].get.responses.200.content['application/json'].schema.properties.dashboards.items.properties.data.required"
+    description: "Remove x-oas-optional fields from required: time_range, access_control"
+    remove: true
+  - target: "$.paths['/api/dashboards'].get.responses.200.content['application/json'].schema.properties.dashboards.items.properties.data"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "title"
+
+  - target: "$.paths['/api/dashboards/{id}'].put.requestBody.content['application/json'].schema.required"
+    description: "Remove x-oas-optional fields from required: query, refresh_interval, time_range"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}'].put.requestBody.content['application/json'].schema"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "options"
+        - "title"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-service-map-embeddable'].required"
+    description: "Remove x-oas-optional fields from required: time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-service-map-embeddable']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_categoricalColorMapping'].required"
+    description: "Remove x-oas-optional fields from required: unassigned"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_categoricalColorMapping']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "mode"
+        - "palette"
+        - "mapping"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_counterRateOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_counterRateOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_countMetricOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_countMetricOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_cumulativeSumOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_cumulativeSumOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQL'].properties.rows.items.required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQL'].properties.rows.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQL'].properties.split_metrics_by.items.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQL'].properties.split_metrics_by.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQLMetric'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableESQLMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "data_source"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowFilters'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableRowTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableStyling'].required"
+    description: "Remove x-oas-optional fields from required: density"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datatableStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_differencesOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_differencesOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_formulaOperation'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_formulaOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeESQL'].properties.metric.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeESQL'].properties.metric"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gaugeNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "data_source"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gradientColorMapping'].required"
+    description: "Remove x-oas-optional fields from required: unassigned"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_gradientColorMapping']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "mode"
+        - "palette"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapAxes'].required"
+    description: "Remove x-oas-optional fields from required: x, y"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapAxes']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].required"
+    description: "Remove x-oas-optional fields from required: legend, filters, axis, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "x"
+        - "data_source"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].properties.metric.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].properties.metric"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].properties.x.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].properties.x"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].properties.y.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapESQL'].properties.y"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapLegend'].required"
+    description: "Remove x-oas-optional fields from required: size"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapLegend']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: legend, filters, axis, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "x"
+        - "query"
+        - "data_source"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapStyling'].required"
+    description: "Remove x-oas-optional fields from required: cells"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapXAxis'].properties.labels.required"
+    description: "Remove x-oas-optional fields from required: orientation"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_heatmapXAxis'].properties.labels"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_histogramOperation'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_histogramOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].required"
+    description: "Remove x-oas-optional fields from required: query, refresh_interval, time_range, access_control"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "options"
+        - "title"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'].properties.config.anyOf[0].required"
+    description: "Remove x-oas-optional fields from required: time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'].properties.config.anyOf[0]"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "tabs"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'].properties.config.anyOf[0].properties.tabs.items.anyOf[0].required"
+    description: "Remove x-oas-optional fields from required: query"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'].properties.config.anyOf[0].properties.tabs.items.anyOf[0]"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "data_source"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'].properties.config.anyOf[1].required"
+    description: "Remove x-oas-optional fields from required: time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'].properties.config.anyOf[1]"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "ref_id"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'].properties.config.anyOf[1].required"
+    description: "Remove x-oas-optional fields from required: time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'].properties.config.anyOf[1]"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "ref_id"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-data-view-field-setting'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-data-view-field-setting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-runtime-field-schema'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-runtime-field-schema']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_lastValueOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_lastValueOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "data_source"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_legacyMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownFilters'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricBreakdownTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].properties.breakdown_by.required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].properties.breakdown_by"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].properties.metrics.items.anyOf[0].required"
+    description: "Remove x-oas-optional fields from required: format, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].properties.metrics.items.anyOf[0]"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].properties.metrics.items.anyOf[1].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricESQL'].properties.metrics.items.anyOf[1]"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "data_source"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryFormula'].required"
+    description: "Remove x-oas-optional fields from required: format, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimarySumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimarySumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale, background_chart"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricPrimaryUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondarySumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondarySumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricSecondaryUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "type"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricStyling'].required"
+    description: "Remove x-oas-optional fields from required: icon"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metricStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_minMaxAvgMedianStdDevMetricOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_minMaxAvgMedianStdDevMetricOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].properties.group_breakdown_by.items.required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].properties.group_breakdown_by.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].properties.group_by.items.required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].properties.group_by.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].properties.metric.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicESQL'].properties.metric"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByFilters'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupBreakdownByTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByFilters'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicGroupByTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicLegend'].required"
+    description: "Remove x-oas-optional fields from required: size"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicLegend']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "query"
+        - "metric"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicStyling'].required"
+    description: "Remove x-oas-optional fields from required: values"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_mosaicStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_movingAverageOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_movingAverageOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_percentileOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_percentileOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_percentileRanksOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_percentileRanksOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieESQL'].properties.group_by.items.required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieESQL'].properties.group_by.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieESQL'].properties.metrics.items.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieESQL'].properties.metrics.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByFilters'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieGroupByTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieLegend'].required"
+    description: "Remove x-oas-optional fields from required: size"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieLegend']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "query"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieStyling'].required"
+    description: "Remove x-oas-optional fields from required: values"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_pieStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rangesOperation'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rangesOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metric"
+        - "region"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapESQL'].properties.metric.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapESQL'].properties.metric"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "data_source"
+        - "metric"
+        - "region"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapRegionHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapRegionHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapRegionRanges'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapRegionRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapRegionTerms'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_regionMapRegionTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_staticOperationDefinition'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_staticOperationDefinition']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_sumMetricOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_sumMetricOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metric"
+        - "tag_by"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudESQL'].properties.metric.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudESQL'].properties.metric"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudESQL'].properties.tag_by.required"
+    description: "Remove x-oas-optional fields from required: format, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudESQL'].properties.tag_by"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "data_source"
+        - "metric"
+        - "tag_by"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudStyling'].required"
+    description: "Remove x-oas-optional fields from required: orientation"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagFilters'].required"
+    description: "Remove x-oas-optional fields from required: color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_tagcloudTagTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_termsOperation'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_termsOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapESQL'].properties.group_by.items.required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapESQL'].properties.group_by.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapESQL'].properties.metrics.items.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapESQL'].properties.metrics.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByFilters'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapGroupByTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapLegend'].required"
+    description: "Remove x-oas-optional fields from required: size"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapLegend']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "query"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapStyling'].required"
+    description: "Remove x-oas-optional fields from required: values"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_treemapStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_uniqueCountMetricOperation'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_uniqueCountMetricOperation']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_vis_api_xy_axis_config'].properties.x.properties.labels.required"
+    description: "Remove x-oas-optional fields from required: orientation"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_vis_api_xy_axis_config'].properties.x.properties.labels"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_vis_api_xy_axis_config'].properties.y.properties.labels.required"
+    description: "Remove x-oas-optional fields from required: orientation"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_vis_api_xy_axis_config'].properties.y.properties.labels"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_vis_api_xy_axis_config'].properties.y2.properties.labels.required"
+    description: "Remove x-oas-optional fields from required: orientation"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_vis_api_xy_axis_config'].properties.y2.properties.labels"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleESQL'].properties.group_by.items.required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleESQL'].properties.group_by.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleESQL'].properties.metrics.items.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleESQL'].properties.metrics.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByFilters'].required"
+    description: "Remove x-oas-optional fields from required: color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleGroupByTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleLegend'].required"
+    description: "Remove x-oas-optional fields from required: size"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleLegend']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleMetricUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "data_source"
+        - "query"
+        - "metrics"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleStyling'].required"
+    description: "Remove x-oas-optional fields from required: values"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_waffleStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownDateHistogram'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownDateHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownFilters'].required"
+    description: "Remove x-oas-optional fields from required: collapse_by, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownFilters']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "filters"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownRanges'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownTerms'].required"
+    description: "Remove x-oas-optional fields from required: format, collapse_by, color"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyBreakdownTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyChartESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, axis, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyChartESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "layers"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyChartNoESQL'].required"
+    description: "Remove x-oas-optional fields from required: filters, legend, axis, styling, time_range"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyChartNoESQL']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "type"
+        - "query"
+        - "layers"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLayerESQL'].properties.breakdown_by.required"
+    description: "Remove x-oas-optional fields from required: format, color, collapse_by"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLayerESQL'].properties.breakdown_by"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLayerESQL'].properties.x.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLayerESQL'].properties.x"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLayerESQL'].properties.y.items.required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLayerESQL'].properties.y.items"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "column"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLegendInside'].required"
+    description: "Remove x-oas-optional fields from required: series_header"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLegendInside']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "placement"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLegendOutsideHorizontal'].required"
+    description: "Remove x-oas-optional fields from required: series_header"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLegendOutsideHorizontal']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLegendOutsideVertical'].required"
+    description: "Remove x-oas-optional fields from required: series_header, size"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyLegendOutsideVertical']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLinePercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLinePercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLinePercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLinePercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineStatic'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineStatic']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyRefLineUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyStyling'].required"
+    description: "Remove x-oas-optional fields from required: overlays, fitting, points, areas, bars"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyStyling']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyXHistogram'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyXHistogram']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyXRanges'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyXRanges']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "field"
+        - "ranges"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyXTerms'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyXTerms']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "fields"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYCounterRate'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYCounterRate']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYCumulativeSum'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYCumulativeSum']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYDifferences'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYDifferences']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYFormula'].required"
+    description: "Remove x-oas-optional fields from required: format"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYFormula']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "operation"
+        - "formula"
+        - "filter"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYLastValue'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYLastValue']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+        - "time_field"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYMovingAverage'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYMovingAverage']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "operation"
+        - "of"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYPercentile'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYPercentile']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYPercentileRanks'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYPercentileRanks']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYStatsMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYStatsMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYSumMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYSumMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYUniqueCountMetric'].required"
+    description: "Remove x-oas-optional fields from required: format, time_scale"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xyYUniqueCountMetric']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "filter"
+        - "field"
+        - "operation"
 
