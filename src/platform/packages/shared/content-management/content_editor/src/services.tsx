@@ -167,7 +167,9 @@ export const ContentEditorKibanaProvider: FC<
   return (
     <QueryClientProvider client={queryClient}>
       <UserProfilesKibanaProvider core={services.core}>
-        <ContentEditorKibanaProviderInner {...services}>{children}</ContentEditorKibanaProviderInner>
+        <ContentEditorKibanaProviderInner {...services}>
+          {children}
+        </ContentEditorKibanaProviderInner>
       </UserProfilesKibanaProvider>
     </QueryClientProvider>
   );
