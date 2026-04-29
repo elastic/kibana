@@ -63,6 +63,7 @@
                 "lineNumber": 138,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -103,6 +104,7 @@
                 "lineNumber": 143,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsSetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -143,6 +145,7 @@
                 "lineNumber": 250,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsStartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -204,6 +207,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -221,6 +225,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -260,6 +265,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -277,6 +283,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -316,6 +323,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -333,6 +341,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -372,6 +381,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -389,6 +399,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -428,6 +439,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -445,6 +457,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -484,6 +497,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -501,6 +515,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -540,6 +555,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -557,6 +573,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -596,6 +613,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -613,6 +631,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -652,6 +671,7 @@
             "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -669,6 +689,7 @@
             "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -708,6 +729,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -725,6 +747,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -764,6 +787,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -781,6 +805,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -820,6 +845,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -837,6 +863,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -878,6 +905,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -897,6 +925,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Promise",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -936,6 +965,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -953,6 +983,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -992,6 +1023,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1009,6 +1041,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1048,6 +1081,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "InternalSavedObjectRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1065,6 +1099,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1135,7 +1170,9 @@
             "type": "number",
             "tags": [],
             "label": "maxRetries",
-            "description": [],
+            "description": [
+              "\nDefines settings for the elasticsearch-js client used for the SO migrations"
+            ],
             "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
             "lineNumber": 13,
             "columnNumber": 43,
@@ -1148,7 +1185,9 @@
             "type": "number",
             "tags": [],
             "label": "requestTimeout",
-            "description": [],
+            "description": [
+              "\nDefines settings for the elasticsearch-js client used for the SO migrations"
+            ],
             "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
             "lineNumber": 13,
             "columnNumber": 58,
