@@ -861,13 +861,20 @@ describe('DispatcherService', () => {
   });
 
   describe('event watermark plumbing', () => {
-    it('returns nextEventWatermark on a fully completed tick', async () => {
+    it('anchors nextEventWatermark to the last observed episode on a fully completed tick', async () => {
       const alertEpisodes = [
         {
-          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          last_event_timestamp: '2026-01-22T07:09:30.000Z',
           rule_id: 'rule-1',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
+          episode_status: 'active' as const,
+        },
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          episode_id: 'episode-2',
           episode_status: 'active' as const,
         },
       ];
@@ -886,16 +893,10 @@ describe('DispatcherService', () => {
         previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
       });
 
-      // Cold start: watermark = upper bound of the queried window. The
-      // exact value is wall-clock dependent, but it must be a valid ISO
-      // timestamp aligned with the lte sent to ES.
-      expect(result.nextEventWatermark).toEqual(expect.any(String));
-      const [firstCall] = queryEsClient.esql.query.mock.calls[0];
-      const range = extractTimestampRange(firstCall);
-      expect(result.nextEventWatermark).toBe(range.lte);
+      expect(result.nextEventWatermark).toBe('2026-01-22T07:10:00.000Z');
     });
 
-    it('returns nextEventWatermark on a no_episodes halt (window was queried but empty)', async () => {
+    it('returns nextEventWatermark = queried lte on a no_episodes halt (empty window)', async () => {
       queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
       const result = await dispatcherService.run({
@@ -904,6 +905,9 @@ describe('DispatcherService', () => {
 
       expect(result.tick.halt_reason).toBe('no_episodes');
       expect(result.nextEventWatermark).toEqual(expect.any(String));
+      const [firstCall] = queryEsClient.esql.query.mock.calls[0];
+      const range = extractTimestampRange(firstCall);
+      expect(result.nextEventWatermark).toBe(range.lte);
     });
 
     it('omits nextEventWatermark on a step_error halt to prevent silent data loss', async () => {
@@ -920,7 +924,7 @@ describe('DispatcherService', () => {
       expect(result.nextEventWatermark).toBeUndefined();
     });
 
-    it('threads eventWatermark from params into the fetch_episodes filter (gt boundary)', async () => {
+    it('threads eventWatermark from params into the fetch_episodes filter (gte boundary)', async () => {
       const watermark = moment().subtract(30, 'seconds').toDate();
 
       queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
@@ -932,8 +936,8 @@ describe('DispatcherService', () => {
 
       const [firstCall] = queryEsClient.esql.query.mock.calls[0];
       const range = extractTimestampRange(firstCall);
-      expect(range).toHaveProperty('gt', watermark.toISOString());
-      expect(range).not.toHaveProperty('gte');
+      expect(range).toHaveProperty('gte', watermark.toISOString());
+      expect(range).not.toHaveProperty('gt');
     });
   });
 

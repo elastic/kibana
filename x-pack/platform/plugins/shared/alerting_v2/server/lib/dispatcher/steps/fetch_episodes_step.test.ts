@@ -170,7 +170,7 @@ describe('FetchEpisodesStep', () => {
       expect(lte).toBeLessThanOrEqual(after - settleMs + 5);
     });
 
-    it('subsequent run: uses the watermark with strict `gt` lower bound', async () => {
+    it('subsequent run: uses gte = watermark and caps the window at TICK_LOOKBACK_CAP_MINUTES', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const step = new FetchEpisodesStep(queryService);
 
@@ -190,8 +190,8 @@ describe('FetchEpisodesStep', () => {
       const [callArg] = mockEsClient.esql.query.mock.calls[0];
       const range = (callArg as any).filter.range['@timestamp'];
 
-      expect(range).toHaveProperty('gt', watermark.toISOString());
-      expect(range).not.toHaveProperty('gte');
+      expect(range).toHaveProperty('gte', watermark.toISOString());
+      expect(range).not.toHaveProperty('gt');
       expect(range).toHaveProperty('lte');
     });
 
@@ -216,20 +216,118 @@ describe('FetchEpisodesStep', () => {
       const range = (callArg as any).filter.range['@timestamp'];
 
       const lte = new Date(range.lte).getTime();
-      const gt = new Date(range.gt).getTime();
+      const gte = new Date(range.gte).getTime();
       const capMs = TICK_LOOKBACK_CAP_MINUTES * 60_000;
 
-      expect(lte - gt).toBeLessThanOrEqual(capMs + 5);
-      expect(lte - gt).toBeGreaterThan(0);
+      expect(lte - gte).toBeLessThanOrEqual(capMs + 5);
+      expect(lte - gte).toBeGreaterThan(0);
     });
 
-    it('returned nextEventWatermark equals the upper bound sent to ES', async () => {
+    it('anchors nextEventWatermark to the last_event_timestamp of the latest returned episode', async () => {
       const { queryService, mockEsClient } = createQueryService();
       const step = new FetchEpisodesStep(queryService);
 
+      const episodes = [
+        createAlertEpisode({
+          rule_id: 'r1',
+          group_hash: 'h1',
+          episode_id: 'e1',
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        }),
+        createAlertEpisode({
+          rule_id: 'r2',
+          group_hash: 'h2',
+          episode_id: 'e2',
+          last_event_timestamp: '2026-01-22T07:10:30.000Z',
+        }),
+      ];
       mockEsClient.esql.query.mockResolvedValueOnce(
-        createDispatchableAlertEventsResponse([createAlertEpisode()])
+        createDispatchableAlertEventsResponse(episodes)
       );
+
+      const watermark = moment().subtract(2, 'hour').toDate();
+      const state = createDispatcherPipelineState({
+        input: {
+          startedAt: new Date(),
+          previousStartedAt: new Date(),
+          eventWatermark: watermark,
+        },
+      });
+
+      const result = await step.execute(state);
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.nextEventWatermark).toBe('2026-01-22T07:10:30.000Z');
+    });
+
+    it('continues a LIMIT-truncated tick from the last observed timestamp on the next run', async () => {
+      // Simulates the loss path Variant A closes: a busy window where ES|QL
+      // returns 10 000 episodes whose tail timestamp is well before the queried
+      // upper bound. The next tick must restart from that tail timestamp (gte)
+      // — not from the wall-clock window end — so the truncated rows are
+      // picked up. The dedup filter on the query (`last_fired < @timestamp`)
+      // prevents the boundary episodes from being re-dispatched.
+      const { queryService, mockEsClient } = createQueryService();
+      const step = new FetchEpisodesStep(queryService);
+
+      const lastObserved = '2026-01-22T07:09:45.000Z';
+      const episodes = [
+        createAlertEpisode({
+          rule_id: 'r-first',
+          group_hash: 'h-first',
+          episode_id: 'e-first',
+          last_event_timestamp: '2026-01-22T07:09:30.000Z',
+        }),
+        createAlertEpisode({
+          rule_id: 'r-last',
+          group_hash: 'h-last',
+          episode_id: 'e-last',
+          last_event_timestamp: lastObserved,
+        }),
+      ];
+      mockEsClient.esql.query.mockResolvedValueOnce(
+        createDispatchableAlertEventsResponse(episodes)
+      );
+
+      const initialWatermark = moment('2026-01-22T07:09:00.000Z').toDate();
+      const result = await step.execute(
+        createDispatcherPipelineState({
+          input: {
+            startedAt: new Date(),
+            previousStartedAt: new Date(),
+            eventWatermark: initialWatermark,
+          },
+        })
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.nextEventWatermark).toBe(lastObserved);
+
+      mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      await step.execute(
+        createDispatcherPipelineState({
+          input: {
+            startedAt: new Date(),
+            previousStartedAt: new Date(),
+            eventWatermark: new Date(lastObserved),
+          },
+        })
+      );
+
+      const [secondCall] = mockEsClient.esql.query.mock.calls[1];
+      const range = (secondCall as any).filter.range['@timestamp'];
+      expect(range).toHaveProperty('gte', lastObserved);
+      expect(range).not.toHaveProperty('gt');
+    });
+
+    it('on an empty window publishes nextEventWatermark equal to the queried lte bound', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const step = new FetchEpisodesStep(queryService);
+
+      mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
       const watermark = moment().subtract(2, 'hour').toDate();
       const state = createDispatcherPipelineState({
@@ -245,8 +343,9 @@ describe('FetchEpisodesStep', () => {
       const [callArg] = mockEsClient.esql.query.mock.calls[0];
       const range = (callArg as any).filter.range['@timestamp'];
 
-      expect(result.type).toBe('continue');
-      if (result.type !== 'continue') return;
+      expect(result.type).toBe('halt');
+      if (result.type !== 'halt') return;
+      expect(result.reason).toBe('no_episodes');
       expect(result.data?.nextEventWatermark).toBe(range.lte);
     });
 
