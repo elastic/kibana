@@ -40,15 +40,10 @@ export function flattenOsqueryHit(
 
   const agentFields = ['agent.name', 'agent.id'] as const;
   for (const field of agentFields) {
-    if (flattened[field] === undefined && edge._source) {
-      const parts = field.split('.');
-      const nested = (edge._source as Record<string, unknown>)?.[parts[0]];
-      if (nested && typeof nested === 'object') {
-        const value = (nested as Record<string, unknown>)[parts[1]];
-        if (value !== undefined) {
-          flattened[field] = isArray(value) && value.length === 1 ? value[0] : value;
-        }
-      }
+    if (flattened[field] !== undefined) continue;
+    const value = getNestedOrFlat(field, edge._source);
+    if (value !== undefined) {
+      flattened[field] = isArray(value) && value.length === 1 ? value[0] : value;
     }
   }
 

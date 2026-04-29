@@ -97,6 +97,7 @@
     "@kbn/scout",
     "@kbn/core-http-browser",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-http-request-handler-context-server"
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-security-server"
   ]
 }

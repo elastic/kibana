@@ -179,6 +179,37 @@ export async function exportResultsToStream({
       formatter.finalizeColumns(firstPageRecords);
     }
 
+    const firstPageKeyUnion = new Set<string>();
+    for (const record of firstPageRecords) {
+      for (const key of Object.keys(record)) {
+        firstPageKeyUnion.add(key);
+      }
+    }
+
+    let warnedKeysBeyondFirstPage = false;
+    const warnIfRecordHasUnseenKeys = (record: Record<string, unknown>) => {
+      if (!formatter.finalizeColumns || warnedKeysBeyondFirstPage) return;
+      for (const key of Object.keys(record)) {
+        if (!firstPageKeyUnion.has(key)) {
+          warnedKeysBeyondFirstPage = true;
+          logger.warn(
+            'CSV export row contains field(s) not present in the first result page; those columns are omitted from the header and all rows.',
+            {
+              labels: {
+                action_id: metadata.action_id,
+                format: metadata.format,
+                example_field: key,
+                ...(metadata.execution_count != null
+                  ? { execution_count: metadata.execution_count }
+                  : {}),
+              },
+            }
+          );
+          break;
+        }
+      }
+    };
+
     // Defer streaming to the next macrotask tick so the route handler can
     // attach the returned PassThrough to the HTTP response before any writes
     // occur. A macrotask (setImmediate) rather than a microtask is required
@@ -230,6 +261,7 @@ export async function exportResultsToStream({
           for (const hit of page.hits.hits) {
             if (signal.aborted) break;
             const flattened = deduplicateFields(flattenOsqueryHit(hit, ecsMapping));
+            warnIfRecordHasUnseenKeys(flattened);
             await writeWithBackpressure(stream, formatter.row(flattened, isFirstRow), signal);
             isFirstRow = false;
           }

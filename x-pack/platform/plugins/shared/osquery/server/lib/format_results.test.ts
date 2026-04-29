@@ -124,9 +124,23 @@ describe('format_results', () => {
   });
 
   describe('createCsvFormatter', () => {
-    it('returns null from opening', () => {
+    it('returns null from opening when metadata format is not csv', () => {
       const formatter = createCsvFormatter();
       expect(formatter.opening(metadata)).toBeNull();
+    });
+
+    it('emits header-only CSV when total_results is zero and csv_columns is set', () => {
+      const formatter = createCsvFormatter();
+      formatter.finalizeColumns?.([]);
+      const csvMeta: ExportMetadata = {
+        action_id: 'a1',
+        timestamp: '2024-01-01T00:00:00.000Z',
+        exported_by: 'user',
+        format: 'csv',
+        total_results: 0,
+        csv_columns: ['agent.name', 'process.pid'],
+      };
+      expect(formatter.opening(csvMeta)).toBe('agent.name,process.pid\n');
     });
 
     it('returns null from closing (CSV is data-only)', () => {

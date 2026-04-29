@@ -10,6 +10,7 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { AuditEvent } from '@kbn/core-security-server';
 
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
@@ -50,7 +51,7 @@ export const createExportRouteHandler =
     context: RequestHandlerContext & DataRequestHandlerContext,
     request: KibanaRequest<
       unknown,
-      { format: string },
+      { format?: string },
       { kuery?: string; agentIds?: string[]; esFilters?: unknown[] } | null
     >,
     response: KibanaResponseFactory,
@@ -63,6 +64,12 @@ export const createExportRouteHandler =
     const esFilters = request.body?.esFilters;
 
     const logger = osqueryContext.logFactory.get('export_results');
+
+    if (!osqueryContext.experimentalFeatures.exportResults) {
+      return response.forbidden({
+        body: { message: 'Export results feature is not enabled' },
+      });
+    }
 
     if (!format) {
       return response.badRequest({
@@ -85,7 +92,17 @@ export const createExportRouteHandler =
       filter += ` AND (${kuery})`;
     }
 
-    const kqlFilterClause = getQueryFilter({ filter });
+    let kqlFilterClause: estypes.QueryDslQueryContainer;
+    try {
+      kqlFilterClause = getQueryFilter({ filter });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      logger.warn(`Invalid kuery in export request: ${message}`);
+
+      return response.badRequest({
+        body: { message: `Invalid kuery: ${message}` },
+      });
+    }
 
     // Build ES filter clauses from SearchBar filter pills. An invalid pill must
     // NOT fall through to an unfiltered export — silently returning the full
@@ -147,6 +164,11 @@ export const createExportRouteHandler =
       formatter.fileExtension
     }`;
 
+    const csvColumnsForEmptyExport =
+      format === 'csv' && ecsMapping
+        ? (['agent.name', 'agent.id', ...Object.keys(ecsMapping)] as string[])
+        : undefined;
+
     const result = await exportResultsToStream({
       esClient,
       index,
@@ -157,6 +179,7 @@ export const createExportRouteHandler =
         timestamp,
         exported_by: user?.username ?? 'unknown',
         format,
+        ...(csvColumnsForEmptyExport ? { csv_columns: csvColumnsForEmptyExport } : {}),
       },
       aborted$: request.events.aborted$,
       logger,
@@ -170,14 +193,26 @@ export const createExportRouteHandler =
       });
     }
 
-    // Audit trail for data egress. Export streams complete asynchronously after
-    // this handler returns, so this is a "started" entry; the stream itself
-    // logs per-export errors separately with the same action_id correlation.
-    logger.info(
-      `Osquery export started: action_id=${routeMetadata.action_id} format=${format} user=${
-        user?.username ?? 'unknown'
-      } execution_count=${routeMetadata.execution_count ?? 'n/a'}`
-    );
+    // Audit trail for data egress (no PII in application logs). Stream errors
+    // are logged separately with action_id correlation. Use Core request context
+    // (not deprecated plugins.security.audit).
+    const auditEvent: AuditEvent = {
+      message: 'Osquery export started',
+      event: {
+        action: 'osquery_export',
+        category: ['database'],
+        type: ['access'],
+        outcome: 'unknown',
+      },
+      labels: {
+        action_id: routeMetadata.action_id,
+        format,
+        ...(routeMetadata.execution_count != null
+          ? { execution_count: routeMetadata.execution_count }
+          : {}),
+      },
+    };
+    coreContext.security.audit.logger.log(auditEvent);
 
     return response.ok({
       body: result,

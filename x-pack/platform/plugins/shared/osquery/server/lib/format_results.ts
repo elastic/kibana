@@ -35,6 +35,11 @@ export interface ExportMetadata {
   total_results?: number;
   /** Schedule execution count — only set for scheduled-query exports. */
   execution_count?: number;
+  /**
+   * When set (CSV + ECS mapping + zero hits), `opening` emits this header row so
+   * an empty export is not a 0-byte file. Column order matches `flattenOsqueryHit`.
+   */
+  csv_columns?: string[];
 }
 
 export interface ResultFormatter {
@@ -130,7 +135,18 @@ export function createCsvFormatter(): ResultFormatter {
 
       columns = union;
     },
-    opening() {
+    opening(metadata) {
+      if (
+        metadata.format === 'csv' &&
+        metadata.total_results === 0 &&
+        metadata.csv_columns &&
+        metadata.csv_columns.length > 0
+      ) {
+        columns = [...metadata.csv_columns];
+
+        return metadata.csv_columns.map(escapeCsvField).join(',') + '\n';
+      }
+
       return null;
     },
     row(record, isFirst) {

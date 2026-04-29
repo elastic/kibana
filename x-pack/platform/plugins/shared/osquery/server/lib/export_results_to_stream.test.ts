@@ -557,6 +557,47 @@ describe('exportResultsToStream', () => {
       ]);
     });
 
+    it('warns once when CSV pagination introduces a field absent from the first page', async () => {
+      const hit1 = createMockHit('1', { 'osquery.common': ['a'] });
+      const hit2 = createMockHit('2', {
+        'osquery.common': ['b'],
+        'osquery.appears_late': ['late'],
+      });
+
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({
+          hits: { hits: [hit1], total: { value: 2 } },
+        })
+        .mockResolvedValueOnce({
+          hits: { hits: [hit2], total: { value: 2 } },
+        })
+        .mockResolvedValueOnce({
+          hits: { hits: [], total: { value: 2 } },
+        });
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createCsvFormatter(),
+        metadata: { ...metadata, format: 'csv' },
+        aborted$,
+        logger,
+      });
+
+      await collectStream(result as NodeJS.ReadableStream);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('first result page'),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            example_field: 'osquery.appears_late',
+            format: 'csv',
+          }),
+        })
+      );
+    });
+
     it('should call row() with isFirst=true for the first row and isFirst=false for subsequent rows', async () => {
       const hits = [createMockHit('1'), createMockHit('2'), createMockHit('3')];
 
@@ -746,7 +787,7 @@ describe('exportResultsToStream', () => {
       expect(output).toContain('CLOSING');
     });
 
-    it('should produce a zero-byte body for CSV when result set is empty', async () => {
+    it('should produce a zero-byte body for CSV when result set is empty and no csv_columns hint', async () => {
       (esClient.search as jest.Mock).mockResolvedValueOnce({
         hits: { hits: [], total: { value: 0 } },
       });
@@ -764,6 +805,30 @@ describe('exportResultsToStream', () => {
       const output = await collectStream(result as NodeJS.ReadableStream);
 
       expect(output).toBe('');
+    });
+
+    it('should emit CSV header only when result set is empty but csv_columns is provided', async () => {
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0 } },
+      });
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createCsvFormatter(),
+        metadata: {
+          ...metadata,
+          format: 'csv',
+          csv_columns: ['agent.name', 'process.pid'],
+        },
+        aborted$,
+        logger,
+      });
+
+      const output = await collectStream(result as NodeJS.ReadableStream);
+
+      expect(output).toBe('agent.name,process.pid\n');
     });
 
     it('should end stream cleanly when result set is empty', async () => {
