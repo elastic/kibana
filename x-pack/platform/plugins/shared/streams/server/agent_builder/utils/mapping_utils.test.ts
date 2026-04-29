@@ -146,6 +146,9 @@ describe('getEffectiveFieldConstraints', () => {
     expect(result.get('my.field')).toEqual({
       type: 'keyword',
       ignore_above: 512,
+      doc_values: true,
+      index: true,
+      normalizer: 'my_normalizer',
     });
   });
 
