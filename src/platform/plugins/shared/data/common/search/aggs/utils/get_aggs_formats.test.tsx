@@ -37,7 +37,7 @@ const createMockNestedFormat = (overrides: Partial<IFieldFormat> = {}) =>
 
 const getReactConvertText = (format: IFieldFormat, value: unknown): string => {
   const result = format.reactConvert(value);
-  const { container } = render(<>{result}</>);
+  const { container } = render(result);
   return container.textContent ?? '';
 };
 
