@@ -426,6 +426,9 @@ export const createLeadDataClient = ({
       });
       logger.info(`[LeadGeneration] Deleted all leads from space "${spaceId}"`);
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.warn(`[LeadGeneration] Failed to delete all leads: ${e}`);
     }
   };

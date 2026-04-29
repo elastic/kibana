@@ -20,6 +20,12 @@ jest.mock('../lead_data_client', () => ({
   createLeadDataClient: () => ({ bulkUpdateLeads: mockBulkUpdateLeads }),
 }));
 
+const makeEsSecurityException = () => ({
+  statusCode: 403,
+  body: { error: { type: 'security_exception', reason: 'access denied' } },
+  meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+});
+
 describe('bulkUpdateLeadsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
@@ -82,11 +88,7 @@ describe('bulkUpdateLeadsRoute', () => {
   });
 
   it('returns 403 when ES denies write access to the leads index', async () => {
-    mockBulkUpdateLeads.mockRejectedValueOnce({
-      statusCode: 403,
-      body: { error: { type: 'security_exception', reason: 'access denied' } },
-      meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
-    });
+    mockBulkUpdateLeads.mockRejectedValueOnce(makeEsSecurityException());
 
     const request = requestMock.create({
       method: 'post',

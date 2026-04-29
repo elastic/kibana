@@ -20,6 +20,12 @@ jest.mock('../lead_data_client', () => ({
   createLeadDataClient: () => ({ findLeads: mockFindLeads }),
 }));
 
+const makeEsSecurityException = () => ({
+  statusCode: 403,
+  body: { error: { type: 'security_exception', reason: 'access denied' } },
+  meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+});
+
 describe('getLeadsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
@@ -132,11 +138,7 @@ describe('getLeadsRoute', () => {
   });
 
   it('returns 403 when ES denies read access to the leads index', async () => {
-    mockFindLeads.mockRejectedValueOnce({
-      statusCode: 403,
-      body: { error: { type: 'security_exception', reason: 'access denied' } },
-      meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
-    });
+    mockFindLeads.mockRejectedValueOnce(makeEsSecurityException());
 
     const request = requestMock.create({
       method: 'get',

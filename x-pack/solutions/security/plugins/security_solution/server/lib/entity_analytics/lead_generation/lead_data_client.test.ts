@@ -11,6 +11,12 @@ import type { LeadDataClient } from './lead_data_client';
 import { getLeadsIndexName } from '../../../../common/entity_analytics/lead_generation/constants';
 import type { Lead } from '../../../../common/entity_analytics/lead_generation/types';
 
+const makeEsSecurityException = () => ({
+  statusCode: 403,
+  body: { error: { type: 'security_exception', reason: 'access denied' } },
+  meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+});
+
 const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
   id: 'lead-1',
   title: 'Test Lead',
@@ -165,11 +171,7 @@ describe('LeadDataClient', () => {
     });
 
     it('re-throws when ES returns security_exception so callers can surface the 403', async () => {
-      const securityException = {
-        statusCode: 403,
-        body: { error: { type: 'security_exception', reason: 'access denied' } },
-        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
-      };
+      const securityException = makeEsSecurityException();
       esClient.bulk.mockRejectedValueOnce(securityException);
 
       await expect(
@@ -280,11 +282,7 @@ describe('LeadDataClient', () => {
     });
 
     it('re-throws when ES returns security_exception so the route can return 403', async () => {
-      const securityException = {
-        statusCode: 403,
-        body: { error: { type: 'security_exception', reason: 'access denied' } },
-        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
-      };
+      const securityException = makeEsSecurityException();
       esClient.search.mockRejectedValueOnce(securityException);
 
       await expect(client.findLeads({})).rejects.toBe(securityException);
@@ -412,11 +410,7 @@ describe('LeadDataClient', () => {
     });
 
     it('re-throws when ES returns security_exception so the route can return 403', async () => {
-      const securityException = {
-        statusCode: 403,
-        body: { error: { type: 'security_exception', reason: 'access denied' } },
-        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
-      };
+      const securityException = makeEsSecurityException();
       esClient.search.mockRejectedValueOnce(securityException);
 
       await expect(client.getStatus()).rejects.toBe(securityException);
@@ -441,6 +435,15 @@ describe('LeadDataClient', () => {
           query: { match_all: {} },
         })
       );
+    });
+
+    it('re-throws when ES returns security_exception so the disable route can return 403', async () => {
+      const securityException = makeEsSecurityException();
+      esClient.deleteByQuery.mockRejectedValueOnce(securityException);
+
+      await expect(client.deleteAllLeads()).rejects.toBe(securityException);
+
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

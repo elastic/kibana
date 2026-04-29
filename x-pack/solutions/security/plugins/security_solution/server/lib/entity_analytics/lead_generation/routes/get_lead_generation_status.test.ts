@@ -21,6 +21,12 @@ jest.mock('../lead_data_client', () => ({
   createLeadDataClient: () => ({ getStatus: mockGetStatus }),
 }));
 
+const makeEsSecurityException = () => ({
+  statusCode: 403,
+  body: { error: { type: 'security_exception', reason: 'access denied' } },
+  meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+});
+
 jest.mock('../tasks', () => ({
   getLeadGenerationTaskId: (spaceId: string) =>
     `entity_analytics:lead_generation:engine:${spaceId}:1.0.0`,
@@ -103,11 +109,7 @@ describe('getLeadGenerationStatusRoute', () => {
   });
 
   it('returns 403 when ES denies read access to the leads index', async () => {
-    mockGetStatus.mockRejectedValueOnce({
-      statusCode: 403,
-      body: { error: { type: 'security_exception', reason: 'access denied' } },
-      meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
-    });
+    mockGetStatus.mockRejectedValueOnce(makeEsSecurityException());
 
     const request = requestMock.create({
       method: 'get',
