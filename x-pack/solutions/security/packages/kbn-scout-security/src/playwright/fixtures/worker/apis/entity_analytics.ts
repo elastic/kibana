@@ -12,8 +12,8 @@ import type {
   GetEntityStoreStatusResponse,
 } from '../../../constants/entity_analytics';
 
-const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
-const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
+const ENTITY_STORE_UNINSTALL_URL = '/api/security/entity_store/uninstall';
+const ENTITY_STORE_STATUS_URL = '/api/security/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
@@ -61,11 +61,12 @@ export const getEntityAnalyticsApiService = ({
         'security.entityAnalytics.deleteEntityStoreEngines',
         async () => {
           await kbnClient.request({
-            method: 'DELETE',
-            path: `${basePath}${ENTITY_STORE_ENGINES_URL}`,
-            query: {
-              delete_data: 'true',
+            method: 'POST',
+            path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
+            headers: {
+              'elastic-api-version': API_VERSIONS.public.v1,
             },
+            body: {},
             ignoreErrors: [404, 500],
           });
           // Wait for cleanup to complete - ensure server state is fully cleaned up

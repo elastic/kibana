@@ -10,44 +10,38 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import expect from '@kbn/expect';
-import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 import { dataViewRouteHelpersFactory } from './data_view';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
-  const entityAnalyticsApi = getService('entityAnalyticsApi');
-  const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const dataView = dataViewRouteHelpersFactory(supertest, namespace);
-  const {
-    expectTransformExists,
-    expectTransformNotFound,
-    expectEnrichPolicyExists,
-    expectEnrichPolicyNotFound,
-    expectComponentTemplateExists,
-    expectComponentTemplateNotFound,
-    expectIngestPipelineExists,
-    expectIngestPipelineNotFound,
-    expectEntitiesIndexExists,
-    expectEntitiesIndexNotFound,
-  } = elasticAssetCheckerFactory(getService);
 
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
+  const namespacedPath = (path: string) =>
+    namespace !== 'default' ? `/s/${namespace}${path}` : path;
+
+  const getEntityStoreStatus = async () => {
+    const res = await supertest
+      .get(namespacedPath(ENTITY_STORE_ROUTES.public.STATUS))
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .query({ include_components: false });
+    expect(res.status).to.eql(200);
+    return res.body as { status: string };
+  };
+
   const cleanEngines = async () => {
-    let settingsUrl = '/internal/kibana/settings';
-    if (namespace !== 'default') {
-      settingsUrl = `/s/${namespace}${settingsUrl}`;
-    }
     await supertest
-      .post(settingsUrl)
+      .post(namespacedPath('/internal/kibana/settings'))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
@@ -55,13 +49,9 @@ export const EntityStoreUtils = (
 
     // Use the supported uninstall API so maintainers are removed via
     // entityMaintainersClient.removeAll() and don't leak task state between tests.
-    let uninstallUrl = '/api/security/entity_store/uninstall';
-    if (namespace !== 'default') {
-      uninstallUrl = `/s/${namespace}${uninstallUrl}`;
-    }
     try {
       await supertest
-        .post(uninstallUrl)
+        .post(namespacedPath(ENTITY_STORE_ROUTES.public.UNINSTALL))
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
         .set('elastic-api-version', '2023-10-31')
@@ -70,154 +60,14 @@ export const EntityStoreUtils = (
     } catch (e) {
       log.debug(`Entity store not installed, skipping uninstall during cleanup: ${e.message}`);
     }
-
-    const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
-
-    // @ts-expect-error body is any
-    const engineTypes = body.engines.map((engine) => engine.type);
-
-    log.info(`Cleaning engines: ${engineTypes.join(', ')}`);
-    try {
-      await Promise.all(
-        engineTypes.map((entityType: 'user' | 'host') =>
-          entityAnalyticsApi.deleteEntityEngine(
-            { params: { entityType }, query: { data: true } },
-            namespace
-          )
-        )
-      );
-    } catch (e) {
-      log.warning(`Error deleting engines: ${e.message}`);
-    }
-  };
-
-  const initEntityEngineForEntityType = async (entityType: EntityType) => {
-    log.info(
-      `Initializing engine for entity type ${entityType} in namespace ${namespace || 'default'}`
-    );
-    const res = await entityAnalyticsApi.initEntityEngine(
-      {
-        params: { entityType },
-        body: {},
-      },
-      namespace
-    );
-
-    if (res.status !== 200) {
-      log.error(`Failed to initialize engine for entity type ${entityType}`);
-      log.error(JSON.stringify(res.body));
-    }
-
-    expect(res.status).to.eql(200);
-  };
-
-  const initEntityEngineForEntityTypesAndWait = async (entityTypes: EntityType[]) => {
-    await Promise.all(entityTypes.map((entityType) => initEntityEngineForEntityType(entityType)));
-
-    await retry.waitForWithTimeout(
-      `Engines to start for entity types: ${entityTypes.join(', ')}`,
-      60_000,
-      async () => {
-        const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
-        if (body.engines.every((engine: any) => engine.status === 'started')) {
-          return true;
-        }
-        if (body.engines.some((engine: any) => engine.status === 'error')) {
-          throw new Error(`Engines not started: ${JSON.stringify(body)}`);
-        }
-        return false;
-      }
-    );
-  };
-
-  const waitForEngineStatus = async (entityType: EntityType, status: string) => {
-    await retry.waitForWithTimeout(
-      `Engine for entity type ${entityType} to be in status ${status}`,
-      60_000,
-      async () => {
-        const { body } = await entityAnalyticsApi
-          .getEntityEngine({ params: { entityType } }, namespace)
-          .expect(200);
-        log.debug(`Engine status for ${entityType}: ${body.status}`);
-
-        if (status !== 'error' && body.status === 'error') {
-          // If we are not expecting an error, throw the error to improve logging
-          throw new Error(`Engine not started: ${JSON.stringify(body)}`);
-        }
-
-        return body.status === status;
-      }
-    );
-  };
-
-  const enableEntityStore = async (body: InitEntityStoreRequestBodyInput = {}) => {
-    const res = await entityAnalyticsApi.initEntityStore({ body }, namespace);
-    if (res.status !== 200) {
-      log.error(`Failed to enable entity store`);
-      log.error(JSON.stringify(res.body));
-    }
-    expect(res.status).to.eql(200);
-    return res;
-  };
-
-  const expectTransformStatus = async (
-    transformId: string,
-    exists: boolean,
-    attempts: number = 5,
-    delayMs: number = 2000
-  ) => {
-    let currentAttempt = 1;
-    while (currentAttempt <= attempts) {
-      try {
-        await es.transform.getTransform({ transform_id: transformId });
-        if (!exists) {
-          throw new Error(`Expected transform ${transformId} to not exist, but it does`);
-        }
-        return; // Transform exists, exit the loop
-      } catch (e) {
-        if (currentAttempt === attempts) {
-          if (exists) {
-            throw new Error(`Expected transform ${transformId} to exist, but it does not: ${e}`);
-          } else {
-            return; // Transform does not exist, exit the loop
-          }
-        }
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-        currentAttempt++;
-      }
-    }
-  };
-
-  const expectEngineAssetsExist = async (entityType: EntityType) => {
-    await expectTransformExists(`entities-v1-latest-security_${entityType}_${namespace}`);
-    await expectEnrichPolicyExists(
-      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
-    );
-    await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
-    await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
-    await expectEntitiesIndexExists(entityType, namespace);
-  };
-
-  const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
-    await expectTransformNotFound(`entities-v1-latest-security_${entityType}_${namespace}`);
-    await expectEnrichPolicyNotFound(
-      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
-    );
-    await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
-    await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);
-    await expectEntitiesIndexNotFound(entityType, namespace);
   };
 
   const searchEntitiesV2 = async (
     filter: string,
     opts: { size?: number; source?: string[] } = {}
   ) => {
-    let url = '/api/security/entity_store/entities';
-    if (namespace !== 'default') {
-      url = `/s/${namespace}${url}`;
-    }
     const res = await supertest
-      .get(url)
+      .get(namespacedPath('/api/security/entity_store/entities'))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2023-10-31')
@@ -235,12 +85,8 @@ export const EntityStoreUtils = (
   };
 
   const deleteEntityV2 = async (entityId: string) => {
-    let url = '/api/security/entity_store/entities/';
-    if (namespace !== 'default') {
-      url = `/s/${namespace}${url}`;
-    }
     const res = await supertest
-      .delete(url)
+      .delete(namespacedPath('/api/security/entity_store/entities/'))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2023-10-31')
@@ -254,23 +100,15 @@ export const EntityStoreUtils = (
   };
 
   const enableEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
-    let settingsUrl = '/internal/kibana/settings';
-    if (namespace !== 'default') {
-      settingsUrl = `/s/${namespace}${settingsUrl}`;
-    }
     await supertest
-      .post(settingsUrl)
+      .post(namespacedPath('/internal/kibana/settings'))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
       .expect(200);
 
-    let url = '/api/security/entity_store/install';
-    if (namespace !== 'default') {
-      url = `/s/${namespace}${url}`;
-    }
     const res = await supertest
-      .post(url)
+      .post(namespacedPath(ENTITY_STORE_ROUTES.public.INSTALL))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2023-10-31')
@@ -299,17 +137,15 @@ export const EntityStoreUtils = (
     const res = await enableEntityStoreV2(installRequestBody);
 
     await retry.waitForWithTimeout(
-      `Engines to start for entity types: ${entityTypes.join(', ')}`,
+      `Entity store to reach 'running' status`,
       60_000,
       async () => {
-        const { body: enginesBody } = await entityAnalyticsApi
-          .listEntityEngines(namespace)
-          .expect(200);
-        if (enginesBody.engines.every((engine: any) => engine.status === 'started')) {
+        const { status } = await getEntityStoreStatus();
+        if (status === 'running') {
           return true;
         }
-        if (enginesBody.engines.some((engine: any) => engine.status === 'error')) {
-          throw new Error(`Engines not started: ${JSON.stringify(enginesBody)}`);
+        if (status === 'error') {
+          throw new Error(`Entity store failed to install (status: error)`);
         }
         return false;
       }
@@ -318,10 +154,9 @@ export const EntityStoreUtils = (
     const fromDateISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const toDateISO = new Date(Date.now() + 60 * 60 * 1000).toISOString();
     for (const entityType of entityTypes) {
-      let extractUrl = `/internal/security/entity_store/${entityType}/force_log_extraction`;
-      if (namespace !== 'default') {
-        extractUrl = `/s/${namespace}${extractUrl}`;
-      }
+      const extractUrl = namespacedPath(
+        `/internal/security/entity_store/${entityType}/force_log_extraction`
+      );
       log.info(`Force extracting entities for type: ${entityType}`);
       const extractRes = await supertest
         .post(extractUrl)
@@ -337,16 +172,11 @@ export const EntityStoreUtils = (
       expect([200, 202]).to.contain(extractRes.status);
     }
     if (waitForEntities) {
-      await waitForEntityStoreEntities({ es, log, count: 1, namespace });
-    }
-
-    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init';
-    if (namespace !== 'default') {
-      maintainersUrl = `/s/${namespace}${maintainersUrl}`;
+      await waitForEntityStoreEntities({ es: getService('es'), log, count: 1, namespace });
     }
 
     const maintainersRes = await supertest
-      .post(maintainersUrl)
+      .post(namespacedPath('/internal/security/entity_store/entity_maintainers/init'))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2')
@@ -363,10 +193,7 @@ export const EntityStoreUtils = (
     entityType: EntityType;
     body: Record<string, unknown>;
   }) => {
-    let url = `/api/security/entity_store/entities/${entityType}?force=true`;
-    if (namespace !== 'default') {
-      url = `/s/${namespace}${url}`;
-    }
+    const url = namespacedPath(`/api/security/entity_store/entities/${entityType}?force=true`);
 
     const response = await supertest
       .put(url)
@@ -384,13 +211,8 @@ export const EntityStoreUtils = (
   };
 
   const unlinkEntitiesViaResolutionApi = async ({ entityIds }: { entityIds: string[] }) => {
-    let url: string = ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK;
-    if (namespace !== 'default') {
-      url = `/s/${namespace}${url}`;
-    }
-
     const response = await supertest
-      .post(url)
+      .post(namespacedPath(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2023-10-31')
@@ -413,10 +235,7 @@ export const EntityStoreUtils = (
     fromDateISO?: string;
     toDateISO?: string;
   }) => {
-    let url = `/internal/security/entity_store/${entityType}/force_log_extraction`;
-    if (namespace !== 'default') {
-      url = `/s/${namespace}${url}`;
-    }
+    const url = namespacedPath(`/internal/security/entity_store/${entityType}/force_log_extraction`);
 
     log.info(`Force extracting entities for type: ${entityType}`);
     const response = await supertest
@@ -439,18 +258,11 @@ export const EntityStoreUtils = (
     cleanEngines,
     deleteEntityV2,
     searchEntitiesV2,
-    initEntityEngineForEntityTypesAndWait,
-    expectTransformStatus,
-    expectEngineAssetsExist,
-    expectEngineAssetsDoNotExist,
-    enableEntityStore,
     enableEntityStoreV2,
     installEntityStoreV2,
     forceUpdateEntityViaCrud,
     unlinkEntitiesViaResolutionApi,
     forceExtractEntities,
-    waitForEngineStatus,
-    initEntityEngineForEntityType,
   };
 };
 

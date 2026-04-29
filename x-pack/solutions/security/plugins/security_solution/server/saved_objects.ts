@@ -22,6 +22,7 @@ import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
+import { legacyEntityEngineDescriptorType } from './lib/entity_analytics/entity_store/legacy_entity_engine_descriptor_type';
 import {
   privilegeMonitoringType,
   monitoringEntitySourceType,
@@ -51,6 +52,7 @@ const types = [
   unifiedManifestType,
   signalsMigrationType,
   riskEngineConfigurationType,
+  legacyEntityEngineDescriptorType,
   privilegeMonitoringType,
   watchlistConfigType,
   PrivilegeMonitoringApiKeyType,
