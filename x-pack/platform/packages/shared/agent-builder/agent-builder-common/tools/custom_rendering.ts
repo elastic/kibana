@@ -7,11 +7,21 @@
 
 import type { ChartType } from '@kbn/visualization-utils';
 
+/**
+ * @deprecated Legacy renderer attributes for the `<visualization />` tag.
+ * New visualization rendering should create a `visualization` attachment and
+ * render it with `<render_attachment />`.
+ */
 export interface VisualizationElementAttributes {
   toolResultId?: string;
   chartType?: ChartType;
 }
 
+/**
+ * @deprecated Legacy `<visualization />` custom-rendering tag.
+ * New visualization rendering should create a `visualization` attachment and
+ * render it with `renderAttachmentElement`.
+ */
 export const visualizationElement = {
   tagName: 'visualization',
   attributes: {
