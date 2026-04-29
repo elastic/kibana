@@ -16,6 +16,15 @@ import {
   createPartitionQualityLlmEvaluator,
 } from './partitioning_evaluators';
 
+const MAX_PROMPT_LEN = 40;
+
+const truncatePrompt = (prompt: string): string => {
+  if (prompt.length <= MAX_PROMPT_LEN) {
+    return prompt;
+  }
+  return `${prompt.slice(0, MAX_PROMPT_LEN)}…`;
+};
+
 type EvaluatePartitionSuggestion = (opts: {
   example: PartitioningEvaluationExample;
   datasetName: string;
@@ -66,15 +75,15 @@ evaluate.describe(
       evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
         dataset.examples.forEach((example, idx) => {
           const label = example.input.user_prompt
-            ? `user-prompt: "${example.input.user_prompt}"`
+            ? `prompt: "${truncatePrompt(example.input.user_prompt)}"`
             : example.input.existing_partitions
-            ? `${example.input.existing_partitions.length} existing partitions`
-            : 'no existing partitions';
+            ? `${example.input.existing_partitions.length} existing`
+            : 'no existing';
 
           evaluate(`${idx + 1}. ${label}`, async ({ evaluatePartitionSuggestion }) => {
             await evaluatePartitionSuggestion({
               example,
-              datasetName: `Partition Suggestion - ${dataset.name}`,
+              datasetName: dataset.name,
               datasetDescription: dataset.description,
               exampleLabel: label,
             });

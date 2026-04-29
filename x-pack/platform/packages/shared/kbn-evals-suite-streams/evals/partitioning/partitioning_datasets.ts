@@ -44,9 +44,8 @@ export interface PartitioningEvaluationDataset {
 
 export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
-    name: 'Multi-System Logs - Partition Suggestion',
-    description:
-      'Diverse log systems (Hadoop, Proxifier, Android, OpenStack) with filepath removed. The LLM must analyze log content and field patterns to identify distinct partitions.',
+    name: 'Multi-System',
+    description: 'Diverse log systems (Hadoop, Proxifier, Android, OpenStack). The LLM must identify distinct partitions.',
     examples: [
       {
         input: {
@@ -58,13 +57,13 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
               name: 'hadoop',
               description:
                 'Hadoop MapReduce job logs with Java stack traces, org.apache.hadoop class names, and YARN references',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'proxifier',
               description:
                 'Proxifier proxy software logs with service.name=proxifier-proxy, host.name=proxy-1, and proxy connection details',
-              key_fields: ['service.name', 'body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'android',
@@ -87,13 +86,13 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'easy',
           notes:
-            'Four distinct LogHub systems with correlated metadata fields (service.name, os.platform, cloud.provider). The LLM must analyze body.text patterns to distinguish systems; Hadoop patterns (Java/MapReduce) differ from Proxifier (proxy), Android (framework), and OpenStack (cloud infrastructure).',
+            'Four distinct LogHub systems with correlated metadata fields (service.name, os.platform, cloud.provider). The LLM should use these structured fields to distinguish systems.',
         },
       },
     ],
   },
   {
-    name: 'Existing Partition Refinement - Partition Suggestion',
+    name: 'Refinement',
     description:
       'Same diverse data but with an existing partition already defined. The LLM should suggest partitions for the remaining unrouted data.',
     examples: [
@@ -118,17 +117,17 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
               name: 'proxifier',
               description:
                 'Proxifier proxy software logs with chrome.exe and proxy connection details',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'android',
               description: 'Android framework logs with com.android.* class names',
-              key_fields: ['body.text', 'resource.attributes.process.name'],
+              key_fields: ['service.name'],
             },
             {
               name: 'openstack',
               description: 'OpenStack infrastructure logs with nova.* class names',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
           ],
           min_partitions: 1,
@@ -145,7 +144,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
     ],
   },
   {
-    name: 'User-Guided Partitioning - Partition Suggestion',
+    name: 'User-Guided',
     description:
       'Same diverse data with a user prompt requesting partitioning by a specific approach.',
     examples: [
@@ -159,22 +158,22 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'hadoop',
               description: 'Hadoop MapReduce job logs',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'proxifier',
               description: 'Proxifier proxy software logs',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'android',
               description: 'Android framework logs',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'openstack',
               description: 'OpenStack infrastructure logs',
-              key_fields: ['body.text'],
+              key_fields: ['service.name'],
             },
           ],
           min_partitions: 3,
@@ -185,7 +184,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'medium',
           notes:
-            'Tests that the LLM follows user guidance to group logs by source system, using body.text content patterns.',
+            'Tests that the LLM follows user guidance to group logs by source system, using structured metadata fields.',
         },
       },
       {
@@ -242,7 +241,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'on-premise',
               description: 'Hadoop, Proxifier, and Android on-premise logs',
-              key_fields: ['body.text', 'service.name'],
+              key_fields: ['service.name'],
             },
           ],
           min_partitions: 2,
@@ -253,13 +252,13 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'medium',
           notes:
-            'Tests conceptual grouping guidance. OpenStack is cloud infrastructure; Hadoop, Proxifier, and Android are on-premise. The LLM must infer the grouping from metadata and body.text patterns.',
+            'Tests conceptual grouping guidance. OpenStack is cloud infrastructure; Hadoop, Proxifier, and Android are on-premise. The LLM must infer the grouping from metadata fields.',
         },
       },
     ],
   },
   {
-    name: 'User-Guided Partitioning - Overlapping Metadata',
+    name: 'Overlapping Metadata',
     description:
       'Hard data with overlapping metadata where user guidance should help the LLM disambiguate systems.',
     examples: [
@@ -273,13 +272,13 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'data-platform',
               description: 'Hadoop and Mac data platform logs with service.name=data-platform',
-              key_fields: ['service.name', 'body.text'],
+              key_fields: ['service.name'],
             },
             {
               name: 'infra-monitoring',
               description:
                 'Linux and HPC infrastructure monitoring logs with service.name=infra-monitoring',
-              key_fields: ['service.name', 'body.text'],
+              key_fields: ['service.name'],
             },
           ],
           min_partitions: 2,
@@ -304,17 +303,17 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'batch',
               description: 'Hadoop batch processing logs with data_layer=batch',
-              key_fields: ['data_layer', 'body.text'],
+              key_fields: ['data_layer'],
             },
             {
               name: 'streaming',
               description: 'Mac streaming logs with data_layer=streaming',
-              key_fields: ['data_layer', 'body.text'],
+              key_fields: ['data_layer'],
             },
             {
               name: 'monitoring',
               description: 'Linux and HPC infrastructure monitoring logs',
-              key_fields: ['service.name', 'body.text'],
+              key_fields: ['service.name'],
             },
           ],
           min_partitions: 2,
@@ -331,7 +330,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
     ],
   },
   {
-    name: 'User-Guided Refinement - Partition Suggestion',
+    name: 'User-Guided Refinement',
     description:
       'Existing partitions with additional user guidance for the remaining unrouted data.',
     examples: [
@@ -383,9 +382,9 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
     ],
   },
   {
-    name: 'Overlapping Metadata - Content-Based Partitioning',
+    name: 'Content-Based',
     description:
-      'Systems with overlapping field schemas (Hadoop+Mac share host/user/process fields; Linux+HPC share process.id) that can only be distinguished by body.text content analysis.',
+      'Systems with overlapping field schemas (Hadoop+Mac share service.name; Linux+HPC share service.name) that require secondary fields to distinguish.',
     examples: [
       {
         input: {
@@ -396,26 +395,26 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'hadoop',
               description:
-                'Hadoop with service.name=data-platform, data_layer=batch. Java/MapReduce patterns in body.text.',
-              key_fields: ['service.name', 'data_layer', 'body.text'],
+                'Hadoop with service.name=data-platform, data_layer=batch. Java/MapReduce patterns.',
+              key_fields: ['service.name', 'data_layer'],
             },
             {
               name: 'mac',
               description:
-                'Mac with service.name=data-platform, data_layer=streaming. macOS kernel/IO patterns in body.text.',
-              key_fields: ['service.name', 'data_layer', 'body.text'],
+                'Mac with service.name=data-platform, data_layer=streaming. macOS kernel/IO patterns.',
+              key_fields: ['service.name', 'data_layer'],
             },
             {
               name: 'linux',
               description:
-                'Linux with service.name=infra-monitoring, host.name=mon-1. syslog auth patterns in body.text.',
-              key_fields: ['service.name', 'host.name', 'body.text'],
+                'Linux with service.name=infra-monitoring, host.name=mon-1. syslog auth patterns.',
+              key_fields: ['service.name', 'host.name'],
             },
             {
               name: 'hpc',
               description:
-                'HPC with service.name=infra-monitoring, host.name=mon-2, cluster.node_id=node-001. Cluster patterns in body.text.',
-              key_fields: ['service.name', 'cluster.node_id', 'body.text'],
+                'HPC with service.name=infra-monitoring, host.name=mon-2, cluster.node_id=node-001. Cluster patterns.',
+              key_fields: ['service.name', 'cluster.node_id'],
             },
           ],
           min_partitions: 2,
@@ -428,13 +427,13 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
           notes:
             'Hadoop and Mac both have service.name=data-platform; Linux and HPC both have service.name=infra-monitoring. ' +
             'The LLM must use secondary fields (data_layer for Hadoop/Mac; host.name/cluster.node_id for Linux/HPC) ' +
-            'combined with body.text pattern analysis to distinguish systems correctly.',
+            'to distinguish systems correctly.',
         },
       },
     ],
   },
   {
-    name: 'Homogeneous Logs - Partition Suggestion',
+    name: 'Homogeneous',
     description: 'Single system (Linux syslog) where no meaningful partitions should be suggested.',
     examples: [
       {

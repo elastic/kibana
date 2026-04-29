@@ -6,9 +6,26 @@
  */
 
 import type { Evaluator, Example, DefaultEvaluators } from '@kbn/evals';
+import type { Condition } from '@kbn/streamlang';
 import type { PartitionSuggestionResult } from './partitioning_task';
 import type { PartitioningGroundTruth } from './partitioning_datasets';
 import { formatPercent } from '../shared_helpers';
+
+const conditionUsesBodyText = (condition: Condition): boolean => {
+  if ('and' in condition) {
+    return condition.and.some(conditionUsesBodyText);
+  }
+  if ('or' in condition) {
+    return condition.or.some(conditionUsesBodyText);
+  }
+  if ('not' in condition) {
+    return conditionUsesBodyText(condition.not);
+  }
+  if ('field' in condition) {
+    return condition.field === 'body.text';
+  }
+  return false;
+};
 
 export const coverageEvaluator: Evaluator<Example, PartitionSuggestionResult> = {
   name: 'partition_coverage',
@@ -114,6 +131,15 @@ export const createPartitionQualityLlmEvaluator = (
        - ${metrics.partitionCount} partitions suggested
        - Too many partitions over-fragments the data
        - Too few partitions misses meaningful distinctions`,
+
+      `FIELD SELECTION: Partitions should prefer structured metadata fields over body.text.
+       - Using body.text for partitioning is an anti-pattern and should be avoided when structured fields are available
+       - ${
+         suggestedPartitions.some((p) => conditionUsesBodyText(p.condition))
+           ? 'WARNING: Some partitions use body.text'
+           : 'No partitions use body.text'
+       }
+       - Prefer fields like service.name, host.name, cloud.provider, data_layer, os.platform, etc.`,
 
       `GROUND TRUTH ALIGNMENT: The suggested partitions should semantically match the expected ground truth.
        - Expected partitions describe: ${exp.expected_partitions.map((p) => p.name).join(', ')}
