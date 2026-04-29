@@ -1364,8 +1364,6 @@
     "css-box-model": "1.2.1",
     "css.escape": "1.5.1",
     "cypress-data-session": "2.8.7",
-    "cytoscape": "3.31.2",
-    "cytoscape-dagre": "2.5.0",
     "d3": "3.5.17",
     "d3-array": "2.12.1",
     "d3-brush": "3.0.0",
