@@ -13,6 +13,7 @@ import {
   closeToastsIfPresent,
   openRetentionModal,
   saveRetentionChanges,
+  setCustomRetention,
   toggleInheritSwitch,
   verifyRetentionBadge,
   BADGE_TEXT,
@@ -43,8 +44,13 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Reset only the child stream's retention via API — no fork/delete cycle
+      const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
       await apiServices.streams.updateStream('logs.otel.nginx', {
-        ingest: { lifecycle: { dsl: {} } },
+        ingest: {
+          ...childDefinition.stream.ingest,
+          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
       });
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
     });
