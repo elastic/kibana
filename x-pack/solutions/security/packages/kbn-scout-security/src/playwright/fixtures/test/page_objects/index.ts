@@ -17,6 +17,8 @@ import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 
+export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
+
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
@@ -25,6 +27,7 @@ export interface SecurityPageObjects extends PageObjects {
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
+  /** Indicator match (threat match) rule creation page — threat index and field mapping controls. */
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
 }
