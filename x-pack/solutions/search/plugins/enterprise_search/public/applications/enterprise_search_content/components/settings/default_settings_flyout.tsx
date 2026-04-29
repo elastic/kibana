@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -28,6 +28,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { Status } from '../../../../../common/types/api';
 
 import { docLinks } from '../../../shared/doc_links';
 
@@ -54,7 +56,8 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
   const modalTitleId = useGeneratedHtmlId();
 
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
-  const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
+  const { defaultPipeline, hasNoChanges, isLoading, pipelineState, status } =
+    useValues(SettingsLogic);
   const {
     extract_binary_content: extractBinaryContent,
     reduce_whitespace: reduceWhitespace,
@@ -62,6 +65,15 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
   } = pipelineState;
   // Reference the first focusable element in the flyout for accessibility on click or Enter key action either Reset or Save button
   const firstFocusInFlyoutRef = useRef<HTMLAnchorElement>(null);
+
+  // Close the flyout on successful save so the global toast notification is keyboard-accessible
+  // (EUI flyout's focus trap would otherwise prevent keyboard users from reaching the toast's dismiss button)
+  useEffect(() => {
+    if (status === Status.SUCCESS) {
+      closeFlyout();
+    }
+  }, [status, closeFlyout]);
+
   return (
     <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>

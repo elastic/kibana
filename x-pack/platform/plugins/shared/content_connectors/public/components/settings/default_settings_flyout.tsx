@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Status } from '../../../common/types/api';
 import { SettingsLogic } from './settings_logic';
 import { SettingsPanel } from './settings_panel';
 
@@ -55,7 +56,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
     services: { http, docLinks },
   } = useKibana();
   const { makeRequest, setPipeline } = useActions(SettingsLogic({ http }));
-  const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(
+  const { defaultPipeline, hasNoChanges, isLoading, pipelineState, status } = useValues(
     SettingsLogic({ http })
   );
   const {
@@ -65,6 +66,15 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
   } = pipelineState;
   // Reference the first focusable element in the flyout for accessibility on click or Enter key action either Reset or Save button
   const firstFocusInFlyoutRef = useRef<HTMLAnchorElement>(null);
+
+  // Close the flyout on successful save so the global toast notification is keyboard-accessible
+  // (EUI flyout's focus trap would otherwise prevent keyboard users from reaching the toast's dismiss button)
+  useEffect(() => {
+    if (status === Status.SUCCESS) {
+      closeFlyout();
+    }
+  }, [status, closeFlyout]);
+
   return (
     <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
