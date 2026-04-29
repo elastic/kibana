@@ -95,6 +95,7 @@
               "lineNumber": 21,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "OsqueryActionResultProps",
               "trackAdoption": false
             }
           ]
@@ -132,6 +133,7 @@
               "lineNumber": 21,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "OsqueryActionResultsProps",
               "trackAdoption": false
             }
           ]
@@ -254,6 +256,7 @@
               "lineNumber": 18,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "OsqueryResponseActionsParamsFormProps",
               "trackAdoption": false
             }
           ]
@@ -296,6 +299,7 @@
               "lineNumber": 65,
               "columnNumber": 25,
               "deprecated": false,
+              "docsReferencedTypeName": "UseAllLiveQueriesConfig",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -390,6 +394,7 @@
               "lineNumber": 46,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -407,6 +412,7 @@
               "lineNumber": 47,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "CheckResponseActionAuthzParams",
               "trackAdoption": false,
               "isRequired": true
             }
