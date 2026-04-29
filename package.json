@@ -1732,6 +1732,7 @@
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-observability-ai": "link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai",
     "@kbn/evals-suite-security-ai-rules": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules",
+    "@kbn/evals-suite-security-automatic-migrations": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations",
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
     "@kbn/evals-suite-workflows": "link:src/platform/packages/shared/kbn-evals-suite-workflows",
