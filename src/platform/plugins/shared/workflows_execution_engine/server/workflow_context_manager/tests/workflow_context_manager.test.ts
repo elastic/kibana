@@ -1484,6 +1484,37 @@ describe('WorkflowContextManager', () => {
           expect.anything()
         );
       });
+
+      it('preserves array shape when both the collection and an indexed item are referenced', () => {
+        testContainer.workflowExecutionState.getLatestStepExecution = jest
+          .fn()
+          .mockImplementation((stepId) => {
+            if (stepId === 'fetchData') {
+              return {
+                state: { status: 'completed' },
+                output: { hits: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] },
+                error: null,
+              };
+            }
+            return undefined;
+          });
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue([
+            ['steps', 'fetchData', 'output', 'hits'],
+            ['steps', 'fetchData', 'output', 'hits', 0, 'id'],
+          ]);
+
+        testContainer.underTest.renderValueAccordingToContext(
+          '{{ steps.fetchData.output.hits | size }} - {{ steps.fetchData.output.hits[0].id }}'
+        );
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        const hits = renderArgs.steps.fetchData.output.hits;
+        expect(Array.isArray(hits)).toBe(true);
+        expect(hits).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
+      });
     });
   });
 

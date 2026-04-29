@@ -283,7 +283,7 @@ export class WorkflowContextManager {
   }
 
   private getRenderingContext(value: unknown): StepContext {
-    if (this.stackFrames.length > 0) {
+    if (!this.stackFramesAllowNarrowing()) {
       return this.getContext();
     }
 
@@ -293,6 +293,15 @@ export class WorkflowContextManager {
     }
 
     return this.getContextForVariableSegments(referencedVariableSegments);
+  }
+
+  // Active scopes (foreach/while/retry/if) bind new top-level identifiers and
+  // merge into steps[stepId] via enrichStepContextAccordingToStepScope, which
+  // doesn't compose with the partial steps map the narrowing path builds.
+  private stackFramesAllowNarrowing(): boolean {
+    return this.stackFrames.every((frame) =>
+      frame.nestedScopes.every((scope) => scope.nodeType === 'enter-timeout-zone')
+    );
   }
 
   private getContextForVariableSegments(referencedVariableSegments: ContextPath[]): StepContext {
@@ -406,11 +415,7 @@ export class WorkflowContextManager {
       }
 
       const existingValue = currentTarget[targetKey];
-      if (
-        existingValue === null ||
-        typeof existingValue !== 'object' ||
-        Array.isArray(existingValue)
-      ) {
+      if (existingValue === null || typeof existingValue !== 'object') {
         currentTarget[targetKey] = {};
       }
 
