@@ -142,11 +142,11 @@ describe('useBrowseIntegrationHook', () => {
   });
 
   describe('Sorting', () => {
-    it('sorts integrations A-Z when sort=a-z', () => {
+    it('sorts integrations A-Z by title when sort=a-z', () => {
       const cards = [
-        { id: '1', name: 'Zebra' },
-        { id: '2', name: 'Apache' },
-        { id: '3', name: 'MySQL' },
+        { id: '1', name: 'zebra', title: 'Zebra Integration' },
+        { id: '2', name: 'apache', title: 'Apache HTTP Server' },
+        { id: '3', name: 'mysql', title: 'MySQL Database' },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -160,14 +160,18 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Apache', 'MySQL', 'Zebra']);
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual([
+        'Apache HTTP Server',
+        'MySQL Database',
+        'Zebra Integration',
+      ]);
     });
 
-    it('sorts integrations Z-A when sort=z-a', () => {
+    it('sorts integrations Z-A by title when sort=z-a', () => {
       const cards = [
-        { id: '1', name: 'Zebra' },
-        { id: '2', name: 'Apache' },
-        { id: '3', name: 'MySQL' },
+        { id: '1', name: 'zebra', title: 'Zebra Integration' },
+        { id: '2', name: 'apache', title: 'Apache HTTP Server' },
+        { id: '3', name: 'mysql', title: 'MySQL Database' },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -181,7 +185,11 @@ describe('useBrowseIntegrationHook', () => {
         useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
       );
 
-      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Zebra', 'MySQL', 'Apache']);
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual([
+        'Zebra Integration',
+        'MySQL Database',
+        'Apache HTTP Server',
+      ]);
     });
   });
 
@@ -323,10 +331,10 @@ describe('useBrowseIntegrationHook', () => {
   describe('Combined filters', () => {
     it('applies deprecated filter and sorting together', () => {
       const cards = [
-        { id: '1', name: 'Zebra', isDeprecated: false },
-        { id: '2', name: 'Apache', isDeprecated: true },
-        { id: '3', name: 'MySQL', isDeprecated: false },
-        { id: '4', name: 'Nginx', isDeprecated: true },
+        { id: '1', name: 'zebra', title: 'Zebra Integration', isDeprecated: false },
+        { id: '2', name: 'apache', title: 'Apache HTTP Server', isDeprecated: true },
+        { id: '3', name: 'mysql', title: 'MySQL Database', isDeprecated: false },
+        { id: '4', name: 'nginx', title: 'Nginx Web Server', isDeprecated: true },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -341,7 +349,10 @@ describe('useBrowseIntegrationHook', () => {
       );
 
       expect(result.current.filteredCards).toHaveLength(2);
-      expect(result.current.filteredCards.map((c) => c.name)).toEqual(['Apache', 'Nginx']);
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual([
+        'Apache HTTP Server',
+        'Nginx Web Server',
+      ]);
     });
   });
 });
