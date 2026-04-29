@@ -68,9 +68,18 @@ export const TemplateSchema = z.object({
   fieldCount: z.number().optional(),
 
   /**
-   * Array of field names to display in a tooltip
+   * Array of field metadata used for tooltips and label-to-storage-key resolution at search time
    */
-  fieldNames: z.array(z.string()).optional(),
+  fieldNames: z
+    .array(
+      z.object({
+        name: z.string(),
+        label: z.string(),
+        type: z.string(),
+        control: z.string(),
+      })
+    )
+    .optional(),
 
   /**
    * Last time this template was used
@@ -86,6 +95,10 @@ export const TemplateSchema = z.object({
    * Whether this is the latest version for a templateId
    */
   isLatest: z.boolean().optional(),
+  /**
+   * Whether this template is enabled. Disabled templates are not shown in the case creation flow.
+   */
+  isEnabled: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;

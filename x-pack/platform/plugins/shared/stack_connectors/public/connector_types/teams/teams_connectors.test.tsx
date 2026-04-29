@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act, render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import TeamsActionFields from './teams_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
@@ -26,21 +31,15 @@ describe('TeamsActionFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <TeamsActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="teamsWebhookUrlInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="teamsWebhookUrlInput"]').first().prop('value')).toBe(
-      'https://test.com'
-    );
+    const teamsWebhookUrlInput = screen.getByTestId('teamsWebhookUrlInput') as HTMLInputElement;
+    expect(teamsWebhookUrlInput).toBeInTheDocument();
+    expect(teamsWebhookUrlInput).toHaveValue('https://test.com');
   });
 
   describe('Validation', () => {
@@ -55,14 +54,14 @@ describe('TeamsActionFields renders', () => {
         secrets: {
           webhookUrl: 'https://test.com',
         },
-        id: 'test',
+        id: 'teams',
         actionTypeId: '.teams',
         name: 'teams',
         config: {},
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TeamsActionFields
             readOnly={false}
@@ -72,21 +71,21 @@ describe('TeamsActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          secrets: {
-            webhookUrl: 'https://test.com',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            secrets: {
+              webhookUrl: 'https://test.com',
+            },
+            id: 'teams',
+            actionTypeId: '.teams',
+            name: 'teams',
+            isDeprecated: false,
           },
-          id: 'test',
-          actionTypeId: '.teams',
-          name: 'teams',
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -102,7 +101,7 @@ describe('TeamsActionFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TeamsActionFields
             readOnly={false}
@@ -112,14 +111,17 @@ describe('TeamsActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(getByTestId('teamsWebhookUrlInput'));
-      await userEvent.type(getByTestId('teamsWebhookUrlInput'), 'no - valid', {
+      const teamsWebhookUrlInput = screen.getByTestId('teamsWebhookUrlInput');
+      await userEvent.clear(teamsWebhookUrlInput);
+      await userEvent.type(teamsWebhookUrlInput, 'no - valid', {
         delay: 10,
       });
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

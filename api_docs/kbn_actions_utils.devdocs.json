@@ -49,6 +49,7 @@
             "lineNumber": 36,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "GetCustomAgentsOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -110,6 +111,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -151,8 +153,55 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SSLSettings",
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.getProxySettings",
+        "type": "Function",
+        "tags": [],
+        "label": "getProxySettings",
+        "description": [],
+        "signature": [
+          "(opts: GetProxySettingsOpts) => ",
+          {
+            "pluginId": "@kbn/actions-utils",
+            "scope": "common",
+            "docId": "kibKbnActionsUtilsPluginApi",
+            "section": "def-common.ProxySettings",
+            "text": "ProxySettings"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_proxy_settings.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getProxySettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "GetProxySettingsOpts"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_proxy_settings.ts",
+            "lineNumber": 23,
+            "columnNumber": 34,
+            "deprecated": false,
+            "docsReferencedTypeName": "GetProxySettingsOpts",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

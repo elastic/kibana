@@ -1,0 +1,645 @@
+{
+  "id": "@kbn/test-saml-auth",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/test-saml-auth",
+        "id": "def-common.SamlSessionManager",
+        "type": "Class",
+        "tags": [],
+        "label": "SamlSessionManager",
+        "description": [
+          "\nManages cookies associated with user roles"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test-saml-auth",
+                    "scope": "common",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
+                    "section": "def-common.SamlSessionManagerOptions",
+                    "text": "SamlSessionManagerOptions"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 71,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "SamlSessionManagerOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.validateRole",
+            "type": "Function",
+            "tags": [],
+            "label": "validateRole",
+            "description": [],
+            "signature": [
+              "(role: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.validateRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 222,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.getApiCredentialsForRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiCredentialsForRole",
+            "description": [],
+            "signature": [
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test-saml-auth",
+                "scope": "common",
+                "docId": "kibKbnTestSamlAuthPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<{ Cookie: string; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 236,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test-saml-auth",
+                    "scope": "common",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 236,
+                "columnNumber": 48,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope",
+            "type": "Function",
+            "tags": [],
+            "label": "getInteractiveUserSessionCookieWithRoleScope",
+            "description": [],
+            "signature": [
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test-saml-auth",
+                "scope": "common",
+                "docId": "kibKbnTestSamlAuthPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 245,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 245,
+                "columnNumber": 54,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test-saml-auth",
+                    "scope": "common",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 245,
+                "columnNumber": 68,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.getEmail",
+            "type": "Function",
+            "tags": [],
+            "label": "getEmail",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 255,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.getEmail.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 255,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.getUserData",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserData",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<",
+              "UserProfile",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 260,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-saml-auth",
+                "id": "def-common.SamlSessionManager.getUserData.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 260,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManager.getSupportedRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "getSupportedRoles",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/test-saml-auth",
+        "id": "def-common.GetCookieOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetCookieOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.GetCookieOptions.forceNewSession",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forceNewSession",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.GetCookieOptions.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-saml-auth",
+        "id": "def-common.HostOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.HostOptions.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "\"http\" | \"https\""
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.HostOptions.hostname",
+            "type": "string",
+            "tags": [],
+            "label": "hostname",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.HostOptions.port",
+            "type": "number",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.HostOptions.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.HostOptions.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-saml-auth",
+        "id": "def-common.SamlSessionManagerOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SamlSessionManagerOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.hostOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "hostOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-saml-auth",
+                "scope": "common",
+                "docId": "kibKbnTestSamlAuthPluginApi",
+                "section": "def-common.HostOptions",
+                "text": "HostOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.supportedRoles",
+            "type": "Object",
+            "tags": [],
+            "label": "supportedRoles",
+            "description": [],
+            "signature": [
+              "SupportedRoles",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.cloudHostName",
+            "type": "string",
+            "tags": [],
+            "label": "cloudHostName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.cloudUsersFilePath",
+            "type": "string",
+            "tags": [],
+            "label": "cloudUsersFilePath",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              "SamlSessionManagerServerlessOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-saml-auth",
+            "id": "def-common.SamlSessionManagerOptions.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/test-saml-auth",
+        "id": "def-common.Role",
+        "type": "Type",
+        "tags": [],
+        "label": "Role",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/types.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

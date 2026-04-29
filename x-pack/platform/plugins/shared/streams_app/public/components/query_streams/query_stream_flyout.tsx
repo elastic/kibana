@@ -72,7 +72,7 @@ export function QueryStreamFlyout({
   const { formState, register, handleSubmit, setValue, watch } = useForm<FormState>({
     defaultValues: {
       name: initialName,
-      esqlQuery: '',
+      esqlQuery: initialEsql ?? '',
     },
   });
 

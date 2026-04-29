@@ -13,6 +13,8 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '../../../../types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -118,7 +120,9 @@ describe('bulkEnableRules', () => {
   let actionsClient: jest.Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [disabledRule1, disabledRule2] }
+    response: { saved_objects: Array<SavedObject<Partial<RawRule>>> } = {
+      saved_objects: [disabledRule1, disabledRule2],
+    }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -205,6 +209,37 @@ describe('bulkEnableRules', () => {
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
+  });
+
+  test('does not leak stale uiamApiKey when bulk enabling a rule without apiKey', async () => {
+    const disabledRuleWithStaleUiam: SavedObject<RawRule> = {
+      ...disabledRule1,
+      attributes: {
+        ...disabledRule1.attributes,
+        apiKey: null,
+        apiKeyOwner: null,
+        uiamApiKey: Buffer.from('stale-uiam:stale-key').toString('base64'),
+      },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithStaleUiam],
+    });
+    mockUnsecuredSavedObjectFind(1);
+
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1],
+    });
+
+    await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    const bulkCreatePayload = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const writtenAttributes = bulkCreatePayload[0].attributes;
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
   });
 
   test('should enable two rules and return right actions', async () => {
@@ -672,6 +707,110 @@ describe('bulkEnableRules', () => {
       rules: [returnedRuleForBulkOps1],
       total: 2,
       taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  describe('lastRun outcome message migration', () => {
+    test('migrates legacy string lastRun.outcomeMsg to string[] when bulk enabling', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...disabledRule1,
+            attributes: {
+              ...disabledRule1.attributes,
+              lastRun: {
+                outcome: 'failed',
+                // @ts-expect-error test legacy outcomeMsg migration
+                outcomeMsg: 'legacy message',
+              },
+            },
+          },
+          disabledRule2,
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'id1',
+            attributes: expect.objectContaining({
+              lastRun: {
+                outcome: 'failed',
+                outcomeMsg: ['legacy message'],
+              },
+            }),
+          }),
+        ]),
+        { overwrite: true }
+      );
+    });
+
+    test('leaves lastRun unchanged when outcomeMsg is already a string array', async () => {
+      const lastRun = {
+        outcome: 'succeeded' as const,
+        outcomeMsg: ['msg a', 'msg b'],
+        alertsCount: {
+          new: 0,
+          ignored: 0,
+          recovered: 0,
+          active: 0,
+        },
+      };
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...disabledRule1,
+            attributes: {
+              ...disabledRule1.attributes,
+              lastRun,
+            },
+          },
+        ],
+      });
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'id1',
+            attributes: expect.objectContaining({
+              lastRun,
+            }),
+          }),
+        ]),
+        { overwrite: true }
+      );
+    });
+
+    test('does not add lastRun when the rule has no lastRun', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [disabledRule1],
+      });
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      const bulkCreateObjects = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+        id: string;
+        attributes: Record<string, unknown>;
+      }>;
+      const attributesForRule = bulkCreateObjects.find((o) => o.id === 'id1')?.attributes;
+      expect(attributesForRule).toBeDefined();
+      expect(attributesForRule).not.toHaveProperty('lastRun');
     });
   });
 

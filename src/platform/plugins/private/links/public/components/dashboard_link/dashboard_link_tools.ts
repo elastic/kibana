@@ -58,7 +58,7 @@ export const fetchDashboards = async ({
 }): Promise<DashboardItem[]> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const responses = await findDashboardsService.search({
-    search,
+    query: search,
     per_page: size,
   });
 

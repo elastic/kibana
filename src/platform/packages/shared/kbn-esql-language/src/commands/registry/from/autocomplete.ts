@@ -9,7 +9,7 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../complete_items';
+import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItem } from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
@@ -22,16 +22,15 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { esqlCommandRegistry } from '../../../..';
 import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
 } from '../../definitions/utils/autocomplete/resource_browser_suggestions';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
 const EMPTY_EXTENSIONS = { recommendedFields: [], recommendedQueries: [] };
-const PIPE_SORT_TEXT = '0';
 
 export async function autocomplete(
   query: string,
@@ -64,17 +63,18 @@ async function handleFromAutocomplete(
 
   // Cursor before FROM keyword
   if (command.location.min > cursorPos) {
-    return getSourceSuggestions(context?.sources ?? [], [], innerText);
+    return getSourceSuggestions(context?.sources ?? [], []);
   }
 
   // Extract text relative to command start (critical for subqueries)
-  // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
+  // Use commandText for pattern matching (e.g., /METADATA\s+$/ and trailing whitespace)
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
+  const subquerySuggestion =
+    commandText.length > command.name.length ? buildSubqueryCompleteItem() : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
-    innerText: commandText,
   });
 
   // METADATA suggestions - uses commandText for regex pattern matching
@@ -92,8 +92,12 @@ async function handleFromAutocomplete(
 
   // Case 1: FROM | (no sources yet)
   if (!hasAnySources) {
-    // Use innerText for absolute positions in rangeToReplace
-    const suggestions = suggestInitialSources(context, innerText);
+    const suggestions = suggestInitialSources(
+      context,
+      innerText,
+      command.location.min,
+      subquerySuggestion
+    );
     if (indicesBrowserSuggestion) {
       suggestions.unshift(indicesBrowserSuggestion);
     }
@@ -101,7 +105,7 @@ async function handleFromAutocomplete(
   }
 
   // Case 2: FROM index | (after space, suggest next actions)
-  if (/\s$/.test(commandText) && !isRestartingExpression(commandText)) {
+  if (endsWithWhitespace(commandText) && !isRestartingExpression(commandText)) {
     return suggestNextActions(context, callbacks);
   }
 
@@ -110,7 +114,17 @@ async function handleFromAutocomplete(
   const shouldSuggestIndicesBrowserInAdditionalSlot =
     Boolean(indicesBrowserSuggestion) && shouldSuggestIndicesBrowserAfterComma(commandText);
 
-  const suggestions = await suggestAdditionalSources(innerText, context, callbacks, indexes);
+  const suggestions = await suggestAdditionalSources(
+    innerText,
+    context,
+    callbacks,
+    indexes,
+    subquerySuggestion,
+    {
+      textBeforeCursor: innerText,
+      commandStart: command.location.min, // Full-query offset of this FROM command.
+    }
+  );
   if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
     suggestions.unshift(indicesBrowserSuggestion);
   }
@@ -122,7 +136,9 @@ async function handleFromAutocomplete(
  */
 function suggestInitialSources(
   context: ICommandContext | undefined,
-  innerText: string
+  innerText: string,
+  commandStart: number,
+  subquerySuggestion?: ISuggestionItem
 ): ISuggestionItem[] {
   let sources = context?.sources ?? [];
 
@@ -130,12 +146,15 @@ function suggestInitialSources(
     sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
   }
 
-  const sourceSuggestions = getSourceSuggestions(sources, [], innerText);
+  const sourceSuggestions = getSourceSuggestions(sources, [], {
+    textBeforeCursor: innerText,
+    commandStart,
+  });
   const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
   const suggestions = [...sourceSuggestions, ...viewSuggestions];
 
-  if (shouldSuggestSubquery(context)) {
-    suggestions.push(subqueryCompleteItem);
+  if (subquerySuggestion && shouldSuggestSubquery(context)) {
+    suggestions.push(subquerySuggestion);
   }
 
   return suggestions;
@@ -148,11 +167,7 @@ async function suggestNextActions(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
-  const suggestions: ISuggestionItem[] = [
-    { ...pipeCompleteItem, sortText: PIPE_SORT_TEXT },
-    commaCompleteItem,
-    metadataSuggestion,
-  ];
+  const suggestions: ISuggestionItem[] = [pipeCompleteItem, commaCompleteItem, metadataSuggestion];
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
@@ -169,15 +184,23 @@ async function suggestAdditionalSources(
   innerText: string,
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined,
-  indexes: ReturnType<typeof getSourcesFromCommands>
+  indexes: ReturnType<typeof getSourcesFromCommands>,
+  subquerySuggestion?: ISuggestionItem,
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
 ): Promise<ISuggestionItem[]> {
   const lastIndex = indexes[indexes.length - 1];
-  const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
+  const isTypingIndexName = !!(lastIndex?.name && innerText.endsWith(lastIndex.name));
 
-  // Check for METADATA overlap (only when not typing index name)
+  // Only use overlap here to decide when to show `METADATA`.
+  // The replacement range is still handled centrally.
   if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
     return [metadataSuggestion];
   }
+
+  const canRewriteFromToTs = indexes.length === 1 && isTypingIndexName;
 
   let sources = context?.sources ?? [];
 
@@ -195,21 +218,17 @@ async function suggestAdditionalSources(
     sources,
     indexes.map(({ name }) => name),
     recommendedQueries,
-    context?.views ?? []
+    context?.views ?? [],
+    canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 
-  if (isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
-    suggestions.push(subqueryCompleteItem);
+  if (subquerySuggestion && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
+    suggestions.push(subquerySuggestion);
   }
 
   return suggestions;
 }
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
-  if (context?.isCursorInSubquery) {
-    return false;
-  }
-
-  const fromCommand = esqlCommandRegistry.getCommandByName('from');
-  return fromCommand?.metadata?.subquerySupport ?? true;
+  return !context?.isCursorInSubquery;
 }

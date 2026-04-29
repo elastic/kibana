@@ -22,6 +22,7 @@ import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
+import { useESQLEditorContext } from './esql_editor_context';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import {
   onActiveDataChange,
@@ -113,6 +114,11 @@ export function ESQLEditor({
     initialAttributes: attributes,
   });
 
+  // Use a ref to always read the latest currentAttributes in async callbacks,
+  // avoiding stale closures when the user changes chart type/config between renders
+  const currentAttributesRef = useRef(currentAttributes);
+  currentAttributesRef.current = currentAttributes;
+
   const adHocDataViews =
     attributes && attributes.state.adHocDataViews
       ? Object.values(attributes.state.adHocDataViews)
@@ -165,7 +171,7 @@ export function ESQLEditor({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        currentAttributes
+        currentAttributesRef.current
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -184,7 +190,6 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
-      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -298,6 +303,7 @@ function InnerESQLEditor({
   queryStats,
 }: InnerEditorProps) {
   const { euiTheme } = useEuiTheme();
+  const esqlEditorContext = useESQLEditorContext();
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
@@ -342,6 +348,16 @@ function InnerESQLEditor({
           }}
           esqlVariables={esqlVariables}
           queryStats={queryStats}
+          initialState={
+            esqlEditorContext?.editorHeightRef.current !== undefined
+              ? { editorHeight: esqlEditorContext.editorHeightRef.current }
+              : undefined
+          }
+          onInitialStateChange={(state) => {
+            if (state.editorHeight !== undefined && esqlEditorContext) {
+              esqlEditorContext.editorHeightRef.current = state.editorHeight;
+            }
+          }}
         />
       </div>
     </EuiFlexItem>

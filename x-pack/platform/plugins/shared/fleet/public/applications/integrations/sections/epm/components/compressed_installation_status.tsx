@@ -37,7 +37,7 @@ export const CompressedInstallationStatus: React.FC<{
       {isActive ? (
         <EuiIcon
           data-test-subj="compressed-active-icon"
-          type="checkInCircleFilled"
+          type="checkCircleFill"
           className={styles.compressedActiveStatusIcon}
         />
       ) : (
@@ -46,7 +46,7 @@ export const CompressedInstallationStatus: React.FC<{
           position="bottom"
           content={installStatus === 'installed' ? installedTooltip : installFailedTooltip}
           anchorClassName={styles.compressedInstalledStatusIcon}
-          type="warningFilled"
+          type="warningFill"
           iconProps={{
             'data-test-subj': 'compressed-installed-icon',
           }}

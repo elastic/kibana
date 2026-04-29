@@ -22,7 +22,7 @@ import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  apiPublishesUnsavedChanges,
+  apiHasSerializableState,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
@@ -172,17 +172,15 @@ export const ControlGroupRenderer = ({
       getInput$: () => input$,
       getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
-        /** Set the last saved state to the new input and then reset each child to this state */
-        const newState = lastSavedState$Ref.current.getValue();
+        const newState = { ...lastSavedState$Ref.current.getValue() };
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
           newState[id] = {
             ...lastSavedState$Ref.current.value[id],
             ...control,
           };
         });
-        lastSavedState$Ref.current.next(newState);
-        asyncForEach(Object.values(parentApi.children$.getValue()), async (child) => {
-          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
+          if (apiHasSerializableState(child)) child.applySerializedState(newState[id]);
         });
       },
     };

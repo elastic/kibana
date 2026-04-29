@@ -118,7 +118,7 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
         <EuiButtonEmpty
           size="xs"
           flush="right"
-          iconType="visBarHorizontal"
+          iconType="chartBarHorizontal"
           href={searchProfilerHref}
           onClick={handleSearchProfilerLinkClick}
           data-test-subj="inspectorRequestOpenInSearchProfilerButton"

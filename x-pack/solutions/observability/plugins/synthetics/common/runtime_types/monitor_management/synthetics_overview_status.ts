@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { ObserverCodec } from '../ping/observer';
 import { ErrorStateCodec } from '../ping/error_state';
 import { AgentType, MonitorType, PingErrorType, UrlType } from '..';
+import { remoteMonitorInfoSchema } from '../remote';
 
 export const OverviewPingCodec = t.intersection([
   t.interface({
@@ -38,15 +39,35 @@ export const OverviewStatusMetaDataCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
     configId: t.string,
-    status: t.string,
-    locationId: t.string,
-    locationLabel: t.string,
+    locations: t.array(
+      t.intersection([
+        t.interface({
+          id: t.string,
+          label: t.string,
+          status: t.string,
+        }),
+        t.partial({
+          // ISO timestamp of when this location entered its current state
+          // segment. Only set when the location is currently down so the UI
+          // can render "Down · 12m" without stale data.
+          downSince: t.string,
+          // Latest error reason for this location's most recent down check.
+          // `error.message` is `text` in the heartbeat mapping so it's pulled
+          // via top_hits on the backend.
+          error: t.partial({
+            message: t.string,
+            type: t.string,
+          }),
+        }),
+      ])
+    ),
     name: t.string,
     schedule: t.string,
     isEnabled: t.boolean,
     tags: t.array(t.string),
     isStatusAlertEnabled: t.boolean,
     type: t.string,
+    overallStatus: t.string,
   }),
   t.partial({
     projectId: t.string,
@@ -55,6 +76,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     spaces: t.array(t.string),
     urls: t.string,
     maintenanceWindows: t.array(t.string),
+    remote: remoteMonitorInfoSchema,
   }),
 ]);
 

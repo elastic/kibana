@@ -39,7 +39,7 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewView } from '../../../../state';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -113,10 +113,11 @@ export function ActionsPopover({
   const locationName = useLocationName(monitor);
 
   const { http } = useKibana().services;
+  const locationLabel = monitor.locations[0]?.label ?? '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
+    locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
@@ -154,7 +155,7 @@ export function ActionsPopover({
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -173,10 +174,10 @@ export function ActionsPopover({
       if (locationName) {
         dispatch(
           setFlyoutConfig({
+            locationId,
             configId: monitor.configId,
             location: locationName,
             id: monitor.configId,
-            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -190,13 +191,13 @@ export function ActionsPopover({
       filters: {
         monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
-        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
+        locations: [{ label: locationLabel, value: locationId }],
         monitor_types: [],
         projects: [],
       },
       view,
     },
-    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    documentTitle: `${monitor.name} - ${locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
       defaultMessage: 'Monitor Overview',
     }),
@@ -224,7 +225,7 @@ export function ActionsPopover({
           {runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'beaker',
+      icon: 'flask',
       disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
@@ -260,7 +261,7 @@ export function ActionsPopover({
           {CREATE_SLO}
         </NoPermissionsTooltip>
       ),
-      icon: 'visGauge',
+      icon: 'chartGauge',
       disabled: !canEditSynthetics || !isServiceAllowed,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -277,7 +278,7 @@ export function ActionsPopover({
           {enableLabel}
         </NoPermissionsTooltip>
       ),
-      icon: 'invert',
+      icon: 'contrast',
       disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
@@ -338,7 +339,7 @@ export function ActionsPopover({
               <EuiButtonIcon
                 data-test-subj="syntheticsActionsPopoverButton"
                 aria-label={openActionsMenuAria}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 color="primary"
                 size={iconSize}
                 display="empty"

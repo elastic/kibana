@@ -10,10 +10,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -41,6 +38,8 @@ interface Props {
   children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 export function ApmServiceTemplate(props: Props) {
@@ -53,7 +52,14 @@ export function ApmServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({ title, children, selectedTab, searchBarOptions }: Props) {
+function TemplateWithContext({
+  title,
+  children,
+  selectedTab,
+  searchBarOptions,
+  bottomHeaderContent: BottomHeaderContent,
+  contentWrapper: ContentWrapper = React.Fragment,
+}: Props) {
   const {
     path: { serviceName },
     query,
@@ -109,7 +115,6 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     }
 
     agentBuilder.setChatConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
@@ -140,36 +145,36 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
 
   return (
     <ServiceSloContextProvider serviceName={serviceName} environment={environment}>
-      <ApmMainTemplate
-        showActionsMenu
-        pageHeader={{
-          tabs,
-          pageTitle: (
+      <ContentWrapper>
+        <ApmMainTemplate
+          showActionsMenu
+          searchBar={
             <>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="l">
-                        <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ServiceIcons
-                        serviceName={serviceName}
-                        environment={environment}
-                        start={start}
-                        end={end}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
+              {BottomHeaderContent && <BottomHeaderContent />}
+              <SearchBar {...searchBarOptions} showEnvironmentFilter />
+            </>
+          }
+          pageHeader={{
+            tabs,
+            rightSideItems: [<AnalyzeDataButton />],
+            pageTitle: (
+              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <AnalyzeDataButton />
+                  <EuiTitle size="l">
+                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ServiceIcons
+                    serviceName={serviceName}
+                    environment={environment}
+                    start={start}
+                    end={end}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size="s" />
+            ),
+            children: (
               <ServiceHeaderBadges
                 serviceName={serviceName}
                 environment={environment}
@@ -178,33 +183,34 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
                 onSloClick={openSloOverviewFlyout}
                 alertsTabHref={alertsTabHref}
               />
-            </>
-          ),
-        }}
-      >
-        {isPendingServiceAgent ? (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="l" />
-              <EuiLoadingLogo logo="logoObservability" size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <>
-            <SearchBar {...searchBarOptions} />
+            ),
+          }}
+        >
+          {isPendingServiceAgent ? (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="l" />
+                <EuiLoadingLogo
+                  logo="logoObservability"
+                  size="l"
+                  data-test-subj="apmMainTemplateServiceAgentLoader"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
             <ServiceAnomalyTimeseriesContextProvider>
               {children}
             </ServiceAnomalyTimeseriesContextProvider>
-          </>
-        )}
-        {sloOverviewFlyout && (
-          <SloOverviewFlyout
-            serviceName={sloOverviewFlyout.serviceName}
-            agentName={sloOverviewFlyout.agentName as AgentName | undefined}
-            onClose={closeSloOverviewFlyout}
-          />
-        )}
-      </ApmMainTemplate>
+          )}
+          {sloOverviewFlyout && (
+            <SloOverviewFlyout
+              serviceName={sloOverviewFlyout.serviceName}
+              agentName={sloOverviewFlyout.agentName as AgentName | undefined}
+              onClose={closeSloOverviewFlyout}
+            />
+          )}
+        </ApmMainTemplate>
+      </ContentWrapper>
     </ServiceSloContextProvider>
   );
 }

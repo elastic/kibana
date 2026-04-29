@@ -98,6 +98,7 @@
                 "lineNumber": 59,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnonymizationTarget",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -114,7 +115,7 @@
               "\nRetrieves a single profile by ID."
             ],
             "signature": [
-              "(namespace: string, profileId: string) => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; } | null>"
+              "(namespace: string, profileId: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 62,
@@ -169,7 +170,7 @@
               "\nRetrieves the global profile for a namespace."
             ],
             "signature": [
-              "(namespace: string) => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; } | null>"
+              "(namespace: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 67,
@@ -461,6 +462,7 @@
                 "lineNumber": 45,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnonymizationProfileInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -548,7 +550,7 @@
             "label": "findProfileByTarget",
             "description": [],
             "signature": [
-              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; } | null>"
+              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 33,
@@ -609,7 +611,7 @@
                 "section": "def-server.CreateAnonymizationProfileParams",
                 "text": "CreateAnonymizationProfileParams"
               },
-              ") => Promise<{ id: string; namespace: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }; targetType: \"index\" | \"data_view\" | \"index_pattern\"; targetId: string; saltId: string; description?: string | undefined; }>"
+              ") => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 37,
@@ -637,6 +639,7 @@
                 "lineNumber": 37,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAnonymizationProfileParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -826,7 +829,7 @@
             "label": "rules",
             "description": [],
             "signature": [
-              "{ fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]; regexRules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]; nerRules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]; }"
+              "{ fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 24,
@@ -942,6 +945,7 @@
               "lineNumber": 90,
               "columnNumber": 32,
               "deprecated": false,
+              "docsReferencedTypeName": "AnonymizationProfileInitializer",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1056,6 +1060,7 @@
               "lineNumber": 103,
               "columnNumber": 32,
               "deprecated": false,
+              "docsReferencedTypeName": "AnonymizationProfileInitializer",
               "trackAdoption": false,
               "isRequired": true
             }

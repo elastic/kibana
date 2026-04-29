@@ -72,6 +72,7 @@ export const createClassicStreamRoute = createServerRoute({
         queries: [],
         rules: [],
         stream: {
+          type: 'classic',
           description,
           ingest,
         },

@@ -7,12 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type {
-  EuiTableActionsColumnType,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
 import {
+  type EuiBasicTableColumn,
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
@@ -23,12 +19,16 @@ import {
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { CaseStatuses } from '../../../common/types/domain';
 
+import {
+  tableColumnPresetDateRelative,
+  tableColumnPresetSeverity,
+} from '../../utils/table_column_presets';
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { useActions } from './use_actions';
@@ -36,16 +36,13 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../incremental_id';
+import { ExtendedFieldsColumnCell } from './extended_fields_column_cell';
 
-type CasesColumns =
-  | EuiTableActionsColumnType<CaseUI>
-  | EuiTableComputedColumnType<CaseUI>
-  | EuiTableFieldDataColumnType<CaseUI>;
+type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
 const LINE_CLAMP = 3;
 const getLineClampedCss = css`
@@ -108,38 +105,42 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
         sortable: true,
-        render: (title: string, theCase: CaseUI) => {
-          if (theCase.id != null && theCase.title != null) {
-            const caseDetailsLinkComponent = isSelectorView ? (
-              theCase.title
-            ) : (
-              <div>
-                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                  <TruncatedText text={theCase.title} />
-                </CaseDetailsLink>
-                {typeof theCase.incrementalId === 'number' ? (
-                  <IncrementalIdText incrementalId={theCase.incrementalId} />
-                ) : null}
-              </div>
-            );
-
-            return caseDetailsLinkComponent;
+        minWidth: '16em',
+        render: (_: string, theCase: CaseUI) => {
+          if (theCase.id == null || theCase.title == null) {
+            return getEmptyCellValue();
           }
-          return getEmptyCellValue();
+
+          if (isSelectorView) {
+            return theCase.title;
+          }
+
+          return (
+            <div>
+              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                <TruncatedText text={theCase.title} />
+              </CaseDetailsLink>
+              {typeof theCase.incrementalId === 'number' && (
+                <IncrementalIdText incrementalId={theCase.incrementalId} />
+              )}
+            </div>
+          );
         },
-        width: !isSelectorView ? '17%' : '55%',
       },
       assignees: {
+        width: '6em',
+        minWidth: '2em',
         field: casesColumnsConfig.assignees.field,
         name: casesColumnsConfig.assignees.name,
         render: (assignees: CaseUI['assignees']) => (
           <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
         ),
-        width: '10%',
       },
       tags: {
         field: casesColumnsConfig.tags.field,
         name: casesColumnsConfig.tags.name,
+        width: '10em',
+        minWidth: '4em',
         render: (tags: CaseUI['tags']) => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
@@ -179,9 +180,9 @@ export const useCasesColumns = ({
 
             return (
               <EuiToolTip
+                content={unclampedBadges}
                 data-test-subj="case-table-column-tags-tooltip"
                 position="left"
-                content={unclampedBadges}
               >
                 {clampedBadges}
               </EuiToolTip>
@@ -189,9 +190,10 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '12%',
       },
       totalAlerts: {
+        minWidth: '4em',
+        width: '4em',
         field: casesColumnsConfig.totalAlerts.field,
         name: casesColumnsConfig.totalAlerts.name,
         align: RIGHT_ALIGNMENT,
@@ -199,9 +201,10 @@ export const useCasesColumns = ({
           totalAlerts != null
             ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
             : getEmptyCellValue(),
-        width: !isSelectorView ? '70px' : '55px',
       },
       totalEvents: {
+        minWidth: '4em',
+        width: '4em',
         field: casesColumnsConfig.totalEvents.field,
         name: casesColumnsConfig.totalEvents.name,
         align: RIGHT_ALIGNMENT,
@@ -209,9 +212,10 @@ export const useCasesColumns = ({
           totalEvents != null
             ? renderStringField(`${totalEvents}`, `case-table-column-eventsCount`)
             : getEmptyCellValue(),
-        width: !isSelectorView ? '70px' : '55px',
       },
       totalComment: {
+        minWidth: '6em',
+        width: '6em',
         field: casesColumnsConfig.totalComment.field,
         name: casesColumnsConfig.totalComment.name,
         align: RIGHT_ALIGNMENT,
@@ -219,9 +223,10 @@ export const useCasesColumns = ({
           totalComment != null
             ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
             : getEmptyCellValue(),
-        width: '75px',
       },
       category: {
+        minWidth: '6.5em',
+        width: '10em',
         field: casesColumnsConfig.category.field,
         name: casesColumnsConfig.category.name,
         sortable: true,
@@ -233,58 +238,31 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '12%',
       },
       closedAt: {
+        ...tableColumnPresetDateRelative({ stripMs: false }),
         field: casesColumnsConfig.closedAt.field,
         name: casesColumnsConfig.closedAt.name,
         sortable: true,
-        render: (closedAt: CaseUI['closedAt']) => {
-          if (closedAt != null) {
-            return (
-              <span data-test-subj={`case-table-column-closedAt`}>
-                <FormattedRelativePreferenceDate value={closedAt} />
-              </span>
-            );
-          }
-          return getEmptyCellValue();
-        },
-        width: '10%',
+        'data-test-subj': 'case-table-column-closedAt',
       },
       createdAt: {
+        ...tableColumnPresetDateRelative({ stripMs: true }),
         field: casesColumnsConfig.createdAt.field,
         name: casesColumnsConfig.createdAt.name,
         sortable: true,
-        render: (createdAt: CaseUI['createdAt']) => {
-          if (createdAt != null) {
-            return (
-              <span data-test-subj={`case-table-column-createdAt`}>
-                <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
-              </span>
-            );
-          }
-          return getEmptyCellValue();
-        },
-        width: '15%',
+        'data-test-subj': 'case-table-column-createdAt',
       },
       updatedAt: {
+        ...tableColumnPresetDateRelative({ stripMs: true }),
         field: casesColumnsConfig.updatedAt.field,
         name: casesColumnsConfig.updatedAt.name,
         sortable: true,
-        render: (updatedAt: CaseUI['updatedAt']) => {
-          if (updatedAt != null) {
-            return (
-              <span data-test-subj="case-table-column-updatedAt">
-                <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
-              </span>
-            );
-          }
-          return getEmptyCellValue();
-        },
-        width: '15%',
+        'data-test-subj': 'case-table-column-updatedAt',
       },
       externalIncident: {
         // no field
+        width: '8.5em',
         name: casesColumnsConfig.externalIncident.name,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
@@ -292,9 +270,11 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '10%',
       },
       status: {
+        width: '6.5em',
+        minWidth: '6.5em', // The longest status string is "In progress"
+        className: 'eui-textNoWrap',
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
@@ -305,46 +285,47 @@ export const useCasesColumns = ({
 
           return getEmptyCellValue();
         },
-        width: '100px',
+      },
+      extendedFields: {
+        minWidth: '10em',
+        width: '14em',
+        name: casesColumnsConfig.extendedFields.name,
+        render: (theCase: CaseUI) => (
+          <ExtendedFieldsColumnCell
+            extendedFields={theCase.extendedFields}
+            extendedFieldsLabels={theCase.extendedFieldsLabels}
+          />
+        ),
       },
       severity: {
+        ...tableColumnPresetSeverity<CaseUI>({}),
         field: casesColumnsConfig.severity.field,
         name: casesColumnsConfig.severity.name,
         sortable: true,
-        render: (severity: CaseUI['severity']) => {
-          if (severity != null) {
-            return (
-              <SeverityHealth
-                data-test-subj={`case-table-column-severity-${severity}`}
-                severity={severity}
-              />
-            );
-          }
-          return getEmptyCellValue();
-        },
-        width: '90px',
       },
       assignCaseAction: {
         // no field
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
-            const disabled = disabledCases?.has(theCase.id) ?? false;
+            const isAlreadyAttached = disabledCases?.has(theCase.id) ?? false;
+            const isClosed = theCase.status === CaseStatuses.closed;
+            const disabled = isAlreadyAttached || isClosed;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
                 onClick={() => assignCaseAction(theCase)}
                 size="s"
-                iconType={disabled ? 'check' : undefined}
+                iconType={isAlreadyAttached ? 'check' : undefined}
                 disabled={disabled}
               >
-                {disabled ? i18n.ALREADY_ATTACHED : i18n.SELECT}
+                {isAlreadyAttached ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }
           return getEmptyCellValue();
         },
-        width: '120px',
+        width: '8em',
       },
     }),
     [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]

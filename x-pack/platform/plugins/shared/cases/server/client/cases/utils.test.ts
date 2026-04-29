@@ -23,6 +23,7 @@ import {
   createIncident,
   dedupAssignees,
   getClosedInfoForUpdate,
+  getCloseReasonIfValid,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -35,11 +36,15 @@ import {
   getTimingMetricsForUpdate,
   isObservable,
   processObservables,
+  enrichCasesWithFieldLabels,
 } from './utils';
+
 import type {
   CaseCustomFields,
   CustomFieldsConfiguration,
   Observable,
+  CaseConnector,
+  JiraFieldsType,
 } from '../../../common/types/domain';
 import {
   CaseStatuses,
@@ -88,6 +93,20 @@ describe('utils', () => {
     });
   });
 
+  describe('getCloseReasonIfValid', () => {
+    it('returns any non-empty close reason', () => {
+      expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
+      expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
+      expect(getCloseReasonIfValid('my custom reason')).toBe('my custom reason');
+    });
+
+    it('returns undefined for empty values', () => {
+      expect(getCloseReasonIfValid('')).toBeUndefined();
+      expect(getCloseReasonIfValid('   ')).toBeUndefined();
+      expect(getCloseReasonIfValid()).toBeUndefined();
+    });
+  });
+
   describe('createIncident', () => {
     const theCase = {
       ...flattenCaseSavedObject({
@@ -122,6 +141,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
@@ -310,6 +330,52 @@ describe('utils', () => {
           labels: ['LOLBins'],
           issueType: 'Task',
           parent: null,
+          otherFields: null,
+          summary: 'Another bad one',
+          description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('includes Jira otherFields in the incident payload', async () => {
+      const caseWithOtherFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithOtherFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: 'High',
+          labels: ['LOLBins'],
+          issueType: 'Task',
+          parent: null,
+          otherFields: '{"customfield_123456":"Blue team"}',
           summary: 'Another bad one',
           description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
           externalId: null,
@@ -430,6 +496,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
@@ -456,6 +523,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
@@ -486,6 +554,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -524,6 +593,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -2079,5 +2149,148 @@ describe('processObservables', () => {
     expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
     expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
     expect(observablesMap.size).toBe(1);
+  });
+});
+
+describe('enrichCasesWithFieldLabels', () => {
+  const baseCase = flattenCaseSavedObject({ savedObject: mockCases[0], totalComment: 0 });
+
+  const caseWithTemplate = {
+    ...baseCase,
+    template: { id: 'template-id-1', version: 1 },
+    extended_fields: { priority_as_keyword: 'high', effort_as_integer: '3' },
+  };
+
+  const templateSO = {
+    id: 'so-id',
+    type: 'cases-template' as const,
+    references: [],
+    attributes: {
+      templateId: 'template-id-1',
+      name: 'My Template',
+      owner: 'cases',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      fieldNames: [
+        { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
+        { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
+      ],
+    },
+  };
+
+  it('populates extended_fields_labels from the matched template fieldNames', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('returns case unchanged when it has no template reference', () => {
+    const result = enrichCasesWithFieldLabels([baseCase], [templateSO]);
+
+    expect(result[0]).toEqual(baseCase);
+  });
+
+  it('returns case unchanged when it has no extended_fields', () => {
+    const caseNoExtFields = { ...baseCase, template: { id: 'template-id-1', version: 1 } };
+
+    const result = enrichCasesWithFieldLabels([caseNoExtFields], [templateSO]);
+
+    expect(result[0]).toEqual(caseNoExtFields);
+  });
+
+  it('omits extended_fields_labels when the referenced template is not in the provided list', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], []);
+
+    expect(result[0].extended_fields_labels).toBeUndefined();
+  });
+
+  it('uses the same template SO for multiple cases with the same templateId+version', () => {
+    const secondCase = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+    };
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate, secondCase], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('resolves different template versions separately for the same templateId', () => {
+    const templateSOv2 = {
+      ...templateSO,
+      id: 'so-id-v2',
+      attributes: {
+        ...templateSO.attributes,
+        templateVersion: 2,
+        fieldNames: [
+          { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
+      },
+    };
+
+    const caseV2 = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-1', version: 2 },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseV2],
+      [templateSO, templateSOv2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level v2',
+    });
+  });
+
+  it('handles multiple cases with different templateIds independently', () => {
+    const templateSO2 = {
+      ...templateSO,
+      id: 'so-id-2',
+      attributes: {
+        ...templateSO.attributes,
+        templateId: 'template-id-2',
+        templateVersion: 1,
+        fieldNames: [
+          { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
+        ],
+      },
+    };
+
+    const caseTwo = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-2', version: 1 },
+      extended_fields: { severity_as_keyword: 'critical' },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseTwo],
+      [templateSO, templateSO2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      severity_as_keyword: 'Severity Label',
+    });
   });
 });

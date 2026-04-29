@@ -65,7 +65,11 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -148,10 +152,6 @@
                   ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -1241,6 +1241,7 @@
                 "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TSearchRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1306,6 +1307,7 @@
                 "lineNumber": 89,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TSearchRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1368,6 +1370,7 @@
                 "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Required",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1491,6 +1494,7 @@
                 "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityEsQueryRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1614,6 +1618,7 @@
                 "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObservabilityEsQueryRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1631,6 +1636,7 @@
                 "lineNumber": 109,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEsqlOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1645,7 +1651,11 @@
             "label": "client",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -1728,10 +1738,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -2752,9 +2758,9 @@
           "EsqlESQLParam",
           "[] | undefined; filter?: ",
           "QueryDslQueryContainer",
-          "; query: string; project_routing?: string | undefined; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; include_execution_metadata?: undefined; project_routing?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; include_execution_metadata?: undefined; project_routing?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; profile?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
+          "; locale?: string | undefined; query: string; project_routing?: string | undefined; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; include_execution_metadata?: undefined; project_routing?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; include_execution_metadata?: undefined; project_routing?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; profile?: boolean | undefined; delimiter?: string | undefined; drop_null_columns?: boolean | undefined; allow_partial_results?: boolean | undefined; tables?: Record<string, Record<string, ",
           "EsqlTableValuesContainer",
-          ">> | undefined; drop_null_columns?: boolean | undefined; allow_partial_results?: boolean | undefined; include_ccs_metadata?: boolean | undefined; include_execution_metadata?: boolean | undefined; }"
+          ">> | undefined; include_ccs_metadata?: boolean | undefined; include_execution_metadata?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
         "lineNumber": 71,

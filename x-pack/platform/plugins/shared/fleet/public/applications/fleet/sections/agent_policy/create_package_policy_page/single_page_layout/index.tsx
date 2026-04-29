@@ -102,6 +102,7 @@ import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
+    padding-top: ${(props) => props.theme.eui.euiSizeXS};
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
@@ -551,6 +552,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
+            agentPolicies={agentPolicies}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}

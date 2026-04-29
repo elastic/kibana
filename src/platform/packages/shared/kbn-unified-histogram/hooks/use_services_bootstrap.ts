@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cloneDeep, pick } from 'lodash';
 import { ReplaySubject } from 'rxjs';
+import { getBreakdownField } from '@kbn/discover-utils';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
@@ -20,7 +21,6 @@ import type {
   UnifiedHistogramVisContext,
   LensVisServiceState,
 } from '../types';
-import { getBreakdownField } from '../utils/local_storage_utils';
 import { processFetchParams } from '../utils/process_fetch_params';
 import { LensVisService } from '../services/lens_vis_service';
 import { exportVisContext } from '../utils/external_vis_context';
@@ -143,7 +143,14 @@ export const useServicesBootstrap = (
         lensVisServiceState: updatedLensVisServiceState,
       });
     },
-    ...pick(stateService, 'state$', 'setChartHidden', 'setTopPanelHeight', 'setTotalHits'),
+    ...pick(
+      stateService,
+      'state$',
+      'setChartHidden',
+      'setTopPanelHeight',
+      'setTotalHits',
+      'setLensRequestAdapter'
+    ),
   }));
 
   const stateProps = useStateProps({

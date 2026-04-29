@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import type {
+  CommonCorrelationsQueryParams,
+  EntityType,
+} from '../../../../common/correlations/types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchPValues } from './fetch_p_values';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
@@ -23,8 +27,8 @@ const mockFetchFailedEventsCorrelationPValues =
   fetchFailedEventsCorrelationPValues as jest.MockedFunction<
     typeof fetchFailedEventsCorrelationPValues
   >;
-const mockIsCCSRemoteIndexName = isCCSRemoteIndexName as jest.MockedFunction<
-  typeof isCCSRemoteIndexName
+const mockisNonLocalIndexName = isNonLocalIndexName as jest.MockedFunction<
+  typeof isNonLocalIndexName
 >;
 
 describe('fetchPValues', () => {
@@ -40,7 +44,15 @@ describe('fetchPValues', () => {
     },
   } as unknown as APMEventClient;
 
-  const defaultParams = {
+  const defaultEntityType: EntityType = 'transaction';
+
+  const defaultParams: CommonCorrelationsQueryParams & {
+    apmEventClient: APMEventClient;
+    durationMin?: number;
+    durationMax?: number;
+    fieldCandidates: string[];
+    entityType: EntityType;
+  } = {
     apmEventClient: mockApmEventClient,
     start: 0,
     end: 1000000,
@@ -48,11 +60,12 @@ describe('fetchPValues', () => {
     kuery: '',
     query: { match_all: {} },
     fieldCandidates: ['service.version', 'service.environment'],
+    entityType: defaultEntityType,
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
-    mockIsCCSRemoteIndexName.mockReturnValue(false);
+    mockisNonLocalIndexName.mockReturnValue(false);
   });
 
   it('should return failed transactions correlations when pValues are below threshold', async () => {
@@ -308,7 +321,7 @@ describe('fetchPValues', () => {
       durationMax: 200,
     });
 
-    mockIsCCSRemoteIndexName.mockReturnValue(true);
+    mockisNonLocalIndexName.mockReturnValue(true);
 
     const correlation: FailedTransactionsCorrelation = {
       fieldName: 'service.version',
@@ -331,7 +344,7 @@ describe('fetchPValues', () => {
 
     expect(result.ccsWarning).toBe(true);
     expect(result.failedTransactionsCorrelations).toHaveLength(1);
-    expect(mockIsCCSRemoteIndexName).toHaveBeenCalledWith('apm-*-transaction-*');
+    expect(mockisNonLocalIndexName).toHaveBeenCalledWith('apm-*-transaction-*');
   });
 
   it('should set ccsWarning to false when there are rejected promises but index is not remote', async () => {
@@ -342,7 +355,7 @@ describe('fetchPValues', () => {
       durationMax: 200,
     });
 
-    mockIsCCSRemoteIndexName.mockReturnValue(false);
+    mockisNonLocalIndexName.mockReturnValue(false);
 
     const correlation: FailedTransactionsCorrelation = {
       fieldName: 'service.version',

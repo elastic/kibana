@@ -12,7 +12,10 @@ import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
-import type { SearchEmbeddableApi } from '@kbn/discover-plugin/public';
+import {
+  type SearchEmbeddableApi,
+  type SearchEmbeddablePanelApiState,
+} from '@kbn/discover-plugin/public';
 import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
@@ -157,6 +160,7 @@ const SavedSearchComponentTable: React.FC<
     dependencies: { dataViews },
     initialSerializedState,
     filters,
+    nonHighlightingFilters,
     query,
     timeRange,
     timestampField,
@@ -218,6 +222,26 @@ const SavedSearchComponentTable: React.FC<
   );
 
   useEffect(
+    function syncNonHighlightingFilters() {
+      if (!embeddableApi.current) return;
+
+      const applyNonHighlightingFilters = (savedSearch: SavedSearch) => {
+        savedSearch.searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
+      };
+
+      applyNonHighlightingFilters(embeddableApi.current.savedSearch$.getValue());
+      const subscription = embeddableApi.current.savedSearch$.subscribe(
+        applyNonHighlightingFilters
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [nonHighlightingFilters, isEmbeddableApiAvailable]
+  );
+
+  useEffect(
     function syncTimeRange() {
       if (!embeddableApi.current) return;
       embeddableApi.current.setTimeRange(timeRange);
@@ -268,7 +292,7 @@ const SavedSearchComponentTable: React.FC<
   );
 
   return (
-    <EmbeddableRenderer<SearchEmbeddableState, SearchEmbeddableApi>
+    <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}

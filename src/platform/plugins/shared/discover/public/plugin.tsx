@@ -63,6 +63,7 @@ import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager'
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
+import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 
 /**
@@ -170,6 +171,10 @@ export class DiscoverPlugin
     });
 
     registerDiscoverEBTManagerAnalytics(core, this.discoverEbtContext$);
+    void getUnifiedChartSectionViewerAnalytics().then(
+      ({ registerUnifiedChartSectionViewerEbtEvents }) =>
+        registerUnifiedChartSectionViewerEbtEvents(core.analytics)
+    );
 
     core.application.register({
       id: PLUGIN_ID,
@@ -241,6 +246,10 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    if (plugins.agentBuilder) {
+      registerEsqlResultsAttachmentUi(plugins.agentBuilder);
+    }
+
     plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
 
     plugins.uiActions.addTriggerActionAsync(
@@ -442,7 +451,7 @@ export class DiscoverPlugin
       getIconForSavedObject: () => 'discoverApp',
     });
 
-    plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesForEmbeddable(),
@@ -456,25 +465,31 @@ export class DiscoverPlugin
     });
 
     // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
-    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
-      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
-        await Promise.all([
-          getStartServices(),
-          getDiscoverServicesForEmbeddable(),
-          getEmbeddableServices(),
-        ]);
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      LEGACY_LOG_STREAM_EMBEDDABLE,
+      async () => {
+        const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+          await Promise.all([
+            getStartServices(),
+            getDiscoverServicesForEmbeddable(),
+            getEmbeddableServices(),
+          ]);
 
-      return getLegacyLogStreamEmbeddableFactory({
-        startServices,
-        discoverServices,
-      });
-    });
+        return getLegacyLogStreamEmbeddableFactory({
+          startServices,
+          discoverServices,
+        });
+      }
+    );
 
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const discoverServices = await getDiscoverServicesForEmbeddable();
         const { getTransformOut } = await getEmbeddableServices();
-        return getTransformOut(transformDrilldownsOut);
+        return getTransformOut(transformDrilldownsOut, () =>
+          discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled()
+        );
       }
     );
   }
@@ -483,6 +498,8 @@ export class DiscoverPlugin
 const getLocators = () => import('./plugin_imports/locators');
 const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
 const getSharedServices = () => import('./plugin_imports/shared_services');
+const getUnifiedChartSectionViewerAnalytics = () =>
+  import('@kbn/unified-chart-section-viewer/src/analytics');
 
 const getHistoryService = once(async () => {
   const { HistoryService } = await getSharedServices();

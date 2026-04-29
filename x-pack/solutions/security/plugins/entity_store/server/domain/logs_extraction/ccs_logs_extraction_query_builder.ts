@@ -12,6 +12,7 @@ import type { PaginationFields } from './query_builder_commons';
 import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
+  buildSetFieldsByCondition,
   type PaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
@@ -66,13 +67,17 @@ export function buildCcsLogsExtractionEsqlQuery({
   parts.push(`SET unmapped_fields="nullify";`);
 
   // FROM and WHERE
-  parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
-  );
+  parts.push(buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO }));
 
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {
     parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
   }
 
   // Builds the id
@@ -84,6 +89,17 @@ export function buildCcsLogsExtractionEsqlQuery({
     ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${aggregationStats(fields, false)}
     BY ${MAIN_ENTITY_ID_FIELD}`);
+
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
+      parts.push(
+        buildSetFieldsByCondition(entry, {
+          entityFields: fields,
+          useRecentDataPrefix: false,
+        })
+      );
+    }
+  }
 
   // Keep fields
   parts.push(`| KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}`);

@@ -31,8 +31,8 @@ import {
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CytoscapeContext } from './cytoscape';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import {
   useMlLocator,
@@ -250,7 +250,12 @@ export const Controls: FC<Props> = React.memo(
     }
 
     const button = (
-      <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={onActionsButtonClick}>
+      <EuiButton
+        size="s"
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={onActionsButtonClick}
+      >
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.flyout.nodeActionsButton"
           defaultMessage="Node actions"
@@ -292,7 +297,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiContextMenuItem
               disabled={!canCreateDataFrameAnalytics}
               key={`${nodeId}-drift-data`}
-              icon="visTagCloud"
+              icon="chartTagCloud"
               onClick={onAnalyzeDataDrift}
             >
               <FormattedMessage
@@ -307,7 +312,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiContextMenuItem
               disabled={!canCreateDataFrameAnalytics}
               key={`${nodeId}-create`}
-              icon="plusInCircle"
+              icon="plusCircle"
               onClick={onCreateJobClick}
             >
               <FormattedMessage

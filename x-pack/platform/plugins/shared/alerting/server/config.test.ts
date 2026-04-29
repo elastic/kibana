@@ -21,6 +21,12 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
+        "ruleChangeTracking": Object {
+          "enabled": false,
+          "scope": Array [
+            "security",
+          ],
+        },
         "rules": Object {
           "apiKeyType": "es",
           "maxScheduledPerMinute": 32000,

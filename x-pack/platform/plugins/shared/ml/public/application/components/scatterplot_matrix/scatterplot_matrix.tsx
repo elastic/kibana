@@ -563,7 +563,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                       defaultMessage:
                         'Explore scatterplot charts in Vega based custom visualization',
                     })}
-                    type="visVega"
+                    type="code"
                     size="l"
                   />
                 </EuiLink>

@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
 import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+import { i18n } from '@kbn/i18n';
 
 interface DropDownLabel {
   label: string;
@@ -66,6 +67,9 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlGeoFieldNameSelect"
+      aria-label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.geoField.ariaLabel', {
+        defaultMessage: 'Geo field select',
+      })}
     />
   );
 };

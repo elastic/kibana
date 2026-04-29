@@ -326,6 +326,87 @@ describe('AttachmentService', () => {
       );
     });
 
+    it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      const unifiedAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+      const pushedAt = '2024-01-02T00:00:00.000Z';
+      const pushedBy = { username: 'pusher', full_name: null, email: null };
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: { ...unifiedAttrs, pushed_at: pushedAt, pushed_by: pushedBy },
+            references: [],
+            version: 'v2',
+          },
+        ],
+      });
+
+      await expect(
+        serviceWithFlagOn.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+              updatedAttributes: { pushed_at: pushedAt, pushed_by: pushedBy },
+            },
+          ],
+          refresh: false,
+          requestWithoutType: true,
+        })
+      ).resolves.not.toThrow();
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            id: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+            attributes: { pushed_at: pushedAt, pushed_by: pushedBy },
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    it('when enabled, bulkUpdate throws for typed patches without owner when requestWithoutType is false', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      await expect(
+        serviceWithFlagOn.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+              updatedAttributes: { type: 'comment', data: { content: 'hello' } },
+            },
+          ],
+          refresh: false,
+          requestWithoutType: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid attributes: expected owner when transforming attachment patch"`
+      );
+    });
+
     it('when disabled, bulkCreate writes to CASE_COMMENT_SAVED_OBJECT', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [createUserAttachment()],
@@ -368,7 +449,7 @@ describe('AttachmentService', () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
       const res = await service.update({
-        attachmentId: '1',
+        savedObjectId: '1',
         updatedAttributes: persistableStateAttachment,
         options: { references: [] },
       });
@@ -383,7 +464,7 @@ describe('AttachmentService', () => {
       });
 
       const res = await service.update({
-        attachmentId: '1',
+        savedObjectId: '1',
         updatedAttributes: externalReferenceAttachmentSO,
         options: { references: [] },
       });
@@ -398,7 +479,7 @@ describe('AttachmentService', () => {
       });
 
       const res = await service.update({
-        attachmentId: '1',
+        savedObjectId: '1',
         updatedAttributes: externalReferenceAttachmentESAttributes,
         options: { references: [] },
       });
@@ -413,7 +494,7 @@ describe('AttachmentService', () => {
         await expect(
           service.update({
             updatedAttributes: createUserAttachment().attributes,
-            attachmentId: '1',
+            savedObjectId: '1',
           })
         ).resolves.not.toThrow();
       });
@@ -423,7 +504,7 @@ describe('AttachmentService', () => {
 
         const res = await service.update({
           updatedAttributes: createUserAttachment().attributes,
-          attachmentId: '1',
+          savedObjectId: '1',
         });
 
         expect(res).toStrictEqual(createUserAttachment());
@@ -438,7 +519,7 @@ describe('AttachmentService', () => {
         await expect(
           service.update({
             updatedAttributes: createAlertAttachment().attributes,
-            attachmentId: '1',
+            savedObjectId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
@@ -454,7 +535,7 @@ describe('AttachmentService', () => {
         await expect(
           service.update({
             updatedAttributes: invalidAttachment.attributes,
-            attachmentId: '1',
+            savedObjectId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
@@ -467,7 +548,7 @@ describe('AttachmentService', () => {
         await service.update({
           // @ts-expect-error: excess attributes
           updatedAttributes: { ...createUserAttachment().attributes, foo: 'bar' },
-          attachmentId: '1',
+          savedObjectId: '1',
         });
 
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
@@ -503,17 +584,17 @@ describe('AttachmentService', () => {
       const res = await service.bulkUpdate({
         comments: [
           {
-            attachmentId: '1',
+            savedObjectId: '1',
             updatedAttributes: persistableStateAttachment,
             options: { references: [] },
           },
           {
-            attachmentId: '2',
+            savedObjectId: '2',
             updatedAttributes: externalReferenceAttachmentSO,
             options: { references: [] },
           },
           {
-            attachmentId: '3',
+            savedObjectId: '3',
             updatedAttributes: externalReferenceAttachmentES,
             options: { references: [] },
           },
@@ -538,7 +619,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createUserAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
+          service.bulkUpdate({ comments: [{ savedObjectId: '1', updatedAttributes }] })
         ).resolves.not.toThrow();
       });
 
@@ -554,8 +635,8 @@ describe('AttachmentService', () => {
 
         const res = await service.bulkUpdate({
           comments: [
-            { attachmentId: '1', updatedAttributes: userAttachment.attributes },
-            { attachmentId: '1', updatedAttributes: userAttachment.attributes },
+            { savedObjectId: '1', updatedAttributes: userAttachment.attributes },
+            { savedObjectId: '1', updatedAttributes: userAttachment.attributes },
           ],
         });
 
@@ -570,7 +651,7 @@ describe('AttachmentService', () => {
         });
 
         const res = await service.bulkUpdate({
-          comments: [{ attachmentId: '1', updatedAttributes }],
+          comments: [{ savedObjectId: '1', updatedAttributes }],
         });
 
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
@@ -587,7 +668,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createAlertAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
+          service.bulkUpdate({ comments: [{ savedObjectId: '1', updatedAttributes }] })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
@@ -606,7 +687,7 @@ describe('AttachmentService', () => {
             comments: [
               {
                 updatedAttributes: invalidAttachment.attributes,
-                attachmentId: '1',
+                savedObjectId: '1',
               },
             ],
           })
@@ -625,7 +706,7 @@ describe('AttachmentService', () => {
             {
               // @ts-expect-error: excess attributes
               updatedAttributes: { ...createUserAttachment().attributes, foo: 'bar' },
-              attachmentId: '1',
+              savedObjectId: '1',
             },
           ],
         });
@@ -642,7 +723,7 @@ describe('AttachmentService', () => {
     it('calls bulkDelete with both CASE_ATTACHMENT_SAVED_OBJECT and CASE_COMMENT_SAVED_OBJECT for each id', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
 
-      await service.bulkDelete({ attachmentIds: ['id-1', 'id-2'], refresh: false });
+      await service.bulkDelete({ savedObjectIds: ['id-1', 'id-2'], refresh: false });
 
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
       const [deleteRequests] = unsecuredSavedObjectsClient.bulkDelete.mock.calls[0];
@@ -662,13 +743,115 @@ describe('AttachmentService', () => {
   });
 
   describe('find', () => {
+    it('uses a single paginated find call when feature flag is enabled', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await serviceWithFlagOn.find({
+        mode: 'legacy',
+        options: {
+          page: 1,
+          perPage: 10,
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 1,
+          perPage: 10,
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
+      );
+    });
+
+    it('queries only legacy SO type when feature flag is disabled', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await service.find({ mode: 'legacy' });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: CASE_COMMENT_SAVED_OBJECT,
+        })
+      );
+    });
+
+    it('queries both legacy and unified comment SO types when feature flag is enabled', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await serviceWithFlagOn.find({ mode: 'legacy' });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
+      );
+    });
+
+    it('transforms unified comment find results to legacy output', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([
+          {
+            id: 'unified-1',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            score: 0,
+            attributes: {
+              type: 'comment',
+              data: { content: 'from unified' },
+              owner: SECURITY_SOLUTION_OWNER,
+              metadata: { owner: SECURITY_SOLUTION_OWNER },
+              created_at: '2024-01-01T00:00:00.000Z',
+              created_by: { username: 'u', full_name: null, email: null },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: null,
+              updated_by: null,
+            },
+            references: [],
+          },
+        ])
+      );
+
+      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+
+      expect(res.saved_objects[0].attributes).toMatchObject({
+        type: 'user',
+        comment: 'from unified',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+    });
+
     describe('Decoding', () => {
       it('does not throw when the response has the required fields', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(
           createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
         );
 
-        await expect(service.find({})).resolves.not.toThrow();
+        await expect(service.find({ mode: 'legacy' })).resolves.not.toThrow();
       });
 
       it('strips excess fields', async () => {
@@ -676,7 +859,7 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...createUserAttachment({ foo: 'bar' }), score: 0 }])
         );
 
-        const res = await service.find({});
+        const res = await service.find({ mode: 'legacy' });
 
         expect(res).toStrictEqual(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
       });
@@ -689,7 +872,7 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...invalidAttachment, score: 0 }])
         );
 
-        await expect(service.find({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        await expect(service.find({ mode: 'legacy' })).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );
       });

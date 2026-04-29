@@ -7,9 +7,10 @@
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ruleTypeUsageSchema } from './schemas/detection_rule_usage';
-import { ruleMetricsSchema } from './schemas/prebuilt_rule_detail';
+import { ruleMetricsSchema } from './schemas/rule_metrics';
 import { ruleStatusMetricsSchema } from './schemas/detection_rule_status';
 import { ruleUpgradeStatusSchema } from './schemas/detection_rule_upgrade_status';
+import { ruleDeprecatedStatusSchema } from './schemas/detection_rule_deprecated_status';
 import type { RuleAdoption } from './types';
 import { ruleCustomizedFieldsCounts } from './schemas/detection_rule_customization_status';
 
@@ -35,4 +36,19 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   detection_rule_status: ruleStatusMetricsSchema,
   elastic_detection_rule_upgrade_status: ruleUpgradeStatusSchema,
   elastic_detection_rule_customization_status: ruleCustomizedFieldsCounts,
+  elastic_detection_rule_deprecated_status: ruleDeprecatedStatusSchema,
+  ai_created_rules: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of rules created via AI rule creation' },
+    },
+    enabled: {
+      type: 'long',
+      _meta: { description: 'Number of AI-created rules that are enabled' },
+    },
+    disabled: {
+      type: 'long',
+      _meta: { description: 'Number of AI-created rules that are disabled' },
+    },
+  },
 };

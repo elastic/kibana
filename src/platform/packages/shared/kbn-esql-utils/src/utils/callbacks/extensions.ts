@@ -18,11 +18,6 @@ interface EditorExtensions {
   recommendedFields: RecommendedField[];
 }
 
-const defaultExtensions: EditorExtensions = {
-  recommendedQueries: [],
-  recommendedFields: [],
-};
-
 /**
  * Single-pass analysis of the query string: parses the AST once and returns
  * whether the source is complete, the index pattern, and the command name.
@@ -95,7 +90,8 @@ export const getEditorExtensions = (
 ): Promise<EditorExtensions> => {
   const analysis = analyzeSourceQuery(queryString);
   if (!analysis) {
-    return Promise.resolve(defaultExtensions);
+    // Still fetch from the server so standalone queries are returned
+    return cachedGetEditorExtensions(http, '_', activeSolutionId);
   }
   // Normalize to a minimal query so the HTTP URL is always identical for a
   // given index pattern — even when the cache triggers a background refresh

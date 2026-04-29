@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
 import type { DocumentProfileProvider } from '../../../profiles';
 import { DocumentType, SolutionType } from '../../../profiles';
@@ -16,6 +15,7 @@ import { SECURITY_PROFILE_ID } from '../constants';
 import * as i18n from '../translations';
 import type { SecurityProfileProviderFactory } from '../types';
 import { AlertEventOverviewLazy } from '../components';
+import { isAlertDocument, isEventDocument } from '../utils/is_alert_document';
 
 export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
@@ -25,17 +25,20 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
-        const isAlert = getFieldValue(params.record, 'event.kind') === 'signal';
+        const isAlert = isAlertDocument(params.record);
+        const isEvent = isEventDocument(params.record);
 
         return {
           ...prevDocViewer,
           docViewsRegistry: (registry) => {
-            registry.add({
-              id: 'doc_view_alerts_overview',
-              title: i18n.overviewTabTitle(isAlert),
-              order: 0,
-              render: (props) => <AlertEventOverviewLazy {...props} />,
-            });
+            if (isAlert || isEvent) {
+              registry.add({
+                id: 'doc_view_alerts_overview',
+                title: i18n.overviewTabTitle(isAlert),
+                order: 0,
+                render: (props) => <AlertEventOverviewLazy {...props} />,
+              });
+            }
 
             return prevDocViewer.docViewsRegistry(registry);
           },

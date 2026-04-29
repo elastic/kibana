@@ -13,12 +13,7 @@ Top-level layout wiring for Kibana's Chrome application shell. Bridges core serv
 
 - **`GridLayout`** — modern CSS Grid-based layout (current default)
 
-## Debug Mode
-
-Set `core.chrome.layoutDebug: true` in your Kibana config to enable debug overlays for layout visualization.
-
 ## Related
 
 - [`@kbn/core-chrome-browser-components`](../../browser-components) — all chrome UI components (headers, sidenav, etc.)
 - [`@kbn/core-chrome-layout-components`](../core-chrome-layout-components) — `ChromeLayout` grid container and layout primitives
-- [`@kbn/core-chrome-layout-feature-flags`](../core-chrome-layout-feature-flags) — feature flag utilities for debug mode

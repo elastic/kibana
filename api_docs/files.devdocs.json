@@ -11,7 +11,15 @@
         "tags": [],
         "label": "FilesClient",
         "description": [
-          "\nA client that can be used to manage a specific {@link FileKind}."
+          "\nA client that can be used to manage a specific ",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.FileKind",
+            "text": "FileKind"
+          },
+          "."
         ],
         "signature": [
           "FilesClient",
@@ -136,7 +144,14 @@
         "tags": [],
         "label": "FilesClientFactory",
         "description": [
-          "\nA factory for creating a {@link ScopedFilesClient}"
+          "\nA factory for creating a ",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.ScopedFilesClient",
+            "text": "ScopedFilesClient"
+          }
         ],
         "path": "src/platform/plugins/shared/files/common/files_client.ts",
         "lineNumber": 48,
@@ -173,7 +188,23 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreate a {@link ScopedFileClient} for a given {@link FileKind}.\n"
+              "\nCreate a ",
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.ScopedFileClient",
+                "text": "ScopedFileClient"
+              },
+              " for a given ",
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.FileKind",
+                "text": "FileKind"
+              },
+              ".\n"
             ],
             "signature": [
               "<M = unknown>(fileKind: string) => ",
@@ -318,7 +349,15 @@
         "tags": [],
         "label": "ScopedFilesClient",
         "description": [
-          "\nA files client that is scoped to a specific {@link FileKind}.\n\nMore convenient if you want to re-use the same client for the same file kind\nand not specify the kind every time."
+          "\nA files client that is scoped to a specific ",
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.FileKind",
+            "text": "FileKind"
+          },
+          ".\n\nMore convenient if you want to re-use the same client for the same file kind\nand not specify the kind every time."
         ],
         "signature": [
           "{ getMetrics: (arg: Omit<undefined, \"kind\">) => Promise<",
@@ -572,7 +611,23 @@
           ],
           "label": "filesClientFactory",
           "description": [
-            "\nA factory for creating an {@link FilesClient} instance. This requires a\nregistered {@link FileKindBrowser}.\n"
+            "\nA factory for creating an ",
+            {
+              "pluginId": "files",
+              "scope": "public",
+              "docId": "kibFilesPluginApi",
+              "section": "def-public.FilesClient",
+              "text": "FilesClient"
+            },
+            " instance. This requires a\nregistered ",
+            {
+              "pluginId": "files",
+              "scope": "public",
+              "docId": "kibFilesPluginApi",
+              "section": "def-public.FileKindBrowser",
+              "text": "FileKindBrowser"
+            },
+            ".\n"
           ],
           "signature": [
             "FilesClientFactory"
@@ -636,7 +691,15 @@
           "tags": [],
           "label": "registerFileKind",
           "description": [
-            "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
+            "\nRegister a ",
+            {
+              "pluginId": "files",
+              "scope": "public",
+              "docId": "kibFilesPluginApi",
+              "section": "def-public.FileKind",
+              "text": "FileKind"
+            },
+            " which allows for specifying details about the files\nthat will be uploaded.\n"
           ],
           "signature": [
             "(fileKind: ",
@@ -677,6 +740,7 @@
               "lineNumber": 41,
               "columnNumber": 20,
               "deprecated": false,
+              "docsReferencedTypeName": "FileKindBrowser",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -742,7 +806,15 @@
         ],
         "label": "createEsFileClient",
         "description": [
-          "\nA utility function for creating an instance of {@link FileClient}\nthat will speak with ES indices only for file functionality.\n"
+          "\nA utility function for creating an instance of ",
+          {
+            "pluginId": "files",
+            "scope": "server",
+            "docId": "kibFilesPluginApi",
+            "section": "def-server.FileClient",
+            "text": "FileClient"
+          },
+          "\nthat will speak with ES indices only for file functionality.\n"
         ],
         "signature": [
           "(arg: ",
@@ -790,6 +862,7 @@
             "lineNumber": 61,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateEsFileClientArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -829,6 +902,7 @@
             "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SupportedFileHashAlgorithm",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -893,7 +967,11 @@
               "\nAn elasticsearch client that will be used to interact with the cluster."
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -976,10 +1054,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -1999,7 +2073,15 @@
             "tags": [],
             "label": "fileKind",
             "description": [
-              "\nFile kind, must correspond to a registered {@link FileKind}."
+              "\nFile kind, must correspond to a registered ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileKind",
+                "text": "FileKind"
+              },
+              "."
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "lineNumber": 20,
@@ -2269,7 +2351,23 @@
         "tags": [],
         "label": "FileClient",
         "description": [
-          "\nWraps the {@link FileMetadataClient} and {@link BlobStorageClient} client\nto provide basic file CRUD functionality.\n\nFor now this is just a shallow type of the implementation for export purposes."
+          "\nWraps the ",
+          {
+            "pluginId": "files",
+            "scope": "server",
+            "docId": "kibFilesPluginApi",
+            "section": "def-server.FileMetadataClient",
+            "text": "FileMetadataClient"
+          },
+          " and ",
+          {
+            "pluginId": "files",
+            "scope": "server",
+            "docId": "kibFilesPluginApi",
+            "section": "def-server.BlobStorageClient",
+            "text": "BlobStorageClient"
+          },
+          " client\nto provide basic file CRUD functionality.\n\nFor now this is just a shallow type of the implementation for export purposes."
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
         "lineNumber": 60,
@@ -2284,7 +2382,15 @@
             "tags": [],
             "label": "fileKind",
             "description": [
-              "See {@link FileMetadata.FileKind}."
+              "See ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileMetadata.FileKind",
+                "text": "FileMetadata.FileKind"
+              },
+              "."
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "lineNumber": 67,
@@ -2299,7 +2405,15 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nSee {@link FileMetadataClient.create}.\n"
+              "\nSee ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileMetadataClient.create",
+                "text": "FileMetadataClient.create"
+              },
+              ".\n"
             ],
             "signature": [
               "<M = unknown>(arg: ",
@@ -2337,6 +2451,7 @@
                 "lineNumber": 75,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2350,7 +2465,15 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nSee {@link FileMetadataClient.get}\n"
+              "\nSee ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileMetadataClient.get",
+                "text": "FileMetadataClient.get"
+              },
+              "\n"
             ],
             "signature": [
               "<M = unknown>(arg: ",
@@ -2399,6 +2522,7 @@
                 "lineNumber": 82,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "P1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2412,7 +2536,15 @@
             "tags": [],
             "label": "update",
             "description": [
-              "\n{@link FileMetadataClient.update}\n"
+              "\n",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileMetadataClient.update",
+                "text": "FileMetadataClient.update"
+              },
+              "\n"
             ],
             "signature": [
               "<M = unknown>(id: string, metadata: ",
@@ -2473,6 +2605,7 @@
                 "lineNumber": 90,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdatableFileMetadata",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2527,6 +2660,7 @@
                 "lineNumber": 96,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2540,7 +2674,15 @@
             "tags": [],
             "label": "find",
             "description": [
-              "\nSee {@link FileMetadataClient.find}.\n"
+              "\nSee ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileMetadataClient.find",
+                "text": "FileMetadataClient.find"
+              },
+              ".\n"
             ],
             "signature": [
               "(arg?: ",
@@ -2590,6 +2732,7 @@
                 "lineNumber": 103,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P1",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2642,6 +2785,7 @@
                 "lineNumber": 112,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "ShareArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2685,6 +2829,7 @@
                 "lineNumber": 44,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteArgs",
                 "trackAdoption": false
               }
             ]
@@ -2748,6 +2893,7 @@
                 "lineNumber": 30,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ListArgs",
                 "trackAdoption": false
               }
             ]
@@ -2904,6 +3050,7 @@
                 "lineNumber": 108,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "FileDescriptor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2966,6 +3113,7 @@
                 "lineNumber": 115,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetArg",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3172,6 +3320,7 @@
                 "lineNumber": 132,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3226,6 +3375,7 @@
                 "lineNumber": 138,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteArg",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3289,6 +3439,7 @@
                 "lineNumber": 144,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindFileArgs",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3351,6 +3502,7 @@
                 "lineNumber": 150,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetUsageMetricsArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3367,7 +3519,14 @@
         "tags": [],
         "label": "FileServiceFactory",
         "description": [
-          "\nA simple interface for getting an instance of {@link FileServiceStart}"
+          "\nA simple interface for getting an instance of ",
+          {
+            "pluginId": "files",
+            "scope": "server",
+            "docId": "kibFilesPluginApi",
+            "section": "def-server.FileServiceStart",
+            "text": "FileServiceStart"
+          }
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
         "lineNumber": 36,
@@ -3419,6 +3578,7 @@
                 "lineNumber": 45,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3479,7 +3639,15 @@
             "tags": [],
             "label": "create",
             "description": [
-              "\nCreate a new file.\n\nOnce created, the file content can be uploaded. See {@link File}.\n"
+              "\nCreate a new file.\n\nOnce created, the file content can be uploaded. See ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.File",
+                "text": "File"
+              },
+              ".\n"
             ],
             "signature": [
               "<M>(args: ",
@@ -3529,6 +3697,7 @@
                 "lineNumber": 33,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateFileArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3583,6 +3752,7 @@
                 "lineNumber": 40,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateFileArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3637,6 +3807,7 @@
                 "lineNumber": 47,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteFileArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3679,6 +3850,7 @@
                 "lineNumber": 54,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkDeleteFilesArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3741,6 +3913,7 @@
                 "lineNumber": 61,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetByIdArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4223,6 +4396,7 @@
                 "lineNumber": 78,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkGetByIdArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4285,6 +4459,7 @@
                 "lineNumber": 85,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindFileArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4334,6 +4509,7 @@
                 "lineNumber": 23,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetArgs",
                 "trackAdoption": false
               }
             ]
@@ -4395,6 +4571,7 @@
                 "lineNumber": 30,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ListArgs",
                 "trackAdoption": false
               }
             ]
@@ -4456,6 +4633,7 @@
                 "lineNumber": 37,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateArgs",
                 "trackAdoption": false
               }
             ]
@@ -4495,6 +4673,7 @@
                 "lineNumber": 44,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteArgs",
                 "trackAdoption": false
               }
             ]
@@ -4585,7 +4764,15 @@
         "tags": [],
         "label": "FileShareServiceStart",
         "description": [
-          "\nWe only expose functionality here that do not require you to have a {@link File}\ninstance loaded."
+          "\nWe only expose functionality here that do not require you to have a ",
+          {
+            "pluginId": "files",
+            "scope": "server",
+            "docId": "kibFilesPluginApi",
+            "section": "def-server.File",
+            "text": "File"
+          },
+          "\ninstance loaded."
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
         "lineNumber": 13,
@@ -4635,6 +4822,7 @@
                 "lineNumber": 23,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4697,6 +4885,7 @@
                 "lineNumber": 30,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ListArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4759,6 +4948,7 @@
                 "lineNumber": 37,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4799,6 +4989,7 @@
                 "lineNumber": 44,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4900,7 +5091,15 @@
             "tags": [],
             "label": "kind",
             "description": [
-              "\nFile kind(s), see {@link FileKind}."
+              "\nFile kind(s), see ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileKind",
+                "text": "FileKind"
+              },
+              "."
             ],
             "signature": [
               "string[] | undefined"
@@ -4918,7 +5117,15 @@
             "tags": [],
             "label": "kindToExclude",
             "description": [
-              "\nFile kind(s) to exclude from search, see {@link FileKind}."
+              "\nFile kind(s) to exclude from search, see ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.FileKind",
+                "text": "FileKind"
+              },
+              "."
             ],
             "signature": [
               "string[] | undefined"
@@ -5433,7 +5640,15 @@
           ],
           "label": "registerFileKind",
           "description": [
-            "\nRegister a {@link FileKind} which allows for specifying details about the files\nthat will be uploaded.\n"
+            "\nRegister a ",
+            {
+              "pluginId": "files",
+              "scope": "server",
+              "docId": "kibFilesPluginApi",
+              "section": "def-server.FileKind",
+              "text": "FileKind"
+            },
+            " which allows for specifying details about the files\nthat will be uploaded.\n"
           ],
           "signature": [
             "(fileKind: ",
@@ -5524,6 +5739,7 @@
               "lineNumber": 27,
               "columnNumber": 20,
               "deprecated": false,
+              "docsReferencedTypeName": "FileKind",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -5558,7 +5774,15 @@
           ],
           "label": "fileServiceFactory",
           "description": [
-            "\nCreate an instance of {@link FileServiceStart}.\n"
+            "\nCreate an instance of ",
+            {
+              "pluginId": "files",
+              "scope": "server",
+              "docId": "kibFilesPluginApi",
+              "section": "def-server.FileServiceStart",
+              "text": "FileServiceStart"
+            },
+            ".\n"
           ],
           "signature": [
             {
@@ -5753,6 +5977,7 @@
                 "lineNumber": 195,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5807,6 +6032,7 @@
                 "lineNumber": 205,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Readable",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5827,6 +6053,7 @@
                 "lineNumber": 206,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -5848,6 +6075,7 @@
                 "lineNumber": 207,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5957,6 +6185,7 @@
                 "lineNumber": 231,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "FileShareOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5970,7 +6199,15 @@
             "tags": [],
             "label": "listShares",
             "description": [
-              "\nList all current {@link FileShareJSON} objects that have been created for\na file."
+              "\nList all current ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              " objects that have been created for\na file."
             ],
             "signature": [
               "() => Promise<",
@@ -5998,7 +6235,15 @@
             "tags": [],
             "label": "unshare",
             "description": [
-              "\nRemove a {@link FileShareJSON} object therefore ceasing to share a file's\ncontent.\n"
+              "\nRemove a ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              " object therefore ceasing to share a file's\ncontent.\n"
             ],
             "signature": [
               "(opts: ",
@@ -6039,6 +6284,7 @@
                 "lineNumber": 245,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "FileUnshareOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6279,7 +6525,15 @@
             "tags": [],
             "label": "status",
             "description": [
-              "\nThe current status of the file.\n\nSee {@link FileStatus} for more details."
+              "\nThe current status of the file.\n\nSee ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileStatus",
+                "text": "FileStatus"
+              },
+              " for more details."
             ],
             "signature": [
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
@@ -6368,7 +6622,15 @@
             ],
             "label": "maxSizeBytes",
             "description": [
-              "\nMax file contents size, in bytes. Can be customized per file using the\n{@link FileJSON} object. This is enforced on the server-side as well as\nin the upload React component.\n"
+              "\nMax file contents size, in bytes. Can be customized per file using the\n",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              " object. This is enforced on the server-side as well as\nin the upload React component.\n"
             ],
             "signature": [
               "number | ((file: ",
@@ -6972,7 +7234,15 @@
         "tags": [],
         "label": "FileSavedObject",
         "description": [
-          "\nAn {@link SavedObject} containing a file object (i.e., metadata only)."
+          "\nAn ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
+          " containing a file object (i.e., metadata only)."
         ],
         "signature": [
           "SavedObject",

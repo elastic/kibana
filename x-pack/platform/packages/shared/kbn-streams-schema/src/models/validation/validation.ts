@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 
-export interface Validation<TLeft = any, TRight extends TLeft = any> {
+export interface Validation<TLeft = unknown, TRight extends TLeft = TLeft> {
   is: (value: TLeft) => value is TRight;
   as: (value: TRight) => TRight;
   asserts: (value: TLeft) => asserts value is TRight;

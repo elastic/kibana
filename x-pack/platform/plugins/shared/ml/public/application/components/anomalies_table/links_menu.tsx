@@ -46,11 +46,12 @@ import { isQuery } from '@kbn/data-plugin/public';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 
 import { useMlJobService } from '../../services/job_service';
@@ -788,7 +789,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key={`custom_url_${index}`}
-            icon="popout"
+            icon="external"
             onClick={() => {
               closePopover();
               openCustomUrl(customUrl);
@@ -898,7 +899,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="view_examples"
-          icon="popout"
+          icon="external"
           onClick={() => {
             closePopover();
             viewExamples();
@@ -927,7 +928,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="create_rule"
-          icon="controlsHorizontal"
+          icon="controls"
           onClick={() => {
             closePopover();
             props.showRuleEditorFlyout(anomaly, focusTrapProps);
@@ -981,7 +982,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
-          icon="logPatternAnalysis"
+          icon="pattern"
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);
@@ -1063,6 +1064,12 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.ml.anomaliesTable.linksMenu.anomalyLinksMenuPopoverAriaLabel',
+          {
+            defaultMessage: 'Anomaly links menu',
+          }
+        )}
       >
         <LinksMenuUI {...props} onItemClick={closePopover} />
       </EuiPopover>

@@ -9,6 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { generateSampleFromJsonSchema } from './generate_sample_from_json_schema';
+import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
 
 describe('generateSampleFromJsonSchema', () => {
   describe('default values', () => {
@@ -32,7 +33,7 @@ describe('generateSampleFromJsonSchema', () => {
 
   describe('string type', () => {
     it('returns "string" for a plain string', () => {
-      expect(generateSampleFromJsonSchema({ type: 'string' })).toBe('string');
+      expect(generateSampleFromJsonSchema({ type: 'string' })).toBe(INPUT_STRING_PLACEHOLDER);
     });
 
     it('returns "user@example.com" for format: email', () => {
@@ -61,7 +62,7 @@ describe('generateSampleFromJsonSchema', () => {
   describe('array type', () => {
     it('returns an array with one sample item when items schema is provided', () => {
       const schema: JSONSchema7 = { type: 'array', items: { type: 'string' } };
-      expect(generateSampleFromJsonSchema(schema)).toEqual(['string']);
+      expect(generateSampleFromJsonSchema(schema)).toEqual([INPUT_STRING_PLACEHOLDER]);
     });
 
     it('returns an empty array when no items schema', () => {
@@ -88,7 +89,10 @@ describe('generateSampleFromJsonSchema', () => {
         },
         required: ['name', 'age'],
       };
-      expect(generateSampleFromJsonSchema(schema)).toEqual({ name: 'string', age: 0 });
+      expect(generateSampleFromJsonSchema(schema)).toEqual({
+        name: INPUT_STRING_PLACEHOLDER,
+        age: 0,
+      });
     });
 
     it('includes properties with defaults even if not required', () => {
@@ -121,8 +125,38 @@ describe('generateSampleFromJsonSchema', () => {
         required: ['address'],
       };
       expect(generateSampleFromJsonSchema(schema)).toEqual({
-        address: { city: 'string' },
+        address: { city: INPUT_STRING_PLACEHOLDER },
       });
+    });
+  });
+
+  describe('implicit object (no explicit type, but has properties)', () => {
+    it('generates defaults from properties when type is omitted', () => {
+      const schema: JSONSchema7 = {
+        properties: {
+          approved: { type: 'boolean', default: true },
+          note: { type: 'string' },
+        },
+      };
+      // approved has a default → included; note has no default and is not required → omitted
+      expect(generateSampleFromJsonSchema(schema)).toEqual({ approved: true });
+    });
+
+    it('includes required properties even when no default', () => {
+      const schema: JSONSchema7 = {
+        properties: {
+          severity: { type: 'string' },
+        },
+        required: ['severity'],
+      };
+      expect(generateSampleFromJsonSchema(schema)).toEqual({ severity: INPUT_STRING_PLACEHOLDER });
+    });
+
+    it('returns empty object when properties exist but none are required or defaulted', () => {
+      const schema: JSONSchema7 = {
+        properties: { optional: { type: 'string' } },
+      };
+      expect(generateSampleFromJsonSchema(schema)).toEqual({});
     });
   });
 
@@ -131,7 +165,7 @@ describe('generateSampleFromJsonSchema', () => {
       expect(generateSampleFromJsonSchema({ type: 'null' })).toBeUndefined();
     });
 
-    it('returns undefined for no type', () => {
+    it('returns undefined for no type and no properties', () => {
       expect(generateSampleFromJsonSchema({})).toBeUndefined();
     });
   });

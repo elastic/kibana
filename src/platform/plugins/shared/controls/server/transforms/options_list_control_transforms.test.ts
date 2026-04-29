@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { registerOptionsListControlTransforms } from './options_list_control_transforms';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 
 const REF_NAME = 'test-data-view';
 
@@ -21,19 +21,19 @@ const baseState = {
 
 const panelReferences = [{ name: REF_NAME, type: 'index-pattern', id: 'data-view-id' }];
 
-const getTransformOut = () => {
+const getTransforms = () => {
   const embeddable = createEmbeddableSetupMock();
   registerOptionsListControlTransforms(embeddable);
 
-  const [, transformsSetup] = embeddable.registerTransforms.mock.calls[0];
-  const { transformOut } = transformsSetup.getTransforms!({} as DrilldownTransforms);
-  return transformOut!;
+  const [, transformsSetup] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
+  const { transformOut, transformIn } = transformsSetup.getTransforms!({} as DrilldownTransforms);
+  return { transformOut: transformOut!, transformIn: transformIn! };
 };
 
 describe('options list control transforms', () => {
-  describe('transformOut', () => {
-    const transformOut = getTransformOut();
+  const { transformOut } = getTransforms();
 
+  describe('transformOut', () => {
     it('omits null values while keeping non-null values', () => {
       const result = transformOut(
         {
@@ -56,13 +56,52 @@ describe('options list control transforms', () => {
           "data_view_id": "data-view-id",
           "exclude": true,
           "field_name": "test",
+          "ignore_validations": false,
           "search_technique": "prefix",
           "selected_options": Array [
             "val",
           ],
           "title": "Test",
+          "use_global_filters": true,
         }
       `);
+    });
+
+    it('falls back to a data view id stored explicitly in state if no reference can be found', () => {
+      const result = transformOut(
+        {
+          ...baseState,
+          dataViewRefName: 'broken',
+          dataViewId: 'data-view-id',
+        },
+        panelReferences,
+        undefined,
+        undefined
+      );
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "data_view_id": "data-view-id",
+          "field_name": "test",
+          "ignore_validations": false,
+          "title": "Test",
+          "use_global_filters": true,
+        }
+      `);
+    });
+
+    it('throws on empty required fields', () => {
+      expect(() =>
+        transformOut({
+          data_view_id: '',
+        })
+      ).toThrow('Must include a non-empty data view ID');
+      expect(() =>
+        transformOut({
+          data_view_id: 'test',
+          field_name: '',
+        })
+      ).toThrow('Must include a non-empty field name');
     });
   });
 });

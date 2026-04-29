@@ -21,7 +21,7 @@ import { UiMetricService } from './services';
 
 import { renderApp } from '.';
 import { setReindexService, setUiMetricService } from './services/api';
-import { notificationService } from './services/notification';
+import { NotificationService } from './services/notification';
 import { httpService } from './services/http';
 import type { ExtensionsService } from '../services/extensions_service';
 import type { StartDependencies } from '../types';
@@ -38,7 +38,7 @@ function initSetup({
   const { http, notifications } = core;
 
   httpService.setup(http);
-  notificationService.setup(notifications);
+  const notificationService = new NotificationService(notifications.toasts);
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);
   setUiMetricService(uiMetricService);
@@ -46,7 +46,7 @@ function initSetup({
 
   setReindexService(reindexService);
 
-  return { uiMetricService };
+  return { uiMetricService, notificationService };
 }
 
 export function getIndexManagementDependencies({
@@ -60,6 +60,7 @@ export function getIndexManagementDependencies({
   cloud,
   startDependencies,
   uiMetricService,
+  notificationService,
   canUseSyntheticSource,
   reindexService,
 }: {
@@ -73,6 +74,7 @@ export function getIndexManagementDependencies({
   cloud?: CloudSetup;
   startDependencies: StartDependencies;
   uiMetricService: UiMetricService;
+  notificationService: NotificationService;
   canUseSyntheticSource: boolean;
   reindexService: ReindexServicePublicStart;
 }): AppDependencies {
@@ -157,7 +159,7 @@ export async function mountManagementSection({
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
 
-  const { uiMetricService } = initSetup({
+  const { uiMetricService, notificationService } = initSetup({
     usageCollection,
     core,
     reindexService: reindexService?.reindexService,
@@ -175,6 +177,7 @@ export async function mountManagementSection({
     usageCollection,
     canUseSyntheticSource,
     reindexService,
+    notificationService,
   });
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

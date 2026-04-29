@@ -866,7 +866,7 @@ export function FormulaEditor({
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
                       <EuiIcon type="documentation" />
-                      <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
+                      <EuiIcon type={isHelpOpen ? 'chevronSingleDown' : 'chevronSingleUp'} />
                     </EuiLink>
                   </EuiToolTip>
                 ) : (
@@ -893,6 +893,12 @@ export function FormulaEditor({
               {errorCount || warningCount ? (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.lens.formula.editorWarningsPopoverAriaLabel',
+                      {
+                        defaultMessage: 'Formula errors and warnings',
+                      }
+                    )}
                     ownFocus={false}
                     isOpen={isWarningOpen}
                     closePopover={() => setIsWarningOpen(false)}

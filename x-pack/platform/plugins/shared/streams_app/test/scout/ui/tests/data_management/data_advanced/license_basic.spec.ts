@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
@@ -20,10 +21,12 @@ const WIRED_STREAM = 'logs.otel';
  * The StreamDescription and StreamDiscoveryConfiguration components should not
  * render when the license doesn't support significant events features.
  */
-test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
-  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+test.describe('Advanced tab with basic license', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ logsSynthtraceEsClient, apiServices }) => {
     // Generate logs to create a classic stream
     await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM });
+    // Ensure logs.otel has a backing data stream (deferred by default) so stream tabs render
+    await apiServices.streams.restoreDataStream(WIRED_STREAM);
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {

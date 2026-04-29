@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   ElasticsearchClient,
   ISavedObjectsSerializer,
@@ -21,6 +22,7 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
+import { toFieldNames } from './utils';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
@@ -33,6 +35,7 @@ export class TemplatesService {
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
+      namespace: string;
     }
   ) {}
 
@@ -47,6 +50,7 @@ export class TemplatesService {
       author,
       owner,
       isDeleted,
+      isEnabled,
     } = params;
 
     const { templates, total } = await this.searchTemplates({
@@ -60,6 +64,7 @@ export class TemplatesService {
       author,
       owner,
       isLatest: true,
+      isEnabled,
     });
 
     const searchLower = search?.toLowerCase() ?? '';
@@ -69,8 +74,10 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some((fieldName) =>
-            fieldName.toLowerCase().includes(searchLower)
+          (so.attributes.fieldNames ?? []).some(
+            (field) =>
+              field.label.toLowerCase().includes(searchLower) ||
+              field.name.toLowerCase().includes(searchLower)
           ),
       })),
       page,
@@ -83,6 +90,57 @@ export class TemplatesService {
     templateId: string,
     version?: string
   ): Promise<SavedObject<Template> | undefined> {
+    return this._getTemplate(templateId, version);
+  }
+
+  /**
+   * Fetches ALL template versions (not just isLatest) for extended field filtering in case search.
+   *
+   * This is critical for extended field filtering because cases may reference
+   * older template versions where field definitions have changed. We need to
+   * resolve filters against ALL versions to correctly match cases created with
+   * historical template versions.
+   *
+   * Example: If template v1 has "effort estimate" field and v2 renames it to
+   * "some estimate", searching for "effort estimate" should only match cases
+   * created with v1, not v2. By fetching ALL versions, the filter resolution
+   * correctly identifies which template versions have which fields.
+   *
+   * @param params - Find parameters (owner, isDeleted)
+   * @returns Promise resolving to array of all template versions matching the criteria
+   *
+   * @example
+   * // Get all versions of Security Solution templates for extended field search
+   * const allVersions = await service.getTemplateVersionsForExtendedFieldSearch({
+   *   owner: ['securitySolution'],
+   * });
+   */
+  async getTemplateVersionsForExtendedFieldSearch(params: {
+    owner?: string[];
+  }): Promise<Array<SavedObject<Template>>> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      owner: params.owner,
+      // CRITICAL: Do NOT set isLatest - we want ALL versions
+    });
+
+    return templates;
+  }
+
+  private async _getTemplate(
+    templateId: string,
+    version?: string
+  ): Promise<SavedObject<Template> | undefined> {
+    if (version !== undefined) {
+      const parsedVersion = parseInt(version, 10);
+      if (isNaN(parsedVersion) || version === '') {
+        return undefined;
+      }
+    }
+
     const { templates } = await this.searchTemplates({
       page: 1,
       perPage: 1,
@@ -112,6 +170,7 @@ export class TemplatesService {
     tags,
     author,
     owner,
+    isEnabled,
   }: {
     page: number;
     perPage: number;
@@ -125,6 +184,7 @@ export class TemplatesService {
     tags?: string[];
     author?: string[];
     owner?: string[];
+    isEnabled?: boolean;
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
       hits: {
@@ -139,6 +199,9 @@ export class TemplatesService {
 
     const filters = [
       ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
+      ...(isEnabled !== undefined
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isEnabled: ${isEnabled}`))]
+        : []),
       ...(templateId
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
         : []),
@@ -183,8 +246,28 @@ export class TemplatesService {
                   },
                 },
                 {
-                  wildcard: {
-                    [`${SO}.fieldNames`]: { value: `*${search}*`, case_insensitive: true },
+                  nested: {
+                    path: `${SO}.fieldNames`,
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            wildcard: {
+                              [`${SO}.fieldNames.name`]: {
+                                value: `*${search}*`,
+                                case_insensitive: true,
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              [`${SO}.fieldNames.label`]: search,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   },
                 },
               ],
@@ -215,8 +298,8 @@ export class TemplatesService {
     ];
 
     const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
-      namespaces: ['*'],
       type: CASE_TEMPLATE_SAVED_OBJECT,
+      namespaces: [this.dependencies.namespace],
       from,
       size: perPage,
       sort,
@@ -236,7 +319,11 @@ export class TemplatesService {
     };
   }
 
-  async createTemplate(input: CreateTemplateInput, author: string): Promise<SavedObject<Template>> {
+  async createTemplate(
+    input: CreateTemplateInput,
+    author: string,
+    id: string = v4()
+  ): Promise<SavedObject<Template>> {
     const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
@@ -253,9 +340,10 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: toFieldNames(parsedDefinition.fields),
+        isEnabled: input.isEnabled ?? true,
       } as Template,
-      { refresh: true }
+      { refresh: true, id }
     );
 
     return templateSavedObject;
@@ -265,10 +353,10 @@ export class TemplatesService {
     templateId: string,
     input: UpdateTemplateInput
   ): Promise<SavedObject<Template>> {
-    const currentTemplate = await this.getTemplate(templateId);
+    const currentTemplate = await this._getTemplate(templateId);
 
     if (!currentTemplate) {
-      throw new Error('template does not exist');
+      throw Boom.notFound(`Template with id ${templateId} not found`);
     }
 
     const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
@@ -287,9 +375,10 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: toFieldNames(parsedDefinition.fields),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
+        isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
       },
       {
         refresh: true,
@@ -345,7 +434,7 @@ export class TemplatesService {
   }
 
   async incrementUsageStats(templateId: string): Promise<void> {
-    const template = await this.getTemplate(templateId);
+    const template = await this._getTemplate(templateId);
 
     if (!template) {
       return;
@@ -367,6 +456,12 @@ export class TemplatesService {
   }
 
   async deleteTemplate(templateId: string): Promise<void> {
+    const latestTemplate = await this._getTemplate(templateId);
+
+    if (!latestTemplate) {
+      return;
+    }
+
     const templateSnapshots = await this.dependencies.unsecuredSavedObjectsClient.find({
       type: CASE_TEMPLATE_SAVED_OBJECT,
       filter: fromKueryExpression(

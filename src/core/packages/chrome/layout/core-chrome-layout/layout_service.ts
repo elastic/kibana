@@ -22,10 +22,6 @@ export interface LayoutServiceStartDeps {
   customBranding: CustomBrandingStart;
 }
 
-export interface LayoutServiceParams {
-  debug?: boolean;
-}
-
 /**
  * The LayoutService responsible for layout management of Kibana.
  * Kibana can swap between different layout service implementation to support different layout types.
