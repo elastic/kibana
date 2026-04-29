@@ -31,7 +31,7 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards: originalFilteredCards,
+    allCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const urlFilters = useUrlFilters();
