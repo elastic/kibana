@@ -20,10 +20,10 @@ imports:
 engine:
   id: codex
   version: "0.118.0"
-  model: gpt-5.4
+  model: gpt-5.3-codex
   args:
     - -c
-    - model=llm-gateway/gpt-5.4
+    - model=llm-gateway/gpt-5.3-codex
     - -c
     - model_context_window=1050000
     # Disable plugins and apps to remove context bloat
@@ -31,11 +31,6 @@ engine:
     - features.plugins=false
     - -c
     - features.apps=false
-    # Force the Chat Completions wire so the model's "assistant text + tool_call"
-    # turns serialize into a single assistant message and Azure-backed LiteLLM
-    # stops rejecting them as orphan tool_calls.
-    - -c
-    - model_providers.openai-proxy.wire_api="chat"
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
