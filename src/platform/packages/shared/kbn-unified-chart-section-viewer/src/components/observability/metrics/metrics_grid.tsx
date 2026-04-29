@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
@@ -25,6 +26,7 @@ import { createESQLQuery, firstNonNullable } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { getEsqlQuery } from './utils/get_esql_query';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -70,6 +72,11 @@ export const MetricsGrid = ({
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
+
+  const userSource = useMemo(() => {
+    const userEsql = getEsqlQuery(fetchParams.query);
+    return userEsql ? getIndexPatternFromESQLQuery(userEsql) : undefined;
+  }, [fetchParams.query]);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
     useGridNavigation({
@@ -154,6 +161,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  userSource={userSource}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
                 />
               </EuiFlexItem>
@@ -190,6 +198,7 @@ interface ChartItemProps
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
   whereStatements?: string[];
+  userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
 }
 
@@ -211,6 +220,7 @@ const ChartItem = React.memo(
     isFocused,
     searchTerm,
     whereStatements,
+    userSource,
     onFocusCell,
     onViewDetails,
     userMessages,
@@ -236,9 +246,10 @@ const ChartItem = React.memo(
             metricItem,
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
+            originalSource: userSource,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements]);
+    }, [metricItem, applicableDimensions, whereStatements, userSource]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({ dimensions: applicableDimensions, metricItem, color });
