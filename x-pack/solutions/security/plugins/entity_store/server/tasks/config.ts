@@ -19,7 +19,7 @@ export const TasksConfig = {
   [EntityStoreTaskType.enum.extractEntity]: {
     title: 'Entity Store - Execute Entity Task',
     type: 'entity_store:v2:extract_entity_task',
-    timeout: '25s',
+    timeout: '1m',
     interval: '30s',
   },
   [EntityStoreTaskType.enum.entityMaintainer]: {

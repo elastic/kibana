@@ -14,7 +14,7 @@ responses:
                   status: started
                   filter: ""
                   delay: "1m"
-                  timeout: "25s"
+                  timeout: "1m"
                   frequency: "30s"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10
@@ -28,7 +28,7 @@ responses:
                   status: started
                   filter: ""
                   delay: "1m"
-                  timeout: "25s"
+                  timeout: "1m"
                   frequency: "30s"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10

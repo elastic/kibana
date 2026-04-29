@@ -16,7 +16,7 @@ export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '30s';
 export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
 // Max raw log documents per logs to be processed in a query (inside elastic search)
 export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 40000;
-export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '25s';
+export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '1m';
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
