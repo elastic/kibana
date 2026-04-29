@@ -106,6 +106,7 @@
                 "lineNumber": 30,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Options",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -358,6 +359,7 @@
                 "lineNumber": 44,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -381,6 +383,7 @@
                 "lineNumber": 44,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -608,6 +611,7 @@
                 "lineNumber": 30,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -631,6 +635,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Lifecycle",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1031,6 +1036,7 @@
                 "lineNumber": 32,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1054,6 +1060,7 @@
                 "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1115,6 +1122,7 @@
                 "lineNumber": 44,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1231,6 +1239,7 @@
                 "lineNumber": 117,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1409,6 +1418,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1463,6 +1473,7 @@
                 "lineNumber": 80,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReqOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1655,6 +1666,7 @@
                 "lineNumber": 149,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1672,6 +1684,7 @@
                 "lineNumber": 149,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientRequester",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1730,6 +1743,7 @@
                 "lineNumber": 169,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1770,6 +1784,7 @@
                 "lineNumber": 185,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1808,6 +1823,7 @@
                 "lineNumber": 213,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1846,6 +1862,7 @@
                 "lineNumber": 235,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1884,6 +1901,7 @@
                 "lineNumber": 259,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1920,6 +1938,7 @@
                 "lineNumber": 273,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "CleanOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2006,6 +2025,7 @@
                 "lineNumber": 295,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteObjectsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2320,6 +2340,7 @@
                 "lineNumber": 42,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2570,6 +2591,7 @@
                 "lineNumber": 58,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Args",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2630,6 +2652,7 @@
                 "lineNumber": 71,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "SamlSessionManagerOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2734,6 +2757,7 @@
                 "lineNumber": 236,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2802,6 +2826,7 @@
                 "lineNumber": 245,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2957,6 +2982,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ICluster",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3014,6 +3040,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3085,6 +3112,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Promise",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3145,6 +3173,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Config",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3170,6 +3199,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3222,6 +3252,7 @@
             "lineNumber": 31,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "EsClientForTestingOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3282,6 +3313,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Config",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3307,6 +3339,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -3352,6 +3385,7 @@
             "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3501,6 +3535,7 @@
             "lineNumber": 259,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecuteJestValidationOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3703,7 +3738,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 774,
+        "lineNumber": 772,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3719,7 +3754,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 779,
+            "lineNumber": 777,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -3876,6 +3911,7 @@
             "lineNumber": 45,
             "columnNumber": 17,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlParam",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3895,6 +3931,7 @@
             "lineNumber": 45,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlParam",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3946,6 +3983,7 @@
             "lineNumber": 15,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4091,6 +4129,7 @@
             "lineNumber": 20,
             "columnNumber": 73,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4180,6 +4219,7 @@
             "lineNumber": 18,
             "columnNumber": 76,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4404,6 +4444,7 @@
             "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4427,6 +4468,7 @@
             "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsVersion",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4632,6 +4674,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunElasticsearchOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4858,6 +4901,7 @@
                     "lineNumber": 310,
                     "columnNumber": 17,
                     "deprecated": false,
+                    "docsReferencedTypeName": "MoonJestProgress",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -4933,6 +4977,7 @@
             "lineNumber": 40,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "RunKibanaServerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4994,6 +5039,7 @@
             "lineNumber": 29,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -5019,6 +5065,7 @@
             "lineNumber": 29,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "RunTestsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5151,6 +5198,7 @@
             "lineNumber": 27,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -5176,6 +5224,7 @@
             "lineNumber": 27,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "StartServerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5234,6 +5283,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TemplateStringsArray",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -5251,6 +5301,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5959,6 +6010,7 @@
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DockerServer",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6278,6 +6330,7 @@
                 "lineNumber": 75,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "K",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6904,6 +6957,7 @@
                 "lineNumber": 89,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6942,6 +6996,7 @@
                 "lineNumber": 95,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "K",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8924,6 +8979,7 @@
             "lineNumber": 126,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "FtrConfigProviderContext",
             "trackAdoption": false
           }
         ],
@@ -9389,7 +9445,9 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [],
+            "description": [
+              "\nUser with higher privileges than regular superuser role for writing to system indices"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn/users.ts",
             "lineNumber": 37,
             "columnNumber": 3,
@@ -9402,7 +9460,9 @@
             "type": "string",
             "tags": [],
             "label": "password",
-            "description": [],
+            "description": [
+              "\nUser with higher privileges than regular superuser role for writing to system indices"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn/users.ts",
             "lineNumber": 38,
             "columnNumber": 3,

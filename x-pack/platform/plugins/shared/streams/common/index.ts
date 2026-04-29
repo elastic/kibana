@@ -41,3 +41,8 @@ export {
 
 export type { SigEventsTuningConfig } from './sig_events_tuning_config';
 export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
+export {
+  type StreamsAppLocation,
+  type StreamsAppLocationParams,
+  getStreamsLocation,
+} from './get_streams_location/get_streams_location';

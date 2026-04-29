@@ -19,7 +19,15 @@
         "tags": [],
         "label": "DeprecationRegistryProvider",
         "description": [
-          "\nProvides a method to scope the {@link DeprecationsServiceSetup | Deprecations Service} to a specific domain."
+          "\nProvides a method to scope the ",
+          {
+            "pluginId": "@kbn/core-deprecations-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDeprecationsServerPluginApi",
+            "section": "def-server.DeprecationsServiceSetup",
+            "text": "Deprecations Service"
+          },
+          " to a specific domain."
         ],
         "path": "src/core/packages/deprecations/server/src/contracts.ts",
         "lineNumber": 128,
@@ -34,7 +42,15 @@
             "tags": [],
             "label": "getRegistry",
             "description": [
-              "\nReturns the {@link DeprecationsServiceSetup | Deprecations Service} scoped to a specific domain."
+              "\nReturns the ",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsServiceSetup",
+                "text": "Deprecations Service"
+              },
+              " scoped to a specific domain."
             ],
             "signature": [
               "(domainId: string) => ",
@@ -135,7 +151,15 @@
             "tags": [],
             "label": "client",
             "description": [
-              "\n{@link DeprecationsClient | Deprecations client} exposed in the request handler context."
+              "\n",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsClient",
+                "text": "Deprecations client"
+              },
+              " exposed in the request handler context."
             ],
             "signature": [
               "DeprecationsClient"
@@ -200,6 +224,7 @@
                 "lineNumber": 100,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "RegisterDeprecationsConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -287,7 +312,15 @@
         "tags": [],
         "label": "RegisterDeprecationsConfig",
         "description": [
-          "\nOptions to provide when registering deprecations via {@link DeprecationsServiceSetup.registerDeprecations}."
+          "\nOptions to provide when registering deprecations via ",
+          {
+            "pluginId": "@kbn/core-deprecations-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDeprecationsServerPluginApi",
+            "section": "def-server.DeprecationsServiceSetup.registerDeprecations",
+            "text": "DeprecationsServiceSetup.registerDeprecations"
+          },
+          "."
         ],
         "path": "src/core/packages/deprecations/server/src/contracts.ts",
         "lineNumber": 103,
@@ -341,6 +374,7 @@
                 "lineNumber": 113,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDeprecationsContext",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -162,7 +162,7 @@
             "label": "colorMode",
             "description": [],
             "signature": [
-              "\"Background\" | \"Labels\" | \"None\""
+              "\"Labels\" | \"Background\" | \"None\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "lineNumber": 32,
@@ -534,7 +534,7 @@
             "label": "metricColorMode",
             "description": [],
             "signature": [
-              "\"Background\" | \"Labels\" | \"None\""
+              "\"Labels\" | \"Background\" | \"None\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
             "lineNumber": 39,

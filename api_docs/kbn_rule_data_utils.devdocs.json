@@ -167,6 +167,7 @@
             "lineNumber": 83,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GetEsQueryConfigParamType",
             "trackAdoption": false,
             "isRequired": false
           }
