@@ -9843,9 +9843,39 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { classic: { field_overrides?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicFieldDefinition",
+                "text": "ClassicFieldDefinition"
+              },
+              " | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
             "lineNumber": 144,
@@ -9864,9 +9894,39 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { classic: { field_overrides?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicFieldDefinition",
+                "text": "ClassicFieldDefinition"
+              },
+              " | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
             "lineNumber": 148,
@@ -9887,11 +9947,81 @@
               "BaseStream",
               ".GetResponse<",
               "BaseStream",
-              ".Definition>, ",
-              "BaseStream",
-              ".GetResponse<",
-              "BaseStream",
-              ".Definition>>"
+              ".Definition>, { dashboards: string[]; rules: string[]; queries: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              },
+              "[]; privileges: IngestStreamPrivileges; stream: { name: string; description: string; updated_at: string; type: any; ingest: { classic: { field_overrides?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicFieldDefinition",
+                "text": "ClassicFieldDefinition"
+              },
+              " | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }; data_stream_exists: boolean; effective_lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicIngestStreamEffectiveLifecycle",
+                "text": "ClassicIngestStreamEffectiveLifecycle"
+              },
+              "; effective_settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; effective_failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.EffectiveFailureStore",
+                "text": "EffectiveFailureStore"
+              },
+              "; index_mode?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamIndexMode",
+                "text": "IngestStreamIndexMode"
+              },
+              " | undefined; replicated?: boolean | undefined; elasticsearch_assets?: ",
+              "ElasticsearchAssets",
+              " | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
             "lineNumber": 152,
@@ -11262,9 +11392,9 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; query: ",
+              "QueryWithEsql",
+              "; query_streams?: { name: string; }[] | undefined; field_descriptions?: Record<string, string> | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
             "lineNumber": 107,
@@ -11283,9 +11413,9 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; query: ",
+              "QueryWithEsql",
+              "; query_streams?: { name: string; }[] | undefined; field_descriptions?: Record<string, string> | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
             "lineNumber": 111,
@@ -11306,11 +11436,25 @@
               "BaseStream",
               ".GetResponse<",
               "BaseStream",
-              ".Definition>, ",
-              "BaseStream",
-              ".GetResponse<",
-              "BaseStream",
-              ".Definition>>"
+              ".Definition>, { dashboards: string[]; rules: string[]; queries: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              },
+              "[]; stream: { name: string; description: string; updated_at: string; type: any; query: ",
+              "QueryWithEsql",
+              "; query_streams?: { name: string; }[] | undefined; field_descriptions?: Record<string, string> | undefined; }; inherited_fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.InheritedFieldDefinition",
+                "text": "InheritedFieldDefinition"
+              },
+              "; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
             "lineNumber": 115,
@@ -12296,9 +12440,47 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { wired: { fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; draft?: boolean | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
             "lineNumber": 154,
@@ -12317,9 +12499,47 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { wired: { fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; draft?: boolean | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
             "lineNumber": 158,
@@ -12340,11 +12560,89 @@
               "BaseStream",
               ".GetResponse<",
               "BaseStream",
-              ".Definition>, ",
-              "BaseStream",
-              ".GetResponse<",
-              "BaseStream",
-              ".Definition>>"
+              ".Definition>, { dashboards: string[]; rules: string[]; queries: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              },
+              "[]; privileges: IngestStreamPrivileges; stream: { name: string; description: string; updated_at: string; type: any; ingest: { wired: { fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; draft?: boolean | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }; data_stream_exists: boolean; inherited_fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.InheritedFieldDefinition",
+                "text": "InheritedFieldDefinition"
+              },
+              "; effective_lifecycle: ",
+              "WiredIngestStreamEffectiveLifecycle",
+              "; effective_settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredIngestStreamEffectiveSettings",
+                "text": "WiredIngestStreamEffectiveSettings"
+              },
+              "; effective_failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredIngestStreamEffectiveFailureStore",
+                "text": "WiredIngestStreamEffectiveFailureStore"
+              },
+              "; index_mode?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamIndexMode",
+                "text": "IngestStreamIndexMode"
+              },
+              " | undefined; replicated?: boolean | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
             "lineNumber": 162,
