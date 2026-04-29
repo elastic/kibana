@@ -269,9 +269,10 @@ export class LogsExtractionClient {
       const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
         type,
         remoteIndexPatterns,
-        fromDateISO,
-        toDateISO,
         docsLimit,
+        maxLogsPerPage,
+        lookbackPeriod: config.lookbackPeriod,
+        delay: config.delay,
         entityDefinition,
         abortController: opts?.abortController,
       });
