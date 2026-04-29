@@ -29,7 +29,7 @@ import {
 } from '../test_ids';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
-  const isOn = status === 'enabled' || status === 'partially_enabled';
+  const isOn = status === 'enabled';
   return (
     <EuiHealth
       textSize="m"
@@ -99,7 +99,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   const isDisabled =
     isPrivilegesLoading || !hasAllRequiredPrivileges || status === 'enabling' || status === 'error';
 
-  const isChecked = status === 'enabled' || status === 'partially_enabled';
+  const isChecked = status === 'enabled';
 
   return (
     <>

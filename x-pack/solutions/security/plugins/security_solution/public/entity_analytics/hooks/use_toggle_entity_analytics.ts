@@ -7,7 +7,6 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { StoreStatusEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
@@ -20,10 +19,7 @@ import {
   useStartEntityStoreMutation,
   useStopEntityStoreMutation,
 } from '../components/entity_store/hooks/use_entity_store';
-import { useEntityStoreTypes } from './use_enabled_entity_types';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
 import * as i18n from '../translations';
 import { useInvalidateRiskEngineSettingsQuery } from '../components/risk_score_management/hooks/use_risk_engine_settings_query';
 import {
@@ -59,7 +55,6 @@ interface UseToggleEntityAnalyticsReturn {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
   toggle: () => Promise<void>;
-  isEntityStoreFeatureFlagDisabled: boolean;
   errors: EntityAnalyticsErrors;
 }
 
@@ -74,10 +69,7 @@ export const useToggleEntityAnalytics = ({
   isSavingSettings,
 }: ToggleOptions): UseToggleEntityAnalyticsReturn => {
   const { addSuccess, addError } = useAppToasts();
-  const { uiSettings } = useKibana().services;
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
-  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const isEntityStoreV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const riskEngineStatusQuery = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
@@ -88,7 +80,6 @@ export const useToggleEntityAnalytics = ({
     refetchInterval: TEN_SECONDS,
     structuralSharing: false,
   });
-  const entityTypes = useEntityStoreTypes();
 
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSuccess: async () => {
@@ -99,8 +90,8 @@ export const useToggleEntityAnalytics = ({
   const disableRiskEngineMutation = useDisableRiskEngineMutation();
 
   const installEntityStoreMutation = useInstallEntityStoreMutation();
-  const startEntityStoreMutation = useStartEntityStoreMutation(entityTypes);
-  const stopEntityStoreMutation = useStopEntityStoreMutation(entityTypes);
+  const startEntityStoreMutation = useStartEntityStoreMutation();
+  const stopEntityStoreMutation = useStopEntityStoreMutation();
 
   const [isToggling, setIsToggling] = useState(false);
 
@@ -126,10 +117,7 @@ export const useToggleEntityAnalytics = ({
   const riskEngineStatus = riskEngineStatusQuery.data?.risk_engine_status;
 
   const status = useEntityAnalyticsStatus({
-    riskEngineStatus,
     entityStoreStatus,
-    isEntityStoreFeatureFlagDisabled,
-    isEntityStoreV2Enabled,
     isMutationLoading: isLoading,
   });
 
@@ -164,58 +152,24 @@ export const useToggleEntityAnalytics = ({
 
     setIsToggling(true);
     try {
-      const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
-      const storeOn = isEntityStoreV2Enabled
-        ? entityStoreStatus === StoreStatusEnum.running
-        : !isEntityStoreFeatureFlagDisabled && entityStoreStatus === StoreStatusEnum.running;
+      const storeOn = entityStoreStatus === StoreStatusEnum.running;
 
-      if (isEntityStoreV2Enabled) {
-        if (storeOn) {
-          await stopEntityStore();
-          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
-        } else {
-          await enableEntityStore();
-
-          if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
-            if (!selectedSettingsMatchSavedSettings) {
-              await onSaveSettings();
-            }
-            await initRiskEngineMutation.mutateAsync(undefined);
-          } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
-            await enableRiskEngineMutation.mutateAsync(undefined);
-          }
-
-          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
-        }
+      if (storeOn) {
+        await stopEntityStore();
+        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
       } else {
-        const isCurrentlyEnabled = riskOn || storeOn;
+        await enableEntityStore();
 
-        if (isCurrentlyEnabled) {
-          const disablePromises: Promise<unknown>[] = [];
-          if (riskOn) {
-            disablePromises.push(disableRiskEngineMutation.mutateAsync(undefined));
+        if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
+          if (!selectedSettingsMatchSavedSettings) {
+            await onSaveSettings();
           }
-          if (storeOn) {
-            disablePromises.push(stopEntityStore());
-          }
-          await Promise.all(disablePromises);
-          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
-        } else {
-          if (!isEntityStoreFeatureFlagDisabled) {
-            await enableEntityStore();
-          }
-
-          if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
-            if (!selectedSettingsMatchSavedSettings) {
-              await onSaveSettings();
-            }
-            await initRiskEngineMutation.mutateAsync(undefined);
-          } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
-            await enableRiskEngineMutation.mutateAsync(undefined);
-          }
-
-          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
+          await initRiskEngineMutation.mutateAsync(undefined);
+        } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
+          await enableRiskEngineMutation.mutateAsync(undefined);
         }
+
+        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
       }
     } catch (e) {
       addError(e, { title: i18n.ENTITY_ANALYTICS_TOGGLE_ERROR, ...TOAST_OPTIONS });
@@ -226,11 +180,8 @@ export const useToggleEntityAnalytics = ({
     isLoading,
     riskEngineStatus,
     entityStoreStatus,
-    isEntityStoreFeatureFlagDisabled,
-    isEntityStoreV2Enabled,
     addSuccess,
     addError,
-    disableRiskEngineMutation,
     stopEntityStore,
     selectedSettingsMatchSavedSettings,
     initRiskEngineMutation,
@@ -243,7 +194,6 @@ export const useToggleEntityAnalytics = ({
     status,
     isLoading,
     toggle,
-    isEntityStoreFeatureFlagDisabled,
     errors,
   };
 };

@@ -45,11 +45,6 @@ describe('EntityAnalyticsHealth', () => {
     expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
   });
 
-  it('shows On when status is partially_enabled', () => {
-    render(<EntityAnalyticsHealth status="partially_enabled" />);
-    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
-  });
-
   it('shows Off when status is disabled', () => {
     render(<EntityAnalyticsHealth status="disabled" />);
     expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('Off');
@@ -119,13 +114,6 @@ describe('EntityAnalyticsToggle', () => {
 
   it('renders a checked switch when status is enabled', () => {
     mockUseToggleReturn.status = 'enabled';
-    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
-    expect(toggle).toBeChecked();
-  });
-
-  it('renders a checked switch when status is partially_enabled', () => {
-    mockUseToggleReturn.status = 'partially_enabled';
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
