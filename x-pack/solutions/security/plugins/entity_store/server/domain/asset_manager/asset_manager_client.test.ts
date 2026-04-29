@@ -189,10 +189,10 @@ describe('AssetManagerClient', () => {
             fieldHistoryLength: 10,
             lookbackPeriod: '3h',
             delay: '1m',
-            frequency: '30s',
+            frequency: '1m',
             docsLimit: 10000,
             maxLogsPerPage: 40000,
-            timeout: '25s',
+            timeout: '59s',
           }),
         })
       );
@@ -256,7 +256,7 @@ describe('AssetManagerClient', () => {
         expect.objectContaining({
           logsExtraction: expect.objectContaining({
             delay: '2m',
-            frequency: '30s',
+            frequency: '1m',
             lookbackPeriod: '3h',
             fieldHistoryLength: 10,
             additionalIndexPatterns: [],
