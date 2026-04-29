@@ -134,12 +134,17 @@ export class OverviewStatusService {
         },
       ];
     };
-    // When CCS is enabled, skip the meta.space_id filter entirely.
-    // Remote pings from other Kibana instances have their own space_id values
-    // that won't match the local Kibana's space. Space scoping for local monitors
-    // is already handled by the saved objects query in getMonitorConfigs().
+    // When CCS is enabled, skip the meta.space_id filter entirely: remote-cluster
+    // pings carry the *remote* cluster's `meta.space_id`, and we cannot
+    // discriminate local vs remote shards at filter time (`_index` matches the
+    // shard-local name, before the coordinating node adds the cluster alias).
+    // Cross-space leakage from local pings is prevented downstream: monitors
+    // without a matching local SO are routed through the remote-only branch,
+    // which drops any bucket whose `_index` lacks a `:` prefix
+    // (see `getRemoteMonitorInfo`).
     const ccsEnabled = isCCSEnabled(this.routeContext.server);
-    const skipSpaceFilter = showFromAllSpaces || ccsEnabled;
+    const skipSpaceFilter =
+      showFromAllSpaces || ccsEnabled || !spaceId || spaceId === ALL_SPACES_ID;
 
     const filters: QueryDslQueryContainer[] = [
       ...(skipSpaceFilter ? [] : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }]),

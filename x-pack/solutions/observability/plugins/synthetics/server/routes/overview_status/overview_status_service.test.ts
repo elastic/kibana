@@ -1355,7 +1355,73 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
+    it('does not surface a cross-space local monitor through the remote-only branch', async () => {
+      // The ES query intentionally drops the `meta.space_id` filter when CCS is
+      // enabled (we cannot disambiguate local vs remote shards at filter time),
+      // so a monitor living in another local space CAN reach the reconciliation
+      // step. The JS-side guard in the remote-only branch must drop it because
+      // its `_index` has no cluster alias prefix.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            // Cross-space LOCAL monitor: not in `testMonitors`, local _index.
+            {
+              key: {
+                monitorId: 'cross-space-local',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      'monitor.name': 'Other-Space Monitor',
+                      'monitor.type': 'http',
+                      config_id: 'cross-space-local',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'synthetics-http-default', doc_count: 1 }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.downConfigs['cross-space-local']).toBeUndefined();
+      expect(result.upConfigs['cross-space-local']).toBeUndefined();
+      expect(result.pendingConfigs['cross-space-local']).toBeUndefined();
+      expect(result.down).toBe(0);
+      expect(result.up).toBe(0);
+    });
+
     it('skips meta.space_id filter when CCS is enabled', async () => {
+      // `_index` is evaluated against shard-local names (no cluster alias prefix),
+      // so we can't reliably gate by `_index` at filter time. Cross-space leakage
+      // from local pings is instead prevented in JS: the remote-only branch
+      // drops any bucket whose `_index` has no `:` prefix
+      // (see `getRemoteMonitorInfo`).
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(
@@ -1400,7 +1466,6 @@ describe('current status route', () => {
 
       await overviewStatusService.getOverviewStatus();
 
-      // Verify the ES query does NOT contain a meta.space_id filter
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
       const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
