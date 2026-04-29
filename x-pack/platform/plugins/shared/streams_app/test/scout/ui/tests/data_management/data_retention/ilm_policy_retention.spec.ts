@@ -50,8 +50,11 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
   });
 
-  test.afterAll(async ({ apiServices, page }) => {
+  test.afterEach(async ({ page }) => {
     await closeToastsIfPresent(page);
+  });
+
+  test.afterAll(async ({ apiServices }) => {
     await apiServices.streams.clearStreamChildren('logs.otel');
   });
 
