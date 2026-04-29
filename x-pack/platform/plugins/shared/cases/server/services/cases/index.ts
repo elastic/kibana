@@ -124,10 +124,23 @@ const mergeCaseIdsByAlertIdResponses = (
   const legacyDocCount = legacyResponse.aggregations?.references.doc_count ?? 0;
   const unifiedDocCount = unifiedResponse.aggregations?.references.doc_count ?? 0;
 
+  // Dedupe saved_objects across legacy + unified by id
+  const seenSavedObjectIds = new Set<string>();
+  const dedupedSavedObjects = [
+    ...legacyResponse.saved_objects,
+    ...unifiedResponse.saved_objects,
+  ].filter((so) => {
+    if (seenSavedObjectIds.has(so.id)) {
+      return false;
+    }
+    seenSavedObjectIds.add(so.id);
+    return true;
+  });
+
   return {
     ...legacyResponse,
-    total: legacyResponse.total + unifiedResponse.total,
-    saved_objects: [...legacyResponse.saved_objects, ...unifiedResponse.saved_objects],
+    total: dedupedSavedObjects.length,
+    saved_objects: dedupedSavedObjects,
     aggregations: {
       references: {
         doc_count: legacyDocCount + unifiedDocCount,

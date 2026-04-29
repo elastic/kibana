@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   SavedObject,
   SavedObjectsBulkResponse,
@@ -81,8 +82,7 @@ import { isSOError } from '../../common/error';
 import { getTransformerForPatchAttributes, transformAttributesForMode } from './operations/utils';
 
 /**
- * Ensures alert attachments have rule.name, or else existing tests will fail.
- * Handles both legacy (attributes.rule) and unified (attributes.metadata.rule) shapes.
+ * Ensures alert attachments include a rule name
  */
 function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
   const type = attributes?.type;
@@ -93,7 +93,9 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
   if (type === AttachmentType.alert || type === 'alert') {
     const rule = attributes.rule as { name?: unknown } | null | undefined;
     if (rule == null || rule.name == null) {
-      throw new Error('Invalid attributes: expected attributes.rule.name for alert attachments');
+      throw Boom.badRequest(
+        'Invalid attributes: expected attributes.rule.name for alert attachments'
+      );
     }
     return;
   }
@@ -101,7 +103,7 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
   const metadata = attributes.metadata as { rule?: { name?: unknown } } | null | undefined;
   const rule = metadata?.rule;
   if (rule == null || rule.name == null) {
-    throw new Error(
+    throw Boom.badRequest(
       'Invalid attributes: expected attributes.metadata.rule.name for unified alert attachments'
     );
   }

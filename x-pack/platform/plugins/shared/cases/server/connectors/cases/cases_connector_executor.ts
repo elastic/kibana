@@ -25,7 +25,7 @@ import {
   MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -1209,7 +1209,18 @@ export class CasesConnectorExecutor {
         const alertIds = alerts.map((alert) => alert._id);
         const alertIndices = alerts.map((alert) => alert._index);
 
-        const alertAttachment: AttachmentRequestV2 = this.isCasesAttachmentsEnabled
+        // Only write the unified shape when the feature flag is on AND the
+        // case owner has a registered unified prefix.
+        const isUnifiedAlertValid =
+          this.isCasesAttachmentsEnabled && hasOwnerUnifiedPrefix(theCase.owner);
+
+        if (this.isCasesAttachmentsEnabled && !isUnifiedAlertValid) {
+          this.logger.warn(
+            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Owner "${theCase.owner}" has no unified attachment prefix; falling back to legacy alert attachment for case ${theCase.id}.`
+          );
+        }
+
+        const alertAttachment: AttachmentRequestV2 = isUnifiedAlertValid
           ? {
               type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
               attachmentId: alertIds,

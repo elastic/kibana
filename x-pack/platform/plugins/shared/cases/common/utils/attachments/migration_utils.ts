@@ -46,6 +46,13 @@ export const toUnifiedAttachmentType = (type: string, owner: string): string => 
 };
 
 /**
+ * Returns true when the owner has a registered prefix in `OWNER_TO_PREFIX_MAP`,
+ * meaning legacy `alert` / `event` types can be mapped to a valid unified
+ * `<prefix>.<type>` (e.g. `security.alert`).
+ */
+export const hasOwnerUnifiedPrefix = (owner: string): boolean => OWNER_TO_PREFIX_MAP[owner] != null;
+
+/**
  * True when the persistable-state subtype id (legacy `.lens` or unified `lens`) is one
  * that this stack migrates to unified attachment attributes (currently Lens only).
  */

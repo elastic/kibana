@@ -138,6 +138,8 @@ export async function find(
         isCasesAttachmentsEnabled: config.attachments?.enabled === true,
       });
 
+    // TODO https://github.com/elastic/security-team/issues/17089
+    // include `cases-attachments.attributes.type === 'comment'`
     const filter = combineFilters([
       buildFilter({
         filters: [AttachmentType.user],

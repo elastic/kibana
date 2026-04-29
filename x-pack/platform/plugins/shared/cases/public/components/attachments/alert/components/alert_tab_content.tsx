@@ -16,7 +16,7 @@ import { useGetFeatureIds } from '../../../../containers/use_get_feature_ids';
 import { getManualAlertIds } from '../../../../../common/utils/attachments/manual_alert_ids';
 import type { CommonAttachmentTabViewProps } from '../../../../client/attachment_framework/types';
 
-export function StackAlertTabContent({ caseData }: CommonAttachmentTabViewProps) {
+export const StackAlertTabContent = ({ caseData }: CommonAttachmentTabViewProps) => {
   const { services } = useKibana();
   const { data, http, notifications, fieldFormats, application, licensing, settings } =
     services as SetRequired<typeof services, 'licensing'>;
@@ -69,6 +69,6 @@ export function StackAlertTabContent({ caseData }: CommonAttachmentTabViewProps)
       />
     </EuiFlexItem>
   );
-}
+};
 
 StackAlertTabContent.displayName = 'StackAlertTabContent';

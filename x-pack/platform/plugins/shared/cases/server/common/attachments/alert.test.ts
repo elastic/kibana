@@ -385,4 +385,146 @@ describe('alert attachment transformer', () => {
       expect(alertAttachmentTransformer.isUnifiedType(legacyAttrs)).toBe(false);
     });
   });
+
+  describe('round-trip toUnifiedSchema -> toLegacySchema', () => {
+    const baseLegacyCommon = {
+      created_at: '2020-01-01T00:00:00.000Z',
+      created_by: {
+        username: 'u',
+        full_name: null,
+        email: null,
+        profile_uid: undefined,
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    };
+
+    it('rule present, scalar id', () => {
+      const legacy = {
+        type: AttachmentType.alert,
+        alertId: 'alert-1',
+        index: 'index-1',
+        rule: { id: 'rule-1', name: 'Test Rule' },
+        owner: SECURITY_SOLUTION_OWNER,
+        ...baseLegacyCommon,
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedSchema(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacySchema(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+
+    it('rule present, array id', () => {
+      const legacy = {
+        type: AttachmentType.alert,
+        alertId: ['alert-1', 'alert-2'],
+        index: ['index-1', 'index-2'],
+        rule: { id: 'rule-1', name: 'Test Rule' },
+        owner: SECURITY_SOLUTION_OWNER,
+        ...baseLegacyCommon,
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedSchema(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacySchema(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+
+    it('rule absent (defaults to {id: null, name: null}) — scalar id', () => {
+      const legacy = {
+        type: AttachmentType.alert,
+        alertId: 'alert-1',
+        index: 'index-1',
+        rule: { id: null, name: null },
+        owner: SECURITY_SOLUTION_OWNER,
+        ...baseLegacyCommon,
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedSchema(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacySchema(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+
+    it('rule absent (defaults to {id: null, name: null}) — array id', () => {
+      const legacy = {
+        type: AttachmentType.alert,
+        alertId: ['alert-1', 'alert-2', 'alert-3'],
+        index: ['index-1', 'index-2', 'index-3'],
+        rule: { id: null, name: null },
+        owner: OBSERVABILITY_OWNER,
+        ...baseLegacyCommon,
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedSchema(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacySchema(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+  });
+
+  describe('round-trip toUnifiedPayload -> toLegacyPayload', () => {
+    it('rule present, scalar id', () => {
+      const legacy = {
+        type: AttachmentType.alert as const,
+        owner: SECURITY_SOLUTION_OWNER,
+        alertId: 'alert-1',
+        index: 'index-1',
+        rule: { id: 'rule-1', name: 'Test Rule' },
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedPayload(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacyPayload(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+
+    it('rule present, array id', () => {
+      const legacy = {
+        type: AttachmentType.alert as const,
+        owner: SECURITY_SOLUTION_OWNER,
+        alertId: ['alert-1', 'alert-2'],
+        index: ['index-1', 'index-2'],
+        rule: { id: 'rule-1', name: 'Test Rule' },
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedPayload(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacyPayload(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+
+    it('rule absent — scalar id', () => {
+      const legacy = {
+        type: AttachmentType.alert as const,
+        owner: SECURITY_SOLUTION_OWNER,
+        alertId: 'alert-1',
+        index: 'index-1',
+        rule: { id: null, name: null },
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedPayload(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacyPayload(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+
+    it('rule absent — array id', () => {
+      const legacy = {
+        type: AttachmentType.alert as const,
+        owner: OBSERVABILITY_OWNER,
+        alertId: ['alert-1', 'alert-2'],
+        index: ['index-1', 'index-2'],
+        rule: { id: null, name: null },
+      };
+
+      const unified = alertAttachmentTransformer.toUnifiedPayload(legacy);
+      const legacyAgain = alertAttachmentTransformer.toLegacyPayload(unified);
+
+      expect(legacyAgain).toEqual(legacy);
+    });
+  });
 });

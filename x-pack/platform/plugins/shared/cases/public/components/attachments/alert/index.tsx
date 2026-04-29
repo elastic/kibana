@@ -19,7 +19,12 @@ import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attach
 import { toStringArray } from '../../../../common/utils/attachments';
 import * as i18n from './translations';
 import { ShowTableButton } from '../common/show_table_button';
-import { StackAlertTabContent } from './components/alert_tab_content';
+
+const StackAlertTabContentLazy = React.lazy(() =>
+  import('./components/alert_tab_content').then(({ StackAlertTabContent }) => ({
+    default: StackAlertTabContent,
+  }))
+);
 
 const StackAlertAttachmentMetadataRt = z.object({
   index: z.union([z.string(), z.array(z.string())]).optional(),
@@ -96,7 +101,7 @@ export const getStackAlertAttachmentType = (): UnifiedReferenceAttachmentType =>
   getAttachmentViewObject,
   getAttachmentRemovalObject,
   getAttachmentTabViewObject: () => ({
-    children: StackAlertTabContent,
+    children: StackAlertTabContentLazy,
   }),
   schemaValidator: stackAlertSchemaValidator,
 });

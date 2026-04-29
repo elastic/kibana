@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type {
   UnifiedReferenceAttachmentPayload,
   AttachmentAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
+import type {
+  AlertAttachmentAttributes,
+  AlertAttachmentPayload,
+} from '../../../common/types/domain';
 import { AttachmentType } from '../../../common/types/domain';
 import type {
   AttachmentPersistedAttributes,
@@ -34,19 +38,34 @@ export interface AlertMetadata {
   } | null;
 }
 
-function isLegacyAlertSchema(attributes: AttachmentAttributesV2): boolean {
-  return isLegacyAlertAttachment(attributes);
-}
+/**
+ * Persisted-attribute shape for a unified alert attachment SO.
+ */
+type UnifiedAlertPersistedAttributes = UnifiedReferenceAttachmentPayload &
+  AttachmentPersistedAttributes & {
+    metadata?: AlertMetadata | null;
+  };
 
-function isUnifiedAlertSchema(
-  attributes: AttachmentAttributesV2
-): attributes is UnifiedAttachmentAttributes & UnifiedReferenceAttachmentPayload {
-  return isUnifiedAlertAttachment(attributes);
-}
+// `@types/lodash` types `isPlainObject` as returning `boolean`, so we wrap it
+// to add a `value is Record<string, unknown>` predicate. Same pattern as
+// `isRecord` in ./persistable_state.ts.
+const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
+
+/**
+ * Type guard for legacy alert persisted attributes (`type === 'alert'`).
+ */
+const isLegacyAlertSchema = (attributes: unknown): attributes is AlertAttachmentAttributes =>
+  isRecord(attributes) && isLegacyAlertAttachment(attributes as AttachmentRequestV2);
+
+/**
+ * Type guard for unified alert persisted attributes
+ */
+const isUnifiedAlertSchema = (attributes: unknown): attributes is UnifiedAlertPersistedAttributes =>
+  isRecord(attributes) && isUnifiedAlertAttachment(attributes as AttachmentRequestV2);
 
 const toAlertMetadata = (
   index: string | string[] | undefined,
-  rule: { id: string | null; name: string | null } | undefined
+  rule: { id: string | null; name: string | null } | null | undefined
 ): UnifiedReferenceAttachmentPayload['metadata'] => {
   const normalizedIndex = toStringOrStringArray(index);
   const metadata: NonNullable<UnifiedReferenceAttachmentPayload['metadata']> = {};
@@ -69,59 +88,49 @@ export const alertAttachmentTransformer: AttachmentTypeTransformer<
   UnifiedAttachmentAttributes
 > = {
   toUnifiedSchema(attributes: unknown): UnifiedAttachmentAttributes {
-    const attrs = attributes as AttachmentAttributesV2;
-    if (isUnifiedAlertSchema(attrs)) {
-      return attrs as UnifiedAttachmentAttributes;
+    if (isUnifiedAlertSchema(attributes)) {
+      return attributes;
     }
-    if (isLegacyAlertSchema(attrs)) {
-      const legacyAttrs = attrs as AttachmentPersistedAttributes & {
-        alertId: string | string[];
-        index?: string | string[];
-        rule?: { id: string | null; name: string | null };
-      };
+    if (isLegacyAlertSchema(attributes)) {
       return {
-        type: toUnifiedAttachmentType(AttachmentType.alert, legacyAttrs.owner),
-        attachmentId: normalizeReferenceAttachmentId(legacyAttrs.alertId),
-        metadata: toAlertMetadata(legacyAttrs.index, legacyAttrs.rule),
-        owner: legacyAttrs.owner,
-        ...extractCommonAttributes(legacyAttrs as AttachmentAttributesV2),
+        type: toUnifiedAttachmentType(AttachmentType.alert, attributes.owner),
+        attachmentId: normalizeReferenceAttachmentId(attributes.alertId),
+        metadata: toAlertMetadata(attributes.index, attributes.rule),
+        owner: attributes.owner,
+        ...extractCommonAttributes(attributes as AttachmentAttributesV2),
       } as UnifiedAttachmentAttributes;
     }
-    return attrs as UnifiedAttachmentAttributes;
+    return attributes as UnifiedAttachmentAttributes;
   },
 
   toLegacySchema(attributes: unknown): AttachmentPersistedAttributes {
-    const attrs = attributes as AttachmentPersistedAttributes | UnifiedAttachmentAttributes;
-    const attrsAsCombined = attrs as AttachmentAttributesV2;
-
-    if (isLegacyAlertSchema(attrsAsCombined)) {
-      return attrs as AttachmentPersistedAttributes;
+    if (isLegacyAlertSchema(attributes)) {
+      return attributes;
     }
 
-    if (isUnifiedAlertSchema(attrsAsCombined)) {
-      const refAttrs = attrsAsCombined;
-      const metadata = refAttrs.metadata as AlertMetadata | null | undefined;
+    if (isUnifiedAlertSchema(attributes)) {
+      const metadata = attributes.metadata ?? undefined;
       return {
         type: AttachmentType.alert,
-        alertId: refAttrs.attachmentId,
+        alertId: attributes.attachmentId,
         index: toStringOrStringArray(metadata?.index) ?? '',
         rule: { id: metadata?.rule?.id ?? null, name: metadata?.rule?.name ?? null },
-        owner: refAttrs.owner,
-        ...extractCommonAttributes(attrs as UnifiedAttachmentAttributes),
+        owner: attributes.owner,
+        ...extractCommonAttributes(attributes as AttachmentAttributesV2),
       } as AttachmentPersistedAttributes;
     }
-    return attrs as AttachmentPersistedAttributes;
+    return attributes as AttachmentPersistedAttributes;
   },
 
   isType(attributes: AttachmentAttributesV2): boolean {
     return isLegacyAlertSchema(attributes) || isUnifiedAlertSchema(attributes);
   },
 
-  isUnifiedType(attributes: AttachmentAttributesV2): boolean {
+  isUnifiedType(attributes: unknown): boolean {
     return isUnifiedAlertSchema(attributes);
   },
 
-  isLegacyType(attributes: AttachmentAttributesV2): boolean {
+  isLegacyType(attributes: unknown): boolean {
     return isLegacyAlertSchema(attributes);
   },
 

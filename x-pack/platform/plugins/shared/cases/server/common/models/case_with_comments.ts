@@ -328,6 +328,14 @@ export class CaseCommentModel {
     const removeItemsByPosition = (items: string[], positionsToRemove: number[]): string[] =>
       items.filter((_, itemIndex) => !positionsToRemove.some((position) => position === itemIndex));
 
+    const assertIdsAndIndicesHaveMatchingLengths = (ids: string[], indices: string[]): void => {
+      if (ids.length !== indices.length) {
+        throw Boom.badRequest(
+          `attachmentId and metadata.index must have matching lengths. Received attachmentId.length=${ids.length} and metadata.index.length=${indices.length}.`
+        );
+      }
+    };
+
     const dedupedAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
     const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
@@ -357,6 +365,8 @@ export class CaseCommentModel {
             idsAlreadySeen.add(id);
           });
 
+          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
+
           const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
             ids,
             idPositionsThatAlreadyExistInCase
@@ -366,10 +376,7 @@ export class CaseCommentModel {
             idPositionsThatAlreadyExistInCase
           );
 
-          if (
-            alertIdsNotAlreadyAttachedToCase.length > 0 &&
-            alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
-          ) {
+          if (alertIdsNotAlreadyAttachedToCase.length > 0) {
             dedupedAttachments.push({
               ...attachment,
               alertId: alertIdsNotAlreadyAttachedToCase,
@@ -388,10 +395,12 @@ export class CaseCommentModel {
             idsAlreadySeen.add(id);
           });
 
+          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
+
           const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
           const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
 
-          if (newIds.length > 0 && newIds.length === newIndices.length) {
+          if (newIds.length > 0) {
             const existingMetadata =
               attachment.metadata && typeof attachment.metadata === 'object'
                 ? (attachment.metadata as Record<string, unknown>)
