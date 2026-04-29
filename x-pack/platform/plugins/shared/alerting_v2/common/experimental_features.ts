@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export * from './create';
-export * from './delete';
-export * from './get';
-export * from './list';
-export * from './prebuilt_install';
-export * from './privileges';
-export * from './search_indices';
-export * from './update';
+export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID =
+  'observability:alerting:experimentalFeatures';
+
+export const ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID =
+  'observability:alerting:ruleDoctorInterval';
