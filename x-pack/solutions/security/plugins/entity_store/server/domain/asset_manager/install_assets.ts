@@ -38,8 +38,9 @@ interface SharedElasticsearchAssetOptions {
 }
 
 /**
- * Installs all shared Elasticsearch assets that must exist before any index is created:
- * ingest pipeline, component templates (for ALL entity types), and index templates.
+ * Installs all shared Elasticsearch assets and storage that must exist before per-entity
+ * initialization begins: ingest pipeline, component templates (for ALL entity types),
+ * index templates, the latest index, and the updates data stream.
  */
 export async function installSharedElasticsearchAssets({
   esClient,
@@ -50,6 +51,7 @@ export async function installSharedElasticsearchAssets({
     await installLatestIndexIngestPipeline(esClient, namespace, logger);
     await installAllComponentTemplates(esClient, namespace, logger);
     await installIndexTemplates(esClient, namespace, logger);
+    await installIndicesAndDataStreams(esClient, namespace, logger);
   } catch (error) {
     logger.error(`error installing shared assets in ${namespace}: ${error}`);
     throw error;
@@ -57,8 +59,7 @@ export async function installSharedElasticsearchAssets({
 }
 
 /**
- * Creates the latest index and updates data stream.
- * Must be called AFTER installSharedElasticsearchAssets to avoid partial mappings.
+ * Creates the latest index and updates data stream after the required templates are installed.
  */
 export async function installIndicesAndDataStreams(
   esClient: ElasticsearchClient,
