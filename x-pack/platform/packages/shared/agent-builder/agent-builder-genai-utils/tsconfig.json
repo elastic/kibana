@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
   ],
   "exclude": [
     "target/**/*"
@@ -30,6 +30,6 @@
     "@kbn/esql-server-utils",
     "@kbn/esql-language",
     "@kbn/datemath",
-    "@kbn/es-query"
+    "@kbn/es-query",
   ]
 }
