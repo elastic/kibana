@@ -141,11 +141,11 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { alertId } = params.body;
       const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
       const [, startDeps] = await core.getStartServices();
-      const { inference, ruleRegistry } = startDeps;
+      const { inference, ruleRegistry, searchInferenceEndpoints } = startDeps;
 
       try {
         const { connectorId, connector } = await resolveConnectorForFeature({
-          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          searchInferenceEndpoints,
           featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
           request,
           logger,
@@ -177,7 +177,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        return toErrorForAiInsightStream({
+        return routeAiInsightError({
           error,
           response,
           isCloudEnabled,
@@ -212,11 +212,11 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
       const [, startDeps] = await core.getStartServices();
-      const { inference } = startDeps;
+      const { inference, searchInferenceEndpoints } = startDeps;
 
       try {
         const { connectorId, connector } = await resolveConnectorForFeature({
-          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          searchInferenceEndpoints,
           featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
           request,
           logger,
@@ -248,7 +248,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        return toErrorForAiInsightStream({
+        return routeAiInsightError({
           error,
           response,
           isCloudEnabled,
@@ -293,10 +293,10 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       try {
         const [coreStart, startDeps] = await core.getStartServices();
-        const { inference } = startDeps;
+        const { inference, searchInferenceEndpoints } = startDeps;
 
         const { connectorId, connector } = await resolveConnectorForFeature({
-          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          searchInferenceEndpoints,
           featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
           request,
           logger,
@@ -327,7 +327,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        return toErrorForAiInsightStream({
+        return routeAiInsightError({
           error,
           response,
           isCloudEnabled,
