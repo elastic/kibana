@@ -41,8 +41,8 @@ export function mapPackageReleaseToIntegrationCardRelease(
  * or `undefined` if no agentless context applies.
  */
 export function getAgentlessReleaseOverride(
-  packageInfo?: PackageWithDeploymentInfo,
-  integrationToEnable?: string,
+  packageInfo: PackageWithDeploymentInfo,
+  integrationToEnable: string,
   options?: { isAgentlessContext?: boolean }
 ): AgentlessDeploymentReleaseStatus | undefined {
   if (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) || options?.isAgentlessContext) {
@@ -61,7 +61,9 @@ export function resolveEffectiveRelease(
   integrationToEnable?: string,
   options?: { isAgentlessContext?: boolean }
 ): IntegrationCardReleaseLabel {
-  const override = getAgentlessReleaseOverride(packageInfo, integrationToEnable, options);
-  if (override !== undefined && override !== AgentlessDeploymentReleaseStatus.GA) return override;
+  if (packageInfo && integrationToEnable) {
+    const override = getAgentlessReleaseOverride(packageInfo, integrationToEnable, options);
+    if (override !== undefined && override !== AgentlessDeploymentReleaseStatus.GA) return override;
+  }
   return getPackageReleaseLabel(packageInfo?.version ?? '');
 }

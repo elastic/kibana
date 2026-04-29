@@ -234,54 +234,45 @@ export function validateDeploymentModesForInputs(
 }
 
 /**
- * Returns the agentless-specific release status for a package or integration.
- * Returns `undefined` when agentless is not enabled, or when the package consists of a single
- * only-agentless template (package semver is the maturity indicator in that case, per spec).
+ * Returns the agentless-specific release status for a given integration.
+ * Returns `undefined` when agentless is not enabled for the integration, or when the package
+ * consists of a single only-agentless template (package semver is the maturity indicator, per spec).
  * Returns `AgentlessDeploymentReleaseStatus.GA` as-is — callers decide whether to defer to package semver instead.
- * For multi-template packages or a single dual-mode template, an absent `release` field implies Beta.
- * When no specific integration is provided, returns the least mature release across all agentless-enabled templates.
+ * An absent `release` field defaults to `AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT`.
  */
 const knownReleases = new Set(Object.values(AgentlessDeploymentReleaseStatus));
 const leastMature = Object.values(AgentlessDeploymentReleaseStatus)[0];
-const coerceRelease = (r?: AgentlessDeploymentReleaseStatus) =>
-  r !== undefined && knownReleases.has(r) ? r : leastMature;
+
+/** The default agentless release when no `release` field is present. Flip to GA when agentless GAs platform-wide. */
+export const AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT = AgentlessDeploymentReleaseStatus.Beta;
+
+const coerceRelease = (r?: AgentlessDeploymentReleaseStatus) => {
+  if (r === undefined) return AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT;
+  // Unknown/invalid values always fall to Beta regardless of the platform-wide default flip.
+  return knownReleases.has(r) ? r : leastMature;
+};
 
 export const getAgentlessRelease = (
-  packageInfo?: PackageWithDeploymentInfo & { version?: string },
-  integrationToEnable?: string
+  packageInfo: PackageWithDeploymentInfo & { version?: string },
+  integrationToEnable: string
 ): AgentlessDeploymentReleaseStatus | undefined => {
-  const templates = packageInfo?.policy_templates ?? [];
+  const templates = packageInfo.policy_templates ?? [];
 
   // Single only-agentless template: spec disallows the release field — defer to package semver
   if (templates.length === 1 && isOnlyAgentlessPolicyTemplate(templates[0])) {
     return undefined;
   }
 
-  if (integrationToEnable) {
-    const template = templates.find(({ name }) => name === integrationToEnable);
-    if (!template?.deployment_modes?.agentless?.enabled) return undefined;
-    const { release } = template.deployment_modes.agentless;
-    if (
-      release === undefined &&
-      isGABeforeReleaseField(packageInfo?.name, integrationToEnable, packageInfo?.version)
-    ) {
-      return AgentlessDeploymentReleaseStatus.GA;
-    }
-    return coerceRelease(release);
+  const template = templates.find(({ name }) => name === integrationToEnable);
+  if (!template?.deployment_modes?.agentless?.enabled) return undefined;
+  const { release } = template.deployment_modes.agentless;
+  if (
+    release === undefined &&
+    isGABeforeReleaseField(packageInfo?.name, integrationToEnable, packageInfo?.version)
+  ) {
+    return AgentlessDeploymentReleaseStatus.GA;
   }
-
-  const agentlessTemplates = templates.filter(
-    (t) => t.deployment_modes?.agentless?.enabled === true
-  );
-
-  if (!agentlessTemplates.length) return undefined;
-
-  // Multi-template or dual-mode: absent release implies least mature. Return least mature across all.
-  const releases = agentlessTemplates.map((t) =>
-    coerceRelease(t.deployment_modes?.agentless?.release)
-  );
-  const hasNonGA = releases.some((r) => r !== AgentlessDeploymentReleaseStatus.GA);
-  return hasNonGA ? leastMature : AgentlessDeploymentReleaseStatus.GA;
+  return coerceRelease(release);
 };
 
 export const isDefaultAgentlessIntegration = (
