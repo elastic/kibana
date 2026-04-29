@@ -21,7 +21,7 @@ engine:
   id: claude
   version: "2.1.111"
   model: llm-gateway/claude-opus-4-7
-  max-budget-usd: 10
+  max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
