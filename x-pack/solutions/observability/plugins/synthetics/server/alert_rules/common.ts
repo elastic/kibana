@@ -271,10 +271,12 @@ export const setRecoveredAlertsContext = ({
         params,
       });
       if (summary) {
-        monitorSummary = {
-          ...monitorSummary,
-          ...summary.monitorSummary,
-        };
+        if (groupByLocation) {
+          monitorSummary = {
+            ...monitorSummary,
+            ...summary.monitorSummary,
+          };
+        }
         recoveryStatus = summary.recoveryStatus;
         recoveryReason = summary.recoveryReason;
         isUp = summary.isUp;
