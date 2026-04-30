@@ -17,6 +17,7 @@ export type {
   SmlDocument,
   SmlCrawlerStateDocument,
   SmlCrawler,
+  SmlCrawlUserScope,
   SmlIndexAction,
 } from './types';
 export {

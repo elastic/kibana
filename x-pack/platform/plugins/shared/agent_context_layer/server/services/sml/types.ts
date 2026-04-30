@@ -26,6 +26,12 @@ export interface SmlChunk {
   title: string;
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
+  /**
+   * Optional ISO-8601 instant for this chunk's content (e.g. source last-modified time).
+   * When set, both `created_at` and `updated_at` on the indexed document use this value.
+   * When omitted, the indexing request time is used.
+   */
+  timestamp?: string;
 }
 
 /**
@@ -161,6 +167,17 @@ export interface SmlCrawlerStateDocument {
 export type SmlIndexAction = 'create' | 'update' | 'delete';
 
 /**
+ * Optional credentials for user-scoped crawling.
+ * System Elasticsearch access (SML data index + crawler state) always uses the
+ * privileged `esClient` passed into {@link SmlCrawler.crawl}; this scope is used
+ * only for `list` / `getSmlData` hooks.
+ */
+export interface SmlCrawlUserScope {
+  elasticsearchClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+/**
  * The SML crawler enumerates registered SML types, compares the current state
  * with what has been previously indexed, and queues create/update/delete actions
  * to be processed by the indexer.
@@ -171,6 +188,8 @@ export interface SmlCrawler {
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     abortSignal?: AbortSignal;
+    /** When set, `list` and `getSmlData` run with these clients; indexing stays on `esClient`. */
+    userScope?: SmlCrawlUserScope;
   }) => Promise<void>;
 }
 

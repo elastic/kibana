@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
-import type { SmlIndexAction, SmlContext } from './types';
+import type { SmlChunk, SmlIndexAction, SmlContext } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 
@@ -31,14 +31,33 @@ export interface SmlIndexer {
     attachmentType: string;
     action: SmlIndexAction;
     spaces: string[];
+    /** Elasticsearch client for SML system index reads/writes (privileged). */
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+    /**
+     * Optional Elasticsearch client used only for `getSmlData`.
+     * When omitted, `esClient` is used (same as today).
+     */
+    getSmlDataElasticsearchClient?: ElasticsearchClient;
     logger: Logger;
   }) => Promise<void>;
 }
 
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
   return new SmlIndexerImpl({ registry, logger });
+};
+
+/** When chunk.timestamp is a valid ISO-8601 instant, use it; otherwise use indexing time. */
+const resolveChunkIndexedAt = (chunk: SmlChunk, indexedAt: string): string => {
+  const raw = chunk.timestamp?.trim();
+  if (!raw) {
+    return indexedAt;
+  }
+  const parsed = Date.parse(raw);
+  if (Number.isNaN(parsed)) {
+    return indexedAt;
+  }
+  return new Date(parsed).toISOString();
 };
 
 class SmlIndexerImpl implements SmlIndexer {
@@ -57,6 +76,7 @@ class SmlIndexerImpl implements SmlIndexer {
     spaces,
     esClient,
     savedObjectsClient,
+    getSmlDataElasticsearchClient,
     logger: contextLogger,
   }: {
     originId: string;
@@ -65,6 +85,7 @@ class SmlIndexerImpl implements SmlIndexer {
     spaces: string[];
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+    getSmlDataElasticsearchClient?: ElasticsearchClient;
     logger: Logger;
   }): Promise<void> {
     this.logger.info(
@@ -91,7 +112,7 @@ class SmlIndexerImpl implements SmlIndexer {
     }
 
     const context: SmlContext = {
-      esClient,
+      esClient: getSmlDataElasticsearchClient ?? esClient,
       savedObjectsClient,
       logger: contextLogger,
     };
@@ -124,6 +145,7 @@ class SmlIndexerImpl implements SmlIndexer {
     const now = new Date().toISOString();
     const bulkOps = smlData.chunks.map((chunk) => {
       const chunkId = `${attachmentType}:${originId}:${uuidv4()}`;
+      const at = resolveChunkIndexedAt(chunk, now);
       return {
         index: {
           _id: chunkId,
@@ -133,8 +155,8 @@ class SmlIndexerImpl implements SmlIndexer {
             title: chunk.title,
             origin_id: originId,
             content: chunk.content,
-            created_at: now,
-            updated_at: now,
+            created_at: at,
+            updated_at: at,
             spaces,
             permissions: chunk.permissions ?? [],
           },

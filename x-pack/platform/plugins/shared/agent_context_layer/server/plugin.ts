@@ -16,6 +16,8 @@ import type {
 import { registerFeatures } from './features';
 import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
+import { registerCrawlerRoute } from './routes/crawler';
+import { registerSmlCrawlerGrantSavedObjectType } from './saved_objects/sml_crawler_grant';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
   registerSmlCrawlerTaskDefinition,
@@ -49,6 +51,8 @@ export class AgentContextLayerPlugin
     registerFeatures({ features: setupDeps.features });
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
+    registerSmlCrawlerGrantSavedObjectType({ savedObjects: coreSetup.savedObjects });
+
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
     registerSmlCrawlerTaskDefinition({
@@ -77,6 +81,13 @@ export class AgentContextLayerPlugin
 
     const router = coreSetup.http.createRouter();
     registerSearchRoute({
+      router,
+      coreSetup,
+      logger: this.logger,
+      getSmlService,
+    });
+
+    registerCrawlerRoute({
       router,
       coreSetup,
       logger: this.logger,

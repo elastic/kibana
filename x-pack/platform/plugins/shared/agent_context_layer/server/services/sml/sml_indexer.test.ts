@@ -405,5 +405,109 @@ describe('createSmlIndexer', () => {
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.operations[0].index.document.permissions).toEqual([]);
     });
+
+    it('uses chunk.timestamp for created_at and updated_at when provided', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const fixedTs = '2021-06-15T12:00:00.000Z';
+      const smlData = {
+        chunks: [
+          {
+            type: 'lens',
+            title: 'Dated',
+            content: 'c',
+            timestamp: fixedTs,
+          },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-12',
+          attachmentType: 'lens',
+          action: 'create',
+          esClient,
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.created_at).toBe(fixedTs);
+      expect(bulkCall.operations[0].index.document.updated_at).toBe(fixedTs);
+    });
+
+    it('ignores invalid chunk.timestamp and uses indexing time', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [{ type: 'lens', title: 'Bad ts', content: 'c', timestamp: 'not-a-date' }],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-13',
+          attachmentType: 'lens',
+          action: 'create',
+          esClient,
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      const doc = bulkCall.operations[0].index.document;
+      expect(doc.created_at).toEqual(expect.any(String));
+      expect(doc.updated_at).toBe(doc.created_at);
+      expect(doc.created_at).not.toBe('not-a-date');
+    });
+
+    it('passes getSmlDataElasticsearchClient into getSmlData context only', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const systemEs = createMockEsClient();
+      const userEs = createMockEsClient();
+      const getSmlData = jest.fn().mockResolvedValue({
+        chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+      });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const logger = createMockLogger();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment({
+        originId: 'att-14',
+        attachmentType: 'lens',
+        action: 'create',
+        spaces: ['default'],
+        esClient: systemEs,
+        savedObjectsClient: {} as unknown as ISavedObjectsRepository,
+        getSmlDataElasticsearchClient: userEs,
+        logger: createMockLogger(),
+      });
+
+      expect(getSmlData).toHaveBeenCalledWith(
+        'att-14',
+        expect.objectContaining({
+          esClient: userEs,
+        })
+      );
+      expect(createSmlStorage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: systemEs,
+        })
+      );
+    });
   });
 });
