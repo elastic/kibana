@@ -30,6 +30,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
+import { useActiveSpaceId } from '../active_space_context';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
 import {
   createNewConversation,
@@ -366,7 +367,8 @@ export const useConversationActions = ({
   onConversationCreated,
   onDeleteConversation,
 }: UseConversationActionsParams): ConversationActions => {
-  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const spaceId = useActiveSpaceId();
+  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
 
   const conversationActions = useMemo(
     () =>
