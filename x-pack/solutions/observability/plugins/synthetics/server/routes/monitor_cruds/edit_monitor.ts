@@ -149,7 +149,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       if (editedMonitorSpaces.length > 0) {
         const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
           routeContext,
-          editedMonitorSpaces
+          editedMonitorSpaces,
+          decryptedMonitorPrevMonitor.type
         );
         if (spaceAuthError) {
           return spaceAuthError;

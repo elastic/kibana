@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { MonitorFields, SyntheticsPrivateLocations } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/runtime_types';
+import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import type { RouteContext } from '../types';
 
 /**
@@ -119,7 +120,8 @@ export const validateMonitorPrivateLocationSpaces = (
  */
 export const assertCanUpdateMonitorInAllSpaces = async (
   routeContext: RouteContext,
-  spaceIds: string[]
+  spaceIds: string[],
+  savedObjectType: string = syntheticsMonitorSavedObjectType
 ) => {
   const { request, response, server, spaceId } = routeContext;
 
@@ -137,7 +139,7 @@ export const assertCanUpdateMonitorInAllSpaces = async (
     server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
   const { hasAllRequested } = await checkSavedObjectsPrivileges(
-    'saved_object:synthetics-monitor/bulk_update',
+    `saved_object:${savedObjectType}/bulk_update`,
     uniqueSpaces
   );
 
