@@ -13,10 +13,17 @@ import type { LoggerServiceContract } from '../services/logger_service/logger_se
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
 import {
   RULE_DOCTOR_INSIGHTS_INDEX,
+  ruleDoctorInsightStatus,
   type RuleDoctorInsightDoc,
   type RuleDoctorInsightStatus,
 } from '../../resources/indices/rule_doctor_insights';
-import type { ListInsightsParams, ListInsightsResult, BulkIndexInsightsResult } from './types';
+import type {
+  ListInsightsParams,
+  ListInsightsResult,
+  BulkIndexInsightsResult,
+  BulkDismissInsightsResult,
+  PersistFindingsResult,
+} from './types';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -56,7 +63,10 @@ export class RuleDoctorInsightsClient {
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ term: { insight_id: insightId } }, { term: { space_id: spaceId } }],
+          filter: [
+            { term: { insight_id: insightId } },
+            { term: { space_id: spaceId } },
+          ],
         },
       },
       size: 1,
@@ -80,7 +90,10 @@ export class RuleDoctorInsightsClient {
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ term: { insight_id: insightId } }, { term: { space_id: spaceId } }],
+          filter: [
+            { term: { insight_id: insightId } },
+            { term: { space_id: spaceId } },
+          ],
         },
       },
       size: 1,
@@ -108,12 +121,7 @@ export class RuleDoctorInsightsClient {
     }
 
     const operations = insights.flatMap((insight) => [
-      {
-        index: {
-          _index: RULE_DOCTOR_INSIGHTS_INDEX,
-          _id: `${insight.space_id}:${insight.insight_id}`,
-        },
-      },
+      { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: `${insight.space_id}:${insight.insight_id}` } },
       insight,
     ]);
 
@@ -140,7 +148,61 @@ export class RuleDoctorInsightsClient {
     return { indexed, failed };
   }
 
-  private buildFilterQuery(params: ListInsightsParams): QueryDslQueryContainer {
+  public async bulkDismissInsights(
+    insightIds: string[],
+    spaceId: string
+  ): Promise<BulkDismissInsightsResult> {
+    if (insightIds.length === 0) {
+      return { dismissed: 0, failed: 0 };
+    }
+
+    const operations = insightIds.flatMap((insightId) => [
+      { update: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: `${spaceId}:${insightId}` } },
+      { doc: { status: ruleDoctorInsightStatus.dismissed } },
+    ]);
+
+    const response = await this.esClient.bulk({ operations, refresh: 'wait_for' });
+
+    const failed = response.items.filter((item) => item.update?.error).length;
+    const dismissed = insightIds.length - failed;
+
+    if (response.errors) {
+      this.logger.warn({
+        message: `RuleDoctorInsightsClient: failed to dismiss ${failed} insights`,
+      });
+    }
+
+    this.logger.debug({
+      message: `RuleDoctorInsightsClient: dismissed ${dismissed} insights (${failed} failed)`,
+    });
+
+    return { dismissed, failed };
+  }
+
+  public async persistFindings(params: {
+    insights: RuleDoctorInsightDoc[];
+    dismissIds: string[];
+    spaceId: string;
+  }): Promise<PersistFindingsResult> {
+    const { insights, dismissIds, spaceId } = params;
+
+    const indexResult = await this.bulkIndexInsights(insights);
+    const dismissResult = await this.bulkDismissInsights(dismissIds, spaceId);
+
+    this.logger.debug({
+      message: `RuleDoctorInsightsClient: persisted ${indexResult.indexed} insights (${indexResult.failed} failed), dismissed ${dismissResult.dismissed}`,
+    });
+
+    return {
+      indexed: indexResult.indexed,
+      failed: indexResult.failed + dismissResult.failed,
+      dismissed: dismissResult.dismissed,
+    };
+  }
+
+  private buildFilterQuery(
+    params: ListInsightsParams
+  ): QueryDslQueryContainer {
     const filters: QueryDslQueryContainer[] = [{ term: { space_id: params.spaceId } }];
 
     if (params.status) {

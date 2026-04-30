@@ -16,6 +16,7 @@ import { TaskDefinition } from '../lib/services/task_run_scope_service/create_ta
 import { registerSavedObjects } from '../saved_objects';
 import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { registerRuleDoctorStepTypes } from '../step_types';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -49,6 +50,12 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
+
+    registerRuleDoctorStepTypes(
+      container.get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
+      )
+    );
 
     if (container.isBound(usageCollectionToken)) {
       // Both getters are called task run (after start), so the

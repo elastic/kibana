@@ -79,10 +79,12 @@ export const ruleDoctorInsightDocSchema = z.object({
     .describe('Arbitrary structured data supporting the insight'),
   current: z
     .record(z.string(), z.unknown())
+    .optional()
     .nullable()
     .describe('Current rule configuration snapshot'),
   proposed: z
     .record(z.string(), z.unknown())
+    .optional()
     .nullable()
     .describe('Proposed rule configuration after applying the action'),
   diffs: z

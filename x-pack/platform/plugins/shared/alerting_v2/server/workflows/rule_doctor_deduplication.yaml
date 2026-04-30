@@ -1,0 +1,331 @@
+version: '1'
+name: rule_doctor_deduplication
+description: >
+  Analyzes alerting rules in a space to identify duplicates and near-duplicates,
+  producing actionable insights for merging or removing redundant rules.
+enabled: true
+
+triggers:
+  - type: manual
+
+settings:
+  timeout: '5m'
+
+steps:
+  - name: fetch_rules
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/.kibana_alerting_cases/_search'
+      body:
+        size: 1000
+        query:
+          bool:
+            filter:
+              - term:
+                  type: alerting_rule
+              - term:
+                  namespaces: '{{ inputs.space_id }}'
+        _source:
+          includes:
+            - alerting_rule.name
+            - alerting_rule.rule_type_id
+            - alerting_rule.params
+            - alerting_rule.schedule
+            - alerting_rule.enabled
+            - alerting_rule.tags
+            - alerting_rule.evaluation
+            - alerting_rule.grouping
+            - alerting_rule.metadata
+
+  - name: set_rules_context
+    type: data.set
+    with:
+      rule_count: '{{ steps.fetch_rules.output.hits.total.value }}'
+
+  - name: analyze_duplicates
+    type: ai.prompt
+    with:
+      connector-id: '{{ inputs.connector_id }}'
+      prompt: |
+        You are Rule Doctor, an expert system for analyzing Kibana alerting rules.
+
+        ## Task
+        Analyze the following alerting rules for duplicates and overlaps. Two rules overlap when they
+        monitor the same or very similar metrics/conditions on the same infrastructure, even if their
+        ES|QL queries are worded differently.
+
+        ## Rules to analyze
+        {{ steps.fetch_rules.output.hits.hits | json }}
+
+        ## Analysis criteria
+        Compare each pair of rules on:
+        - `alerting_rule.params` or `alerting_rule.rule_type_id` — do the queries target the same index patterns, metrics, or fields?
+        - `alerting_rule.tags` — shared domain tags?
+        - `alerting_rule.schedule` — similar execution intervals?
+        - `alerting_rule.name` — similar naming patterns?
+
+        Two rules are duplicates if they would fire on largely the same conditions for the same
+        infrastructure, even if one uses a slightly different threshold or filtering approach.
+        Rules with the same schedule but monitoring completely different things are NOT duplicates.
+
+        For each duplicate group:
+        - Populate `rule_ids` with the _id field of all affected rules from the Elasticsearch hits.
+        - Set `title` to a short plain-text description of the duplicate group.
+        - Set `summary` explaining why these rules overlap.
+        - Set `justification` with detailed reasoning about which fields/conditions overlap.
+        - Set `current` to an object keyed by rule_id containing each rule's key fields (name, query/params, schedule, tags).
+        - Set `proposed` to an object describing the recommended merged/retained rule configuration (name, query/params, schedule, tags). Use null if action is "delete".
+        - Set `diffs` to an array describing the field-level differences between current rules and the proposed configuration.
+
+        If no duplicates are found, return an empty insights array.
+
+        ## Output style
+        All text fields (title, summary, justification) must be plain text only — no markdown,
+        no bold, no tables, no special formatting. Keep justification to 2-3 sentences.
+      schema:
+        type: object
+        properties:
+          insights:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [deduplication]
+                action:
+                  type: string
+                  enum: [merge, delete]
+                impact:
+                  type: string
+                  enum: [low, medium, high]
+                confidence:
+                  type: string
+                  enum: [low, medium, high]
+                title:
+                  type: string
+                summary:
+                  type: string
+                justification:
+                  type: string
+                rule_ids:
+                  type: array
+                  items:
+                    type: string
+                current:
+                  type: object
+                  description: Object keyed by rule_id with each rule's key config fields
+                proposed:
+                  type: object
+                  nullable: true
+                  description: Recommended merged rule configuration, or null if action is delete
+                diffs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        description: Dot-delimited field path
+                      previous:
+                        description: Value before the proposed change
+                      proposed:
+                        description: Value after the proposed change
+                    required: [field, previous, proposed]
+                  description: Field-level differences between current and proposed
+              required: [type, action, impact, confidence, title, summary, justification, rule_ids]
+        required: [insights]
+    timeout: 300s
+
+  - name: validate_insights
+    type: alerting_v2.validate_rules
+    with:
+      insights: '${{ steps.analyze_duplicates.output.content.insights }}'
+      space_id: '{{ inputs.space_id }}'
+      execution_id: '{{ inputs.execution_id }}'
+
+  - name: store_validation
+    type: data.set
+    with:
+      has_invalid: '${{ steps.validate_insights.output.hasInvalid }}'
+      invalid_insights: '${{ steps.validate_insights.output.invalidInsights }}'
+      valid_insights: '${{ steps.validate_insights.output.validInsights }}'
+      correction_attempt: 0
+      loop_valid_insights: []
+
+  - name: correction_loop
+    type: while
+    condition: 'variables.has_invalid:true AND variables.correction_attempt < 3'
+    max-iterations: 3
+    steps:
+      - name: increment_attempt
+        type: data.set
+        with:
+          correction_attempt: '${{ variables.correction_attempt | plus: 1 }}'
+
+      - name: correct_insights
+        type: ai.prompt
+        with:
+          connector-id: '{{ inputs.connector_id }}'
+          prompt: |
+            You are Rule Doctor's insight correction agent.
+
+            ## Task
+            Some insights generated from alerting rule analysis failed schema validation.
+            Fix each invalid insight using the validation errors below.
+
+            ## Invalid insights with errors
+            {{ variables.invalid_insights | json }}
+
+            Each entry has:
+            - "raw": the original insight object that failed validation
+            - "error": the validation error message
+
+            ## Required schema for each insight
+            Each insight must have ALL of these fields:
+            - type: string (must be "deduplication")
+            - action: string (must be "merge" or "delete")
+            - impact: string (must be "low", "medium", or "high")
+            - confidence: string (must be "low", "medium", or "high")
+            - title: string (short plain-text description)
+            - summary: string (plain-text explanation)
+            - justification: string (plain-text detailed reasoning, 2-3 sentences)
+            - rule_ids: array of strings (Elasticsearch document _id values)
+            - current: object keyed by rule_id with each rule's key config fields (optional)
+            - proposed: object with recommended merged rule config, or null for delete (optional)
+            - diffs: array of {field, previous, proposed} objects (optional)
+
+            ## Instructions
+            - Fix validation errors in each insight
+            - Ensure all required fields are present with correct types
+            - All text must be plain text only — no markdown formatting
+            - If an insight cannot be fixed, omit it entirely
+            - Return the corrected insights as an array
+          schema:
+            type: object
+            properties:
+              insights:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [deduplication]
+                    action:
+                      type: string
+                      enum: [merge, delete]
+                    impact:
+                      type: string
+                      enum: [low, medium, high]
+                    confidence:
+                      type: string
+                      enum: [low, medium, high]
+                    title:
+                      type: string
+                    summary:
+                      type: string
+                    justification:
+                      type: string
+                    rule_ids:
+                      type: array
+                      items:
+                        type: string
+                    current:
+                      type: object
+                      description: Object keyed by rule_id with each rule's key config fields
+                    proposed:
+                      type: object
+                      nullable: true
+                      description: Recommended merged rule configuration, or null if action is delete
+                    diffs:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          field:
+                            type: string
+                          previous:
+                            description: Value before the proposed change
+                          proposed:
+                            description: Value after the proposed change
+                        required: [field, previous, proposed]
+                  required: [type, action, impact, confidence, title, summary, justification, rule_ids]
+            required: [insights]
+        timeout: 120s
+
+      - name: revalidate_insights
+        type: alerting_v2.validate_rules
+        with:
+          insights: '${{ steps.correct_insights.output.content.insights }}'
+          space_id: '{{ inputs.space_id }}'
+          execution_id: '{{ inputs.execution_id }}'
+
+      - name: update_validation
+        type: data.set
+        with:
+          has_invalid: '${{ steps.revalidate_insights.output.hasInvalid }}'
+          invalid_insights: '${{ steps.revalidate_insights.output.invalidInsights }}'
+          loop_valid_insights: '${{ steps.revalidate_insights.output.validInsights }}'
+
+  - name: merge_all_valid
+    type: data.set
+    with:
+      valid_insights: '${{ variables.valid_insights | concat: variables.loop_valid_insights }}'
+
+  - name: fetch_open_insights
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/.rule-doctor-insights/_search'
+      body:
+        size: 100
+        query:
+          bool:
+            filter:
+              - term:
+                  space_id: '{{ inputs.space_id }}'
+              - term:
+                  status: open
+              - term:
+                  type: deduplication
+
+  - name: evaluate_existing
+    type: ai.prompt
+    if: '{{ steps.fetch_open_insights.output.hits.total.value > 0 }}'
+    with:
+      connector-id: '{{ inputs.connector_id }}'
+      prompt: |
+        You are evaluating existing Rule Doctor deduplication insights against new analysis results.
+
+        ## New insights
+        {{ variables.valid_insights | json }}
+
+        ## Currently open existing insights
+        {{ steps.fetch_open_insights.output.hits.hits | json }}
+
+        For each existing insight, determine if it should be dismissed because:
+        1. A new insight covers the same issue (overlapping or duplicate recommendation)
+        2. The insight references rules that now appear in a new, updated recommendation
+        3. The insight is no longer relevant based on the latest analysis
+
+        Only dismiss insights you are confident are stale or superseded. If unsure, keep them open.
+        If there are no existing insights, or none should be dismissed, return an empty array.
+
+        Return the insight_id of each existing insight to dismiss.
+      schema:
+        type: object
+        properties:
+          dismissals:
+            type: array
+            items:
+              type: string
+              description: The insight_id of the existing insight to dismiss
+
+  - name: persist_results
+    type: alerting_v2.persist_findings
+    with:
+      insights: '${{ variables.valid_insights }}'
+      dismiss_ids: '${{ steps.evaluate_existing.output.content.dismissals }}'
+      space_id: '{{ inputs.space_id }}'
