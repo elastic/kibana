@@ -558,7 +558,7 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -581,7 +581,7 @@
               "<Input, Output, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "docsReferencedTypeName": "PublicStepDefinition",
@@ -726,7 +726,7 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -744,7 +744,7 @@
               "React.ComponentType | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -759,11 +759,17 @@
               "\nProperty handlers for the step."
             ],
             "signature": [
-              "EditorHandlers",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.EditorHandlers",
+                "text": "EditorHandlers"
+              },
               "<Input, Output, Config> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
