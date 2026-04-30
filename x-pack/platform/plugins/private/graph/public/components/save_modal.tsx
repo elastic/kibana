@@ -10,8 +10,10 @@ import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elas
 import { i18n } from '@kbn/i18n';
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 
 import type { GraphSavePolicy } from '../types/config';
+import { hasLibraryItemWithTitle } from '../helpers/saved_objects_utils';
 
 export interface OnSaveGraphProps extends OnSaveProps {
   newDescription: string;
@@ -19,6 +21,7 @@ export interface OnSaveGraphProps extends OnSaveProps {
 }
 
 export function SaveModal({
+  contentClient,
   onSave,
   onClose,
   title,
@@ -27,6 +30,7 @@ export function SaveModal({
   savePolicy,
   hasData,
 }: {
+  contentClient: ContentClient;
   onSave: (props: OnSaveGraphProps) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
@@ -39,6 +43,9 @@ export function SaveModal({
   const [dataConsent, setDataConsent] = useState(false);
   return (
     <SavedObjectSaveModalWithSaveResult
+      hasLibraryItemWithTitle={async (titleToCheck: string) =>
+        hasLibraryItemWithTitle(titleToCheck, contentClient)
+      }
       onSave={async (props) => {
         return onSave({ ...props, newDescription, dataConsent });
       }}
