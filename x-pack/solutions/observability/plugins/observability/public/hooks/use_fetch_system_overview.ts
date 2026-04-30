@@ -96,13 +96,13 @@ export function useFetchSystemOverview(): {
 
       const eventsParams: estypes.SearchRequest = {
         index: EVENTS_INDEX,
-        size: 100,
+        size: 5,
         query: {
           bool: {
             must_not: [{ term: { verdict: 'promoted' } }],
           },
         },
-        sort: [{ '@timestamp': { order: 'desc' } }],
+        sort: [{ criticality: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       };
 
       const detectionsParams: estypes.SearchRequest = {
