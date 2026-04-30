@@ -78,6 +78,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(
       initialStepExecutionId ?? null
     );
+    const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(
+      initialWorkflowRunId ?? null
+    );
     const [start, setStart] = useState('now-1w');
     const [end, setEnd] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
@@ -93,34 +96,39 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         end,
       });
 
-    const selectedItem = useMemo(() => {
-      const results = stepExecutionsList?.results ?? [];
-      return results.find((r) => r.id === selectedStepExecutionId) ?? null;
-    }, [stepExecutionsList?.results, selectedStepExecutionId]);
+    const selectedStepExecutionMetadata = useMemo(
+      () => stepExecutionsList?.results.find((r) => r.id === selectedStepExecutionId),
+      [stepExecutionsList?.results, selectedStepExecutionId]
+    );
 
-    const workflowRunIdForFetch = selectedItem?.workflowRunId ?? initialWorkflowRunId ?? '';
+    // Update the workflow execution id and selected step execution id when the step executions list changes
+    useEffect(() => {
+      if (isLoadingStepExecutions) {
+        // reset the workflow execution id to avoid querying step execution details with stale execution id
+        setWorkflowExecutionId(null);
+        return;
+      }
+      if (selectedStepExecutionMetadata) {
+        setWorkflowExecutionId(selectedStepExecutionMetadata.workflowRunId);
+      } else {
+        setWorkflowExecutionId(null);
+        setSelectedStepExecutionId(null);
+      }
+    }, [isLoadingStepExecutions, selectedStepExecutionMetadata, selectedStepExecutionId]);
+
     const { data: selectedStepExecution, isLoading: isLoadingStepExecution } = useStepExecution(
-      workflowRunIdForFetch,
+      workflowExecutionId ?? '',
       selectedStepExecutionId ?? undefined,
-      selectedItem?.status
+      selectedStepExecutionMetadata?.status
     );
     const { data: workflowExecution, isLoading: isLoadingWorkflowExecution } = useWorkflowExecution(
       {
-        executionId: workflowRunIdForFetch || null,
-        enabled: !!selectedStepExecutionId && !!workflowRunIdForFetch,
+        executionId: workflowExecutionId,
+        enabled: Boolean(selectedStepExecutionId && workflowExecutionId),
         includeInput: true,
         includeOutput: true,
       }
     );
-
-    useEffect(() => {
-      if (!selectedStepExecutionId || isLoadingStepExecution || !stepExecutionsList) {
-        return;
-      }
-      if (!stepExecutionsList.results.some((r) => r.id === selectedStepExecutionId)) {
-        setSelectedStepExecutionId(null);
-      }
-    }, [selectedStepExecutionId, stepExecutionsList, setExecutionContext, isLoadingStepExecution]);
 
     // Set the time range automatically when we have an initial step execution id
     useEffect(() => {
