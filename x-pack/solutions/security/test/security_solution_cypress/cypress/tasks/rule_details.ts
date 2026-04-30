@@ -24,7 +24,6 @@ import {
   DETAILS_TITLE,
   EDIT_EXCEPTION_BTN,
   EDIT_RULE_SETTINGS_LINK,
-  ENDPOINT_EXCEPTIONS_TAB,
   EXCEPTION_ITEM_ACTIONS_BUTTON,
   EXCEPTIONS_TAB,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
@@ -63,6 +62,7 @@ import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_br
 import { visit } from './navigation';
 import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
 import { GAP_AUTO_FILL_LOGS_TABLE } from '../screens/rule_gaps';
+import { ENDPOINT_EXCEPTIONS_URL } from '../urls/navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -143,8 +143,8 @@ export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
 };
 
-export const goToEndpointExceptionsTab = () => {
-  cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
+export const navigateToEndpointExceptions = () => {
+  cy.visit(ENDPOINT_EXCEPTIONS_URL);
 };
 
 export const openEditException = (index = 0) => {

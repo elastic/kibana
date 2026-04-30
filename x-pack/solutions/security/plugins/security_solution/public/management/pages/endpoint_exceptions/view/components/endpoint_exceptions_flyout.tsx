@@ -189,7 +189,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={endpointExceptionsFlyoutTitleId}>
+          <h2 id={endpointExceptionsFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
             {ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateTitle}
           </h2>
         </EuiTitle>
