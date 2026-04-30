@@ -28,8 +28,8 @@ const createInsight = (overrides: Record<string, unknown> = {}) => ({
   summary: 'A test insight for Scout API tests',
   rule_ids: [],
   data: {},
-  current: null,
-  proposed: null,
+  current: {},
+  proposed: {},
   space_id: 'default',
   ...overrides,
 });

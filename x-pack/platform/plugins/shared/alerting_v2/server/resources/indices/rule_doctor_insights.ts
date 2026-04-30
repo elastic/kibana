@@ -70,23 +70,18 @@ export const ruleDoctorInsightDocSchema = z.object({
     .describe('Reasoning for why this insight was raised and the proposed action'),
   rule_ids: z
     .array(z.string())
-    .optional()
     .default([])
     .describe('IDs of the alerting rules involved'),
   data: z
     .record(z.string(), z.any())
     .optional()
     .describe('Arbitrary structured data supporting the insight'),
-  current: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .nullable()
-    .describe('Current rule configuration snapshot'),
+  current: z.record(z.string(), z.unknown()).describe('Current rule configuration snapshot'),
   proposed: z
     .record(z.string(), z.unknown())
-    .optional()
-    .nullable()
-    .describe('Proposed rule configuration after applying the action'),
+    .describe(
+      'Object keyed by rule_id with post-action config for each rule (null for deleted rules)'
+    ),
   diffs: z
     .array(
       z.object({

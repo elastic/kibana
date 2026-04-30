@@ -75,7 +75,7 @@ steps:
         - Set `summary` explaining why these rules overlap.
         - Set `justification` with detailed reasoning about which fields/conditions overlap.
         - Set `current` to an object keyed by rule_id containing each rule's key fields (name, query/params, schedule, tags).
-        - Set `proposed` to an object describing the recommended merged/retained rule configuration (name, query/params, schedule, tags). Use null if action is "delete".
+        - Set `proposed` to an object keyed by rule_id. For the retained/merged rule, the value is the new configuration (name, query/params, schedule, tags). For rules being deleted, the value is null.
         - Set `diffs` to an array describing the field-level differences between current rules and the proposed configuration.
 
         If no duplicates are found, return an empty insights array.
@@ -118,8 +118,7 @@ steps:
                   description: Object keyed by rule_id with each rule's key config fields
                 proposed:
                   type: object
-                  nullable: true
-                  description: Recommended merged rule configuration, or null if action is delete
+                  description: Object keyed by rule_id with post-action config for each rule (null for deleted rules)
                 diffs:
                   type: array
                   items:
@@ -193,7 +192,7 @@ steps:
             - justification: string (plain-text detailed reasoning, 2-3 sentences)
             - rule_ids: array of strings (Elasticsearch document _id values)
             - current: object keyed by rule_id with each rule's key config fields (optional)
-            - proposed: object with recommended merged rule config, or null for delete (optional)
+            - proposed: object keyed by rule_id with post-action config for each rule, null for deleted rules (optional)
             - diffs: array of {field, previous, proposed} objects (optional)
 
             ## Instructions
@@ -237,8 +236,7 @@ steps:
                       description: Object keyed by rule_id with each rule's key config fields
                     proposed:
                       type: object
-                      nullable: true
-                      description: Recommended merged rule configuration, or null if action is delete
+                      description: Object keyed by rule_id with post-action config for each rule (null for deleted rules)
                     diffs:
                       type: array
                       items:
