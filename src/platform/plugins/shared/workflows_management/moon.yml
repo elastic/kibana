@@ -100,6 +100,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod
