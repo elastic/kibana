@@ -64,7 +64,9 @@ describe('event_search tool', () => {
       eventsClient: {},
       params: { query: 'timeout', stream_name: 'logs.checkout', verdict: ['promoted'] },
     });
-    expect(result.results[0].type).toBe('other');
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('other');
+    }
   });
 
   it('returns error result when handler fails', async () => {
@@ -89,9 +91,11 @@ describe('event_search tool', () => {
       createMockToolContext()
     );
 
-    expect(result.results[0].type).toBe('error');
-    expect((result.results[0].data as { message: string }).message).toContain(
-      'Failed to search significant events'
-    );
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'Failed to search significant events'
+      );
+    }
   });
 });

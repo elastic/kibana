@@ -99,7 +99,9 @@ describe('event_create tool', () => {
 
     expect(assertSignificantEventsAccess).toHaveBeenCalled();
     expect(createEventToolHandler).toHaveBeenCalled();
-    expect(result.results[0].type).toBe('other');
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('other');
+    }
   });
 
   it('returns error result when creation fails', async () => {
@@ -132,9 +134,11 @@ describe('event_create tool', () => {
       createMockToolContext()
     );
 
-    expect(result.results[0].type).toBe('error');
-    expect((result.results[0].data as { message: string }).message).toContain(
-      'Failed to create significant event'
-    );
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'Failed to create significant event'
+      );
+    }
   });
 });

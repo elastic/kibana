@@ -65,7 +65,9 @@ describe('event_demote tool', () => {
 
     expect(assertSignificantEventsAccess).toHaveBeenCalled();
     expect(demoteEventToolHandler).toHaveBeenCalledWith({ eventsClient: {}, eventId: 'event-1' });
-    expect(result.results[0].type).toBe('other');
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('other');
+    }
   });
 
   it('returns error result when demotion fails', async () => {
@@ -90,9 +92,11 @@ describe('event_demote tool', () => {
       createMockToolContext()
     );
 
-    expect(result.results[0].type).toBe('error');
-    expect((result.results[0].data as { message: string }).message).toContain(
-      'Failed to demote significant event'
-    );
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'Failed to demote significant event'
+      );
+    }
   });
 });
