@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Sentinel components for both dashboards and rules
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    SentinelResourceType:
+      type: string
+      description: The type of the resource
+      enum:
+        - watchlist
