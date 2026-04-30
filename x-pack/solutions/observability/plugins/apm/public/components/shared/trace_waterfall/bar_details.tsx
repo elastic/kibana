@@ -110,7 +110,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               color="hollow"
               data-test-subj="apmBarDetailsServiceNameBadge"
               data-ebt-action={getServiceBadgeHref ? EBT_CLICK_ACTION_VIEW_SERVICE : undefined}
-              data-ebt-element={getServiceBadgeHref ? ebt?.serviceBadge.element : undefined}
+              data-ebt-element={getServiceBadgeHref ? ebt?.serviceBadge?.element : undefined}
               data-prevent-row-click={getServiceBadgeHref ? true : undefined}
               href={getServiceBadgeHref?.(item.serviceName) as any}
               aria-label={
@@ -158,7 +158,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 color={theme.euiTheme.colors.danger}
                 iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
-                data-ebt-action={ebt?.errorBadge ? EBT_CLICK_ACTION_VIEW_ERROR : undefined}
+                data-ebt-action={ebt ? EBT_CLICK_ACTION_VIEW_ERROR : undefined}
                 data-ebt-element={ebt?.errorBadge.element}
                 data-prevent-row-click
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
