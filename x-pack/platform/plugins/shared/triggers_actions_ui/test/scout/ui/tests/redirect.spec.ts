@@ -14,16 +14,17 @@ import { getAlertsAndActionsRole } from '../fixtures/roles';
 const TRIGGERS_ACTIONS_APP = 'management/insightsAndAlerting/triggersActions';
 
 test.describe('Redirect from triggersActions to rules app', { tag: tags.stateful.classic }, () => {
-  let createdRuleId: string | undefined;
+  const createdRuleIds: string[] = [];
 
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(getAlertsAndActionsRole());
   });
 
   test.afterAll(async ({ apiServices }) => {
-    if (createdRuleId) {
-      await apiServices.alerting.rules.delete(createdRuleId).catch(() => {});
+    for (const id of createdRuleIds) {
+      await apiServices.alerting.rules.delete(id).catch(() => {});
     }
+    createdRuleIds.length = 0;
   });
 
   test('redirects to rules app home when navigating to triggersActions with path rules', async ({
@@ -40,7 +41,7 @@ test.describe('Redirect from triggersActions to rules app', { tag: tags.stateful
     const rule = await createIndexThresholdRule(apiServices, {
       name: `Scout Redirect Details ${Date.now()}`,
     });
-    createdRuleId = rule.id;
+    createdRuleIds.push(rule.id);
 
     await page.gotoApp(`${TRIGGERS_ACTIONS_APP}/${rule.id}`);
     await expect(page).toHaveURL(new RegExp(`app/rules/${rule.id}`));
@@ -53,7 +54,7 @@ test.describe('Redirect from triggersActions to rules app', { tag: tags.stateful
     const rule = await createIndexThresholdRule(apiServices, {
       name: `Scout Redirect Edit ${Date.now()}`,
     });
-    createdRuleId = rule.id;
+    createdRuleIds.push(rule.id);
 
     await page.gotoApp(`${TRIGGERS_ACTIONS_APP}/edit/${rule.id}`);
     await expect(page).toHaveURL(new RegExp(`app/rules/edit/${rule.id}`));

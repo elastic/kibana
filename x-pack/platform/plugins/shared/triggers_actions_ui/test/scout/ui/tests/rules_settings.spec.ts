@@ -5,25 +5,33 @@
  * 2.0.
  */
 
+import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { createIndexThresholdRule } from '../fixtures/generators';
 
+const SEEDED_FLAPPING = { enabled: true, look_back_window: 10, status_change_threshold: 10 };
+const SEEDED_QUERY_DELAY = { delay: 10 };
+
+async function applySeededSettings(kbnClient: KbnClient) {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/internal/alerting/rules/settings/_flapping',
+    body: SEEDED_FLAPPING,
+  });
+  await kbnClient.request({
+    method: 'POST',
+    path: '/internal/alerting/rules/settings/_query_delay',
+    body: SEEDED_QUERY_DELAY,
+  });
+}
+
 test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
   let createdRuleId: string | undefined;
 
   test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.request({
-      method: 'POST',
-      path: '/internal/alerting/rules/settings/_flapping',
-      body: { enabled: true, look_back_window: 10, status_change_threshold: 10 },
-    });
-    await kbnClient.request({
-      method: 'POST',
-      path: '/internal/alerting/rules/settings/_query_delay',
-      body: { delay: 10 },
-    });
+    await applySeededSettings(kbnClient);
   });
 
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
@@ -41,6 +49,12 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
       await apiServices.alerting.rules.delete(createdRuleId).catch(() => {});
       createdRuleId = undefined;
     }
+  });
+
+  // The "modifies and persists" test mutates flapping/look-back/status-change globally; restore the
+  // seeded values so other suites sharing this Kibana deployment see a clean baseline.
+  test.afterAll(async ({ kbnClient }) => {
+    await applySeededSettings(kbnClient);
   });
 
   test('rules settings link should be enabled', async ({ pageObjects }) => {
