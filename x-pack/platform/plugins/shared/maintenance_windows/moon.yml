@@ -57,6 +57,10 @@ dependsOn:
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/rule-data-utils'
   - '@kbn/alerts-as-data-utils'
+  - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/kql'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

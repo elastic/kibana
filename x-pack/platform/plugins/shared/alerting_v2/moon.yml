@@ -102,6 +102,7 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
   - '@kbn/user-profile-components'
+  - '@kbn/maintenance-windows-plugin'
 tags:
   - plugin
   - prod
