@@ -328,6 +328,7 @@ export class EditJobFlyoutUI extends Component {
       payload.earliestMs === undefined ||
       payload.latestMs === undefined
     ) {
+      this.setState({ modelMemoryEstimation: null });
       return;
     }
 
@@ -335,7 +336,7 @@ export class EditJobFlyoutUI extends Component {
 
     try {
       const { modelMemoryLimit } = await firstValueFrom(mlApi.calculateModelMemoryLimit$(payload));
-      this.setState({ modelMemoryEstimation: modelMemoryLimit });
+      this.setState({ modelMemoryEstimation: modelMemoryLimit ?? null });
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Model memory limit could not be calculated', error);

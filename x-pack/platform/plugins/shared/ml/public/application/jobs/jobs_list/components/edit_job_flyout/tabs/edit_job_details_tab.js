@@ -181,7 +181,11 @@ export class EditJobDetailsTabUI extends Component {
 
     const { datafeedRunning, jobClosed, hasDatafeed } = this.props;
     const canApplyEstimatedMml =
-      mml !== mmlEstimation && !datafeedRunning && jobClosed && hasDatafeed;
+      mml !== mmlEstimation &&
+      mmlEstimation !== null &&
+      !datafeedRunning &&
+      jobClosed &&
+      hasDatafeed;
 
     let mmlEstimationHelpText = null;
     if (canApplyEstimatedMml) {
