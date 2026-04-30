@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esql } from '@elastic/esql';
+import { esql, Walker, Parser } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 
 type ComposerParamValue = string | number | Array<string | number>;
@@ -22,9 +22,6 @@ export interface InlineEsqlVariablesResult {
    */
   unresolved: string[];
 }
-
-export const esqlTimeLiteralIsDirectlySubstitutable = (v: ESQLControlVariable): boolean =>
-  v.type === ESQLVariableType.TIME_LITERAL && typeof v.value === 'string' && v.value.length > 0;
 
 /**
  * Composer's `inlineParam` supports: string / number / homogeneous non-empty
@@ -55,24 +52,12 @@ export const esqlControlVariableIsComposerInlinable = (v: ESQLControlVariable): 
   }
 };
 
-const PLACEHOLDER_RE = /\?\??[A-Za-z_]\w*/g;
-
 /**
  * Names the alerting v2 rule executor substitutes itself with the rule's time
- * window at execution time. They are valid in a
+ * window at execution time (see `get_query_payload.ts`). They are valid in a
  * persisted rule and must not be flagged as unresolved.
  */
 const RESERVED_RULE_PARAM_NAMES: ReadonlySet<string> = new Set(['_tstart', '_tend']);
-
-const placeholderName = (token: string): string => token.replace(/^\?\??/, '');
-
-const findPlaceholderTokens = (query: string): string[] => [
-  ...new Set(
-    (query.match(PLACEHOLDER_RE) ?? []).filter(
-      (token) => !RESERVED_RULE_PARAM_NAMES.has(placeholderName(token))
-    )
-  ),
-];
 
 type PlaceholderShape = 'value' | 'identifier';
 
@@ -86,11 +71,36 @@ const naturalPlaceholderShape = (v: ESQLControlVariable): PlaceholderShape => {
   }
 };
 
+/**
+ * Returns unique `?param` / `??param` tokens (with prefix) still present in
+ * `query`, excluding reserved rule-executor params. Uses the ANTLR-based parser
+ * so tokens inside string literals are never false-positives.
+ */
+const findPlaceholderTokens = (query: string): string[] => {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const p of Walker.params(Parser.parse(query).root)) {
+    const name = p.value as string;
+    if (RESERVED_RULE_PARAM_NAMES.has(name)) continue;
+    const token = p.text as string;
+    if (!seen.has(token)) {
+      seen.add(token);
+      result.push(token);
+    }
+  }
+  return result;
+};
+
+/**
+ * Builds a map of param name → set of shapes ('value' | 'identifier') seen in
+ * `query`. Uses the ANTLR-based parser — immune to tokens inside string literals.
+ */
 const collectPlaceholderShapesByName = (query: string): Map<string, Set<PlaceholderShape>> => {
+  const { root } = Parser.parse(query);
   const byName = new Map<string, Set<PlaceholderShape>>();
-  for (const token of query.match(PLACEHOLDER_RE) ?? []) {
-    const name = placeholderName(token);
-    const shape: PlaceholderShape = token.startsWith('??') ? 'identifier' : 'value';
+  for (const p of Walker.params(root)) {
+    const name = p.value as string;
+    const shape: PlaceholderShape = (p.text as string).startsWith('??') ? 'identifier' : 'value';
     let shapes = byName.get(name);
     if (!shapes) {
       shapes = new Set();
@@ -112,20 +122,11 @@ export const inlineEsqlVariables = (
     return { query, unresolved: findPlaceholderTokens(query) };
   }
 
-  // Step 1: TIME_LITERAL — direct substitution (Composer would quote the value).
-  let processedQuery = query;
-  for (const v of esqlVariables) {
-    if (esqlTimeLiteralIsDirectlySubstitutable(v)) {
-      const escapedKey = v.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      processedQuery = processedQuery.replace(
-        new RegExp(`(?<!\\?)\\?${escapedKey}(?!\\w)`, 'g'),
-        v.value as string
-      );
-    }
-  }
-
-  // Step 2: Composer — value/identifier inlining for everything else.
-  const shapesByName = collectPlaceholderShapesByName(processedQuery);
+  // Composer — value/identifier inlining.
+  // TIME_LITERAL is intentionally excluded: Composer has no duration-aware mode
+  // and would quote the value (e.g. "15m"), producing a broken query. Those
+  // placeholders stay unresolved and block save until proper support is added.
+  const shapesByName = collectPlaceholderShapesByName(query);
   const params = esqlVariables.reduce<Record<string, ComposerParamValue>>((acc, v) => {
     if (!esqlControlVariableIsComposerInlinable(v)) {
       return acc;
@@ -141,12 +142,12 @@ export const inlineEsqlVariables = (
     return acc;
   }, {});
 
-  let inlinedQuery = processedQuery;
+  let inlinedQuery = query;
   if (Object.keys(params).length > 0) {
     try {
-      inlinedQuery = esql(processedQuery, params).inlineParams().print('basic');
+      inlinedQuery = esql(query, params).inlineParams().print('basic');
     } catch (err) {
-      inlinedQuery = processedQuery;
+      inlinedQuery = query;
     }
   }
 

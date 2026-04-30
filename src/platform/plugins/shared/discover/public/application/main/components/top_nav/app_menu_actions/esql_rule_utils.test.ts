@@ -9,11 +9,7 @@
 
 import { esql } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import {
-  esqlControlVariableIsComposerInlinable,
-  esqlTimeLiteralIsDirectlySubstitutable,
-  inlineEsqlVariables,
-} from './esql_rule_utils';
+import { esqlControlVariableIsComposerInlinable, inlineEsqlVariables } from './esql_rule_utils';
 
 jest.mock('@elastic/esql', () => {
   const actual = jest.requireActual('@elastic/esql');
@@ -25,40 +21,6 @@ const esqlMock = esql as jest.MockedFunction<typeof esql>;
 const makeVar = (
   overrides: Partial<ESQLControlVariable> & Pick<ESQLControlVariable, 'type' | 'value'>
 ): ESQLControlVariable => ({ key: 'p', ...overrides });
-
-describe('esqlTimeLiteralIsDirectlySubstitutable', () => {
-  it('returns true for TIME_LITERAL with a non-empty string value', () => {
-    expect(
-      esqlTimeLiteralIsDirectlySubstitutable(
-        makeVar({ type: ESQLVariableType.TIME_LITERAL, value: '15m' })
-      )
-    ).toBe(true);
-  });
-
-  it('returns false for TIME_LITERAL with an empty string value', () => {
-    expect(
-      esqlTimeLiteralIsDirectlySubstitutable(
-        makeVar({ type: ESQLVariableType.TIME_LITERAL, value: '' })
-      )
-    ).toBe(false);
-  });
-
-  it('returns false for TIME_LITERAL with a numeric value', () => {
-    expect(
-      esqlTimeLiteralIsDirectlySubstitutable(
-        makeVar({ type: ESQLVariableType.TIME_LITERAL, value: 15 })
-      )
-    ).toBe(false);
-  });
-
-  it('returns false for VALUES type even with a non-empty string', () => {
-    expect(
-      esqlTimeLiteralIsDirectlySubstitutable(
-        makeVar({ type: ESQLVariableType.VALUES, value: '15m' })
-      )
-    ).toBe(false);
-  });
-});
 
 describe('esqlControlVariableIsComposerInlinable', () => {
   it('returns false for TIME_LITERAL (Composer would quote the duration)', () => {
@@ -169,31 +131,16 @@ describe('inlineEsqlVariables', () => {
       expect(result.unresolved).toEqual([]);
     });
 
-    it('inlines a TIME_LITERAL variable verbatim (value is NOT quoted)', () => {
-      const timeLiteralQuery = 'FROM logs* | WHERE @timestamp > NOW() - ?window | LIMIT 10';
-      const result = inlineEsqlVariables(timeLiteralQuery, [
-        makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value: '15m' }),
-      ]);
-      expect(result.query).toContain('15m');
-      expect(result.query).not.toContain('"15m"');
-      expect(result.query).not.toContain('?window');
-      expect(result.unresolved).toEqual([]);
+    it('reports TIME_LITERAL as unresolved — Composer cannot inline duration tokens without quoting', () => {
+      const result = inlineEsqlVariables(
+        'FROM logs* | WHERE @timestamp > NOW() - ?window | LIMIT 10',
+        [makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value: '15m' })]
+      );
+      expect(result.query).toContain('?window');
+      expect(result.unresolved).toEqual(['?window']);
     });
 
-    it('does not replace ??key when substituting a TIME_LITERAL ?key', () => {
-      const mixedQuery =
-        'FROM logs* | KEEP ??window | WHERE @timestamp > NOW() - ?window | LIMIT 10';
-      const result = inlineEsqlVariables(mixedQuery, [
-        makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value: '15m' }),
-      ]);
-      expect(result.query).toContain('??window');
-      expect(result.query).not.toContain('?window | LIMIT');
-      // ??window is left over because TIME_LITERAL is not Composer-inlinable as
-      // an identifier — surfaced as unresolved.
-      expect(result.unresolved).toEqual(['??window']);
-    });
-
-    it('warns and falls back when Composer throws, surfacing leftover tokens as unresolved', () => {
+    it('falls back when Composer throws, surfacing leftover tokens as unresolved', () => {
       // Force Composer to throw deterministically rather than relying on a
       // specific malformed input string — that way this test keeps covering
       // the catch path even if Composer's parser becomes more lenient.
@@ -201,13 +148,9 @@ describe('inlineEsqlVariables', () => {
         throw new Error('forced Composer failure');
       });
 
-      const result = inlineEsqlVariables('FROM logs* | WHERE host == ?host - ?window | LIMIT 5', [
-        makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value: '15m' }),
+      const result = inlineEsqlVariables('FROM logs* | WHERE host == ?host | LIMIT 5', [
         makeVar({ key: 'host', type: ESQLVariableType.VALUES, value: 'web-1' }),
       ]);
-      // TIME_LITERAL substitution was applied before Composer was invoked.
-      expect(result.query).toContain('15m');
-      expect(result.query).not.toContain('?window');
       // ?host survives the catch fallback — must be reported as unresolved so
       // the caller blocks save instead of persisting a raw placeholder.
       expect(result.unresolved).toEqual(['?host']);
@@ -235,20 +178,14 @@ describe('inlineEsqlVariables', () => {
       expect(result.unresolved).toEqual(['?new']);
     });
 
-    it('returns no tokens for a TIME_LITERAL control with a valid value', () => {
-      const result = inlineEsqlVariables(
-        'FROM logs* | WHERE @timestamp > NOW() - ?window | LIMIT 10',
-        [makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value: '15m' })]
-      );
-      expect(result.unresolved).toEqual([]);
-    });
-
-    it('reports the token for a TIME_LITERAL control with an empty value', () => {
-      const result = inlineEsqlVariables(
-        'FROM logs* | WHERE @timestamp > NOW() - ?window | LIMIT 10',
-        [makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value: '' })]
-      );
-      expect(result.unresolved).toEqual(['?window']);
+    it('reports TIME_LITERAL as unresolved regardless of value', () => {
+      for (const value of ['15m', '', 0]) {
+        const result = inlineEsqlVariables(
+          'FROM logs* | WHERE @timestamp > NOW() - ?window | LIMIT 10',
+          [makeVar({ key: 'window', type: ESQLVariableType.TIME_LITERAL, value })]
+        );
+        expect(result.unresolved).toEqual(['?window']);
+      }
     });
 
     it('reports only the unresolved token when one of two params is missing', () => {
