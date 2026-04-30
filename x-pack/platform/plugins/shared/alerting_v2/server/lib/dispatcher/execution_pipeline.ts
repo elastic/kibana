@@ -44,6 +44,10 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
 
       const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
 
+      if (output.data) {
+        pipelineState = { ...pipelineState, ...output.data };
+      }
+
       if (output.type === 'halt') {
         this.logger.debug({
           message: `Dispatcher: Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
@@ -54,10 +58,6 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
           haltReason: output.reason,
           finalState: pipelineState,
         };
-      }
-
-      if (output.data) {
-        pipelineState = { ...pipelineState, ...output.data };
       }
     }
 

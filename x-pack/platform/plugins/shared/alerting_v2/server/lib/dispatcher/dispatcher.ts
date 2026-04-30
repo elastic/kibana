@@ -19,11 +19,23 @@ export class DispatcherService implements DispatcherServiceContract {
 
   public async run({
     previousStartedAt = new Date(),
+    eventWatermark,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
 
-    await this.pipeline.execute({ startedAt, previousStartedAt });
+    // If the pipeline throws, the error propagates and `task_runner` never
+    // gets a result — Task Manager treats this as a failed run and the
+    // persisted `eventWatermark` from the prior tick is preserved. That is
+    // what guarantees no silent data loss when a step fails mid-pipeline.
+    const pipelineResult = await this.pipeline.execute({
+      startedAt,
+      previousStartedAt,
+      eventWatermark,
+    });
 
-    return { startedAt };
+    return {
+      startedAt,
+      nextEventWatermark: pipelineResult.finalState.nextEventWatermark,
+    };
   }
 }

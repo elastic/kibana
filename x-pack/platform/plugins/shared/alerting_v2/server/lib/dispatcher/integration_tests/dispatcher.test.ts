@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+// The dispatcher's per-tick lookback cap (1 minute) and 5-second settle buffer
+// are appropriate for production but would force these integration tests —
+// which seed events spanning many minutes — to drive the dispatcher across
+// many ticks. We override them locally so a single `dispatcherService.run()`
+// covers the entire seeded dataset, keeping these end-to-end assertions fast
+// and focused on the pipeline's data-handling behaviour rather than its
+// time-bounded windowing (which is covered by unit tests).
+jest.mock('../constants', () => {
+  const actual = jest.requireActual('../constants');
+  const ONE_YEAR_MIN = 60 * 24 * 365;
+  return {
+    ...actual,
+    LOOKBACK_WINDOW_MINUTES: ONE_YEAR_MIN,
+    TICK_LOOKBACK_CAP_MINUTES: ONE_YEAR_MIN * 10,
+    SETTLE_BUFFER_SECONDS: 0,
+  };
+});
+
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';

@@ -142,5 +142,24 @@ describe('DispatcherPipeline', () => {
       expect(result.completed).toBe(true);
       expect(result.finalState).toEqual({ input });
     });
+
+    it('applies state data carried by a halt output to finalState', async () => {
+      const { loggerService } = createLoggerService();
+
+      const step1 = createMockDispatcherStep('step1', async () => ({
+        type: 'halt',
+        reason: 'no_episodes',
+        data: { nextEventWatermark: '2026-01-22T08:00:00.000Z' },
+      }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [step1]);
+      const input = createDispatcherPipelineInput();
+
+      const result = await pipeline.execute(input);
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('no_episodes');
+      expect(result.finalState.nextEventWatermark).toBe('2026-01-22T08:00:00.000Z');
+    });
   });
 });

@@ -28,7 +28,11 @@ import type { RulesSavedObjectServiceContract } from '../services/rules_saved_ob
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { LOOKBACK_WINDOW_MINUTES } from './constants';
+import {
+  LOOKBACK_WINDOW_MINUTES,
+  SETTLE_BUFFER_SECONDS,
+  TICK_LOOKBACK_CAP_MINUTES,
+} from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline } from './execution_pipeline';
 import {
@@ -95,6 +99,17 @@ const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup
     getWorkflow: jest.fn().mockResolvedValue(null),
     runWorkflow: jest.fn().mockResolvedValue('exec-1'),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+
+interface TimestampRange {
+  gte?: string;
+  gt?: string;
+  lte?: string;
+}
+
+function extractTimestampRange(esqlRequest: unknown): TimestampRange {
+  const filter = (esqlRequest as { filter: { range: Record<string, TimestampRange> } }).filter;
+  return filter.range['@timestamp'];
+}
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
@@ -206,32 +221,35 @@ describe('DispatcherService', () => {
 
       const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
 
+      const before = Date.now();
       const result = await dispatcherService.run({
         previousStartedAt,
       });
+      const after = Date.now();
 
       expect(result.startedAt).toBeInstanceOf(Date);
 
-      const expectedLookback = moment(previousStartedAt)
-        .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-        .toISOString();
-
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(3);
-      expect(queryEsClient.esql.query).toHaveBeenCalledWith(
-        {
-          query: getDispatchableAlertEventsQuery().query,
-          drop_null_columns: false,
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: expectedLookback,
-              },
-            },
-          },
-          params: undefined,
-        },
-        { signal: undefined }
-      );
+      const fetchEpisodesCall = queryEsClient.esql.query.mock.calls[0][0];
+      expect(fetchEpisodesCall).toMatchObject({
+        query: getDispatchableAlertEventsQuery().query,
+        drop_null_columns: false,
+        params: undefined,
+      });
+
+      // Cold start: lower bound is `gte = now − LOOKBACK_WINDOW_MINUTES`,
+      // upper bound is min(start + TICK_CAP, now − SETTLE_BUFFER).
+      const range = extractTimestampRange(fetchEpisodesCall);
+      expect(range).toHaveProperty('gte');
+      expect(range).toHaveProperty('lte');
+      expect(range).not.toHaveProperty('gt');
+      const gte = new Date(range.gte as string).getTime();
+      const lte = new Date(range.lte as string).getTime();
+      const tolerance = 100;
+      expect(gte).toBeGreaterThanOrEqual(before - LOOKBACK_WINDOW_MINUTES * 60_000 - tolerance);
+      expect(gte).toBeLessThanOrEqual(after - LOOKBACK_WINDOW_MINUTES * 60_000 + tolerance);
+      expect(lte - gte).toBeLessThanOrEqual(TICK_LOOKBACK_CAP_MINUTES * 60_000 + tolerance);
+      expect(lte).toBeLessThanOrEqual(after - SETTLE_BUFFER_SECONDS * 1_000 + tolerance);
 
       expect(storageEsClient.bulk).toHaveBeenCalledWith({
         operations: expect.any(Array),
@@ -634,6 +652,78 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+  });
+
+  describe('event watermark plumbing', () => {
+    it('returns nextEventWatermark anchored to the last observed episode when the pipeline completes', async () => {
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(
+          createDispatchableAlertEventsResponse([
+            {
+              last_event_timestamp: '2026-01-22T07:10:00.000Z',
+              rule_id: 'rule-1',
+              group_hash: 'hash-1',
+              episode_id: 'episode-1',
+              episode_status: 'active',
+            },
+          ])
+        )
+        .mockResolvedValueOnce(
+          createAlertEpisodeSuppressionsResponse([
+            {
+              rule_id: 'rule-1',
+              group_hash: 'hash-1',
+              episode_id: 'episode-1',
+              should_suppress: false,
+            },
+          ])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      expect(result.nextEventWatermark).toBe('2026-01-22T07:10:00.000Z');
+    });
+
+    it('returns nextEventWatermark equal to the queried lte when fetch_episodes halts on no_episodes', async () => {
+      queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      const range = extractTimestampRange(queryEsClient.esql.query.mock.calls[0][0]);
+      expect(result.nextEventWatermark).toBe(range.lte);
+    });
+
+    it('threads eventWatermark from params as a `gte` lower bound on subsequent runs', async () => {
+      queryEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      const watermark = moment().subtract(20, 'seconds').toDate();
+      await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        eventWatermark: watermark,
+      });
+
+      const range = extractTimestampRange(queryEsClient.esql.query.mock.calls[0][0]);
+      expect(range.gte).toBe(watermark.toISOString());
+      expect(range).not.toHaveProperty('gt');
+    });
+
+    it('does not return nextEventWatermark when the pipeline throws', async () => {
+      queryEsClient.esql.query.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') })
+      ).rejects.toThrow('boom');
     });
   });
 });
