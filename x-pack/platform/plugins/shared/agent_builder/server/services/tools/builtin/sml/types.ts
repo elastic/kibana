@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { SmlService } from '../../../sml';
+import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
 
 /**
  * Options for creating SML tools.
- * Uses a getter for lazy resolution — the SML service start contract
+ * Uses a getter for lazy resolution — the agent context layer start contract
  * is not available until after plugin start.
  */
 export interface SmlToolsOptions {
-  /** Lazy getter for the SML service (resolved at handler invocation time). */
-  getSmlService: () => SmlService;
+  getAgentContextLayer: () => AgentContextLayerPluginStart;
 }
