@@ -60,6 +60,7 @@ if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- Downloading Scout Test Configuration"
   download_artifact "$SCHEDULED_MANIFEST" .
 
+  # Extract module and its configs
   module_data=$(jq -c ".[] | select(.name == env.SCOUT_CONFIG_GROUP_KEY)" "$SCHEDULED_MANIFEST")
 
   if [[ -z "$module_data" ]]; then
@@ -69,6 +70,7 @@ if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
 
   # Extract config paths only if configs is not already set (e.g., from retry logic)
   if [ -z "$configs" ]; then
+    # Extract config paths: process configs with their serverRunFlags directly
     configs=$(echo "$module_data" | jq -r '.configs[].path')
   fi
 fi
