@@ -9,7 +9,7 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { isInInferenceContext } from './is_in_inference_context';
 
-export function shouldTrackSpan(span: tracing.Span, parentContext: api.Context): boolean {
+export function isInferenceSpan(span: tracing.Span, parentContext: api.Context): boolean {
   return (
     (isInInferenceContext(parentContext) || span.instrumentationScope.name === 'inference') &&
     span.instrumentationScope.name !== '@elastic/transport'

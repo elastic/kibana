@@ -9,7 +9,6 @@ export type {
   InferenceTracingExportConfig,
   InferenceTracingLangfuseExportConfig,
   InferenceTracingPhoenixExportConfig,
-  InferenceTracingAgentBuilderExportConfig,
 } from './types';
 
 export { inferenceTracingExportConfigSchema } from './config';

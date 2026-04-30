@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
@@ -14,7 +15,12 @@ import {
   AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
 } from '@kbn/agent-builder-common/constants';
+import { LateBindingSpanProcessor } from '@kbn/tracing';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { ElasticsearchOtlpExporter } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from './config';
+import { AgentBuilderSpanProcessor } from './tracing/agent_builder_span_processor';
 import { ServiceManager } from './services';
 import type {
   AgentBuilderPluginSetup,
@@ -59,6 +65,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private teardownTracing?: () => Promise<void>;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -274,6 +281,8 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
+    this.registerTracingExporter(coreStart);
+
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
     const startServices = this.serviceManager.startServices({
@@ -372,5 +381,64 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  async stop() {
+    await this.teardownTracing?.();
+  }
+
+  private registerTracingExporter(core: CoreStart) {
+    const { tracing: tracingConfig } = this.config;
+    if (!tracingConfig.enabled) {
+      return;
+    }
+
+    const exporter = tracingConfig.url
+      ? new OTLPTraceExporter({
+          url: tracingConfig.url,
+          ...(tracingConfig.headers ? { headers: tracingConfig.headers } : {}),
+        })
+      : new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser);
+
+    const processor = new AgentBuilderSpanProcessor({
+      exporter,
+      scheduledDelayMillis: tracingConfig.scheduled_delay,
+      isEnabled: this.createCachedIsEnabled(core),
+    });
+
+    this.teardownTracing = LateBindingSpanProcessor.register(processor);
+  }
+
+  private createCachedIsEnabled(core: CoreStart): () => boolean {
+    const TTL_MS = 30_000;
+    let cachedValue = false;
+    let lastFetchedAt = 0;
+    let fetching = false;
+
+    const refresh = () => {
+      if (fetching) return;
+      fetching = true;
+      const internalRepo = core.savedObjects.createInternalRepository();
+      const internalClient = new SavedObjectsClient(internalRepo);
+      core.uiSettings
+        .asScopedToClient(internalClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+        .then((value) => {
+          cachedValue = value;
+          lastFetchedAt = Date.now();
+        })
+        .catch(() => {
+          cachedValue = false;
+          lastFetchedAt = Date.now();
+        })
+        .finally(() => {
+          fetching = false;
+        });
+    };
+
+    return () => {
+      if (Date.now() - lastFetchedAt > TTL_MS) {
+        refresh();
+      }
+      return cachedValue;
+    };
+  }
 }

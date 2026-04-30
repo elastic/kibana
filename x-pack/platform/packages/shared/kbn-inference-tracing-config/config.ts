@@ -10,7 +10,6 @@ import type {
   InferenceTracingExportConfig,
   InferenceTracingLangfuseExportConfig,
   InferenceTracingPhoenixExportConfig,
-  InferenceTracingAgentBuilderExportConfig,
 } from './types';
 
 const scheduledDelay = schema.conditional(
@@ -35,39 +34,11 @@ const phoenixExportConfigSchema: Type<InferenceTracingPhoenixExportConfig> = sch
   scheduled_delay: scheduledDelay,
 });
 
-const agentBuilderExportConfigSchema: Type<InferenceTracingAgentBuilderExportConfig> =
-  schema.object(
-    {
-      send_to_self: schema.boolean({ defaultValue: true }),
-      url: schema.maybe(schema.string()),
-      headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-      force_sample: schema.boolean({ defaultValue: true }),
-      scheduled_delay: scheduledDelay,
-    },
-    {
-      validate: (value) => {
-        if (value.send_to_self) {
-          if (value.url) {
-            return '"url" must not be set when "send_to_self" is true';
-          }
-          if (value.headers) {
-            return '"headers" must not be set when "send_to_self" is true';
-          }
-        } else if (!value.url) {
-          return '"url" is required when "send_to_self" is false';
-        }
-      },
-    }
-  );
-
 export const inferenceTracingExportConfigSchema: Type<InferenceTracingExportConfig> = schema.oneOf([
   schema.object({
     langfuse: langfuseExportConfigSchema,
   }),
   schema.object({
     phoenix: phoenixExportConfigSchema,
-  }),
-  schema.object({
-    agent_builder: agentBuilderExportConfigSchema,
   }),
 ]);

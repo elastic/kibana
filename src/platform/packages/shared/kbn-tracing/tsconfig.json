@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/inference-tracing",
-    "@kbn/inference-tracing-config",
     "@kbn/std",
     "@kbn/tracing-config",
     "@kbn/cleanup-before-exit",

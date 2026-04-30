@@ -8,12 +8,25 @@
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 
+const scheduledDelay = schema.conditional(
+  schema.contextRef('dev'),
+  true,
+  schema.number({ defaultValue: 1000 }),
+  schema.number({ defaultValue: 5000 })
+);
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   githubBaseUrl: schema.string({ defaultValue: 'https://github.com' }),
   topSnippets: schema.object({
     numSnippets: schema.number({ defaultValue: 2, min: 1, max: 10 }),
     numWords: schema.number({ defaultValue: 750, min: 1, max: 5000 }),
+  }),
+  tracing: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    url: schema.maybe(schema.string()),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    scheduled_delay: scheduledDelay,
   }),
 });
 

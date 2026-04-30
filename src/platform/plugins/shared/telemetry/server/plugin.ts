@@ -43,8 +43,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { completeSendToSelfRegistration } from '@kbn/tracing';
 import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
@@ -267,11 +265,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     core: CoreStart,
     { telemetryCollectionManager, security }: TelemetryPluginsDepsStart
   ) {
-    const isAgentBuilderEnabled = this.createCachedIsEnabled(core);
-    completeSendToSelfRegistration(core.elasticsearch.client.asInternalUser, {
-      isEnabled: isAgentBuilderEnabled,
-    });
-
     const { analytics, savedObjects } = core;
 
     this.isOptedIn$.subscribe((enabled) => analytics.optIn({ global: { enabled } }));
@@ -343,41 +336,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   ) {
     // We start the fetcher having updated everything we need to use the config settings
     this.fetcherTask.start(core, { telemetryCollectionManager });
-  }
-
-  private createCachedIsEnabled(core: CoreStart): () => boolean {
-    const TTL_MS = 30_000;
-    let cachedValue = false;
-    let lastFetchedAt = 0;
-    let fetching = false;
-
-    const refresh = () => {
-      if (fetching) return;
-      fetching = true;
-      const internalRepo = core.savedObjects.createInternalRepository();
-      const internalClient = new SavedObjectsClient(internalRepo);
-      core.uiSettings
-        .asScopedToClient(internalClient)
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-        .then((value) => {
-          cachedValue = value;
-          lastFetchedAt = Date.now();
-        })
-        .catch(() => {
-          cachedValue = false;
-          lastFetchedAt = Date.now();
-        })
-        .finally(() => {
-          fetching = false;
-        });
-    };
-
-    return () => {
-      if (Date.now() - lastFetchedAt > TTL_MS) {
-        refresh();
-      }
-      return cachedValue;
-    };
   }
 
   private registerUsageCollectors(usageCollection: UsageCollectionSetup) {
