@@ -142,9 +142,17 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
           defaultMessage: 'Data set',
         }),
         sortable: true,
-        width: '24%',
+        width: '22%',
         truncateText: true,
         'data-test-subj': 'dataSourcePreviewFlyoutSetsColName',
+      },
+      {
+        field: 'resource',
+        name: dataSourcePreviewFlyoutStrings.setsColumnResource(),
+        sortable: true,
+        width: '28%',
+        truncateText: true,
+        'data-test-subj': 'dataSourcePreviewFlyoutSetsColResource',
       },
       {
         field: 'description',
@@ -152,6 +160,7 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
           defaultMessage: 'Description',
         }),
         sortable: true,
+        width: '26%',
         truncateText: true,
         'data-test-subj': 'dataSourcePreviewFlyoutSetsColDescription',
       },
@@ -194,6 +203,7 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
           schema: {
             fields: {
               name: { type: 'string' },
+              resource: { type: 'string' },
               description: { type: 'string' },
             },
           },

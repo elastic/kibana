@@ -101,4 +101,19 @@ export class SampleDataSourcesClient {
     const nameSet = new Set(typeof names === 'string' ? [names] : names);
     this.rows = this.rows.filter((row) => !nameSet.has(row.name));
   }
+
+  /** Updates the description of the data source with the given `id`. */
+  public async updateDescription(id: string, description: string): Promise<DataSourceListItem> {
+    const idx = this.rows.findIndex((row) => row.id === id);
+    if (idx === -1) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.sourceNotFound', {
+          defaultMessage: 'Data source not found.',
+        })
+      );
+    }
+    const next = { ...this.rows[idx], description };
+    this.rows[idx] = next;
+    return { ...next };
+  }
 }
