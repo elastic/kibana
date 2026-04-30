@@ -56,7 +56,7 @@ describe('syncNamespaceTemplatesTask', () => {
         expect.objectContaining({
           'fleet:sync_namespace_templates': expect.objectContaining({
             title: 'Fleet Sync namespace templates',
-            timeout: '5m',
+            timeout: '15m',
             maxAttempts: 3,
           }),
         })

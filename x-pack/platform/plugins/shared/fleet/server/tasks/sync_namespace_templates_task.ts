@@ -6,7 +6,6 @@
  */
 
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -28,15 +27,13 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
   taskManagerSetup.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Fleet Sync namespace templates',
-      timeout: '5m',
+      // Most syncs finish in well under a minute, but a large integration with many
+      // data streams and existing backing indices can need longer due to mapping
+      // updates and rollovers. 15 minutes is a generous safety margin while still
+      // bounded; failures are retried up to maxAttempts.
+      timeout: '15m',
       maxAttempts: 3,
-      createTaskRunner: ({
-        taskInstance,
-        abortController,
-      }: {
-        taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
-      }) => {
+      createTaskRunner: ({ taskInstance, abortController }) => {
         const { spaceId, packageName, addedNamespaces, removedNamespaces } =
           taskInstance.params as SyncNamespaceTemplatesTaskParams;
         return {
@@ -53,14 +50,25 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
             const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
             const esClient = appContextService.getInternalUserESClient();
 
-            await syncNamespaceTemplates({
-              soClient,
-              esClient,
-              packageName,
-              addedNamespaces,
-              removedNamespaces,
-              abortController,
-            });
+            try {
+              await syncNamespaceTemplates({
+                soClient,
+                esClient,
+                packageName,
+                addedNamespaces,
+                removedNamespaces,
+                abortController,
+              });
+            } catch (err) {
+              logger.error(
+                `[syncNamespaceTemplatesTask] Failed for package ${packageName} in space ${spaceId}: ${
+                  err instanceof Error ? err.message : String(err)
+                }`,
+                { error: err }
+              );
+              // Rethrow so task manager records the failure and retries up to maxAttempts.
+              throw err;
+            }
           },
         };
       },

@@ -259,6 +259,7 @@ async function createNamespaceTemplatesForPackage({
     return [];
   }
 
+  if (abortController) throwIfAborted(abortController);
   // A user can opt in a namespace before any data stream for that namespace exists
   // (no data has been ingested yet). In that case `getDataStream` 404s on the
   // namespace-scoped pattern; nothing to update, so just continue.
