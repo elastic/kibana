@@ -8,10 +8,10 @@
 import * as t from 'io-ts';
 
 /**
- * Types of all the regular single value list items but not exception list
- * or exception list types. Those types are in the list_types folder.
+ * Elasticsearch field types supported for value list documents (list items index).
+ * Kept in sync with `.list-item` index mappings in the lists plugin.
  */
-export const type = t.keyof({
+export const valueListElasticsearchDataTypes = {
   binary: null,
   boolean: null,
   byte: null,
@@ -35,8 +35,54 @@ export const type = t.keyof({
   shape: null,
   short: null,
   text: null,
-});
+} as const;
+
+/**
+ * Types of all the regular single value list items but not exception list
+ * or exception list types. Those types are in the list_types folder.
+ */
+export const type = t.keyof(valueListElasticsearchDataTypes);
 
 export const typeOrUndefined = t.union([type, t.undefined]);
-export type Type = t.TypeOf<typeof type>;
+export type Type = keyof typeof valueListElasticsearchDataTypes;
 export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
+
+/**
+ * Preferred ordering for UI pickers (common types first, then numeric, date, ranges, geo).
+ * Compile-time check: every {@link Type} must appear exactly once.
+ */
+export const VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED = [
+  'keyword',
+  'text',
+  'ip',
+  'ip_range',
+  'boolean',
+  'byte',
+  'short',
+  'integer',
+  'long',
+  'float',
+  'half_float',
+  'double',
+  'date',
+  'date_nanos',
+  'binary',
+  'integer_range',
+  'float_range',
+  'long_range',
+  'double_range',
+  'date_range',
+  'geo_point',
+  'geo_shape',
+  'shape',
+] as const satisfies readonly Type[];
+
+type TypesOrdered = (typeof VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED)[number];
+type AssertExhaustiveOrderedList = Exclude<Type, TypesOrdered> extends never
+  ? Exclude<TypesOrdered, Type> extends never
+    ? true
+    : never
+  : never;
+// If this fails to typecheck, update VALUE_LIST_ELASTICSEARCH_TYPES_ORDERED to match Type.
+const _valueListTypesOrderedIsExhaustive: AssertExhaustiveOrderedList = true;
+void _valueListTypesOrderedIsExhaustive;

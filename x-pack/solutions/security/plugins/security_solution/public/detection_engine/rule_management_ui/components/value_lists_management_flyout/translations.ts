@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 export const VALUE_LISTS_FLYOUT_TITLE = i18n.translate(
   'xpack.securitySolution.lists.importValueListTitle',
@@ -129,34 +130,107 @@ export const TABLE_TITLE = i18n.translate('xpack.securitySolution.lists.valueLis
 export const LIST_TYPES_RADIO_LABEL = i18n.translate(
   'xpack.securitySolution.lists.valueListsForm.listTypesRadioLabel',
   {
-    defaultMessage: 'Type of value list',
+    defaultMessage: 'Elasticsearch field type',
   }
 );
 
-export const IP_RADIO = i18n.translate('xpack.securitySolution.lists.valueListsForm.ipRadioLabel', {
-  defaultMessage: 'IP addresses',
-});
-
-export const KEYWORDS_RADIO = i18n.translate(
-  'xpack.securitySolution.lists.valueListsForm.keywordsRadioLabel',
-  {
-    defaultMessage: 'Keywords',
+/** User-visible label for a value list type (matches Elasticsearch field type names). */
+export const getListTypeSelectOptionText = (listType: Type): string => {
+  switch (listType) {
+    case 'binary':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.binary', {
+        defaultMessage: 'binary',
+      });
+    case 'boolean':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.boolean', {
+        defaultMessage: 'boolean',
+      });
+    case 'byte':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.byte', {
+        defaultMessage: 'byte',
+      });
+    case 'date':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.date', {
+        defaultMessage: 'date',
+      });
+    case 'date_nanos':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.dateNanos', {
+        defaultMessage: 'date_nanos',
+      });
+    case 'date_range':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.dateRange', {
+        defaultMessage: 'date_range',
+      });
+    case 'double':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.double', {
+        defaultMessage: 'double',
+      });
+    case 'double_range':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.doubleRange', {
+        defaultMessage: 'double_range',
+      });
+    case 'float':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.float', {
+        defaultMessage: 'float',
+      });
+    case 'float_range':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.floatRange', {
+        defaultMessage: 'float_range',
+      });
+    case 'geo_point':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.geoPoint', {
+        defaultMessage: 'geo_point',
+      });
+    case 'geo_shape':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.geoShape', {
+        defaultMessage: 'geo_shape',
+      });
+    case 'half_float':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.halfFloat', {
+        defaultMessage: 'half_float',
+      });
+    case 'integer':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.integer', {
+        defaultMessage: 'integer',
+      });
+    case 'integer_range':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.integerRange', {
+        defaultMessage: 'integer_range',
+      });
+    case 'ip':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.ip', {
+        defaultMessage: 'ip',
+      });
+    case 'ip_range':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.ipRange', {
+        defaultMessage: 'ip_range',
+      });
+    case 'keyword':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.keyword', {
+        defaultMessage: 'keyword',
+      });
+    case 'long':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.long', {
+        defaultMessage: 'long',
+      });
+    case 'long_range':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.longRange', {
+        defaultMessage: 'long_range',
+      });
+    case 'shape':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.shape', {
+        defaultMessage: 'shape',
+      });
+    case 'short':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.short', {
+        defaultMessage: 'short',
+      });
+    case 'text':
+      return i18n.translate('xpack.securitySolution.lists.valueListsForm.listType.text', {
+        defaultMessage: 'text',
+      });
   }
-);
-
-export const IP_RANGE_RADIO = i18n.translate(
-  'xpack.securitySolution.lists.valueListsForm.ipRangesRadioLabel',
-  {
-    defaultMessage: 'IP ranges',
-  }
-);
-
-export const TEXT_RADIO = i18n.translate(
-  'xpack.securitySolution.lists.valueListsForm.textRadioLabel',
-  {
-    defaultMessage: 'Text',
-  }
-);
+};
 
 export const REFERENCE_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.lists.referenceModalTitle',

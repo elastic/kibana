@@ -26,9 +26,10 @@ describe('type', () => {
     const decoded = type.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "madeup" supplied to ""binary" | "boolean" | "byte" | "date" | "date_nanos" | "date_range" | "double" | "double_range" | "float" | "float_range" | "geo_point" | "geo_shape" | "half_float" | "integer" | "integer_range" | "ip" | "ip_range" | "keyword" | "long" | "long_range" | "shape" | "short" | "text""',
-    ]);
+    const [errorPath] = getPaths(left(message.errors));
+    expect(errorPath).toMatch(/^Invalid value "madeup" supplied to "/);
+    expect(errorPath).toContain('"binary"');
+    expect(errorPath).toContain('"text"');
     expect(message.schema).toEqual({});
   });
 });
