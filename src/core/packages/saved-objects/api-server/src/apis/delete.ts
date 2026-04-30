@@ -13,8 +13,7 @@ import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from '.
  *
  * @public
  */
-export interface SavedObjectsDeleteOptions<ReturnTitle extends boolean = false>
-  extends SavedObjectsBaseOptions {
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
   /** Force deletion of an object that exists in multiple namespaces */

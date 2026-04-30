@@ -118,10 +118,8 @@ export async function loadDashboardApi({
 
   const performanceSubscription = startQueryPerformanceTracking(api, {
     firstLoad: true,
-    creationStartTime: performance.getEntriesByName(
-      DASHBOARD_DURATION_START_MARK,
-      'mark'
-    )[0] as PerformanceMark,
+    creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
+      ?.startTime,
   });
 
   if (savedObjectId) {

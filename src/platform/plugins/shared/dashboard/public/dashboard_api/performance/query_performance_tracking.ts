@@ -28,7 +28,7 @@ type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardS
 
 export interface PerformanceState {
   firstLoad: boolean;
-  creationStartTime?: PerformanceMark;
+  creationStartTime?: number;
   creationEndTime?: number;
   lastLoadStartTime?: number;
 }
@@ -107,8 +107,7 @@ export function startQueryPerformanceTracking(
       if (queryHasFinished) {
         const timeToData = now - (performanceState.lastLoadStartTime ?? now);
         const completeLoadDuration =
-          (performanceState.creationEndTime ?? now) -
-          (performanceState.creationStartTime?.startTime ?? now);
+          (performanceState.creationEndTime ?? now) - (performanceState.creationStartTime ?? now);
         // console.log({ timeToData, loadType, test: dashboard.refreshInterval$?.getValue() });
         if (loadType === 'dashboardSubsequentLoad') {
           dashboard.userActivity$.next({ type: 'refresh', end: Date.now() });
