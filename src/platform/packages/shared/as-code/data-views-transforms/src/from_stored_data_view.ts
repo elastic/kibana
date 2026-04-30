@@ -23,14 +23,18 @@ import { fromStoredFields } from './from_stored_fields';
  * @param index String id (referenced data view), inline {@link DataViewSpec}, or null/undefined
  * @returns As-code `data_source` object for classic (KQL/Lucene) tabs
  */
-export function fromStoredDataView(
-  index: string | null | undefined,
-  useSavedSchema?: boolean
-): AsCodeDataView;
-export function fromStoredDataView<UseSavedSchema extends boolean = false>(
-  index: DataViewSpec | null | undefined,
+
+export function fromStoredDataView<
+  IndexType extends string | DataViewSpec | null | undefined,
+  UseSavedSchema extends boolean = false
+>(
+  index: IndexType,
   useSavedSchema?: UseSavedSchema
-): UseSavedSchema extends true ? AsCodeSavedDataView : AsCodeDataView;
+): IndexType extends string
+  ? AsCodeDataView
+  : UseSavedSchema extends true
+  ? AsCodeSavedDataView
+  : AsCodeDataView;
 
 export function fromStoredDataView(
   index: string | DataViewSpec | null | undefined,
