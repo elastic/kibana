@@ -21,7 +21,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { LIST_BREADCRUMB, PLUGIN_NAME } from '../common';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+
+import { LIST_BREADCRUMB, PLUGIN_NAME, registerConnectorFailedMessage } from '../common';
 import type { DataSetListItem } from '../common/sample_data_sets_client';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import {
@@ -52,6 +54,7 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
   const { overlays } = coreStart;
 
   const [source, setSource] = useState<DataSourceListItem | null | undefined>(undefined);
+  const [allSources, setAllSources] = useState<DataSourceListItem[]>([]);
   const [dataSetItems, setDataSetItems] = useState<DataSetListItem[]>([]);
   const [isManagePopoverOpen, setManagePopoverOpen] = useState(false);
   const [isEditFlyoutOpen, setEditFlyoutOpen] = useState(false);
@@ -68,6 +71,7 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
         return;
       }
       setDataSetItems(nextSets);
+      setAllSources(nextSources);
       setSource(nextSources.find((row) => row.id === sourceId) ?? null);
     })();
     return () => {
@@ -110,12 +114,9 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
 
   const handleAddDataSetSave = useCallback(
     async (values: AddDataSetFlyoutPayload) => {
-      if (!source) {
-        return 'Unknown error';
-      }
       try {
         await dataSetsClient.add({
-          sourceName: source.name,
+          sourceName: values.sourceName,
           datasetId: values.datasetId,
           resource: values.resource,
           description: values.description,
@@ -128,7 +129,25 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
         return e instanceof Error ? e.message : 'Unknown error';
       }
     },
-    [dataSetsClient, refreshDataSets, source]
+    [dataSetsClient, refreshDataSets]
+  );
+
+  const handleRegisterConnectorFromFlyout = useCallback(
+    async (connector: ActionConnector) => {
+      try {
+        await dataSourcesClient.addFromKibanaConnector(connector.name);
+        const nextSources = await dataSourcesClient.get();
+        setAllSources(nextSources);
+      } catch (e) {
+        const message =
+          e instanceof Error
+            ? e.message
+            : registerConnectorFailedMessage();
+        coreStart.notifications.toasts.addDanger(message);
+        throw e;
+      }
+    },
+    [coreStart.notifications.toasts, dataSourcesClient]
   );
 
   const handleEditFlyoutSave = useCallback(
@@ -285,9 +304,10 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
       {isAddDataSetFlyoutOpen ? (
         <AddDataSetFlyout
           key={source.id}
-          sourceName={source.name}
+          sources={allSources}
           onClose={handleCloseAddDataSetFlyout}
           onSave={handleAddDataSetSave}
+          onRegisterConnectorFromFlyout={handleRegisterConnectorFromFlyout}
         />
       ) : null}
     </>

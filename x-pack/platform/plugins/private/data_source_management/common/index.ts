@@ -27,8 +27,13 @@ export const DATA_SOURCES_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sour
 export const DATA_SOURCE_BY_ID_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources/{id}` as const;
 
 export const PLUGIN_NAME = i18n.translate('dataSourceManagement.pluginName', {
-  defaultMessage: 'Data sources',
+  defaultMessage: 'Data sets',
 });
+
+export const registerConnectorFailedMessage = () =>
+  i18n.translate('dataSourceManagement.errors.registerConnectorFailed', {
+    defaultMessage: 'Could not register the connector as a source.',
+  });
 
 export const LIST_BREADCRUMB = [
   {

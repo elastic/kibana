@@ -22,9 +22,9 @@ export class DataSourceManagementPlugin
       order: 2,
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { triggersActionsUi }] = await core.getStartServices();
 
-        const unmountAppCallback = mountManagementSection(coreStart, params);
+        const unmountAppCallback = mountManagementSection(coreStart, triggersActionsUi, params);
         return () => {
           unmountAppCallback();
         };

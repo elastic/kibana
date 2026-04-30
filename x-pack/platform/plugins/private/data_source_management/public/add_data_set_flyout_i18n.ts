@@ -8,10 +8,45 @@
 import { i18n } from '@kbn/i18n';
 
 export const addDataSetFlyoutStrings = {
-  title: (dataSource: string) =>
+  title: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.title', {
-      defaultMessage: 'Add data set from {dataSource}',
-      values: { dataSource },
+      defaultMessage: 'Add data set',
+    }),
+
+  sourceLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceLabel', {
+      defaultMessage: 'Source',
+    }),
+
+  createNewConnectorOption: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.createNewConnectorOption', {
+      defaultMessage: 'Create new connector',
+    }),
+
+  sourceSearchPlaceholder: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceSearchPlaceholder', {
+      defaultMessage: 'Filter sources…',
+    }),
+
+  sourceNoMatches: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceNoMatches', {
+      defaultMessage: 'No matching sources.',
+    }),
+
+  selectSourcePlaceholder: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.selectSourcePlaceholder', {
+      defaultMessage: 'Select a source connector',
+    }),
+
+  sourceRequired: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceRequired', {
+      defaultMessage: 'Select a source.',
+    }),
+
+  noSourcesCallout: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.noSourcesCallout', {
+      defaultMessage:
+        'Use “Create new connector” in Source below, or connect a data source from the data sets page.',
     }),
 
   datasetIdLabel: () =>

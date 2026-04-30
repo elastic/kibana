@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,8 @@ interface Props {
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   searchValue?: string;
+  allowedActionTypeIds?: string[];
+  menuHeader?: ReactNode;
 }
 
 interface RegisteredActionType {
@@ -60,6 +63,8 @@ export const ActionTypeMenu = ({
   setAllActionTypes,
   actionTypeRegistry,
   searchValue = '',
+  allowedActionTypeIds,
+  menuHeader,
 }: Props) => {
   const {
     http,
@@ -127,10 +132,15 @@ export const ActionTypeMenu = ({
       };
     });
 
-  const filteredConnectors = useMemo(
-    () => filterActionTypes(registeredActionTypes, searchValue),
-    [registeredActionTypes, searchValue]
-  );
+  const filteredConnectors = useMemo(() => {
+    const allowlisted =
+      allowedActionTypeIds != null
+        ? registeredActionTypes.filter((item) =>
+            allowedActionTypeIds.includes(item.actionType.id)
+          )
+        : registeredActionTypes;
+    return filterActionTypes(allowlisted, searchValue);
+  }, [registeredActionTypes, searchValue, allowedActionTypeIds]);
 
   const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
@@ -177,19 +187,29 @@ export const ActionTypeMenu = ({
     </SectionLoading>
   ) : (
     <div className="actConnectorsListGrid">
-      <EuiSpacer size="s" />
+      {menuHeader}
+      <EuiSpacer size={menuHeader ? 'm' : 's'} />
 
-      <EuiFlexGrid
-        gutterSize="xl"
-        columns={3}
-        role="list"
-        aria-label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel',
-          { defaultMessage: 'Available connector types' }
-        )}
-      >
-        {cardNodes}
-      </EuiFlexGrid>
+      {filteredConnectors.length === 0 ? (
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noConnectorsToShow"
+            defaultMessage="No connectors match the current filter or search."
+          />
+        </p>
+      ) : (
+        <EuiFlexGrid
+          gutterSize="xl"
+          columns={3}
+          role="list"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel',
+            { defaultMessage: 'Available connector types' }
+          )}
+        >
+          {cardNodes}
+        </EuiFlexGrid>
+      )}
     </div>
   );
 };

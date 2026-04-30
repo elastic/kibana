@@ -23,6 +23,8 @@ import {
 import type { DataSetListItem } from '../common/sample_data_sets_client';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { dataSourcePreviewFlyoutStrings } from './data_source_preview_flyout_i18n';
+import { EditDataSetDescriptionFlyout } from './edit_data_set_description_flyout';
+import { editDataSetDescriptionFlyoutStrings } from './edit_data_set_description_flyout_i18n';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 import { useDataSourceManagementAppContext } from './data_source_management_app_context';
 
@@ -112,9 +114,20 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
 }) => {
   const { dataSetsClient } = useDataSourceManagementAppContext();
   const [selectedItems, setSelectedItems] = useState<DataSetListItem[]>([]);
+  const [editingDataSet, setEditingDataSet] = useState<DataSetListItem | null>(null);
 
   useEffect(() => {
     setSelectedItems((prev) => prev.filter((item) => sets.some((row) => row.id === item.id)));
+  }, [sets]);
+
+  useEffect(() => {
+    setEditingDataSet((prev) => {
+      if (!prev) {
+        return null;
+      }
+      const next = sets.find((r) => r.id === prev.id);
+      return next ?? null;
+    });
   }, [sets]);
 
   const deleteByIds = useCallback(
@@ -132,6 +145,27 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
       await deleteByIds([item.id]);
     },
     [deleteByIds]
+  );
+
+  const handleCloseEditDescriptionFlyout = useCallback(() => {
+    setEditingDataSet(null);
+  }, []);
+
+  const handleEditDataSetDescriptionSave = useCallback(
+    async (description: string) => {
+      if (!editingDataSet) {
+        return null;
+      }
+      try {
+        await dataSetsClient.updateDescription(editingDataSet.id, description);
+        onDataSetsChanged?.();
+        setEditingDataSet(null);
+        return null;
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Unknown error';
+      }
+    },
+    [dataSetsClient, editingDataSet, onDataSetsChanged]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListItem>>>(
@@ -168,9 +202,20 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
         name: i18n.translate('dataSourceManagement.previewFlyout.setsColumnActions', {
           defaultMessage: 'Actions',
         }),
-        width: '100px',
+        width: '120px',
+        minWidth: '112px',
         field: 'id',
         actions: [
+          {
+            name: editDataSetDescriptionFlyoutStrings.editTableActionName(),
+            description: editDataSetDescriptionFlyoutStrings.editActionDescription(),
+            type: 'icon',
+            icon: 'pencil',
+            onClick: (item: DataSetListItem) => {
+              setEditingDataSet(item);
+            },
+            'data-test-subj': 'dataSourcePreviewSetEdit',
+          },
           {
             name: i18n.translate('dataSourceManagement.deleteButtonLabel', {
               defaultMessage: 'Delete',
@@ -191,7 +236,8 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
   );
 
   return (
-    <EuiInMemoryTable<DataSetListItem>
+    <>
+      <EuiInMemoryTable<DataSetListItem>
       items={sets}
       itemId="id"
       columns={columns}
@@ -239,7 +285,17 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
       noItemsMessage={dataSourcePreviewFlyoutStrings.emptySets()}
       tableLayout="auto"
       responsiveBreakpoint={false}
+      scrollableInline
     />
+      {editingDataSet ? (
+        <EditDataSetDescriptionFlyout
+          key={editingDataSet.id}
+          dataSet={editingDataSet}
+          onClose={handleCloseEditDescriptionFlyout}
+          onSave={handleEditDataSetDescriptionSave}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -252,6 +308,13 @@ export interface DataSourcePreviewFooterActionsProps {
    * @default true
    */
   showCloseAction?: boolean;
+  /**
+   * When false, omits the primary “Add data set” button (e.g. connector settings flyout).
+   * @default true
+   */
+  showAddDataSetButton?: boolean;
+  /** @default dataSourcePreviewFlyoutClose */
+  closeButtonDataTestSubj?: string;
 }
 
 export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreviewFooterActionsProps> = ({
@@ -259,6 +322,8 @@ export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreview
   onClose,
   onManageDataSets = () => {},
   showCloseAction = true,
+  showAddDataSetButton = true,
+  closeButtonDataTestSubj = 'dataSourcePreviewFlyoutClose',
 }) => {
   const manageButton = (
     <EuiButton
@@ -278,10 +343,26 @@ export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreview
     );
   }
 
+  if (!showAddDataSetButton) {
+    return (
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            data-test-subj={closeButtonDataTestSubj}
+            onClick={onClose}
+          >
+            {closeLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty data-test-subj="dataSourcePreviewFlyoutClose" onClick={onClose}>
+        <EuiButtonEmpty data-test-subj={closeButtonDataTestSubj} onClick={onClose}>
           {closeLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>

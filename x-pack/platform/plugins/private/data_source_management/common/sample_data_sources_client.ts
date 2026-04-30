@@ -64,6 +64,26 @@ export class SampleDataSourcesClient {
     return cloneRows(this.rows);
   }
 
+  /**
+   * Adds a catalog row for a connector that was created in Stack Management (prototype bridge).
+   */
+  public async addFromKibanaConnector(connectorName: string): Promise<DataSourceListItem> {
+    const name = connectorName.trim();
+    return this.add({
+      name,
+      dataSource: {
+        type: 'flight',
+        description: i18n.translate('dataSourceManagement.sampleClient.fromConnectorDescription', {
+          defaultMessage: 'Registered from a Stack Management connector.',
+        }),
+        settings: {
+          host: 'localhost',
+          port: 443,
+        },
+      },
+    });
+  }
+
   public async add(input: {
     name: string;
     dataSource: Omit<DataSourceWithSecrets, 'id'>;

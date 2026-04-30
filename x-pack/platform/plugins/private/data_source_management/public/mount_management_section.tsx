@@ -9,17 +9,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { DataSourceManagementApp } from './data_source_management_app';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart,
   { element, history, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   ReactDOM.render(
     coreStart.rendering.addContext(
       <DataSourceManagementApp
         coreStart={coreStart}
+        triggersActionsUi={triggersActionsUi}
         history={history}
         setBreadcrumbs={setBreadcrumbs}
       />

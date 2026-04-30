@@ -124,7 +124,15 @@ export class SampleDataSetsClient {
     description: string;
     partitionDetection: DataSetPartitionDetection;
   }): Promise<DataSetListItem> {
+    const sourceName = input.sourceName.trim();
     const datasetId = input.datasetId.trim();
+    if (!sourceName) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.dataSetSourceRequired', {
+          defaultMessage: 'Source is required.',
+        })
+      );
+    }
     if (!datasetId) {
       throw new Error(
         i18n.translate('dataSourceManagement.errors.dataSetIdRequired', {
@@ -140,7 +148,7 @@ export class SampleDataSetsClient {
         })
       );
     }
-    if (this.rows.some((row) => row.sourceName === input.sourceName && row.name === datasetId)) {
+    if (this.rows.some((row) => row.sourceName === sourceName && row.name === datasetId)) {
       throw new Error(
         i18n.translate('dataSourceManagement.errors.duplicateDataSetId', {
           defaultMessage: 'A data set with this ID already exists for this source.',
@@ -152,11 +160,25 @@ export class SampleDataSetsClient {
       id,
       name: datasetId,
       description: input.description.trim(),
-      sourceName: input.sourceName,
+      sourceName,
       resource,
       partitionDetection: input.partitionDetection,
     };
     this.rows.push(row);
+    return { ...row };
+  }
+
+  public async updateDescription(id: string, description: string): Promise<DataSetListItem> {
+    const idx = this.rows.findIndex((row) => row.id === id);
+    if (idx === -1) {
+      throw new Error(
+        i18n.translate('dataSourceManagement.errors.dataSetNotFound', {
+          defaultMessage: 'Data set not found.',
+        })
+      );
+    }
+    const row = { ...this.rows[idx], description: description.trim() };
+    this.rows[idx] = row;
     return { ...row };
   }
 }
