@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
