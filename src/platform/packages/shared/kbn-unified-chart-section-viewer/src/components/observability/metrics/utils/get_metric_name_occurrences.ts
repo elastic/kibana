@@ -8,11 +8,16 @@
  */
 
 import type { MetricsESQLResponse } from '../../../../types';
+import { toArray } from './to_array';
 
 export const getMetricNameOccurrences = (response: MetricsESQLResponse[]): Map<string, number> => {
   const occurrences = new Map<string, number>();
   for (const metric of response) {
-    occurrences.set(metric.metric_name, (occurrences.get(metric.metric_name) ?? 0) + 1);
+    const dataStreamCount = toArray(metric.data_stream).length;
+    occurrences.set(
+      metric.metric_name,
+      (occurrences.get(metric.metric_name) ?? 0) + dataStreamCount
+    );
   }
   return occurrences;
 };

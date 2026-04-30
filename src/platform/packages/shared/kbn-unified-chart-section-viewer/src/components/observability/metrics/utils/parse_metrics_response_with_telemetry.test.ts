@@ -118,7 +118,7 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
-          isDuplicateMetricName: false,
+          isDuplicateMetricName: true,
           dataStream: 'stream-a',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -127,7 +127,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
         {
           metricName: 'cpu.usage',
-          isDuplicateMetricName: false,
+          isDuplicateMetricName: true,
           dataStream: 'stream-b',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],

@@ -182,6 +182,43 @@ describe('MetricsGrid', () => {
     );
   });
 
+  it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
+    const duplicateMetricItems: MetricsGridProps['metricItems'] = [
+      {
+        ...metricItems[0],
+        isDuplicateMetricName: true,
+        dataStream: 'metrics-system.cpu-default',
+      },
+      {
+        ...metricItems[1],
+        isDuplicateMetricName: false,
+      },
+    ];
+
+    const descriptionForDuplicate = 'Data stream: metrics-system.cpu-default';
+
+    const getDescription = jest.fn((metric: (typeof metricItems)[0]) =>
+      metric.isDuplicateMetricName ? descriptionForDuplicate : undefined
+    );
+
+    renderMetricsGrid({ metricItems: duplicateMetricItems, getDescription });
+
+    expect(getDescription).toHaveBeenCalledTimes(duplicateMetricItems.length);
+    expect(getDescription).toHaveBeenNthCalledWith(1, duplicateMetricItems[0]);
+    expect(getDescription).toHaveBeenNthCalledWith(2, duplicateMetricItems[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ description: descriptionForDuplicate }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ description: undefined }),
+      expect.anything()
+    );
+  });
+
   it('filters dimensions to only those applicable to each metric', () => {
     // mockMetricItems only have dimensionFields: [{ name: 'host.name' }]
     // so service.name and container.id should be filtered out

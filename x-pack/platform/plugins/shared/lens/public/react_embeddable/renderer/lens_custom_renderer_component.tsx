@@ -103,7 +103,7 @@ export function LensRenderer({
   const initialStateRef = useRef<LensSerializedState>(
     props.attributes
       ? { attributes: cleanedAttributes, description }
-      : createEmptyLensState(null, title)
+      : createEmptyLensState(null, title, description)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
