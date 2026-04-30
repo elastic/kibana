@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import FormData from 'form-data';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -14,48 +15,66 @@ import { apiTest, testData } from '../fixtures';
 
 const { MANAGEMENT_API } = testData;
 
+const BATCH_SIZE = 1_000;
 const TOTAL_OBJECTS = 12_000;
-const HOOK_TIMEOUT = 120_000;
+const CONCURRENCY = 3;
 
-// Visualization saved objects are stored in the dedicated analytics index.
-// This matches the ANALYTICS_SAVED_OBJECT_INDEX constant from @kbn/core-saved-objects-server.
-const ANALYTICS_INDEX = '.kibana_analytics';
+// Generous timeout: 4 concurrent-batch rounds at worst-case ~60 s each = ~240 s.
+const HOOK_TIMEOUT = 300_000;
+
+function generateVisualizationNdjson(startIdx: number, endIdx: number): string {
+  return Array.from({ length: endIdx - startIdx + 1 }, (_, i) => {
+    const idx = startIdx + i;
+    return JSON.stringify({
+      type: 'visualization',
+      id: `test-vis-${idx}`,
+      attributes: {
+        title: `My visualization (${idx})`,
+        uiStateJSON: '{}',
+        visState: '{}',
+      },
+      references: [],
+    });
+  }).join('\n');
+}
 
 apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ esClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
     apiTest.setTimeout(HOOK_TIMEOUT);
     adminCredentials = await requestAuth.getApiKey('admin');
 
-    const now = new Date().toISOString();
+    const batches = Array.from(
+      { length: Math.ceil(TOTAL_OBJECTS / BATCH_SIZE) },
+      (_, i): [number, number] => [
+        i * BATCH_SIZE + 1,
+        Math.min((i + 1) * BATCH_SIZE, TOTAL_OBJECTS),
+      ]
+    );
 
-    // Bulk-insert visualization saved objects directly into Elasticsearch,
-    // bypassing the Kibana import API which is subject to per-request HAProxy
-    // client-timeout constraints on ECH (typically ~60 s). The esClient connects
-    // to the ES endpoint directly, so it is not affected by that proxy limit.
-    const operations = Array.from({ length: TOTAL_OBJECTS }, (_, i) => {
-      const idx = i + 1;
-      return [
-        { index: { _index: ANALYTICS_INDEX, _id: `visualization:test-vis-${idx}` } },
-        {
-          type: 'visualization',
-          visualization: { title: `My visualization (${idx})`, uiStateJSON: '{}', visState: '{}' },
-          references: [] as never[],
-          namespaces: ['default'],
-          updated_at: now,
-          created_at: now,
-          managed: false,
-          coreMigrationVersion: '8.8.0',
-          typeMigrationVersion: '8.3.0',
-        },
-      ];
-    }).flat();
+    // Run CONCURRENCY batches at a time to reduce total import wall-clock time on ECH,
+    // while keeping each individual request small enough to avoid HAProxy per-request
+    // timeout limits (~60 s). Each round of CONCURRENCY batches is awaited before
+    // starting the next, so at most CONCURRENCY requests are in-flight simultaneously.
+    for (let i = 0; i < batches.length; i += CONCURRENCY) {
+      await Promise.all(
+        batches.slice(i, i + CONCURRENCY).map(async ([start, end]) => {
+          const ndjson = generateVisualizationNdjson(start, end);
+          const formData = new FormData();
+          formData.append('file', ndjson, 'export.ndjson');
 
-    const { errors, items } = await esClient.bulk({ operations, refresh: true });
-    if (errors) {
-      const firstError = items.find((item) => item.index?.error)?.index?.error;
-      throw new Error(`Bulk insert failed: ${JSON.stringify(firstError)}`);
+          const response = await apiClient.post(MANAGEMENT_API.IMPORT, {
+            headers: {
+              ...adminCredentials.apiKeyHeader,
+              ...testData.COMMON_HEADERS,
+              ...formData.getHeaders(),
+            },
+            body: formData.getBuffer(),
+          });
+          expect(response).toHaveStatusCode(200);
+        })
+      );
     }
   });
 
