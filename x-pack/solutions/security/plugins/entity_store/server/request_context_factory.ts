@@ -135,6 +135,7 @@ export async function createRequestHandlerContext({
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     historySnapshotClient,
+    globalStateClient,
     security: startPlugins.security,
     namespace,
   };

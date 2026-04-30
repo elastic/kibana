@@ -27,8 +27,7 @@ import type {
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/server';
-import type { CoreSetup } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
@@ -36,6 +35,7 @@ import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/log
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { ResolutionClient } from './domain/resolution';
+import type { EntityStoreGlobalStateClient } from './domain/saved_objects';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {
@@ -70,6 +70,13 @@ export interface EntityStoreApiRequestHandlerContext {
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
+  /**
+   * Exposed alongside the extraction client so route handlers can read or
+   * update individual config blocks on the global state SO (e.g. the
+   * Knowledge Indicators block) without re-instantiating their own client.
+   * Same instance the extraction client uses internally.
+   */
+  globalStateClient: EntityStoreGlobalStateClient;
   security: SecurityPluginStart;
   namespace: string;
 }

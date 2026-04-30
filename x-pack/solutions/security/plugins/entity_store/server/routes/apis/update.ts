@@ -11,13 +11,20 @@ import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
-import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS, KnowledgeIndicatorsUpdateParams } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
 
 const bodySchema = z.object({
   logExtraction: LogExtractionUpdadeSchema,
+  /**
+   * Optional partial update to the Knowledge Indicators config. Omitting
+   * the field leaves the persisted config untouched; supplying it merges
+   * the provided keys onto the persisted block (read-modify-write is
+   * performed by `EntityStoreGlobalStateClient.updateKnowledgeIndicatorsConfig`).
+   */
+  knowledgeIndicators: KnowledgeIndicatorsUpdateParams.optional(),
 });
 
 export function registerUpdate(router: EntityStorePluginRouter) {
@@ -48,11 +55,19 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const { logsExtractionClient, logger } = await ctx.entityStore;
+        const { logsExtractionClient, globalStateClient, logger } = await ctx.entityStore;
         logger.debug('Update api called');
 
         try {
           await logsExtractionClient.updateConfig(req.body.logExtraction);
+          // KI config update is independent of log-extraction config and
+          // is only performed when the caller actually supplies the block.
+          // Keeping it as a separate write means a callsite that only
+          // wants to retune log extraction does not pay any cost on the
+          // KI block (no read, no write, no schema parse).
+          if (req.body.knowledgeIndicators !== undefined) {
+            await globalStateClient.updateKnowledgeIndicatorsConfig(req.body.knowledgeIndicators);
+          }
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });

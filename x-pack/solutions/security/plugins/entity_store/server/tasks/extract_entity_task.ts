@@ -23,7 +23,13 @@ import {
   coerceTaskState,
   toTaskManagerState,
   type ExtractEntityTaskState,
+  type KiDefinitionStates,
 } from './extract_entity_task_state';
+import { createKnowledgeIndicatorsReader } from '../domain/streams_features';
+import {
+  runKnowledgeIndicatorsExtraction,
+  type KnowledgeIndicatorsLoopMetrics,
+} from './knowledge_indicators_loop';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -59,7 +65,7 @@ async function runTask({
   }
 
   try {
-    const { logsExtractionClient } = await createLogsExtractionClient({
+    const { logsExtractionClient, globalStateClient } = await createLogsExtractionClient({
       core,
       fakeRequest,
       logger,
@@ -82,6 +88,48 @@ async function runTask({
       );
     }
 
+    // Stream-derived (Knowledge Indicators) entity extraction runs ONLY for
+    // the generic entity type, AFTER the static generic extraction so that
+    // a KI-loop failure can never undo a successful static run. Errors
+    // thrown by the KI loop itself (e.g. global state SO missing, streams
+    // ES unreachable for the initial feature read) are caught locally and
+    // logged at warn level — they do not flip the task into the error
+    // branch of the outer try/catch.
+    let kiDefinitionStates: KiDefinitionStates | undefined = currentState.kiDefinitionStates;
+    let kiMetrics: KnowledgeIndicatorsLoopMetrics | undefined;
+    if (entityType === 'generic') {
+      try {
+        const reader = await createKnowledgeIndicatorsReader({ core, fakeRequest, logger });
+        const globalState = await globalStateClient.findOrThrow();
+        const kiResult = await runKnowledgeIndicatorsExtraction(
+          {
+            logger,
+            reader,
+            logsExtractionClient,
+            namespace,
+            config: globalState.logsExtraction,
+            knowledgeIndicatorsConfig: globalState.knowledgeIndicators,
+            abortController,
+          },
+          { currentStates: kiDefinitionStates }
+        );
+        kiDefinitionStates = kiResult.updatedStates;
+        kiMetrics = kiResult.metrics;
+        logger.info(
+          `KI extraction loop: total=${kiMetrics.groupsTotal} ` +
+            `succeeded=${kiMetrics.groupsSucceeded} failed=${kiMetrics.groupsFailed} ` +
+            `skipped=${kiMetrics.groupsSkippedNoIndexPatterns} ` +
+            `truncated=${kiMetrics.groupsTruncated}`
+        );
+      } catch (kiError) {
+        const message = kiError instanceof Error ? kiError.message : String(kiError);
+        logger.warn(
+          `KI extraction loop aborted before processing groups (${message}); ` +
+            `static generic extraction result is unaffected.`
+        );
+      }
+    }
+
     const updatedState: ExtractEntityTaskState = {
       namespace,
       lastExecutionTimestamp: new Date().toISOString(),
@@ -89,11 +137,7 @@ async function runTask({
       entityType,
       lastExtractionSuccess: extractionResult.success,
       status: 'success',
-      // KI definition states are preserved across runs; the loop in a
-      // follow-up PR will read and write into this map. Pre-loop runs
-      // simply pass through whatever was already persisted (typically
-      // undefined for non-generic types and for legacy state).
-      kiDefinitionStates: currentState.kiDefinitionStates,
+      kiDefinitionStates,
     };
 
     return {
