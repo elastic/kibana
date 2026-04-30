@@ -41,6 +41,12 @@ export interface CreateConnectorFlyoutProps {
   isServerless?: boolean;
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
   icon?: IconType;
+  /**
+   * When set, only these action type ids are shown on the connector picker (e.g. curated storage connectors).
+   */
+  allowedActionTypeIds?: string[];
+  /** Renders above the connector grid when no type is selected yet (e.g. explanatory copy + link). */
+  connectorMenuHeader?: ReactNode;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -51,6 +57,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onTestConnector,
   initialConnector,
   icon,
+  allowedActionTypeIds,
+  connectorMenuHeader,
 }) => {
   const {
     application: { capabilities },
@@ -346,6 +354,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             setAllActionTypes={setAllActionTypes}
             actionTypeRegistry={actionTypeRegistry}
             searchValue={searchValue}
+            allowedActionTypeIds={allowedActionTypeIds}
+            menuHeader={connectorMenuHeader}
           />
         )}
       </EuiFlyoutBody>

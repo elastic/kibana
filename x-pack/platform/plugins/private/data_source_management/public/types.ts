@@ -6,9 +6,12 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface SetupDependencies {
   management: ManagementSetup;
 }
 
-export type StartDependencies = Record<string, never>;
+export interface StartDependencies {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}

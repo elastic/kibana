@@ -6,15 +6,17 @@
   ],
   "group": "platform",
   "visibility": "private",
-  "description": "Data source management UI in Stack Management",
+  "description": "Data sets and connectors (data sources) in Stack Management",
   "plugin": {
     "id": "data_source_management",
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "management"
+      "management",
+      "triggersActionsUi"
     ],
     "requiredBundles": [
+      "kibanaReact"
     ]
   }
 }

@@ -12,7 +12,10 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/triggers-actions-ui-plugin",
     "@kbn/i18n",
     "@elastic/eui"
   ],

@@ -6,33 +6,18 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiForm,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 
 import type { DataSourceWithSecrets } from '../common';
-import { ALL_DATA_SOURCE_TYPES } from '../common';
-import type { DataSourceType } from '../common/datasource_types';
-import { buildOmitIdDataSource } from './build_create_data_source_payload';
+import { useConnectDataSourceFormParts } from './connect_data_source_editor';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
-import { emptyCreateDataSourceFormSettings } from './create_data_source_flyout_form_state';
-import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
-import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
 export interface CreateDataSourceFlyoutProps {
   onClose: () => void;
@@ -49,62 +34,19 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   onClose,
   onSave,
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [dataSourceType, setDataSourceType] = useState<DataSourceType>('s3');
-  const [formSettings, setFormSettings] = useState<CreateDataSourceFlyoutFormSettings>(
-    emptyCreateDataSourceFormSettings
-  );
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [saveError, setSaveError] = useState<string | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
-
-  const dataSourceTypeOptions = useMemo(
-    () =>
-      ALL_DATA_SOURCE_TYPES.map((value) => ({
-        value,
-        text: getDataSourceTypeLabel(value),
-      })),
-    []
-  );
-
-  const handleSave = useCallback(async () => {
-    const trimmedName = name.trim();
-    if (!trimmedName) {
-      setNameError(createDataSourceFlyoutStrings.nameRequired());
-      return;
-    }
-    setNameError(undefined);
-    setSaveError(undefined);
-    setIsSaving(true);
-    try {
-      const built = buildOmitIdDataSource(trimmedName, description, dataSourceType, formSettings);
-      if (!('dataSource' in built)) {
-        setSaveError(built.message);
-        return;
-      }
-      const { dataSource } = built;
-      const message = await onSave({ name: trimmedName, dataSource });
-      if (message) {
-        setSaveError(message);
-      } else {
-        setName('');
-        setDescription('');
-        setDataSourceType('s3');
-        setFormSettings(emptyCreateDataSourceFormSettings());
-        onClose();
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  }, [dataSourceType, description, formSettings, name, onClose, onSave]);
+  const { form, footerActions } = useConnectDataSourceFormParts({
+    variant: 'flyout',
+    onCancel: onClose,
+    onCompleted: onClose,
+    onSave,
+  });
 
   return (
     <EuiFlyout
       ownFocus
       onClose={onClose}
       aria-labelledby="createDataSourceFlyoutTitle"
-      size="l"
+      size="m"
       data-test-subj="createDataSourceFlyout"
     >
       <EuiFlyoutHeader hasBorder>
@@ -112,74 +54,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <h2 id="createDataSourceFlyoutTitle">{createDataSourceFlyoutStrings.title()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiForm component="form" id="createDataSourceForm" onSubmit={(e) => e.preventDefault()}>
-          {saveError ? (
-            <>
-              <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
-                {saveError}
-              </EuiText>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
-            <EuiSelect
-              options={dataSourceTypeOptions}
-              value={dataSourceType}
-              onChange={(e) => setDataSourceType(e.target.value as DataSourceType)}
-              data-test-subj="createDataSourceFlyoutType"
-              fullWidth
-              aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={createDataSourceFlyoutStrings.nameLabel()}
-            isInvalid={Boolean(nameError)}
-            error={nameError}
-            fullWidth
-          >
-            <EuiFieldText
-              name="dataSourceName"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              isInvalid={Boolean(nameError)}
-              data-test-subj="createDataSourceFlyoutName"
-              autoFocus
-              fullWidth
-            />
-          </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
-            <EuiTextArea
-              name="dataSourceDescription"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              data-test-subj="createDataSourceFlyoutDescription"
-              fullWidth
-              rows={4}
-            />
-          </EuiFormRow>
-          <CreateDataSourceFlyoutTypeSettingsBlock
-            dataSourceType={dataSourceType}
-            formSettings={formSettings}
-            onFormSettingsChange={setFormSettings}
-          />
-        </EuiForm>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={onClose}>
-          {createDataSourceFlyoutStrings.cancelButton()}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          type="button"
-          data-test-subj="createDataSourceFlyoutSubmit"
-          onClick={() => void handleSave()}
-          isLoading={isSaving}
-          disabled={isSaving}
-        >
-          {createDataSourceFlyoutStrings.saveButton()}
-        </EuiButton>
-      </EuiFlyoutFooter>
+      <EuiFlyoutBody>{form}</EuiFlyoutBody>
+      <EuiFlyoutFooter>{footerActions}</EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
