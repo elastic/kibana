@@ -7,35 +7,44 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { Timestamp } from './timestamp';
 import { TIMESTAMP_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 
+const buildHit = (fields: Record<string, unknown[]>) =>
+  buildDataTableRecord({ _id: 'test-hit', fields } as unknown as EsHitRecord);
+
 describe('<Timestamp />', () => {
-  it('should render the formatted date', () => {
+  it('should render the formatted @timestamp by default', () => {
+    const hit = buildHit({ '@timestamp': ['2024-01-15T10:30:00.000Z'] });
     const { getByTestId } = render(
       <TestProviders>
-        <Timestamp date="2024-01-15T10:30:00.000Z" />
+        <Timestamp hit={hit} />
       </TestProviders>
     );
 
     expect(getByTestId(TIMESTAMP_TEST_ID)).toHaveTextContent('Jan 15, 2024 @ 10:30:00.000');
   });
 
-  it('should render nothing when date is absent', () => {
-    const { container } = render(
+  it('should render the formatted date for the provided field', () => {
+    const hit = buildHit({
+      'threat.indicator.first_seen': ['2024-01-15T10:30:00.000Z'],
+    });
+    const { getByTestId } = render(
       <TestProviders>
-        <Timestamp />
+        <Timestamp hit={hit} field="threat.indicator.first_seen" />
       </TestProviders>
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(TIMESTAMP_TEST_ID)).toHaveTextContent('Jan 15, 2024 @ 10:30:00.000');
   });
 
-  it('should render nothing when date is an empty string', () => {
+  it('should render nothing when the field is absent from the hit', () => {
+    const hit = buildHit({});
     const { container } = render(
       <TestProviders>
-        <Timestamp date="" />
+        <Timestamp hit={hit} />
       </TestProviders>
     );
 

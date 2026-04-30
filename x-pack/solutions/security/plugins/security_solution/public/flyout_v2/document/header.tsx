@@ -10,7 +10,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { flyoutHeaderBlockStyles } from '../shared/components/flyout_header_block';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
@@ -56,21 +56,17 @@ export const Header: FC<HeaderProps> = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
-    const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
     return (
       <>
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>
-        {timestamp && (
-          <>
-            <EuiText size="s">
-              <Timestamp date={timestamp} />
-            </EuiText>
-            <EuiSpacer size="xs" />
-          </>
-        )}
+        <EuiText size="s">
+          <Timestamp hit={hit} />
+        </EuiText>
+        <EuiSpacer size="xs" />
+
         <Title hit={hit} hideLink={!canReadRules} />
         {isAlert && (
           <>

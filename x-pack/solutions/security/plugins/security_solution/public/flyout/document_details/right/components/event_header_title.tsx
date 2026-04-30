@@ -7,8 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import { buildDataTableRecord, getFieldValue, type EsHitRecord } from '@kbn/discover-utils';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { Timestamp } from '../../../../flyout_v2/shared/components/timestamp';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
@@ -23,21 +22,16 @@ export const EventHeaderTitle = memo(() => {
   const { searchHit } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const title = useMemo(() => getDocumentTitle(hit), [hit]);
-  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
   return (
     <>
       <DocumentSeverity hit={hit}>
         <EuiSpacer size="m" />
       </DocumentSeverity>
-      {timestamp && (
-        <>
-          <EuiText size="s">
-            <Timestamp date={timestamp} />
-          </EuiText>
-          <EuiSpacer size="xs" />
-        </>
-      )}
+      <EuiText size="s">
+        <Timestamp hit={hit} />
+      </EuiText>
+      <EuiSpacer size="xs" />
       <FlyoutTitle title={title} iconType={'analyzeEvent'} data-test-subj={EVENT_TITLE_TEST_ID} />
     </>
   );

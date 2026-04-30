@@ -10,9 +10,9 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { FlyoutTitle } from '../shared/components/flyout_title';
 import { Timestamp } from '../shared/components/timestamp';
-import { unwrapValue } from '../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../common/threat_intelligence/types/indicator';
 import type { RightPanelTabType, RightPanelPaths } from './tabs';
@@ -62,7 +62,14 @@ export const Header: FC<HeaderProps> = memo(
       [onSelectedTabChanged, selectedTabId, tabs]
     );
 
-    const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
+    const hit = useMemo(
+      () =>
+        buildDataTableRecord({
+          _id: String(indicator._id ?? ''),
+          fields: indicator.fields,
+        } as unknown as EsHitRecord),
+      [indicator]
+    );
 
     return (
       <>
@@ -78,7 +85,7 @@ export const Header: FC<HeaderProps> = memo(
               id="xpack.securitySolution.flyout.iocDetails.panelSubTitle"
               defaultMessage="First seen: "
             />
-            <Timestamp date={firstSeen} />
+            <Timestamp hit={hit} field={RawIndicatorFieldId.FirstSeen} />
           </p>
         </EuiText>
         <EuiSpacer size="m" />

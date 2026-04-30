@@ -23,8 +23,8 @@ jest.mock('../../document/components/severity', () => ({
 }));
 
 jest.mock('./timestamp', () => ({
-  Timestamp: ({ date }: { date?: string }) => (
-    <div data-test-subj="mockTimestamp" data-date={date} />
+  Timestamp: ({ hit }: { hit: { id: string; flattened: Record<string, unknown> } }) => (
+    <div data-test-subj="mockTimestamp" data-hit-id={hit.id} />
   ),
 }));
 
@@ -71,21 +71,6 @@ describe('<ToolsFlyoutHeader />', () => {
   it('should render the document timestamp', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId('mockTimestamp')).toBeInTheDocument();
-    expect(getByTestId('mockTimestamp')).toHaveAttribute('data-date', '2024-01-15T10:30:00.000Z');
-  });
-
-  it('should not render the document timestamp when @timestamp is missing', () => {
-    const hit = {
-      id: 'hit-1',
-      raw: {},
-      flattened: {},
-      isAnchor: false,
-    } as DataTableRecord;
-    const { queryByTestId } = render(
-      <IntlProvider locale="en">
-        <ToolsFlyoutHeader hit={hit} title={<span>{'Correlations'}</span>} />
-      </IntlProvider>
-    );
-    expect(queryByTestId('mockTimestamp')).not.toBeInTheDocument();
+    expect(getByTestId('mockTimestamp')).toHaveAttribute('data-hit-id', 'hit-1');
   });
 });

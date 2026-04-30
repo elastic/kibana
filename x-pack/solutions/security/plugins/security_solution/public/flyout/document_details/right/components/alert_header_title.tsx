@@ -6,10 +6,9 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { buildDataTableRecord, getFieldValue, type EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   FlyoutHeaderBlock,
   flyoutHeaderBlockStyles,
@@ -40,7 +39,6 @@ export const AlertHeaderTitle = memo(() => {
   const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
   const { refetch } = useRefetchByScope({ scopeId });
 
@@ -88,14 +86,10 @@ export const AlertHeaderTitle = memo(() => {
       <DocumentSeverity hit={hit}>
         <EuiSpacer size="m" />
       </DocumentSeverity>
-      {timestamp && (
-        <>
-          <EuiText size="s">
-            <Timestamp date={timestamp} />
-          </EuiText>
-          <EuiSpacer size="xs" />
-        </>
-      )}
+      <EuiText size="s">
+        <Timestamp hit={hit} />
+      </EuiText>
+      <EuiSpacer size="xs" />
       <Title hit={hit} hideLink={isRulePreview || !canReadRules} />
       <EuiSpacer size="m" />
       <EuiFlexGroup

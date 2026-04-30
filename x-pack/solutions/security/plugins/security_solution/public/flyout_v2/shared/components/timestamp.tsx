@@ -5,21 +5,31 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { TIMESTAMP_TEST_ID } from './test_ids';
 
 export interface TimestampProps {
   /**
-   * The date string to format and display. When empty, nothing is rendered.
+   * The document to read the date from.
    */
-  date?: string;
+  hit: DataTableRecord;
+  /**
+   * Field name to read from the hit. Defaults to `@timestamp`.
+   */
+  field?: string;
 }
 
 /**
- * Renders a date string formatted with the user's locale and timezone preferences.
+ * Reads a date field from the hit and renders it formatted with the user's
+ * locale and timezone preferences. Returns nothing if the field is absent.
  */
-export const Timestamp = memo(({ date }: TimestampProps) => {
+export const Timestamp = memo(({ hit, field = TIMESTAMP }: TimestampProps) => {
+  const date = useMemo(() => getFieldValue(hit, field) as string, [hit, field]);
+
   if (!date) return null;
 
   return (
