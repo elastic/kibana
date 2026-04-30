@@ -13,6 +13,7 @@ export type { ChromeNextGlobalSearchConfig } from './global_search';
 export type {
   ChromeNextHeaderBack,
   ChromeNextHeaderBadge,
+  ChromeNextHeaderBadgeMenuItem,
   ChromeNextHeaderCallout,
   ChromeNextHeaderConfig,
   ChromeNextHeaderGlobalActions,

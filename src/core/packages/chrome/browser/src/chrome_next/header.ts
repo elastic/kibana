@@ -8,6 +8,7 @@
  */
 import type { ReactNode } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { IconType } from '@elastic/eui';
 
 /**
  * Unified configuration for the Chrome-controlled Chrome-Next header.
@@ -74,15 +75,52 @@ export interface ChromeNextHeaderBack {
   label?: string;
 }
 
-export interface ChromeNextHeaderBadge {
+interface ChromeNextHeaderBadgeBase {
   label: string;
   /** EUI badge color. `filled` is intentionally excluded. */
   color?: 'hollow' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
   tooltip?: string;
-  onClick?: () => void;
-  onClickAriaLabel?: string;
   'data-test-subj'?: string;
 }
+
+interface ChromeNextHeaderBadgeWithClick extends ChromeNextHeaderBadgeBase {
+  popoverWidth?: never;
+  items?: never;
+  onClick?: () => void;
+  onClickAriaLabel?: string;
+}
+
+interface ChromeNextHeaderPopoverBadge extends ChromeNextHeaderBadgeBase {
+  items: ChromeNextHeaderBadgeMenuItem[];
+  popoverWidth?: number;
+  onClick?: never;
+  onClickAriaLabel?: never;
+}
+
+/**
+ * A menu item for badge context menus.
+ * Leaf items have `onClick`; parent items have nested `items`.
+ */
+export interface ChromeNextHeaderBadgeMenuItem {
+  /** Display label for the menu item. */
+  name: string;
+  /** Optional icon. */
+  icon?: IconType;
+  /** Handler for leaf items. Mutually exclusive with `items`. */
+  onClick?: () => void;
+  /** Nested sub-menu items. Mutually exclusive with `onClick`. */
+  items?: ChromeNextHeaderBadgeMenuItem[];
+  /** Width of the nested sub-menu panel (in px). Only used when `items` is provided. */
+  popoverWidth?: number;
+  /** Test subject identifier. */
+  'data-test-subj'?: string;
+  /** Whether the item is disabled. */
+  disabled?: boolean;
+  /** Optional tooltip content. */
+  toolTipContent?: string;
+}
+
+export type ChromeNextHeaderBadge = ChromeNextHeaderBadgeWithClick | ChromeNextHeaderPopoverBadge;
 
 /**
  * A single metadata slot item — either plain text or an interactive button.

@@ -7,11 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import type { ChromeNextHeaderBadge } from '@kbn/core-chrome-browser/src';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBadge, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import type {
+  ChromeNextHeaderBadge,
+  ChromeNextHeaderBadgeMenuItem,
+} from '@kbn/core-chrome-browser/src';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+
+/**
+ * Recursively builds flat EuiContextMenu panels from nested badge menu items.
+ */
+const buildPanels = (
+  items: ChromeNextHeaderBadgeMenuItem[],
+  panelId: number,
+  width?: number,
+  title?: string
+): EuiContextMenuPanelDescriptor[] => {
+  const panels: EuiContextMenuPanelDescriptor[] = [];
+  let nextPanelId = panelId + 1;
+
+  const panelItems: EuiContextMenuPanelItemDescriptor[] = items.map((item) => {
+    const { items: childItems, popoverWidth: childWidth, ...rest } = item;
+    if (childItems && childItems.length > 0) {
+      const childPanelId = nextPanelId;
+      const childPanels = buildPanels(childItems, childPanelId, childWidth, item.name);
+      nextPanelId = childPanelId + childPanels.length;
+      panels.push(...childPanels);
+      return { ...rest, panel: childPanelId };
+    }
+
+    return rest;
+  });
+
+  panels.unshift({
+    id: panelId,
+    items: panelItems,
+    ...(title && { title }),
+    ...(width && { width }),
+  });
+
+  return panels;
+};
 
 const useBadgeStyle = () => {
   return useMemo(() => {
@@ -25,12 +67,18 @@ const useBadgeStyle = () => {
 
 export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
   const { badge: badgeStyle } = useBadgeStyle();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
 
   // @ts-expect-error supported for backward compatibility. TODO: Remove it
   if (badge?.renderCustomBadge) {
     // @ts-expect-error supported for backward compatibility. TODO: Remove it
     return badge.renderCustomBadge({ badgeText: badge.label });
   }
+
+  const hasItems = 'items' in badge && badge.items !== undefined;
 
   const badgeOnClickAriaLabel =
     badge?.onClickAriaLabel ??
@@ -40,9 +88,11 @@ export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
     });
 
   const handleBadgeClick = () => {
-    if (badge?.onClick) {
-      badge.onClick();
+    if (hasItems) {
+      togglePopover();
+      return;
     }
+    badge?.onClick?.();
   };
 
   const badgeComponent = (
@@ -52,16 +102,37 @@ export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
       color={badge?.color ?? 'hollow'}
       data-test-subj={badge?.['data-test-subj']}
       css={badgeStyle}
+      iconType={hasItems ? 'arrowDown' : undefined}
+      iconSide={hasItems ? 'right' : undefined}
     >
       {badge.label}
     </EuiBadge>
   );
 
-  if (badge?.tooltip) {
-    return <EuiToolTip content={badge.tooltip}>{badgeComponent}</EuiToolTip>;
+  const wrappedBadge = badge?.tooltip ? (
+    <EuiToolTip content={badge.tooltip}>{badgeComponent}</EuiToolTip>
+  ) : (
+    badgeComponent
+  );
+
+  if (hasItems) {
+    return (
+      <EuiPopover
+        button={wrappedBadge}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        aria-label={badge.label}
+      >
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={buildPanels(badge.items, 0, badge.popoverWidth)}
+        />
+      </EuiPopover>
+    );
   }
 
-  return badgeComponent;
+  return wrappedBadge;
 };
 
 AppBadge.displayName = 'AppBadge';
