@@ -74,7 +74,8 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
     [dataConditions]
   );
 
-  const isSnoozeDisabled = !isConfirmed && confirmedDataConditions.length === 0;
+  const isSnoozeDisabled =
+    isTimeConditionInvalid || (!isConfirmed && confirmedDataConditions.length === 0);
 
   const timeEndDate = useMemo<string | null>(() => {
     if (isTimeConditionInvalid) return null;

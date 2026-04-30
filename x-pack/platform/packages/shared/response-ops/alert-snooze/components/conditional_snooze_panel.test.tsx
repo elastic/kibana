@@ -24,6 +24,20 @@ jest.mock('moment', () => {
   );
 });
 
+let mockValidationOverride: {
+  isDurationInvalid: boolean;
+  isPastDateTime: boolean;
+  isDateTimeMissing: boolean;
+} | null = null;
+jest.mock('../utils/duration_validation', () => {
+  const actual = jest.requireActual('../utils/duration_validation');
+  return {
+    ...actual,
+    validateDuration: (...args: unknown[]) =>
+      mockValidationOverride ?? actual.validateDuration(...args),
+  };
+});
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
@@ -33,6 +47,7 @@ describe('ConditionalSnoozePanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockValidationOverride = null;
   });
 
   describe('empty state', () => {
@@ -317,6 +332,59 @@ describe('ConditionalSnoozePanel', () => {
       // The second separator should just be text (so we'd find ANY twice, once inside button, once inside text)
       const anyTexts = await screen.findAllByText('ANY');
       expect(anyTexts).toHaveLength(2);
+    });
+  });
+
+  describe('confirmed time condition that becomes invalid', () => {
+    it('reports undefined schedule when the only confirmed condition is a time that has aged past', async () => {
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+
+      fireEvent.click(await screen.findByTestId('addTimeCondition'));
+      fireEvent.click(await screen.findByTestId('confirmTimeCondition'));
+
+      expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
+        expiresAt: moment(MOCKED_NOW).add(1, 'h').toISOString(),
+      });
+
+      mockValidationOverride = {
+        isDurationInvalid: false,
+        isPastDateTime: true,
+        isDateTimeMissing: false,
+      };
+
+      fireEvent.click(await screen.findByTestId('addDataCondition'));
+
+      expect(onScheduleChangeMock).toHaveBeenLastCalledWith(undefined);
+    });
+
+    it('reports undefined schedule when an invalid confirmed time coexists with valid data conditions', async () => {
+      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+
+      fireEvent.click(await screen.findByTestId('addDataCondition'));
+      fireEvent.change(await screen.findByTestId('dataConditionType-dc-1'), {
+        target: { value: DataConditionType.SEVERITY_CHANGE },
+      });
+      fireEvent.click(await screen.findByTestId('confirmDataCondition-dc-1'));
+
+      fireEvent.click(await screen.findByTestId('addTimeCondition'));
+      fireEvent.click(await screen.findByTestId('confirmTimeCondition'));
+
+      expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
+        expiresAt: moment(MOCKED_NOW).add(1, 'h').toISOString(),
+        conditions: [{ type: DataConditionType.SEVERITY_CHANGE }],
+        conditionOperator: 'any',
+      });
+
+      mockValidationOverride = {
+        isDurationInvalid: false,
+        isPastDateTime: true,
+        isDateTimeMissing: false,
+      };
+
+      fireEvent.click(await screen.findByTestId('editDataCondition-dc-1'));
+      fireEvent.click(await screen.findByTestId('confirmDataCondition-dc-1'));
+
+      expect(onScheduleChangeMock).toHaveBeenLastCalledWith(undefined);
     });
   });
 
