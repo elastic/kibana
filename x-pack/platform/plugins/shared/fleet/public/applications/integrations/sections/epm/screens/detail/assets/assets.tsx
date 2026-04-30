@@ -215,14 +215,17 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       );
     } else {
       content = !hasDeferredInstallations ? (
-        <EuiTitle>
-          <h2>
+        <EuiCallOut
+          announceOnMount
+          iconType="info"
+          color="primary"
+          title={
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
-              defaultMessage="No assets found"
+              defaultMessage="No assets installed for this integration."
             />
-          </h2>
-        </EuiTitle>
+          }
+        />
       ) : null;
     }
   } else {
