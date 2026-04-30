@@ -73,16 +73,18 @@ describe('createFakeRequestEnrichment', () => {
       );
     });
 
-    it('throws on access to arbitrary string-keyed properties not in the allowlist', () => {
-      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
-      const request = httpServerMock.createFakeKibanaRequest({});
+    it.each(['someUnknownProp', 'then', 'toJSON'])(
+      'returns undefined (not throw) for non-AuthenticatedUser string-keyed property "%s"',
+      (property) => {
+        const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+        const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+        enrichRequestWithUserProfile(request, 'u_test_profile_123');
 
-      const user = getOverride(request)! as unknown as Record<string, unknown>;
-      expect(() => user.toJSON).toThrow(/not available on a fake request enriched/);
-      expect(() => user.someUnknownProp).toThrow(/not available on a fake request enriched/);
-    });
+        const user = getOverride(request)! as unknown as Record<string, unknown>;
+        expect(user[property]).toBeUndefined();
+      }
+    );
 
     it('allows symbol-keyed access so JS reflection on the enriched user does not throw', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
@@ -95,6 +97,29 @@ describe('createFakeRequestEnrichment', () => {
       expect(() => (user as any)[Symbol.toPrimitive]).not.toThrow();
       expect(() => (user as any)[Symbol.toStringTag]).not.toThrow();
       expect(() => (user as any)[Symbol.iterator]).not.toThrow();
+    });
+
+    it('flows through Promise.resolve / async return without throwing on `.then`', async () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      // `Promise.resolve(value)` probes `value.then` to detect thenables;
+      // the proxy must not throw. Mirrors the encrypted_saved_objects pattern.
+      const asyncReturn = async () => getOverride(request);
+      const resolved = await asyncReturn();
+      expect(resolved!.profile_uid).toBe('u_test_profile_123');
+    });
+
+    it('serializes via JSON.stringify with only the profile_uid exposed', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+
+      const user = getOverride(request)!;
+      expect(JSON.parse(JSON.stringify(user))).toEqual({ profile_uid: 'u_test_profile_123' });
     });
 
     it('returns a frozen enriched user', () => {

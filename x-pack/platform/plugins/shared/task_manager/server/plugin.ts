@@ -96,15 +96,11 @@ export interface TaskManagerSetupContract {
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
   registerTaskEventLogger: (logger: TaskEventLogger) => void;
   /**
-   * Enriches a fake request with a user profile so that
-   * `security.authc.getCurrentUser(request)` resolves an
-   * {@link AuthenticatedUser} whose `profile_uid` matches.
-   *
-   * Re-exposed from Core's one-shot `getFakeRequestEnricher()` for trusted
-   * Task Manager consumers (e.g. test fixtures) that need to enrich a
-   * fake request constructed outside the normal scheduling flow. Throws
-   * if called with a non-fake request. Calling twice on the same fake
-   * request is a no-op (first-wins) and emits a warning.
+   * Re-exposes Core's one-shot `getFakeRequestEnricher()` for trusted Task
+   * Manager consumers (e.g. test fixtures) that build fake requests
+   * outside the normal scheduling flow. Throws on non-fake requests;
+   * calling twice on the same fake request is a no-op (first-wins) and
+   * emits a warning.
    *
    * @internal
    */

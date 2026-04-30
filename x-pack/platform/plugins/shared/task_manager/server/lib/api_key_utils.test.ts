@@ -334,7 +334,7 @@ describe('api_key_utils', () => {
       });
     });
 
-    test('should not throw when scheduling a fake request enriched with the strict allowlist proxy user', async () => {
+    test('should not throw when scheduling a fake request whose enriched user blocks identity fields', async () => {
       const mockApiKey = Buffer.from('apiKeyId:my-fake-apiKey').toString('base64');
       const fakeRawRequest: FakeRawRequest = {
         headers: {
@@ -344,19 +344,31 @@ describe('api_key_utils', () => {
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
-      // Mirror the production fake-request enrichment: the synthetic
-      // AuthenticatedUser only allows reading `profile_uid`; every other field
-      // throws so misuse is surfaced loudly.
+      // Mirror the production proxy: reading any AuthenticatedUser field
+      // other than `profile_uid` throws.
+      const blockedFields = new Set([
+        'username',
+        'email',
+        'full_name',
+        'roles',
+        'enabled',
+        'metadata',
+        'authentication_realm',
+        'lookup_realm',
+        'authentication_provider',
+        'authentication_type',
+        'elastic_cloud_user',
+        'operator',
+        'api_key',
+      ]);
       const enrichedUser = new Proxy({ profile_uid: 'u_profile_enriched' } as AuthenticatedUser, {
         get: (target, prop, receiver) => {
-          if (typeof prop === 'symbol' || prop === 'profile_uid') {
-            return Reflect.get(target, prop, receiver);
+          if (typeof prop === 'string' && blockedFields.has(prop)) {
+            throw new Error(
+              `Property "${prop}" is not available on a fake request enriched with a user profile.`
+            );
           }
-          throw new Error(
-            `Property "${String(
-              prop
-            )}" is not available on a fake request enriched with a user profile.`
-          );
+          return Reflect.get(target, prop, receiver);
         },
       });
 

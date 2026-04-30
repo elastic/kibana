@@ -15,40 +15,49 @@ import type { Logger } from '@kbn/logging';
 import type { InternalSecurityServiceStart } from '../internal_contracts';
 
 /**
- * Properties accessible on the synthetic user produced by
- * {@link CoreFakeRequestEnrichment.enrichRequestWithUserProfile}. Any other
- * string-keyed access throws so consumers cannot read placeholder identity
- * data off an enriched fake request instead of using `profile_uid` for
- * per-user lookups. Symbol-keyed access (e.g. `Symbol.toPrimitive`,
- * `Symbol.toStringTag`, `util.inspect.custom`) is allowed so that JS
- * reflection on the object does not blow up unexpectedly.
+ * Identity fields blocked on the synthetic user produced by
+ * {@link CoreFakeRequestEnrichment.enrichRequestWithUserProfile}. Reading
+ * any of these throws so callers can't derive identity from an enriched
+ * fake request; only `profile_uid` is intentionally accessible.
+ *
+ * The `Record<keyof Omit<AuthenticatedUser, 'profile_uid'>, true>` shape
+ * forces this list to stay in sync with the type — adding/removing a
+ * field on `AuthenticatedUser` is a compile error until reflected here.
  */
-const ENRICHED_USER_ALLOWED_PROPERTIES = new Set<string>(['profile_uid']);
+const ENRICHED_USER_BLOCKED_PROPERTIES_RECORD: Record<
+  keyof Omit<AuthenticatedUser, 'profile_uid'>,
+  true
+> = {
+  username: true,
+  email: true,
+  full_name: true,
+  roles: true,
+  enabled: true,
+  metadata: true,
+  authentication_realm: true,
+  lookup_realm: true,
+  authentication_provider: true,
+  authentication_type: true,
+  elastic_cloud_user: true,
+  operator: true,
+  api_key: true,
+};
+
+const ENRICHED_USER_BLOCKED_PROPERTIES = new Set<string>(
+  Object.keys(ENRICHED_USER_BLOCKED_PROPERTIES_RECORD)
+);
 
 /**
- * Internal bundle wiring the Core-owned fake-request enrichment:
- * - `enrichRequestWithUserProfile` is exposed via
- *   `SecurityServiceSetup.getFakeRequestEnricher`.
- * - `getOverride` is consulted by `convertSecurityApi`'s `getCurrentUser`
- *   to resolve enriched fake requests without going through the delegate.
- *
- * Both ends share the same WeakMap closure, so enrichment performed at
- * setup-obtained enricher call sites is observable at start-time
- * `getCurrentUser` call sites.
+ * Pairs the public `enrichRequestWithUserProfile` (exposed via
+ * `SecurityServiceSetup.getFakeRequestEnricher`) with `getOverride`,
+ * consulted by `convertSecurityApi`'s `getCurrentUser`. Both close over the
+ * same WeakMap so enrichment at setup is observable at start.
  */
 export interface CoreFakeRequestEnrichment {
   enrichRequestWithUserProfile: FakeRequestEnricher;
   getOverride(request: KibanaRequest): AuthenticatedUser | undefined;
 }
 
-/**
- * Create the Core-owned fake-request enrichment state.
- *
- * The WeakMap lives in this closure; the public-facing enrich function and
- * the internal override getter both close over it, so there is no way for
- * a consumer to observe or tamper with the mapping other than through
- * these two methods.
- */
 export const createFakeRequestEnrichment = (logger: Logger): CoreFakeRequestEnrichment => {
   const fakeRequestUsers = new WeakMap<KibanaRequest, AuthenticatedUser>();
 
@@ -70,22 +79,21 @@ export const createFakeRequestEnrichment = (logger: Logger): CoreFakeRequestEnri
 
     logger.debug(`Enriching request with user profile ID "${userProfileId}".`);
 
-    // The synthetic user only exposes `profile_uid`. Reading any other
-    // {@link AuthenticatedUser} field throws to surface code paths that
-    // try to derive identity (username, roles, realms, etc.) from a fake
-    // request enriched purely on behalf of a stored task. Symbol-keyed
-    // access is allowed so the proxy plays nicely with JS reflection.
+    // Synthetic user that only exposes `profile_uid`. Reading any blocked
+    // identity field throws; everything else (symbols, unknown props) falls
+    // through to the empty target so JS reflection (`then`, `JSON.stringify`,
+    // etc.) keeps working.
     const enrichedUserStub: Partial<AuthenticatedUser> = { profile_uid: userProfileId };
     const enrichedUser = deepFreeze(
       new Proxy(enrichedUserStub as AuthenticatedUser, {
         get: (target, prop, receiver) => {
-          if (typeof prop === 'symbol' || ENRICHED_USER_ALLOWED_PROPERTIES.has(prop)) {
-            return Reflect.get(target, prop, receiver);
+          if (typeof prop === 'string' && ENRICHED_USER_BLOCKED_PROPERTIES.has(prop)) {
+            throw new Error(
+              `Property "${prop}" is not available on a fake request enriched ` +
+                `with a user profile. Use profile_uid for per-user lookups.`
+            );
           }
-          throw new Error(
-            `Property "${String(prop)}" is not available on a fake request enriched ` +
-              `with a user profile. Use profile_uid for per-user lookups.`
-          );
+          return Reflect.get(target, prop, receiver);
         },
       })
     );

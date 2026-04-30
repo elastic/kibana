@@ -27,13 +27,12 @@ const mockCapturedRun: CapturedRun = {
 
 let mockKibanaServerRef: TestKibanaUtils | null = null;
 
-jest.mock('../queries/task_claiming', () => {
+    jest.mock('../queries/task_claiming', () => {
   const actual = jest.requireActual('../queries/task_claiming');
   return {
     ...actual,
     TaskClaiming: jest.fn().mockImplementation((opts: TaskClaimingOpts) => {
-      // Task definitions must be registered before TaskClaiming is constructed,
-      // otherwise partitionIntoClaimingBatches won't include them.
+      // Register before TaskClaiming construction so partitionIntoClaimingBatches sees them.
       opts.definitions.registerTaskDefinitions({
         profileResolvingTestTask: {
           title: 'Profile Resolving Test Task',
@@ -121,10 +120,7 @@ describe('Task Manager user profile enrichment (integration)', () => {
       startedAt: null,
       retryAt: null,
       ownerId: null,
-      // A syntactically valid API-key authorization payload. Task Manager does
-      // not invoke Elasticsearch with it in this flow, so the key does not need
-      // to exist; it only needs to be a non-empty string so the task runner
-      // builds a fake request for us.
+      // Non-empty so the runner builds a fake request; not used against ES here.
       apiKey: Buffer.from('integration-api-key-id:integration-api-key-value').toString('base64'),
       userScope: {
         apiKeyId: 'integration-api-key-id',
@@ -142,10 +138,8 @@ describe('Task Manager user profile enrichment (integration)', () => {
     expect(mockCapturedRun.userFromTaskFakeRequest).not.toBeNull();
     expect(mockCapturedRun.userFromTaskFakeRequest?.profile_uid).toBe(testProfileUid);
 
-    // RunContext.enrichRequest is exposed whenever a userProfileId is associated
-    // with the task so task implementations can propagate the originating user's
-    // profile to child fake requests they construct. Propagation behavior itself
-    // is covered by task_runner unit tests and convert_security_api unit tests.
+    // Exposed whenever the task has a userProfileId so tasks can propagate it to
+    // child fake requests. Propagation itself is covered by unit tests.
     expect(mockCapturedRun.enrichRequestWasProvided).toBe(true);
   });
 });

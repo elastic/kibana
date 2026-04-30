@@ -36,18 +36,14 @@ export interface CoreAuthenticationService {
 }
 
 /**
- * Binds a user profile UID to a fake request so that downstream
- * `security.authc.getCurrentUser(request)` resolves to a minimal
- * {@link AuthenticatedUser} whose `profile_uid` matches the provided value.
- *
- * Obtained via {@link SecurityServiceSetup.getFakeRequestEnricher} at Core
- * setup time. See that method for the full security boundary and intended
- * use.
- *
- * Throws if called with a non-fake request. Calling twice on the same fake
- * request is a no-op (first-wins) and emits a warning.
+ * Binds a `profile_uid` to a fake request so
+ * `security.authc.getCurrentUser(request)` resolves to a synthetic
+ * {@link AuthenticatedUser} exposing only that `profile_uid`. Obtained via
+ * {@link SecurityServiceSetup.getFakeRequestEnricher}; see that method for
+ * the security boundary. Throws on non-fake requests; calling twice on the
+ * same fake request is a no-op (first-wins) and emits a warning.
  *
  * @internal Intended for trusted orchestrators that own the fake request
- *   lifecycle (e.g. Task Manager). Not for general plugin consumption.
+ *   lifecycle (e.g. Task Manager).
  */
 export type FakeRequestEnricher = (request: KibanaRequest, userProfileId: string) => void;

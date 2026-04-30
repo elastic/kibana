@@ -233,11 +233,8 @@ export function initRoutes(
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
-      // Manually enrich the scheduling fake request with the supplied profile_uid.
-      // This mirrors the production case where the scheduling request carries a
-      // session whose userProfileId populates AuthenticatedUser.profile_uid,
-      // without needing a real login flow in FTR (which uses basic auth over
-      // supertest and does not create a session).
+      // Mirrors a real session populating profile_uid without a login flow
+      // (FTR uses basic auth and doesn't create a session).
       fakeRequestEnricher(fakeRequest, userProfileId);
 
       const task = {
