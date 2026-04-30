@@ -63,21 +63,10 @@ const buildModeSuffix = (flag: string): string => {
 };
 
 /**
- * For each module whose name matches `HEAVY_MODULE_NAME_FRAGMENTS`, fan it out into one
- * virtual module per supported `(arch, domain)` mode so each mode gets its own Buildkite
- * step. Each split module:
- *   - keeps the original module's `group`/`type`/`isAffected` (via spread),
- *   - is renamed to `<original>-<arch>-<domain>` so BK step keys remain unique,
- *   - retains only the configs that support that specific mode,
- *   - has each retained config narrowed to the single matching `serverRunFlag`.
- *
- * Non-matching modules are returned unchanged. Pure: no I/O, no input mutation.
- *
- * This used to live inside `kbn-scout`'s discovery CLI and ran before the manifest
- * was saved to disk. That conflated "describe the codebase" with "schedule the build"
- * and produced manifest entries with duplicate config paths, which broke downstream
- * consumers (notably the flaky-test runner planner). Discovery now saves a canonical
- * manifest; this scheduler is the only consumer that needs the split.
+ * Splits heavy modules (per `HEAVY_MODULE_NAME_FRAGMENTS`) into one virtual module per
+ * `(arch, domain)`, renamed `<original>-<arch>-<domain>` and narrowed to the configs
+ * and single `serverRunFlag` that match. Non-matching modules pass through.
+ * Pure: no I/O, no mutation.
  */
 const splitHeavyModulesByServerRunFlags = (modules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] =>
   modules.flatMap((module) => {
