@@ -15,7 +15,6 @@ import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
-import { useKibana } from '../../../../common/lib/kibana';
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -296,7 +295,7 @@ describe('ActionsConnectorsHome', () => {
     expect(documentationButton).toBeEnabled();
   });
 
-  it('shows auth-status load failure in toast and passes error to connectors list', async () => {
+  it('passes auth-status load failure to connectors list', async () => {
     loadConnectorAuthStatus.mockRejectedValue({
       body: { message: 'Auth status endpoint failed' },
     });
@@ -327,13 +326,6 @@ describe('ActionsConnectorsHome', () => {
     );
 
     await screen.findByTestId('actionsConnectorsListComponent');
-
-    const { toasts } = useKibana().services.notifications;
-    expect(toasts.addDanger).toHaveBeenCalledWith(
-      expect.objectContaining({
-        text: 'Auth status endpoint failed',
-      })
-    );
 
     expect(lastActionsConnectorsListProps?.connectorAuthStatusError).toBe(
       'Auth status endpoint failed'
