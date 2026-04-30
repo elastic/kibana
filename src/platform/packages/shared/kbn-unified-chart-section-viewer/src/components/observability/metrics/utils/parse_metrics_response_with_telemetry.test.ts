@@ -40,14 +40,15 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
+          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: [null],
-          dimensionFields: [{ name: 'host.name' }],
+          dimensionFields: [{ name: 'host.name', type: undefined }],
         },
       ],
-      allDimensions: [{ name: 'host.name' }],
+      allDimensions: [{ name: 'host.name', type: undefined }],
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -78,14 +79,15 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
+          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
-          dimensionFields: [{ name: 'host.name' }],
+          dimensionFields: [{ name: 'host.name', type: undefined }],
         },
       ],
-      allDimensions: [{ name: 'host.name' }],
+      allDimensions: [{ name: 'host.name', type: undefined }],
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -116,22 +118,24 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
+          isDuplicateMetricName: false,
           dataStream: 'stream-a',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
-          dimensionFields: [{ name: 'host.name' }],
+          dimensionFields: [{ name: 'host.name', type: undefined }],
         },
         {
           metricName: 'cpu.usage',
+          isDuplicateMetricName: false,
           dataStream: 'stream-b',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
-          dimensionFields: [{ name: 'host.name' }],
+          dimensionFields: [{ name: 'host.name', type: undefined }],
         },
       ],
-      allDimensions: [{ name: 'host.name' }],
+      allDimensions: [{ name: 'host.name', type: undefined }],
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -162,14 +166,15 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
+          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['bytes'],
-          dimensionFields: [{ name: 'host.name' }],
+          dimensionFields: [{ name: 'host.name', type: undefined }],
         },
       ],
-      allDimensions: [{ name: 'host.name' }],
+      allDimensions: [{ name: 'host.name', type: undefined }],
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -200,14 +205,21 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
+          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge', 'counter'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
           units: ['bytes'],
-          dimensionFields: [{ name: 'host.name' }, { name: 'pod.name' }],
+          dimensionFields: [
+            { name: 'host.name', type: undefined },
+            { name: 'pod.name', type: undefined },
+          ],
         },
       ],
-      allDimensions: [{ name: 'host.name' }, { name: 'pod.name' }],
+      allDimensions: [
+        { name: 'host.name', type: undefined },
+        { name: 'pod.name', type: undefined },
+      ],
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 2,
@@ -277,6 +289,46 @@ describe('parseMetricsWithTelemetry', () => {
     });
     const totalNumberOfMetrics = sum(Object.values(result.telemetry.metrics_by_type));
     expect(result.telemetry.total_number_of_metrics).toBe(totalNumberOfMetrics);
+  });
+
+  it('marks isDuplicateMetricName true when the same metric_name appears more than once', () => {
+    const response: MetricsESQLResponse[] = [
+      {
+        metric_name: 'cpu.usage',
+        data_stream: 'stream-a',
+        unit: ['percent'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: [],
+      },
+      {
+        metric_name: 'memory.usage',
+        data_stream: 'stream-a',
+        unit: ['bytes'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.LONG,
+        dimension_fields: [],
+      },
+      {
+        metric_name: 'cpu.usage',
+        data_stream: 'stream-b',
+        unit: ['percent'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: [],
+      },
+    ];
+    const result = parseMetricsWithTelemetry(response);
+    expect(result.metricItems).toHaveLength(3);
+    expect(result.metricItems[0]).toEqual(
+      expect.objectContaining({ metricName: 'cpu.usage', isDuplicateMetricName: true })
+    );
+    expect(result.metricItems[1]).toEqual(
+      expect.objectContaining({ metricName: 'memory.usage', isDuplicateMetricName: false })
+    );
+    expect(result.metricItems[2]).toEqual(
+      expect.objectContaining({ metricName: 'cpu.usage', isDuplicateMetricName: true })
+    );
   });
 
   describe('internal dimension filtering', () => {

@@ -90,6 +90,18 @@ export const MetricsExperienceGridContent = ({
     []
   );
 
+  const getDescription = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      metricItem.isDuplicateMetricName
+        ? i18n.translate('metricsExperience.grid.duplicateMetricDescription', {
+            defaultMessage:
+              'Data stream: This metric exists across multiple streams. This chart is filtered to show data from the {dataStream} stream only.',
+            values: { dataStream: metricItem.dataStream },
+          })
+        : undefined,
+    []
+  );
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -130,6 +142,7 @@ export const MetricsExperienceGridContent = ({
           searchTerm={searchTerm}
           whereStatements={whereStatements}
           getUserMessages={getUserMessages}
+          getDescription={getDescription}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
