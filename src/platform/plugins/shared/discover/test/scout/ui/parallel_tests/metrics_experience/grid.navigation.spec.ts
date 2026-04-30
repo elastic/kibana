@@ -26,6 +26,7 @@ import {
 
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
+// Longer than default `expect` (10s) for `should paginate through metrics` only, may be slow CI/late card mount.
 const PAGINATE_METRICS_CARDS_TIMEOUT_MS = 30_000;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
