@@ -451,7 +451,7 @@ export class DiscoverPlugin
       getIconForSavedObject: () => 'discoverApp',
     });
 
-    plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesForEmbeddable(),
@@ -465,19 +465,22 @@ export class DiscoverPlugin
     });
 
     // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
-    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
-      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
-        await Promise.all([
-          getStartServices(),
-          getDiscoverServicesForEmbeddable(),
-          getEmbeddableServices(),
-        ]);
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      LEGACY_LOG_STREAM_EMBEDDABLE,
+      async () => {
+        const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+          await Promise.all([
+            getStartServices(),
+            getDiscoverServicesForEmbeddable(),
+            getEmbeddableServices(),
+          ]);
 
-      return getLegacyLogStreamEmbeddableFactory({
-        startServices,
-        discoverServices,
-      });
-    });
+        return getLegacyLogStreamEmbeddableFactory({
+          startServices,
+          discoverServices,
+        });
+      }
+    );
 
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,

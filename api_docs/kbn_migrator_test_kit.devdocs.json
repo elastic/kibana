@@ -82,6 +82,7 @@
             "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -138,6 +139,7 @@
             "lineNumber": 383,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -199,6 +201,7 @@
             "lineNumber": 19,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "GetElasticsearchClientWrapperFactoryParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -240,6 +243,7 @@
             "lineNumber": 129,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "GetEsClientParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -299,6 +303,7 @@
             "lineNumber": 146,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaMigratorTestKitParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1767,6 +1772,7 @@
                 "lineNumber": 92,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ISavedObjectTypeRegistry",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1872,6 +1878,7 @@
             "lineNumber": 12,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false
           }
         ],

@@ -180,29 +180,23 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   // effect runs on the next render, and the state is cleared.
   //
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
-  const pendingCloseRef = useRef<'exit' | 'child' | null>(null);
-  // We have special conditions here where we want to force an effect to fire as
-  // result of a callback. Because we're relying on a ref to handle this state (which
-  // cannot trigger a re-render), calling a setState will force the component to render.
-  // Without doing this, when the user exits the flyout using the back button, it won't
-  // end up rendering, and the traces flyout will never re-open again.
-  const [, forceRender] = useState(0);
+  const [pendingClose, setPendingClose] = useState<'exit' | 'child' | null>(null);
 
   useEffect(() => {
-    if (pendingCloseRef.current === 'exit') {
+    if (pendingClose === 'exit') {
       setShowFullScreenWaterfall(false);
       clearActiveFlyout();
-    } else if (pendingCloseRef.current === 'child') {
+      setPendingClose(null);
+    } else if (pendingClose === 'child') {
       clearActiveFlyout();
+      setPendingClose(null);
     }
-    pendingCloseRef.current = null;
-  });
+  }, [pendingClose, setShowFullScreenWaterfall, clearActiveFlyout]);
 
   const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
       if (event.type === 'navigation') {
-        pendingCloseRef.current = 'exit';
-        forceRender((n) => n + 1);
+        setPendingClose('exit');
         return;
       }
 
@@ -215,8 +209,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const onCloseFlyout = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
       if (event.type === 'navigation') {
-        pendingCloseRef.current = 'child';
-        forceRender((n) => n + 1);
+        setPendingClose('child');
         return;
       }
 
@@ -224,6 +217,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     },
     [clearActiveFlyout]
   );
+
+  const contextSpanIds = useMemo(() => (docId ? [docId] : undefined), [docId]);
 
   const actions = useMemo(
     () => [
@@ -251,8 +246,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
-          highlightedSpanId={activeDocId ?? docId}
-          scrollToHighlightedOnMount={docId != null}
+          contextSpanIds={contextSpanIds}
+          scrollToContextOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
           activeFlyoutType={activeFlyoutType}

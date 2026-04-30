@@ -27,10 +27,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type {
-  ModelSnapshot,
-  CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import { useMlApi, useNotifications } from '../../../contexts/kibana';
 
 interface Props {

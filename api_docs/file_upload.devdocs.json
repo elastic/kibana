@@ -84,6 +84,7 @@
                 "lineNumber": 15,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImportFactoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -225,6 +226,7 @@
                 "lineNumber": 21,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArrayBuffer",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -298,6 +300,7 @@
                 "lineNumber": 24,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndicesIndexSettings",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -315,6 +318,7 @@
                 "lineNumber": 25,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MappingTypeMapping",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -340,6 +344,7 @@
                 "lineNumber": 26,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -374,6 +379,7 @@
                 "lineNumber": 28,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -437,6 +443,7 @@
                 "lineNumber": 32,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MappingTypeMapping",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -478,6 +485,7 @@
                 "lineNumber": 34,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -573,6 +581,7 @@
                 "lineNumber": 40,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -683,6 +692,7 @@
                 "lineNumber": 46,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }

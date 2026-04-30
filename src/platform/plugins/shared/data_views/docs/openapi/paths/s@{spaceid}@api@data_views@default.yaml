@@ -1,8 +1,19 @@
 get:
-  summary: Get the default data view identifier
+  summary: Get the default data view
   operationId: getDefaultDataView
+  description: >
+    Retrieve the identifier of the default data view for the current Kibana space.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X GET "${KIBANA_URL}/s/{spaceId}/api/data_views/default" \
+          -H "Authorization: ApiKey ${API_KEY}"
+    - lang: Console
+      source: |
+        GET kbn://s/{spaceId}/api/data_views/default
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
   responses:
@@ -24,11 +35,30 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            getDefaultDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'
 post:
-  summary: Sets the default data view identifier
+  summary: Set the default data view
   operationId: setDefaultDatailView
+  description: >
+    Set the default data view for the current Kibana space.
+    The default data view is used as a fallback when no specific data view is selected.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/s/{spaceId}/api/data_views/default" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"data_view_id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","force":true}'
+    - lang: Console
+      source: |
+        POST kbn://s/{spaceId}/api/data_views/default
+        {"data_view_id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","force":true}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/space_id.yaml'
@@ -65,9 +95,15 @@ post:
             properties:
               acknowledged:
                 type: boolean
+          examples:
+            setDefaultDataViewResponse:
+              $ref: '../components/examples/set_default_data_view_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            setDefaultDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

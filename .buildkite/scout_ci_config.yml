@@ -35,11 +35,13 @@ plugins:
     - painless_lab
     - profiling
     - saved_objects_management
+    - saved_objects_tagging
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
     - security
     - security_solution
+    - serverless_observability
     - share
     - slo
     - spaces

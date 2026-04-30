@@ -63,6 +63,7 @@
             "lineNumber": 28,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Labels",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -80,6 +81,7 @@
             "lineNumber": 28,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "AddLabelsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -131,6 +133,7 @@
             "lineNumber": 36,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Labels",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -148,6 +151,7 @@
             "lineNumber": 36,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "AddLabelsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -405,6 +409,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": false
           }
