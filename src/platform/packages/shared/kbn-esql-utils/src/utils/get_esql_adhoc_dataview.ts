@@ -9,19 +9,9 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { LRUCache } from 'lru-cache';
-import {
-  type ESQLSourceResult,
-  SOURCES_AUTOCOMPLETE_ROUTE,
-  TIMEFIELD_ROUTE,
-} from '@kbn/esql-types';
+import { type ESQLSourceResult, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
-
-// Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query.
-// Storing the Promise (not the resolved value) deduplicates concurrent calls:
-// if multiple callers request the same query before the first resolves,
-// they all await the same promise instead of each firing a separate HTTP request.
-const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
+import { getESQLTimeFieldFromQuery } from './get_esql_time_field_from_query';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -83,23 +73,7 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  let timeFieldName: string | undefined;
-  if (timeFieldCache.has(query)) {
-    timeFieldName = await timeFieldCache.get(query);
-  } else if (http) {
-    const encodedQuery = encodeURIComponent(query);
-    const pendingRequest = http
-      .get(`${TIMEFIELD_ROUTE}${encodedQuery}`)
-      .then((response) => (response as { timeField?: string } | undefined)?.timeField)
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch the timefield', error);
-        timeFieldCache.delete(query);
-        return undefined;
-      });
-    timeFieldCache.set(query, pendingRequest);
-    timeFieldName = await pendingRequest;
-  }
+  const timeFieldName = await getESQLTimeFieldFromQuery({ query, http });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';

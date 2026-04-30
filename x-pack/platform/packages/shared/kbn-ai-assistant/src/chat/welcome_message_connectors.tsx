@@ -55,18 +55,18 @@ export function WelcomeMessageConnectors({
       <div className={fadeInClassName} data-test-subj="observabilityAiAssistantConnectorsError">
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="danger">
               {isForbiddenError
                 ? i18n.translate(
-                    'xpack.aiAssistant.welcomeMessageConnectors.connectorsForbiddenTextLabel',
-                    { defaultMessage: 'Required privileges to get connectors are missing' }
+                    'xpack.aiAssistant.welcomeMessageConnectors.modelsForbiddenTextLabel',
+                    { defaultMessage: 'Required privileges to get models are missing' }
                   )
                 : i18n.translate(
-                    'xpack.aiAssistant.welcomeMessageConnectors.connectorsErrorTextLabel',
-                    { defaultMessage: 'Could not load connectors' }
+                    'xpack.aiAssistant.welcomeMessageConnectors.modelsErrorTextLabel',
+                    { defaultMessage: 'Could not load models' }
                   )}
             </EuiText>
           </EuiFlexItem>
@@ -77,9 +77,9 @@ export function WelcomeMessageConnectors({
   return !connectors.loading && connectors.connectors?.length === 0 && onSetupConnectorClick ? (
     <div className={fadeInClassName}>
       <EuiText color="subdued" size="s">
-        {i18n.translate('xpack.aiAssistant.initialSetupPanel.setupConnector.description2', {
+        {i18n.translate('xpack.aiAssistant.initialSetupPanel.setupModel.description2', {
           defaultMessage:
-            'Start working with the Elastic AI Assistant by setting up a connector for your AI provider. The model needs to support function calls. When using OpenAI or Azure, we recommend using GPT4.',
+            'Start working with the Elastic AI Assistant by setting up a model for your AI provider. The model needs to support function calls. When using OpenAI or Azure, we recommend using GPT4.',
         })}
         <EuiIconTip
           content={i18n.translate('xpack.aiAssistant.technicalPreviewBadgeDescription', {
@@ -99,13 +99,13 @@ export function WelcomeMessageConnectors({
 
       <div>
         <EuiButton
-          data-test-subj="observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton"
+          data-test-subj="observabilityAiAssistantInitialSetupPanelSetUpModelButton"
           fill
           color="primary"
           onClick={onSetupConnectorClick}
         >
-          {i18n.translate('xpack.aiAssistant.initialSetupPanel.setupConnector.buttonLabel', {
-            defaultMessage: 'Set up GenAI connector',
+          {i18n.translate('xpack.aiAssistant.initialSetupPanel.setupModel.buttonLabel', {
+            defaultMessage: 'Set up model',
           })}
         </EuiButton>
       </div>

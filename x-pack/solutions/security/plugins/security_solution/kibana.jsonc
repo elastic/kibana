@@ -67,10 +67,10 @@
       "telemetry",
       "elasticAssistantSharedState",
       "share",
-      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
@@ -86,7 +86,9 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
-      "cps"
+      "workflowsExtensions",
+      "cps",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "esUiShared",

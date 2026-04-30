@@ -117,18 +117,11 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     throw new Error('No euid ranking branches found, invalid euid logic definition');
   }
 
-  const filterChecks: string[] = [];
-  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
-    (c): c is Condition => Boolean(c)
-  )) {
-    filterChecks.push(`if (!(${streamlangConditionToPainlessDoc(filterCond)})) { return null; }`);
-  }
-  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
-
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
-  if (identityField.fieldEvaluations?.length) {
-    const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const result = buildFieldEvaluationsPreamble(fieldEvaluations);
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
@@ -140,6 +133,18 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     entityDefinition.whenConditionTrueSetFieldsAfterStats,
     evaluatedVars
   );
+
+  /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
+  const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
+  const filterChecks: string[] = [];
+  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
+    (c): c is Condition => Boolean(c)
+  )) {
+    filterChecks.push(
+      `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
+    );
+  }
+  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
 
   const fieldCondition = (field: string): string => {
     const varName = evaluatedVars.get(field);
@@ -168,8 +173,8 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const hasConditionalBranch = euidRanking.branches.some((b) => b.when != null);
   if (!hasConditionalBranch && euidRanking.branches.length === 1) {
     return (
-      filterPreamble +
       preamble +
+      filterPreamble +
       buildBranchClauses(euidRanking.branches[0].ranking) +
       ' return null;'
     );
@@ -193,7 +198,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const lastBranchPart = branchParts[branchParts.length - 1] ?? '';
   const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
   const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
-  return filterPreamble + preamble + branchLogic + trailingReturn;
+  return preamble + filterPreamble + branchLogic + trailingReturn;
 }
 
 function painlessFieldNonEmpty(field: string): string {
@@ -299,6 +304,10 @@ function escapePainlessString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function toPainlessNullableStringLiteral(value: string | null): string {
+  return value === null ? 'null' : `"${escapePainlessString(value)}"`;
+}
+
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
 }
@@ -327,18 +336,42 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
         );
       }
     }
-    stmts.push(`if (_src != null) {`);
-    let first = true;
+
+    let branchFirst = true;
     for (const clause of ev.whenClauses) {
-      const conds = clause.sourceMatchesAny
-        .map((v) => `_src == "${escapePainlessString(v)}"`)
-        .join(' || ');
-      const prefix = first ? '  if ' : '  else if ';
-      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
-      first = false;
+      if ('sourceMatchesAny' in clause) {
+        const conds = clause.sourceMatchesAny
+          .map((v) => `_src == "${escapePainlessString(v)}"`)
+          .join(' || ');
+        const prefix = branchFirst ? 'if' : 'else if';
+        stmts.push(
+          `${prefix} (_src != null && (${conds})) { ${varName} = "${escapePainlessString(
+            clause.then
+          )}"; }`
+        );
+        branchFirst = false;
+      } else {
+        const cond = streamlangConditionToPainlessDoc(clause.condition);
+        const prefix = branchFirst ? 'if' : 'else if';
+        stmts.push(`${prefix} (${cond}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
+        branchFirst = false;
+      }
     }
-    stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push(`} else { ${varName} = "${escapePainlessString(ev.fallbackValue)}"; }`);
+
+    if (branchFirst) {
+      stmts.push(
+        `if (_src != null) { ${varName} = _src; } else { ${varName} = ${toPainlessNullableStringLiteral(
+          ev.fallbackValue
+        )}; }`
+      );
+    } else {
+      stmts.push(
+        `else if (_src != null) { ${varName} = _src; } else { ${varName} = ${toPainlessNullableStringLiteral(
+          ev.fallbackValue
+        )}; }`
+      );
+    }
+
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');

@@ -16,9 +16,10 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerRunWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/run',
@@ -54,7 +55,7 @@ export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteD
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
@@ -102,8 +103,16 @@ export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteD
             undefined,
             metadata
           );
+          audit.logWorkflowRun(request, {
+            workflowId: id,
+            executionId: workflowExecutionId,
+          });
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          audit.logWorkflowRun(request, {
+            workflowId: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

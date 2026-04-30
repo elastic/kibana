@@ -1,0 +1,519 @@
+{
+  "id": "@kbn/test-docker-servers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-docker-servers",
+        "id": "def-common.defineDockerServersConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "defineDockerServersConfig",
+        "description": [
+          "\nHelper that helps authors use the type definitions for the section of the FTR config\nunder the `dockerServers` key."
+        ],
+        "signature": [
+          "(config: {} | { [name: string]: ",
+          {
+            "pluginId": "@kbn/test-docker-servers",
+            "scope": "common",
+            "docId": "kibKbnTestDockerServersPluginApi",
+            "section": "def-common.DockerServerSpec",
+            "text": "DockerServerSpec"
+          },
+          "; }) => {} | { [name: string]: ",
+          {
+            "pluginId": "@kbn/test-docker-servers",
+            "scope": "common",
+            "docId": "kibKbnTestDockerServersPluginApi",
+            "section": "def-common.DockerServerSpec",
+            "text": "DockerServerSpec"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.defineDockerServersConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "{} | { [name: string]: ",
+              {
+                "pluginId": "@kbn/test-docker-servers",
+                "scope": "common",
+                "docId": "kibKbnTestDockerServersPluginApi",
+                "section": "def-common.DockerServerSpec",
+                "text": "DockerServerSpec"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 35,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/test-docker-servers",
+        "id": "def-common.DockerServer",
+        "type": "Interface",
+        "tags": [],
+        "label": "DockerServer",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test-docker-servers",
+            "scope": "common",
+            "docId": "kibKbnTestDockerServersPluginApi",
+            "section": "def-common.DockerServer",
+            "text": "DockerServer"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/test-docker-servers",
+            "scope": "common",
+            "docId": "kibKbnTestDockerServersPluginApi",
+            "section": "def-common.DockerServerSpec",
+            "text": "DockerServerSpec"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServer.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServer.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-docker-servers",
+        "id": "def-common.DockerServerSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "DockerServerSpec",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.portInContainer",
+            "type": "number",
+            "tags": [],
+            "label": "portInContainer",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.port",
+            "type": "number",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.image",
+            "type": "string",
+            "tags": [],
+            "label": "image",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.preferCached",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferCached",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.waitForLogLine",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "waitForLogLine",
+            "description": [],
+            "signature": [
+              "string | RegExp | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.waitForLogLineTimeoutMs",
+            "type": "number",
+            "tags": [],
+            "label": "waitForLogLineTimeoutMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.waitFor",
+            "type": "Function",
+            "tags": [],
+            "label": "waitFor",
+            "description": [
+              "a function that should return an observable that will allow the tests to execute as soon as it emits anything"
+            ],
+            "signature": [
+              "((server: ",
+              {
+                "pluginId": "@kbn/test-docker-servers",
+                "scope": "common",
+                "docId": "kibKbnTestDockerServersPluginApi",
+                "section": "def-common.DockerServer",
+                "text": "DockerServer"
+              },
+              ", logLine$: ",
+              "Observable",
+              "<string>) => ",
+              "Observable",
+              "<unknown>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-docker-servers",
+                "id": "def-common.DockerServerSpec.waitFor.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "server",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test-docker-servers",
+                    "scope": "common",
+                    "docId": "kibKbnTestDockerServersPluginApi",
+                    "section": "def-common.DockerServer",
+                    "text": "DockerServer"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+                "lineNumber": 21,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "DockerServer",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-docker-servers",
+                "id": "def-common.DockerServerSpec.waitFor.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "logLine$",
+                "description": [],
+                "signature": [
+                  "Observable",
+                  "<string>"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+                "lineNumber": 21,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.DockerServerSpec.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/test-docker-servers",
+        "id": "def-common.dockerRegistryPort",
+        "type": "string",
+        "tags": [],
+        "label": "dockerRegistryPort",
+        "description": [
+          "\nThis is used by CI to set the docker registry port\nyou can also define this environment variable locally when running tests which\nwill spin up a local docker package registry locally for you\nif this is defined it takes precedence over the `packageRegistryOverride` variable"
+        ],
+        "signature": [
+          "string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-docker-servers",
+        "id": "def-common.fleetPackageRegistryDockerImage",
+        "type": "string",
+        "tags": [],
+        "label": "fleetPackageRegistryDockerImage",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/test-docker-servers",
+        "id": "def-common.packageRegistryDocker",
+        "type": "Object",
+        "tags": [],
+        "label": "packageRegistryDocker",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.image",
+            "type": "string",
+            "tags": [],
+            "label": "image",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.portInContainer",
+            "type": "number",
+            "tags": [],
+            "label": "portInContainer",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.port",
+            "type": "string",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.waitForLogLine",
+            "type": "string",
+            "tags": [],
+            "label": "waitForLogLine",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.waitForLogLineTimeoutMs",
+            "type": "number",
+            "tags": [],
+            "label": "waitForLogLineTimeoutMs",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-docker-servers",
+            "id": "def-common.packageRegistryDocker.preferCached",
+            "type": "boolean",
+            "tags": [],
+            "label": "preferCached",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

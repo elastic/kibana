@@ -75,6 +75,7 @@ import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LayerCellValueActions } from '../types';
 import { EuiThemeProvider } from '@elastic/eui';
+import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -2008,6 +2009,78 @@ describe('XYChart component', () => {
     });
   });
 
+  describe('axis decimal precision', () => {
+    test('applies y axis maximumFractionDigits from number formatter params', () => {
+      const { data, args } = sampleArgs();
+      const yAxisFormatData: Datatable = {
+        ...data,
+        columns: data.columns.map((column) =>
+          column.id === 'a'
+            ? {
+                ...column,
+                meta: {
+                  ...column.meta,
+                  params: {
+                    id: 'number',
+                    params: {
+                      pattern: '0,0.00',
+                      decimals: 2,
+                    },
+                  },
+                },
+              }
+            : column
+        ),
+      };
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: args.layers.map((layer) => ({
+              ...layer,
+              accessors: ['a'],
+              splitAccessors: undefined,
+              table: yAxisFormatData,
+            })),
+          }}
+        />
+      );
+
+      const yAxis = component
+        .find(Axis)
+        .filterWhere((axis) => axis.prop('id') !== 'x')
+        .first();
+
+      expect(yAxis.prop('maximumFractionDigits')).toEqual(2);
+    });
+
+    test('does not set maximumFractionDigits when formatter does not include decimals', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: args.layers.map((layer) => ({
+              ...layer,
+              accessors: ['a'],
+              splitAccessors: undefined,
+            })),
+          }}
+        />
+      );
+
+      const yAxis = component
+        .find(Axis)
+        .filterWhere((axis) => axis.prop('id') !== 'x')
+        .first();
+
+      expect(yAxis.prop('maximumFractionDigits')).toBeUndefined();
+    });
+  });
+
   describe('y series coloring', () => {
     const args = createArgsWithLayers();
     const layer = args.layers[0] as DataLayerConfig;
@@ -2189,7 +2262,10 @@ describe('XYChart component', () => {
   test('it should pass the formatter function to the axis', () => {
     const localConvertSpy = jest.fn((x) => x);
     const getFormatSpy = jest.fn();
-    getFormatSpy.mockReturnValue({ convert: localConvertSpy });
+    getFormatSpy.mockReturnValue({
+      convert: localConvertSpy,
+      params: jest.fn(() => ({})),
+    });
 
     const { args } = sampleArgs();
 
@@ -2985,7 +3061,10 @@ describe('XYChart component', () => {
     const args = createArgsWithLayers([timeSampleLayer]);
 
     const getCustomFormatSpy = jest.fn();
-    getCustomFormatSpy.mockReturnValue({ convert: jest.fn((x) => Boolean(x)) });
+    getCustomFormatSpy.mockReturnValue({
+      convert: jest.fn((x) => Boolean(x)),
+      params: jest.fn(() => ({})),
+    });
 
     const component = shallow(
       <XYChart {...defaultProps} formatFactory={getCustomFormatSpy} args={{ ...args }} />
@@ -3150,6 +3229,30 @@ describe('XYChart component', () => {
       expect(groupedAnnotation.length).toEqual(1);
       // styles are default because they are different for both annotations
       expect(groupedAnnotation).toMatchSnapshot();
+    });
+
+    test('should render annotation defaults for dark mode', () => {
+      const { args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
+      ]);
+      const component = mount(
+        <EuiThemeProvider colorMode="dark">
+          <XYChart {...defaultProps} args={args} />
+        </EuiThemeProvider>
+      );
+
+      expect(component.find(LineAnnotation).prop('style')).toEqual({
+        line: {
+          dash: undefined,
+          opacity: 1,
+          stroke: getResolvedAnnotationColor({ color: undefined, isDarkMode: true }),
+          strokeWidth: 1,
+        },
+      });
+      expect(component.find(RectAnnotation).last().prop('style')).toEqual({
+        fill: getResolvedAnnotationColor({ color: undefined, isDarkMode: true, isRange: true }),
+        opacity: 1,
+      });
     });
   });
 

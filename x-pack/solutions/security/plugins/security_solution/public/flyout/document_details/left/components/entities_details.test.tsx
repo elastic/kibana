@@ -22,6 +22,23 @@ import { useHostRelatedUsers } from '../../../../common/containers/related_entit
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return { ...actual, useUiSetting: jest.fn() };
+});
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -96,6 +113,8 @@ const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
 
 jest.mock('../../../../common/containers/related_entities/related_hosts');
 const mockUseUsersRelatedHosts = useUserRelatedHosts as jest.Mock;
+const mockUseUiSetting = useUiSetting as jest.Mock;
+const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
 
 const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
 const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
@@ -113,6 +132,16 @@ const renderEntitiesDetails = (contextValue: DocumentDetailsContext) =>
 
 describe('<EntitiesDetails />', () => {
   beforeEach(() => {
+    mockUseUiSetting.mockReturnValue(false);
+    mockUseEntityFromStore.mockImplementation(({ entityType }: { entityType: string }) => ({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    }));
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseHasSecurityCapability.mockReturnValue(false);
     mockUseHostDetails.mockReturnValue([false, {}]);
@@ -143,9 +172,14 @@ describe('<EntitiesDetails />', () => {
   it('should render no data message if user name and host name are not available', () => {
     const contextValue = {
       ...mockContextValue,
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+        user: {},
+      },
       getFieldsData: (fieldName: string) =>
         fieldName === '@timestamp' ? ['2022-07-25T08:20:18.966Z'] : [],
-    };
+    } as DocumentDetailsContext;
     const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
@@ -170,5 +204,59 @@ describe('<EntitiesDetails />', () => {
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('with entity store v2, renders host panel but omits user panel when store has no entity records and fields API omits user.*', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    const contextValue = {
+      ...mockContextValue,
+      getFieldsData: (fieldName: string) => {
+        if (fieldName === '@timestamp') {
+          return ['2022-07-25T08:20:18.966Z'];
+        }
+        if (fieldName === 'host.name') {
+          return ['host1'];
+        }
+        if (fieldName.startsWith('user.')) {
+          return [];
+        }
+        return mockContextValue.getFieldsData(fieldName);
+      },
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: { name: ['host1'] },
+        user: { name: ['fields-api-missing-but-ecs-has-user'] },
+      },
+    } as DocumentDetailsContext;
+    const { queryByText, getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('with entity store v2 and no entity records, renders user and host details from document fields', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    const { queryByText, getByTestId } = renderEntitiesDetails(mockContextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
   });
 });

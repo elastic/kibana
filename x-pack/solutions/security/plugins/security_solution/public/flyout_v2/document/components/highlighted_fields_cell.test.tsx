@@ -22,8 +22,8 @@ import { HostPreviewPanelKey } from '../../../flyout/entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../../flyout/document_details/right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../flyout/entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../../flyout/document_details/right/components/user_entity_overview';
-import { NETWORK_PREVIEW_BANNER, NetworkPreviewPanelKey } from '../../../flyout/network_details';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { ChildLink } from '../../shared/components/child_link';
 
 jest.mock('../../../management/hooks');
 jest.mock('../../../management/hooks/agents/use_get_agent_status');
@@ -31,13 +31,23 @@ jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
+const mockOpenSystemFlyout = jest.fn();
 jest.mock('../../../common/lib/kibana', () => {
+  const kibanaActual = jest.requireActual('../../../common/lib/kibana');
   return {
+    ...kibanaActual,
     useKibana: () => ({
+      ...kibanaActual.useKibana(),
       services: {
+        ...kibanaActual.useKibana().services,
         telemetry: mockedTelemetry,
+        overlays: {
+          ...kibanaActual.useKibana().services.overlays,
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
       },
     }),
+    useUiSetting: jest.fn().mockReturnValue(false),
   };
 });
 
@@ -62,6 +72,10 @@ describe('<HighlightedFieldsCell />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render a basic cell', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field', true);
 
@@ -76,9 +90,36 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
+        contextID: SCOPE_ID,
         hostName: 'test host',
         scopeId: SCOPE_ID,
         banner: HOST_PREVIEW_BANNER,
+        entityId: undefined,
+      },
+    });
+  });
+
+  it('should pass entityId to host preview when provided (document identity / entity resolution)', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell
+          values={['test host']}
+          field="host.name"
+          scopeId={SCOPE_ID}
+          showPreview
+          entityId="euid-from-highlighted-fields"
+        />
+      </TestProviders>
+    );
+    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: HostPreviewPanelKey,
+      params: {
+        contextID: SCOPE_ID,
+        hostName: 'test host',
+        scopeId: SCOPE_ID,
+        banner: HOST_PREVIEW_BANNER,
+        entityId: 'euid-from-highlighted-fields',
       },
     });
   });
@@ -91,27 +132,29 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
+        contextID: SCOPE_ID,
         userName: 'test user',
         scopeId: SCOPE_ID,
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });
 
-  it('should open ip preview when click on ip', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['100:XXX:XXX'], 'source.ip', true);
-    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
+  it('should open network details flyout when click on ip with renderChildLink', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell
+          values={['100:XXX:XXX']}
+          field="source.ip"
+          scopeId={SCOPE_ID}
+          renderChildLink={ChildLink}
+        />
+      </TestProviders>
+    );
 
-    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: NetworkPreviewPanelKey,
-      params: {
-        ip: '100:XXX:XXX',
-        flowTarget: 'source',
-        scopeId: SCOPE_ID,
-        banner: NETWORK_PREVIEW_BANNER,
-      },
-    });
+    getByTestId('securitySolutionFlyoutChildLink').click();
+    expect(mockOpenSystemFlyout).toHaveBeenCalled();
   });
 
   it('should render agent status cell if field is `agent.status`', () => {

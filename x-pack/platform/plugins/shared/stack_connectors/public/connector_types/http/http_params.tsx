@@ -37,6 +37,16 @@ interface KeyValuePair {
   value: string;
 }
 
+function formatHttpBodyForEditor(body: ActionParamsType['body']): string | undefined {
+  if (body === undefined) {
+    return undefined;
+  }
+  if (typeof body === 'string') {
+    return body;
+  }
+  return JSON.stringify(body, null, 2);
+}
+
 const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsType>> = ({
   actionParams,
   editAction,
@@ -174,7 +184,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
         messageVariables={messageVariables}
         isOptionalField={!methodExpectsBody(method)}
         paramsProperty={'body'}
-        inputTargetValue={body}
+        inputTargetValue={formatHttpBodyForEditor(body)}
         label={i18n.translate('xpack.stackConnectors.components.http.bodyFieldLabel', {
           defaultMessage: 'Body',
         })}
@@ -207,7 +217,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addQueryParam}
             data-test-subj="httpQueryAddButton"
             size="s"
@@ -286,7 +296,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addHeader}
             data-test-subj="httpHeaderAddButton"
             size="s"

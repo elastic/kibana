@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import { createSmlService, isNotFoundError } from './sml_service';
@@ -19,6 +19,14 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     search: jest.fn(),
     count: jest.fn(),
   } as unknown as jest.Mocked<ElasticsearchClient>);
+
+const createMockScopedClient = (
+  internalUser: jest.Mocked<ElasticsearchClient>
+): IScopedClusterClient =>
+  ({
+    asInternalUser: internalUser,
+    asCurrentUser: createMockEsClient(),
+  } as unknown as IScopedClusterClient);
 
 const createMockLogger = () => {
   const log = loggerMock.create();
@@ -146,16 +154,27 @@ describe('isNotFoundError', () => {
 
 describe('SmlService', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let scopedClient: IScopedClusterClient;
   let logger: ReturnType<typeof createMockLogger>;
   let request: KibanaRequest;
 
   beforeEach(() => {
     esClient = createMockEsClient();
+    scopedClient = createMockScopedClient(esClient);
     logger = createMockLogger();
     request = {} as unknown as KibanaRequest;
   });
 
   describe('search', () => {
+    const saytBoolPrefixFields = [
+      'title',
+      'title._2gram',
+      'title._3gram',
+      'title._index_prefix',
+      'type.autocomplete',
+      'type.autocomplete._index_prefix',
+    ];
+
     it('calls ES search with correct query, space filter, and _source fields', async () => {
       const service = createSmlService();
       service.setup({ logger });
@@ -169,14 +188,17 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['foo', 'bar'],
+        query: 'foo bar',
         size: 10,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(
+        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+      ).not.toHaveBeenCalled();
       const call = esClient.search.mock.calls[0]![0]!;
       expect(call.index).toBe(smlIndexName);
       expect(call.size).toBe(10);
@@ -186,24 +208,10 @@ describe('SmlService', () => {
         bool: {
           must: [
             {
-              bool: {
-                should: [
-                  {
-                    multi_match: {
-                      query: 'foo',
-                      fields: ['title^2', 'content'],
-                      type: 'best_fields',
-                    },
-                  },
-                  {
-                    multi_match: {
-                      query: 'bar',
-                      fields: ['title^2', 'content'],
-                      type: 'best_fields',
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
+              multi_match: {
+                query: 'foo bar',
+                type: 'bool_prefix',
+                fields: saytBoolPrefixFields,
               },
             },
           ],
@@ -220,7 +228,7 @@ describe('SmlService', () => {
       expect(call._source).toEqual(true);
     });
 
-    it('uses match_all for keywords ["*"]', async () => {
+    it('uses _source excludes when skipContent is true', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -230,10 +238,32 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['*'],
+        query: 'viz',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        skipContent: true,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect(call._source).toEqual({ excludes: ['content'] });
+    });
+
+    it('uses match_all for query "*"', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await smlService.search({
+        query: '*',
         size: 5,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -243,7 +273,7 @@ describe('SmlService', () => {
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
-    it('uses match_all for empty keywords', async () => {
+    it('uses match_all for empty query after trim', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -253,10 +283,10 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: [],
+        query: '',
         size: 5,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -294,10 +324,10 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['viz'],
+        query: 'viz',
         size: 10,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -359,10 +389,10 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -378,10 +408,10 @@ describe('SmlService', () => {
       esClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await smlService.search({
-        keywords: ['foo'],
+        query: 'foo',
         size: 10,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -401,10 +431,10 @@ describe('SmlService', () => {
 
       await expect(
         smlService.search({
-          keywords: ['foo'],
+          query: 'foo',
           size: 10,
           spaceId: 'default',
-          esClient,
+          esClient: scopedClient,
           request,
         })
       ).rejects.toThrow('Connection refused');
@@ -458,10 +488,10 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -513,10 +543,10 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -534,9 +564,9 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['*'],
+        query: '*',
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -555,12 +585,9 @@ describe('SmlService', () => {
       const smlService = service.start({ logger });
 
       const result = await smlService.checkItemsAccess({
-        items: [
-          { id: 'item-1', type: 'lens' },
-          { id: 'item-2', type: 'dashboard' },
-        ],
+        ids: ['item-1', 'item-2'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -583,9 +610,9 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'missing-item', type: 'lens' }],
+        ids: ['missing-item'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -613,9 +640,9 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'item-1', type: 'lens' }],
+        ids: ['item-1'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -643,9 +670,9 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'item-1', type: 'dashboard' }],
+        ids: ['item-1'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -673,9 +700,9 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'item-1', type: 'lens' }],
+        ids: ['item-1'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -691,12 +718,9 @@ describe('SmlService', () => {
       esClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await smlService.checkItemsAccess({
-        items: [
-          { id: 'item-1', type: 'lens' },
-          { id: 'item-2', type: 'lens' },
-        ],
+        ids: ['item-1', 'item-2'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -715,9 +739,9 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.checkItemsAccess({
-        items: [{ id: 'id-1', type: 'lens' }],
+        ids: ['id-1'],
         spaceId: 'my-space',
-        esClient,
+        esClient: scopedClient,
         request,
       });
 
@@ -743,6 +767,9 @@ describe('SmlService', () => {
           _source: ['id', 'permissions'],
         })
       );
+      expect(
+        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -789,7 +816,7 @@ describe('SmlService', () => {
       const result = await smlService.getDocuments({
         ids: ['doc-1', 'doc-2'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
       });
 
       expect(result.size).toBe(2);
@@ -825,7 +852,7 @@ describe('SmlService', () => {
       const result = await smlService.getDocuments({
         ids: [],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
       });
 
       expect(result.size).toBe(0);
@@ -842,7 +869,7 @@ describe('SmlService', () => {
       const result = await smlService.getDocuments({
         ids: ['doc-1'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
       });
 
       expect(result.size).toBe(0);
@@ -858,7 +885,7 @@ describe('SmlService', () => {
       const result = await smlService.getDocuments({
         ids: ['doc-1'],
         spaceId: 'default',
-        esClient,
+        esClient: scopedClient,
       });
 
       expect(result.size).toBe(0);
@@ -877,7 +904,7 @@ describe('SmlService', () => {
       await smlService.getDocuments({
         ids: ['id-1', 'id-2'],
         spaceId: 'my-space',
-        esClient,
+        esClient: scopedClient,
       });
 
       expect(esClient.search).toHaveBeenCalledWith(
@@ -901,6 +928,9 @@ describe('SmlService', () => {
           },
         })
       );
+      expect(
+        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+      ).not.toHaveBeenCalled();
     });
   });
 });

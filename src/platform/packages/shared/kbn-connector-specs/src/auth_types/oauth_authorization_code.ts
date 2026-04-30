@@ -14,19 +14,34 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    authorizationUrl: z.url().meta({ label: i18n.OAUTH_AUTHORIZATION_URL_LABEL }),
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
+    authorizationUrl: z.url().meta({
+      label: i18n.OAUTH_AUTHORIZATION_URL_LABEL,
+      validate: { allowedHosts: true },
+    }),
+    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
     clientId: z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
     clientSecret: z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
     useBasicAuth: z.boolean().default(true).optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
+    }),
+    scopeParamName: z.string().optional().meta({
+      hidden: true, // Override the authorization URL query param name (falls back to 'scope')
+    }),
+    accessTokenPath: z.string().optional().meta({
+      hidden: true, // JSON path for access_token in the token response (falls back to 'access_token')
+    }),
+    tokenTypePath: z.string().optional().meta({
+      hidden: true, // JSON path for token_type in the token response (falls back to 'token_type')
+    }),
+    tokenType: z.string().optional().meta({
+      hidden: true, // Literal token type for Authorization header, bypasses response extraction
     }),
   })
   .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
@@ -94,10 +109,14 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
+        authType: 'oauth',
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
+        accessTokenPath: secret.accessTokenPath,
+        tokenTypePath: secret.tokenTypePath,
+        tokenType: secret.tokenType,
       });
     } catch (error) {
       throw new Error(

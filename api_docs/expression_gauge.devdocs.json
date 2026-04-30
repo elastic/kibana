@@ -56,6 +56,7 @@
             "lineNumber": 123,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableRow",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -80,6 +81,7 @@
             "lineNumber": 123,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessors",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -148,6 +150,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableRow",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -172,6 +175,7 @@
             "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessors",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -196,6 +200,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CustomPaletteParams",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -281,6 +286,7 @@
             "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableRow",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -305,6 +311,7 @@
             "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessors",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -329,6 +336,7 @@
             "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CustomPaletteParams",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -415,6 +423,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableRow",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1126,6 +1135,7 @@
             "lineNumber": 18,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedFieldFormat",
             "trackAdoption": false
           }
         ],
@@ -1354,7 +1364,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { locale?: string | undefined; onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1382,7 +1392,7 @@
           "PointerUpdateTrigger",
           " | undefined; brushAxis?: ",
           "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; dow?: number | undefined; legendValues?: ",
           "MakeOverridesSerializable",
           "<",
           "LegendValue",

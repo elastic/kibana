@@ -16,6 +16,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import type {
   AnomaliesTableData,
   ExplorerJob,
@@ -30,8 +31,8 @@ import { getColumns } from './anomalies_table_columns';
 import { RuleEditorFlyout } from '../rule_editor';
 import type { FocusTrapProps } from '../../util/create_focus_trap_props';
 import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
-import type { MlAnomalyDetectionAlertParams } from '../../../../common/types/alerts';
 import { buildAlertParamsFromAnomaly } from './build_alert_params_from_anomaly';
+import type { CustomRuleEditorSource } from '../../../../common/constants/usage_collection';
 
 interface AnomaliesTableProps {
   bounds?: TimeRangeBounds;
@@ -40,6 +41,10 @@ interface AnomaliesTableProps {
   influencerFilter?: (fieldName: string, fieldValue: string, action: FilterAction) => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
   selectedJobs: ExplorerJob[];
+  telemetrySource: Extract<
+    CustomRuleEditorSource,
+    'explorer_anomalies_table' | 'single_metric_viewer_anomalies_table'
+  >;
 }
 
 interface AnomaliesTableState {
@@ -62,7 +67,15 @@ export const getDefaultAnomaliesTableState = (): AnomaliesTableState => ({
 });
 
 export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
-  ({ bounds, tableData, filter, influencerFilter, sourceIndicesWithGeoFields, selectedJobs }) => {
+  ({
+    bounds,
+    tableData,
+    filter,
+    influencerFilter,
+    sourceIndicesWithGeoFields,
+    selectedJobs,
+    telemetrySource,
+  }) => {
     const [tableState, updateTableState] = usePageUrlState<AnomaliesTablePageUrlState>(
       'mlAnomaliesTable',
       getDefaultAnomaliesTableState()
@@ -334,6 +347,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
         <RuleEditorFlyout
           setShowFunction={handleSetShowFunction}
           unsetShowFunction={handleUnsetShowFunction}
+          telemetrySource={telemetrySource}
         />
         {alertFlyoutVisible && alertFlyoutParams && (
           <MlAnomalyAlertFlyout

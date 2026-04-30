@@ -9,6 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { HostPanelHeader } from './header';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 const defaultLastSeen = {
   date: '2023-02-23T20:03:17.489Z',
@@ -75,5 +76,65 @@ describe('HostPanelHeader', () => {
     expect(getByTestId('host-panel-header-lastSeen-loading')).toBeInTheDocument();
     expect(getByTestId('host-panel-header-observed-badge-loading')).toBeInTheDocument();
     expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders entity store badge when isEntityInStore is true', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent('Entity Store');
+  });
+
+  it('renders observed badge text when isEntityInStore is false', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent('Observed');
+  });
+
+  it('renders risk level badge when isEntityInStore and riskLevel are provided', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
+      </TestProviders>
+    );
+
+    expect(getByText('Risk: High')).toBeInTheDocument();
+  });
+
+  it('does not render risk level badge when isEntityInStore is false', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} riskLevel={RiskSeverity.High} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Risk: High')).not.toBeInTheDocument();
+  });
+
+  it('renders the host name as a link to the details page when isEntityInStore is false', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore={false} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('flyoutTitleLinkIcon')).toBeInTheDocument();
+  });
+
+  it('renders the host name without a link when isEntityInStore is true', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('flyoutTitleLinkIcon')).not.toBeInTheDocument();
   });
 });

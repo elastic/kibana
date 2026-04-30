@@ -73,7 +73,7 @@ export const SearchSynonymsOverview = () => {
                 <EuiButton
                   data-test-subj="searchSynonymsSearchSynonymsOverviewCreateButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     setIsCreateModalVisible(true);
                   }}

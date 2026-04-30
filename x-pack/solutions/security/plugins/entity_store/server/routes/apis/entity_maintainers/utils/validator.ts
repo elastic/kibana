@@ -23,3 +23,23 @@ export const maintainerIdParamsSchema = z
     id: z.string().min(1, 'id is required'),
   })
   .superRefine(validateMaintainerIdExists);
+
+export const maintainerIdsQuerySchema = z.object({
+  ids: z
+    .union([z.string().min(1), z.array(z.string().min(1))])
+    .transform((value) => (Array.isArray(value) ? value : [value]))
+    .optional(),
+});
+
+export const runMaintainerQuerySchema = z.object({
+  sync: z
+    .union([z.literal('true'), z.literal('false')])
+    .optional()
+    .transform((value) => value === 'true'),
+});
+
+export const initMaintainersBodySchema = z
+  .object({
+    autoStart: z.boolean().optional().default(true),
+  })
+  .optional();

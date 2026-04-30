@@ -9,6 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetPrivilegedAccessDetectionPackageStatus
       summary: Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      description: Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
 
       responses:
         "200":
@@ -43,3 +44,16 @@ paths:
                         state:
                           type: string
                           enum: [closing, closed, opened, failed, opening]
+              examples:
+                GetPrivilegedAccessDetectionPackageStatusResponse:
+                  summary: Package fully installed and running
+                  value:
+                    package_installation_status: complete
+                    ml_module_setup_status: complete
+                    jobs:
+                      - job_id: pad-high-risk-login
+                        description: Detects high-risk login patterns
+                        state: opened
+                      - job_id: pad-privilege-escalation
+                        description: Detects privilege escalation events
+                        state: opened

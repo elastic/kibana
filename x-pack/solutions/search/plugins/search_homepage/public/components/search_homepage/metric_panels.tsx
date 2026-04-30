@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiSpacer,
   EuiSplitPanel,
@@ -20,16 +21,15 @@ import {
 import { css } from '@emotion/react';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApplicationStart } from '@kbn/core/public';
-import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 
 const PANEL_TYPES = [
   'discover',
   'dashboards',
   'agentBuilder',
-  'dataSources',
   'workflows',
   'machineLearning',
   'dataManagement',
@@ -103,21 +103,6 @@ export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
   },
 
   {
-    type: 'dataSources' as const,
-    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_connect_visibility.svg`,
-    metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataSources.desc', {
-      defaultMessage:
-        'Connect and manage external data sources like GitHub, Notion, and SharePoint to use directly in Agent Builder.',
-    }),
-    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataSources.title', {
-      defaultMessage: 'Data Sources',
-    }),
-    onPanelClick: ({ application }) => {
-      application.navigateToApp('data_sources');
-    },
-    dataTestSubj: 'searchHomepageNavLinks-dataSources',
-  },
-  {
     type: 'workflows' as const,
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_relevance.svg`,
     metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.workflows.desc', {
@@ -167,10 +152,11 @@ export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataManagement.title', {
       defaultMessage: 'Data Management',
     }),
-    onPanelClick: ({ application }) => {
-      application.navigateToApp('management', {
-        path: 'data/index_management',
-      });
+    onPanelClick: async ({ share }) => {
+      const indexManagementLocator = share.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+      if (indexManagementLocator) {
+        await indexManagementLocator.navigate({ page: 'index_list' });
+      }
     },
     dataTestSubj: 'searchHomepageNavLinks-dataManagement',
   },
@@ -215,18 +201,17 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
 };
 
 export const MetricPanels = () => {
+  const { hasEnterpriseLicense } = useGetLicenseInfo();
   const { services } = useKibana();
   const { chrome, uiSettings } = services;
 
   const isWorkflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ENABLED_ID, false);
-  const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
 
   const panels = useMemo(() => {
     const capabilityChecks: Record<MetricPanelType, boolean> = {
       discover: chrome.navLinks.get('discover') !== undefined,
       dashboards: chrome.navLinks.get('dashboards') !== undefined,
-      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined,
-      dataSources: isDataSourcesEnabled && chrome.navLinks.get('data_sources') !== undefined,
+      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined && hasEnterpriseLicense,
       workflows: isWorkflowsUiEnabled && chrome.navLinks.get('workflows') !== undefined,
       machineLearning:
         chrome.navLinks.get('ml:overview') !== undefined || chrome.navLinks.get('ml') !== undefined,
@@ -234,13 +219,32 @@ export const MetricPanels = () => {
     };
 
     return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
-  }, [chrome.navLinks, isWorkflowsUiEnabled, isDataSourcesEnabled]);
+  }, [chrome.navLinks, isWorkflowsUiEnabled, hasEnterpriseLicense]);
+
+  const gridColumns = useMemo(() => {
+    const count = panels.length;
+    if (count === 1 || count === 2 || count === 4) {
+      return 2;
+    }
+    return 3;
+  }, [panels.length]);
+
+  if (panels.length === 0) {
+    return null;
+  }
 
   return (
-    <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
-      {panels.map((panel, index) => (
-        <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
-      ))}
-    </EuiFlexGrid>
+    <EuiFlexItem>
+      <EuiSpacer size="l" />
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={gridColumns}
+        data-test-subj="searchHomepageNavLinksTabGrid"
+      >
+        {panels.map((panel, index) => (
+          <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
+        ))}
+      </EuiFlexGrid>
+    </EuiFlexItem>
   );
 };

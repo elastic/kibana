@@ -61,7 +61,6 @@ toc:
           - file: scout/run-tests.md
           - file: scout/debugging.md
           - file: scout/best-practices.md
-          - file: scout/training.md
       - file: scout/core-concepts.md
         children:
           - file: scout/fixtures.md
@@ -75,11 +74,13 @@ toc:
       - file: scout/ui-testing.md
         children:
           - file: scout/write-ui-tests.md
+          - file: scout/ui-best-practices.md
           - file: scout/browser-auth.md
           - file: scout/a11y-checks.md
       - file: scout/api-testing.md
         children:
           - file: scout/write-api-tests.md
+          - file: scout/api-best-practices.md
           - file: scout/api-auth.md
   - file: external-plugin-development.md
     children:

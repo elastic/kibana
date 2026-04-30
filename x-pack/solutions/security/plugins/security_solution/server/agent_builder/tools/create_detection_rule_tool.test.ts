@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { z } from '@kbn/zod/v4';
 import type { ExperimentalFeatures } from '../../../common';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -37,15 +38,12 @@ const userQuery = 'Create a rule to detect suspicious activity';
 
 describe('createDetectionRuleTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const mockModelProvider = {
-    getDefaultModel: jest.fn().mockResolvedValue({
-      chatModel: {
-        getConnector: jest.fn().mockReturnValue({ connectorId: 'test-connector-id' }),
-      },
-    }),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn(),
-  };
+  const mockModelProvider = agentBuilderMocks.createModelProvider();
+  mockModelProvider.getDefaultModel.mockResolvedValue({
+    chatModel: {
+      getConnector: jest.fn().mockReturnValue({ connectorId: 'test-connector-id' }),
+    },
+  } as never);
   const mockEvents = {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
@@ -159,7 +157,7 @@ describe('createDetectionRuleTool', () => {
       ]);
     });
 
-    it('returns rule as success result', async () => {
+    it('creates an attachment with the rule result', async () => {
       const mockRule = {
         name: 'Test Rule',
         query: 'FROM test | limit 100',
@@ -171,13 +169,19 @@ describe('createDetectionRuleTool', () => {
         errors: [],
       });
 
-      const result = await tool.handler(
-        { user_query: userQuery },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        })
-      );
+      const mockAttachmentId = 'ai-rule-creation';
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+      (context.attachments.add as jest.Mock).mockResolvedValue({
+        id: mockAttachmentId,
+        type: 'security.rule',
+        versions: [],
+        current_version: 1,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
 
       expect(result).toEqual({
         results: [
@@ -186,22 +190,31 @@ describe('createDetectionRuleTool', () => {
             data: {
               success: true,
               rule: mockRule,
+              attachmentId: mockAttachmentId,
+              version: 1,
             },
           },
         ],
+      });
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: 'ai-rule-creation',
+        type: 'security.rule',
+        data: {
+          text: JSON.stringify(mockRule),
+          attachmentLabel: 'Test Rule',
+        },
+        description: 'Rule: Test Rule',
       });
       expect(mockIterativeAgent.invoke).toHaveBeenCalledWith({ userQuery });
     });
 
     it('returns error when connector ID is not available', async () => {
-      const mockModelProviderWithoutConnector = {
-        ...mockModelProvider,
-        getDefaultModel: jest.fn().mockResolvedValue({
-          chatModel: {
-            getConnector: jest.fn().mockReturnValue({ connectorId: null }),
-          },
-        }),
-      };
+      const mockModelProviderWithoutConnector = agentBuilderMocks.createModelProvider();
+      mockModelProviderWithoutConnector.getDefaultModel.mockResolvedValue({
+        chatModel: {
+          getConnector: jest.fn().mockReturnValue({ connectorId: null }),
+        },
+      } as never);
 
       const result = await tool.handler(
         { user_query: userQuery },

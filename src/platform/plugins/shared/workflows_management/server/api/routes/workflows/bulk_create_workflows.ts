@@ -14,9 +14,10 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_BULK_CREATE_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerBulkCreateWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows',
@@ -48,15 +49,22 @@ export function registerBulkCreateWorkflowsRoute({ router, api, spaces }: RouteD
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
           const { overwrite } = request.query;
           const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
             overwrite,
           });
+          audit.logBulkWorkflowCreateResults(request, {
+            created: result.created,
+            failed: result.failed,
+          });
           return response.ok({ body: result });
         } catch (error) {
+          audit.logWorkflowCreateFailed(request, error, {
+            bulkOperation: true,
+          });
           return handleRouteError(response, error);
         }
       })

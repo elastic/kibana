@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import {
@@ -17,7 +17,8 @@ import {
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
-import { PrevalenceDetails as PrevalenceDetailsContent } from '../../../../flyout_v2/prevalence/prevalence';
+import type { IdentityFields } from '../../shared/utils';
+import { PrevalenceDetailsView } from '../../../../flyout_v2/prevalence/components/prevalence_details_view';
 import type { PrevalenceDetailsRow } from '../../../../flyout_v2/prevalence/utils/get_columns';
 import {
   alertCountColumn,
@@ -43,20 +44,29 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => (
-          <EuiFlexItem key={value}>
-            <CellActions field={data.field} value={value}>
-              <PreviewLink
-                field={data.field}
-                value={value}
-                scopeId={data.scopeId}
-                data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
-              >
-                <EuiText size="xs">{value}</EuiText>
-              </PreviewLink>
-            </CellActions>
-          </EuiFlexItem>
-        ))}
+        {data.values.map((value) => {
+          const linkIdentityFields: IdentityFields =
+            data.field === 'host.name' && data.documentHostEntityIdentifiers
+              ? data.documentHostEntityIdentifiers
+              : data.field === 'user.name' && data.documentUserEntityIdentifiers
+              ? data.documentUserEntityIdentifiers
+              : { [data.field]: value };
+          return (
+            <EuiFlexItem key={value}>
+              <CellActions field={data.field} value={value}>
+                <PreviewLink
+                  field={data.field}
+                  value={value}
+                  identityFields={linkIdentityFields}
+                  scopeId={data.scopeId}
+                  data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+                >
+                  <EuiText size="xs">{value}</EuiText>
+                </PreviewLink>
+              </CellActions>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     ),
     width: '20%',
@@ -76,12 +86,14 @@ export const PrevalenceDetails: React.FC = () => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <PrevalenceDetailsContent
-      hit={hit}
-      investigationFields={investigationFields}
-      scopeId={scopeId}
-      columns={columns}
-    />
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      <PrevalenceDetailsView
+        hit={hit}
+        investigationFields={investigationFields}
+        scopeId={scopeId}
+        columns={columns}
+      />
+    </EuiPanel>
   );
 };
 

@@ -21,11 +21,11 @@ import {
   SUMMARY_ROW_BUTTON_TEST_ID,
   SUMMARY_ROW_TEXT_TEST_ID,
 } from './test_ids';
-import { useShowRelatedAlertsByAncestry } from '../hooks/use_show_related_alerts_by_ancestry';
-import { useShowRelatedAlertsBySameSourceEvent } from '../hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../hooks/use_show_related_alerts_by_session';
-import { useShowRelatedCases } from '../hooks/use_show_related_cases';
-import { useShowSuppressedAlerts } from '../hooks/use_show_suppressed_alerts';
+import { useShowRelatedAlertsByAncestry } from '../../correlations/hooks/use_show_related_alerts_by_ancestry';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../correlations/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../correlations/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedCases } from '../../correlations/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../correlations/hooks/use_show_suppressed_alerts';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySession } from '../hooks/use_fetch_related_alerts_by_session';
@@ -40,11 +40,11 @@ import {
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 
-jest.mock('../hooks/use_show_related_alerts_by_ancestry');
-jest.mock('../hooks/use_show_related_alerts_by_same_source_event');
-jest.mock('../hooks/use_show_related_alerts_by_session');
-jest.mock('../hooks/use_show_related_cases');
-jest.mock('../hooks/use_show_suppressed_alerts');
+jest.mock('../../correlations/hooks/use_show_related_alerts_by_ancestry');
+jest.mock('../../correlations/hooks/use_show_related_alerts_by_same_source_event');
+jest.mock('../../correlations/hooks/use_show_related_alerts_by_session');
+jest.mock('../../correlations/hooks/use_show_related_cases');
+jest.mock('../../correlations/hooks/use_show_suppressed_alerts');
 jest.mock('../hooks/use_fetch_related_alerts_by_session');
 jest.mock('../hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../hooks/use_fetch_related_alerts_by_same_source_event');

@@ -63,7 +63,7 @@ export const useColumns = (
             defaultMessage="Resource"
           />
         ),
-        width: '20%',
+        width: '12em',
         render: (resource: EngineComponentStatus['resource']) => RESOURCE_TO_TEXT[resource],
       },
       {
@@ -101,7 +101,7 @@ export const useColumns = (
             defaultMessage="Installed"
           />
         ),
-        width: '10%',
+        width: '6em',
         align: 'center',
         render: (value: boolean) =>
           value ? (
@@ -117,7 +117,7 @@ export const useColumns = (
             defaultMessage="Health"
           />
         ),
-        width: '10%',
+        width: '6em',
         align: 'center',
         render: ({ installed, resource, health }: EngineComponentStatus) => {
           if (!installed) {
@@ -149,7 +149,7 @@ export const useColumns = (
             <EuiButtonIcon
               onClick={() => onToggleExpandedItem(component)}
               aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
-              iconType={isItemExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isItemExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
           ) : null;
         },

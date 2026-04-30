@@ -61,7 +61,6 @@
     "@kbn/es-errors",
     "@kbn/content-connectors-plugin",
     "@kbn/search-playground",
-    "@kbn/utility-types",
     "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",
@@ -78,9 +77,10 @@
     "@kbn/ui-actions-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
-    "@kbn/search-indices",
     "@kbn/charts-theme",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
+    "@kbn/ml-common-types",
+    "@kbn/react-kibana-context-render",
   ]
 }

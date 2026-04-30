@@ -50,6 +50,7 @@ describe(`cases`, () => {
         ['settings', 'observability'],
         ['createComment', 'securitySolution'],
         ['reopenCase', 'observability'],
+        ['manageTemplates', 'securitySolution'],
       ])('grants %s privileges under feature with id %s', (operation, featureID) => {
         const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
@@ -93,6 +94,7 @@ describe(`cases`, () => {
             settings: ['security'],
             createComment: ['security'],
             reopenCase: ['security'],
+            manageTemplates: ['security'],
           },
           savedObject: {
             all: [],
@@ -139,6 +141,7 @@ describe(`cases`, () => {
             "cases:obs/findConfigurations",
             "cases:obs/updateCase",
             "cases:obs/updateComment",
+            "cases:security/manageTemplate",
           ]
         `);
       });
@@ -151,6 +154,7 @@ describe(`cases`, () => {
           cases: {
             all: ['security', 'other-security'],
             read: ['obs', 'other-obs'],
+            manageTemplates: ['security'],
           },
           savedObject: {
             all: [],
@@ -218,6 +222,7 @@ describe(`cases`, () => {
             "cases:other-obs/getReporters",
             "cases:other-obs/getUserActions",
             "cases:other-obs/findConfigurations",
+            "cases:security/manageTemplate",
           ]
         `);
       });

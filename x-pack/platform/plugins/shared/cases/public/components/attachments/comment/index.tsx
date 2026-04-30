@@ -7,6 +7,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
+import * as rt from 'io-ts';
+import { isRight } from 'fp-ts/Either';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type {
   AttachmentType,
@@ -27,9 +29,7 @@ const CommentAttachmentChildrenLazy = React.lazy(async () => {
 
   const CommentAttachmentChildren: React.FC<UnifiedValueAttachmentViewProps> = (props) => (
     <CommentChildren
-      // TODO: attachmentId here means saved object id
-      // it's a legacy term that should be renamed to savedObjectId
-      commentId={props.attachmentId}
+      commentId={props.savedObjectId}
       content={props.data.content as string}
       caseId={props.caseData.id}
       version={props.version}
@@ -55,15 +55,15 @@ const CommentActionsLazy = React.lazy(() =>
 const getCommentClassName = (props: UnifiedCommentViewProps): string | undefined => {
   if (!props.rowContext) return undefined;
 
-  const { attachmentId, caseData } = props;
+  const { savedObjectId, caseData } = props;
   const { selectedOutlineCommentId, manageMarkdownEditIds, loadingCommentIds, appId } =
     props.rowContext;
 
-  const outlined = attachmentId === selectedOutlineCommentId;
-  const isEdit = manageMarkdownEditIds.includes(attachmentId);
-  const isLoading = loadingCommentIds.includes(attachmentId);
+  const outlined = savedObjectId === selectedOutlineCommentId;
+  const isEdit = manageMarkdownEditIds.includes(savedObjectId);
+  const isLoading = loadingCommentIds.includes(savedObjectId);
   const draftFooter =
-    !isEdit && !isLoading && hasDraftComment(appId, caseData.id, attachmentId, props.data.content);
+    !isEdit && !isLoading && hasDraftComment(appId, caseData.id, savedObjectId, props.data.content);
 
   return classNames('userAction__comment', {
     outlined,
@@ -94,9 +94,7 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
           return (
             <React.Suspense fallback={null}>
               <CommentActionsLazy
-                // TODO: attachmentId here meant saved object id
-                // it's a legacy term that should be renamed to savedObjectId
-                commentId={viewProps.attachmentId}
+                commentId={viewProps.savedObjectId}
                 content={viewProps.data.content as string}
               />
             </React.Suspense>
@@ -109,6 +107,15 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
   };
 };
 
+const CommentDataRt = rt.strict({ data: rt.strict({ content: rt.string }) });
+
+const commentSchemaValidator = (attachment: unknown): void => {
+  const result = CommentDataRt.decode(attachment);
+  if (!isRight(result)) {
+    throw new Error('Invalid comment attachment data: expected { content: string }');
+  }
+};
+
 /**
  * Returns the comment (user) attachment type for registration with the unified registry.
  * Renders comment body via CommentChildren and uses CommentTimelineAvatar.
@@ -119,4 +126,5 @@ export const getCommentAttachmentType = (): AttachmentType<UnifiedValueAttachmen
   displayName: COMMENT,
   getAttachmentViewObject: (props) => getCommentAttachmentViewObject(props),
   getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
+  schemaValidator: commentSchemaValidator,
 });

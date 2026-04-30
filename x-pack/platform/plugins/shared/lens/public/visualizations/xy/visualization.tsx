@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 
 import { Position } from '@elastic/charts';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -77,6 +78,7 @@ import {
   getColorAssignments,
   getLayerPaletteName,
 } from './color_assignment';
+import { getDefaultPalette } from './default_palette';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
@@ -322,7 +324,7 @@ export const getXyVisualization = ({
 
     return {
       title: 'Empty XY chart',
-      legend: { isVisible: true, position: Position.Right },
+      legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,
       layers: [
@@ -423,9 +425,10 @@ export const getXyVisualization = ({
     }
 
     const isTextBasedLayer = frame.datasourceLayers[layerId]?.isTextBasedLanguage();
+    const isDarkMode = kibanaTheme.getTheme().darkMode;
 
     if (isAnnotationsLayer(layer)) {
-      return getAnnotationsConfiguration({ state, frame, layer });
+      return getAnnotationsConfiguration({ state, frame, layer, isDarkMode });
     }
 
     const sortedAccessors: string[] = getSortedAccessors(
@@ -441,6 +444,7 @@ export const getXyVisualization = ({
       frame,
       layer,
       fieldFormats,
+      isDarkMode,
       paletteService,
       accessors: sortedAccessors,
     });
@@ -493,7 +497,9 @@ export const getXyVisualization = ({
         })
         .unsubscribe();
     } else {
-      const palette = paletteService.get(dataLayer.palette?.name || 'default');
+      const palette = paletteService.get(
+        dataLayer.palette?.name || getDefaultPalette(dataLayer.seriesType)
+      );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
 
@@ -730,8 +736,9 @@ export const getXyVisualization = ({
         newLayer.splitAccessors = newLayer.splitAccessors.filter((a) => a !== columnId);
         if (newLayer.splitAccessors.length === 0) {
           delete newLayer.splitAccessors;
-          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          // as palette and colorMapping are associated with the breakdown dimension, remove them together with the breakdown dimension
           delete newLayer.palette;
+          delete newLayer.colorMapping;
         }
       }
     }
@@ -1147,7 +1154,13 @@ export const getXyVisualization = ({
         });
     }
 
-    const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
+    const info = getNotifiableFeatures(
+      state,
+      frame,
+      paletteService,
+      fieldFormats,
+      kibanaTheme.getTheme().darkMode
+    );
 
     return errors.concat(warnings, info);
   },
@@ -1202,7 +1215,13 @@ export const getXyVisualization = ({
   },
 
   getVisualizationInfo(state, frame) {
-    return getVisualizationInfo(state, frame, paletteService, fieldFormats);
+    return getVisualizationInfo(
+      state,
+      frame,
+      paletteService,
+      fieldFormats,
+      kibanaTheme.getTheme().darkMode
+    );
   },
 
   getTelemetryEventsOnSave(state, prevState) {
@@ -1231,6 +1250,7 @@ const getMappedAccessors = ({
   accessors,
   frame,
   fieldFormats,
+  isDarkMode,
   paletteService,
   state,
   layer,
@@ -1239,6 +1259,7 @@ const getMappedAccessors = ({
   frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
+  isDarkMode: boolean;
   state: XYVisualizationState;
   layer: XYDataLayerConfig;
 }) => {
@@ -1259,7 +1280,8 @@ const getMappedAccessors = ({
         ...layer,
         accessors: accessors.filter((sorted) => layer.accessors.includes(sorted)),
       },
-      paletteService
+      paletteService,
+      isDarkMode
     );
   }
   return mappedAccessors;
@@ -1315,7 +1337,8 @@ function getVisualizationInfo(
   state: XYVisualizationState,
   frame: Partial<FramePublicAPI> | undefined,
   paletteService: PaletteRegistry,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  isDarkMode = false
 ): VisualizationInfo {
   const isHorizontal = isHorizontalChart(state.layers);
   const visualizationLayersInfo = state.layers.map((layer) => {
@@ -1356,6 +1379,7 @@ function getVisualizationInfo(
             frame: frame as Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
             layer,
             fieldFormats,
+            isDarkMode,
             paletteService,
             accessors: sortedAccessors,
           });
@@ -1426,7 +1450,7 @@ function getVisualizationInfo(
       palette.push(
         ...layer.annotations
           .filter(({ isHidden }) => !isHidden)
-          .map((annotation) => getAnnotationAccessor(annotation).color)
+          .map((annotation) => getAnnotationAccessor(annotation, isDarkMode).color)
       );
     }
 
@@ -1451,7 +1475,8 @@ function getNotifiableFeatures(
   state: XYVisualizationState,
   frame: Pick<FramePublicAPI, 'dataViews'> & Partial<FramePublicAPI>,
   paletteService: PaletteRegistry,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  isDarkMode = false
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
     (layer) =>
@@ -1462,7 +1487,13 @@ function getNotifiableFeatures(
   if (!annotationsWithIgnoreFlag.length) {
     return [];
   }
-  const visualizationInfo = getVisualizationInfo(state, frame, paletteService, fieldFormats);
+  const visualizationInfo = getVisualizationInfo(
+    state,
+    frame,
+    paletteService,
+    fieldFormats,
+    isDarkMode
+  );
 
   return [
     {
@@ -1544,6 +1575,9 @@ const SubtypeSwitch = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsPopoverAriaLabel', {
+          defaultMessage: 'Stacking options',
+        })}
         ownFocus
         panelPaddingSize="none"
         button={

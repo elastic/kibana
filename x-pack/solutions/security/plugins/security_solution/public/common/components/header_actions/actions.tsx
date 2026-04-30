@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
@@ -174,6 +175,11 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
     [isEnterprisePlus, sessionViewConfig]
   );
 
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(ecsData._index ?? ''),
+    [ecsData._index]
+  );
+
   return (
     <ActionsContainer data-test-subj="actions-container">
       <>
@@ -184,7 +190,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="expand-event"
-                  iconType="expand"
+                  iconType="maximize"
                   onClick={onExpandEvent}
                   size="s"
                   color="text"
@@ -232,7 +238,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={false}
+          disabled={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

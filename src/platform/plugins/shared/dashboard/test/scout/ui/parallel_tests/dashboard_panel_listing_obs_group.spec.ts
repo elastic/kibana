@@ -21,7 +21,7 @@ const DASHBOARD_PANEL_GROUP_ORDER = [
   'legacyGroup',
 ];
 
-const DASHBOARD_PANEL_TYPE_COUNT = 25;
+const DASHBOARD_PANEL_TYPE_COUNT = 26;
 
 spaceTest.describe(
   'Dashboard panel listing (includes observability group)',
@@ -33,9 +33,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.dashboard.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

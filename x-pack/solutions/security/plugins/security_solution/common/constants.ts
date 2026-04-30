@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   RULES_FEATURE_LATEST,
@@ -60,7 +59,8 @@ export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
-export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 10_000 as const;
+export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -121,7 +121,6 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
-export const AI_RULE_CREATION_PATH = `${RULES_PATH}/ai_rule_creation` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -156,7 +155,6 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
-export const ENTITY_ANALYTICS_WATCHLISTS_PATH = '/entity_analytics_watchlists' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -174,6 +172,7 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
 export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_MANAGE_PATH = `${SIEM_MIGRATIONS_PATH}/manage` as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
@@ -263,6 +262,9 @@ export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
 /** This Kibana Advanced Setting allows users to include only selected data stream namespaces in search during rule execution */
 export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
   'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
+
+/** This hidden Kibana Advanced Setting stores gap reason types to exclude from gap monitoring and auto-fill */
+export const EXCLUDED_GAP_REASONS_KEY = 'securitySolution:excludedGapReasons' as const;
 
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
@@ -484,10 +486,10 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+  AI_RULE_CREATION_MENU: 'securitySolution.rulesManagementPage.aiRuleCreationMenuTour.v9.4',
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
-  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -523,8 +525,9 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
 
-export const DEFAULT_ALERT_CLOSE_REASONS_KEY = 'securitySolution:alertCloseReasons' as const;
-export const DEFAULT_ALERT_CLOSE_REASONS_VALUE = [] as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_KEY =
+  'securitySolution:detectionsCloseReasons' as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_VALUE = [] as const;
 
 /**
  * Max length for the comments within security solution
@@ -715,7 +718,12 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
+  entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
 }
 
-export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
+
+export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
+  'securitySolution.registerAlertValidationStepsEnabled' as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;

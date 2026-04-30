@@ -13,9 +13,10 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .get({
       path: '/api/workflows/workflow/{id}',
@@ -40,16 +41,25 @@ export function registerGetWorkflowRoute({ router, api, spaces }: RouteDependenc
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
           const workflow = await api.getWorkflow(id, spaceId);
           if (!workflow) {
+            audit.logWorkflowAccessed(request, {
+              id,
+              error: new Error('Workflow not found'),
+            });
             return response.notFound({ body: { message: 'Workflow not found' } });
           }
+          audit.logWorkflowAccessed(request, { id });
           return response.ok({ body: workflow });
         } catch (error) {
+          audit.logWorkflowAccessed(request, {
+            id: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

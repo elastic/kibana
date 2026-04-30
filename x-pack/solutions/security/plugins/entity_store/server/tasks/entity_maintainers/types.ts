@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { EntityUpdateClient } from '../../domain/crud';
 
 export const EntityMaintainerTaskStatus = {
@@ -35,10 +36,26 @@ export type EntityMaintainerTelemetryEventType =
 export interface EntityMaintainerRegistryData {
   interval: string;
   description?: string;
+  minLicense: LicenseType;
 }
 
 export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData {
   id: string;
+}
+
+export interface EntityMaintainerLifecycle {
+  run: EntityMaintainerTaskMethod;
+  setup?: EntityMaintainerTaskMethod;
+  initialState: EntityMaintainerState;
+}
+
+export interface EntityMaintainerRegistration
+  extends EntityMaintainerTaskEntry,
+    EntityMaintainerLifecycle {}
+
+export interface EntityMaintainerRegistryValue {
+  task: EntityMaintainerTaskEntry;
+  lifecycle: EntityMaintainerLifecycle;
 }
 
 export interface EntityMaintainerStatusMetadata {
@@ -60,7 +77,7 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
   taskStatus: EntityMaintainerTaskStatus;
 }
 
-interface EntityMaintainerTaskMethodContext {
+export interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
   abortController: AbortController;
   logger: Logger;
@@ -77,7 +94,9 @@ export interface RegisterEntityMaintainerConfig {
   id: string;
   description?: string;
   interval: string;
+  timeout?: string;
   initialState: EntityMaintainerState;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
+  minLicense?: LicenseType;
 }

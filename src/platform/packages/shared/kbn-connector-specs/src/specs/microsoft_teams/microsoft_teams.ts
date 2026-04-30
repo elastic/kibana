@@ -26,9 +26,6 @@ import type {
   ListChatMessagesInput,
   SearchMessagesInput,
 } from './types';
-import listWorkflow from './workflows/list.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 /**
  * Returns the base path for user-scoped Microsoft Graph API endpoints.
  * When a userId is provided, returns `/users/{userId}` (for app-only auth).
@@ -49,6 +46,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       defaultMessage: 'Search Microsoft Teams channels, chats, and teams',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
@@ -76,6 +74,48 @@ export const MicrosoftTeams: ConnectorSpec = {
         },
       },
       {
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            authorizationUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.label',
+                { defaultMessage: 'Authorization URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
@@ -93,11 +133,23 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
                 }
               ),
             },
           },
+        },
+      },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
         },
       },
     ],
@@ -107,6 +159,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-joinedteams
     listJoinedTeams: {
       isTool: true,
+      description:
+        "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token or OAuth authorization code), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
       input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
@@ -133,6 +187,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list
     listChannels: {
       isTool: true,
+      description:
+        'List all channels in a Microsoft Teams team. Use this to discover channel IDs before fetching messages with listChannelMessages. Requires the team ID (obtainable via listJoinedTeams).',
       input: ListChannelsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelsInput) => {
@@ -152,6 +208,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list-messages
     listChannelMessages: {
       isTool: true,
+      description:
+        'Retrieve recent messages from a Microsoft Teams channel. Returns message content, sender, timestamp, and web URL for each message. Use listJoinedTeams and listChannels first to obtain teamId and channelId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChannelMessagesInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelMessagesInput) => {
@@ -173,6 +231,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list
     listChats: {
       isTool: true,
+      description:
+        'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token or OAuth authorization code), omit userId. With app-only auth (client credentials), userId is required.',
       input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
@@ -197,6 +257,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list-messages
     listChatMessages: {
       isTool: true,
+      description:
+        'Retrieve recent messages from a Microsoft Teams direct message or group chat. Returns message content, sender, timestamp, and web URL. Use listChats first to obtain the chatId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChatMessagesInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatMessagesInput) => {
@@ -216,13 +278,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-chat-messages
     searchMessages: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.actions.searchMessages.description',
-        {
-          defaultMessage:
-            'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
-        }
-      ),
+      description:
+        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
       output: z
         .object({
@@ -240,7 +297,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       handler: async (ctx, input: SearchMessagesInput) => {
         if (ctx.secrets?.authType === 'oauth_client_credentials') {
           throw new Error(
-            'searchMessages requires delegated authentication (bearer token). ' +
+            'searchMessages requires delegated authentication (bearer token or OAuth authorization code). ' +
               'Microsoft Graph does not support app-only (client credentials) access ' +
               'to the /search/query API for chatMessage entities.'
           );
@@ -272,6 +329,19 @@ export const MicrosoftTeams: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'Microsoft Teams connector — usage guidance:',
+    '',
+    'NAVIGATION PATTERNS:',
+    '- Team channels: listJoinedTeams → listChannels (with teamId) → listChannelMessages (with teamId + channelId)',
+    '- Direct/group chats: listChats → listChatMessages (with chatId)',
+    '',
+    'AUTH DIFFERENCES (delegated vs app-only):',
+    '- Delegated auth (bearer token or oauth_authorization_code or ears): userId is optional — omit it to operate as the signed-in user.',
+    '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
+    '- searchMessages only works with delegated auth (bearer or oauth_authorization_code or ears); app-only (client credentials) is not supported.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.test.description', {
       defaultMessage: 'Verifies Microsoft Teams connection by listing joined teams',
@@ -283,7 +353,7 @@ export const MicrosoftTeams: ConnectorSpec = {
         const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
         const url = isAppOnly
           ? 'https://graph.microsoft.com/v1.0/teams'
-          : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
+          : 'https://graph.microsoft.com/v1.0/me/joinedTeams'; // bearer and oauth_authorization_code use delegated /me path
 
         const response = await ctx.client.get(url, {
           params: { $select: 'id,displayName' },
@@ -305,6 +375,4 @@ export const MicrosoftTeams: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [listWorkflow, searchWorkflow],
 };

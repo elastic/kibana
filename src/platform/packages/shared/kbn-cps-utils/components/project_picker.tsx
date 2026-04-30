@@ -124,6 +124,7 @@ export const ProjectPicker = ({
         panelPaddingSize="none"
         panelProps={{ css: styles.popover }}
         hasArrow
+        aria-label={strings.getProjectPickerPopoverTitle()}
       >
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
@@ -137,6 +138,7 @@ export const ProjectPicker = ({
         </EuiPopoverTitle>
         {isReadonly && (
           <EuiCallOut
+            announceOnMount={false}
             size="s"
             css={styles.callout}
             title={strings.getProjectPickerReadonlyCallout()}
