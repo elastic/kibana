@@ -12,6 +12,11 @@ import type { InferenceFeaturesResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { errorHandler } from '../utils/error_handler';
+import {
+  buildVisibilityCheck,
+  filterVisibleFeatures,
+  toFeatureResponse,
+} from '../utils/feature_visibility';
 
 export const defineInferenceFeaturesRoutes = ({
   logger,
@@ -42,9 +47,15 @@ export const defineInferenceFeaturesRoutes = ({
         validate: {},
         version: ROUTE_VERSIONS.v1,
       },
-      errorHandler(logger)(async (_context, _request, response) => {
+      errorHandler(logger)(async (context, _request, response) => {
+        const { uiSettings } = await context.core;
+        const allFeatures = featureRegistry.getAll();
+
+        const isVisible = await buildVisibilityCheck(allFeatures, uiSettings.client, logger);
+        const visibleFeatures = filterVisibleFeatures(allFeatures, isVisible);
+
         const body: InferenceFeaturesResponse = {
-          features: featureRegistry.getAll(),
+          features: visibleFeatures.map(toFeatureResponse),
         };
 
         return response.ok({

@@ -35,9 +35,12 @@ export class InferenceFeatureRegistry {
     }
 
     if (this.features.has(feature.featureId)) {
-      const error = `Feature with id "${feature.featureId}" is already registered.`;
-      this.logger.error(`Failed to register inference feature: ${error}`);
-      return { ok: false, error };
+      // Idempotent: allow multiple plugins to declare the same feature (typically a
+      // shared parent group) without ordering coupling. First registration wins.
+      this.logger.debug(
+        `Inference feature "${feature.featureId}" already registered; ignoring duplicate registration.`
+      );
+      return { ok: true };
     }
 
     if (feature.parentFeatureId !== undefined && !this.features.has(feature.parentFeatureId)) {

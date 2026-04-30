@@ -68,15 +68,20 @@ describe('InferenceFeatureRegistry', () => {
       );
     });
 
-    it('returns error for duplicate featureId', () => {
-      registry.register(createValidFeature());
-      const result = registry.register(createValidFeature());
+    it('treats duplicate featureId as idempotent and keeps the first registration', () => {
+      const first = createValidFeature({ featureName: 'First' });
+      const second = createValidFeature({ featureName: 'Second' });
 
-      expect(result).toEqual({ ok: false, error: expect.stringContaining('already registered') });
+      registry.register(first);
+      const result = registry.register(second);
+
+      expect(result).toEqual({ ok: true });
       expect(registry.getAll()).toHaveLength(1);
-      expect(mockLogger.get().error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to register inference feature')
+      expect(registry.get(first.featureId)).toEqual(first);
+      expect(mockLogger.get().debug).toHaveBeenCalledWith(
+        expect.stringContaining('already registered')
       );
+      expect(mockLogger.get().error).not.toHaveBeenCalled();
     });
 
     it('returns error for parentFeatureId referencing non-existent feature', () => {
