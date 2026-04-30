@@ -1364,7 +1364,7 @@
             "label": "metadata",
             "description": [],
             "signature": [
-              "{ branch: string; }"
+              "{ branch: string; version: string; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "lineNumber": 127,
