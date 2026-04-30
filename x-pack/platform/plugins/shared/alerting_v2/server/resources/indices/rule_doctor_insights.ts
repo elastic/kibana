@@ -68,10 +68,7 @@ export const ruleDoctorInsightDocSchema = z.object({
   justification: z
     .string()
     .describe('Reasoning for why this insight was raised and the proposed action'),
-  rule_ids: z
-    .array(z.string())
-    .default([])
-    .describe('IDs of the alerting rules involved'),
+  rule_ids: z.array(z.string()).default([]).describe('IDs of the alerting rules involved'),
   data: z
     .record(z.string(), z.any())
     .optional()
