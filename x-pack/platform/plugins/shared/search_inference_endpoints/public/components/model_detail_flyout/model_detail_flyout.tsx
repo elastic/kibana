@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -55,7 +54,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onDeleteEndpoint,
   onCopyEndpointId,
 }) => {
-  const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
   const usageTracker = useUsageTracker();
@@ -148,12 +146,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     <EuiFlyout
       onClose={onClose}
       size="m"
-      aria-labelledby={flyoutTitleId}
+      aria-label={displayName}
       data-test-subj="modelDetailFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{displayName}</h2>
+          <h2>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <span data-test-subj="flyoutTaskBadges">
