@@ -982,7 +982,6 @@ describe('LogsExtractionClient', () => {
 
     it('should update multiple fields at once', async () => {
       const result = await client.updateConfig({
-        filter: 'agent.type:filebeat',
         additionalIndexPatterns: ['custom-logs-*'],
         lookbackPeriod: '6h',
         delay: '30s',
@@ -991,7 +990,6 @@ describe('LogsExtractionClient', () => {
         fieldHistoryLength: 5,
       });
 
-      expect(result.filter).toBe('agent.type:filebeat');
       expect(result.additionalIndexPatterns).toEqual(['custom-logs-*']);
       expect(result.lookbackPeriod).toBe('6h');
       expect(result.delay).toBe('30s');

@@ -8,10 +8,8 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-plugin/server';
-import type {
-  SmlAttachHttpResponse,
-  SmlSearchHttpResponse,
-} from '@kbn/agent-builder-plugin/common/http_api/sml';
+import type { SmlAttachHttpResponse } from '@kbn/agent-builder-plugin/common/http_api/sml';
+import type { SmlSearchHttpResponse } from '@kbn/agent-context-layer-plugin/common/http_api/sml';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { createLlmProxy, type LlmProxy } from '../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../utils/proxy_scenario';
@@ -30,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('SML internal API', function () {
     this.tags(['skipServerless']);
 
-    describe('POST /internal/agent_builder/sml/_search', () => {
+    describe('POST /internal/agent_context_layer/sml/_search', () => {
       const runId = uuidv4();
       const chunkId = `sml-ftr-autocomplete-${runId}`;
       const originId = `sml-ftr-origin-${runId}`;
@@ -79,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns a hit when query matches a partial word in the title (autocomplete)', async () => {
         const response = await supertest
-          .post('/internal/agent_builder/sml/_search')
+          .post('/internal/agent_context_layer/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ query: 'pacif', size: 20 })
@@ -96,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns total and results with the expected item fields (wildcard)', async () => {
         const response = await supertest
-          .post('/internal/agent_builder/sml/_search')
+          .post('/internal/agent_context_layer/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ query: '*', size: 10 })
@@ -123,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('omits content on each hit when skip_content is true', async () => {
         const response = await supertest
-          .post('/internal/agent_builder/sml/_search')
+          .post('/internal/agent_context_layer/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ query: '*', size: 10, skip_content: true })
@@ -138,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('rejects an empty query string', async () => {
         await supertest
-          .post('/internal/agent_builder/sml/_search')
+          .post('/internal/agent_context_layer/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ query: '' })
