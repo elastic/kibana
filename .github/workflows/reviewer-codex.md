@@ -20,7 +20,7 @@ imports:
 engine:
   id: claude
   version: "2.1.98"
-  model: llm-gateway/gpt-5.4
+  model: opus[1m]
   max-turns: 120
   # args:
   #   - -c
@@ -49,6 +49,9 @@ engine:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
     ENABLE_PROMPT_CACHING_1H: "1"
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/gpt-5.4[1m]
+    ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES: 'effort'
+    CLAUDE_CODE_EFFORT_LEVEL: "medium"
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
