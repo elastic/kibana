@@ -13,14 +13,14 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import type { EditResult, StepDefinition } from './yaml_edit_utils';
+import type { EditResult, StepDefinition } from '@kbn/workflows-yaml';
 import {
   deleteStep,
   insertStep,
   modifyStep,
   modifyStepProperty,
   modifyWorkflowProperty,
-} from './yaml_edit_utils';
+} from '@kbn/workflows-yaml';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_CHANGED_EVENT,
