@@ -68,11 +68,18 @@ You **must** get the query from one of two sources before calling this tool:
 Under no circumstances should you invent, guess, or modify a query yourself for this tool.
 If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
 
-### Using a limit
+### Fetching rows: prefer preview_rows + jq_filter over large limits
 
-The \`limit\` parameter can be used to limit the number of results to return. It defaults to 100.
-You should avoid using a higher limit value unless explicitly asked by the user or if you know for sure the length of the data will not be a problem.
-Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.`,
+**Prefer \`preview_rows\` over a high \`limit\` whenever you need more than a handful of rows.**
+Setting \`preview_rows\` stores the full result in the filestore and keeps your context clean —
+you then call \`${platformCoreTools.jqFilter}\` to extract exactly what you need.
+Loading hundreds of raw rows directly into context wastes space and makes it harder to reason about the data.
+
+Use a plain \`limit\` (without \`preview_rows\`) only when:
+- You genuinely need every row in context to answer the question (rare), **or**
+- The expected result is small (< ~20 rows).
+
+The \`limit\` parameter defaults to 100. It cannot increase results beyond a \`LIMIT\` clause already in the query — the lower value always wins.`,
     schema: executeEsqlToolSchema,
     handler: async (
       {
