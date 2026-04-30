@@ -47,13 +47,13 @@ describe('getThrottleStrategyLabel', () => {
 
   it('returns the per-episode every-time label when mode is per_episode', () => {
     expect(getThrottleStrategyLabel('every_time', 'per_episode')).toBe(
-      'Every evaluation (per episode, no throttle)'
+      'Every evaluation'
     );
   });
 
   it('returns the aggregate every-time label when mode is all', () => {
     expect(getThrottleStrategyLabel('every_time', 'all')).toBe(
-      'Every evaluation (per group, no throttle)'
+      'Every evaluation'
     );
   });
 
