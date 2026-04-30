@@ -132,9 +132,9 @@
       },
       "scope": {
         "alerting": {
-          "kql": "",
+          "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
           "filters": [],
-          "dsl": ""
+          "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
         },
         "episodes": {
           "query": "data.host.name : \"my-host\"",
