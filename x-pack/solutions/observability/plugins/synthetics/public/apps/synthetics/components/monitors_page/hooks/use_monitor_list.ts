@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import type { MonitorListPageState } from '../../../state';
 import {
@@ -29,52 +28,38 @@ export function useMonitorList() {
   const { handleFilterChange } = useMonitorFiltersState();
   const { lastRefresh } = useSyntheticsRefreshContext();
 
+  const paramsRef = useRef({ pageState, loaded });
+  paramsRef.current = { pageState, loaded };
+
   const loadPage = useCallback(
     (state: MonitorListPageState) => {
       dispatch(updateManagementPageStateAction(state));
     },
     [dispatch]
   );
-  const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
+  const reloadPage = useCallback(() => {
+    dispatch(fetchMonitorListAction.get(paramsRef.current.pageState));
+  }, [dispatch]);
 
-  // Periodically refresh
   useEffect(() => {
     if (!isInitialMount.current) {
-      dispatch(quietFetchMonitorListAction({ ...pageState }));
+      dispatch(quietFetchMonitorListAction({ ...paramsRef.current.pageState }));
     }
-    // specifically only want to run this on refreshInterval change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh]);
+  }, [dispatch, lastRefresh]);
 
-  // On initial mount, load the page
-  useDebounce(
-    () => {
-      if (isInitialMount.current) {
-        if (loaded) {
-          dispatch(quietFetchMonitorListAction(pageState));
-        } else {
-          dispatch(fetchMonitorListAction.get(pageState));
-        }
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (paramsRef.current.loaded) {
+        dispatch(quietFetchMonitorListAction(pageState));
+      } else {
+        dispatch(fetchMonitorListAction.get(pageState));
       }
-    },
-    100,
-    // we don't use pageState here, for pageState, useDebounce will handle it
-    [dispatch]
-  );
-
-  useDebounce(
-    () => {
-      // Don't load on initial mount, only meant to handle pageState changes
-      if (isInitialMount.current || !loaded) {
-        // setting false here to account for debounce timing
-        isInitialMount.current = false;
-        return;
-      }
-      dispatch(fetchMonitorListAction.get(pageState));
-    },
-    200,
-    [pageState]
-  );
+      return;
+    }
+    if (!paramsRef.current.loaded) return;
+    dispatch(fetchMonitorListAction.get(pageState));
+  }, [dispatch, pageState]);
 
   return {
     loading,
