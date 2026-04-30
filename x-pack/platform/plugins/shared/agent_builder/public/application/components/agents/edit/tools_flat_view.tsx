@@ -7,7 +7,13 @@
 
 import React from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiInMemoryTable, EuiText, EuiFlexGroup, EuiCheckbox } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiText,
+  EuiFlexGroup,
+  EuiCheckbox,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -59,6 +65,11 @@ const createCheckboxColumn = (
   disabled: boolean
 ) => ({
   width: '40px',
+  name: (
+    <EuiScreenReaderOnly>
+      <span>{labels.tools.selectToolColumnHeader}</span>
+    </EuiScreenReaderOnly>
+  ),
   render: (tool: ToolDefinition) => {
     const toolFields: ToolSelectionRelevantFields = {
       id: tool.id,
@@ -69,6 +80,7 @@ const createCheckboxColumn = (
         checked={isToolSelected(toolFields, selectedTools)}
         onChange={() => onToggleTool(tool.id)}
         disabled={disabled}
+        aria-label={labels.tools.selectToolCheckboxAriaLabel(tool.id)}
       />
     );
   },
@@ -144,6 +156,7 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
+        tableCaption={labels.tools.toolsTableCaption(tools.length)}
         columns={columns}
         items={tools}
         itemId="id"
