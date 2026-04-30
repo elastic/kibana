@@ -27,6 +27,7 @@ import {
   DashboardMigrationRetryFilter,
 } from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
+import { CreateSentinelDashboardsBody } from '../../vendor/dashboards/sentinel.gen';
 import {
   LangSmithOptions,
   SiemMigrationResourceData,
@@ -73,7 +74,7 @@ export type CreateDashboardMigrationDashboardsRequestParamsInput = z.input<
 >;
 
 export const CreateDashboardMigrationDashboardsRequestBody = lazySchema(() =>
-  z.array(SplunkOriginalDashboardExport)
+  z.union([z.array(SplunkOriginalDashboardExport), CreateSentinelDashboardsBody])
 );
 export type CreateDashboardMigrationDashboardsRequestBody = z.infer<
   typeof CreateDashboardMigrationDashboardsRequestBody

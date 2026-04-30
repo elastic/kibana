@@ -260,6 +260,48 @@ export const sentinelArmResourcesWithWatchlist = {
  */
 export const expectedSentinelWatchlists = [{ type: 'lookup', name: 'HighValueAccounts' }];
 
+/**
+ * Sentinel ARM template resources containing one Workbook with a KQL query panel
+ * that references a watchlist.
+ */
+export const sentinelArmResourcesWithWorkbook = {
+  vendor: 'microsoft-sentinel' as const,
+  resources: [
+    {
+      id: '/subscriptions/abc/resourceGroups/rg/providers/Microsoft.Insights/workbooks/wb-1',
+      name: 'wb-1',
+      type: 'Microsoft.Insights/workbooks',
+      properties: {
+        displayName: 'Sign-in overview',
+        description: 'Workbook covering Azure AD sign-ins and watchlist hits',
+        serializedData: JSON.stringify({
+          version: 'Notebook/1.0',
+          items: [
+            { type: 1, content: { json: '## Welcome' } },
+            {
+              type: 3,
+              name: 'failed-signins',
+              title: 'Failed sign-ins by user',
+              content: {
+                version: 'KqlItem/1.0',
+                query:
+                  "SigninLogs | where AccountName in (_GetWatchlist('HighValueAccounts')) | summarize count() by UserPrincipalName",
+                queryType: 0,
+                visualization: 'barchart',
+              },
+            },
+          ],
+        }),
+      },
+    },
+  ],
+};
+
+/**
+ * Expected watchlist resources identified from sentinelArmResourcesWithWorkbook.
+ */
+export const expectedSentinelWorkbookWatchlists = [{ type: 'lookup', name: 'HighValueAccounts' }];
+
 export const executeTaskInBatches = async <T>({
   items,
   batchSize,

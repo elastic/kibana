@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Sentinel Vendor Dashboard Schema
+  version: '1.0.0'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    SentinelWorkbookProperties:
+      type: object
+      description: Properties of a Microsoft Sentinel Workbook
+      required:
+        - displayName
+        - serializedData
+      properties:
+        displayName:
+          type: string
+          description: The Workbook display name
+        serializedData:
+          type: string
+          description: The JSON-encoded Workbook definition (items, parameters, version)
+        version:
+          type: string
+          description: The Workbook serialization version
+        category:
+          type: string
+          description: The Workbook category
+        description:
+          type: string
+          description: The Workbook description
+
+    SentinelWorkbookArmResource:
+      type: object
+      description: A Workbook resource entry from a Microsoft Sentinel ARM template export
+      properties:
+        id:
+          type: string
+          description: The ARM resource identifier
+        name:
+          type: string
+          description: The ARM resource name
+        type:
+          type: string
+          description: The ARM resource type (expected `Microsoft.Insights/workbooks`)
+        properties:
+          $ref: '#/components/schemas/SentinelWorkbookProperties'
+          description: The workbook properties
+
+    CreateSentinelDashboardsBody:
+      type: object
+      description: Request body for creating Sentinel dashboard migration dashboards from an ARM template export
+      required:
+        - vendor
+        - resources
+      properties:
+        vendor:
+          type: string
+          enum:
+            - microsoft-sentinel
+          description: Discriminator selecting the Sentinel dashboards branch on the create endpoint
+        resources:
+          type: array
+          description: The ARM template resources array containing Sentinel Workbooks
+          items:
+            $ref: '#/components/schemas/SentinelWorkbookArmResource'
+          minItems: 1

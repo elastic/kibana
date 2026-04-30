@@ -14,9 +14,12 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
+  EuiSuperSelect,
+  EuiFormRow,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,6 +27,7 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
@@ -32,8 +36,33 @@ import type { HandleMissingResourcesIndexed, MigrationSettingsBase } from '../..
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 import { STEP_COMPONENTS } from './configs';
+import { SentinelDashboardDataInputStep } from './steps/constants';
 import { PanelText } from '../../../../common/components/panel_text';
 import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
+
+const MIGRATION_SOURCE_DROPDOWN_TITLE = kbnI18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.migrationSource.title',
+  { defaultMessage: 'Source vendor' }
+);
+
+type SupportedDashboardSource = MigrationSource.SPLUNK | MigrationSource.SENTINEL;
+
+const SOURCE_OPTIONS: Array<{ value: SupportedDashboardSource; inputDisplay: string }> = [
+  {
+    value: MigrationSource.SPLUNK,
+    inputDisplay: kbnI18n.translate(
+      'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.migrationSource.splunk',
+      { defaultMessage: 'Splunk' }
+    ),
+  },
+  {
+    value: MigrationSource.SENTINEL,
+    inputDisplay: kbnI18n.translate(
+      'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.migrationSource.sentinel',
+      { defaultMessage: 'Microsoft Sentinel (Technical preview)' }
+    ),
+  },
+];
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -56,13 +85,29 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     const { closeFlyout } = useMigrationDataInputContext();
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
-
-    const [dataInputStep, setDataInputStep] = useState<SplunkDataInputStep>(
-      SplunkDataInputStep.Upload
+    const isSentinelDashboardsEnabled = useIsExperimentalFeatureEnabled(
+      'sentinelDashboardsMigration'
     );
+
+    const initialSource: SupportedDashboardSource =
+      migrationStats?.vendor === MigrationSource.SENTINEL
+        ? MigrationSource.SENTINEL
+        : MigrationSource.SPLUNK;
+    const [migrationSource, setMigrationSource] = useState<SupportedDashboardSource>(initialSource);
+
+    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
 
     const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
       ({ newMissingResourcesIndexed }) => {
+        if (migrationSource === MigrationSource.SENTINEL) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(SentinelDashboardDataInputStep.Watchlists);
+            return;
+          }
+          setDataInputStep(SentinelDashboardDataInputStep.End);
+          return;
+        }
+
         if (newMissingResourcesIndexed?.macros.length) {
           setDataInputStep(SplunkDataInputStep.Macros);
           return;
@@ -75,13 +120,15 @@ export const DashboardMigrationDataInputFlyout = React.memo(
 
         setDataInputStep(SplunkDataInputStep.End);
       },
-      []
+      [migrationSource]
     );
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
       handleMissingResourcesIndexed: setMissingResourcesStep,
-      migrationSource: MigrationSource.SPLUNK,
+      migrationSource,
     });
+
+    const isSourceSelectorVisible = isSentinelDashboardsEnabled && !migrationStats;
 
     const onMigrationCreated = useCallback(
       (createdMigrationStats: DashboardMigrationStats) => {
@@ -137,12 +184,25 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiFlexGroup direction="column" gutterSize="m">
+              {isSourceSelectorVisible && (
+                <EuiFlexItem>
+                  <EuiFormRow label={MIGRATION_SOURCE_DROPDOWN_TITLE} fullWidth>
+                    <EuiSuperSelect
+                      data-test-subj="dashboardMigrationSourceDropdown"
+                      options={SOURCE_OPTIONS}
+                      valueOfSelected={migrationSource}
+                      onChange={setMigrationSource}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              )}
               <>
-                {STEP_COMPONENTS[MigrationSource.SPLUNK].map((step) => (
+                {STEP_COMPONENTS[migrationSource].map((step) => (
                   <EuiFlexItem key={step.id}>
                     <step.Component
                       dataInputStep={dataInputStep}
-                      migrationSource={MigrationSource.SPLUNK}
+                      migrationSource={migrationSource}
                       migrationStats={migrationStats}
                       missingResourcesIndexed={missingResourcesIndexed}
                       onMigrationCreated={onMigrationCreated}
@@ -154,7 +214,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
               </>
               <EuiFlexItem>
                 <PanelText size="xs" subdued cursive>
-                  <p>{getCopyrightNoticeByVendor(MigrationSource.SPLUNK)}</p>
+                  <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
                 </PanelText>
               </EuiFlexItem>
             </EuiFlexGroup>

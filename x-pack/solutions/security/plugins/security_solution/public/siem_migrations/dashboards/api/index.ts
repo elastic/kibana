@@ -39,6 +39,7 @@ import type {
   InstallMigrationDashboardsResponse,
   GetAllTranslationStatsDashboardMigrationResponse,
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type { SentinelWorkbookArmResource } from '../../../../common/siem_migrations/model/vendor/dashboards/sentinel.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { DashboardMigrationStats } from '../types';
 
@@ -179,6 +180,27 @@ export const addDashboardsToDashboardMigration = async ({
       signal,
     }
   );
+};
+
+export interface AddSentinelWorkbooksToDashboardMigrationParams {
+  migrationId: string;
+  resources: SentinelWorkbookArmResource[];
+}
+
+/**
+ * Adds Microsoft Sentinel Workbooks (parsed from an ARM template export) to a dashboard migration.
+ * Targets the same path as the Splunk variant; the server dispatches by request-body shape.
+ */
+export const addSentinelWorkbooksToDashboardMigration = async ({
+  migrationId,
+  resources,
+  signal,
+}: WithSignal<AddSentinelWorkbooksToDashboardMigrationParams>) => {
+  return addDashboardsToDashboardMigration({
+    migrationId,
+    body: { vendor: 'microsoft-sentinel', resources },
+    signal,
+  });
 };
 
 export interface InstallDashboardsParams {

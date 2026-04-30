@@ -20,6 +20,7 @@ export default createTestConfig({
       'automaticDashboardsMigration',
       'qradarRulesMigration',
       'sentinelRulesMigration',
+      'sentinelDashboardsMigration',
     ])}`,
   ],
   testFiles: [require.resolve('..')],

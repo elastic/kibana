@@ -10,3 +10,14 @@ export enum SplunkDashboardDataInputStepId {
   Macros = 'splunk_dashboard_macros',
   Lookups = 'splunk_dashboard_lookups',
 }
+
+export enum SentinelDashboardDataInputStepId {
+  Workbooks = 'sentinel_dashboard_workbooks',
+  Watchlists = 'sentinel_dashboard_watchlists',
+}
+
+export enum SentinelDashboardDataInputStep {
+  Workbooks = 1,
+  Watchlists = 2,
+  End = 10,
+}

@@ -9,19 +9,28 @@ import { ResourceIdentifier } from '../../resources';
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { OriginalDashboard } from '../../model/dashboard_migration.gen';
 import { getSplunkDashboardXmlParser } from '../../parsers/splunk/get_dashboard_xml_parser';
+import { extractQueriesFromSerializedData } from '../../parsers/sentinel/workbook_json';
 
 export class DashboardResourceIdentifier extends ResourceIdentifier<OriginalDashboard> {
   public async fromOriginal(item: OriginalDashboard): Promise<SiemMigrationResourceBase[]> {
-    const originalDashboardXMLString = item?.data;
-
-    if (!originalDashboardXMLString) {
+    const data = item?.data;
+    if (!data) {
       return [];
     }
-    const splunkDashboardXMLPaser = await getSplunkDashboardXmlParser(originalDashboardXMLString, {
-      experimentalFeatures: this.deps.experimentalFeatures,
-    });
-    const queries: string[] = await splunkDashboardXMLPaser.extractQueries();
+
+    const queries =
+      item.vendor === 'microsoft-sentinel'
+        ? extractQueriesFromSerializedData(data)
+        : await this.extractSplunkQueries(data);
+
     const resources = await Promise.all(queries.map((query) => this.identifier(query)));
     return resources.flat();
+  }
+
+  private async extractSplunkQueries(xml: string): Promise<string[]> {
+    const parser = await getSplunkDashboardXmlParser(xml, {
+      experimentalFeatures: this.deps.experimentalFeatures,
+    });
+    return parser.extractQueries();
   }
 }
