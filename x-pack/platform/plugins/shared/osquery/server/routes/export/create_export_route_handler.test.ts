@@ -291,6 +291,28 @@ describe('createExportRouteHandler', () => {
     expect(response.ok).toHaveBeenCalled();
   });
 
+  it('includes negated esFilters as must_not in the ES query', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {
+        esFilters: [
+          {
+            meta: { negate: true, type: 'phrase', key: 'osquery.uid', params: { query: '0' } },
+            query: { match_phrase: { 'osquery.uid': '0' } },
+          },
+        ],
+      },
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
+    expect(esQueryArg.bool.must_not).toEqual([{ match_phrase: { 'osquery.uid': '0' } }]);
+    expect(response.ok).toHaveBeenCalled();
+  });
+
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();

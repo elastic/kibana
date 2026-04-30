@@ -88,10 +88,12 @@ export const createExportRouteHandler =
     // NOT fall through to an unfiltered export — silently returning the full
     // dataset when the user asked for a narrowed one is a correctness hazard.
     let esFilterClauses: estypes.QueryDslQueryContainer[] = [];
+    let esFilterMustNotClauses: estypes.QueryDslQueryContainer[] = [];
     if (esFilters && esFilters.length > 0) {
       try {
         const built = buildQueryFromFilters(esFilters as unknown as Filter[], undefined);
         esFilterClauses = built.filter as estypes.QueryDslQueryContainer[];
+        esFilterMustNotClauses = built.must_not as estypes.QueryDslQueryContainer[];
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         logger.warn(`Invalid esFilters in export request: ${message}`);
@@ -154,7 +156,12 @@ export const createExportRouteHandler =
     const result = await exportResultsToStream({
       esClient,
       index,
-      query: { bool: { filter: [kqlFilterClause, ...esFilterClauses] } },
+      query: {
+        bool: {
+          filter: [kqlFilterClause, ...esFilterClauses],
+          ...(esFilterMustNotClauses.length > 0 ? { must_not: esFilterMustNotClauses } : {}),
+        },
+      },
       formatter,
       metadata: {
         ...routeMetadata,
