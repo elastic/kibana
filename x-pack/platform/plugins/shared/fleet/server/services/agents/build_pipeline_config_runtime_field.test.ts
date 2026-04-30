@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CONFIG_GROUP_RUNTIME_FIELD } from './build_config_group_runtime_field';
+import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
 
-describe('CONFIG_GROUP_RUNTIME_FIELD', () => {
-  it('defines a config_group keyword runtime field', () => {
-    expect(CONFIG_GROUP_RUNTIME_FIELD).toHaveProperty('config_group');
-    expect(CONFIG_GROUP_RUNTIME_FIELD.config_group).toMatchObject({
+describe('PIPELINE_CONFIG_RUNTIME_FIELD', () => {
+  it('defines a pipeline_config keyword runtime field', () => {
+    expect(PIPELINE_CONFIG_RUNTIME_FIELD).toHaveProperty('pipeline_config');
+    expect(PIPELINE_CONFIG_RUNTIME_FIELD.pipeline_config).toMatchObject({
       type: 'keyword',
       script: { lang: 'painless' },
     });
   });
 
   it('script source covers all required sections', () => {
-    const source = (CONFIG_GROUP_RUNTIME_FIELD.config_group as any).script.source as string;
+    const source = (PIPELINE_CONFIG_RUNTIME_FIELD.pipeline_config as any).script.source as string;
     expect(source).toContain('receivers');
     expect(source).toContain('processors');
     expect(source).toContain('exporters');

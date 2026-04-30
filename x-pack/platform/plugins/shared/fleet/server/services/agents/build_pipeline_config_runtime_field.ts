@@ -13,9 +13,9 @@ import type { estypes } from '@elastic/elasticsearch';
 //   - top-level component sections (receivers, processors, exporters, connectors): sorted keys
 //   - service.pipelines: sorted pipeline names, each with sorted component ref lists
 //   - service.extensions: sorted active extension list
-// the fingerprint string is hashed to a human-readable label in TypeScript by configGroupLabel().
-export const CONFIG_GROUP_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
-  config_group: {
+// the fingerprint string is hashed to a human-readable label in TypeScript by pipelineConfigLabel().
+export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
+  pipeline_config: {
     type: 'keyword',
     script: {
       lang: 'painless',

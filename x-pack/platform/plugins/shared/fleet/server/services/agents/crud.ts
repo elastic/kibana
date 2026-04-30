@@ -37,7 +37,7 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
-import { CONFIG_GROUP_RUNTIME_FIELD } from './build_config_group_runtime_field';
+import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
@@ -178,7 +178,7 @@ export async function getAgentTags(
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = Object.assign(
     await buildAgentStatusRuntimeField(soClient),
-    CONFIG_GROUP_RUNTIME_FIELD
+    PIPELINE_CONFIG_RUNTIME_FIELD
   );
   try {
     const result = await retryTransientEsErrors(() =>
@@ -283,7 +283,7 @@ export async function getAgentsByKuery(
 
   const runtimeFields = Object.assign(
     await buildAgentStatusRuntimeField(soClient),
-    CONFIG_GROUP_RUNTIME_FIELD
+    PIPELINE_CONFIG_RUNTIME_FIELD
   );
 
   const sort = getSortConfig(sortField, sortOrder);
@@ -481,7 +481,7 @@ export async function fetchAllAgentsByKuery(
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = Object.assign(
     await buildAgentStatusRuntimeField(soClient),
-    CONFIG_GROUP_RUNTIME_FIELD,
+    PIPELINE_CONFIG_RUNTIME_FIELD,
     options.runtimeFields
   );
 
@@ -594,7 +594,7 @@ async function _filterAgents(
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
   const runtimeFields = Object.assign(
     await buildAgentStatusRuntimeField(soClient),
-    CONFIG_GROUP_RUNTIME_FIELD
+    PIPELINE_CONFIG_RUNTIME_FIELD
   );
   const currentSpaceId = getCurrentNamespace(soClient);
 

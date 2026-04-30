@@ -6,7 +6,7 @@
  */
 
 // 256-entry adjective and noun wordlists.
-// CONFIG_GROUP_RUNTIME_FIELD emits a structured fingerprint string (e.g.
+// PIPELINE_CONFIG_RUNTIME_FIELD emits a structured fingerprint string (e.g.
 // "receivers:foo;pipe:logs[...]"). A djb2 hash of that string produces two byte-range indices
 // used to look up a deterministic "adjective-noun" label (e.g. "calm-river").
 const ADJECTIVES: string[] = [
@@ -554,7 +554,7 @@ function djb2(s: string): number {
   return h >>> 0;
 }
 
-export function configGroupLabel(fingerprint: string): string {
+export function pipelineConfigLabel(fingerprint: string): string {
   const hash = djb2(fingerprint);
   const adjIndex = hash & 0xff;
   const nounIndex = (hash >> 8) & 0xff;

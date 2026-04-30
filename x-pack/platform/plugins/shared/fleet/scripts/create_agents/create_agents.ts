@@ -504,7 +504,7 @@ function logStatusMap(statusMap: Partial<{ [status in AgentStatus]: number }>) {
 // Each group has a fixed topology (component names + pipeline wiring) but
 // per-instance values (endpoint URLs, api_key) vary between collectors so
 // they don't hash to the same effective_config_hash — demonstrating that
-// config_group correctly groups them despite the per-instance differences.
+// pipeline_config correctly groups them despite the per-instance differences.
 
 const OPAMP_CONFIG_GROUPS = [
   {

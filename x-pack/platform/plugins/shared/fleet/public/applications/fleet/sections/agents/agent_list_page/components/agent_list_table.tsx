@@ -41,7 +41,7 @@ import {
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
-import { configGroupLabel } from '../../../../../../../common/services/config_group_label';
+import { pipelineConfigLabel } from '../../../../../../../common/services/pipeline_config_label';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -356,17 +356,17 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     ...(enableOpAMP
       ? [
           {
-            field: 'config_group' as keyof Agent,
+            field: 'pipeline_config' as keyof Agent,
             sortable: false,
-            name: i18n.translate('xpack.fleet.agentList.configGroupColumnTitle', {
-              defaultMessage: 'Config group',
+            name: i18n.translate('xpack.fleet.agentList.pipelineConfigColumnTitle', {
+              defaultMessage: 'Pipeline config',
             }),
             width: '120px',
-            render: (configGroup: string | undefined) => {
-              if (!configGroup) return <EuiText color="subdued">{'—'}</EuiText>;
+            render: (pipelineConfig: string | undefined) => {
+              if (!pipelineConfig) return <EuiText color="subdued">{'—'}</EuiText>;
               return (
-                <EuiToolTip content={configGroup}>
-                  <EuiCode>{configGroupLabel(configGroup)}</EuiCode>
+                <EuiToolTip content={pipelineConfig}>
+                  <EuiCode>{pipelineConfigLabel(pipelineConfig)}</EuiCode>
                 </EuiToolTip>
               );
             },
