@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ActiveMaintenanceWindow,
-  MaintenanceWindowServiceContract,
-} from '../../services/maintenance_window_service/maintenance_window_service';
+import type { MaintenanceWindowServiceContract } from '../../services/maintenance_window_service/maintenance_window_service';
 import { createMaintenanceWindowServiceMock } from '../../services/maintenance_window_service/maintenance_window_service.mock';
 import { ApplyMaintenanceWindowStep } from './apply_maintenance_window_step';
 import {
@@ -17,6 +14,7 @@ import {
   createDispatcherPipelineState,
   createRule,
 } from '../fixtures/test_utils';
+import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
 
 const buildMw = (overrides: Partial<ActiveMaintenanceWindow> = {}): ActiveMaintenanceWindow => ({
   id: 'mw-1',
