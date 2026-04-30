@@ -29,6 +29,13 @@ const getAgentContextLayer = jest.fn(() => ({
   listResolverTypes: jest.fn(() => []),
 }));
 
+const smlToolOptions = {
+  getAgentContextLayer,
+  getSmlReadResolverService: () => ({
+    getResolverType: () => undefined,
+  }),
+};
+
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
 const mockContext = {
@@ -46,7 +53,7 @@ describe('createSmlAttachTool', () => {
   });
 
   it('has correct id and tags', () => {
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool(smlToolOptions);
     expect(tool.id).toBe(platformCoreTools.smlAttach);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['sml', 'attachment']);
@@ -60,7 +67,7 @@ describe('createSmlAttachTool', () => {
         message: 'Access denied: you do not have the required permissions',
       },
     ]);
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool(smlToolOptions);
     const result = (await tool.handler(
       { chunk_ids: ['chunk-1'] },
       mockContext as unknown as ToolHandlerContext
@@ -78,7 +85,7 @@ describe('createSmlAttachTool', () => {
         message: "SML document 'chunk-1' not found in the index",
       },
     ]);
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool(smlToolOptions);
     const result = (await tool.handler(
       { chunk_ids: ['chunk-1'] },
       mockContext as unknown as ToolHandlerContext
@@ -102,7 +109,7 @@ describe('createSmlAttachTool', () => {
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-123' });
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool(smlToolOptions);
     const result = (await tool.handler(
       { chunk_ids: ['chunk-1'] },
       mockContext as unknown as ToolHandlerContext
@@ -131,7 +138,7 @@ describe('createSmlAttachTool', () => {
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-456' });
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool(smlToolOptions);
     const result = (await tool.handler(
       { chunk_ids: ['denied-chunk', 'ok-chunk'] },
       mockContext as unknown as ToolHandlerContext
@@ -143,7 +150,7 @@ describe('createSmlAttachTool', () => {
 
   it('calls resolveSmlAttachItems with correct params', async () => {
     mockResolveSmlAttachItems.mockResolvedValue([]);
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool(smlToolOptions);
     await tool.handler(
       { chunk_ids: ['chunk-a', 'chunk-b'] },
       mockContext as unknown as ToolHandlerContext

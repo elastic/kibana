@@ -167,6 +167,15 @@ export class AgentBuilderPlugin
         }
         return this.startDeps.agentContextLayer;
       },
+      getSmlReadResolverService: () => {
+        if (!this.startDeps) {
+          throw new Error('Agent Context Layer not available — plugin has not started');
+        }
+        const agentContextLayer = this.startDeps.agentContextLayer;
+        return {
+          getResolverType: (typeId: string) => agentContextLayer.getResolverType(typeId),
+        };
+      },
     });
     smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);

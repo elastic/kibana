@@ -33,6 +33,7 @@ export const platformCoreTools = {
   integrationKnowledge: platformCoreTool('integration_knowledge'),
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
+  smlRead: platformCoreTool('sml_read'),
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
@@ -103,6 +104,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
   platformCoreTools.smlSearch,
+  platformCoreTools.smlRead,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
 ];
