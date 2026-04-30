@@ -47,7 +47,7 @@ export const getGlobalModelComboOptions = (
     },
     {
       label: i18n.translate('xpack.searchInferenceEndpoints.settings.globalModel.customGroup', {
-        defaultMessage: 'Custom connectors',
+        defaultMessage: 'Custom models',
       }),
       value: 'custom',
       options: custom,

@@ -92,7 +92,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     const ro = new ResizeObserver(([entry]) => setListWidth(entry.contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [useRecommendedDefaults]);
 
   const endpointDisplayMap = useMemo(
     () =>

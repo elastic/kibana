@@ -61,7 +61,7 @@ describe('default_model_section_combo', () => {
     it('does not include No default model when no-default is not allowed', () => {
       const opts = getGlobalModelComboOptions(connectors, false);
 
-      expect(opts.map((g) => g.label)).toEqual(['Pre-configured', 'Custom connectors']);
+      expect(opts.map((g) => g.label)).toEqual(['Pre-configured', 'Custom models']);
     });
   });
 

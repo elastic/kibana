@@ -98,8 +98,8 @@ export const ModelSettings: React.FC = () => {
     // round-trip actually succeeded. `saveDefaultModel` swallows its own errors and surfaces them
     // via toasts, so its rejection branch is unreachable in practice -- we still guard for safety.
     const results = await Promise.allSettled([
-      isFeatureDirty ? saveFeatures() : Promise.resolve(),
-      isDefaultModelDirty ? saveDefaultModel() : Promise.resolve(),
+      ...(isFeatureDirty ? [saveFeatures()] : []),
+      ...(isDefaultModelDirty ? [saveDefaultModel()] : []),
     ]);
     if (results.some((r) => r.status === 'fulfilled')) {
       usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
