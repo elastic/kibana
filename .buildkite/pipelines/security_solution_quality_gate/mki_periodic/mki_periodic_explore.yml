@@ -16,8 +16,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
   - group: "Cypress MKI - Explore"
     key: cypress_test_explore
@@ -36,8 +35,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore:cases
         label: "Cypress MKI - Cases"
@@ -53,5 +51,4 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101

@@ -13,8 +13,7 @@ steps:
     timeout_in_minutes: 300
     parallelism: 1
     soft_fail:
-      exit_status:
-        - 101
+      - exit_status: 101
 
   - group: "API MKI - AI Assistant"
     key: api_test_ai_assistant
@@ -33,8 +32,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - nlp_cleanup_task:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless
@@ -50,5 +48,4 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101

@@ -16,8 +16,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 5
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -33,8 +32,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:data_view
         label: 'Cypress MKI - Data View'
@@ -50,8 +48,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:siem_migrations
         label: 'Cypress MKI - SIEM Integrations'
@@ -67,8 +64,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:threat_intelligence
         label: 'Cypress MKI - Threat Intelligence'
@@ -84,8 +80,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timeline_templates
         label: 'Cypress MKI - Timeline Templates'
@@ -101,8 +96,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timelines
         label: 'Cypress MKI - Timelines'
@@ -118,8 +112,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 3
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:filters
         label: 'Cypress MKI - Explore - Filters'
@@ -135,8 +128,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:inspect
         label: 'Cypress MKI - Explore - Inspect'
@@ -152,8 +144,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:navigation
         label: 'Cypress MKI - Explore - Navigation'
@@ -169,8 +160,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:overview
         label: 'Cypress MKI - Explore - Overview'
@@ -186,8 +176,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:pagination
         label: 'Cypress MKI - Explore - Pagination'
@@ -203,8 +192,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:urls
         label: 'Cypress MKI - Explore - URLs'
@@ -220,8 +208,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
   - group: "API MKI - Investigations"
     key: api_test_investigations
@@ -240,8 +227,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - investigations:saved-objects:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
@@ -257,8 +243,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - explore:overview:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
@@ -274,5 +259,4 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101

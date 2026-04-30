@@ -16,8 +16,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -33,8 +32,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:entity_analytics_home
         label: 'Cypress MKI - Entity Analytics Home'
@@ -50,8 +48,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:host_details
         label: 'Cypress MKI - Host Details'
@@ -67,8 +64,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:hosts
         label: 'Cypress MKI - Hosts'
@@ -84,8 +80,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:priv_mon
         label: 'Cypress MKI - Priv Mon'
@@ -101,8 +96,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:watchlists
         label: 'Cypress MKI - Watchlists'
@@ -118,8 +112,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:explore_hosts
         label: 'Cypress MKI - Explore - Hosts'
@@ -135,8 +128,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:machine_learning
         label: 'Cypress MKI - Explore - Machine Learning'
@@ -152,8 +144,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:network
         label: 'Cypress MKI - Explore - Network'
@@ -169,8 +160,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:users
         label: 'Cypress MKI - Explore - Users'
@@ -186,8 +176,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
@@ -206,8 +195,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - entity_analytics:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless
@@ -223,8 +211,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - explore:hosts:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless
@@ -240,8 +227,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - explore:network:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless
@@ -257,8 +243,7 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
 
       - label: 'API MKI - explore:users:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless
@@ -274,5 +259,4 @@ steps:
             - exit_status: "1"
               limit: 2
         soft_fail:
-          exit_status:
-            - 101
+          - exit_status: 101
