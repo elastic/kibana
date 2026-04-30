@@ -74,15 +74,15 @@ describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
 
     // Single word search
-    searchForExceptionList('Endpoint');
+    searchForExceptionList('my');
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
     // Multi word search
     clearSearchSelection();
@@ -105,17 +105,17 @@ describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
 
     // Field search
     clearSearchSelection();
-    searchForExceptionList('list_id:endpoint_list');
+    searchForExceptionList('list_id:exception_list_1');
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
     clearSearchSelection();
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
   });
 });

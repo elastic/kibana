@@ -10,30 +10,28 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import type { AlertEpisode } from '../queries/episodes_query';
-import { buildRelatedAlertEpisodesEsqlQuery } from '../queries/related_episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
-export interface FetchRelatedAlertEpisodesOptions {
-  abortSignal?: AbortSignal;
+export interface FetchRelatedEpisodesOptions {
+  /** Pre-built related-episodes ES|QL (e.g. from `build*RelatedAlertEpisodesEsqlQuery(…).print('basic')`). */
+  query: string;
   pageSize: number;
-  ruleId: string;
-  excludeEpisodeId: string;
-  services: { expressions: ExpressionsStart };
+  abortSignal?: AbortSignal;
+  expressions: ExpressionsStart;
 }
 
 /**
- * Executes an ES|QL query to fetch episodes related to the current one (excluded).
+ * Runs a related-episodes ES|QL string through the expressions `esql` function with a page size variable.
  */
-export const fetchRelatedAlertEpisodes = ({
+export const fetchRelatedEpisodes = ({
   abortSignal,
   pageSize,
-  ruleId,
-  excludeEpisodeId,
-  services: { expressions },
-}: FetchRelatedAlertEpisodesOptions): Promise<AlertEpisode[]> => {
-  return executeEsqlQuery<AlertEpisode>({
+  query,
+  expressions,
+}: FetchRelatedEpisodesOptions): Promise<AlertEpisode[]> =>
+  executeEsqlQuery<AlertEpisode>({
     expressions,
-    query: buildRelatedAlertEpisodesEsqlQuery(ruleId, excludeEpisodeId).print('basic'),
+    query,
     input: {
       type: 'kibana_context',
       esqlVariables: [
@@ -42,4 +40,3 @@ export const fetchRelatedAlertEpisodes = ({
     },
     abortSignal,
   });
-};
