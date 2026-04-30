@@ -2299,6 +2299,36 @@ export const labels = {
       }),
     },
   },
+  mcpGateway: {
+    panelTitle: i18n.translate('xpack.agentBuilder.mcpGateway.panelTitle', {
+      defaultMessage: 'MCP Gateway',
+    }),
+    panelDescription: i18n.translate('xpack.agentBuilder.mcpGateway.panelDescription', {
+      defaultMessage:
+        "Proxy tools from your MCP connectors through Kibana's own MCP server endpoint, so any MCP client connecting to Kibana automatically sees and can call those tools.",
+    }),
+    enabledToggleLabel: i18n.translate('xpack.agentBuilder.mcpGateway.enabledToggleLabel', {
+      defaultMessage: 'Enable MCP Gateway',
+    }),
+    connectorNameColumn: i18n.translate('xpack.agentBuilder.mcpGateway.connectorNameColumn', {
+      defaultMessage: 'Connector',
+    }),
+    toolPrefixColumn: i18n.translate('xpack.agentBuilder.mcpGateway.toolPrefixColumn', {
+      defaultMessage: 'Tool name prefix',
+    }),
+    enabledColumn: i18n.translate('xpack.agentBuilder.mcpGateway.enabledColumn', {
+      defaultMessage: 'Proxy',
+    }),
+    noConnectorsMessage: i18n.translate('xpack.agentBuilder.mcpGateway.noConnectorsMessage', {
+      defaultMessage: 'No MCP connectors configured. Add a connector to start proxying tools.',
+    }),
+    savedSuccessToast: i18n.translate('xpack.agentBuilder.mcpGateway.savedSuccessToast', {
+      defaultMessage: 'MCP Gateway settings saved',
+    }),
+    saveErrorToast: i18n.translate('xpack.agentBuilder.mcpGateway.saveErrorToast', {
+      defaultMessage: 'Failed to save MCP Gateway settings',
+    }),
+  },
   navigationAbort: {
     title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
       defaultMessage: 'Abort chat request?',

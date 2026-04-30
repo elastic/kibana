@@ -30,6 +30,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { McpGatewayService } from './mcp_gateway';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -240,6 +241,12 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const mcpGateway = new McpGatewayService(
+      elasticsearch.client.asInternalUser,
+      actions,
+      logger.get('mcp-gateway')
+    );
+
     this.internalStart = {
       tools,
       agents,
@@ -257,6 +264,7 @@ export class ServiceManager {
       savedObjects,
       plugins,
       consumption,
+      mcpGateway,
     };
 
     return this.internalStart;

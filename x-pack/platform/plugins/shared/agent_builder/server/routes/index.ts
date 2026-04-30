@@ -20,6 +20,7 @@ import { registerConversationRoutes } from './conversations';
 import { registerAttachmentRoutes } from './attachments';
 import { registerMCPRoutes } from './mcp';
 import { registerA2ARoutes } from './a2a';
+import { registerInternalMcpGatewayRoutes } from './internal/mcp_gateway';
 import { registerSkillsRoutes } from './skills';
 import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
@@ -39,6 +40,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerAttachmentRoutes(dependencies);
   registerMCPRoutes(dependencies);
   registerA2ARoutes(dependencies);
+  registerInternalMcpGatewayRoutes(dependencies);
   registerSkillsRoutes(dependencies);
   registerPluginsRoutes(dependencies);
   registerInternalExecutionRoutes(dependencies);

@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ExecuteToolParams } from '@kbn/agent-builder-browser';
+import type { McpGatewayConfig } from '@kbn/agent-builder-common';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -31,6 +32,10 @@ import type {
   BulkDeleteConnectorsResponse,
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
+import type {
+  GetMcpGatewayConfigResponse,
+  UpdateMcpGatewayConfigResponse,
+} from '../../../common/http_api/mcp_gateway';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
 export class ToolsService {
@@ -182,6 +187,19 @@ export class ToolsService {
     return await this.http.get<ValidateNamespaceResponse>(
       `${internalApiPath}/tools/_validate_namespace`,
       { query: { namespace, connector_id: connectorId } }
+    );
+  }
+
+  async getMcpGatewayConfig() {
+    return await this.http.get<GetMcpGatewayConfigResponse>(
+      `${internalApiPath}/mcp_gateway/config`
+    );
+  }
+
+  async updateMcpGatewayConfig(config: McpGatewayConfig) {
+    return await this.http.put<UpdateMcpGatewayConfigResponse>(
+      `${internalApiPath}/mcp_gateway/config`,
+      { body: JSON.stringify({ config }) }
     );
   }
 }

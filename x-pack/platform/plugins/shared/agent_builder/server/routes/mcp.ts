@@ -16,9 +16,29 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { MCP_SERVER_PATH } from '../../common/mcp';
+import type { ProxyTool } from '../services/mcp_gateway';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
+
+export function filterProxyToolsByNamespace(tools: ProxyTool[], namespaces?: string): ProxyTool[] {
+  if (!namespaces?.trim()) {
+    return tools;
+  }
+
+  const namespaceSet = new Set(
+    namespaces
+      .split(',')
+      .map((ns) => ns.trim())
+      .filter(Boolean)
+  );
+
+  if (namespaceSet.size === 0) {
+    return tools;
+  }
+
+  return tools.filter((tool) => namespaceSet.has(tool.namespace));
+}
 
 export function filterToolsByNamespace(
   tools: InternalToolDefinition[],
@@ -112,7 +132,7 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
             version: MCP_SERVER_VERSION,
           });
 
-          const { tools: toolService } = getInternalServices();
+          const { tools: toolService, mcpGateway } = getInternalServices();
 
           const registry = await toolService.getRegistry({ request });
           const allTools = await registry.list({});
@@ -137,6 +157,21 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
                   content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
                 };
               }
+            );
+          }
+
+          // Expose proxied tools from configured external MCP connectors
+          const agentBuilderCtx = await ctx.agentBuilder;
+          const spaceId = agentBuilderCtx.spaces.getSpaceId();
+          const allProxyTools = await mcpGateway.getProxyTools({ request, spaceId });
+          const proxyTools = filterProxyToolsByNamespace(allProxyTools, request.query.namespace);
+
+          for (const proxyTool of proxyTools) {
+            server.tool(
+              proxyTool.mcpName,
+              proxyTool.description,
+              proxyTool.schemaShape,
+              proxyTool.execute
             );
           }
 

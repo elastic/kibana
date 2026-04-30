@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useConnectorsActions } from '../../context/connectors_provider';
 import { labels } from '../../utils/i18n';
 import { AgentBuilderConnectorsTable } from './table/connectors_table';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
+import { McpGatewayPanel } from '../mcp_gateway/mcp_gateway_panel';
 
 export const AgentBuilderConnectors = () => {
   const { openCreateFlyout } = useConnectorsActions();
@@ -37,6 +38,8 @@ export const AgentBuilderConnectors = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
+        <McpGatewayPanel />
+        <EuiSpacer size="l" />
         <AgentBuilderConnectorsTable />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

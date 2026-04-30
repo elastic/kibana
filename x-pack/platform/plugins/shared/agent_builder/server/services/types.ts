@@ -35,6 +35,7 @@ import type { AuditLogService } from '../audit';
 import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import type { McpGatewayService } from './mcp_gateway';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -63,6 +64,7 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
+  mcpGateway: McpGatewayService;
 }
 
 export interface ServiceSetupDeps {

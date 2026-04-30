@@ -61,4 +61,7 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  mcpGateway: {
+    config: ['mcpGateway', 'config'] as const,
+  },
 };

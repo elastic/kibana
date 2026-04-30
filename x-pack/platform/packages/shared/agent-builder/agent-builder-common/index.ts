@@ -6,6 +6,7 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
+export type { McpGatewayConfig, McpGatewayConnectorConfig } from './mcp_gateway/types';
 export {
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
