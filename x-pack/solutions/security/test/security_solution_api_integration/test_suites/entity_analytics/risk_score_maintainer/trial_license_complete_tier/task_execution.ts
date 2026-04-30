@@ -40,10 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
-  // Task lifecycle tests depend on Task Manager scheduling which is inherently
-  // non-deterministic. The sync run_now route cannot help here because this
-  // test specifically validates the start/stop/restart Task Manager flow.
-  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
+  describe('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
     this.tags(['esGate']);
 
     context('with maintainer test logs data', () => {
@@ -105,6 +102,11 @@ export default ({ getService }: FtrProviderContext): void => {
           riskScore: 40,
         });
 
+        // Run via Task Manager so this test exercises the real scheduler path.
+        // installAndRunMaintainer ends with waitForMaintainerRun, which waits
+        // for the runs count to stabilise across two consecutive polls — a
+        // stronger idle guarantee than polling taskStatus alone. Stopping
+        // immediately after it returns avoids the version-conflict race.
         await maintainerScenario.installAndRunMaintainer({
           dataViewPattern: testLogsIndex,
           runMode: 'async',
@@ -119,26 +121,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const preRestartScores = await readRiskScores(es);
         const preRestartCount = preRestartScores.length;
 
-        // Wait for the maintainer to be fully idle before stopping it.
-        // Stopping while taskStatus is still running can cause a Task Manager
-        // version conflict and wedge the task document in serverless runs.
-        await retry.waitForWithTimeout('maintainer to finish first run', 30_000, async () => {
-          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
-          const maintainer = response.body.maintainers.find(
-            (m: { id: string; runs: number; taskStatus: string }) => m.id === 'risk-score'
-          );
-          return (
-            maintainer !== undefined &&
-            maintainer.runs >= 1 &&
-            maintainer.taskStatus.toLowerCase() !== 'running'
-          );
-        });
-
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
-        // Restart only re-enables scheduling, so use a sync trigger here to
-        // verify the maintainer can resume deterministically after restart.
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        // Use the sync run_now route (bypasses Task Manager's runSoon) to verify
+        // scoring resumes after the stop/start cycle without wedging on a
+        // version_conflict_engine_exception in the task document.
+        await maintainerRoutes.runRiskScoreNow();
 
         await waitForRiskScoresToBePresent({ es, log, scoreCount: preRestartCount + 1 });
         const postRestartScores = await readRiskScores(es);

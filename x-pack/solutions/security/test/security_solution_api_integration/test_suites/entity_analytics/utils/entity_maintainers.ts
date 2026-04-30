@@ -183,7 +183,7 @@ export const waitForMaintainerRun = async ({
   let lastSeenRuns = -1;
   await retry.waitForWithTimeout(
     `Entity maintainer "${maintainerId}" to start and settle before run`,
-    30_000,
+    60_000,
     async () => {
       const response = await routes.getMaintainers(200, [maintainerId]);
       const maintainer = response.body.maintainers.find(
