@@ -131,6 +131,12 @@ export function LensRenderer({
   }, [lensApi, cleanedAttributes, props.overrides]);
 
   useEffect(() => {
+    if (lensApi) {
+      lensApi.setDescription(description);
+    }
+  }, [lensApi, description]);
+
+  useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
       settings.syncColors$.next(syncColors);
     }
