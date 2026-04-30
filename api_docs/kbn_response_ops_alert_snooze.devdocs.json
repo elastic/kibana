@@ -47,6 +47,7 @@
             "lineNumber": 42,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "QuickSnoozePanelProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -98,6 +99,7 @@
             "lineNumber": 32,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "SnoozeDurationPickerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -319,6 +321,7 @@
                 "lineNumber": 27,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }

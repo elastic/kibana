@@ -96,6 +96,7 @@
                 "lineNumber": 38,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -159,6 +160,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -182,6 +184,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverEnhancedSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -228,6 +231,7 @@
                 "lineNumber": 70,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -251,6 +255,7 @@
                 "lineNumber": 70,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverEnhancedStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -395,6 +400,7 @@
                 "lineNumber": 37,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExploreDataChartActionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -435,6 +441,7 @@
                 "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExploreDataChartActionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
