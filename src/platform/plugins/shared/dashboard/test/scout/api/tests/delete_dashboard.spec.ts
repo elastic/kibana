@@ -67,7 +67,6 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
   apiTest(
     'authorization - should return 403 if the user is not authorized to delete the dashboard',
     async ({ apiClient }) => {
-      console.log('HERE!!!!!!');
       const response = await apiClient.delete(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
         headers: {
           ...COMMON_HEADERS,
