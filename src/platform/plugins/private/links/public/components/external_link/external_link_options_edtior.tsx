@@ -12,7 +12,7 @@ import { EuiFormRow, EuiSpacer, EuiSwitch, EuiTextColor } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { ExternalLinkOptions } from '../../../server';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
 
 interface Props {
   options: ExternalLinkOptions;
