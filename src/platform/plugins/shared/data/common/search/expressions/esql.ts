@@ -225,7 +225,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               ...(delayFilter ? [delayFilter] : []),
             ];
 
-            params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
+            const inputQuery = ignoreGlobalFilters ? [] : input.query || [];
+            params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
           }
 
           let startTime = Date.now();

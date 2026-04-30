@@ -21,6 +21,7 @@ interface Props {
 const runButtonStyles = css`
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
+  min-width: 74px;
 `;
 
 const RunComponent: React.FC<Props> = ({ isLoading, onGenerate, isDisabled }) => (

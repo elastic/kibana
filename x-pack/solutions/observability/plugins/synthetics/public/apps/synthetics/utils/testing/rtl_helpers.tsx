@@ -28,6 +28,7 @@ import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { mockState } from './__mocks__/synthetics_store.mock';
@@ -156,6 +157,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
         PageTemplate: KibanaPageTemplate,
       },
     },
+    charts: chartPluginMock.createStartContract(),
     exploratoryView: {
       createExploratoryViewUrl: jest.fn(),
       getAppDataView: jest.fn(),

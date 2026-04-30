@@ -24,9 +24,14 @@ export const workflowsExecutionEngineMock = {
     resumeWorkflowExecution: jest.fn(),
     scheduleWorkflow: jest.fn(),
     bulkScheduleWorkflow: jest.fn(),
-    isEventDrivenExecutionEnabled: jest.fn().mockReturnValue(true),
-    isLogTriggerEventsEnabled: jest.fn().mockReturnValue(true),
-    getMaxEventChainDepth: jest.fn().mockReturnValue(10),
-    getMaxWorkflowDepth: jest.fn().mockReturnValue(10),
+    triggerEvents: {
+      emitEvent: jest.fn().mockResolvedValue(undefined),
+      isEnabled: true,
+      isLogEventsEnabled: true,
+      maxEventChainDepth: 10,
+    },
+    config: {
+      maxWorkflowDepth: 10,
+    },
   } as jest.Mocked<WorkflowsExecutionEnginePluginStart>),
 };

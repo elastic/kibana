@@ -29,6 +29,7 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 
 /**
@@ -190,10 +191,8 @@ export const getCommaAndPipe = (
 
   // does the query end with whitespace?
   if (endsWithWhitespace(innerText)) {
-    // if so, comma needs to be sent back a column to replace the trailing space
-    commaSuggestion.rangeToReplace = {
-      start: innerText.length - 1,
-      end: innerText.length,
+    commaSuggestion.replacementRangeStrategy = {
+      kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };
   }
   // special case: cursor right after a column name
