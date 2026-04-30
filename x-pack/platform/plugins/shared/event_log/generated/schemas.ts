@@ -314,6 +314,27 @@ export const EventSchema = schema.maybe(
             ),
           })
         ),
+        alerting_v2: schema.maybe(
+          schema.object({
+            dispatcher: schema.maybe(
+              schema.object({
+                episode_count: ecsStringOrNumber(),
+                episode_ids: ecsStringMulti(),
+                rule_count: ecsStringOrNumber(),
+                rule_ids: ecsStringMulti(),
+                action_group_count: ecsStringOrNumber(),
+                action_group_ids: ecsStringMulti(),
+                workflow_ids: ecsStringMulti(),
+                workflow_execution_ids: ecsStringMulti(),
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                  })
+                ),
+              })
+            ),
+          })
+        ),
       })
     ),
   })

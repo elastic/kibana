@@ -97,6 +97,7 @@
                 "lineNumber": 22,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "Feature",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -133,6 +134,7 @@
                 "lineNumber": 27,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Feature",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -185,6 +187,7 @@
                 "lineNumber": 35,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseFeature",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -221,6 +224,7 @@
                 "lineNumber": 42,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "Feature",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -564,6 +568,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBaseSchema",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -581,6 +586,7 @@
             "lineNumber": 20,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "TNarrowSchema",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -634,6 +640,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DefinitionToESQLQueryOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -648,7 +655,15 @@
         "tags": [],
         "label": "deriveQueryType",
         "description": [
-          "\nDerives the canonical {@link QueryType} from an ES|QL query string\nby checking whether it contains a STATS command."
+          "\nDerives the canonical ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.QueryType",
+            "text": "QueryType"
+          },
+          " from an ES|QL query string\nby checking whether it contains a STATS command."
         ],
         "signature": [
           "(esql: string) => ",
@@ -738,6 +753,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IngestStreamEffectiveLifecycle",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1396,6 +1412,7 @@
             "lineNumber": 15,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldDefinitionConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1414,7 +1431,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 143,
+        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1430,7 +1447,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 143,
+            "lineNumber": 147,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
@@ -1451,7 +1468,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 163,
+        "lineNumber": 167,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1467,7 +1484,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 163,
+            "lineNumber": 167,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1516,6 +1533,7 @@
             "lineNumber": 59,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "GetDiscoverEsqlQueryOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1637,6 +1655,7 @@
             "lineNumber": 26,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "InsightImpactLevel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1682,6 +1701,7 @@
             "lineNumber": 11,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1946,7 +1966,7 @@
           "(id: string) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 134,
+        "lineNumber": 138,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1962,7 +1982,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 134,
+            "lineNumber": 138,
             "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
@@ -1983,7 +2003,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 167,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1999,7 +2019,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 167,
+            "lineNumber": 171,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -2068,7 +2088,15 @@
         "tags": [],
         "label": "getStatsQueryHints",
         "description": [
-          "\nReturns quality hints for STATS queries to feed back to the LLM.\nChecks for common structural issues in aggregate queries.\nReturns an empty array for non-STATS queries or when no issues are found.\n\nNote: This re-parses the ES|QL string (same as {@link hasStatsCommand}).\nThe double parse is intentional — callers may invoke only one of the two\nfunctions, and merging them would couple unrelated responsibilities."
+          "\nReturns quality hints for STATS queries to feed back to the LLM.\nChecks for common structural issues in aggregate queries.\nReturns an empty array for non-STATS queries or when no issues are found.\n\nNote: This re-parses the ES|QL string (same as ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.hasStatsCommand",
+            "text": "hasStatsCommand"
+          },
+          ").\nThe double parse is intentional — callers may invoke only one of the two\nfunctions, and merging them would couple unrelated responsibilities."
         ],
         "signature": [
           "(esql: string) => string[]"
@@ -2374,6 +2402,7 @@
             "lineNumber": 96,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2399,6 +2428,7 @@
             "lineNumber": 96,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2413,7 +2443,15 @@
         "tags": [],
         "label": "hasStatsCommand",
         "description": [
-          "\nReturns `true` when the ES|QL query contains a STATS command,\nindicating an aggregation-based (symptom) query rather than a\nrow-level (cause / match) query.\n\nWhen parsing succeeds the AST is inspected for a `stats` command.\nOn parse failure a regex fallback (`STATS_REGEX`) is used so that\nunparseable queries containing `| STATS` are still classified\ncorrectly rather than silently defaulting to `match`.\n\n**Limitation**: the regex fallback can misclassify if `| STATS`\nappears inside a string literal or comment. Callers in validation\npaths (e.g. {@link validateEsqlQueryForStreamOrThrow}) should\nparse independently so a parse failure surfaces before classification."
+          "\nReturns `true` when the ES|QL query contains a STATS command,\nindicating an aggregation-based (symptom) query rather than a\nrow-level (cause / match) query.\n\nWhen parsing succeeds the AST is inspected for a `stats` command.\nOn parse failure a regex fallback (`STATS_REGEX`) is used so that\nunparseable queries containing `| STATS` are still classified\ncorrectly rather than silently defaulting to `match`.\n\n**Limitation**: the regex fallback can misclassify if `| STATS`\nappears inside a string literal or comment. Callers in validation\npaths (e.g. ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.validateEsqlQueryForStreamOrThrow",
+            "text": "validateEsqlQueryForStreamOrThrow"
+          },
+          ") should\nparse independently so a parse failure surfaces before classification."
         ],
         "signature": [
           "(esql: string) => boolean"
@@ -2545,6 +2583,7 @@
             "lineNumber": 92,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2645,6 +2684,7 @@
             "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2783,6 +2823,7 @@
             "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -2842,6 +2883,7 @@
             "lineNumber": 104,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2867,6 +2909,7 @@
             "lineNumber": 104,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3020,6 +3063,7 @@
             "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3138,6 +3182,7 @@
             "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3187,6 +3232,7 @@
             "lineNumber": 143,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "FailureStore",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3233,6 +3279,7 @@
             "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3472,7 +3519,7 @@
           "(id: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 117,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3488,7 +3535,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 117,
+            "lineNumber": 121,
             "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
@@ -3545,6 +3592,7 @@
             "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3581,6 +3629,7 @@
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false
           }
         ],
@@ -3616,6 +3665,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSchema",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3702,6 +3752,7 @@
             "lineNumber": 131,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3727,6 +3778,7 @@
             "lineNumber": 131,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseFeature",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3780,7 +3832,15 @@
         "tags": [],
         "label": "normalizeEsqlSafe",
         "description": [
-          "\nLike {@link normalizeEsqlQuery} but never throws and additionally\nsorts commutative AND/OR operands so that `WHERE a AND b` and\n`WHERE b AND a` produce the same canonical string. Falls back to\nwhitespace normalization when the parser cannot handle the input."
+          "\nLike ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.normalizeEsqlQuery",
+            "text": "normalizeEsqlQuery"
+          },
+          " but never throws and additionally\nsorts commutative AND/OR operands so that `WHERE a AND b` and\n`WHERE b AND a` produce the same canonical string. Falls back to\nwhitespace normalization when the parser cannot handle the input."
         ],
         "signature": [
           "(esql: string) => string"
@@ -4018,6 +4078,7 @@
             "lineNumber": 113,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Feature",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -6735,7 +6796,15 @@
         "tags": [],
         "label": "bulkStreamQueryInputSchema",
         "description": [
-          "\nWire schema for the bulk endpoint index operations.\nSame as {@link upsertStreamQueryRequestSchema} but with `id` included,\nand `type` intentionally omitted — derived server-side."
+          "\nWire schema for the bulk endpoint index operations.\nSame as ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.upsertStreamQueryRequestSchema",
+            "text": "upsertStreamQueryRequestSchema"
+          },
+          " but with `id` included,\nand `type` intentionally omitted — derived server-side."
         ],
         "signature": [
           "any"
@@ -8009,7 +8078,7 @@
           "5"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 185,
+        "lineNumber": 189,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -9774,9 +9843,39 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { classic: { field_overrides?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicFieldDefinition",
+                "text": "ClassicFieldDefinition"
+              },
+              " | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
             "lineNumber": 144,
@@ -9795,9 +9894,39 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { classic: { field_overrides?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicFieldDefinition",
+                "text": "ClassicFieldDefinition"
+              },
+              " | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
             "lineNumber": 148,
@@ -9818,11 +9947,81 @@
               "BaseStream",
               ".GetResponse<",
               "BaseStream",
-              ".Definition>, ",
-              "BaseStream",
-              ".GetResponse<",
-              "BaseStream",
-              ".Definition>>"
+              ".Definition>, { dashboards: string[]; rules: string[]; queries: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              },
+              "[]; privileges: IngestStreamPrivileges; stream: { name: string; description: string; updated_at: string; type: any; ingest: { classic: { field_overrides?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicFieldDefinition",
+                "text": "ClassicFieldDefinition"
+              },
+              " | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }; data_stream_exists: boolean; effective_lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ClassicIngestStreamEffectiveLifecycle",
+                "text": "ClassicIngestStreamEffectiveLifecycle"
+              },
+              "; effective_settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; effective_failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.EffectiveFailureStore",
+                "text": "EffectiveFailureStore"
+              },
+              "; index_mode?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamIndexMode",
+                "text": "IngestStreamIndexMode"
+              },
+              " | undefined; replicated?: boolean | undefined; elasticsearch_assets?: ",
+              "ElasticsearchAssets",
+              " | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/classic.ts",
             "lineNumber": 152,
@@ -10467,7 +10666,9 @@
             "type": "number",
             "tags": [],
             "label": "critical",
-            "description": [],
+            "description": [
+              "Numeric impact level for sorting: 0 = critical, 1 = high, 2 = medium, 3 = low."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
             "lineNumber": 17,
             "columnNumber": 3,
@@ -10480,7 +10681,9 @@
             "type": "number",
             "tags": [],
             "label": "high",
-            "description": [],
+            "description": [
+              "Numeric impact level for sorting: 0 = critical, 1 = high, 2 = medium, 3 = low."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
@@ -10493,7 +10696,9 @@
             "type": "number",
             "tags": [],
             "label": "medium",
-            "description": [],
+            "description": [
+              "Numeric impact level for sorting: 0 = critical, 1 = high, 2 = medium, 3 = low."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
@@ -10506,7 +10711,9 @@
             "type": "number",
             "tags": [],
             "label": "low",
-            "description": [],
+            "description": [
+              "Numeric impact level for sorting: 0 = critical, 1 = high, 2 = medium, 3 = low."
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
             "lineNumber": 20,
             "columnNumber": 3,
@@ -11185,9 +11392,9 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; query: ",
+              "QueryWithEsql",
+              "; query_streams?: { name: string; }[] | undefined; field_descriptions?: Record<string, string> | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
             "lineNumber": 107,
@@ -11206,9 +11413,9 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; query: ",
+              "QueryWithEsql",
+              "; query_streams?: { name: string; }[] | undefined; field_descriptions?: Record<string, string> | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
             "lineNumber": 111,
@@ -11229,11 +11436,25 @@
               "BaseStream",
               ".GetResponse<",
               "BaseStream",
-              ".Definition>, ",
-              "BaseStream",
-              ".GetResponse<",
-              "BaseStream",
-              ".Definition>>"
+              ".Definition>, { dashboards: string[]; rules: string[]; queries: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              },
+              "[]; stream: { name: string; description: string; updated_at: string; type: any; query: ",
+              "QueryWithEsql",
+              "; query_streams?: { name: string; }[] | undefined; field_descriptions?: Record<string, string> | undefined; }; inherited_fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.InheritedFieldDefinition",
+                "text": "InheritedFieldDefinition"
+              },
+              "; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/index.ts",
             "lineNumber": 115,
@@ -11370,7 +11591,15 @@
         "tags": [],
         "label": "streamQuerySchema",
         "description": [
-          "\nThe `type` default exists for backward compatibility with pre-migration\nstored documents that lack a type field. For all new writes the type MUST\nbe derived server-side via {@link deriveQueryType} — never trust the default."
+          "\nThe `type` default exists for backward compatibility with pre-migration\nstored documents that lack a type field. For all new writes the type MUST\nbe derived server-side via ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.deriveQueryType",
+            "text": "deriveQueryType"
+          },
+          " — never trust the default."
         ],
         "signature": [
           "ZodType",
@@ -12211,9 +12440,47 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { wired: { fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; draft?: boolean | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
             "lineNumber": 154,
@@ -12232,9 +12499,47 @@
               "Validation",
               "<",
               "BaseStream",
-              ".Definition, ",
-              "BaseStream",
-              ".Definition>"
+              ".Definition, { name: string; description: string; updated_at: string; type: any; ingest: { wired: { fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; draft?: boolean | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
             "lineNumber": 158,
@@ -12255,11 +12560,89 @@
               "BaseStream",
               ".GetResponse<",
               "BaseStream",
-              ".Definition>, ",
-              "BaseStream",
-              ".GetResponse<",
-              "BaseStream",
-              ".Definition>>"
+              ".Definition>, { dashboards: string[]; rules: string[]; queries: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.StreamQuery",
+                "text": "StreamQuery"
+              },
+              "[]; privileges: IngestStreamPrivileges; stream: { name: string; description: string; updated_at: string; type: any; ingest: { wired: { fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "; routing: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RoutingDefinition",
+                "text": "RoutingDefinition"
+              },
+              "[]; draft?: boolean | undefined; }; lifecycle: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycle",
+                "text": "IngestStreamLifecycle"
+              },
+              "; processing: Record<any, any>; settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamSettings",
+                "text": "IngestStreamSettings"
+              },
+              "; failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FailureStore",
+                "text": "FailureStore"
+              },
+              "; }; query_streams?: { name: string; }[] | undefined; }; data_stream_exists: boolean; inherited_fields: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.InheritedFieldDefinition",
+                "text": "InheritedFieldDefinition"
+              },
+              "; effective_lifecycle: ",
+              "WiredIngestStreamEffectiveLifecycle",
+              "; effective_settings: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredIngestStreamEffectiveSettings",
+                "text": "WiredIngestStreamEffectiveSettings"
+              },
+              "; effective_failure_store: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredIngestStreamEffectiveFailureStore",
+                "text": "WiredIngestStreamEffectiveFailureStore"
+              },
+              "; index_mode?: ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamIndexMode",
+                "text": "IngestStreamIndexMode"
+              },
+              " | undefined; replicated?: boolean | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/wired.ts",
             "lineNumber": 162,
