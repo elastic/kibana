@@ -21,6 +21,19 @@ interface MaintenanceWindowResponse {
   id: string;
 }
 
+const deleteMaintenanceWindows = async (kbnClient: KbnClient, ids: string[]) => {
+  await Promise.allSettled(
+    ids.map((id) =>
+      kbnClient.request({
+        method: 'DELETE',
+        path: `/internal/alerting/rules/maintenance_window/${id}`,
+        headers: { 'kbn-xsrf': 'scout' },
+        ignoreErrors: [404],
+      })
+    )
+  );
+};
+
 const createMaintenanceWindow = async (
   kbnClient: KbnClient,
   body: Record<string, unknown>
@@ -33,6 +46,8 @@ const createMaintenanceWindow = async (
   });
   return res.data;
 };
+
+const getUniqueMaintenanceWindowName = (prefix: string) => `${prefix} ${Date.now()}`;
 
 const buildMwBody = (overrides: Record<string, unknown> = {}) => ({
   title: 'placeholder',
@@ -76,34 +91,23 @@ const openEditFlow = async (
 };
 
 test.describe('Maintenance window update form', { tag: tags.stateful.classic }, () => {
+  const createdMaintenanceWindowIds: string[] = [];
+
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    const findRes = await kbnClient.request<{ data: Array<{ id: string }> }>({
-      method: 'GET',
-      path: '/internal/alerting/rules/maintenance_window/_find',
-      headers: { 'kbn-xsrf': 'scout' },
-    });
-    const ids = findRes.data?.data?.map((mw) => mw.id) ?? [];
-    await Promise.allSettled(
-      ids.map((id) =>
-        kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/alerting/rules/maintenance_window/${id}`,
-          headers: { 'kbn-xsrf': 'scout' },
-          ignoreErrors: [404],
-        })
-      )
-    );
+    const idsToDelete = [...createdMaintenanceWindowIds];
+    createdMaintenanceWindowIds.length = 0;
+    await deleteMaintenanceWindows(kbnClient, idsToDelete);
   });
 
   test('updates a maintenance window', async ({ page, kbnClient, kbnUrl }) => {
-    const initialName = 'Test Maintenance Window';
-    const updatedName = 'Test Maintenance Window updated';
+    const initialName = getUniqueMaintenanceWindowName('Test Maintenance Window');
+    const updatedName = `${initialName} updated`;
 
-    await createMaintenanceWindow(kbnClient, {
+    const { id } = await createMaintenanceWindow(kbnClient, {
       ...buildMwBody({
         title: initialName,
         r_rule: {
@@ -116,6 +120,7 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
         category_ids: ['management', 'observability', 'securitySolution'],
       }),
     });
+    createdMaintenanceWindowIds.push(id);
 
     await openEditFlow(page, kbnUrl, initialName);
 
@@ -139,9 +144,9 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
     kbnClient,
     kbnUrl,
   }) => {
-    const name = 'Test Maintenance Window 2';
+    const name = getUniqueMaintenanceWindowName('Test Maintenance Window');
 
-    await createMaintenanceWindow(
+    const { id } = await createMaintenanceWindow(
       kbnClient,
       buildMwBody({
         title: name,
@@ -157,6 +162,7 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
         category_ids: ['observability', 'securitySolution'],
       })
     );
+    createdMaintenanceWindowIds.push(id);
 
     await openEditFlow(page, kbnUrl, name);
 
@@ -170,9 +176,9 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
     kbnClient,
     kbnUrl,
   }) => {
-    const name = 'New Maintenance Window';
+    const name = getUniqueMaintenanceWindowName('New Maintenance Window');
 
-    await createMaintenanceWindow(
+    const { id } = await createMaintenanceWindow(
       kbnClient,
       buildMwBody({
         title: name,
@@ -180,6 +186,7 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
         category_ids: ['management'],
       })
     );
+    createdMaintenanceWindowIds.push(id);
 
     await openEditFlow(page, kbnUrl, name);
 

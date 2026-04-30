@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/no-nth-methods */
-// The webhook header form renders an indexed list of identical
-// `webhookHeaderPanel` rows where individual cells share their
-// data-test-subj across rows; addressing row 0 vs row 1 by index is the only
-// way to distinguish them.
-
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../fixtures';
@@ -19,6 +14,8 @@ const WEBHOOK_CARD_SUBJ = '.webhook-card';
 const CREATE_CONNECTOR_BUTTON = 'createConnectorButton';
 const HEADER_KEY_INPUT = 'webhookHeadersKeyInput';
 const HEADER_VALUE_INPUT = 'webhookHeadersValueInput';
+const getHeaderRow = (page: ScoutPage, index: number) =>
+  page.testSubj.locator(`webhookHeaderRow-${index}`);
 
 test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
@@ -52,23 +49,19 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     // After toggling, one default empty header row is present. Add a second.
     await page.testSubj.click('webhookAddHeaderButton');
 
-    const headerKeys = page.testSubj.locator(HEADER_KEY_INPUT);
-    const headerValues = page.testSubj.locator(HEADER_VALUE_INPUT);
-    const headerTypeSelects = page.testSubj.locator('webhookHeaderTypeSelect');
+    const configHeaderRow = getHeaderRow(page, 0);
+    const secretHeaderRow = getHeaderRow(page, 1);
 
-    await expect(headerKeys).toHaveCount(2);
-    await expect(headerValues).toHaveCount(2);
-    await expect(headerTypeSelects).toHaveCount(2);
+    await expect(configHeaderRow).toBeVisible();
+    await expect(secretHeaderRow).toBeVisible();
 
-    // Config header (row 0)
-    await headerKeys.nth(0).fill('config-key');
-    await headerValues.nth(0).fill('config-value');
+    await configHeaderRow.getByTestId(HEADER_KEY_INPUT).fill('config-key');
+    await configHeaderRow.getByTestId(HEADER_VALUE_INPUT).fill('config-value');
 
-    // Secret header (row 1)
-    await headerKeys.nth(1).fill('secret-key');
-    await headerValues.nth(1).fill('secret-value');
+    await secretHeaderRow.getByTestId(HEADER_KEY_INPUT).fill('secret-key');
+    await secretHeaderRow.getByTestId(HEADER_VALUE_INPUT).fill('secret-value');
 
-    await headerTypeSelects.nth(1).click();
+    await secretHeaderRow.getByTestId('webhookHeaderTypeSelect').click();
     await page.testSubj.click('option-secret');
 
     const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');
@@ -140,19 +133,14 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     // The cell is a button-link to open the edit flyout.
     await rows.getByTestId('connectorsTableCell-name').locator('button').click();
 
-    const headerKeys = page.testSubj.locator(HEADER_KEY_INPUT);
-    await expect(headerKeys).toHaveCount(2);
-    await expect(headerKeys.nth(0)).toHaveValue('configHeader');
-    await expect(headerKeys.nth(1)).toHaveValue('secretHeader');
+    const configHeaderRow = getHeaderRow(page, 0);
+    const secretHeaderRow = getHeaderRow(page, 1);
+    await expect(configHeaderRow.getByTestId(HEADER_KEY_INPUT)).toHaveValue('configHeader');
+    await expect(secretHeaderRow.getByTestId(HEADER_KEY_INPUT)).toHaveValue('secretHeader');
 
     // The config header value is shown verbatim; the secret header value is
     // intentionally blanked so the encrypted secret is never displayed.
-    const configValue = page.testSubj.locator(HEADER_VALUE_INPUT);
-    await expect(configValue).toHaveCount(1);
-    await expect(configValue).toHaveValue('config-value');
-
-    const secretValue = page.testSubj.locator('webhookHeadersSecretValueInput');
-    await expect(secretValue).toHaveCount(1);
-    await expect(secretValue).toHaveValue('');
+    await expect(configHeaderRow.getByTestId(HEADER_VALUE_INPUT)).toHaveValue('config-value');
+    await expect(secretHeaderRow.getByTestId('webhookHeadersSecretValueInput')).toHaveValue('');
   });
 });

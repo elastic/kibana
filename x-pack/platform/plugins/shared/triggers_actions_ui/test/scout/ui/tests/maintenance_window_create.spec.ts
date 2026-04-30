@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -18,6 +18,10 @@ const FREQUENCY_SELECT = 'customRecurringScheduleFrequencySelect';
 const SUBMIT_BUTTON = 'create-submit';
 const TOAST_TITLE = 'euiToastHeader__title';
 const MULTIPLE_SOLUTIONS_WARNING = 'maintenanceWindowMultipleSolutionsRemovedWarning';
+
+interface MaintenanceWindowFindResponse {
+  data: Array<{ id: string; title: string }>;
+}
 
 // Native HTML <select> options carry the option's runtime `value` attribute
 // (e.g. rrule's Frequency.DAILY === 3). Rather than hard-coding numeric or
@@ -37,7 +41,47 @@ const selectNativeOptionByTestSubj = async (
   await page.testSubj.locator(selectSubj).selectOption(optionValue);
 };
 
+const getUniqueMaintenanceWindowName = (prefix: string) => `${prefix} ${Date.now()}`;
+
+const findMaintenanceWindowIdsByTitles = async (
+  kbnClient: KbnClient,
+  titles: string[]
+): Promise<string[]> => {
+  const idsByTitle = await Promise.all(
+    titles.map(async (title) => {
+      const response = await kbnClient.request<MaintenanceWindowFindResponse>({
+        method: 'GET',
+        path: `/internal/alerting/rules/maintenance_window/_find?search=${encodeURIComponent(
+          title
+        )}`,
+        headers: { 'kbn-xsrf': 'scout' },
+      });
+
+      return response.data.data
+        .filter((maintenanceWindow) => maintenanceWindow.title === title)
+        .map((maintenanceWindow) => maintenanceWindow.id);
+    })
+  );
+
+  return idsByTitle.flat();
+};
+
+const deleteMaintenanceWindows = async (kbnClient: KbnClient, ids: string[]) => {
+  await Promise.allSettled(
+    ids.map((id) =>
+      kbnClient.request({
+        method: 'DELETE',
+        path: `/internal/alerting/rules/maintenance_window/${id}`,
+        headers: { 'kbn-xsrf': 'scout' },
+        ignoreErrors: [404],
+      })
+    )
+  );
+};
+
 test.describe('Maintenance window create form', { tag: tags.stateful.classic }, () => {
+  const createdMaintenanceWindowTitles: string[] = [];
+
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/maintenanceWindows'));
@@ -45,26 +89,14 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    const findRes = await kbnClient.request<{ data: Array<{ id: string }> }>({
-      method: 'GET',
-      path: '/internal/alerting/rules/maintenance_window/_find',
-      headers: { 'kbn-xsrf': 'scout' },
-    });
-    const ids = findRes.data?.data?.map((mw) => mw.id) ?? [];
-    await Promise.allSettled(
-      ids.map((id) =>
-        kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/alerting/rules/maintenance_window/${id}`,
-          headers: { 'kbn-xsrf': 'scout' },
-          ignoreErrors: [404],
-        })
-      )
-    );
+    const ids = await findMaintenanceWindowIdsByTitles(kbnClient, createdMaintenanceWindowTitles);
+    createdMaintenanceWindowTitles.length = 0;
+    await deleteMaintenanceWindows(kbnClient, ids);
   });
 
   test('creates a maintenance window with a custom recurring schedule', async ({ page }) => {
-    const name = 'Test Maintenance Window';
+    const name = getUniqueMaintenanceWindowName('Test Maintenance Window');
+    createdMaintenanceWindowTitles.push(name);
 
     await page.testSubj.click(CREATE_BUTTON);
     await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
@@ -99,7 +131,8 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
   });
 
   test('shows a callout when filters toggle is on and scope query is set', async ({ page }) => {
-    const name = 'New Maintenance Window';
+    const name = getUniqueMaintenanceWindowName('New Maintenance Window');
+    createdMaintenanceWindowTitles.push(name);
 
     await page.testSubj.click(CREATE_BUTTON);
     await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();

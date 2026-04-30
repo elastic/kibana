@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule } from '../fixtures';
+import { test } from '../fixtures';
 
 const RULES_LIST_SUBJ = 'rulesList';
 const RULES_TAB_SUBJ = 'rulesTab';
@@ -17,24 +17,9 @@ const RULES_URL_RE = /\/app\/rules(\/|$|\?|#)/;
 const LOGS_URL_RE = /\/app\/rules\/logs(\/|$|\?|#)/;
 
 test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, () => {
-  let createdRuleId: string | undefined;
-
-  test.beforeAll(async ({ apiServices }) => {
-    const response = await apiServices.alerting.rules.create(
-      makeEsQueryRule('scout-tab-functionality')
-    );
-    createdRuleId = response.data.id;
-  });
-
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('rules');
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    if (createdRuleId) {
-      await apiServices.alerting.rules.delete(createdRuleId);
-    }
   });
 
   test('selects the Rules tab by default on load', async ({ page }) => {

@@ -7,29 +7,14 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule } from '../fixtures';
+import { test } from '../fixtures';
 
 const RULES_LIST_SUBJ = 'rulesList';
 
 test.describe('Rules page navigation and loading', { tag: tags.stateful.classic }, () => {
-  let createdRuleId: string | undefined;
-
-  test.beforeAll(async ({ apiServices }) => {
-    const response = await apiServices.alerting.rules.create(
-      makeEsQueryRule('scout-page-navigation')
-    );
-    createdRuleId = response.data.id;
-  });
-
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('rules');
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    if (createdRuleId) {
-      await apiServices.alerting.rules.delete(createdRuleId);
-    }
   });
 
   test('navigates to /app/rules successfully', async ({ page }) => {
