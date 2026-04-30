@@ -17,8 +17,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
 import React, { useState } from 'react';
+import {
+  EBT_CLICK_ACTION_OPEN_IN_DISCOVER,
+  EBT_CLICK_ACTION_OPEN_IN_APM,
+} from '@kbn/ebt-click-actions';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDiscoverHref } from '../../../../shared/links/discover_links/use_discover_href';
+import {
+  EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_DISCOVER,
+  EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_APM,
+} from '../../../../shared/trace_waterfall/ebt_constants';
 
 interface Props {
   traceId: string;
@@ -84,6 +92,8 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
                       <EuiContextMenuItem
                         key="discover"
                         data-test-subj="apmTraceWaterfallOpenInDiscover"
+                        data-ebt-action={EBT_CLICK_ACTION_OPEN_IN_DISCOVER}
+                        data-ebt-element={EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_DISCOVER}
                         href={discoverHref}
                         onClick={() => setIsPopoverOpen(false)}
                       >
@@ -98,6 +108,8 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
                       <EuiContextMenuItem
                         key="apm"
                         data-test-subj="apmTraceWaterfallOpenInApm"
+                        data-ebt-action={EBT_CLICK_ACTION_OPEN_IN_APM}
+                        data-ebt-element={EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_APM}
                         href={apmHref}
                         onClick={() => setIsPopoverOpen(false)}
                       >
