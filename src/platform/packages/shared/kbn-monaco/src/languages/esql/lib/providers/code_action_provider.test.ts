@@ -10,15 +10,71 @@
 import { getQuickFixForMessage } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { getCodeActionProvider } from './code_action_provider';
+import type { ESQLDependencies } from './types';
 
 jest.mock('@kbn/esql-language', () => ({
   getQuickFixForMessage: jest.fn(),
 }));
 
-describe('code_action_provider', () => {
+describe('Code actions provider', () => {
   const mockGetQuickFixForMessage = getQuickFixForMessage as jest.MockedFunction<
     typeof getQuickFixForMessage
   >;
+
+  describe('provideCodeActions', () => {
+    it('returns quick fixes from the language service when markers match editor messages', async () => {
+      mockGetQuickFixForMessage.mockResolvedValue({ title: 'Rewrite', fixedText: 'ROW 1' });
+
+      const uri = monaco.Uri.parse('inmemory://test');
+      const editorMessage = {
+        severity: monaco.MarkerSeverity.Error,
+        message: 'bad query',
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 10,
+        code: 'syntax.error',
+      };
+
+      const deps: ESQLDependencies = {
+        getEditorMessages: () => ({
+          errors: [editorMessage],
+          warnings: [],
+        }),
+      };
+
+      const marker: monaco.editor.IMarkerData = {
+        severity: editorMessage.severity,
+        message: editorMessage.message,
+        startLineNumber: editorMessage.startLineNumber,
+        startColumn: editorMessage.startColumn,
+        endLineNumber: editorMessage.endLineNumber,
+        endColumn: editorMessage.endColumn,
+      };
+
+      const model = {
+        getValue: jest.fn().mockReturnValue('FROM'),
+        isDisposed: () => false,
+        uri,
+        getFullModelRange: jest.fn().mockReturnValue(new monaco.Range(1, 1, 1, 100)),
+      } as unknown as monaco.editor.ITextModel;
+
+      const provider = getCodeActionProvider(deps);
+      const result = await provider.provideCodeActions(
+        model,
+        new monaco.Range(1, 1, 1, 10),
+        {
+          markers: [marker],
+          trigger: monaco.languages.CodeActionTriggerType.Invoke,
+        } as monaco.languages.CodeActionContext,
+        new monaco.CancellationTokenSource().token
+      );
+
+      expect(result?.actions).toHaveLength(1);
+      expect(result?.actions[0].title).toBe('Rewrite');
+      expect(mockGetQuickFixForMessage).toHaveBeenCalled();
+    });
+  });
 
   describe('disposed model', () => {
     it('returns an empty code action list and does not call the language service', async () => {

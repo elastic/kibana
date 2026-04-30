@@ -15,8 +15,57 @@ jest.mock('@kbn/esql-language', () => ({
   getSignatureHelp: jest.fn(),
 }));
 
-describe('signature_help_provider', () => {
+describe('Signature Help Provider', () => {
   const mockGetSignatureHelp = getSignatureHelp as jest.MockedFunction<typeof getSignatureHelp>;
+
+  describe('provideSignatureHelp', () => {
+    it('maps signature help from the language service', async () => {
+      mockGetSignatureHelp.mockResolvedValue({
+        signatures: [
+          {
+            label: 'COUNT()',
+            documentation: 'Counts values',
+            parameters: [{ label: 'field', documentation: 'Field to count' }],
+          },
+        ],
+        activeSignature: 0,
+        activeParameter: 0,
+      });
+
+      const model = {
+        getValue: jest.fn().mockReturnValue('COUNT('),
+        isDisposed: () => false,
+      } as unknown as monaco.editor.ITextModel;
+
+      const provider = getSignatureProvider();
+      const result = await provider.provideSignatureHelp(
+        model,
+        new monaco.Position(1, 7),
+        new monaco.CancellationTokenSource().token,
+        {
+          triggerCharacter: '(',
+          triggerKind: monaco.languages.SignatureHelpTriggerKind.Invoke,
+          isRetrigger: false,
+        }
+      );
+
+      expect(mockGetSignatureHelp).toHaveBeenCalled();
+      expect(result).toEqual({
+        value: {
+          signatures: [
+            {
+              label: 'COUNT()',
+              documentation: { value: 'Counts values' },
+              parameters: [{ label: 'field', documentation: { value: 'Field to count' } }],
+            },
+          ],
+          activeSignature: 0,
+          activeParameter: 0,
+        },
+        dispose: expect.any(Function),
+      });
+    });
+  });
 
   describe('disposed model', () => {
     it('returns null and does not call the language service', async () => {

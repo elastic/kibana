@@ -15,10 +15,33 @@ jest.mock('@kbn/esql-language', () => ({
   getDocumentHighlightItems: jest.fn(),
 }));
 
-describe('document_highlight_provider', () => {
+describe('Document highlight provider', () => {
   const mockGetDocumentHighlightItems = getDocumentHighlightItems as jest.MockedFunction<
     typeof getDocumentHighlightItems
   >;
+
+  describe('provideDocumentHighlights', () => {
+    it('maps highlight ranges from the language service', async () => {
+      mockGetDocumentHighlightItems.mockReturnValue([{ start: 0, end: 4 }]);
+
+      const model = {
+        getValue: jest.fn().mockReturnValue('FROM'),
+        isDisposed: () => false,
+      } as unknown as monaco.editor.ITextModel;
+
+      const provider = getDocumentHighlightProvider();
+      const result = await provider.provideDocumentHighlights(
+        model,
+        new monaco.Position(1, 2),
+        new monaco.CancellationTokenSource().token
+      );
+
+      expect(mockGetDocumentHighlightItems).toHaveBeenCalledWith('FROM', 1);
+      expect(result).toHaveLength(1);
+      expect(result![0].kind).toBe(monaco.languages.DocumentHighlightKind.Read);
+      expect(result![0].range).toBeInstanceOf(monaco.Range);
+    });
+  });
 
   describe('disposed model', () => {
     it('returns an empty highlight list and does not call the language service', async () => {

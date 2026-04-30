@@ -15,8 +15,34 @@ jest.mock('@kbn/esql-language', () => ({
   inlineSuggest: jest.fn(),
 }));
 
-describe('inline_completions_provider', () => {
+describe('Inline completion provider', () => {
   const mockInlineSuggest = inlineSuggest as jest.MockedFunction<typeof inlineSuggest>;
+
+  describe('provideInlineCompletions', () => {
+    it('returns inline suggestions from the language service', async () => {
+      mockInlineSuggest.mockResolvedValue({
+        items: [{ insertText: 'optional suggestion' }],
+      });
+
+      const fullText = 'FROM index';
+      const model = {
+        getValue: jest.fn().mockReturnValue(fullText),
+        getValueInRange: jest.fn().mockReturnValue(fullText),
+        isDisposed: () => false,
+      } as unknown as monaco.editor.ITextModel;
+
+      const provider = getInlineCompletionsProvider();
+      const result = await provider.provideInlineCompletions(
+        model,
+        new monaco.Position(1, fullText.length + 1),
+        {} as monaco.languages.InlineCompletionContext,
+        new monaco.CancellationTokenSource().token
+      );
+
+      expect(result).toEqual({ items: [{ insertText: 'optional suggestion' }] });
+      expect(mockInlineSuggest).toHaveBeenCalled();
+    });
+  });
 
   describe('disposed model', () => {
     it('returns an empty item list and does not call the language service', async () => {
