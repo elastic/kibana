@@ -1806,8 +1806,6 @@
       "@kbn/portable-dashboards-example/*": ["examples/portable_dashboards_example/*"],
       "@kbn/preboot-example-plugin": ["examples/preboot_example"],
       "@kbn/preboot-example-plugin/*": ["examples/preboot_example/*"],
-      "@kbn/presentation-panel-plugin": ["src/platform/plugins/private/presentation_panel"],
-      "@kbn/presentation-panel-plugin/*": ["src/platform/plugins/private/presentation_panel/*"],
       "@kbn/presentation-publishing": ["src/platform/packages/shared/presentation/presentation_publishing"],
       "@kbn/presentation-publishing/*": ["src/platform/packages/shared/presentation/presentation_publishing/*"],
       "@kbn/presentation-publishing-schemas": ["src/platform/packages/shared/presentation/presentation_publishing_schemas"],

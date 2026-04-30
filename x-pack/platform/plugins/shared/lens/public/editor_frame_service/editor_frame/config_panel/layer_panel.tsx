@@ -760,7 +760,7 @@ export function LayerPanel(props: LayerPanelProps) {
           panelRef={(el) => (settingsPanelRef.current = el)}
           isFullscreen={false}
           label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
-            defaultMessage: 'Layer settings',
+            defaultMessage: 'Settings',
           })}
           isOpen={isPanelSettingsOpen}
           handleClose={() => {
