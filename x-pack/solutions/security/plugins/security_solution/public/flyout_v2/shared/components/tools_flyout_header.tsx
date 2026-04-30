@@ -7,7 +7,7 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { Timestamp } from './timestamp';
 import { DocumentSeverity } from '../../document/components/severity';
@@ -73,9 +73,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="xs">
-                <Timestamp hit={hit} />
-              </EuiText>
+              <Timestamp hit={hit} size={'xs'} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

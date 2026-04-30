@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { HeaderTitle } from '../../flyout_v2/ioc_details/header_title';
+import { Header } from '../../flyout_v2/ioc_details/header';
+import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
@@ -30,6 +31,11 @@ export interface IOCFlyoutHeaderProps {
 export const IOCFlyoutHeader = ({ hit, servicesPromise, storePromise }: IOCFlyoutHeaderProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+
+  const indicator = useMemo<Indicator>(
+    () => ({ _id: hit.raw._id, fields: hit.flattened as Indicator['fields'] }),
+    [hit]
+  );
 
   useEffect(() => {
     let isCanceled = false;
@@ -62,6 +68,6 @@ export const IOCFlyoutHeader = ({ hit, servicesPromise, storePromise }: IOCFlyou
   return flyoutProviders({
     services,
     store,
-    children: <HeaderTitle hit={hit} />,
+    children: <Header indicator={indicator} />,
   });
 };
