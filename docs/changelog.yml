@@ -282,46 +282,29 @@ rules:
   #   #   - cloud-serverless
   #   #   - cloud-hosted
   #   # Type/area filtering:
-    exclude_types: "docs"
+    # exclude_types: "docs"
   #   # exclude_areas:
   #   #   - "Internal"
-  #   # Per-product overrides:
-      # products:
-        # 'cloud-serverless':
-        #   exclude_types:
-        #     - docs
-        # 'kibana':
-        #   exclude_types:
-        #     - docs
-          # match_areas: all
-          # exclude_areas:
-          # - "AI for security"
-          # - "Cloud security"
-          # - "Detection rules and alerts"
-          # - "Endpoint security"
-          # - "Entity analytics"
-          # - "Elastic Observability solution"
-          # - "Elastic Security solution"
-          # - "Investigations"
-        # 'observability':
-        #   exclude_types:
-        #     - docs
-          # Include changelogs that have (at least) the following areas:
+    # Per-product overrides:
+      products:
+        'cloud-serverless':
+          exclude_types:
+            - docs
+        'kibana':
+          exclude_types:
+            - docs
           # match_areas: any
           # include_areas:
-          #   - "Elastic Observability solution"
-        # 'security':
-        #   exclude_types:
-        #     - docs
-          # match_areas: any
-          # include_areas:
-          #   - "AI for security"
-          #   - "Cloud security"
-          #   - "Detection rules and alerts"
-          #   - "Endpoint security"
-          #   - "Elastic Security solution"   
-          #   - "Entity analytics"
-          #   - "Investigations"
+          #   - "Alerting and Reporting":
+          #   - "Dashboards and Visualizations"
+          #   - "Discover and ES|QL"
+          #   - Other
+        'observability':
+          exclude_types:
+            - docs
+        'security':
+          exclude_types:
+            - docs
 
 # Bundle configuration (profiles and defaults)
 bundle:
