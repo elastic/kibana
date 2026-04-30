@@ -184,10 +184,6 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    // The saved manifest is canonical: one entry per discovered module with the full
-    // set of `(arch, domain)` modes in `serverRunFlags`. Heavy-suite fan-out (one BK
-    // step per mode for streams_app/dashboard) is applied at scheduling time inside
-    // `pickScoutTestGroupRunOrder`, not here.
     saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
