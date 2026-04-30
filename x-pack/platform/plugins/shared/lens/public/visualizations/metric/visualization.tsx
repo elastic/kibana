@@ -111,6 +111,12 @@ const getMetricLayerConfiguration = (
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    if (props.state.applyColorTo === undefined) {
+      return {
+        triggerIconType: 'none',
+      };
+    }
+
     const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
