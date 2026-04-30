@@ -355,7 +355,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                 min-height: 0;
               `}
             >
-              {(errors || warnings) && (
+              {(errors || warnings) && errors !== NOT_READY_SENTINEL && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} warnings={warnings} />
                 </EuiFlexItem>

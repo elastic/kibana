@@ -262,7 +262,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                 min-height: 0;
               `}
             >
-              {errors && (
+              {errors && errors !== NOT_READY_SENTINEL && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} />
                 </EuiFlexItem>
