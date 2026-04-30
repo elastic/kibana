@@ -21,6 +21,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 import type { RulesClient } from './lib/rules_client';
@@ -39,6 +40,7 @@ export interface AlertingServerSetupDependencies {
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
 }
 

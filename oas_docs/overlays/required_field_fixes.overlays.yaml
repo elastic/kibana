@@ -6,11 +6,18 @@
 # in the parent required array. Each fix below uses remove + update because
 # the Bump overlay engine appends arrays on 'update' alone rather than replacing them.
 #
-# 0 schema(s) affected.
+# 1 schema(s) affected.
 
 overlay: 1.0.0
 info:
   title: Required-field fixes (auto-generated)
   version: 0.0.1
 actions:
+  - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body'].required"
+    description: "Remove x-oas-optional fields from required: sort, filters"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
 

@@ -29,7 +29,8 @@
       "kibanaUtils",
       "share",
       "unifiedDocViewer",
-      "maintenanceWindows"
+      "maintenanceWindows",
+      "eventLog"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],
