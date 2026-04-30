@@ -257,16 +257,19 @@ describe('CreateESQLRuleFlyout', () => {
     );
   });
 
-  it('should inline `time_literal` Controls by direct substitution (not via Composer)', async () => {
+  it('should treat `time_literal` Controls as unresolved (Composer cannot inline durations without quoting)', async () => {
     const { RuleFormFlyout } = await renderFlyout({
       esqlQuery: 'FROM logs* | WHERE @timestamp > NOW() - ?duration | LIMIT 5',
       esqlVariables: [{ key: 'duration', value: '15m', type: ESQLVariableType.TIME_LITERAL }],
     });
 
-    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
-    expect(lastCall.query).toContain('15m');
-    expect(lastCall.query).not.toContain('?duration');
-    expect(lastCall.validationErrors).toEqual([]);
+    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        validationErrors: ['?duration'],
+        query: 'FROM logs* | WHERE @timestamp > NOW() - ?duration | LIMIT 5',
+      }),
+      expect.anything()
+    );
   });
 
   it('should treat a `?param` with no matching Control as unresolved', async () => {
