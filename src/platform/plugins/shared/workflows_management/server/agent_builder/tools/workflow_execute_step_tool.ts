@@ -14,6 +14,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import {
   buildWorkflowLookup,
+  isNestedStepKey,
   isWorkflowValidationError,
   NESTED_STEP_KEYS,
   type StepInfo,
@@ -200,9 +201,9 @@ const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
 
     for (const pair of node.items) {
       if (YAML.isPair(pair) && YAML.isScalar(pair.key)) {
-        const key = pair.key.value as string;
+        const key = pair.key.value;
         if (
-          NESTED_STEP_KEYS.includes(key as (typeof NESTED_STEP_KEYS)[number]) &&
+          isNestedStepKey(key) &&
           key !== 'fallback' &&
           (YAML.isMap(pair.value) || YAML.isSeq(pair.value))
         ) {

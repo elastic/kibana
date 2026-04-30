@@ -55,6 +55,8 @@ export {
   inspectStep,
   getValueFromValueNode,
   NESTED_STEP_KEYS,
+  isNestedStepKey,
+  type NestedStepKey,
   type StepInfo,
   type StepPropInfo,
   type WorkflowLookup,

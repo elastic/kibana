@@ -83,6 +83,12 @@ export const NESTED_STEP_KEYS = [
   'fallback',
 ] as const;
 
+export type NestedStepKey = (typeof NESTED_STEP_KEYS)[number];
+
+export function isNestedStepKey(value: unknown): value is NestedStepKey {
+  return typeof value === 'string' && (NESTED_STEP_KEYS as readonly string[]).includes(value);
+}
+
 export function inspectStep(
   node: any,
   lineCounter: LineCounter,
@@ -104,8 +110,8 @@ export function inspectStep(
           }
         }
 
-        const keyValue = YAML.isScalar(item.key) ? (item.key.value as string) : undefined;
-        if (!keyValue || !NESTED_STEP_KEYS.includes(keyValue)) {
+        const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
+        if (!isNestedStepKey(keyValue)) {
           const currentParentStepId = stepId ?? parentStepId;
           Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId));
         }
@@ -114,8 +120,7 @@ export function inspectStep(
 
     node.items.forEach((item) => {
       if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-        const keyValue = item.key.value as string;
-        if (NESTED_STEP_KEYS.includes(keyValue)) {
+        if (isNestedStepKey(item.key.value)) {
           Object.assign(result, inspectStep(item.value, lineCounter, stepId ?? parentStepId));
         }
       }
@@ -130,7 +135,7 @@ export function inspectStep(
     const propNodes: Record<string, StepPropInfo> = {};
     node.items.forEach((innerNode) => {
       if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
-        if (!NESTED_STEP_KEYS.includes(innerNode.key.value as string)) {
+        if (!isNestedStepKey(innerNode.key.value)) {
           Object.assign(propNodes, visitStepProps(innerNode));
         }
       }
