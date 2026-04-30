@@ -31,9 +31,7 @@ export type AlertSeverity =
 
 /**
  * Ordered list of severity values from highest to lowest, intended for UX
- * surfaces (severity dropdowns, snooze condition pickers) and for runtime
- * validation in API schemas. The framework does NOT validate alert documents
- * against this list at write time; rule types may emit any keyword value.
+ * surfaces and for runtime validation in API schemas.
  */
 export const ALERT_SEVERITY_VALUES = [
   ALERT_SEVERITY_CRITICAL,
