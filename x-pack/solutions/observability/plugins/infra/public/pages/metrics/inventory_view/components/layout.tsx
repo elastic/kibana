@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from '@emotion/styled';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
@@ -23,8 +22,6 @@ import type { WaffleLegendOptions } from '../hooks/use_waffle_options';
 import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import type { InfraWaffleMapBounds } from '../../../../common/inventory/types';
 import { InfraFormatterType } from '../../../../common/inventory/types';
-import { Toolbar } from './toolbars/toolbar';
-import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { BottomDrawer } from './bottom_drawer';
@@ -54,7 +51,6 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     groupBy,
     sort,
     nodeType,
-    changeView,
     view,
     autoBounds,
     boundsOverride,
@@ -142,34 +138,22 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     <>
       <PageContent>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <TopActionContainer grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-              <Toolbar nodeType={nodeType} currentTime={currentTime} />
-              <EuiFlexGroup
-                responsive={false}
-                css={css`
-                  margin: 0;
-                  justify-content: flex-end;
-                `}
-              >
-                {view === 'map' && (
-                  <EuiFlexItem grow={false}>
-                    <LegendControls
-                      options={legend != null ? legend : DEFAULT_LEGEND}
-                      dataBounds={dataBounds}
-                      bounds={bounds}
-                      autoBounds={autoBounds}
-                      boundsOverride={boundsOverride}
-                      onChange={handleLegendControlChange}
-                    />
-                  </EuiFlexItem>
-                )}
+          {view === 'map' && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
                 <EuiFlexItem grow={false}>
-                  <ViewSwitcher view={view} onChange={changeView} />
+                  <LegendControls
+                    options={legend != null ? legend : DEFAULT_LEGEND}
+                    dataBounds={dataBounds}
+                    bounds={bounds}
+                    autoBounds={autoBounds}
+                    boundsOverride={boundsOverride}
+                    onChange={handleLegendControlChange}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexGroup>
-          </TopActionContainer>
+            </EuiFlexItem>
+          )}
           {nodeType === 'pod' &&
             (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) &&
             !loading && (
@@ -244,7 +228,3 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     </>
   );
 });
-
-const TopActionContainer = styled(EuiFlexItem)`
-  padding: ${(props) => `${props.theme.euiTheme.size.m} 0`};
-`;

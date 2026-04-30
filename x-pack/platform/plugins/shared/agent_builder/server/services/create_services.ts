@@ -21,7 +21,6 @@ import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
-import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import {
@@ -40,7 +39,6 @@ interface ServiceInstances {
   skills: SkillService;
   plugins: PluginsService;
   metering: MeteringService;
-  sml: SmlServiceInstance;
   consumption: ConsumptionService;
 }
 
@@ -68,7 +66,6 @@ export class ServiceManager {
       skills: createSkillService(),
       plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
-      sml: createSmlService(),
       consumption: createConsumptionService(),
     };
 
@@ -86,7 +83,6 @@ export class ServiceManager {
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
-      sml: this.services.sml.setup({ logger: logger.get('sml') }),
     };
 
     return this.internalSetup;
@@ -134,10 +130,6 @@ export class ServiceManager {
       spaces,
       savedObjects,
     });
-    const sml = this.services.sml.start({
-      logger: logger.get('sml'),
-      securityAuthz: securityPlugin?.authz,
-    });
 
     const tools = this.services.tools.start({
       getRunner,
@@ -175,6 +167,7 @@ export class ServiceManager {
       config: this.config,
       getToolRegistry: tools.getRegistry,
       analyticsService,
+      trackingService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -262,7 +255,6 @@ export class ServiceManager {
       featureFlags,
       uiSettings,
       savedObjects,
-      sml,
       plugins,
       consumption,
     };

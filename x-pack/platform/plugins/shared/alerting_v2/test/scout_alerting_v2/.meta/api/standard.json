@@ -1,5 +1,5 @@
 {
-  "sha1": "c61c3e7aded349fa68e4f788b71a60d2b6302402",
+  "sha1": "eb152f4faf1d23ef32cbf775c18490fc09fa6075",
   "tests": [
     {
       "id": "7d659b2da63538a-85f1c7853cd9e1b",
@@ -58,8 +58,92 @@
       }
     },
     {
-      "id": "c54256d5fae7766-1ffc5a96414cd09",
-      "title": "Search rules across all fields should find rules by name prefix",
+      "id": "0279d59e2a21a9f-ddebf96dc384bd8",
+      "title": "Rule Doctor insights API should list insights with pagination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "0279d59e2a21a9f-a6fa6908c6c9c51",
+      "title": "Rule Doctor insights API should filter insights by status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "0279d59e2a21a9f-3f2325366461873",
+      "title": "Rule Doctor insights API should get an insight by ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
+        "line": 125,
+        "column": 10
+      }
+    },
+    {
+      "id": "0279d59e2a21a9f-2ad7feca01bd359",
+      "title": "Rule Doctor insights API should return 404 for an unknown insight ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
+        "line": 136,
+        "column": 10
+      }
+    },
+    {
+      "id": "0279d59e2a21a9f-38f2a9fa2521b1e",
+      "title": "Rule Doctor insights API should update insight status from open to dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "0279d59e2a21a9f-d576e7c3f330958",
+      "title": "Rule Doctor insights API should return 404 when updating status of unknown insight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "c54256d5fae7766-a41bda64b59ff23",
+      "title": "Search rules by name and description should find rules by name prefix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -72,8 +156,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-17a591acd081538",
-      "title": "Search rules across all fields should find rules by description prefix",
+      "id": "c54256d5fae7766-9b60bc16fe20e1a",
+      "title": "Search rules by name and description should find rules by description prefix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -86,8 +170,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-ea09193c15d2484",
-      "title": "Search rules across all fields should find rules by tag prefix",
+      "id": "c54256d5fae7766-b3c19ceb2d2b713",
+      "title": "Search rules by name and description should AND multiple search terms together",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -100,8 +184,8 @@
       }
     },
     {
-      "id": "c54256d5fae7766-ba60b9b8326389f",
-      "title": "Search rules across all fields should find rules by grouping field prefix",
+      "id": "c54256d5fae7766-51e3dc1672dd5ab",
+      "title": "Search rules by name and description should return empty results when no fields match",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -109,35 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 128,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-10c2565fff624c3",
-      "title": "Search rules across all fields should AND multiple search terms together",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 168,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-705cb40b3eb7c20",
-      "title": "Search rules across all fields should return empty results when no fields match",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 203,
+        "line": 124,
         "column": 10
       }
     }

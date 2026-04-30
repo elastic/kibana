@@ -133,7 +133,12 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromUsersType(type, userName, identityFields, euid),
+    criteriaFields: getCriteriaFromUsersType({
+      type,
+      userName,
+      identityFields,
+      euid,
+    }),
     filterQuery: anomaliesInfluencersFilterQuery,
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
     aggregationInterval: selectedInterval,

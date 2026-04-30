@@ -86,6 +86,7 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
+  - src/platform/test/functional/apps/discover/embeddable_2/config.ts
   - src/platform/test/functional/apps/discover/esql_1/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_3/config.ts
@@ -205,6 +206,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group5/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group6/config.ts
+  - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group6/config_with_change_tracking_enabled.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/connector_types/stack/email_recipient_allowlist/config.ts
@@ -471,7 +473,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts
