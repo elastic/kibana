@@ -10,10 +10,13 @@
 import { readFileSync } from 'fs';
 import { access } from 'fs/promises';
 
-import { resolve, dirname } from 'path';
+import { basename, resolve, dirname } from 'path';
 import { asyncForEach } from '@kbn/std';
 import { Jsonc } from '@kbn/repo-packages';
-import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-server-internal';
+import {
+  discoverAllTranslationPaths,
+  getKibanaTranslationFiles,
+} from '@kbn/core-i18n-server-internal';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
@@ -37,9 +40,16 @@ export const CreateCdnAssets: Task = {
 
     const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
 
-    // translation files
+    // translation files: discover every locale that any plugin or package
+    // ships a translation file for, and bundle one CDN asset per locale.
+    // This allows admins to enable plugin- or admin-supplied locales via
+    // `i18n.locales` at runtime without rebuilding Kibana.
     const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));
-    for (const locale of supportedLocale) {
+    const allTranslationPaths = await discoverAllTranslationPaths(pluginPaths);
+    const discoveredLocales = Array.from(
+      new Set(allTranslationPaths.map((path) => basename(path, '.json')))
+    );
+    for (const locale of discoveredLocales) {
       const translationFileContent = await generateTranslationFile(locale, pluginPaths);
       await write(
         resolve(assets, buildSha, `translations`, `${locale}.json`),

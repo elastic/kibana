@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n, setAvailableLocales } from '@kbn/i18n';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
@@ -24,6 +24,8 @@ export async function __kbnBootstrap__() {
   const injectedMetadata: InjectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
+
+  setAvailableLocales(injectedMetadata.i18n.availableLocales ?? []);
 
   let i18nError: Error | undefined;
   const apmSystem = new ApmSystem(
