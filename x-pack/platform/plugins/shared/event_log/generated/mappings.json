@@ -743,6 +743,14 @@
                                     "meta": {
                                         "isArray": "true"
                                     }
+                                },
+                                "execution": {
+                                    "properties": {
+                                        "uuid": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        }
+                                    }
                                 }
                             }
                         }

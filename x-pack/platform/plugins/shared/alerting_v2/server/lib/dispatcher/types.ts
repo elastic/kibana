@@ -121,6 +121,7 @@ export interface LastNotifiedInfo {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
+  readonly executionUuid: string;
 }
 
 export interface DispatcherPipelineState {

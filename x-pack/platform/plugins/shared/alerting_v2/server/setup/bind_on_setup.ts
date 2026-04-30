@@ -14,13 +14,13 @@ import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
-import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
+import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
-  ActionPolicyExecutionEventLoggerToken,
-} from '../lib/dispatcher/steps/store_execution_history_step_tokens';
+} from '../lib/dispatcher/steps/constants';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -49,7 +49,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       alertingVTwo: {},
     }));
 
-    container.get(CoreSetup('uiSettings')).registerGlobal(dispatcherUiSettings);
+    const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
+    uiSettingsSetup.registerGlobal(alertingV2UiSettings);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
@@ -61,7 +62,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     const eventLogger = eventLogService.getLogger({
       event: { provider: ACTION_POLICY_EVENT_PROVIDER },
     });
-    container.bind(ActionPolicyExecutionEventLoggerToken).toConstantValue(eventLogger);
+    container.bind(EventLoggerToken).toConstantValue(eventLogger);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);

@@ -73,6 +73,7 @@
             "lineNumber": 178,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "ExecuteTypeCheckValidationOptions",
             "trackAdoption": false,
             "isRequired": true
           }

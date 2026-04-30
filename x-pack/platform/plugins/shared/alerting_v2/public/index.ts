@@ -21,7 +21,9 @@ import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+  ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
@@ -115,12 +117,36 @@ export const module = new ContainerModule(({ bind }) => {
       },
     });
 
+    getStartServices().then(([coreStart]) => {
+      const experimentalEnabled = coreStart.uiSettings.get<boolean>(
+        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+        false
+      );
+      if (experimentalEnabled) {
+        alertingV2Section.registerApp({
+          id: ALERTING_V2_RULE_DOCTOR_APP_ID,
+          title: i18n.translate('xpack.alertingV2.management.ruleDoctorNavTitle', {
+            defaultMessage: 'Rule Doctor',
+          }),
+          order: 4,
+          async mount(params) {
+            const { mountRuleDoctorApp } = await import('./application/mount');
+            return mountRuleDoctorApp({
+              params,
+              container: coreStart.injection.getContainer(),
+              coreStart,
+            });
+          },
+        });
+      }
+    });
+
     alertingV2Section.registerApp({
       id: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.executionHistoryNavTitle', {
         defaultMessage: 'Execution history',
       }),
-      order: 4,
+      order: 5,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountExecutionHistoryRedirect } = await import('./application/mount');

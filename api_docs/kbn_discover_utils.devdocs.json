@@ -94,6 +94,7 @@
                 "lineNumber": 30,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuItemType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -167,6 +168,7 @@
                 "lineNumber": 39,
                 "columnNumber": 54,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuPopoverItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -221,6 +223,7 @@
                 "lineNumber": 53,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuItemType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -330,6 +333,7 @@
                 "lineNumber": 69,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuPrimaryActionItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -403,6 +407,7 @@
                 "lineNumber": 78,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "DiscoverAppMenuPopoverItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -504,6 +509,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsHitRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -530,6 +536,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -740,6 +747,7 @@
                     "lineNumber": 54,
                     "columnNumber": 20,
                     "deprecated": false,
+                    "docsReferencedTypeName": "DataTableRecord",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -1280,6 +1288,7 @@
             "lineNumber": 31,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "DegradedDocsControlProps",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1327,6 +1336,7 @@
             "lineNumber": 36,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "LogsContextServiceDeps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1391,6 +1401,7 @@
             "lineNumber": 25,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1442,6 +1453,7 @@
             "lineNumber": 93,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DiscoverFlyouts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1526,6 +1538,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DiscoverFlyouts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1535,41 +1548,46 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.escapeAndPreserveHighlightTags",
+        "id": "def-common.formatFieldStringValueWithHighlights",
         "type": "Function",
         "tags": [],
-        "label": "escapeAndPreserveHighlightTags",
+        "label": "formatFieldStringValueWithHighlights",
         "description": [
-          "\nEscapes HTML in a string while preserving field-format highlight <mark> tags.\nUsed for values already processed by formatFieldValue / getHighlightHtml (e.g. resource badges)."
+          "\nFormats a value using the default string formatter with React output and search highlighting.\n\nThis is a convenience function for formatting values when you only have a field name (not a DataViewField).\nIt attempts to look up the field in the data view, falling back to a minimal field object with just the name.\nThis fallback ensures search highlighting still works even for fields not in the data view (e.g., OTel body.text).\n"
         ],
         "signature": [
-          "(value: string) => string"
+          "({ value, hit, fieldFormats, dataView, fieldName, options, }: ",
+          "FormatFieldStringWithHighlightsParams",
+          ") => React.ReactNode"
         ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-        "lineNumber": 23,
-        "columnNumber": 1,
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+        "lineNumber": 158,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.escapeAndPreserveHighlightTags.$1",
-            "type": "string",
+            "id": "def-common.formatFieldStringValueWithHighlights.$1",
+            "type": "Object",
             "tags": [],
-            "label": "value",
+            "label": "{\n  value,\n  hit,\n  fieldFormats,\n  dataView,\n  fieldName,\n  options,\n}",
             "description": [],
             "signature": [
-              "string"
+              "FormatFieldStringWithHighlightsParams"
             ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-            "lineNumber": 27,
-            "columnNumber": 48,
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+            "lineNumber": 158,
+            "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatFieldStringWithHighlightsParams",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A ReactNode that can be rendered directly"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1649,14 +1667,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
           },
@@ -1667,18 +1677,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/entities_data_table.tsx"
-          },
-          {
-            "plugin": "@kbn/discover-contextual-components",
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
-          },
-          {
-            "plugin": "@kbn/discover-contextual-components",
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
-          },
-          {
-            "plugin": "@kbn/discover-contextual-components",
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx"
           }
         ],
         "children": [
@@ -1723,6 +1721,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsHitRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1748,6 +1747,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormatsStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1774,6 +1774,7 @@
             "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1800,6 +1801,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1826,6 +1828,7 @@
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormatsContentType",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1903,6 +1906,7 @@
             "lineNumber": 100,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatFieldValueReactParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1946,6 +1950,7 @@
             "lineNumber": 122,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatFieldValueTextParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2040,6 +2045,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2063,6 +2069,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2086,6 +2093,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ShouldShowFieldInTableHandler",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2126,6 +2134,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormatsStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2187,6 +2196,7 @@
             "lineNumber": 38,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2237,6 +2247,149 @@
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_available_trace_fields.ts",
             "lineNumber": 22,
             "columnNumber": 41,
+            "deprecated": false,
+            "docsReferencedTypeName": "TraceFields",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getBreakdownField",
+        "type": "Function",
+        "tags": [],
+        "label": "getBreakdownField",
+        "description": [
+          "\nGet the breakdown field from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getBreakdownField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getBreakdownField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getChartHidden",
+        "type": "Function",
+        "tags": [],
+        "label": "getChartHidden",
+        "description": [
+          "\nGet the chart hidden state from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => boolean | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getChartHidden.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getChartHidden.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2498,6 +2651,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AggregateQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2742,6 +2896,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2817,64 +2972,9 @@
             "lineNumber": 76,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.getHighlightedFieldValue",
-        "type": "Function",
-        "tags": [],
-        "label": "getHighlightedFieldValue",
-        "description": [
-          "\nMerges ES highlight snippets into a field value, producing safe HTML with <mark> tags.\nReplicates the logic of getHighlightHtml from @kbn/field-formats-plugin, which packages\ncannot import directly.\n\nEach snippet in the highlights array is the full field value with ES highlight tags\naround matched terms. The function iterates over all snippets (handling multi-valued\nfields), strips the ES tags to find the matching text, and replaces those occurrences\nin the escaped field value with properly tagged <mark> elements."
-        ],
-        "signature": [
-          "(fieldValue: string, highlights: string[] | undefined) => string"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-        "lineNumber": 48,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getHighlightedFieldValue.$1",
-            "type": "string",
-            "tags": [],
-            "label": "fieldValue",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-            "lineNumber": 59,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getHighlightedFieldValue.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "highlights",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
-            "lineNumber": 60,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3030,6 +3130,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3150,6 +3251,7 @@
             "lineNumber": 21,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "LogDocumentOverview",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3298,6 +3400,7 @@
             "lineNumber": 117,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevelCoalescedValue",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3351,6 +3454,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevelCoalescedValue",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3369,6 +3473,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3420,6 +3525,7 @@
             "lineNumber": 19,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "LogDocumentOverview",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3580,6 +3686,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3704,6 +3811,7 @@
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3792,6 +3900,7 @@
             "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SortInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3815,6 +3924,7 @@
             "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3977,6 +4087,77 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getTableHidden",
+        "type": "Function",
+        "tags": [],
+        "label": "getTableHidden",
+        "description": [
+          "\nGet the table hidden state from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => boolean | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTableHidden.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTableHidden.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getTieBreakerFieldName",
         "type": "Function",
         "tags": [],
@@ -4023,6 +4204,7 @@
             "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4040,6 +4222,78 @@
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_es_query_sort.ts",
             "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Pick",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getTopPanelHeight",
+        "type": "Function",
+        "tags": [],
+        "label": "getTopPanelHeight",
+        "description": [
+          "\nGet the top panel height from local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string) => number | \"max-content\" | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTopPanelHeight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTopPanelHeight.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4110,6 +4364,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4197,6 +4452,7 @@
             "lineNumber": 50,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4305,6 +4561,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4326,6 +4583,359 @@
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
             "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "DataViewsServicePublic",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.setBreakdownField",
+        "type": "Function",
+        "tags": [],
+        "label": "setBreakdownField",
+        "description": [
+          "\nSet the breakdown field in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, breakdownField: string | undefined) => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 87,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setBreakdownField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setBreakdownField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setBreakdownField.$3",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.setChartHidden",
+        "type": "Function",
+        "tags": [],
+        "label": "setChartHidden",
+        "description": [
+          "\nSet the chart hidden state in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, chartHidden: boolean | undefined) => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setChartHidden.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setChartHidden.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setChartHidden.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chartHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.setTableHidden",
+        "type": "Function",
+        "tags": [],
+        "label": "setTableHidden",
+        "description": [
+          "\nSet the table hidden state in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, tableHidden: boolean | undefined) => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setTableHidden.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setTableHidden.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setTableHidden.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tableHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.setTopPanelHeight",
+        "type": "Function",
+        "tags": [],
+        "label": "setTopPanelHeight",
+        "description": [
+          "\nSet the top panel height in local storage"
+        ],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          ", localStorageKeyPrefix: string, topPanelHeight: number | \"max-content\") => false | void"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setTopPanelHeight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Storage",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setTopPanelHeight.$2",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.setTopPanelHeight.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "topPanelHeight",
+            "description": [],
+            "signature": [
+              "number | \"max-content\""
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5749,6 +6359,7 @@
                 "lineNumber": 36,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "RowControlComponent",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5772,6 +6383,7 @@
                 "lineNumber": 36,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "RowControlRowProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6702,6 +7314,23 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CHART_HIDDEN_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "CHART_HIDDEN_KEY",
+        "description": [],
+        "signature": [
+          "\"chartHidden\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.CLOUD_AVAILABILITY_ZONE_FIELD",
         "type": "string",
         "tags": [],
@@ -7269,6 +7898,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DiscoverAppMenuRunActionParams",
             "trackAdoption": false
           }
         ],
@@ -7594,6 +8224,40 @@
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.HISTOGRAM_BREAKDOWN_FIELD_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTOGRAM_BREAKDOWN_FIELD_KEY",
+        "description": [],
+        "signature": [
+          "\"histogramBreakdownField\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.HISTOGRAM_HEIGHT_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTOGRAM_HEIGHT_KEY",
+        "description": [],
+        "signature": [
+          "\"histogramHeight\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8199,6 +8863,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -8669,6 +9334,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TABLE_HIDDEN_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "TABLE_HIDDEN_KEY",
+        "description": [],
+        "signature": [
+          "\"tableHidden\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/local_storage_utils.ts",
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

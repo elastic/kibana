@@ -326,6 +326,11 @@ export const EventSchema = schema.maybe(
                 action_group_ids: ecsStringMulti(),
                 workflow_ids: ecsStringMulti(),
                 workflow_execution_ids: ecsStringMulti(),
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                  })
+                ),
               })
             ),
           })

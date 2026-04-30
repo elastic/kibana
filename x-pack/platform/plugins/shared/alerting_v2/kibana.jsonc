@@ -28,7 +28,8 @@
       "management",
       "kibanaUtils",
       "share",
-      "eventLog"
+      "eventLog",
+      "unifiedDocViewer"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],

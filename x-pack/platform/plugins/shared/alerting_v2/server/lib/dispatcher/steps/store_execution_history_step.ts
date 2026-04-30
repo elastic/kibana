@@ -6,9 +6,11 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { IEvent, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEvent } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../../services/event_log_service/tokens';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -19,11 +21,7 @@ import type {
   Rule,
   RuleId,
 } from '../types';
-import {
-  ACTION_POLICY_EVENT_ACTIONS,
-  ActionPolicyExecutionEventLoggerToken,
-  type ActionPolicyEventAction,
-} from './store_execution_history_step_tokens';
+import { ACTION_POLICY_EVENT_ACTIONS, type ActionPolicyEventAction } from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
 
 const RULE_REF_CAP = 50;
@@ -46,7 +44,7 @@ interface PolicySummary {
   workflowExecutionIds: Set<string>;
 }
 
-interface PolicySummaryAlertingV2Fields {
+interface PolicySummaryDispatcherFields {
   episode_count: number;
   episode_ids: string[];
   rule_count: number;
@@ -57,20 +55,20 @@ interface PolicySummaryAlertingV2Fields {
   workflow_execution_ids: string[];
 }
 
-interface UnmatchedAlertingV2Fields {
+interface UnmatchedDispatcherFields {
   episode_count: number;
   episode_ids: string[];
 }
 
-type AlertingV2Fields = PolicySummaryAlertingV2Fields | UnmatchedAlertingV2Fields;
+type DispatcherFields = PolicySummaryDispatcherFields | UnmatchedDispatcherFields;
 
 @injectable()
 export class StoreExecutionHistoryStep implements DispatcherStep {
   public readonly name = 'store_execution_history';
 
   constructor(
-    @inject(ActionPolicyExecutionEventLoggerToken)
-    private readonly eventLogger: IEventLogger
+    @inject(EventLogServiceToken)
+    private readonly eventLogService: EventLogServiceContract
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
@@ -88,10 +86,12 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     }
 
     const timestamp = input.startedAt.toISOString();
+    const { executionUuid } = input;
 
     for (const summary of aggregateByPolicy(dispatch, dispatchedExecutions).values()) {
       this.emitPolicySummary({
         timestamp,
+        executionUuid,
         summary,
         action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
         rules,
@@ -101,6 +101,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     for (const summary of aggregateByPolicy(throttled).values()) {
       this.emitPolicySummary({
         timestamp,
+        executionUuid,
         summary,
         action: ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
         rules,
@@ -111,7 +112,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
     for (const [ruleId, episodeIds] of unmatched) {
-      this.emitUnmatchedSummary({ timestamp, ruleId, episodeIds, rules });
+      this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
     }
 
     return { type: 'continue' };
@@ -119,11 +120,13 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
 
   private emitPolicySummary({
     timestamp,
+    executionUuid,
     summary,
     action,
     rules,
   }: {
     timestamp: string;
+    executionUuid: string;
     summary: PolicySummary;
     action: ActionPolicyEventAction;
     rules: Map<RuleId, Rule> | undefined;
@@ -144,13 +147,14 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       }),
     ];
 
-    this.eventLogger.logEvent(
+    this.eventLogService.logEvent(
       buildEvent({
         timestamp,
+        executionUuid,
         action,
         spaceId: summary.spaceId,
         savedObjects: refs,
-        alertingV2: {
+        dispatcherFields: {
           episode_count: summary.episodeIds.size,
           episode_ids: Array.from(summary.episodeIds),
           rule_count: summary.ruleIds.size,
@@ -166,23 +170,26 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
 
   private emitUnmatchedSummary({
     timestamp,
+    executionUuid,
     ruleId,
     episodeIds,
     rules,
   }: {
     timestamp: string;
+    executionUuid: string;
     ruleId: RuleId;
     episodeIds: Set<string>;
     rules: Map<RuleId, Rule> | undefined;
   }): void {
     const rule = rules?.get(ruleId);
-    this.eventLogger.logEvent(
+    this.eventLogService.logEvent(
       buildEvent({
         timestamp,
+        executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
         spaceId: rule?.spaceId ?? 'default',
         savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId, kind: rule?.kind })],
-        alertingV2: {
+        dispatcherFields: {
           episode_count: episodeIds.size,
           episode_ids: Array.from(episodeIds),
         },
@@ -269,16 +276,18 @@ function policyRef({ id, spaceId }: { id: string; spaceId: string }): SavedObjec
 
 function buildEvent({
   timestamp,
+  executionUuid,
   action,
   spaceId,
   savedObjects,
-  alertingV2,
+  dispatcherFields,
 }: {
   timestamp: string;
+  executionUuid: string;
   action: ActionPolicyEventAction;
   spaceId: string;
   savedObjects: SavedObjectRef[];
-  alertingV2: AlertingV2Fields;
+  dispatcherFields: DispatcherFields;
 }): IEvent {
   return {
     '@timestamp': timestamp,
@@ -286,7 +295,12 @@ function buildEvent({
     kibana: {
       saved_objects: savedObjects,
       space_ids: [spaceId],
-      alerting_v2: { dispatcher: alertingV2 },
+      alerting_v2: {
+        dispatcher: {
+          ...dispatcherFields,
+          execution: { uuid: executionUuid },
+        },
+      },
     },
   };
 }

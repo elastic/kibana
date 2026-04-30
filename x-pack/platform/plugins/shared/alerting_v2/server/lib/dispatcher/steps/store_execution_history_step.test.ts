@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import type { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { createEventLogService } from '../../services/event_log_service/event_log_service.mock';
 import {
   createActionGroup,
   createActionPolicy,
   createAlertEpisode,
+  createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
 } from '../fixtures/test_utils';
@@ -22,8 +24,9 @@ describe('StoreExecutionHistoryStep', () => {
   let step: StoreExecutionHistoryStep;
 
   beforeEach(() => {
-    eventLogger = eventLoggerMock.create();
-    step = new StoreExecutionHistoryStep(eventLogger);
+    const { eventLogService, mockEventLogger } = createEventLogService();
+    eventLogger = mockEventLogger;
+    step = new StoreExecutionHistoryStep(eventLogService);
   });
 
   it('emits one dispatched summary per policy with aggregated episode/rule/group counts', async () => {
@@ -100,6 +103,7 @@ describe('StoreExecutionHistoryStep', () => {
       action_group_ids: ['group-1', 'group-2'],
       workflow_ids: ['wf-a', 'wf-b'],
       workflow_execution_ids: ['exec-a', 'exec-b'],
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
   });
 
@@ -162,6 +166,7 @@ describe('StoreExecutionHistoryStep', () => {
       action_group_ids: ['group-1'],
       workflow_ids: ['wf-a'],
       workflow_execution_ids: [],
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
   });
 
@@ -201,12 +206,14 @@ describe('StoreExecutionHistoryStep', () => {
     expect(eventA?.kibana?.alerting_v2?.dispatcher).toEqual({
       episode_count: 2,
       episode_ids: ['ep-a1', 'ep-a2'],
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
 
     const eventB = byRuleId.get('rule-b');
     expect(eventB?.kibana?.alerting_v2?.dispatcher).toEqual({
       episode_count: 1,
       episode_ids: ['ep-b1'],
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
     expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('signal');
   });
@@ -235,6 +242,32 @@ describe('StoreExecutionHistoryStep', () => {
     expect(outcomes).toEqual(['success', 'success', 'success']);
     const unmatchedEvent = eventLogger.logEvent.mock.calls[2][0];
     expect(unmatchedEvent?.kibana?.alerting_v2?.dispatcher?.episode_ids).toEqual(['ep-unmatched']);
+  });
+
+  it('stamps the same execution.uuid on every event emitted in a single run', async () => {
+    const rule = createRule({ id: 'rule-1' });
+    const policy = createActionPolicy({ id: 'policy-1' });
+    const dispatched = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-dispatched' });
+    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-throttled' });
+    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-unmatched' });
+    const executionUuid = 'a1b2c3d4-e5f6-4789-9abc-def012345678';
+
+    await step.execute(
+      createDispatcherPipelineState({
+        input: createDispatcherPipelineInput({ executionUuid }),
+        dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', episodes: [dispatched] })],
+        throttled: [createActionGroup({ id: 'g2', policyId: 'policy-1', episodes: [throttledEp] })],
+        dispatchable: [dispatched, throttledEp, unmatchedEp],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+      })
+    );
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    const uuids = eventLogger.logEvent.mock.calls.map(
+      ([event]) => event?.kibana?.alerting_v2?.dispatcher?.execution?.uuid
+    );
+    expect(uuids).toEqual([executionUuid, executionUuid, executionUuid]);
   });
 
   it('short-circuits when there is nothing to record', async () => {
@@ -311,10 +344,10 @@ describe('StoreExecutionHistoryStep', () => {
 
     await step.execute(
       createDispatcherPipelineState({
-        input: {
+        input: createDispatcherPipelineInput({
           startedAt: new Date('2027-06-01T12:34:56.789Z'),
           previousStartedAt: new Date('2027-06-01T12:00:00.000Z'),
-        },
+        }),
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
       })
