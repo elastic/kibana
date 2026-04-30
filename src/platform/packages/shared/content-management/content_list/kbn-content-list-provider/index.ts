@@ -27,6 +27,20 @@ export type {
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
+
+// Phase.
+export {
+  useContentListPhase,
+  useIsInitialLoad,
+  useIsEmpty,
+  useIsFiltering,
+  useIsFiltered,
+  useIsPopulated,
+  derivePhase,
+  derivePhaseFromState,
+} from './src/phase';
+export type { ContentListPhase, DerivePhaseInput } from './src/phase';
+
 export {
   isFilterFacetConfig,
   useContentListSort,

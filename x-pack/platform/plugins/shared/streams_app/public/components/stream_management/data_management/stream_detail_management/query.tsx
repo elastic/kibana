@@ -22,9 +22,11 @@ import { StreamOverview } from '../../../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import type { ManagementTabs } from './wrapper';
+import { QueryStreamPartitioning } from '../stream_detail_routing/query_stream_partitioning';
 
 const queryStreamManagementSubTabs = [
   'overview',
+  'partitioning',
   'advanced',
   'schema',
   'significantEvents',
@@ -78,6 +80,15 @@ export function QueryStreamDetailManagement({
     };
   }
 
+  tabs.partitioning = {
+    content: (
+      <QueryStreamPartitioning definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: i18n.translate('xpack.streams.streamDetailView.partitioningTab', {
+      defaultMessage: 'Partitioning',
+    }),
+  };
+
   tabs.schema = {
     content: (
       <QueryStreamSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
@@ -119,7 +130,7 @@ export function QueryStreamDetailManagement({
     ),
   };
 
-  const defaultTab = overviewPage.enabled ? 'overview' : 'schema';
+  const defaultTab = overviewPage.enabled ? 'overview' : 'partitioning';
 
   if (!isValidManagementSubTab(tab, overviewPage.enabled) || !tabs[tab]?.content) {
     return (
