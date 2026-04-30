@@ -194,6 +194,7 @@
               "lineNumber": 37,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "CreateTagClientOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -253,6 +254,7 @@
               "lineNumber": 49,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "CreateTagAssignmentServiceOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -792,6 +794,7 @@
             "lineNumber": 23,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -949,7 +952,15 @@
         "tags": [],
         "label": "tagIdToReference",
         "description": [
-          "\nCreate a {@link SavedObjectReference | reference} for given tag id."
+          "\nCreate a ",
+          {
+            "pluginId": "savedObjectsTagging",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "reference"
+          },
+          " for given tag id."
         ],
         "signature": [
           "(tagId: string) => ",

@@ -64,6 +64,7 @@
             "lineNumber": 13,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CliOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -123,6 +124,7 @@
             "lineNumber": 16,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CliOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -146,6 +148,7 @@
             "lineNumber": 16,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }

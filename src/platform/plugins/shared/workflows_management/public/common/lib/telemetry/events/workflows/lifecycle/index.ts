@@ -201,6 +201,27 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
       optional: false,
     },
   },
+  hasTriggerWorkflowEventsIgnore: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any trigger sets on.workflowEvents: ignore',
+      optional: false,
+    },
+  },
+  hasTriggerWorkflowEventsAllow: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any trigger sets on.workflowEvents: allow-all',
+      optional: false,
+    },
+  },
+  hasTriggerWorkflowEventsAvoidLoop: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any trigger explicitly sets on.workflowEvents: avoid-loop',
+      optional: false,
+    },
+  },
 };
 
 const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
