@@ -19,6 +19,7 @@ import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_o
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import { OsqueryIcon } from './components/osquery_icon';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -155,6 +156,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      OsqueryIcon,
       OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
       fetchAllLiveQueries: useAllLiveQueries,
       fetchInstallationStatus: useFetchStatus,

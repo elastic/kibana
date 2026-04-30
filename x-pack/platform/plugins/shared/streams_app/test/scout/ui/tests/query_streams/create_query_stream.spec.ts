@@ -30,11 +30,11 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     await pageObjects.streams.gotoStreamMainPage();
   });
 
-  test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+  test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
     await deleteRootStreamViews(esClient);
     for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
       const esqlViewName = `$.${streamName}`;
-      await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
+      await deleteQueryStream(apiServices, esClient, streamName, esqlViewName, log);
     }
     await disableQueryStreams(kbnClient);
   });
@@ -53,12 +53,7 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     const rootQueryStreamEsqlQuery = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
     // create root query stream
-    await pageObjects.streams.clickCreateQueryStreamButton();
-    await expect(pageObjects.streams.queryStreamFlyout).toBeVisible();
-    await pageObjects.streams.fillRoutingRuleName(rootQueryStreamName);
-    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-    await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(rootQueryStreamEsqlQuery);
-    await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
+    await pageObjects.streams.createRootQueryStream(rootQueryStreamName, rootQueryStreamEsqlQuery);
     await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
 
     // root query stream created in the UI
@@ -90,11 +85,7 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     await pageObjects.streams.clickStreamNameLink(parentStreamName);
     await pageObjects.streams.gotoPartitioningTab(parentStreamName);
     await pageObjects.streams.selectChildStreamType('Query');
-    await pageObjects.streams.clickQueryModeCreateQueryStreamButton();
-    await pageObjects.streams.fillRoutingRuleName(childStreamName);
-    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-    await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
-    await pageObjects.streams.clickQueryStreamFormCreateButton();
+    await pageObjects.streams.createChildQueryStreamFromPartitioningTab(childStreamName, esqlQuery);
 
     // child query stream created appears in the UI
     await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();

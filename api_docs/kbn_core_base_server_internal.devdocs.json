@@ -108,6 +108,7 @@
                 "lineNumber": 15,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
