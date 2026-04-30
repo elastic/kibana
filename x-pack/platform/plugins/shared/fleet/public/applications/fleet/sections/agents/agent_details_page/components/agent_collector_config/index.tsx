@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 
 import type { Agent } from '../../../../../types';
 import { useGetAgentEffectiveConfigQuery } from '../../../../../hooks';
@@ -20,5 +20,10 @@ export const AgentCollectorConfig: React.FunctionComponent<{ agent: Agent }> = (
     return <EuiLoadingSpinner />;
   }
 
-  return <CollectorConfigView config={agentData?.effective_config ?? {}} />;
+  return (
+    <>
+      <CollectorConfigView config={agentData?.effective_config ?? {}} />
+      <EuiSpacer size="l" />
+    </>
+  );
 };
