@@ -8,10 +8,11 @@
  */
 
 import Fs from 'fs';
+import path from 'path';
 import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
-import { getRequiredEnv } from '#pipeline-utils';
+import { getKibanaDir, getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {
   name: string;
@@ -44,6 +45,12 @@ const scoutExtraEnv: Record<string, string> = Object.fromEntries(
     return value ? [[key, value]] : [];
   })
 );
+
+// Buildkite artifact name for the post-split ("scheduled") manifest produced by this
+// scheduler. Distinct from the canonical `scout_playwright_configs.json` that discovery
+// uploads so the two coexist without overwriting. `configs.sh` downloads this file when
+// resolving `SCOUT_CONFIG_GROUP_KEY` for child steps.
+const SCHEDULED_MANIFEST_FILENAME = 'scout_playwright_configs_scheduled.json';
 
 // Heavy-suite modules whose test runs are too slow to share a single Buildkite step
 // across every (arch, domain) mode. Substring match (e.g. `streams_app_api` is also
@@ -124,27 +131,25 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       : ['build_scout_tests', 'build'];
 
   // Apply the heavy-suite split here, at scheduling time, so each (arch, domain) mode
-  // for streams_app/dashboard gets its own Buildkite step.
+  // for module gets its own Buildkite step. The scheduled (post-split)
+  // manifest is uploaded as its own artifact (separate from the canonical one written
+  // by discovery) so child steps can resolve their `SCOUT_CONFIG_GROUP_KEY` against
+  // the same names emitted in the BK steps below.
   const scheduledModules = splitHeavyModulesByServerRunFlags(modulesWithTests);
+
+  const scheduledManifestPath = path.join(getKibanaDir(), SCHEDULED_MANIFEST_FILENAME);
+  Fs.writeFileSync(scheduledManifestPath, JSON.stringify(scheduledModules), 'utf-8');
+  bk.uploadArtifacts(SCHEDULED_MANIFEST_FILENAME);
 
   const scoutCiRunGroups = scheduledModules.map((module) => {
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
     const affectedPrefix = module.isAffected ? 'affected ' : '';
-
-    // A module is "split" when scheduling narrowed it to exactly one config with one
-    // (arch, domain) mode. Those steps pass SCOUT_CONFIG + SCOUT_SERVER_RUN_FLAGS
-    // directly, so configs.sh skips the manifest jq lookup and runs the targeted mode.
-    // Non-split modules keep the manifest-driven SCOUT_CONFIG_GROUP_KEY contract.
-    const isSplitModule =
-      module.configs.length === 1 && module.configs[0].serverRunFlags.length === 1;
-    const splitConfig = isSplitModule ? module.configs[0] : undefined;
 
     return {
       label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
       key: module.name,
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       group: module.group,
-      splitConfig,
     };
   });
 
@@ -154,26 +159,18 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       key: 'scout-configs',
       depends_on: SCOUT_CONFIGS_DEPS,
       steps: scoutCiRunGroups.map(
-        ({ label, key, group, agents, splitConfig }): BuildkiteStep => ({
+        ({ label, key, group, agents }): BuildkiteStep => ({
           label,
           command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
           timeout_in_minutes: 60,
           key,
           agents,
-          env: splitConfig
-            ? {
-                SCOUT_CONFIG: splitConfig.path,
-                SCOUT_SERVER_RUN_FLAGS: splitConfig.serverRunFlags[0],
-                SCOUT_CONFIG_GROUP_TYPE: group,
-                ...envFromlabels,
-                ...scoutExtraEnv,
-              }
-            : {
-                SCOUT_CONFIG_GROUP_KEY: key,
-                SCOUT_CONFIG_GROUP_TYPE: group,
-                ...envFromlabels,
-                ...scoutExtraEnv,
-              },
+          env: {
+            SCOUT_CONFIG_GROUP_KEY: key,
+            SCOUT_CONFIG_GROUP_TYPE: group,
+            ...envFromlabels,
+            ...scoutExtraEnv,
+          },
           retry: {
             automatic: [
               { exit_status: '-1', limit: 3 },

@@ -50,23 +50,25 @@ fi
 
 
 module_data=""
-# Download module_data if SCOUT_CONFIG_GROUP_KEY is set (needed for serverRunFlags)
-# This is required even when retrying, as we need module_data to get serverRunFlags for each config
+# Download module_data if SCOUT_CONFIG_GROUP_KEY is set (needed for serverRunFlags).
+# Resolve names against the SCHEDULED manifest (post-split) produced by
+# pickScoutTestGroupRunOrder, not the canonical discovery output — heavy-suite modules
+# (streams_app, dashboard) only exist under their split names (e.g. `dashboard-stateful-classic`)
+# in the scheduled manifest.
+SCHEDULED_MANIFEST="scout_playwright_configs_scheduled.json"
 if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- Downloading Scout Test Configuration"
-  download_artifact scout_playwright_configs.json .
+  download_artifact "$SCHEDULED_MANIFEST" .
 
-  # Extract module and its configs
-  module_data=$(jq -c ".[] | select(.name == env.SCOUT_CONFIG_GROUP_KEY)" scout_playwright_configs.json)
+  module_data=$(jq -c ".[] | select(.name == env.SCOUT_CONFIG_GROUP_KEY)" "$SCHEDULED_MANIFEST")
 
   if [[ -z "$module_data" ]]; then
-    echo "Module '${SCOUT_CONFIG_GROUP_KEY}' not found in scout_playwright_configs.json"
+    echo "Module '${SCOUT_CONFIG_GROUP_KEY}' not found in ${SCHEDULED_MANIFEST}"
     exit 1
   fi
 
   # Extract config paths only if configs is not already set (e.g., from retry logic)
   if [ -z "$configs" ]; then
-    # Extract config paths: process configs with their serverRunFlags directly
     configs=$(echo "$module_data" | jq -r '.configs[].path')
   fi
 fi
@@ -78,8 +80,8 @@ fi
 
 # Warn only when neither the manifest nor an explicit SCOUT_SERVER_RUN_FLAGS value is
 # available — that's the only case where serverRunFlags truly cannot be determined.
-# Heavy-suite split steps (pickScoutTestGroupRunOrder) and the flaky-test runner both
-# pass SCOUT_CONFIG + SCOUT_SERVER_RUN_FLAGS, which is fully supported below.
+# The flaky-test runner sets SCOUT_CONFIG + SCOUT_SERVER_RUN_FLAGS directly, which is
+# fully supported below.
 if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" && -z "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
   echo "⚠️ Warning: SCOUT_CONFIG is set but neither module_data nor SCOUT_SERVER_RUN_FLAGS is available."
   echo "   Server run flags cannot be determined from tags; tests may not run in the expected modes."
