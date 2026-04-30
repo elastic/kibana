@@ -102,15 +102,6 @@ export interface LensInspector {
   closeInspector: () => Promise<void | undefined>;
 }
 
-export interface CheckDuplicateTitleOptions {
-  id?: string;
-  title: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-}
-
 export interface LensSaveResult {
   savedObjectId: string;
 }

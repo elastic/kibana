@@ -43,8 +43,6 @@ describe('annotation group save action', () => {
   describe('save modal', () => {
     const modalSaveArgs = {
       newCopyOnSave: false,
-      isTitleDuplicateConfirmed: false,
-      onTitleDuplicate: () => {},
     };
 
     it('reports new saved object attributes', async () => {
@@ -83,7 +81,6 @@ describe('annotation group save action', () => {
         Array [
           Object {
             "closeModal": [Function],
-            "isTitleDuplicateConfirmed": false,
             "newCopyOnSave": false,
             "newDescription": "description",
             "newTags": Array [
@@ -92,7 +89,6 @@ describe('annotation group save action', () => {
               "tags",
             ],
             "newTitle": "title",
-            "onTitleDuplicate": [Function],
           },
         ]
       `);
@@ -175,8 +171,6 @@ describe('annotation group save action', () => {
           closeModal: jest.fn(),
           newTags: ['my-tag'],
           newCopyOnSave: false,
-          isTitleDuplicateConfirmed: false,
-          onTitleDuplicate: jest.fn(),
         },
         dataViews,
         goToAnnotationLibrary: () => Promise.resolve(),

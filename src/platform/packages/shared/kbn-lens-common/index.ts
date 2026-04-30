@@ -88,7 +88,6 @@ export type {
   InitializationOptions,
   LensInspector,
   ILensDocumentService,
-  CheckDuplicateTitleOptions,
   LensSaveResult,
   DatasourceFixAction,
   LensAttributesService,

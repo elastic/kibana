@@ -25,8 +25,6 @@ export type SaveDiscoverSessionParams = Pick<
   Partial<Pick<DiscoverSession, 'id'>>;
 
 export interface SaveDiscoverSessionOptions {
-  onTitleDuplicate?: () => void;
-  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
