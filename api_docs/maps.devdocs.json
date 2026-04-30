@@ -3669,7 +3669,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -3721,7 +3721,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -3827,7 +3827,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -4401,7 +4401,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -4453,7 +4453,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -4559,7 +4559,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5449,7 +5449,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5501,7 +5501,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5607,7 +5607,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6411,7 +6411,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6463,7 +6463,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6569,7 +6569,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7413,7 +7413,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -7465,7 +7465,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -7571,7 +7571,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8422,7 +8422,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -8474,7 +8474,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -8580,7 +8580,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9384,7 +9384,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9436,7 +9436,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9542,7 +9542,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10403,7 +10403,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -10455,7 +10455,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -10561,7 +10561,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11532,7 +11532,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -11584,7 +11584,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -11690,7 +11690,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12631,7 +12631,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -12683,7 +12683,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -12789,7 +12789,7 @@
                     "section": "def-common.FIELD_ORIGIN",
                     "text": "FIELD_ORIGIN"
                   },
-                  "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+                  "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13651,7 +13651,7 @@
                 "section": "def-common.FIELD_ORIGIN",
                 "text": "FIELD_ORIGIN"
               },
-              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+              "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -14405,7 +14405,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15761,7 +15761,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15813,7 +15813,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15919,7 +15919,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16829,7 +16829,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; readonly invert?: boolean | undefined; readonly minSize: number; readonly maxSize: number; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
+          "; }> | undefined; readonly invert?: boolean | undefined; readonly maxSize: number; readonly minSize: number; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "lineNumber": 72,
@@ -16887,7 +16887,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "lineNumber": 74,
@@ -17624,7 +17624,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17676,7 +17676,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17782,7 +17782,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -18425,7 +18425,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -18477,7 +18477,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -18583,7 +18583,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -18908,7 +18908,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -18960,7 +18960,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -19066,7 +19066,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -19241,7 +19241,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -19293,7 +19293,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -19399,7 +19399,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20320,7 +20320,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20372,7 +20372,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20478,7 +20478,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21390,7 +21390,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21442,7 +21442,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21548,7 +21548,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -22225,7 +22225,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -22277,7 +22277,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -22383,7 +22383,7 @@
             "section": "def-common.FIELD_ORIGIN",
             "text": "FIELD_ORIGIN"
           },
-          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          "; }> | undefined; invert?: boolean | undefined; } & { maxSize: number; minSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
