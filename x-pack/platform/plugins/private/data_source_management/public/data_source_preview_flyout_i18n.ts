@@ -43,6 +43,11 @@ export const dataSourcePreviewFlyoutStrings = {
     i18n.translate('dataSourceManagement.previewFlyout.deleteDataSetDescription', {
       defaultMessage: 'Delete this data set',
     }),
+
+  setsColumnResource: () =>
+    i18n.translate('dataSourceManagement.previewFlyout.setsColumnResource', {
+      defaultMessage: 'Resource',
+    }),
 };
 
 /** Preview page header / manage menu (full-page source detail). */
@@ -82,5 +87,10 @@ export const dataSourcePreviewPageStrings = {
   cancelButton: () =>
     i18n.translate('dataSourceManagement.previewPage.cancelButton', {
       defaultMessage: 'Cancel',
+    }),
+
+  editSourceFlyoutSave: () =>
+    i18n.translate('dataSourceManagement.previewPage.editSourceFlyoutSave', {
+      defaultMessage: 'Save changes',
     }),
 };

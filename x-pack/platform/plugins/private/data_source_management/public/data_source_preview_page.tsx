@@ -33,6 +33,9 @@ import {
   DataSourcePreviewDetails,
   DataSourcePreviewTitleWithType,
 } from './data_source_preview_shared';
+import { EditDataSourceFlyout } from './edit_data_source_flyout';
+import { AddDataSetFlyout } from './add_data_set_flyout';
+import type { AddDataSetFlyoutPayload } from './add_data_set_flyout';
 import { DATA_SOURCE_MANAGEMENT_ROUTES } from './data_source_management_routes';
 import { useDataSourceManagementAppContext } from './data_source_management_app_context';
 
@@ -51,6 +54,8 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
   const [source, setSource] = useState<DataSourceListItem | null | undefined>(undefined);
   const [dataSetItems, setDataSetItems] = useState<DataSetListItem[]>([]);
   const [isManagePopoverOpen, setManagePopoverOpen] = useState(false);
+  const [isEditFlyoutOpen, setEditFlyoutOpen] = useState(false);
+  const [isAddDataSetFlyoutOpen, setAddDataSetFlyoutOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,7 +97,52 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
 
   const handleEditSource = useCallback(() => {
     closeManagePopover();
+    setEditFlyoutOpen(true);
   }, [closeManagePopover]);
+
+  const handleCloseEditFlyout = useCallback(() => {
+    setEditFlyoutOpen(false);
+  }, []);
+
+  const handleCloseAddDataSetFlyout = useCallback(() => {
+    setAddDataSetFlyoutOpen(false);
+  }, []);
+
+  const handleAddDataSetSave = useCallback(
+    async (values: AddDataSetFlyoutPayload) => {
+      if (!source) {
+        return 'Unknown error';
+      }
+      try {
+        await dataSetsClient.add({
+          sourceName: source.name,
+          datasetId: values.datasetId,
+          resource: values.resource,
+          description: values.description,
+          partitionDetection: values.partitionDetection,
+        });
+        await refreshDataSets();
+        setAddDataSetFlyoutOpen(false);
+        return null;
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Unknown error';
+      }
+    },
+    [dataSetsClient, refreshDataSets, source]
+  );
+
+  const handleEditFlyoutSave = useCallback(
+    async (description: string) => {
+      if (!source) {
+        return;
+      }
+      await dataSourcesClient.updateDescription(source.id, description);
+      const nextSources = await dataSourcesClient.get();
+      setSource(nextSources.find((row) => row.id === sourceId) ?? null);
+      setEditFlyoutOpen(false);
+    },
+    [dataSourcesClient, source, sourceId]
+  );
 
   const handleDeleteSource = useCallback(() => {
     if (!source) {
@@ -137,10 +187,11 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
       <EuiContextMenuItem
         key="delete"
         icon="trash"
+        color="danger"
         data-test-subj="dataSourcePreviewDeleteSourceMenuItem"
         onClick={handleDeleteSource}
       >
-        <EuiText color="danger" size="s">
+        <EuiText size="s" color="inherit">
           {dataSourcePreviewPageStrings.deleteSourceMenuItem()}
         </EuiText>
       </EuiContextMenuItem>,
@@ -184,44 +235,61 @@ export const DataSourcePreviewPage: FunctionComponent<RouteComponentProps<MatchP
   }
 
   return (
-    <EuiPageSection paddingSize="m">
-      {/* EuiPageHeader reverses `rightSideItems` on wider breakpoints; primary CTA first so it stays rightmost. */}
-      <EuiPageHeader
-        bottomBorder
-        data-test-subj="dataSourceManagementPreviewPageHeader"
-        pageTitle={
-          <DataSourcePreviewTitleWithType
-            title={source.name}
-            source={source}
-            titleSize="l"
-            heading="h1"
-            titleTestSubj="dataSourceManagementPreviewPageTitle"
-          />
-        }
-        description={<DataSourcePreviewDescription source={source} variant="page" />}
-        rightSideItems={[
-          <EuiButton
-            key="dataSourcePreviewManageDataSets"
-            fill
-            data-test-subj="dataSourcePreviewAddDataSet"
-            onClick={() => {}}
-          >
-            {dataSourcePreviewFlyoutStrings.addDataSetButton()}
-          </EuiButton>,
-          <EuiPopover
-            key="dataSourcePreviewManage"
-            button={manageMenuButton}
-            isOpen={isManagePopoverOpen}
-            closePopover={closeManagePopover}
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-          >
-            <EuiContextMenuPanel size="s" items={manageMenuItems} />
-          </EuiPopover>,
-        ]}
-      />
-      <EuiSpacer size="l" />
-      <DataSourcePreviewDetails sets={previewSets} onDataSetsChanged={refreshDataSets} />
-    </EuiPageSection>
+    <>
+      <EuiPageSection paddingSize="m">
+        {/* EuiPageHeader reverses `rightSideItems` on wider breakpoints; primary CTA first so it stays rightmost. */}
+        <EuiPageHeader
+          bottomBorder
+          data-test-subj="dataSourceManagementPreviewPageHeader"
+          pageTitle={
+            <DataSourcePreviewTitleWithType
+              title={source.name}
+              source={source}
+              titleSize="l"
+              heading="h1"
+              titleTestSubj="dataSourceManagementPreviewPageTitle"
+            />
+          }
+          description={<DataSourcePreviewDescription source={source} variant="page" />}
+          rightSideItems={[
+            <EuiButton
+              key="dataSourcePreviewManageDataSets"
+              fill
+              data-test-subj="dataSourcePreviewAddDataSet"
+              onClick={() => setAddDataSetFlyoutOpen(true)}
+            >
+              {dataSourcePreviewFlyoutStrings.addDataSetButton()}
+            </EuiButton>,
+            <EuiPopover
+              key="dataSourcePreviewManage"
+              button={manageMenuButton}
+              isOpen={isManagePopoverOpen}
+              closePopover={closeManagePopover}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel size="s" items={manageMenuItems} />
+            </EuiPopover>,
+          ]}
+        />
+        <EuiSpacer size="l" />
+        <DataSourcePreviewDetails sets={previewSets} onDataSetsChanged={refreshDataSets} />
+      </EuiPageSection>
+      {isEditFlyoutOpen ? (
+        <EditDataSourceFlyout
+          source={source}
+          onClose={handleCloseEditFlyout}
+          onSave={handleEditFlyoutSave}
+        />
+      ) : null}
+      {isAddDataSetFlyoutOpen ? (
+        <AddDataSetFlyout
+          key={source.id}
+          sourceName={source.name}
+          onClose={handleCloseAddDataSetFlyout}
+          onSave={handleAddDataSetSave}
+        />
+      ) : null}
+    </>
   );
 };
