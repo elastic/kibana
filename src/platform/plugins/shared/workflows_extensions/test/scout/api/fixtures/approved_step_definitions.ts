@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'eb7dc95f4ed0ed0151051c77827c71d45ec4f17d22efff73d43f4e9f5741a2ee',
+    handlerHash: 'ee8c280a01262305768e617ba97723d50c1c13fd01f620825bece394aaf48ee6',
   },
   {
     id: 'ai.classify',
@@ -130,7 +130,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.deleteCases',
-    handlerHash: 'a18a2e1090962d85c945b12e16d13b53d21d08ad1dde449194f5e735d3cd7946',
+    handlerHash: '4fcd80128a7d6abe2da1645deae2823e4912271a49c0c9ba3e4121112ad0cd34',
   },
   {
     id: 'cases.deleteObservable',
@@ -138,15 +138,15 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.findCases',
-    handlerHash: '61ec2695a6ddba397c05b3845e9dbd3c66f9b299ed8568b8f4e7f3c187ff1c73',
+    handlerHash: 'e787e07fa01ca1f3f1ea070faeb78cd50447d1e02184aedcb2dd0d49aa9c6816',
   },
   {
     id: 'cases.findSimilarCases',
-    handlerHash: '647032606a8724390063eb7f093e84360b65ff6e44eecaa74222d7c557dfde02',
+    handlerHash: 'bc0f49aff3be36fbea2f169aa9bdd082b2cee5240af16b2f54ee9b931dee8412',
   },
   {
     id: 'cases.getAllAttachments',
-    handlerHash: '457c9c81535a0207aade08cf2bcc9f7a354f5760307da976ae8faca2d43338ee',
+    handlerHash: '32dc3d6f6e918e1cd89b6864bf275bfee7eb6de81e8eb3434d6b8e2c5b9af9b1',
   },
   {
     id: 'cases.getCase',
@@ -154,11 +154,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.getCases',
-    handlerHash: 'f5bb45aa044adfd07898a0ecd172f49d3d7580ca75a6c7fe5261487c6c6ae9e3',
+    handlerHash: 'f101c5ddc9e9f52611453c186a5ca1d33019e0ce4823c18c244deb7351928680',
   },
   {
     id: 'cases.getCasesByAlertId',
-    handlerHash: 'e2b50fd7bbbb6122db65f3a52ed78a4c24cb10304abf3927c69288ebb0f75fa7',
+    handlerHash: '0066f40a84dad03c0d745e43f342b72cc42a2d4ac3207533a9f7fe0695d79b78',
   },
   {
     id: 'cases.setCategory',
@@ -194,7 +194,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.updateCases',
-    handlerHash: '3ae63ce68db19a0ac7a7e6ccaba5807269c4ec035c37acf204713ae100048932',
+    handlerHash: 'd5b3622761a1c9a654a26b50f3f3f74c2d784d4ba8267dd21667d2014c94141b',
   },
   {
     id: 'cases.updateObservable',

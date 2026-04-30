@@ -14,22 +14,50 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
+const mockExperimentalFeature = (
+  flags: Partial<Record<'qradarRulesMigration' | 'sentinelRulesMigration', boolean>>
+) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (feature: 'qradarRulesMigration' | 'sentinelRulesMigration') => flags[feature] ?? false
+  );
+};
+
 describe('useMigrationSourceOptions', () => {
-  it('returns only Splunk option when QRadar feature is disabled', () => {
-    const { result } = renderHook(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-      return useMigrationSourceOptions();
-    });
-    expect(result.current.length).toEqual(1);
-    expect(result.current[0].value).toEqual(MigrationSource.SPLUNK);
+  it('returns only Splunk option when QRadar and Sentinel features are disabled', () => {
+    mockExperimentalFeature({});
+    const { result } = renderHook(() => useMigrationSourceOptions());
+
+    expect(result.current.map((option) => option.value)).toEqual([MigrationSource.SPLUNK]);
   });
-  it('returns Splunk and QRadar options when QRadar feature is enabled', () => {
-    const { result } = renderHook(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-      return useMigrationSourceOptions();
-    });
-    expect(result.current.length).toEqual(2);
-    expect(result.current[0].value).toEqual(MigrationSource.SPLUNK);
-    expect(result.current[1].value).toEqual(MigrationSource.QRADAR);
+
+  it('returns Splunk and QRadar options when only QRadar feature is enabled', () => {
+    mockExperimentalFeature({ qradarRulesMigration: true });
+    const { result } = renderHook(() => useMigrationSourceOptions());
+
+    expect(result.current.map((option) => option.value)).toEqual([
+      MigrationSource.SPLUNK,
+      MigrationSource.QRADAR,
+    ]);
+  });
+
+  it('returns Splunk and Sentinel options when only Sentinel feature is enabled', () => {
+    mockExperimentalFeature({ sentinelRulesMigration: true });
+    const { result } = renderHook(() => useMigrationSourceOptions());
+
+    expect(result.current.map((option) => option.value)).toEqual([
+      MigrationSource.SPLUNK,
+      MigrationSource.SENTINEL,
+    ]);
+  });
+
+  it('returns Splunk, QRadar, and Sentinel options when both features are enabled', () => {
+    mockExperimentalFeature({ qradarRulesMigration: true, sentinelRulesMigration: true });
+    const { result } = renderHook(() => useMigrationSourceOptions());
+
+    expect(result.current.map((option) => option.value)).toEqual([
+      MigrationSource.SPLUNK,
+      MigrationSource.QRADAR,
+      MigrationSource.SENTINEL,
+    ]);
   });
 });

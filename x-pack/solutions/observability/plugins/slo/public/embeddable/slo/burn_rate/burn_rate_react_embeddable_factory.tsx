@@ -56,7 +56,7 @@ export const getBurnRateEmbeddableFactory = ({
         slo_instance_id: '*',
         duration: '',
       });
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const reload$ = new Subject<boolean>();
 
       function serializeState(): BurnRateEmbeddableState {

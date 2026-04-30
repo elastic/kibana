@@ -168,6 +168,7 @@
                 "lineNumber": 32,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -225,6 +226,7 @@
                 "lineNumber": 44,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "NoDataPageStorybookParams",
                 "trackAdoption": false,
                 "isRequired": true
               }

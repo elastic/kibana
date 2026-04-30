@@ -51,6 +51,7 @@
             "lineNumber": 155,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -90,6 +91,7 @@
             "lineNumber": 159,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -129,6 +131,7 @@
             "lineNumber": 163,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -222,6 +225,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -351,6 +355,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -427,6 +432,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -446,6 +452,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleCreateProps",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -537,6 +544,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -554,6 +562,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -571,6 +580,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -624,6 +634,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -641,6 +652,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -730,6 +742,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -882,6 +895,7 @@
             "lineNumber": 139,
             "columnNumber": 75,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -962,6 +976,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1063,6 +1078,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1172,6 +1188,7 @@
             "lineNumber": 10,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertIds",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1385,6 +1402,7 @@
             "lineNumber": 15,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1495,6 +1513,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1518,6 +1537,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1684,6 +1704,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1786,6 +1807,7 @@
             "lineNumber": 98,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1825,6 +1847,7 @@
             "lineNumber": 80,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1953,6 +1976,7 @@
             "lineNumber": 12,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1970,6 +1994,7 @@
             "lineNumber": 12,
             "columnNumber": 66,
             "deprecated": false,
+            "docsReferencedTypeName": "Date",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2055,6 +2080,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2163,6 +2189,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2267,6 +2294,7 @@
             "lineNumber": 79,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2318,6 +2346,7 @@
             "lineNumber": 76,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2365,6 +2394,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuleExecutionStatus",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2388,6 +2418,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2439,6 +2470,7 @@
             "lineNumber": 73,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "WaitForRuleStatusParams",
             "trackAdoption": false,
             "isRequired": true
           }

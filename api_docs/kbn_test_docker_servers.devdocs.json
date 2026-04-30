@@ -306,6 +306,7 @@
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DockerServer",
                 "trackAdoption": false,
                 "isRequired": true
               },
