@@ -76,7 +76,7 @@ describe('formatResearcherActionHistory', () => {
       makeExecuteToolAction([{ toolCallId: 'c1', content: 'result' }]),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     const aiMsg = messages[0];
     expect(isAIMessage(aiMsg as AIMessage)).toBe(true);
@@ -92,7 +92,7 @@ describe('formatResearcherActionHistory', () => {
       makeExecuteToolAction([{ toolCallId: 'c1', content: 'result' }]),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     const aiMsg = messages[0];
     expect(isAIMessage(aiMsg as AIMessage)).toBe(true);
@@ -111,7 +111,7 @@ describe('formatResearcherActionHistory', () => {
       ]),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     const aiMsg = messages[0] as AIMessage;
     expect(aiMsg.tool_calls).toHaveLength(2);
@@ -126,7 +126,7 @@ describe('formatResearcherActionHistory', () => {
       makeBackgroundExecutionCompleteAction(makeCompletedExecution()),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     // Tool call (AI) + tool result + background notice (user message)
     const lastMessage = messages[messages.length - 1];
@@ -140,7 +140,7 @@ describe('formatResearcherActionHistory', () => {
       makeBackgroundExecutionCompleteAction(makeFailedExecution()),
     ];
 
-    const messages = formatResearcherActionHistory({ actions });
+    const messages = formatResearcherActionHistory({ actions, cycleLimit: 100 });
 
     expect(messages).toHaveLength(1);
     expect(isHumanMessage(messages[0] as any)).toBe(true);
