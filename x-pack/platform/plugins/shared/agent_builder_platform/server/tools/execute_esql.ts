@@ -40,6 +40,14 @@ const executeEsqlToolSchema = z.object({
     .optional()
     .default(100)
     .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
+  preview_rows: z
+    .number()
+    .optional()
+    .describe(
+      '(Optional) When set, the full result is stored in the filestore and only the first N rows are returned in context. ' +
+        'Use this when fetching large datasets that you intend to post-filter with the jq_filter tool. ' +
+        'The response will include a filestore_path you can pass to jq_filter.'
+    ),
 });
 
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
@@ -67,8 +75,14 @@ You should avoid using a higher limit value unless explicitly asked by the user 
 Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.`,
     schema: executeEsqlToolSchema,
     handler: async (
-      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
-      { esClient, attachments }
+      {
+        query: esqlQuery,
+        params: esqlParams = {},
+        time_range: explicitTimeRange,
+        limit = 100,
+        preview_rows,
+      },
+      { esClient, attachments, filestore }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -93,6 +107,45 @@ Note that this option can't be used to increase the number of results if the que
             params.reduce((acc, curr) => ({ ...acc, ...curr }), {})
           )
         : esqlQuery;
+
+      if (preview_rows !== undefined) {
+        const resultId = getToolResultId();
+        const filestorePath = `/scratch/esql_${resultId}.json`;
+
+        // Convert to row-objects so jq can address columns by name
+        const rows = result.values.map((row) =>
+          Object.fromEntries(result.columns.map((col, i) => [col.name, row[i]]))
+        );
+
+        await filestore.write(filestorePath, rows);
+
+        return {
+          results: [
+            {
+              type: ToolResultType.query,
+              data: { esql: interpolatedQuery },
+            },
+            {
+              tool_result_id: resultId,
+              type: ToolResultType.other,
+              data: {
+                preview: {
+                  columns: result.columns,
+                  values: result.values.slice(0, preview_rows),
+                },
+                total_rows: result.values.length,
+                filestore_path: filestorePath,
+                note:
+                  `Showing first ${Math.min(preview_rows, result.values.length)} of ${
+                    result.values.length
+                  } rows. ` +
+                  `Full result (as row objects) stored at filestore path. ` +
+                  `Use the jq_filter tool with that path to post-filter.`,
+              },
+            },
+          ],
+        };
+      }
 
       return {
         results: [

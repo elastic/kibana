@@ -47,9 +47,19 @@ export interface IFileStore {
 
 /**
  * Distinct interface for the API exposed to tool handlers.
- * The same for now, but will change in the future.
+ * Extends the read-only IFileStore with the ability to write scratch files.
  */
-export type IToolFileStore = IFileStore;
+export interface IToolFileStore extends IFileStore {
+  /**
+   * Write data to a scratch path in the filestore.
+   * Files written here persist for the duration of the agent run and can be
+   * read back by subsequent tool calls (e.g. jq_filter).
+   *
+   * @param path Absolute path within the filestore (e.g. `/scratch/my_data.json`)
+   * @param data The data to store
+   */
+  write(path: string, data: unknown): Promise<void>;
+}
 
 export interface DirEntryWithChildren extends DirEntry {
   children?: LsEntry[];

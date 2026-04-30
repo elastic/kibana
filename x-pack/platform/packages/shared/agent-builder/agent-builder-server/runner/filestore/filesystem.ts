@@ -13,6 +13,7 @@ export enum FileEntryType {
   attachment = 'attachment',
   skill = 'skill',
   skillReferenceContent = 'skill_reference_content',
+  scratch = 'scratch',
 }
 
 export type FileEntryMetadata<TExtraMeta extends object = {}> = {

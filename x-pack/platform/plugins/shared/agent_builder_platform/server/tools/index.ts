@@ -21,6 +21,7 @@ import { listIndicesTool } from './list_indices';
 import { indexExplorerTool } from './index_explorer';
 import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
+import { jqFilterTool } from './jq_filter';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
@@ -40,6 +41,7 @@ export const registerTools = ({
     getDocumentByIdTool(),
     executeEsqlTool(),
     generateEsqlTool(),
+    jqFilterTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),

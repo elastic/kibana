@@ -6,7 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { VirtualFileSystem } from './filesystem';
+import { VirtualFileSystem, MemoryVolume } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
@@ -16,10 +16,13 @@ export const createStore = ({ conversation }: { conversation?: Conversation }) =
 
   const resultStore = createResultStore({ conversation });
   const skillsStore = createSkillsStore({ skills: [] });
+  const scratchVolume = new MemoryVolume('scratch');
+
   filesystem.mount(resultStore.getVolume());
   filesystem.mount(skillsStore.getVolume());
+  filesystem.mount(scratchVolume);
 
-  const filestore = new FileSystemStore({ filesystem });
+  const filestore = new FileSystemStore({ filesystem, scratchVolume });
 
   return {
     filesystem,

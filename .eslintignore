@@ -37,3 +37,5 @@ snapshots.js
 /src/platform/packages/shared/kbn-workflows/spec/elasticsearch/generated/**
 /src/platform/packages/shared/kbn-workflows/spec/kibana/generated/**
 /x-pack/platform/plugins/shared/screenshotting/chromium
+
+/x-pack/platform/plugins/shared/agent_builder_platform/server/tools/jq/jq_impl.ts

@@ -6,21 +6,50 @@
  */
 
 import type {
-  IFileStore,
+  IToolFileStore,
   FsEntry,
   FileEntry,
   LsEntry,
   GrepMatch,
   DirEntryWithChildren,
 } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { IVirtualFileSystem } from './filesystem';
 import { normalizePath, dirname } from './filesystem/path_utils';
+import type { MemoryVolume } from './filesystem';
 
-export class FileSystemStore implements IFileStore {
+export class FileSystemStore implements IToolFileStore {
   private readonly filesystem: IVirtualFileSystem;
+  private readonly scratchVolume: MemoryVolume;
 
-  constructor({ filesystem }: { filesystem: IVirtualFileSystem }) {
+  constructor({
+    filesystem,
+    scratchVolume,
+  }: {
+    filesystem: IVirtualFileSystem;
+    scratchVolume: MemoryVolume;
+  }) {
     this.filesystem = filesystem;
+    this.scratchVolume = scratchVolume;
+  }
+
+  async write(path: string, data: unknown): Promise<void> {
+    const stringified = JSON.stringify(data, undefined, 2);
+    this.scratchVolume.add({
+      path,
+      type: 'file',
+      metadata: {
+        type: FileEntryType.scratch,
+        id: path,
+        token_count: estimateTokens(stringified),
+        readonly: false,
+      },
+      content: {
+        raw: data as object,
+        plain_text: stringified,
+      },
+    });
   }
 
   /**
