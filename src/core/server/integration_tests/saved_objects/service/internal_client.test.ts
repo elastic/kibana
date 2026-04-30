@@ -79,7 +79,7 @@ describe('SavedObjects Internal Client Integration', () => {
     start = await root.start();
     internalClient = start.savedObjects.getUnsafeInternalClient();
     // FIPS-mode Kibana startup (SavedObjects migrations + TLS overhead) exceeds the default ~280 s budget.
-  }, 60 * 1000);
+  }, 7 * 60 * 1000);
 
   afterAll(async () => {
     await root?.shutdown();
