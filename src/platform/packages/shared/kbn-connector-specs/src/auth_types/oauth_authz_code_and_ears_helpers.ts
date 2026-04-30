@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as connectorsSpecs from './src/all_specs';
-export type * from './src/connector_spec';
-
-export * as authTypeSpecs from './src/all_auth_types';
-export { EARS_PROVIDERS } from './src/auth_types/ears';
-
-export { getConnectorSpec } from './src/get_connector_spec';
-export { isToolAction } from './src/connector_spec';
-export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
+/**
+ * OAuth token responses often use `token_type: "bearer"` (lowercase). If the stored header begins
+ * with `bearer ` (after trim), rewrites the scheme to `Bearer `; otherwise returns the trimmed value.
+ */
+export function normalizeAuthorizationHeaderValue(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('bearer ')) {
+    return `Bearer ${trimmed.slice('bearer '.length)}`;
+  }
+  return trimmed;
+}
