@@ -6,7 +6,7 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,

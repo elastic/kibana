@@ -76,6 +76,10 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     const agentBuilderToken =
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
+    const agentContextLayerToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentContextLayer']>>(
+        'agentContextLayer'
+      );
     if (container.isBound(agentBuilderToken)) {
       const agentBuilder = container.get(agentBuilderToken);
       const getScopedRulesClient = buildScopedRulesClientFactory(() =>
@@ -87,11 +91,16 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
           getRulesClient: (context) => getScopedRulesClient(context.request),
         }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
       );
-      const getInternalRepository = () =>
-        container.get(CoreStart('savedObjects')).createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
-      agentBuilder.sml.registerType(
-        createRuleSmlType({ getScopedRulesClient, getInternalRepository })
-      );
+      if (container.isBound(agentContextLayerToken)) {
+        const agentContextLayer = container.get(agentContextLayerToken);
+        const getInternalRepository = () =>
+          container
+            .get(CoreStart('savedObjects'))
+            .createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
+        agentContextLayer.registerType(
+          createRuleSmlType({ getScopedRulesClient, getInternalRepository })
+        );
+      }
 
       const getStartServices = container.get(CoreSetup('getStartServices'));
       getStartServices()

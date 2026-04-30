@@ -69,9 +69,9 @@ export const module = new ContainerModule(({ bind }) => {
         import(
           /* webpackChunkName: "alerting_v2_rule_attachment" */
           './agent_builder/attachments/rule_attachment_definition'
-        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE }) => {
+        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE: ruleAttachmentType }) => {
           agentBuilder.attachments.addAttachmentType(
-            RULE_ATTACHMENT_TYPE,
+            ruleAttachmentType,
             createRuleAttachmentDefinition({
               rulesApi,
               application: coreStart.application,

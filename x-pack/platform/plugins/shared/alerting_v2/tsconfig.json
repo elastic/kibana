@@ -103,6 +103,7 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-context-layer-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server"
   ],
