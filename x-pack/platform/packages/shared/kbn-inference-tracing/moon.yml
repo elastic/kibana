@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/std'
   - '@kbn/tracing-utils'
+  - '@kbn/core'
 tags:
   - shared-server
   - package
