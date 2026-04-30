@@ -26,10 +26,16 @@ describe('convertPrebuiltRuleAssetSearchTermToKQL', () => {
 
 describe('buildPrebuiltRuleInstallationKql', () => {
   it('returns undefined when filter and search are empty', () => {
-    expect(buildPrebuiltRuleInstallationKql({ filter: undefined, search: undefined })).toBeUndefined();
+    expect(
+      buildPrebuiltRuleInstallationKql({ filter: undefined, search: undefined })
+    ).toBeUndefined();
     expect(buildPrebuiltRuleInstallationKql({ filter: '  ', search: undefined })).toBeUndefined();
-    expect(buildPrebuiltRuleInstallationKql({ filter: undefined, search: { term: '' } })).toBeUndefined();
-    expect(buildPrebuiltRuleInstallationKql({ filter: '  ', search: { term: '  ' } })).toBeUndefined();
+    expect(
+      buildPrebuiltRuleInstallationKql({ filter: undefined, search: { term: '' } })
+    ).toBeUndefined();
+    expect(
+      buildPrebuiltRuleInstallationKql({ filter: '  ', search: { term: '  ' } })
+    ).toBeUndefined();
   });
 
   it('returns only filter when search is absent', () => {

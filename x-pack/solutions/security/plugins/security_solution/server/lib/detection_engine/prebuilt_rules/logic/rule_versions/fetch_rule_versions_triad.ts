@@ -40,9 +40,7 @@ export async function fetchRuleVersionsTriad({
       ? ruleAssetsClient.fetchAssetsByVersion(versionSpecifiers)
       : ruleAssetsClient.fetchLatestAssets(),
   ]);
-  const latestRules = Array.isArray(latestRulesFetch)
-    ? latestRulesFetch
-    : latestRulesFetch.assets;
+  const latestRules = Array.isArray(latestRulesFetch) ? latestRulesFetch : latestRulesFetch.assets;
   const { assets: baseRules } = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
   return zipRuleVersions(currentRules, baseRules, latestRules);
 }
