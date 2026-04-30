@@ -17,7 +17,6 @@ import { useStore } from 'react-redux';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../common/types/session_view';
-import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
 import { PREFIX } from '../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useKibana } from '../../common/lib/kibana';
@@ -25,6 +24,7 @@ import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
+import { openDocumentFlyout } from '../document/open_document_flyout';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -88,25 +88,19 @@ export const SessionView: FC<SessionViewProps> = memo(
 
     const openAlertDetails = useCallback(
       (alertId: string, alertIndex: string, onClose?: () => void) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={alertId}
-                indexName={alertIndex}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-          }
-        ),
+        openDocumentFlyout({
+          overlays,
+          services,
+          store,
+          history,
+          documentId: alertId,
+          indexName: alertIndex,
+          renderCellActions,
+          onAlertUpdated,
+          defaultFlyoutProperties,
+          session: 'inherit',
+          onClose,
+        }),
       [
         defaultFlyoutProperties,
         history,

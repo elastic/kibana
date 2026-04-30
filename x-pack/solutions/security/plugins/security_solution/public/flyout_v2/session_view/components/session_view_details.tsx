@@ -12,8 +12,6 @@ import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { DocumentFlyoutWrapper } from '../../document/document_flyout_wrapper';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { type CustomProcess } from '../../../flyout/document_details/session_view/context';
 import { AlertsTab } from './alerts_tab';
@@ -21,6 +19,7 @@ import { MetadataTab } from './metadata_tab';
 import { ProcessTab } from './process_tab';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { openDocumentFlyout } from '../../document/open_document_flyout';
 
 export const SESSION_VIEW_DETAILS_TEST_ID = `${PREFIX}SessionViewDetails` as const;
 
@@ -81,25 +80,18 @@ export const SessionViewDetails = memo(
 
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={alertId}
-                indexName={alertIndex}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-          }
-        );
+        openDocumentFlyout({
+          overlays,
+          services,
+          store,
+          history,
+          documentId: alertId,
+          indexName: alertIndex,
+          renderCellActions,
+          onAlertUpdated,
+          defaultFlyoutProperties,
+          session: 'inherit',
+        });
       },
       [
         defaultFlyoutProperties,

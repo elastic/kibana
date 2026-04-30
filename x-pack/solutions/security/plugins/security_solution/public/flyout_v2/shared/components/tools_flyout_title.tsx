@@ -18,10 +18,11 @@ import { getDocumentTitle } from '../../document/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
-import { flyoutProviders } from './flyout_provider';
-import { DocumentFlyout } from '../../document';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { openDocumentFlyout } from '../../document/open_document_flyout';
+import { alertFlyoutHistoryKey } from '../../document/constants/flyout_history';
+import { getToolFlyoutDocRefFromRecord } from '../../tools/url_state';
 
 const noop = () => {};
 
@@ -60,21 +61,24 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
     const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
     const onShowDocument = useCallback(() => {
-      services.overlays?.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyout
-              hit={hit}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
-          ),
-        }),
-        { ...defaultFlyoutProperties, session: 'inherit' }
-      );
+      const docRef = getToolFlyoutDocRefFromRecord(hit);
+      if (!docRef || !services.overlays) {
+        return;
+      }
+
+      openDocumentFlyout({
+        overlays: services.overlays,
+        services,
+        store,
+        history,
+        documentId: docRef.documentId,
+        indexName: docRef.indexName,
+        renderCellActions,
+        onAlertUpdated,
+        defaultFlyoutProperties,
+        historyKey: alertFlyoutHistoryKey,
+        session: 'inherit',
+      });
     }, [defaultFlyoutProperties, history, hit, onAlertUpdated, renderCellActions, services, store]);
 
     return (

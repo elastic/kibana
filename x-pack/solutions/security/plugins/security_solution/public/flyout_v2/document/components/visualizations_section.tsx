@@ -20,12 +20,13 @@ import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { openToolFlyout } from '../../tools/open_tool_flyout';
+import { getToolFlyoutDocRefFromRecord } from '../../tools/url_state';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -75,51 +76,53 @@ export const VisualizationsSection = memo(
 
     const onShowAnalyzer = useCallback(
       () =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <AnalyzerGraph
-                hit={hit}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultToolsFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        ),
+        openToolFlyout({
+          overlays,
+          services,
+          store,
+          history,
+          content: (
+            <AnalyzerGraph
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          ),
+          defaultFlyoutProperties: defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          persistedState: {
+            toolType: 'analyzer',
+            docRef: getToolFlyoutDocRefFromRecord(hit),
+          },
+        }),
       [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
     const onShowSessionView = useCallback(
       () =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <SessionView
-                hit={hit}
-                jumpToCursor={sessionViewConfig?.jumpToCursor}
-                jumpToEntityId={sessionViewConfig?.jumpToEntityId}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultToolsFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        ),
+        openToolFlyout({
+          overlays,
+          services,
+          store,
+          history,
+          content: (
+            <SessionView
+              hit={hit}
+              jumpToCursor={sessionViewConfig?.jumpToCursor}
+              jumpToEntityId={sessionViewConfig?.jumpToEntityId}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          ),
+          defaultFlyoutProperties: defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          persistedState: {
+            toolType: 'session_view',
+            docRef: getToolFlyoutDocRefFromRecord(hit),
+          },
+        }),
       [
         history,
         historyKey,

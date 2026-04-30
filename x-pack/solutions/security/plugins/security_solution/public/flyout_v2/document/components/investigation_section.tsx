@@ -25,11 +25,12 @@ import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
 import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { HighlightedFields } from './highlighted_fields';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { ChildLink } from '../../shared/components/child_link';
+import { openToolFlyout } from '../../tools/open_tool_flyout';
+import { getToolFlyoutDocRefFromRecord } from '../../tools/url_state';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -99,19 +100,20 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <InvestigationGuideToolsFlyout hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
+      openToolFlyout({
+        overlays,
+        services,
+        store,
+        history,
+        content: <InvestigationGuideToolsFlyout hit={hit} />,
+        defaultFlyoutProperties: defaultToolsFlyoutProperties,
+        historyKey,
+        session: 'start',
+        persistedState: {
+          toolType: 'investigation_guide',
+          docRef: getToolFlyoutDocRefFromRecord(hit),
+        },
+      });
     }, [history, historyKey, hit, overlays, services, store]);
 
     return (

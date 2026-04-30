@@ -7,10 +7,10 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
@@ -19,6 +19,8 @@ import { useSecuritySolutionNavigation } from '../../../common/components/naviga
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { DocumentFlyoutUrlSynchronizer } from '../../../flyout_v2/document/document_flyout_url_synchronizer';
+import { ToolFlyoutUrlSynchronizer } from '../../../flyout_v2/tools/tool_flyout_url_synchronizer';
 import { GlobalKQLHeader } from './global_kql_header';
 import { Timeline } from './timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
@@ -100,6 +102,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               grow={true}
             >
               <AlertsContextProvider>
+                <DocumentFlyoutUrlSynchronizer />
+                <ToolFlyoutUrlSynchronizer />
                 <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
                   {children}
                   <SecuritySolutionFlyout />

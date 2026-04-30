@@ -24,10 +24,11 @@ import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { NotesDetails } from '../notes';
 import { useKibana } from '../../common/lib/kibana';
-import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { alertFlyoutHistoryKey } from './constants/flyout_history';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
+import { openToolFlyout } from '../tools/open_tool_flyout';
+import { getToolFlyoutDocRefFromRecord } from '../tools/url_state';
 
 export interface DocumentFlyoutProps {
   /**
@@ -63,18 +64,19 @@ export const DocumentFlyout = memo(
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     const onShowNotes = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <NotesDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-        }
-      );
+      openToolFlyout({
+        overlays,
+        services,
+        store,
+        history,
+        content: <NotesDetails hit={hit} />,
+        defaultFlyoutProperties: defaultToolsFlyoutProperties,
+        historyKey,
+        persistedState: {
+          toolType: 'notes',
+          docRef: getToolFlyoutDocRefFromRecord(hit),
+        },
+      });
     }, [history, historyKey, hit, overlays, services, store]);
 
     if (isAlert && loading) {

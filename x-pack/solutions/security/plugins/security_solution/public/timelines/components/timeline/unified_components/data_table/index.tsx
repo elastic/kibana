@@ -57,9 +57,8 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
-import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/document_flyout_wrapper';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { openDocumentFlyout } from '../../../../../flyout_v2/document/open_document_flyout';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -188,26 +187,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (newFlyoutSystemEnabled) {
-          overlays.openSystemFlyout(
-            flyoutProviders({
-              services,
-              store,
-              history,
-              children: (
-                <DocumentFlyoutWrapper
-                  documentId={eventData._id}
-                  indexName={eventData.ecs._index}
-                  renderCellActions={cellActionRenderer}
-                  onAlertUpdated={refetch}
-                />
-              ),
-            }),
-            {
-              ...defaultFlyoutProperties,
-              historyKey: alertFlyoutHistoryKey,
-              session: 'start',
-            }
-          );
+          openDocumentFlyout({
+            overlays,
+            services,
+            store,
+            history,
+            documentId: eventData._id,
+            indexName: eventData.ecs._index ?? eventData._index,
+            renderCellActions: cellActionRenderer,
+            onAlertUpdated: refetch,
+            defaultFlyoutProperties,
+            historyKey: alertFlyoutHistoryKey,
+            session: 'start',
+          });
         } else {
           const isAttackRow = isAttackDiscoveryRow(eventData);
           const indexName = eventData.ecs._index ?? '';

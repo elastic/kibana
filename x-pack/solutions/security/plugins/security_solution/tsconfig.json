@@ -234,6 +234,7 @@
     "@kbn/charts-theme",
     "@kbn/product-doc-base-plugin",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/shared-url-state",
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
     "@kbn/inference-langchain",

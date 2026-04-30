@@ -10,11 +10,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { flyoutProviders } from './flyout_provider';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHILD_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { openToolFlyout } from '../../tools/open_tool_flyout';
 
 export interface ChildLinkProps {
   /**
@@ -58,21 +59,31 @@ export const ChildLink: FC<ChildLinkProps> = ({
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: flyoutContent,
-        }),
-        {
+      const flowTarget = field.includes(FlowTargetSourceDest.destination)
+        ? FlowTargetSourceDest.destination
+        : FlowTargetSourceDest.source;
+
+      openToolFlyout({
+        overlays,
+        services,
+        store,
+        history,
+        content: flyoutContent,
+        defaultFlyoutProperties: {
           ...defaultToolsFlyoutProperties,
           size: 's',
-          session: 'inherit',
-        }
-      );
+        },
+        session: 'inherit',
+        persistedState: {
+          toolType: 'network_details',
+          networkDetails: {
+            ip: value,
+            flowTarget,
+          },
+        },
+      });
     }
-  }, [overlays, services, store, history, flyoutContent]);
+  }, [field, flyoutContent, history, overlays, services, store, value]);
 
   if (!flyoutContent) {
     return <>{children}</>;

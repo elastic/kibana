@@ -34,8 +34,8 @@ import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
 import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { openDocumentFlyout } from '../../flyout_v2/document/open_document_flyout';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -143,25 +143,18 @@ export const ResolverWithoutProviders = React.memo(
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
         () =>
-          overlays.openSystemFlyout(
-            flyoutProviders({
-              services,
-              store,
-              history,
-              children: (
-                <DocumentFlyoutWrapper
-                  documentId={documentId}
-                  indexName={indexName}
-                  renderCellActions={renderCellActions}
-                  onAlertUpdated={handleAlertUpdated}
-                />
-              ),
-            }),
-            {
-              ...defaultFlyoutProperties,
-              session: 'inherit',
-            }
-          ),
+          openDocumentFlyout({
+            overlays,
+            services,
+            store,
+            history,
+            documentId,
+            indexName,
+            renderCellActions,
+            onAlertUpdated: handleAlertUpdated,
+            defaultFlyoutProperties,
+            session: 'inherit',
+          }),
       [
         defaultFlyoutProperties,
         handleAlertUpdated,

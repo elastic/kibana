@@ -14,7 +14,6 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { alertFlyoutHistoryKey } from '../../../../flyout_v2/document/constants/flyout_history';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -32,8 +31,8 @@ import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../com
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
-import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { openDocumentFlyout } from '../../../../flyout_v2/document/open_document_flyout';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -121,26 +120,19 @@ const RowActionComponent = ({
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (newFlyoutSystemEnabled && hit) {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyoutWrapper
-              documentId={eventId}
-              indexName={indexName ?? undefined}
-              renderCellActions={cellActionRenderer}
-              onAlertUpdated={handleAlertUpdated}
-            />
-          ),
-        }),
-        {
-          ...defaultFlyoutProperties,
-          historyKey: alertFlyoutHistoryKey,
-          session: 'start',
-        }
-      );
+      openDocumentFlyout({
+        overlays,
+        services,
+        store,
+        history,
+        documentId: eventId,
+        indexName: indexName ?? hit.raw._index,
+        renderCellActions: cellActionRenderer,
+        onAlertUpdated: handleAlertUpdated,
+        defaultFlyoutProperties,
+        historyKey: alertFlyoutHistoryKey,
+        session: 'start',
+      });
     } else {
       openFlyout({
         right: {

@@ -13,7 +13,6 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { alertFlyoutHistoryKey } from '../constants/flyout_history';
-import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
 import { getColumns } from '../../prevalence/utils/get_columns';
@@ -27,7 +26,6 @@ import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PrevalenceDetails } from '../../prevalence';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
@@ -36,6 +34,9 @@ import {
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
 import { ChildLink } from '../../shared/components/child_link';
+import { openDocumentFlyout } from '../open_document_flyout';
+import { openToolFlyout } from '../../tools/open_tool_flyout';
+import { getToolFlyoutDocRefFromRecord } from '../../tools/url_state';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -96,89 +97,80 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
   );
 
   const onShowThreatIntelligenceDetails = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <ThreatIntelligenceDetails hit={hit} />,
-      }),
-      {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      }
-    );
+    openToolFlyout({
+      overlays,
+      services,
+      store,
+      history,
+      content: <ThreatIntelligenceDetails hit={hit} />,
+      defaultFlyoutProperties: defaultToolsFlyoutProperties,
+      historyKey,
+      session: 'start',
+      persistedState: {
+        toolType: 'threat_intelligence',
+        docRef: getToolFlyoutDocRefFromRecord(hit),
+      },
+    });
   }, [history, historyKey, hit, overlays, services, store]);
 
   const onShowAlert = useCallback(
     (id: string, indexName: string) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyoutWrapper
-              documentId={id}
-              indexName={indexName}
-              renderCellActions={cellActionRenderer}
-              onAlertUpdated={onAlertUpdated}
-            />
-          ),
-        }),
-        {
-          ...defaultFlyoutProperties,
-          session: 'inherit',
-        }
-      ),
+      openDocumentFlyout({
+        overlays,
+        services,
+        store,
+        history,
+        documentId: id,
+        indexName,
+        renderCellActions: cellActionRenderer,
+        onAlertUpdated,
+        defaultFlyoutProperties,
+        session: 'inherit',
+      }),
     [defaultFlyoutProperties, history, onAlertUpdated, overlays, services, store]
   );
 
   const onShowCorrelationsDetails = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: (
-          <CorrelationsDetails
-            hit={hit}
-            scopeId=""
-            isRulePreview={false}
-            onShowAlert={onShowAlert}
-          />
-        ),
-      }),
-      {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      }
-    );
+    openToolFlyout({
+      overlays,
+      services,
+      store,
+      history,
+      content: (
+        <CorrelationsDetails hit={hit} scopeId="" isRulePreview={false} onShowAlert={onShowAlert} />
+      ),
+      defaultFlyoutProperties: defaultToolsFlyoutProperties,
+      historyKey,
+      session: 'start',
+      persistedState: {
+        toolType: 'correlations',
+        docRef: getToolFlyoutDocRefFromRecord(hit),
+      },
+    });
   }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
 
   const onShowPrevalenceDetails = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: (
-          <PrevalenceDetails
-            hit={hit}
-            investigationFields={investigationFields}
-            scopeId={''}
-            columns={getColumns(cellActionRenderer, isInSecurityApp, '', ChildLink)}
-          />
-        ),
-      }),
-      {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      }
-    );
+    openToolFlyout({
+      overlays,
+      services,
+      store,
+      history,
+      content: (
+        <PrevalenceDetails
+          hit={hit}
+          investigationFields={investigationFields}
+          scopeId={''}
+          columns={getColumns(cellActionRenderer, isInSecurityApp, '', ChildLink)}
+        />
+      ),
+      defaultFlyoutProperties: defaultToolsFlyoutProperties,
+      historyKey,
+      session: 'start',
+      persistedState: {
+        toolType: 'prevalence',
+        docRef: getToolFlyoutDocRefFromRecord(hit),
+      },
+    });
   }, [history, historyKey, hit, investigationFields, isInSecurityApp, overlays, services, store]);
 
   return (
