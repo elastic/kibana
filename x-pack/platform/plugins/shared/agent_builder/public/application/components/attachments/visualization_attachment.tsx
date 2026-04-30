@@ -9,7 +9,8 @@ import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { ApplicationStart } from '@kbn/core/public';
+import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderStartDependencies } from '../../../types';
 
 const LazyVisualizeLens = React.lazy(() =>
@@ -24,15 +25,19 @@ export const createVisualizationAttachmentDefinition = ({
   startDependencies,
 }: {
   startDependencies: AgentBuilderStartDependencies;
+  application: ApplicationStart;
 }): AttachmentUIDefinition<VisualizationAttachment> => {
   return {
-    getLabel: (attachment) =>
-      attachment.data.query ??
-      i18n.translate('xpack.agentBuilder.attachments.visualization.label', {
-        defaultMessage: 'Visualization',
-      }),
+    getLabel: (attachment: VisualizationAttachment): string => {
+      const { title } = attachment.data.visualization;
+      return typeof title === 'string'
+        ? title
+        : i18n.translate('xpack.agentBuilder.attachments.visualization.label', {
+            defaultMessage: 'Visualization',
+          });
+    },
     getIcon: () => 'lensApp',
-    renderInlineContent: ({ attachment, screenContext }) => {
+    renderInlineContent: ({ attachment, screenContext }, callbacks) => {
       const timeRange = attachment.data.time_range ?? screenContext?.time_range;
 
       return (
@@ -43,6 +48,7 @@ export const createVisualizationAttachmentDefinition = ({
             lens={startDependencies.lens}
             uiActions={startDependencies.uiActions}
             timeRange={timeRange}
+            registerActionButtons={callbacks?.registerActionButtons}
           />
         </Suspense>
       );
