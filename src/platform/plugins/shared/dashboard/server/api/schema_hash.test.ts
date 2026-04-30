@@ -33,13 +33,16 @@ const getDashboardSchema = () => {
   return dashboardSchema;
 };
 
+/**
+ * If this test is failing on CI but passing locally, run `node scripts/capture_oas_snapshot --include-path /api/dashboards && yarn test:jest src/platform/plugins/shared/dashboard/server/api/schema_hash.test.ts -u`
+ */
 describe('dashboard OAS schema hash', () => {
   it('hashes kbn-dashboard-data from the generated OAS bundle', () => {
     const dashboardSchema = getDashboardSchema();
     const schemaHash = createHash('sha256').update(JSON.stringify(dashboardSchema)).digest('hex');
 
     expect(schemaHash).toMatchInlineSnapshot(
-      `"9cf9c8f70ae373fb53f33944acfe0b481d21daa022533af3114daa7eadc4e176"`
+      `"c9f21a8cae1e8daf2c6c1cdc443986b3b8d96f415b00762d425f44fc184dc2e5"`
     );
   });
 });
