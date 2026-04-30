@@ -19,6 +19,7 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
+  version: "2.1.98"
   model: llm-gateway/gpt-5.4
   max-turns: 120
   # args:
