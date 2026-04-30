@@ -549,14 +549,9 @@ describe('MaintenanceWindowClient - update', () => {
       },
     });
 
-    expect((savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting)
-      .toMatchInlineSnapshot(`
-      Object {
-        "dsl": "",
-        "filters": Array [],
-        "kql": "",
-      }
-    `);
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting
+    ).toBeNull();
   });
 
   it('should throw if updating a maintenance window with invalid scope', async () => {
