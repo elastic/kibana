@@ -9,9 +9,18 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../../config.oblt.base.ts'));
+  const kbnTestServer = baseTestConfig.get('kbnTestServer');
 
   return {
     ...baseTestConfig.getAll(),
+    kbnTestServer: {
+      ...kbnTestServer,
+      serverArgs: [
+        ...kbnTestServer.serverArgs,
+        // Increase scroll duration for large CSV exports to avoid connection timeouts
+        '--xpack.reporting.csv.scroll.duration=5m',
+      ],
+    },
     testFiles: [
       require.resolve('../../test_suites/discover/embeddable'),
       require.resolve('../../test_suites/discover/x_pack'),
