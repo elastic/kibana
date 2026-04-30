@@ -662,9 +662,7 @@ export class WorkflowsExecutionEnginePlugin
 
       let hasActiveTask = true;
       try {
-        hasActiveTask = await workflowTaskManager.hasActiveTaskForExecution(
-          workflowExecution.id
-        );
+        hasActiveTask = await workflowTaskManager.hasActiveTaskForExecution(workflowExecution.id);
       } catch (err) {
         // TM/ES issues: preserve legacy behavior (cancelRequested + nudge idle tasks) instead of
         // failing the API or optimistically terminalizing without a reliable task check.
