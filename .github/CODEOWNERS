@@ -2724,10 +2724,10 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/create_list_indices @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_prebuilt_rules_package @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_endpoint_package @elastic/security-defend-workflows
-/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_ai_prompts_package @elastic/security-generative-ai
-/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_de_rule_monitoring_assets @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_prebuilt_rules @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_endpoint_protection @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_ai_prompts @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_detection_rule_monitoring @elastic/security-detection-rule-management
 
 # Security Solution sub teams
 
