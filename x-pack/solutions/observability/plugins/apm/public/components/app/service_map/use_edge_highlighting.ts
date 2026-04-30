@@ -53,8 +53,8 @@ export function useEdgeHighlighting(): UseEdgeHighlightingResult {
   const primaryColor = euiTheme.colors.primary;
   const defaultEdgeColor = euiTheme.colors.mediumShade;
 
-  const defaultZIndex = 1;
-  const highlightedZIndex = Number(euiTheme.levels.content) + 1;
+  const defaultZIndex = 0;
+  const highlightedZIndex = Number(euiTheme.levels.content);
 
   const markers = useMemo<EdgeMarkers>(
     () => ({

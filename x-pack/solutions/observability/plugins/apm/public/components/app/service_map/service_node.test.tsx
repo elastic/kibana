@@ -244,7 +244,7 @@ describe('ServiceNode', () => {
   describe('search highlight', () => {
     const getSearchHighlightWrapper = () => {
       const node = screen.getByTestId('serviceMapNode-service-test-service');
-      return node.closest('[data-search-match]') ?? node.parentElement?.parentElement;
+      return node.closest('[data-search-match]') ?? node.parentElement;
     };
 
     afterEach(() => {

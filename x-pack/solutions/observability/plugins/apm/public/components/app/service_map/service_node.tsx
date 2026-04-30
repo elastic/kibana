@@ -28,7 +28,7 @@ import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 import { useServiceMapSearchHighlight } from './service_map_search_context';
-import { SearchHighlightWrapper } from '../../shared/service_map/search_highlight_wrapper';
+import { HighlightWrapper } from '../../shared/service_map/highlight_wrapper';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -174,121 +174,94 @@ export const ServiceNode = memo(
       values: { count: data.alertsCount ?? 0 },
     });
 
-    const contextFrameStyles = useMemo(
-      () => css`
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 100%;
-        padding: ${euiTheme.size.s};
-        border: ${euiTheme.border.width.thick} solid transparent;
-        border-radius: ${euiTheme.border.radius.medium};
-        ${contextHighlight
-          ? `
-          border: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
-          background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
-        `
-          : ''}
-      `,
-      [euiTheme, contextHighlight]
-    );
-
     return (
-      <SearchHighlightWrapper
+      <HighlightWrapper
         isSearchMatch={isSearchMatch}
         isActiveSearchMatch={isActiveSearchMatch}
+        contextHighlight={contextHighlight}
       >
-        <div
-          data-test-subj={contextHighlight ? 'serviceMapNodeContextHighlightFrame' : undefined}
-          css={contextFrameStyles}
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          gutterSize="xs"
+          responsive={false}
+          data-test-subj={`serviceMapNode-service-${data.id}`}
         >
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            gutterSize="xs"
-            responsive={false}
-            data-test-subj={`serviceMapNode-service-${data.id}`}
-          >
-            <EuiFlexItem grow={false} css={containerStyles}>
-              <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
-              <div
-                data-test-subj="serviceMapNodeServiceCircle"
-                css={circleStyles}
-                role="button"
-                tabIndex={0}
-                aria-label={ariaLabel}
-                aria-pressed={selected}
+          <EuiFlexItem grow={false} css={containerStyles}>
+            <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
+            <div
+              data-test-subj="serviceMapNodeServiceCircle"
+              css={circleStyles}
+              role="button"
+              tabIndex={0}
+              aria-label={ariaLabel}
+              aria-pressed={selected}
+            >
+              {iconUrl && (
+                <img src={iconUrl} alt={data.agentName} css={iconStyles} aria-hidden="true" />
+              )}
+            </div>
+            <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
+          </EuiFlexItem>
+          {(showAlertsBadge || showSloBadge) && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                justifyContent="center"
+                responsive={false}
+                wrap
+                css={badgesRowStyles}
               >
-                {iconUrl && (
-                  <img src={iconUrl} alt={data.agentName} css={iconStyles} aria-hidden="true" />
+                {showAlertsBadge && (
+                  <span
+                    css={badgePointerEventsStyles}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    <EuiToolTip position="bottom" content={alertsTooltip}>
+                      <EuiBadge
+                        data-test-subj="serviceMapNodeAlertsBadge"
+                        color="danger"
+                        iconType="warning"
+                        onClick={navigateToAlertsTab}
+                        tabIndex={0}
+                        role="button"
+                        onClickAriaLabel={alertsTooltip}
+                      >
+                        {data.alertsCount}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  </span>
                 )}
-              </div>
-              <Handle
-                type="source"
-                position={sourcePosition ?? Position.Right}
-                css={handleStyles}
-              />
+                {showSloBadge && data.sloStatus && (
+                  <span
+                    css={badgePointerEventsStyles}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    <SloStatusBadge
+                      sloStatus={data.sloStatus}
+                      sloCount={data.sloCount}
+                      serviceName={data.label}
+                      compactLabelOnNarrowScreens
+                      {...(onSloBadgeClick
+                        ? {
+                            onClick: (e) => {
+                              e.stopPropagation();
+                              onSloBadgeClick(data.label, data.agentName);
+                            },
+                          }
+                        : { hideTooltip: true })}
+                    />
+                  </span>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {(showAlertsBadge || showSloBadge) && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  justifyContent="center"
-                  responsive={false}
-                  wrap
-                  css={badgesRowStyles}
-                >
-                  {showAlertsBadge && (
-                    <span
-                      css={badgePointerEventsStyles}
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => e.stopPropagation()}
-                    >
-                      <EuiToolTip position="bottom" content={alertsTooltip}>
-                        <EuiBadge
-                          data-test-subj="serviceMapNodeAlertsBadge"
-                          color="danger"
-                          iconType="warning"
-                          onClick={navigateToAlertsTab}
-                          tabIndex={0}
-                          role="button"
-                          onClickAriaLabel={alertsTooltip}
-                        >
-                          {data.alertsCount}
-                        </EuiBadge>
-                      </EuiToolTip>
-                    </span>
-                  )}
-                  {showSloBadge && data.sloStatus && (
-                    <span
-                      css={badgePointerEventsStyles}
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => e.stopPropagation()}
-                    >
-                      <SloStatusBadge
-                        sloStatus={data.sloStatus}
-                        sloCount={data.sloCount}
-                        serviceName={data.label}
-                        compactLabelOnNarrowScreens
-                        {...(onSloBadgeClick
-                          ? {
-                              onClick: (e) => {
-                                e.stopPropagation();
-                                onSloBadgeClick(data.label, data.agentName);
-                              },
-                            }
-                          : { hideTooltip: true })}
-                      />
-                    </span>
-                  )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-            <NodeLabel label={data.label} selected={selected} />
-          </EuiFlexGroup>
-        </div>
-      </SearchHighlightWrapper>
+          )}
+          <NodeLabel label={data.label} selected={selected} />
+        </EuiFlexGroup>
+      </HighlightWrapper>
     );
   }
 );

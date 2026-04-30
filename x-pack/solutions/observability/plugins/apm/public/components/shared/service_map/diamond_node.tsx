@@ -18,7 +18,7 @@ import {
   NODE_BORDER_WIDTH_SELECTED,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
-import { SearchHighlightWrapper } from './search_highlight_wrapper';
+import { HighlightWrapper } from './highlight_wrapper';
 
 interface DiamondNodeProps {
   id: string;
@@ -166,10 +166,7 @@ export const DiamondNode = memo(
     `;
 
     return (
-      <SearchHighlightWrapper
-        isSearchMatch={isSearchMatch}
-        isActiveSearchMatch={isActiveSearchMatch}
-      >
+      <HighlightWrapper isSearchMatch={isSearchMatch} isActiveSearchMatch={isActiveSearchMatch}>
         <EuiFlexGroup
           direction="column"
           alignItems="center"
@@ -203,7 +200,7 @@ export const DiamondNode = memo(
           </EuiFlexItem>
           <NodeLabel label={label} selected={selected} />
         </EuiFlexGroup>
-      </SearchHighlightWrapper>
+      </HighlightWrapper>
     );
   }
 );

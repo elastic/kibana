@@ -9,20 +9,22 @@ import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface SearchHighlightWrapperProps {
+interface HighlightWrapperProps {
   isSearchMatch: boolean;
   isActiveSearchMatch: boolean;
+  contextHighlight?: boolean;
   children: React.ReactNode;
 }
 
-export function SearchHighlightWrapper({
+export function HighlightWrapper({
   isSearchMatch,
   isActiveSearchMatch,
+  contextHighlight = false,
   children,
-}: SearchHighlightWrapperProps) {
+}: HighlightWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
-  const searchFrameStyles = useMemo(
+  const frameStyles = useMemo(
     () => css`
       display: inline-flex;
       flex-direction: column;
@@ -37,15 +39,26 @@ export function SearchHighlightWrapper({
         outline-offset: -${euiTheme.border.width.thick};
         background-color: ${euiTheme.colors.backgroundBaseSubdued};
       `
+        : contextHighlight
+        ? `
+        border: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
+      `
         : ''}
     `,
-    [euiTheme, isActiveSearchMatch]
+    [euiTheme, isActiveSearchMatch, contextHighlight]
   );
+
+  const testSubj = isActiveSearchMatch
+    ? 'serviceMapNodeSearchHighlightFrame'
+    : contextHighlight
+    ? 'serviceMapNodeContextHighlightFrame'
+    : undefined;
 
   return (
     <div
-      data-test-subj={isActiveSearchMatch ? 'serviceMapNodeSearchHighlightFrame' : undefined}
-      css={searchFrameStyles}
+      data-test-subj={testSubj}
+      css={frameStyles}
       data-search-match={isSearchMatch || undefined}
       data-search-active-match={isActiveSearchMatch || undefined}
     >
