@@ -306,13 +306,7 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When set to non-recording, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when set to non-recording, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.',
     }),
-    excludeAgents: [
-      'nodejs',
-      'rum-js',
-      'js-base',
-      ...EDOT_AGENT_NAMES,
-      ...OTEL_AGENT_NAMES,
-    ],
+    excludeAgents: ['nodejs', 'rum-js', 'js-base', ...EDOT_AGENT_NAMES, ...OTEL_AGENT_NAMES],
   },
 
   {

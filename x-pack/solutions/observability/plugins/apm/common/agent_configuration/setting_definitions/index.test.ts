@@ -206,7 +206,9 @@ describe('filterByAgent', () => {
     });
 
     it('opentelemetry/java/opentelemetry-java-instrumentation', () => {
-      expect(getSettingKeysForAgent('opentelemetry/java/opentelemetry-java-instrumentation')).toEqual(
+      expect(
+        getSettingKeysForAgent('opentelemetry/java/opentelemetry-java-instrumentation')
+      ).toEqual(
         expect.arrayContaining([
           'deactivate_all_instrumentations',
           'deactivate_instrumentations',
