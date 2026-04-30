@@ -89,7 +89,6 @@ export type {
   LensInspector,
   ILensDocumentService,
   CheckDuplicateTitleOptions,
-  CheckDuplicateTitleProps,
   LensSaveResult,
   DatasourceFixAction,
   LensAttributesService,

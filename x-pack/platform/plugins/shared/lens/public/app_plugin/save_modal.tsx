@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import type { OriginSaveProps } from './tags_saved_object_save_modal_origin_wrapper';
 import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
 import type { DashboardSaveProps } from './tags_saved_object_save_modal_dashboard_wrapper';
@@ -17,6 +18,7 @@ import { TagEnhancedSavedObjectSaveModalDashboard } from './tags_saved_object_sa
 export type SaveProps = OriginSaveProps | DashboardSaveProps;
 
 export interface Props {
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
   savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
@@ -40,6 +42,7 @@ export interface Props {
 
 export const SaveModal = (props: Props) => {
   const {
+    hasLibraryItemWithTitle,
     originatingApp,
     getOriginatingPath,
     savingToLibraryPermitted,
@@ -60,6 +63,7 @@ export const SaveModal = (props: Props) => {
   if (originatingApp && returnToOrigin !== false) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
+        hasLibraryItemWithTitle={hasLibraryItemWithTitle}
         savedObjectsTagging={savedObjectsTagging}
         initialTags={tagsIds}
         originatingApp={originatingApp}
@@ -82,6 +86,7 @@ export const SaveModal = (props: Props) => {
 
   return (
     <TagEnhancedSavedObjectSaveModalDashboard
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
       canSaveByReference={Boolean(savingToLibraryPermitted)}

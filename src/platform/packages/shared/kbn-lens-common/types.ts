@@ -78,7 +78,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
@@ -95,6 +94,7 @@ import type {
 } from './visualizations/types';
 import type { DatasourceStates, GeneralDatasourceState } from './datasources/types';
 import type { LENS_ITEM_LATEST_VERSION } from './content_management/constants';
+import { HasLibraryTransforms } from '@kbn/presentation-publishing';
 
 export interface LensInspector {
   getInspectorAdapters: () => Adapters;
@@ -111,13 +111,6 @@ export interface CheckDuplicateTitleOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
-export type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
-
 export interface LensSaveResult {
   savedObjectId: string;
 }
@@ -125,10 +118,7 @@ export interface LensSaveResult {
 export interface ILensDocumentService {
   save: (vis: LensDocument) => Promise<LensSaveResult>;
   load: (savedObjectId: string) => Promise<unknown>;
-  checkForDuplicateTitle: (
-    options: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ) => Promise<boolean>;
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
 }
 
 export interface LensAttributesService {
@@ -142,7 +132,7 @@ export interface LensAttributesService {
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
 }
 
 export interface LensAppServices extends StartServices {
