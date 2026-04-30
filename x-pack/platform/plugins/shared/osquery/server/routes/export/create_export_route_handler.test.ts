@@ -255,9 +255,7 @@ describe('createExportRouteHandler', () => {
     const getIntegrationNamespaces = jest.fn().mockResolvedValue({
       [OSQUERY_INTEGRATION_NAME]: ['fleet-ns'],
     });
-    const handler = createExportRouteHandler(
-      createOsqueryContext({ getIntegrationNamespaces })
-    );
+    const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
       query: { format: 'ndjson' },
