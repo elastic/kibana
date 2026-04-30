@@ -79,8 +79,7 @@ test.describe(
         });
 
         await test.step('All panels have data', async () => {
-          const emptyPanels = await serviceDetailsPage.metricsTab.countPanelsWithNoResults();
-          expect(emptyPanels).toBe(0);
+          await expect(serviceDetailsPage.metricsTab.getPanelsWithNoResults()).toHaveCount(0);
         });
 
         await test.step('No-dashboard callout is not shown', async () => {
