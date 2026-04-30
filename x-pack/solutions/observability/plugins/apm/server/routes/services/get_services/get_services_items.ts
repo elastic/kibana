@@ -15,7 +15,7 @@ import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { getHealthStatuses } from './get_health_statuses';
+import { getServiceAnomalyScores } from './get_service_anomaly_scores';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
@@ -78,13 +78,13 @@ export async function getServicesItems({
       searchQuery,
     };
 
-    const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, healthStatuses, alertCounts] =
+    const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, anomalyScores, alertCounts] =
       await Promise.all([
         getServiceTransactionStats({
           ...commonParams,
           apmEventClient,
         }),
-        getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
+        getServiceAnomalyScores({ ...commonParams, mlClient }).catch((err) => {
           logger.debug(err);
           return [];
         }),
@@ -106,7 +106,7 @@ export async function getServicesItems({
     const items =
       mergeServiceStats({
         serviceStats,
-        healthStatuses,
+        anomalyScores,
         alertCounts,
         sloStats,
       }) ?? [];
