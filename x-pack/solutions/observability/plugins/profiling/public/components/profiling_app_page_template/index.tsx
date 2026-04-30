@@ -41,6 +41,7 @@ export function ProfilingAppPageTemplate({
     defaultMessage: 'Universal Profiling',
   }),
   showBetaBadge = false,
+  customSearchBar,
 }: {
   children: React.ReactElement;
   tabs?: EuiPageHeaderContentProps['tabs'];
@@ -49,6 +50,7 @@ export function ProfilingAppPageTemplate({
   restrictWidth?: boolean;
   pageTitle?: React.ReactNode;
   showBetaBadge?: boolean;
+  customSearchBar?: React.ReactNode;
 }) {
   const {
     start: { observabilityShared },
@@ -106,7 +108,7 @@ export function ProfilingAppPageTemplate({
               )}
               {!hideSearchBar && (
                 <EuiFlexItem grow={false}>
-                  <PrimaryProfilingSearchBar />
+                  {customSearchBar ?? <PrimaryProfilingSearchBar />}
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
