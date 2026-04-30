@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@kbn/synthtrace-client';
+import type { Instance } from '@kbn/synthtrace-client';
+
 export interface ApmMetricsServiceConfig {
   name: string;
   agentName: string;
@@ -316,3 +319,58 @@ export const APM_METRICS_ALL_SERVICES: ApmMetricsServiceConfig[] = [
   ...APM_METRICS_DASHBOARD_SERVICES,
   ...APM_METRICS_NON_DASHBOARD_SERVICES,
 ];
+
+export interface ApmMetricsServiceInstance {
+  instance: Instance;
+  config: ApmMetricsServiceConfig;
+}
+
+/**
+ * Creates an APM service instance from a config entry, applying optional
+ * runtime/SDK fields to the instance. Shared between the CLI scenario and
+ * the Scout test fixture so both stay in sync.
+ */
+export const createMetricsServiceInstance = (
+  config: ApmMetricsServiceConfig,
+  environment: string
+): ApmMetricsServiceInstance => {
+  const instance = apm
+    .service({ name: config.name, environment, agentName: config.agentName })
+    .instance(`${config.name}-instance`);
+
+  const fields = instance.fields as Record<string, unknown>;
+  if (config.runtimeVersion) fields['service.runtime.version'] = config.runtimeVersion;
+  if (config.runtimeName) fields['service.runtime.name'] = config.runtimeName;
+  if (config.telemetrySdkName) fields['telemetry.sdk.name'] = config.telemetrySdkName;
+  if (config.telemetrySdkLanguage) fields['telemetry.sdk.language'] = config.telemetrySdkLanguage;
+
+  return { instance, config };
+};
+
+const BASE_METRICS: Record<string, unknown> = {
+  'system.cpu.total.norm.pct': 0.4,
+  'system.memory.actual.free': 2_000_000_000,
+  'system.memory.total': 8_000_000_000,
+};
+
+/**
+ * Generates app-metric documents for a single timestamp, normalising
+ * extraMetrics into an array and applying each entry as a separate metricset.
+ */
+export const generateAppMetrics = (
+  instance: Instance,
+  config: ApmMetricsServiceConfig,
+  timestamp: number
+) => {
+  const extraList = Array.isArray(config.extraMetrics)
+    ? config.extraMetrics
+    : config.extraMetrics
+    ? [config.extraMetrics]
+    : [{}];
+
+  return extraList.map((extra) => {
+    const metricset = instance.appMetrics(BASE_METRICS).timestamp(timestamp);
+    Object.assign(metricset.fields, extra);
+    return metricset;
+  });
+};

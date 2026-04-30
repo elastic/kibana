@@ -40,4 +40,7 @@ export {
   APM_METRICS_ALL_SERVICES,
   SYSTEM_METRICS as APM_SYSTEM_METRICS,
   type ApmMetricsServiceConfig,
+  type ApmMetricsServiceInstance,
+  createMetricsServiceInstance,
+  generateAppMetrics,
 } from './src/scenarios/helpers/apm_metrics_dashboards';

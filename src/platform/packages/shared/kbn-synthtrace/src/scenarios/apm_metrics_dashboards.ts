@@ -20,31 +20,23 @@
  */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
-import { apm } from '@kbn/synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
-import { APM_METRICS_ALL_SERVICES } from './helpers/apm_metrics_dashboards';
+import {
+  APM_METRICS_ALL_SERVICES,
+  createMetricsServiceInstance,
+  generateAppMetrics,
+} from './helpers/apm_metrics_dashboards';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async () => {
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      const instances = APM_METRICS_ALL_SERVICES.map((config) => {
-        const instance = apm
-          .service({ name: config.name, environment: ENVIRONMENT, agentName: config.agentName })
-          .instance(`${config.name}-instance`);
-
-        const fields = instance.fields as Record<string, unknown>;
-        if (config.runtimeVersion) fields['service.runtime.version'] = config.runtimeVersion;
-        if (config.runtimeName) fields['service.runtime.name'] = config.runtimeName;
-        if (config.telemetrySdkName) fields['telemetry.sdk.name'] = config.telemetrySdkName;
-        if (config.telemetrySdkLanguage)
-          fields['telemetry.sdk.language'] = config.telemetrySdkLanguage;
-
-        return { instance, config };
-      });
+      const instances = APM_METRICS_ALL_SERVICES.map((config) =>
+        createMetricsServiceInstance(config, ENVIRONMENT)
+      );
 
       return withClient(
         apmEsClient,
@@ -62,25 +54,7 @@ const scenario: Scenario<ApmFields> = async () => {
           range
             .interval('30s')
             .rate(1)
-            .generator((timestamp) => {
-              const baseMetrics = {
-                'system.cpu.total.norm.pct': 0.4,
-                'system.memory.actual.free': 2_000_000_000,
-                'system.memory.total': 8_000_000_000,
-              };
-
-              const extraList = Array.isArray(config.extraMetrics)
-                ? config.extraMetrics
-                : config.extraMetrics
-                ? [config.extraMetrics]
-                : [{}];
-
-              return extraList.map((extra) => {
-                const metricset = instance.appMetrics(baseMetrics).timestamp(timestamp);
-                Object.assign(metricset.fields, extra);
-                return metricset;
-              });
-            }),
+            .generator((timestamp) => generateAppMetrics(instance, config, timestamp)),
         ])
       );
     },
