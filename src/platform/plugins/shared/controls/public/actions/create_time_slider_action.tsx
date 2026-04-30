@@ -19,6 +19,7 @@ import {
   DEFAULT_TIME_SLIDER_STATE,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
+import { ADD_PANEL_CONTROL_GROUP } from './constants';
 
 interface SupportsTimeSliderControl {
   hasTimeSliderControl: () => boolean;
@@ -35,6 +36,7 @@ const compatibilityCheck = (api: unknown | null) =>
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
+  grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controls',
   couldBecomeCompatible: ({ embeddable }) => apiCanPinPanels(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>

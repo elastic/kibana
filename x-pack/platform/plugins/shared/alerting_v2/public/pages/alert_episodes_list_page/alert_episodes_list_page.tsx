@@ -6,18 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { map } from 'rxjs';
+import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiScreenReaderOnly,
-  EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
@@ -26,33 +22,37 @@ import type { SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   UnifiedDataTable,
+  type CustomCellRenderer,
+  type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
-import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
-import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import type {
-  AlertEpisode,
   EpisodesFilterState,
   EpisodesSortState,
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
-import useObservable from 'react-use/lib/useObservable';
-import type { InputTimeRange } from '@kbn/data-plugin/public/query';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { paths } from '../../constants';
+import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import {
+  EpisodeStatusCell,
+  EpisodeTagsCell,
+  EpisodeRuleCell,
+} from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
-import { EpisodesFilterBar } from './components/episodes_filter_bar';
-import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 import * as i18n from './translations';
+import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { alertEpisodeToDataTableRecord } from './utils';
+import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
+import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import { paths } from '../../constants';
+import { useEpisodesTimeRange } from './hooks/use_episodes_time_range';
+import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 
 const PAGE_SIZE = 1000;
 
@@ -62,9 +62,19 @@ const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
     assignees: { width: 120 },
-    actions: { width: 360 },
     'episode.status': { width: 220 },
   },
+};
+
+const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
+  tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+  }),
+  assignees: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
+  }),
 };
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
@@ -80,6 +90,7 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   & .euiDataGridRowCell__content {
     display: flex;
     align-items: center;
+    block-size: 100%;
   }
 
   & .euiDataGridRowCell[data-gridcell-column-id='select'] .euiDataGridRowCell__content {
@@ -88,37 +99,23 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
     height: 100%;
   }
 
-  & .euiDataGridRowCell[data-gridcell-column-id='actions'] .euiDataGridRowCell__content {
-    justify-content: flex-end;
+  &
+    .euiDataGridRowCell--controlColumn[data-gridcell-column-id='actions']
+    .euiDataGridRowCell__content
+    > .euiFlexGroup {
+    justify-content: center;
   }
 `;
 
-const alertEpisodeToDataTableRecord = (row: AlertEpisode, idx: number): DataTableRecord => ({
-  id: String(idx),
-  raw: {},
-  flattened: Object.fromEntries(Object.entries(row)),
-});
-
-function EmptyToolbar() {
-  return <></>;
-}
-
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
+  const queryClient = useQueryClient();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
   useBreadcrumbs('episodes_list');
 
-  const timeRange$ = useMemo(
-    () => timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
-    [timefilter]
-  );
-
-  const timeRange = useObservable(
-    timeRange$,
-    timefilter?.getTime() ?? { from: 'now-24h', to: 'now' }
-  );
+  const { timeRange, handleTimeChange } = useEpisodesTimeRange(timefilter);
 
   const [filterState, setFilterState] = useState<EpisodesFilterState>({});
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
@@ -129,16 +126,8 @@ export const AlertEpisodesListPage = () => {
     'duration',
     'tags',
     'assignees',
-    'actions',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
-
-  const handleTimeChange = useCallback(
-    (range: InputTimeRange) => {
-      timefilter.setTime(range);
-    },
-    [timefilter]
-  );
 
   const {
     data: episodesData,
@@ -193,36 +182,96 @@ export const AlertEpisodesListPage = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
-  const episodeIds = useMemo(
-    () => episodesData?.map((row) => row['episode.id']).filter(Boolean),
-    [episodesData]
+  const episodeActions: EpisodeAction[] = useMemo(
+    () =>
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        queryClient,
+        getEpisodeDetailsHref: (id) =>
+          services.http.basePath.prepend(paths.alertEpisodeDetails(id)),
+        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+          getDiscoverHrefForRuleAndEpisodeTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
+            episodeIsoTimestamp,
+          }),
+      }),
+    [services, queryClient, rulesCache]
   );
 
-  const groupHashes = useMemo(
-    () => [...new Set(episodesData?.map((row) => row.group_hash).filter(Boolean))],
-    [episodesData]
+  const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
+    () =>
+      episodeActions.map((action, index) => ({
+        id: action.id,
+        // The UnifiedDataTable actions header maxWidth calculation doesn't take into account larger
+        // paddings, causing the column title to wrap. This forces the column width to be larger and
+        // avoids the problem until https://github.com/elastic/kibana/issues/265569 is fixed
+        width: index === 0 ? 38 : undefined,
+        render: (Control, { record }) => {
+          const episodes = [dataTableRecordToEpisode(record)];
+          if (!action.isCompatible({ episodes })) return <></>;
+          return (
+            <Control
+              iconType={action.iconType}
+              label={action.displayName}
+              onClick={() => action.execute({ episodes, onSuccess: refetch })}
+              tooltipContent={action.displayName}
+            />
+          );
+        },
+      })),
+    [episodeActions, refetch]
   );
 
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
-    episodeIds: episodeIds ?? [],
-    services,
+  const customBulkActions = useEpisodesBulkActions({
+    actions: episodeActions,
+    episodesData,
+    onSuccess: refetch,
   });
-  const { data: groupActionsMap } = useFetchGroupActions({ groupHashes, services });
 
   const assigneeUids = useMemo(
     () => [
       ...new Set(
-        [...(episodeActionsMap?.values() ?? [])]
-          .map((a) => a.lastAssigneeUid)
+        (episodesData ?? [])
+          .map((row) => row.last_assignee_uid)
           .filter((uid): uid is string => uid != null)
       ),
     ],
-    [episodeActionsMap]
+    [episodesData]
   );
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
   }, []);
+
+  const externalCustomRenderers = useMemo<CustomCellRenderer>(
+    () => ({
+      'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      tags: (props) => <EpisodeTagsCell {...props} />,
+      'rule.id': (props) => (
+        <EpisodeRuleCell
+          {...props}
+          rulesCache={rulesCache}
+          isLoadingRules={isLoadingRules}
+          rowHeight={rowHeight}
+        />
+      ),
+      assignees: (props) => {
+        const assigneeUid = props.row.flattened.last_assignee_uid as string | undefined;
+        return <EpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={services.userProfile} />;
+      },
+    }),
+    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
+  );
 
   return (
     <div
@@ -282,132 +331,13 @@ export const AlertEpisodesListPage = () => {
                   stripes: false,
                   cellPadding: 'l',
                 }}
-                renderCustomToolbar={EmptyToolbar}
                 dataView={dataView}
                 columns={columns}
                 onSetColumns={onSetColumns}
                 canDragAndDropColumns
                 showTimeCol={!!dataView.timeFieldName}
-                customGridColumnsConfiguration={{
-                  actions: ({ column }) => ({
-                    ...column,
-                    displayAsText: i18n.EPISODES_LIST_COLUMN_ACTIONS,
-                  }),
-                  tags: ({ column }) => ({
-                    ...column,
-                    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
-                  }),
-                  assignees: ({ column }) => ({
-                    ...column,
-                    displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
-                  }),
-                }}
-                externalCustomRenderers={{
-                  'episode.status': (props) => {
-                    const status = props.row.flattened[props.columnId] as AlertEpisodeStatus;
-                    const episodeId = props.row.flattened['episode.id'] as string;
-                    const groupHash = props.row.flattened.group_hash as string;
-
-                    return (
-                      <AlertEpisodeStatusBadges
-                        status={status}
-                        episodeAction={episodeActionsMap?.get(episodeId)}
-                        groupAction={groupActionsMap?.get(groupHash)}
-                      />
-                    );
-                  },
-                  actions: (props) => {
-                    const episodeId = props.row.flattened['episode.id'] as string;
-                    const groupHash = props.row.flattened.group_hash as string;
-                    const ruleId = props.row.flattened['rule.id'] as string;
-                    const discoverHref = getDiscoverHrefForRuleAndEpisodeTimestamp({
-                      share: services.share,
-                      capabilities: services.application.capabilities,
-                      uiSettings: services.uiSettings,
-                      ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
-                      episodeIsoTimestamp: props.row.flattened['@timestamp'] as string,
-                    });
-
-                    return (
-                      <AlertEpisodeActions
-                        episodeId={episodeId}
-                        groupHash={groupHash}
-                        episodeAction={episodeActionsMap?.get(episodeId)}
-                        groupAction={groupActionsMap?.get(groupHash)}
-                        http={services.http}
-                        openInDiscoverHref={discoverHref}
-                        expressions={services.expressions}
-                        viewDetailsHref={
-                          episodeId
-                            ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
-                            : undefined
-                        }
-                        lastAssigneeUid={episodeActionsMap?.get(episodeId)?.lastAssigneeUid}
-                      />
-                    );
-                  },
-                  assignees: (props) => {
-                    const episodeId = props.row.flattened['episode.id'] as string;
-                    const assigneeUid = episodeActionsMap?.get(episodeId)?.lastAssigneeUid;
-
-                    return (
-                      <EpisodeAssigneeCell
-                        assigneeUid={assigneeUid}
-                        userProfile={services.userProfile}
-                      />
-                    );
-                  },
-                  tags: (props) => {
-                    const groupHash = props.row.flattened.group_hash as string;
-                    const groupAction = groupActionsMap?.get(groupHash);
-
-                    return <AlertEpisodeTags tags={groupAction?.tags ?? []} />;
-                  },
-                  'rule.id': (props) => {
-                    if (!Object.keys(rulesCache).length && isLoadingRules) {
-                      return <EuiSkeletonText />;
-                    }
-                    const ruleId = props.row.flattened[props.columnId] as string;
-                    const rule = rulesCache[ruleId];
-                    if (!rule) {
-                      return ruleId;
-                    }
-                    const ruleName = (
-                      <EuiText
-                        size="s"
-                        css={css`
-                          font-weight: ${euiTheme.font.weight.semiBold};
-                        `}
-                      >
-                        {rule.metadata.name}
-                      </EuiText>
-                    );
-                    if (rowHeight === 1) {
-                      return ruleName;
-                    }
-                    return (
-                      <EuiFlexGroup direction="column" gutterSize="none">
-                        <EuiFlexItem>{ruleName}</EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiCode
-                            color="subdued"
-                            css={css`
-                              background: none;
-                              color: ${euiTheme.colors.mediumShade};
-                              font-size: ${euiTheme.font.scale.xs};
-                              white-space: nowrap;
-                              overflow: hidden;
-                              text-overflow: ellipsis;
-                              padding: 0;
-                            `}
-                          >
-                            {rule.evaluation.query.base}
-                          </EuiCode>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    );
-                  },
-                }}
+                customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
+                externalCustomRenderers={externalCustomRenderers}
                 rows={rows}
                 totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
                 loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
@@ -419,6 +349,9 @@ export const AlertEpisodesListPage = () => {
                 onSort={onSort}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}
+                customBulkActions={customBulkActions}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                enableComparisonMode={false}
                 services={services}
               />
             )}
