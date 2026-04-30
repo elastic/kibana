@@ -24,7 +24,9 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
@@ -133,7 +135,12 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   // The DETAILS state
   const [stepDetailsState, setStepDetailsState] = useState(
-    applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
+    applyTransformConfigToDetailsState(
+      getDefaultStepDetailsState(
+        cloneConfig && isLatestTransform(cloneConfig) ? TRANSFORM_FUNCTION.LATEST : undefined
+      ),
+      cloneConfig
+    )
   );
 
   // The CREATE state

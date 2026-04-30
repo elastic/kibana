@@ -397,13 +397,24 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateTransformSettingsRequestBody() skips default settings', () => {
+  test('getCreateTransformSettingsRequestBody() skips default settings for pivot', () => {
     const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: null,
       transformSettingsMaxPageSearchSize: 500,
     };
 
     const request = getCreateTransformSettingsRequestBody(transformDetailsState);
+
+    expect(request).toEqual({});
+  });
+
+  test('getCreateTransformSettingsRequestBody() skips default settings for latest', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
+      transformSettingsDocsPerSecond: null,
+      transformSettingsMaxPageSearchSize: 5000,
+    };
+
+    const request = getCreateTransformSettingsRequestBody(transformDetailsState, 5000);
 
     expect(request).toEqual({});
   });
