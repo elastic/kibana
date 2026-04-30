@@ -59,10 +59,10 @@ export const getDefaultState = (config?: TransformConfigUnion): State => ({
       config,
       {
         defaultValue: `${
-        config && isLatestTransform(config)
-          ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
-          : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
-      }`,
+          config && isLatestTransform(config)
+            ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+            : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
+        }`,
         isNullable: true,
         isOptional: true,
         validator: 'transformSettingsPageSearchSizeValidator',
