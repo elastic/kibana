@@ -91,7 +91,7 @@ Parameters:
 - `attachmentId` (required): The attachment ID from list attachments.
 
 ::::{note}
-Attachment content can be large. Only call this action when you have a plan to process the binary data, for example, via an Elasticsearch ingest pipeline attachment processor.
+Attachment content can be large. Only call this action when you have a plan to process the binary data, for example, using an Elasticsearch ingest pipeline attachment processor.
 ::::
 
 ### List folders
@@ -115,7 +115,7 @@ To use the Outlook connector, you need a Microsoft Entra ID application registra
 3. Under **API permissions**, add the following **Delegated** permissions for Microsoft Graph:
    - `Mail.Read` — Read user mail
    - `Mail.ReadBasic` — Read basic mail metadata
-   - `offline_access` — Maintain access to data you have given it access to
+   - `offline_access` — Allow the app to maintain access between sessions
 4. Under **Certificates & secrets**, create a new client secret and note the value.
 5. Copy the **Application (client) ID**, **client secret value**, and **tenant ID**.
-6. In the connector configuration, enter the client ID, client secret, and set the authorization and token URLs using your tenant ID.
+6. In the connector configuration, enter the client ID and client secret, and set the authorization and token URLs using your tenant ID.
