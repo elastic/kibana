@@ -207,12 +207,12 @@ export function Detail() {
     packageInfo.installationInfo?.version &&
     packageInfo.version !== packageInfo.installationInfo.version;
 
-  const isViewingOlderVersion = Boolean(
+  const isViewingUnavailableVersion = Boolean(
     isViewingDifferentVersion || (!isInstalled && isViewingOldPackage)
   );
 
   const addIntegrationDisabledReason: AddIntegrationButtonDisabledReason | undefined =
-    isViewingOlderVersion
+    isViewingUnavailableVersion
       ? isInstalled
         ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
         : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
