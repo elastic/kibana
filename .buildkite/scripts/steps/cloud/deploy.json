@@ -61,7 +61,7 @@
               ],
               "id": "hot_content",
               "size": {
-                "value": 2048,
+                "value": 16384,
                 "resource": "memory"
               }
             },
