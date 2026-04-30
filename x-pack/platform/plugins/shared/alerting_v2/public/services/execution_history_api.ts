@@ -12,11 +12,10 @@ import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constan
 
 export interface PolicyExecutionHistoryItem {
   '@timestamp': string;
-  policy: { id: string; name: string | null };
+  policy: { id: string; name?: string | null };
+  rule: { id: string; name?: string | null };
   outcome: 'dispatched' | 'throttled';
   episode_count: number;
-  rule_count: number;
-  rules: Array<{ id: string; name: string | null }>;
   action_group_count: number;
   workflow_ids: string[];
 }

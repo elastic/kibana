@@ -34,10 +34,16 @@ const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
     }),
   },
   {
-    field: 'policy.name',
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
       defaultMessage: 'Policy',
     }),
+    render: (item: PolicyExecutionHistoryItem) => item.policy.name ?? item.policy.id,
+  },
+  {
+    name: i18n.translate('xpack.alertingV2.executionHistory.columns.rule', {
+      defaultMessage: 'Rule',
+    }),
+    render: (item: PolicyExecutionHistoryItem) => item.rule.name ?? item.rule.id,
   },
   {
     field: 'outcome',
@@ -52,12 +58,6 @@ const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
     }),
   },
   {
-    field: 'rule_count',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.rules', {
-      defaultMessage: 'Rules',
-    }),
-  },
-  {
     field: 'action_group_count',
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.actionGroups', {
       defaultMessage: 'Action groups',
@@ -68,6 +68,7 @@ const columns: Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> = [
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.workflows', {
       defaultMessage: 'Workflows',
     }),
+    render: (workflowIds: string[]) => workflowIds.join(', '),
   },
 ];
 
