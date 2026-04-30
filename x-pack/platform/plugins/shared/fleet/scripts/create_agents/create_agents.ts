@@ -664,6 +664,13 @@ function createOpampCollector(
     },
     effective_config: effectiveConfig,
     local_metadata: {
+      elastic: {
+        agent: {
+          snapshot: false,
+          upgradeable: false,
+          version: '9.0.0',
+        },
+      },
       host: { hostname: `host-${groupLabel}-${index}.example.com` },
     },
     user_provided_metadata: {},
