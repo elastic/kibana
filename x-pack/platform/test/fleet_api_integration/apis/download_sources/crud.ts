@@ -339,8 +339,8 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
-              certificate: 'path/to/cert',
+              certificate_authorities: ['/path/to/cert-authority'],
+              certificate: '/path/to/cert',
               key: 'KEY',
             },
             secrets: { ssl: { key: 'KEY' } },
