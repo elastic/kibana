@@ -99,16 +99,31 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
           const spaceId = doc.namespaces?.[0];
           if (!spaceId) continue;
 
-          windows.push({
-            id: doc.id,
-            spaceId,
-            enabled: doc.attributes.enabled,
-            events: doc.attributes.events.map((event) => ({
-              gteMs: Date.parse(event.gte),
-              lteMs: Date.parse(event.lte),
-            })),
-            ...(doc.attributes.scope !== undefined ? { scope: doc.attributes.scope } : {}),
-          });
+          if (!Array.isArray(doc.attributes.events)) {
+            this.logger.warn({
+              message: () =>
+                `Skipping maintenance window "${doc.id}": missing or invalid events array`,
+            });
+            continue;
+          }
+
+          try {
+            windows.push({
+              id: doc.id,
+              spaceId,
+              enabled: doc.attributes.enabled,
+              events: doc.attributes.events.map((event) => ({
+                gteMs: Date.parse(event.gte),
+                lteMs: Date.parse(event.lte),
+              })),
+              ...(doc.attributes.scope !== undefined ? { scope: doc.attributes.scope } : {}),
+            });
+          } catch (perDocError) {
+            this.logger.error({
+              error: perDocError,
+              type: 'MaintenanceWindowDocParseError',
+            });
+          }
         }
       }
     } catch (error) {

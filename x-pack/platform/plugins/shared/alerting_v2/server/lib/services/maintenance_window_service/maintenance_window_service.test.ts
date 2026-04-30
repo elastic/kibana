@@ -171,6 +171,28 @@ describe('MaintenanceWindowService', () => {
     expect(close).toHaveBeenCalledTimes(1);
   });
 
+  it('skips a malformed MW with missing events and still returns the valid ones', async () => {
+    const malformed = buildSo('mw-bad', 'default', {});
+    delete (malformed.attributes as unknown as { events?: unknown }).events;
+    const valid = buildSo('mw-ok', 'default', {
+      events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
+    });
+
+    client.createPointInTimeFinder.mockReturnValue(
+      mockFinderForSavedObjects([malformed, valid]) as ReturnType<
+        SavedObjectsClientContract['createPointInTimeFinder']
+      >
+    );
+
+    const logger = buildLogger();
+    const service = new MaintenanceWindowService(client, logger);
+
+    const result = await service.getEnabledMaintenanceWindows();
+
+    expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
   it('skips docs without a namespace', async () => {
     const noNamespace = buildSo('mw-1', 'default', {
       events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
