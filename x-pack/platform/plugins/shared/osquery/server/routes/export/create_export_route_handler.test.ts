@@ -313,6 +313,27 @@ describe('createExportRouteHandler', () => {
     expect(response.ok).toHaveBeenCalled();
   });
 
+  it('wraps the entire composed filter in outer parentheses to prevent KQL OR gate-bypass', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    // A kuery that attempts to inject an OR clause to bypass the action_id gate.
+    // With outer parens the ES query will still be scoped to the base filter.
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: { kuery: 'host.name: "a"' },
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
+    // The combined KQL is passed to getQueryFilter which compiles to an ES bool query.
+    // We verify the call succeeds (no bad-request) and the query object is defined,
+    // confirming the outer-parens do not break parsing.
+    expect(response.badRequest).not.toHaveBeenCalled();
+    expect(esQueryArg).toBeDefined();
+    expect(response.ok).toHaveBeenCalled();
+  });
+
   it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();

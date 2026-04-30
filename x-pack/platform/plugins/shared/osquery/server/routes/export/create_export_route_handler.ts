@@ -59,18 +59,21 @@ export const createExportRouteHandler =
 
     const logger = osqueryContext.logFactory.get('export_results');
 
-    // Build filter query. Every clause is wrapped in parens defensively so
-    // that KQL precedence cannot allow a user-supplied `kuery` to escape the
-    // action_id / schedule_id gate (e.g. `foo OR action_id: "other"`).
-    let filter = `(${baseFilter})`;
+    // Build filter query. All clauses are collected into an array and the
+    // entire expression is wrapped in a final outer pair of parentheses so
+    // that a user-supplied `kuery` cannot escape the action_id / schedule_id
+    // gate via KQL OR precedence (e.g. `foo) OR action_id: "other" AND (bar`).
+    const filterParts: string[] = [`(${baseFilter})`];
     if (agentIds && agentIds.length > 0) {
       const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
-      filter += ` AND (${agentFilter})`;
+      filterParts.push(`(${agentFilter})`);
     }
 
     if (kuery) {
-      filter += ` AND (${kuery})`;
+      filterParts.push(`(${kuery})`);
     }
+
+    const filter = `(${filterParts.join(' AND ')})`;
 
     let kqlFilterClause: estypes.QueryDslQueryContainer;
     try {

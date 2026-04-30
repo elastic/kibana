@@ -64,9 +64,11 @@ export const exportLiveQueryResultsRoute = (
         let query: string | undefined;
         let ecsMapping: ECSMapping | undefined;
 
-        // Fetch action details to populate export metadata and ECS mapping for
-        // proper CSV column headers. Failure here is non-fatal — the export
-        // will proceed without enriched metadata.
+        // Fetch action details to populate export metadata and ECS mapping.
+        // When present, ECS mapping enriches all export formats: NDJSON/JSON rows
+        // gain extra ECS-keyed fields (e.g. process.pid alongside osquery.pid.number)
+        // and CSV column headers use ECS names rather than raw osquery field names.
+        // Failure here is non-fatal — the export will proceed without enriched metadata.
         try {
           const abortController = new AbortController();
           const sub = request.events.aborted$.subscribe(() => abortController.abort());

@@ -22,7 +22,18 @@ jest.mock('../export/create_export_route_handler', () => ({
   createExportRouteHandler: jest.fn(),
 }));
 
+jest.mock('../../utils/get_internal_saved_object_client', () => ({
+  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
+}));
+
+jest.mock('../unified_history/process_scheduled_history', () => ({
+  getPacksForSpace: jest.fn().mockResolvedValue([]),
+}));
+
 import { createExportRouteHandler } from '../export/create_export_route_handler';
+import { getPacksForSpace } from '../unified_history/process_scheduled_history';
+
+const mockGetPacksForSpace = getPacksForSpace as jest.MockedFunction<typeof getPacksForSpace>;
 
 const mockCreateExportRouteHandler = createExportRouteHandler as jest.MockedFunction<
   typeof createExportRouteHandler
@@ -50,6 +61,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     jest.clearAllMocks();
     mockHandler = jest.fn().mockResolvedValue({ status: 200 });
     mockCreateExportRouteHandler.mockReturnValue(mockHandler);
+    mockGetPacksForSpace.mockResolvedValue([]);
   });
 
   it('registers a POST route at the correct path', () => {
@@ -112,10 +124,10 @@ describe('exportScheduledQueryResultsRoute', () => {
       response,
       expect.objectContaining({
         baseFilter: 'schedule_id: "sched-uuid-123" AND osquery_meta.schedule_execution_count: 7',
-        metadata: {
+        metadata: expect.objectContaining({
           action_id: 'sched-uuid-123',
           execution_count: 7,
-        },
+        }),
         fileNamePrefix: 'osquery-scheduled-results-sched-uuid-123-7',
       })
     );
@@ -146,6 +158,133 @@ describe('exportScheduledQueryResultsRoute', () => {
     expect(mockHandler.mock.calls[0][3]).toEqual(
       expect.objectContaining({
         baseFilter: `schedule_id: "${expectedEscaped}" AND osquery_meta.schedule_execution_count: 1`,
+      })
+    );
+  });
+
+  it('passes query text and ecsMapping to the handler when a matching pack query is found', async () => {
+    mockGetPacksForSpace.mockResolvedValue([
+      {
+        id: 'pack-1',
+        attributes: {
+          name: 'my_pack',
+          queries: [
+            {
+              id: 'q1',
+              name: 'q1',
+              query: 'SELECT pid FROM processes',
+              interval: 60,
+              schedule_id: 'sched-uuid-123',
+              ecs_mapping: [
+                { key: 'process.pid', result: { type: 'field', value: 'pid' } },
+              ] as unknown as Record<string, unknown>,
+            },
+          ],
+        },
+      } as never,
+    ]);
+
+    const router = httpServiceMock.createRouter();
+    exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
+
+    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+      .mock.calls[0][1];
+
+    const request = {
+      ...httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-uuid-123', executionCount: 2 },
+        query: { format: 'csv' },
+        body: {},
+      }),
+      events: { aborted$: NEVER, completed$: NEVER },
+    };
+
+    const context = { core: Promise.resolve({}) };
+    const response = httpServerMock.createResponseFactory();
+
+    await registeredHandler(context, request, response);
+
+    expect(mockHandler).toHaveBeenCalledWith(
+      context,
+      request,
+      response,
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          action_id: 'sched-uuid-123',
+          execution_count: 2,
+          query: 'SELECT pid FROM processes',
+        }),
+        ecsMapping: { 'process.pid': { field: 'pid' } },
+      })
+    );
+  });
+
+  it('calls the handler with undefined ecsMapping and query when no matching pack is found', async () => {
+    mockGetPacksForSpace.mockResolvedValue([]);
+
+    const router = httpServiceMock.createRouter();
+    exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
+
+    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+      .mock.calls[0][1];
+
+    const request = {
+      ...httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'unknown-sched', executionCount: 1 },
+        query: { format: 'ndjson' },
+        body: {},
+      }),
+      events: { aborted$: NEVER, completed$: NEVER },
+    };
+
+    const context = { core: Promise.resolve({}) };
+    const response = httpServerMock.createResponseFactory();
+
+    await registeredHandler(context, request, response);
+
+    expect(mockHandler).toHaveBeenCalledWith(
+      context,
+      request,
+      response,
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          action_id: 'unknown-sched',
+        }),
+        ecsMapping: undefined,
+      })
+    );
+  });
+
+  it('calls the handler successfully even when getPacksForSpace throws', async () => {
+    mockGetPacksForSpace.mockRejectedValue(new Error('saved objects unavailable'));
+
+    const router = httpServiceMock.createRouter();
+    exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
+
+    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+      .mock.calls[0][1];
+
+    const request = {
+      ...httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 5 },
+        query: { format: 'json' },
+        body: {},
+      }),
+      events: { aborted$: NEVER, completed$: NEVER },
+    };
+
+    const context = { core: Promise.resolve({}) };
+    const response = httpServerMock.createResponseFactory();
+
+    await registeredHandler(context, request, response);
+
+    expect(mockHandler).toHaveBeenCalledWith(
+      context,
+      request,
+      response,
+      expect.objectContaining({
+        baseFilter: expect.stringContaining('sched-1'),
+        ecsMapping: undefined,
       })
     );
   });
