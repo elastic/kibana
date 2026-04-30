@@ -12,8 +12,8 @@ set -euo pipefail
 #   PERF_INTERVAL - interval in seconds
 #   PERF_COUNT - number of uploads
 #   CLOUD_DEPLOYMENT_ID - deployment ID
-#   CLOUD_DEPLOYMENT_KIBANA_URL - Kibana URL
-#   CLOUD_DEPLOYMENT_ELASTICSEARCH_URL - Elasticsearch URL
+#   CLOUD_DEPLOYMENT_KIBANA_URL - Kibana base URL
+#   CLOUD_DEPLOYMENT_ELASTICSEARCH_URL - Elasticsearch base URL
 
 # Function to format large numbers (e.g., 1000000 -> "1m", 7500000 -> "7.5m")
 format_log_count() {
@@ -44,6 +44,28 @@ format_log_count() {
   else
     echo "$count"
   fi
+}
+
+rewrite_markdown_for_pr_comment() {
+  local source_file=$1
+  local dest_file=$2
+
+  awk '
+    /^## Deployment Information$/ {
+      print "> See Buildkite artifacts and annotations for this job."
+      print ""
+      skip = 1
+      next
+    }
+    skip {
+      if (/^### / || /^## /) {
+        skip = 0
+        print
+      }
+      next
+    }
+    { print }
+  ' "$source_file" >"$dest_file"
 }
 
 generate_performance_report() {
@@ -262,13 +284,16 @@ EOF
   # Annotate Buildkite with report
   buildkite-agent annotate --style "info" --context "entity-store-performance" < "$REPORT_FILE"
 
-  # Upload report as artifact
+  # Upload report as artifact (full content)
   buildkite-agent artifact upload "$REPORT_FILE"
+
+  REPORT_FILE_FOR_PR=$(mktemp)
+  rewrite_markdown_for_pr_comment "$REPORT_FILE" "$REPORT_FILE_FOR_PR"
 
   # Create formatted PR comment with collapsible section
   echo "--- Create PR Comment"
   PR_COMMENT_FILE=$(mktemp)
-  
+
   {
     echo "## Entity Store Performance Tests"
     echo ""
@@ -279,10 +304,11 @@ EOF
     echo "<details>"
     echo "<summary>Click to expand full performance report</summary>"
     echo ""
-    cat "$REPORT_FILE"
+    cat "$REPORT_FILE_FOR_PR"
     echo ""
     echo "</details>"
   } > "$PR_COMMENT_FILE"
+  rm -f "$REPORT_FILE_FOR_PR"
   
   # Post comment directly to PR
   echo "Posting performance report to PR"
