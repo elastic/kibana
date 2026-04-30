@@ -68,7 +68,7 @@ export interface SmlListItem {
 /**
  * Server-side type definition for SML (Semantic Metadata Layer).
  *
- * Registered via `agentBuilder.sml.registerType()` during plugin setup.
+ * Registered via `agentContextLayer.registerType()` during plugin setup.
  *
  * Solutions register these to make their content discoverable via the SML.
  */
@@ -159,17 +159,6 @@ export interface SmlCrawlerStateDocument {
  * Action to index an SML attachment.
  */
 export type SmlIndexAction = 'create' | 'update' | 'delete';
-
-/**
- * Parameters for the event-driven indexing API.
- */
-export interface SmlIndexAttachmentParams {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-  spaceId?: string;
-}
 
 /**
  * The SML crawler enumerates registered SML types, compares the current state

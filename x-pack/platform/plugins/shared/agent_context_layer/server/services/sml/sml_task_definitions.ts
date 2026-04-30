@@ -14,7 +14,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlService } from './types';
 
 /**
@@ -39,7 +39,7 @@ import type { SmlService } from './types';
  * SML type implementers are responsible for setting correct `permissions`
  * arrays in their `getSmlData` hook (see `SmlTypeDefinition`).
  */
-export const SML_CRAWLER_TASK_TYPE = 'agent_builder:sml_crawler';
+export const SML_CRAWLER_TASK_TYPE = 'agent_context_layer:sml_crawler';
 
 export interface SmlCrawlerTaskParams {
   attachmentType: string;
@@ -66,7 +66,7 @@ export const registerSmlCrawlerTaskDefinition = ({
 }) => {
   taskManager.registerTaskDefinitions({
     [SML_CRAWLER_TASK_TYPE]: {
-      title: 'Agent Builder: SML Crawler',
+      title: 'Agent Context Layer: SML Crawler',
       timeout: '10m',
       maxAttempts: 3,
       priority: TaskPriority.Low,
@@ -86,7 +86,7 @@ export const registerSmlCrawlerTaskDefinition = ({
             const soClient = savedObjects.createInternalRepository();
             const uiSettingsClient = uiSettings.asScopedToClient(soClient);
             const experimentalEnabled = await uiSettingsClient.get<boolean>(
-              AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+              AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
             );
             if (!experimentalEnabled) {
               logger.debug(
@@ -158,7 +158,7 @@ export const scheduleSmlCrawlerTasks = async ({
         taskType: SML_CRAWLER_TASK_TYPE,
         params: { attachmentType: definition.id },
         schedule: { interval },
-        scope: ['agentBuilder'],
+        scope: ['agentContextLayer'],
         state: {},
       });
       logger.info(
@@ -166,7 +166,9 @@ export const scheduleSmlCrawlerTasks = async ({
       );
     } catch (error) {
       logger.error(
-        `Failed to schedule SML crawler task for type '${definition.id}': ${error.message}`
+        `Failed to schedule SML crawler task for type '${definition.id}': ${
+          (error as Error).message
+        }`
       );
     }
   }
