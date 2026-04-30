@@ -91,7 +91,7 @@ groups:
           ```
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 9.5
           self: ga
           ech: unavailable
 
@@ -191,11 +191,11 @@ groups:
           The OTLP endpoint URL to which log records are shipped. Required for the `otel` appender type.
 
           The expected path depends on the chosen protocol:
-          * HTTP/Protobuf (`http` or `proto`): typically ends in `/v1/logs`, e.g. `https://collector:4318/v1/logs`.
-          * gRPC (`grpc`): a bare host and port without a path, e.g. `https://collector:4317`.
+          * HTTP/Protobuf (`http` or `proto`): typically ends in `/v1/logs`. For example, `https://collector:4318/v1/logs`.
+          * gRPC (`grpc`): a bare host and port without a path. For example, `https://collector:4317`.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 9.5
           self: ga
           ech: unavailable
 
@@ -219,7 +219,7 @@ groups:
 
       - setting: logging.appenders[].<appender-name>.headers
         description: |
-          Optional map of HTTP headers sent with every request to the OTLP endpoint. Applies to the `otel` appender type only. Commonly used for authentication, for example `Authorization: 'Bearer <token>'` or `Authorization: 'ApiKey <base64>'`.
+          Optional map of HTTP headers sent with every request to the OTLP endpoint. Applies to the `otel` appender type only. Commonly used for authentication. For example, `Authorization: 'Bearer <token>'` or `Authorization: 'ApiKey <base64>'`.
 
           For the `grpc` protocol the key-value pairs are sent as gRPC metadata instead of HTTP headers.
 
@@ -228,7 +228,7 @@ groups:
           ::::
         datatype: object
         applies_to:
-          stack: ga
+          stack: ga 9.5
           self: ga
           ech: unavailable
 
@@ -245,7 +245,7 @@ groups:
           ```
         datatype: object
         applies_to:
-          stack: ga
+          stack: ga 9.5
           self: ga
           ech: unavailable
 
