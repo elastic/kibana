@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiSuperDatePicker,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -77,6 +78,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(
       initialStepExecutionId ?? null
     );
+    const [start, setStart] = useState('now-1w');
+    const [end, setEnd] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
 
     const workflowId = useSelector(selectWorkflowId);
@@ -85,6 +88,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       workflowId: workflowId ?? null,
       stepId,
       size: 100,
+      start,
+      end,
     });
 
     const selectedItem = useMemo(() => {
@@ -98,7 +103,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       selectedStepExecutionId ?? undefined,
       selectedItem?.status
     );
-
     const { data: workflowExecution, isLoading: isLoadingWorkflowExecution } = useWorkflowExecution(
       {
         executionId: workflowRunIdForFetch || null,
@@ -107,9 +111,43 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         includeOutput: true,
       }
     );
+
     useEffect(() => {
-      setExecutionContext(workflowExecution?.context);
-    }, [setExecutionContext, workflowExecution?.context]);
+      if (!selectedStepExecutionId || isLoadingStepExecution || !stepExecutionsList) {
+        return;
+      }
+      if (!stepExecutionsList.results.some((r) => r.id === selectedStepExecutionId)) {
+        setSelectedStepExecutionId(null);
+      }
+    }, [selectedStepExecutionId, stepExecutionsList, setExecutionContext, isLoadingStepExecution]);
+
+    // Set the time range automatically when we have an initial step execution id
+    useEffect(() => {
+      if (!initialStepExecutionId || selectedStepExecutionId !== initialStepExecutionId) {
+        return;
+      }
+      const startedAt = selectedStepExecution?.startedAt;
+      if (!startedAt) {
+        return;
+      }
+      // Set the time range to the execution time and start 1 week in the past
+      setEnd(startedAt);
+      setStart(moment(startedAt).subtract(1, 'week').toISOString());
+    }, [initialStepExecutionId, selectedStepExecutionId, selectedStepExecution?.startedAt]);
+
+    // Populate the execution context when the execution data arrives
+    useEffect(() => {
+      if (
+        selectedStepExecutionId &&
+        workflowExecution &&
+        workflowExecution.id === selectedStepExecutionId &&
+        workflowExecution.context
+      ) {
+        setExecutionContext(workflowExecution?.context);
+      } else {
+        setExecutionContext(undefined);
+      }
+    }, [selectedStepExecutionId, setExecutionContext, workflowExecution]);
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
       const results = stepExecutionsList?.results ?? [];
@@ -177,13 +215,14 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     }, [stepExecutionsList?.results, getFormattedDateTime, euiTheme]);
 
     useEffect(() => {
-      if (!selectedStepExecutionId || isLoadingStepExecution || isLoadingWorkflowExecution) {
+      if (
+        !selectedStepExecution ||
+        !workflowExecution ||
+        !workflowGraph ||
+        selectedStepExecution.id !== selectedStepExecutionId
+      ) {
         setErrors(NOT_READY_SENTINEL);
-      }
-    }, [selectedStepExecutionId, isLoadingStepExecution, isLoadingWorkflowExecution, setErrors]);
-
-    useEffect(() => {
-      if (selectedStepExecution && workflowExecution && workflowGraph) {
+      } else {
         const override = buildContextOverrideFromExecution(
           workflowGraph,
           workflowExecution,
@@ -192,7 +231,22 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         setValue(JSON.stringify(override.stepContext, null, 2));
         setErrors(null);
       }
-    }, [selectedStepExecution, workflowExecution, workflowGraph, setValue, setErrors]);
+    }, [
+      selectedStepExecution,
+      workflowExecution,
+      workflowGraph,
+      selectedStepExecutionId,
+      setValue,
+      setErrors,
+    ]);
+
+    const handleTimeChange = useCallback(
+      ({ start: nextStart, end: nextEnd }: { start: string; end: string }) => {
+        setStart(nextStart);
+        setEnd(nextEnd);
+      },
+      []
+    );
 
     const handleExecutionChange = useCallback((selected: EuiComboBoxOptionOption<string>[]) => {
       const id = selected.length > 0 && selected[0].value ? String(selected[0].value) : null;
@@ -235,26 +289,49 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={translations.selectStepExecutionLabel} fullWidth>
-            <EuiComboBox
-              singleSelection={{ asPlainText: true }}
-              options={executionOptions}
-              selectedOptions={
-                selectedStepExecutionId && executionOptions.length > 0
-                  ? executionOptions.filter((o) => o.key === selectedStepExecutionId)
-                  : []
-              }
-              onChange={handleExecutionChange}
-              isClearable
-              fullWidth
-              isLoading={stepExecutionsList === undefined && !!workflowId}
-              placeholder={translations.selectStepExecutionPlaceholder}
-              data-test-subj="workflowTestStepModalReplayExecutionComboBox"
-            />
-          </EuiFormRow>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd" responsive={false}>
+            <EuiFlexItem grow>
+              <EuiFormRow label={translations.selectStepExecutionLabel} fullWidth>
+                <EuiComboBox
+                  singleSelection={{ asPlainText: true }}
+                  options={executionOptions}
+                  selectedOptions={
+                    selectedStepExecutionId && executionOptions.length > 0
+                      ? executionOptions.filter((o) => o.key === selectedStepExecutionId)
+                      : []
+                  }
+                  onChange={handleExecutionChange}
+                  isClearable
+                  fullWidth
+                  isLoading={stepExecutionsList === undefined && !!workflowId}
+                  placeholder={translations.selectStepExecutionPlaceholder}
+                  data-test-subj="workflowTestStepModalReplayExecutionComboBox"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow hasEmptyLabelSpace>
+                <EuiSuperDatePicker
+                  start={start}
+                  end={end}
+                  onTimeChange={handleTimeChange}
+                  showUpdateButton={false}
+                  width="auto"
+                  data-test-subj="workflowTestStepModalReplayTimeRange"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
-        {selectedStepExecution && (
+        {selectedStepExecutionId && (isLoadingStepExecution || isLoadingWorkflowExecution) && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {translations.loadingExecution}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {selectedStepExecution && selectedStepExecution.id === selectedStepExecutionId && (
           <EuiFlexItem
             css={css`
               overflow: hidden;
@@ -267,7 +344,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                 min-height: 0;
               `}
             >
-              {((errors && errors !== NOT_READY_SENTINEL) || warnings) && (
+              {(errors || warnings) && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} warnings={warnings} />
                 </EuiFlexItem>
@@ -330,13 +407,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-        {selectedStepExecutionId && (isLoadingStepExecution || isLoadingWorkflowExecution) && (
-          <EuiFlexItem>
-            <EuiText size="s" color="subdued">
-              {translations.loadingExecution}
-            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

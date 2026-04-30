@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -73,6 +73,24 @@ describe('WorkflowExecuteHistoricalForm', () => {
       expect(screen.getByTestId('workflowExecuteModalReplayExecutionComboBox')).toBeInTheDocument();
     });
 
+    it('should render the time range picker', () => {
+      renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
+      expect(screen.getByTestId('workflowExecuteModalReplayTimeRange')).toBeInTheDocument();
+    });
+
+    it('should pass last week default time range to useWorkflowExecutions', () => {
+      renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
+      expect(mockUseWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'workflow-1',
+          omitStepRuns: true,
+          size: 100,
+          start: 'now-1w',
+          end: 'now',
+        })
+      );
+    });
+
     it('should render the select execution label', () => {
       renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
       expect(screen.getByText('Select execution')).toBeInTheDocument();
@@ -82,6 +100,20 @@ describe('WorkflowExecuteHistoricalForm', () => {
   describe('not-ready signaling', () => {
     it('should set NOT_READY_SENTINEL error when no execution is selected', () => {
       renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
+      expect(defaultProps.setErrors).toHaveBeenCalledWith(NOT_READY_SENTINEL);
+    });
+
+    it('should set NOT_READY_SENTINEL when the selected execution is not in the current list', () => {
+      mockUseWorkflowExecutions.mockReturnValue({
+        data: { total: 0, results: [] },
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'exec-1', context: { inputs: {} } },
+        isLoading: false,
+      });
+      renderWithProviders(
+        <WorkflowExecuteHistoricalForm {...defaultProps} initialExecutionId="exec-1" />
+      );
       expect(defaultProps.setErrors).toHaveBeenCalledWith(NOT_READY_SENTINEL);
     });
 
@@ -97,10 +129,39 @@ describe('WorkflowExecuteHistoricalForm', () => {
   describe('execution loading', () => {
     it('should show loading text when execution is loading', () => {
       mockUseWorkflowExecution.mockReturnValue({ data: null, isLoading: true });
+      mockUseWorkflowExecutions.mockReturnValue({
+        data: {
+          total: 1,
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
+        },
+      });
       renderWithProviders(
         <WorkflowExecuteHistoricalForm {...defaultProps} initialExecutionId="exec-1" />
       );
       expect(screen.getByText(/Loading execution/)).toBeInTheDocument();
+    });
+  });
+
+  describe('no selection body', () => {
+    it('should show select historical message when the selected execution is not in the current list', () => {
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'exec-1', context: { inputs: { x: 1 } } },
+        isLoading: false,
+      });
+      mockUseWorkflowExecutions.mockReturnValue({
+        data: { total: 0, results: [] },
+      });
+      renderWithProviders(
+        <WorkflowExecuteHistoricalForm {...defaultProps} initialExecutionId="exec-1" />
+      );
+      expect(screen.queryByTestId('workflow-historical-json-editor')).not.toBeInTheDocument();
     });
   });
 
@@ -160,6 +221,45 @@ describe('WorkflowExecuteHistoricalForm', () => {
       );
 
       expect(defaultProps.setValue).toHaveBeenCalledWith(JSON.stringify({ foo: 'bar' }, null, 2));
+    });
+
+    it('should anchor time range from initial execution startedAt when replaying', async () => {
+      const startedAt = '2024-06-01T12:00:00.000Z';
+      const mockExecution = {
+        id: 'exec-1',
+        startedAt,
+        context: { inputs: { foo: 'bar' } },
+      };
+      mockUseWorkflowExecution.mockReturnValue({ data: mockExecution, isLoading: false });
+      mockUseWorkflowExecutions.mockReturnValue({
+        data: {
+          total: 1,
+          results: [
+            {
+              id: 'exec-1',
+              startedAt,
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
+        },
+      });
+
+      renderWithProviders(
+        <WorkflowExecuteHistoricalForm {...defaultProps} initialExecutionId="exec-1" />
+      );
+
+      await waitFor(() => {
+        const calls = mockUseWorkflowExecutions.mock.calls.map((c) => c[0]);
+        expect(
+          calls.some(
+            (arg) =>
+              arg.end === startedAt &&
+              typeof arg.start === 'string' &&
+              arg.start.startsWith('2024-05-25')
+          )
+        ).toBe(true);
+      });
     });
   });
 
@@ -248,7 +348,9 @@ describe('WorkflowExecuteHistoricalForm', () => {
         },
       });
 
-      renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
+      renderWithProviders(
+        <WorkflowExecuteHistoricalForm {...defaultProps} initialExecutionId="exec-1" />
+      );
       const editor = screen.getByTestId('workflow-historical-json-editor');
       fireEvent.change(editor, { target: { value: '{"valid": true}' } });
 

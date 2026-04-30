@@ -95,6 +95,22 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Number of results per page.' },
                 })
               ),
+              start: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering executions by startedAt (inclusive when parsed).',
+                  },
+                })
+              ),
+              end: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -116,6 +132,8 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             page: request.query.page,
             size: request.query.size,
             omitStepRuns: request.query.omitStepRuns,
+            start: request.query.start,
+            end: request.query.end,
           };
           return response.ok({
             body: await api.getWorkflowExecutions(params, spaceId),

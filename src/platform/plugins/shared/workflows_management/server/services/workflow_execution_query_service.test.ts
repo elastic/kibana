@@ -125,6 +125,32 @@ describe('WorkflowExecutionQueryService', () => {
       expect(stepIdFilter).toBeDefined();
     });
 
+    it('adds startedAt range filter when start and end are provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', start: 'now-1w', end: 'now' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      const rangeClause = must.find((clause: any) => clause.range?.startedAt);
+      expect(rangeClause).toBeDefined();
+      expect(rangeClause.range.startedAt.gte).toMatch(/^\d{4}-/);
+      expect(rangeClause.range.startedAt.lte).toMatch(/^\d{4}-/);
+    });
+
+    it('does not add startedAt range when start and end are omitted', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must.some((clause: any) => clause.range?.startedAt)).toBe(false);
+    });
+
     it('uses default page size and page 1 when not specified', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
@@ -262,6 +288,18 @@ describe('WorkflowExecutionQueryService', () => {
       const call = mockEsClient.search.mock.calls[0][0] as any;
       // No source excludes should be passed
       expect(call._source?.excludes).toBeUndefined();
+    });
+
+    it('adds startedAt range when start and end are provided', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', includeInput: true, includeOutput: true, start: 'now-1w', end: 'now' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must.some((clause: any) => clause.range?.startedAt)).toBe(true);
     });
   });
 

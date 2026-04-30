@@ -19,10 +19,18 @@ export interface StepExecutionListResult {
 }
 
 interface UseWorkflowStepExecutionsParams {
+  /** Workflow ID. */
   workflowId: string | null;
+  /** Filter by step ID. */
   stepId?: string | null;
+  /** Number of results per page. */
   size?: number;
+  /** Page number. */
   page?: number;
+  /** Datemath start of the time range filter (e.g. 'now-1d') applied to startedAt. */
+  start?: string;
+  /** Datemath end of the time range filter (e.g. 'now') applied to startedAt. */
+  end?: string;
 }
 
 export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParams) {
@@ -36,6 +44,8 @@ export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParam
       params.stepId,
       params.page,
       params.size,
+      params.start,
+      params.end,
     ],
     queryFn: async () => {
       if (!params.workflowId) {
@@ -45,6 +55,8 @@ export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParam
         ...(params.stepId ? { stepId: params.stepId } : {}),
         page: params.page,
         size: params.size ?? 100,
+        ...(params.start != null && params.start !== '' ? { start: params.start } : {}),
+        ...(params.end != null && params.end !== '' ? { end: params.end } : {}),
       });
     },
     enabled: params.workflowId !== null,

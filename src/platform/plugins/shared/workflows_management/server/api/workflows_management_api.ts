@@ -127,6 +127,10 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  start?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  end?: string;
 }
 
 export interface GetAvailableConnectorsParams {

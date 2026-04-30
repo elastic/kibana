@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
+import { selectWorkflowId } from '../../../entities/workflows/store';
 
 const mockUseWorkflowStepExecutions = jest.fn();
 jest.mock('../../../entities/workflows/model/use_workflow_step_executions', () => ({
@@ -79,8 +80,7 @@ describe('StepExecuteHistoricalForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSelector.mockImplementation((selector: unknown) => {
-      const s = String(selector);
-      if (s.includes('selectWorkflowId')) return 'workflow-1';
+      if (selector === selectWorkflowId) return 'workflow-1';
       return null;
     });
     mockUseStepExecution.mockReturnValue({ data: null, isLoading: false });
@@ -98,6 +98,30 @@ describe('StepExecuteHistoricalForm', () => {
       expect(
         screen.getByTestId('workflowTestStepModalReplayExecutionComboBox')
       ).toBeInTheDocument();
+    });
+
+    it('should render the time range picker', () => {
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: { results: [], total: 0 },
+      });
+      renderWithProviders(<StepExecuteHistoricalForm {...defaultProps} />);
+      expect(screen.getByTestId('workflowTestStepModalReplayTimeRange')).toBeInTheDocument();
+    });
+
+    it('should pass last week default time range to useWorkflowStepExecutions', () => {
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: { results: [], total: 0 },
+      });
+      renderWithProviders(<StepExecuteHistoricalForm {...defaultProps} />);
+      expect(mockUseWorkflowStepExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'workflow-1',
+          stepId: 'my_step',
+          size: 100,
+          start: 'now-1w',
+          end: 'now',
+        })
+      );
     });
 
     it('should render the select step execution label', () => {
@@ -168,7 +192,7 @@ describe('StepExecuteHistoricalForm', () => {
   describe('step execution loaded', () => {
     it('should show code editor when step execution data is available', () => {
       mockUseStepExecution.mockReturnValue({
-        data: { input: { key: 'value' } },
+        data: { id: 'step-exec-1', input: { key: 'value' } },
         isLoading: false,
       });
       mockUseWorkflowStepExecutions.mockReturnValue({
@@ -195,7 +219,7 @@ describe('StepExecuteHistoricalForm', () => {
     });
 
     it('should call setValue with context override when step execution and workflow execution load', () => {
-      const mockStepExecution = { input: { foo: 'bar' } };
+      const mockStepExecution = { id: 'step-exec-1', input: { foo: 'bar' } };
       const mockWorkflowExec = { id: 'run-1' };
       const mockGraph = { nodes: [] };
 
@@ -241,7 +265,7 @@ describe('StepExecuteHistoricalForm', () => {
 
     it('should not call setValue when workflowGraph is not provided', () => {
       mockUseStepExecution.mockReturnValue({
-        data: { input: { foo: 'bar' } },
+        data: { id: 'step-exec-1', input: { foo: 'bar' } },
         isLoading: false,
       });
       mockUseWorkflowExecution.mockReturnValue({
@@ -270,6 +294,53 @@ describe('StepExecuteHistoricalForm', () => {
       );
       expect(mockBuildContextOverrideFromExecution).not.toHaveBeenCalled();
       expect(defaultProps.setValue).not.toHaveBeenCalled();
+    });
+
+    it('should anchor time range from initial step execution startedAt when replaying', async () => {
+      const startedAt = '2024-06-01T12:00:00.000Z';
+      mockUseStepExecution.mockReturnValue({
+        data: { id: 'step-exec-1', input: {}, startedAt },
+        isLoading: false,
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'run-1', context: {} },
+        isLoading: false,
+      });
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: {
+          total: 1,
+          results: [
+            {
+              id: 'step-exec-1',
+              workflowRunId: 'run-1',
+              startedAt,
+              status: 'completed',
+            },
+          ],
+        },
+      });
+      mockBuildContextOverrideFromExecution.mockReturnValue({ stepContext: {} });
+
+      renderWithProviders(
+        <StepExecuteHistoricalForm
+          {...defaultProps}
+          initialStepExecutionId="step-exec-1"
+          initialWorkflowRunId="run-1"
+          workflowGraph={{ nodes: [] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        const calls = mockUseWorkflowStepExecutions.mock.calls.map((c) => c[0]);
+        expect(
+          calls.some(
+            (arg) =>
+              arg.end === startedAt &&
+              typeof arg.start === 'string' &&
+              arg.start.startsWith('2024-05-25')
+          )
+        ).toBe(true);
+      });
     });
   });
 
@@ -300,6 +371,25 @@ describe('StepExecuteHistoricalForm', () => {
     });
   });
 
+  describe('no selection body', () => {
+    it('should show select historical message when the selected step is not in the current list', () => {
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: { total: 0, results: [] },
+      });
+      mockUseStepExecution.mockReturnValue({ data: null, isLoading: true });
+      renderWithProviders(
+        <StepExecuteHistoricalForm
+          {...defaultProps}
+          initialStepExecutionId="step-exec-1"
+          initialWorkflowRunId="run-1"
+        />
+      );
+      expect(
+        screen.queryByTestId('workflow-test-step-historical-json-editor')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('error display', () => {
     it('should not show error callout when errors is NOT_READY_SENTINEL', () => {
       mockUseWorkflowStepExecutions.mockReturnValue({
@@ -313,7 +403,7 @@ describe('StepExecuteHistoricalForm', () => {
 
     it('should show error callout when there is a real error and execution is selected', () => {
       mockUseStepExecution.mockReturnValue({
-        data: { input: { key: 'value' } },
+        data: { id: 'step-exec-1', input: { key: 'value' } },
         isLoading: false,
       });
       mockUseWorkflowStepExecutions.mockReturnValue({
@@ -344,7 +434,7 @@ describe('StepExecuteHistoricalForm', () => {
   describe('warnings display', () => {
     it('should show warnings callout when warnings is provided', () => {
       mockUseStepExecution.mockReturnValue({
-        data: { input: { key: 'value' } },
+        data: { id: 'step-exec-1', input: { key: 'value' } },
         isLoading: false,
       });
       mockUseWorkflowStepExecutions.mockReturnValue({

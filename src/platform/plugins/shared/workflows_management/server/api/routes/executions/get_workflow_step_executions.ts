@@ -59,6 +59,22 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
                   meta: { description: 'Number of results per page.' },
                 })
               ),
+              start: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering step executions by startedAt (inclusive when parsed).',
+                  },
+                })
+              ),
+              end: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -76,6 +92,8 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
             includeOutput: query.includeOutput ?? false,
             page: query.page,
             size: query.size,
+            start: query.start,
+            end: query.end,
           };
 
           return response.ok({

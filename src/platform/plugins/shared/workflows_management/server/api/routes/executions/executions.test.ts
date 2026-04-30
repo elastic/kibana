@@ -329,7 +329,7 @@ describe('Execution Routes', () => {
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflowExecutions).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           workflowId: 'wf-1',
           statuses: ['running'],
           executionTypes: undefined,
@@ -337,7 +337,30 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+        }),
+        'default'
+      );
+    });
+
+    it('should forward start and end query params to api.getWorkflowExecutions', async () => {
+      mockApi.getWorkflowExecutions.mockResolvedValue({ executions: [] });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: {
+          start: 'now-1w',
+          end: 'now',
         },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          start: 'now-1w',
+          end: 'now',
+        }),
         'default'
       );
     });
@@ -367,14 +390,39 @@ describe('Execution Routes', () => {
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.searchStepExecutions).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           workflowId: 'wf-1',
           stepId: 's1',
           includeInput: true,
           includeOutput: false,
           page: 1,
           size: 10,
+        }),
+        'default'
+      );
+    });
+
+    it('should forward start and end query params to api.searchStepExecutions', async () => {
+      mockApi.searchStepExecutions.mockResolvedValue({ stepExecutions: [] });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: {
+          stepId: 's1',
+          start: 'now-1w',
+          end: 'now',
         },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.searchStepExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          stepId: 's1',
+          start: 'now-1w',
+          end: 'now',
+        }),
         'default'
       );
     });

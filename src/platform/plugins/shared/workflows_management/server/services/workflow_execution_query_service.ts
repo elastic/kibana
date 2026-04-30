@@ -24,6 +24,7 @@ import type {
 
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { buildStartedAtRangeFilter } from '../api/lib/build_started_at_range_filter';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
@@ -122,6 +123,11 @@ export class WorkflowExecutionQueryService {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
     }
 
+    const startedAtRange = buildStartedAtRangeFilter(params.start, params.end);
+    if (startedAtRange) {
+      must.push(startedAtRange);
+    }
+
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
@@ -202,6 +208,8 @@ export class WorkflowExecutionQueryService {
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
       page: params.page,
       size: params.size,
+      start: params.start,
+      end: params.end,
     });
   }
 

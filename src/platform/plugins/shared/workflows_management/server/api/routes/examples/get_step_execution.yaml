@@ -35,4 +35,4 @@ x-codeSamples:
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |
-      GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}?start=now-1d&end=now

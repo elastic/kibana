@@ -180,6 +180,28 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
+  it('should pass start and end time range to query params', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutions({
+          workflowId: 'wf-1',
+          start: 'now-1w',
+          end: 'now',
+        }),
+      { wrapper: createQueryClientWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({
+        start: 'now-1w',
+        end: 'now',
+      })
+    );
+  });
+
   it('should use custom page size when provided', async () => {
     const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', size: 25 }), {
       wrapper: createQueryClientWrapper(queryClient),

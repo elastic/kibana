@@ -51,10 +51,13 @@ describe('useWorkflowStepExecutions', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith('wf-1', {
-      page: undefined,
-      size: 100,
-    });
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({
+        page: undefined,
+        size: 100,
+      })
+    );
     expect(result.current.data).toEqual(stepExecutionsResponse);
   });
 
@@ -75,11 +78,14 @@ describe('useWorkflowStepExecutions', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith('wf-1', {
-      stepId: 'fetch_data',
-      page: undefined,
-      size: 100,
-    });
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({
+        stepId: 'fetch_data',
+        page: undefined,
+        size: 100,
+      })
+    );
   });
 
   it('should pass page and size params when provided', async () => {
@@ -90,10 +96,35 @@ describe('useWorkflowStepExecutions', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith('wf-1', {
-      page: 2,
-      size: 50,
-    });
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({
+        page: 2,
+        size: 50,
+      })
+    );
+  });
+
+  it('should pass start and end time range to query params', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowStepExecutions({
+          workflowId: 'wf-1',
+          start: 'now-1w',
+          end: 'now',
+        }),
+      { wrapper: createQueryClientWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({
+        start: 'now-1w',
+        end: 'now',
+      })
+    );
   });
 
   it('should handle HTTP errors', async () => {

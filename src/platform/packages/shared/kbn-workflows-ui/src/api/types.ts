@@ -75,6 +75,10 @@ export interface GetWorkflowExecutionsParams {
   omitStepRuns?: boolean;
   page?: number;
   size?: number;
+  /** Datemath start of the time range filter (applied to startedAt). */
+  start?: string;
+  /** Datemath end of the time range filter (applied to startedAt). */
+  end?: string;
 }
 
 export interface GetWorkflowStepExecutionsParams {
@@ -83,6 +87,10 @@ export interface GetWorkflowStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath start of the time range filter (applied to startedAt). */
+  start?: string;
+  /** Datemath end of the time range filter (applied to startedAt). */
+  end?: string;
 }
 
 export interface GetExecutionParams {

@@ -75,6 +75,10 @@ export interface SearchWorkflowExecutionsParams {
   omitStepRuns?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  start?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  end?: string;
 }
 
 export class WorkflowsService {

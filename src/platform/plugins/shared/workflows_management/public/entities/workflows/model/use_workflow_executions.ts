@@ -16,12 +16,22 @@ const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
 
 interface UseWorkflowExecutionsParams {
+  /** Workflow ID. */
   workflowId: string | null;
+  /** Filter by execution status. */
   statuses?: ExecutionStatus[];
+  /** Filter by execution type. */
   executionTypes?: ExecutionType[];
+  /** Filter by the user who triggered the execution. */
   executedBy?: string[];
+  /** Number of results per page. */
   size?: number;
+  /** Whether to omit single-step runs from the results. */
   omitStepRuns?: boolean;
+  /** Datemath start of the time range filter (e.g. 'now-1d') applied to startedAt. */
+  start?: string;
+  /** Datemath end of the time range filter (e.g. 'now') applied to startedAt. */
+  end?: string;
 }
 
 export function useWorkflowExecutions(
@@ -52,6 +62,8 @@ export function useWorkflowExecutions(
           ? { executedBy: params.executedBy }
           : {}),
         ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
+        ...(params.start != null && params.start !== '' ? { start: params.start } : {}),
+        ...(params.end != null && params.end !== '' ? { end: params.end } : {}),
         page: pageParam,
         size: currentSize,
       });
@@ -63,6 +75,8 @@ export function useWorkflowExecutions(
       params.executionTypes,
       params.executedBy,
       params.omitStepRuns,
+      params.start,
+      params.end,
       currentSize,
     ]
   );
@@ -96,6 +110,8 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      params.start,
+      params.end,
       currentSize,
     ],
     queryFn,
