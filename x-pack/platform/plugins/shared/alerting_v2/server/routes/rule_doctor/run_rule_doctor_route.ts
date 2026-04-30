@@ -26,9 +26,7 @@ import { WorkflowsManagementApiToken } from '../../lib/dispatcher/steps/dispatch
 import { ensureRuleDoctorWorkflow } from '../../workflows/load_workflows';
 
 const runRuleDoctorBodySchema = z.object({
-  type: z
-    .enum(['deduplication'])
-    .describe('The type of Rule Doctor analysis to run'),
+  type: z.enum(['deduplication']).describe('The type of Rule Doctor analysis to run'),
 });
 
 @injectable()
@@ -54,7 +52,11 @@ export class RunRuleDoctorRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, z.infer<typeof runRuleDoctorBodySchema>>,
+    private readonly request: KibanaRequest<
+      unknown,
+      unknown,
+      z.infer<typeof runRuleDoctorBodySchema>
+    >,
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(SpaceContext) private readonly spaceContext: SpaceContext,

@@ -16,9 +16,7 @@ import {
 import type { LoggerServiceContract } from '../lib/services/logger_service/logger_service';
 
 const persistFindingsInputSchema = z.object({
-  insights: z
-    .array(z.unknown())
-    .describe('Insight documents to validate and persist'),
+  insights: z.array(z.unknown()).describe('Insight documents to validate and persist'),
   dismiss_ids: z
     .array(z.string())
     .optional()

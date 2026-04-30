@@ -16,5 +16,4 @@ export const ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH =
   '/api/alerting/v2/internal/user_profiles/_suggest' as const;
 export const ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH =
   '/api/alerting/v2/rule_doctor/insights' as const;
-export const ALERTING_V2_RULE_DOCTOR_RUN_API_PATH =
-  '/api/alerting/v2/rule_doctor/run' as const;
+export const ALERTING_V2_RULE_DOCTOR_RUN_API_PATH = '/api/alerting/v2/rule_doctor/run' as const;
