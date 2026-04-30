@@ -249,7 +249,7 @@ const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
 };
 
 const formatToolError = (error: unknown) => {
-  if (isWorkflowValidationError(error)) {
+  if (error instanceof Error && isWorkflowValidationError(error)) {
     return {
       success: false,
       error: error.message,
@@ -261,6 +261,162 @@ const formatToolError = (error: unknown) => {
     success: false,
     error: error instanceof Error ? error.message : String(error),
   };
+};
+
+const createToolResult = (data: Record<string, unknown>) => ({
+  results: [
+    {
+      type: 'other' as const,
+      data,
+    },
+  ],
+});
+
+const executeAndPollStep = async ({
+  api,
+  yaml,
+  stepName,
+  workflowId,
+  contextOverride,
+  spaceId,
+  request,
+}: {
+  api: WorkflowsManagementApi;
+  yaml: string;
+  stepName: string;
+  workflowId?: string;
+  contextOverride?: Record<string, unknown>;
+  spaceId: string;
+  request: ToolHandlerContext['request'];
+}) => {
+  const executionId = await api.testStep(
+    yaml,
+    stepName,
+    workflowId,
+    undefined,
+    contextOverride ?? {},
+    spaceId,
+    request
+  );
+
+  const result = await pollExecution(api, executionId, stepName, spaceId);
+
+  return { executionId, result };
+};
+
+const formatExecutionResult = ({
+  executionId,
+  result,
+}: {
+  executionId: string;
+  result: Awaited<ReturnType<typeof pollExecution>>;
+}) => ({
+  success: result.status === ExecutionStatus.COMPLETED,
+  executionId,
+  status: result.status,
+  ...(result.output !== undefined ? { output: result.output } : {}),
+  ...(result.error !== undefined ? { error: result.error } : {}),
+  ...(result.duration != null ? { duration: result.duration } : {}),
+});
+
+const getUnsafeStepValidation = async ({
+  api,
+  yaml,
+  spaceId,
+  request,
+}: {
+  api: WorkflowsManagementApi;
+  yaml: string;
+  spaceId: string;
+  request: ToolHandlerContext['request'];
+}): Promise<{ valid: boolean; errors?: string[] } | undefined> => {
+  try {
+    const result = await api.validateWorkflow(yaml, spaceId, request);
+    if (result.valid) {
+      return { valid: true };
+    }
+
+    const errors = result.diagnostics
+      .filter((d) => d.severity === 'error')
+      .map((d) => `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`);
+    return { valid: false, errors };
+  } catch {
+    return undefined;
+  }
+};
+
+const executeConditionStepWithStubs = async ({
+  api,
+  yaml,
+  stepName,
+  workflowId,
+  contextOverride,
+  context,
+}: {
+  api: WorkflowsManagementApi;
+  yaml: string;
+  stepName: string;
+  workflowId?: string;
+  contextOverride?: Record<string, unknown>;
+  context: ToolHandlerContext;
+}) => {
+  try {
+    const { executionId, result } = await executeAndPollStep({
+      api,
+      yaml: stubUnsafeChildren(yaml, stepName),
+      stepName,
+      workflowId,
+      contextOverride,
+      spaceId: context.spaceId,
+      request: context.request,
+    });
+
+    return createToolResult({
+      conditionTest: true,
+      ...formatExecutionResult({ executionId, result }),
+      hint: 'Unsafe child steps were replaced with safe stubs to test the condition. Check the output to see which branch was taken.',
+    });
+  } catch (error) {
+    return createToolResult(formatToolError(error));
+  }
+};
+
+const createUnsafeStepResult = async ({
+  api,
+  yaml,
+  stepName,
+  stepInfo,
+  unsafeStep,
+  context,
+}: {
+  api: WorkflowsManagementApi;
+  yaml: string;
+  stepName: string;
+  stepInfo: StepInfo;
+  unsafeStep: StepInfo;
+  context: ToolHandlerContext;
+}) => {
+  const validation = await getUnsafeStepValidation({
+    api,
+    yaml,
+    spaceId: context.spaceId,
+    request: context.request,
+  });
+
+  const isChildUnsafe = unsafeStep.stepId !== stepName;
+  const reason = isChildUnsafe
+    ? `Step "${stepName}" contains child step "${unsafeStep.stepId}" (type "${unsafeStep.stepType}") which has external side effects`
+    : `Step type "${unsafeStep.stepType}" has external side effects and cannot be auto-executed`;
+
+  return createToolResult({
+    blocked: true,
+    reason,
+    stepType: stepInfo.stepType,
+    unsafeStepType: unsafeStep.stepType,
+    ...(isChildUnsafe ? { unsafeChildStepId: unsafeStep.stepId } : {}),
+    ...(validation ? { validation } : {}),
+    hint: 'Ask the user to test this step manually using the "Run step" button in the editor.',
+  });
 };
 
 const pollExecution = async (
@@ -348,192 +504,81 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
       cacheMode: 'space',
     },
     handler: async ({ stepName, yaml: inlineYaml, contextOverride }, context) => {
-      let yaml: string;
-      let workflowId: string | undefined;
-
-      if (inlineYaml) {
-        // Ensure inline YAML has minimum required fields for validation
-        yaml = ensureMinimalWorkflow(inlineYaml);
-      } else {
-        const attachment = findWorkflowYamlAttachment(context);
-        if (!attachment) {
-          return {
-            results: [
-              {
-                type: 'other' as const,
-                data: {
-                  success: false,
-                  error:
-                    'No workflow YAML attachment found. Provide the `yaml` parameter with inline YAML, or create a workflow first.',
-                },
-              },
-            ],
-          };
-        }
-        yaml = attachment.yaml;
-        workflowId = attachment.workflowId;
+      const attachment = inlineYaml ? null : findWorkflowYamlAttachment(context);
+      if (!inlineYaml && !attachment) {
+        return createToolResult({
+          success: false,
+          error:
+            'No workflow YAML attachment found. Provide the `yaml` parameter with inline YAML, or create a workflow first.',
+        });
       }
+
+      const yaml = inlineYaml
+        ? ensureMinimalWorkflow(inlineYaml)
+        : attachment
+        ? attachment.yaml
+        : '';
+      const workflowId = attachment?.workflowId;
 
       const yamlParseError = getYamlParseError(yaml);
       if (yamlParseError) {
-        return {
-          results: [
-            {
-              type: 'other' as const,
-              data: {
-                success: false,
-                error: `Invalid workflow YAML: ${yamlParseError}`,
-              },
-            },
-          ],
-        };
+        return createToolResult({
+          success: false,
+          error: `Invalid workflow YAML: ${yamlParseError}`,
+        });
       }
 
       const lookup = buildLookup(yaml);
       const stepInfo = lookup.steps[stepName];
       if (!stepInfo) {
-        return {
-          results: [
-            {
-              type: 'other' as const,
-              data: {
-                success: false,
-                error: `Step "${stepName}" not found in the workflow YAML`,
-              },
-            },
-          ],
-        };
+        return createToolResult({
+          success: false,
+          error: `Step "${stepName}" not found in the workflow YAML`,
+        });
       }
 
       const unsafeStep = findUnsafeStep(stepName, lookup.steps);
-
-      // For condition steps (if/while) with unsafe children, auto-stub
-      // the children with safe console steps so the condition can be tested.
       const CONDITION_STEP_TYPES = new Set(['if', 'while']);
-      if (unsafeStep && CONDITION_STEP_TYPES.has(stepInfo.stepType)) {
-        const isChildUnsafe = unsafeStep.stepId !== stepName;
-        if (isChildUnsafe) {
-          yaml = stubUnsafeChildren(yaml, stepName);
-          // Re-execute with stubbed YAML — children are now safe console steps
-          try {
-            const executionId = await api.testStep(
-              yaml,
-              stepName,
-              workflowId,
-              undefined,
-              contextOverride ?? {},
-              context.spaceId,
-              context.request
-            );
-
-            const result = await pollExecution(api, executionId, stepName, context.spaceId);
-
-            return {
-              results: [
-                {
-                  type: 'other' as const,
-                  data: {
-                    conditionTest: true,
-                    success: result.status === ExecutionStatus.COMPLETED,
-                    executionId,
-                    status: result.status,
-                    ...(result.output !== undefined ? { output: result.output } : {}),
-                    ...(result.error !== undefined ? { error: result.error } : {}),
-                    ...(result.duration != null ? { duration: result.duration } : {}),
-                    hint: 'Unsafe child steps were replaced with safe stubs to test the condition. Check the output to see which branch was taken.',
-                  },
-                },
-              ],
-            };
-          } catch (e) {
-            return {
-              results: [
-                {
-                  type: 'other' as const,
-                  data: formatToolError(e),
-                },
-              ],
-            };
-          }
-        }
-      }
-
-      if (unsafeStep) {
-        let validation: { valid: boolean; errors?: string[] } | undefined;
-        try {
-          const result = await api.validateWorkflow(yaml, context.spaceId, context.request);
-          if (result.valid) {
-            validation = { valid: true };
-          } else {
-            const errors = result.diagnostics
-              .filter((d) => d.severity === 'error')
-              .map((d) => `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`);
-            validation = { valid: false, errors };
-          }
-        } catch {
-          // validation unavailable
-        }
-
-        const isChildUnsafe = unsafeStep.stepId !== stepName;
-        const reason = isChildUnsafe
-          ? `Step "${stepName}" contains child step "${unsafeStep.stepId}" (type "${unsafeStep.stepType}") which has external side effects`
-          : `Step type "${unsafeStep.stepType}" has external side effects and cannot be auto-executed`;
-
-        return {
-          results: [
-            {
-              type: 'other' as const,
-              data: {
-                blocked: true,
-                reason,
-                stepType: stepInfo.stepType,
-                unsafeStepType: unsafeStep.stepType,
-                ...(isChildUnsafe ? { unsafeChildStepId: unsafeStep.stepId } : {}),
-                ...(validation ? { validation } : {}),
-                hint: 'Ask the user to test this step manually using the "Run step" button in the editor.',
-              },
-            },
-          ],
-        };
-      }
-
-      try {
-        const executionId = await api.testStep(
+      if (
+        unsafeStep &&
+        CONDITION_STEP_TYPES.has(stepInfo.stepType) &&
+        unsafeStep.stepId !== stepName
+      ) {
+        return executeConditionStepWithStubs({
+          api,
           yaml,
           stepName,
           workflowId,
-          undefined,
-          contextOverride ?? {},
-          context.spaceId,
-          context.request
-        );
+          contextOverride,
+          context,
+        });
+      }
 
-        const result = await pollExecution(api, executionId, stepName, context.spaceId);
+      if (unsafeStep) {
+        return createUnsafeStepResult({
+          api,
+          yaml,
+          stepName,
+          stepInfo,
+          unsafeStep,
+          context,
+        });
+      }
 
-        return {
-          results: [
-            {
-              type: 'other' as const,
-              data: {
-                success: result.status === ExecutionStatus.COMPLETED,
-                executionId,
-                status: result.status,
-                ...(result.output !== undefined ? { output: result.output } : {}),
-                ...(result.error !== undefined ? { error: result.error } : {}),
-                ...(result.duration != null ? { duration: result.duration } : {}),
-              },
-            },
-          ],
-        };
-      } catch (e) {
-        return {
-          results: [
-            {
-              type: 'other' as const,
-              data: formatToolError(e),
-            },
-          ],
-        };
+      try {
+        const { executionId, result } = await executeAndPollStep({
+          api,
+          yaml,
+          stepName,
+          workflowId,
+          contextOverride,
+          spaceId: context.spaceId,
+          request: context.request,
+        });
+
+        return createToolResult(formatExecutionResult({ executionId, result }));
+      } catch (error) {
+        return createToolResult(formatToolError(error));
       }
     },
   });
