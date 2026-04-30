@@ -8,6 +8,7 @@
  */
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
+import pRetry from 'p-retry';
 
 const retryResponseStatuses = [
   401, // AuthorizationException
@@ -68,30 +69,24 @@ function getRequestDescription(error: EsErrors.ResponseError) {
   return 'Elasticsearch';
 }
 
-async function delay(ms: number) {
-  await new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export interface RetryEsOptions {
   logger?: Logger;
   dataStreamName?: string;
 }
 
-export async function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions = {}) {
-  let retryCount = 0;
-
-  while (true) {
-    try {
-      return await fn();
-    } catch (error) {
-      if (!(error instanceof Error) || !isRetryableEsClientError(error)) {
+export function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions = {}) {
+  return pRetry(fn, {
+    forever: true,
+    minTimeout: 1000,
+    factor: 2,
+    maxTimeout: maxRetryDelayMs,
+    onFailedAttempt: (error) => {
+      if (!isRetryableEsClientError(error)) {
         throw error;
       }
 
-      retryCount++;
-
       if (error instanceof EsErrors.ResponseError && error.statusCode === 429) {
-        const retryDelay = getExponentialDelayMs(retryCount - 1);
+        const retryDelay = getExponentialDelayMs(error.attemptNumber - 1);
         const dataStream = options.dataStreamName
           ? ` for data stream [${options.dataStreamName}]`
           : '';
@@ -100,20 +95,17 @@ export async function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions =
         options.logger?.warn(
           `${getRequestDescription(
             error
-          )} call failed with retryable error ${errorType}${dataStream}. This operation will be retried indefinitely because this is a transient ES state. Retrying attempt ${retryCount} in ${
-            retryDelay / 1000
-          } seconds.`
+          )} call failed with retryable error ${errorType}${dataStream}. This operation will be retried indefinitely because this is a transient ES state. Retrying attempt ${
+            error.attemptNumber
+          } in ${retryDelay / 1000} seconds.`
         );
 
-        await delay(retryDelay);
-        continue;
+        return;
       }
 
-      if (retryCount > boundedRetryAttempts) {
+      if (error.attemptNumber > boundedRetryAttempts) {
         throw error;
       }
-
-      await delay(getExponentialDelayMs(retryCount - 1));
-    }
-  }
+    },
+  });
 }
