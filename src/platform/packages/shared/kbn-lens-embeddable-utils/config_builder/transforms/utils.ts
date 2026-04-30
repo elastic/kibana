@@ -33,7 +33,7 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
 import type { LensAttributes } from '../types';
-import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
+import type { LensApiAllOperations, LensApiConfig, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn, APIAdHocDataView, APIDataView } from './columns/types';
@@ -50,7 +50,7 @@ import type {
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
 } from '../schema/data_source';
-import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { DataLayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
@@ -119,7 +119,7 @@ export function isFormBasedLayer(
 }
 
 export function isTextBasedLayer(
-  layer: LensApiState | DataSourceStateLayer
+  layer: LensApiConfig | DataSourceStateLayer
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
 }
@@ -329,12 +329,13 @@ function buildDatasourceStatesLayer(
     i: number,
     xAxisScale?: XScaleSchemaType
   ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
-  fullConfig: LensApiState
+  fullConfig: LensApiConfig
 ): [LensDatasourceId, DataSourceStateLayer | undefined] {
   function buildESQLLayer(
     config: unknown,
     ds: NarrowByType<DataSourceType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
+    const layerWithSettings = config as Partial<LayerSettingsSchema>;
     const xAxisScale =
       fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const columns = getValueColumns(config, i, xAxisScale);
@@ -344,6 +345,7 @@ function buildDatasourceStatesLayer(
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
       columns,
+      ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
 
@@ -354,7 +356,7 @@ function buildDatasourceStatesLayer(
 }
 
 /**
- * Builds lens config datasource states from LensApiState
+ * Builds lens config datasource states from LensApiConfig
  *
  * @param config lens api state
  * @param dataviews list to which dataviews are added
@@ -365,7 +367,7 @@ function buildDatasourceStatesLayer(
  *
  */
 export const buildDatasourceStates = (
-  config: LensApiState,
+  config: LensApiConfig,
   buildDataLayers: (
     config: unknown,
     i: number,
@@ -511,7 +513,8 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   if (!('columnOrder' in options)) {
     return {
       sampling: LENS_SAMPLING_DEFAULT_VALUE,
-      ignore_global_filters: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+      ignore_global_filters:
+        options.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     };
   }
   // mind this is already filled by schema validate
@@ -619,15 +622,18 @@ export const filtersAndQueryToApiFormat = (
   };
 };
 
-function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query | undefined {
+function extraQueryFromAPIState(state: LensApiConfig): { esql: string } | Query | undefined {
   if ('data_source' in state && state.data_source.type === 'esql') {
     return { esql: state.data_source.query };
   }
   if ('layers' in state && Array.isArray(state.layers)) {
     // pick only the first one for now
     const esqlLayer = state.layers.find(
-      (layer): layer is LayerTypeESQL =>
-        'data_source' in layer && layer.data_source?.type === 'esql'
+      (layer): layer is DataLayerTypeESQL =>
+        layer.type !== 'reference_lines' &&
+        layer.type !== 'annotations' &&
+        'data_source' in layer &&
+        layer.data_source?.type === 'esql'
     );
     if (esqlLayer && 'query' in esqlLayer.data_source) {
       return { esql: esqlLayer.data_source.query };
@@ -640,7 +646,7 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
 }
 
 export const filtersAndQueryToLensState = (
-  state: LensApiState,
+  state: LensApiConfig,
   references: SavedObjectReference[]
 ) => {
   const query = extraQueryFromAPIState(state);

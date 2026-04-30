@@ -12,13 +12,13 @@ paths:
         (pack name, query name/text, timestamp).
       operationId: OsqueryGetScheduledActionResults
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: scheduleId
           in: path
           required: true
+          description: 'The schedule ID of the scheduled query.'
           schema:
             description: 'The schedule ID of the scheduled query.'
             type: string
@@ -26,6 +26,7 @@ paths:
         - name: executionCount
           in: path
           required: true
+          description: 'The execution count for this scheduled query run.'
           schema:
             description: 'The execution count for this scheduled query run.'
             type: integer
@@ -33,35 +34,68 @@ paths:
         - name: kuery
           in: query
           required: false
+          description: 'The kuery to filter the results by.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
         - name: page
           in: query
           required: false
+          description: 'The page number to return. The default is 1.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         - name: pageSize
           in: query
           required: false
+          description: 'The number of results to return per page. The default is 20.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
         - name: sort
           in: query
           required: false
+          description: 'The field that is used to sort the results.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         - name: sortOrder
           in: query
           required: false
+          description: 'Specifies the sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './get_scheduled_action_results.schema.yaml#/components/schemas/GetScheduledActionResultsResponse'
+              examples:
+                scheduledActionResultsExample:
+                  summary: Example scheduled action results response
+                  value:
+                    metadata:
+                      scheduleId: 'pack_my_pack_uptime'
+                      executionCount: 3
+                      packId: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+                      packName: 'My Pack'
+                      queryName: 'uptime'
+                      queryText: 'select * from uptime;'
+                      timestamp: '2024-07-26T09:00:00.000Z'
+                    edges:
+                      - _id: 'result-001'
+                        fields:
+                          agent_id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                          status: 'success'
+                          rows_count: 5
+                    total: 10
+                    currentPage: 0
+                    pageSize: 20
+                    totalPages: 1
+                    aggregations:
+                      totalRowCount: 42
+                      totalResponded: 10
+                      successful: 9
+                      failed: 1
+                      pending: 0
 
   /api/osquery/scheduled_results/{scheduleId}/{executionCount}/results:
     get:
@@ -71,13 +105,13 @@ paths:
         for a specific scheduled query execution.
       operationId: OsqueryGetScheduledQueryResults
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: scheduleId
           in: path
           required: true
+          description: 'The schedule ID of the scheduled query.'
           schema:
             description: 'The schedule ID of the scheduled query.'
             type: string
@@ -85,6 +119,7 @@ paths:
         - name: executionCount
           in: path
           required: true
+          description: 'The execution count for this scheduled query run.'
           schema:
             description: 'The execution count for this scheduled query run.'
             type: integer
@@ -92,39 +127,60 @@ paths:
         - name: kuery
           in: query
           required: false
+          description: 'The kuery to filter the results by.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
         - name: page
           in: query
           required: false
+          description: 'The page number to return. The default is 1.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         - name: pageSize
           in: query
           required: false
+          description: 'The number of results to return per page. The default is 20.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
         - name: sort
           in: query
           required: false
+          description: 'The field that is used to sort the results.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         - name: sortOrder
           in: query
           required: false
+          description: 'Specifies the sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
         - name: startDate
           in: query
           required: false
+          description: 'The start date filter (ISO 8601) to narrow down results.'
           schema:
             description: 'The start date filter (ISO 8601) to narrow down results.'
             example: '2024-01-01T00:00:00Z'
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './get_scheduled_query_results.schema.yaml#/components/schemas/GetScheduledQueryResultsResponse'
+              examples:
+                scheduledQueryResultsExample:
+                  summary: Example scheduled query results response
+                  value:
+                    data:
+                      total: 2
+                      edges:
+                        - _id: 'row-001'
+                          fields:
+                            host.uptime:
+                              - '12345'
+                        - _id: 'row-002'
+                          fields:
+                            host.uptime:
+                              - '67890'

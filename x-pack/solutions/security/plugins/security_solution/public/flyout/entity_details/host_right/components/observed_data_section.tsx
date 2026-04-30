@@ -39,12 +39,14 @@ type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
 export const ObservedDataSection = memo(
   ({
     identityFields,
+    entityRecord,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
     identityFields: IdentityFields;
+    entityRecord?: EntityStoreRecord | null;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -58,7 +60,7 @@ export const ObservedDataSection = memo(
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.observedDataTitle"
-            defaultMessage="Observed data"
+            defaultMessage="Observed attributes"
           />
         </h3>
       </EuiTitle>
@@ -76,7 +78,7 @@ export const ObservedDataSection = memo(
             title={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.observedDataInspectTitle"
-                defaultMessage="Observed data"
+                defaultMessage="Observed attributes"
               />
             }
           />
@@ -130,6 +132,7 @@ export const ObservedDataSection = memo(
           ) : (
             <ObservedDataSectionContent
               identityFields={identityFields}
+              entityRecord={entityRecord}
               observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
@@ -146,12 +149,14 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 const ObservedDataSectionContent = memo(
   ({
     identityFields,
+    entityRecord,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
     identityFields: IdentityFields;
+    entityRecord?: EntityStoreRecord | null;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -165,12 +170,13 @@ const ObservedDataSectionContent = memo(
     const euid = euidApi?.euid;
     const hostNameFallback = observedHost.details?.host?.name?.[0];
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
-      criteriaFields: hostToCriteria(observedHost.details, euid),
+      criteriaFields: hostToCriteria({ hostItem: observedHost.details, entityRecord, euid }),
       filterQuery: buildAnomaliesTableInfluencersFilterQuery({
         euid,
         entityType: 'host',
         isScopedToEntity: true,
         identityFields,
+        entityRecord,
         fallbackDisplayName: hostNameFallback,
       }),
       startDate: from,

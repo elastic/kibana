@@ -20,8 +20,8 @@ import {
   openIndices as openIndicesRequest,
   refreshIndices as refreshIndicesRequest,
 } from '../../../../services';
-import { notificationService } from '../../../../services/notification';
 import { httpService } from '../../../../services/http';
+import { useServices } from '../../../../app_context';
 
 import type { IndexActionsContextMenuProps } from '../index_actions_context_menu/index_actions_context_menu';
 import { IndexActionsContextMenu } from '../index_actions_context_menu/index_actions_context_menu';
@@ -59,6 +59,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
   onIndexRefresh,
   fill = false,
 }) => {
+  const { notificationService } = useServices();
   const [isLoading, setIsLoading] = useState(false);
 
   // the "index actions context menu" component is expecting an array of indices, the same as on the indices list
@@ -90,7 +91,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames]);
+  }, [reloadIndices, indexNames, notificationService]);
 
   const openIndices = useCallback(async () => {
     setIsLoading(true);
@@ -108,7 +109,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames]);
+  }, [reloadIndices, indexNames, notificationService]);
 
   const flushIndices = useCallback(async () => {
     setIsLoading(true);
@@ -126,7 +127,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames]);
+  }, [reloadIndices, indexNames, notificationService]);
 
   const refreshIndices = useCallback(async () => {
     setIsLoading(true);
@@ -145,7 +146,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames, onIndexRefresh]);
+  }, [reloadIndices, indexNames, onIndexRefresh, notificationService]);
 
   const clearCacheIndices = useCallback(async () => {
     setIsLoading(true);
@@ -163,7 +164,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames]);
+  }, [reloadIndices, indexNames, notificationService]);
 
   const forcemergeIndices = useCallback(
     async (maxNumSegments: string) => {
@@ -183,7 +184,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
         notificationService.showDangerToast(error.body.message);
       }
     },
-    [reloadIndices, indexNames]
+    [reloadIndices, indexNames, notificationService]
   );
 
   const deleteIndices = useCallback(async () => {
@@ -202,7 +203,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [navigateToIndicesList, indexNames]);
+  }, [navigateToIndicesList, indexNames, notificationService]);
 
   const performExtensionAction = useCallback(
     async (
@@ -220,7 +221,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
         notificationService.showDangerToast(error.body.message);
       }
     },
-    [reloadIndices, indexNames]
+    [reloadIndices, indexNames, notificationService]
   );
 
   return (

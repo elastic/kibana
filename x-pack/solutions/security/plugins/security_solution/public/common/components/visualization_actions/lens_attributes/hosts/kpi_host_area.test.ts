@@ -70,7 +70,7 @@ describe('getKpiHostAreaLensAttributes', () => {
     const adHoc = attrs?.state.adHocDataViews;
     expect(adHoc).toBeDefined();
     const spec = Object.values(adHoc ?? {})[0];
-    expect(spec?.title).toBe('.entities.v2.latest.security_my_space');
+    expect(spec?.title).toBe('.entities.v2.latest.security_my_space-00001');
     const hostTypeFilter = attrs?.state.filters?.find(
       (f) => f.meta?.key === 'entity.EngineMetadata.Type'
     );

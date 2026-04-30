@@ -41,6 +41,7 @@ import type { PackQueryInput } from './utils';
 import { createPackRequestBodySchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
+import { createPackResponseSchema } from './response_schemas';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -64,6 +65,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               typeof createPackRequestBodySchema,
               CreatePackRequestBodySchema
             >(createPackRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => createPackResponseSchema,
+            },
           },
         },
       },

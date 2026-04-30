@@ -31,7 +31,6 @@ import {
 } from '../../../../hooks/use_streams_doc_counts_fetch';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../../util/calculate_data_quality';
-import { FeedbackButton } from '../../../feedback_button';
 import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
@@ -111,9 +110,10 @@ export function Wrapper({
 
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
-    canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
-      ? definition.privileges.read_failure_store
-      : true,
+    getCanReadFailureStore: () =>
+      Streams.ingest.all.GetResponse.is(definition)
+        ? definition.privileges.read_failure_store
+        : false,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
   const docCountsFetch = getStreamDocCounts(streamId);
@@ -215,23 +215,14 @@ export function Wrapper({
                 ))}
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {Streams.ingest.all.GetResponse.is(definition) && (
-                    <DiscoverBadgeButton
-                      stream={definition.stream}
-                      hasDataStream={definition.data_stream_exists}
-                      indexMode={definition.index_mode ?? 'standard'}
-                      spellOut
-                    />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <FeedbackButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {Streams.ingest.all.GetResponse.is(definition) && (
+              <DiscoverBadgeButton
+                stream={definition.stream}
+                hasDataStream={definition.data_stream_exists}
+                indexMode={definition.index_mode ?? 'standard'}
+                spellOut
+              />
+            )}
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {

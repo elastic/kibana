@@ -29,9 +29,10 @@
       "fieldsMetadata",
       "uiActions",
       "contentManagement",
-      "security"
+      "security",
+      "share"
     ],
-    "optionalPlugins": ["cloud", "features", "home", "spaces", "serverless", "share", "cps"],
+    "optionalPlugins": ["cloud", "features", "home", "spaces", "serverless", "cps"],
     "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils", "actions"],
     "extraPublicDirs": ["public/common", "public/common/constants"],
     "runtimePluginDependencies": [

@@ -338,7 +338,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.debTitle', {
@@ -354,7 +354,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.rpmTitle', {
@@ -370,7 +370,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -389,7 +389,7 @@ export const createHeartbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
   },
 });
@@ -418,7 +418,7 @@ export const createHeartbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     DEB: {
       title: i18n.translate(
@@ -442,7 +442,7 @@ export const createHeartbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     RPM: {
       title: i18n.translate(
@@ -466,7 +466,7 @@ export const createHeartbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -490,7 +490,7 @@ export const createHeartbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
   },
 });

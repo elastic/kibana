@@ -11,12 +11,12 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import type { GaugeState } from '../../schema/charts/gauge';
+import type { GaugeConfig } from '../../schema/charts/gauge';
 
 /**
  * Basic gauge chart with ad hoc dataView
  */
-export const basicGaugeWithAdHocDataView: GaugeState = {
+export const basicGaugeWithAdHocDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Test Gauge',
   data_source: {
@@ -36,7 +36,7 @@ export const basicGaugeWithAdHocDataView: GaugeState = {
 /**
  * Basic gauge chart with existing dataView
  */
-export const basicGaugeWithDataView: GaugeState = {
+export const basicGaugeWithDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Test Gauge',
   description: 'A test gauge chart',
@@ -56,7 +56,7 @@ export const basicGaugeWithDataView: GaugeState = {
 /**
  * ESQL-based gauge chart
  */
-export const esqlGauge: GaugeState = {
+export const esqlGauge: GaugeConfig = {
   type: 'gauge',
   title: 'Test ESQL Gauge',
   description: 'A test gauge chart using ESQL',
@@ -74,7 +74,7 @@ export const esqlGauge: GaugeState = {
 /**
  * Comprehensive gauge chart with ad hoc dataView
  */
-export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
+export const comprehensiveGaugeWithAdHocDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
@@ -112,7 +112,7 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
 /**
  * Comprehensive gauge chart with existing dataView
  */
-export const comprehensiveGaugeWithDataView: GaugeState = {
+export const comprehensiveGaugeWithDataView: GaugeConfig = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
@@ -148,7 +148,7 @@ export const comprehensiveGaugeWithDataView: GaugeState = {
 /**
  * Comprehensive ESQL-based gauge chart
  */
-export const comprehensiveEsqlGauge: GaugeState = {
+export const comprehensiveEsqlGauge: GaugeConfig = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',

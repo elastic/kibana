@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { dashboardNavigationOptionsSchema } from '../dashboard_navigation';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 
 export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.extends({
   dashboard_id: schema.string(),

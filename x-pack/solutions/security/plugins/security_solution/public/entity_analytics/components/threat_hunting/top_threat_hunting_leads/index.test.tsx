@@ -11,6 +11,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
 
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(() => '/app/management/ai/genAiSettings'),
+      },
+    },
+  }),
+}));
+
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',
   moduleId: 'risk_analysis',
@@ -45,10 +55,16 @@ const defaultProps = {
   totalCount: 0,
   isLoading: false,
   isGenerating: false,
+  isScheduled: false,
+  onToggleSchedule: jest.fn(),
   onSeeAll: jest.fn(),
   onLeadClick: jest.fn(),
   onHuntInChat: jest.fn(),
   onGenerate: jest.fn(),
+  connectorId: 'test-connector-id',
+  hasValidConnector: true,
+  isAgentChatExperienceEnabled: true,
+  onConnectorIdSelected: jest.fn(),
 };
 
 describe('TopThreatHuntingLeads', () => {
@@ -87,12 +103,24 @@ describe('TopThreatHuntingLeads', () => {
     expect(screen.queryByTestId('leadCard-lead-6')).not.toBeInTheDocument();
   });
 
-  it('renders empty state when no leads', () => {
+  it('renders empty state when no leads and never generated', () => {
     render(<TopThreatHuntingLeads {...defaultProps} />);
 
     expect(screen.getByTestId('topThreatHuntingLeads')).toBeInTheDocument();
     expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Generate leads to surface proactive threat hunting opportunities from your entity data.'
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('leadsLoadingSpinner')).not.toBeInTheDocument();
+  });
+
+  it('renders "no data found" empty state after generation with no results', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
+
+    expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('No data found')).toBeInTheDocument();
   });
 
   it('renders loading state (spinner visible)', () => {
@@ -116,20 +144,103 @@ describe('TopThreatHuntingLeads', () => {
     expect(onSeeAll).toHaveBeenCalledTimes(1);
   });
 
-  it('"Generate" button calls onGenerate with loading state when isGenerating', () => {
-    const onGenerate = jest.fn();
-
-    const { rerender } = render(
-      <TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} />
+  it('shows "Open GenAI Settings" button when Classic AI Assistant experience is active, regardless of connectorId', () => {
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        isAgentChatExperienceEnabled={false}
+        connectorId="some-connector"
+      />
     );
 
-    fireEvent.click(screen.getByTestId('generateLeadsButton'));
-    expect(onGenerate).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('openGenAiSettingsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
+  });
 
-    rerender(<TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} isGenerating />);
+  it('shows "Open GenAI Settings" button when Classic AI Assistant experience is active and connectorId is empty', () => {
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        isAgentChatExperienceEnabled={false}
+        connectorId=""
+        hasValidConnector={false}
+      />
+    );
+
+    expect(screen.getByTestId('openGenAiSettingsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
+  });
+
+  it('disables "Generate" button under Agent experience when no valid connector is selected', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" hasValidConnector={false} />);
 
     const generateButton = screen.getByTestId('generateLeadsButton');
-    expect(generateButton).toHaveTextContent('Generating...');
+    expect(generateButton).toBeInTheDocument();
+    expect(generateButton).toBeDisabled();
+    expect(screen.queryByTestId('openGenAiSettingsButton')).not.toBeInTheDocument();
+  });
+
+  it('shows "Generate" button when no leads exist and calls onGenerate', () => {
+    const onGenerate = jest.fn();
+
+    render(<TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} />);
+
+    const generateButton = screen.getByTestId('generateLeadsButton');
+    expect(generateButton).toBeInTheDocument();
+    expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
+
+    fireEvent.click(generateButton);
+    expect(onGenerate).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps "Generate" button when generation produced no leads', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
+  });
+
+  it('shows refresh button instead of "Generate" button when leads exist', () => {
+    const onGenerate = jest.fn();
+    const lead = createMockLead();
+
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        leads={[lead]}
+        totalCount={1}
+        hasGenerated
+        onGenerate={onGenerate}
+      />
+    );
+
+    expect(screen.queryByTestId('generateLeadsButton')).not.toBeInTheDocument();
+    const refreshButton = screen.getByTestId('refreshLeadsButton');
+    expect(refreshButton).toBeInTheDocument();
+
+    fireEvent.click(refreshButton);
+    expect(onGenerate).toHaveBeenCalledTimes(1);
+  });
+
+  it('displays generated timestamp when leads exist and lastRunTimestamp is provided', () => {
+    const lead = createMockLead();
+
+    render(
+      <TopThreatHuntingLeads
+        {...defaultProps}
+        leads={[lead]}
+        totalCount={1}
+        lastRunTimestamp="2026-03-13T14:30:00.000Z"
+      />
+    );
+
+    expect(screen.getByTestId('leadsGeneratedTimestamp')).toBeInTheDocument();
+  });
+
+  it('does not display timestamp when no leads exist', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} lastRunTimestamp="2026-03-13T14:30:00.000Z" />);
+
+    expect(screen.queryByTestId('leadsGeneratedTimestamp')).not.toBeInTheDocument();
   });
 
   it('lead card click calls onLeadClick', () => {
@@ -149,33 +260,5 @@ describe('TopThreatHuntingLeads', () => {
 
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
-  });
-
-  it('info button calls onLeadInfoClick when prop is defined', () => {
-    const onLeadInfoClick = jest.fn();
-    const lead = createMockLead({ id: 'lead-info' });
-
-    render(
-      <TopThreatHuntingLeads
-        {...defaultProps}
-        leads={[lead]}
-        totalCount={1}
-        onLeadInfoClick={onLeadInfoClick}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('leadInfoButton-lead-info'));
-
-    expect(onLeadInfoClick).toHaveBeenCalledTimes(1);
-    expect(onLeadInfoClick).toHaveBeenCalledWith(lead);
-  });
-
-  it('info button not rendered when onLeadInfoClick is undefined', () => {
-    const lead = createMockLead({ id: 'lead-no-info' });
-
-    render(<TopThreatHuntingLeads {...defaultProps} leads={[lead]} totalCount={1} />);
-
-    expect(screen.getByTestId('leadCard-lead-no-info')).toBeInTheDocument();
-    expect(screen.queryByTestId('leadInfoButton-lead-no-info')).not.toBeInTheDocument();
   });
 });

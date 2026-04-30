@@ -1,0 +1,2346 @@
+---
+# This file is used to generate "Logging settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Space-specific advanced settings in Kibana
+id: kibana-settings-reference
+page_description: |
+  Change the settings that apply only to a specific {{product.kibana}} space.
+
+  1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+  2. Click **Space Settings**.
+  3. Scroll or search for the setting.
+  4. Make your change, then click **Save changes**.
+
+groups:
+  - group: General
+    id: kibana-general-settings
+    settings:
+
+      - setting: hideAnnouncements
+        id: hideAnnouncements
+        description: |
+          Stops showing messages and tours that highlight new features.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.0-9.3, deprecated 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        note: "{applies_to}`stack: ga 9.4+` If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space."
+
+      - setting: dateFormat
+        id: dateformat
+        description: |
+          The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "dateFormat:tz"
+        id: dateformat-tz
+        description: |
+          The timezone that {{product.kibana}} uses.
+        datatype: string
+        default: Browser
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "dateFormat:scaled"
+        id: dateformat-scaled
+        description: |
+          The values that define the format to use to render ordered time-based data. Formatted timestamps must adapt to the interval between measurements. Keys are [ISO8601 intervals](http://en.wikipedia.org/wiki/ISO_8601#Time_intervals).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "dateFormat:dow"
+        id: dateformat-dow
+        description: |
+          The day that a week should start on.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: dateNanosFormat
+        id: datenanosformat
+        description: |
+          The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/) of [{{product.elasticsearch}} date_nanos type](elasticsearch://reference/elasticsearch/mapping-reference/date_nanos.md).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "theme:darkMode"
+        id: theme-darkmode
+        description: |
+          The UI theme that the {{product.kibana}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{product.kibana}} UI theme follow the system theme. You must refresh the page to apply the setting.
+        datatype: enum
+        options:
+          - option: enabled
+          - option: disabled
+          - option: system
+        applies_to:
+          stack: deprecated 9.0
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "state:storeInSessionStorage"
+        id: state-storeinsessionstorage
+        description: |
+          {{product.kibana}} tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
+        datatype: bool
+        applies_to:
+          stack: preview 9.0-9.3, deprecated 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "savedObjects:perPage"
+        id: savedobjects-perpage
+        description: |
+          The number of objects to show on each page of the list of saved objects.
+        datatype: int
+        default: 20
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "savedObjects:listingLimit"
+        id: savedobjects-listinglimit
+        description: |
+          The number of objects to fetch for lists of saved objects. Do not set above `10000`.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "csv:separator"
+        id: csv-separator
+        description: |
+          The separator for exported values.
+        datatype: string
+        default: ","
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "csv:quoteValues"
+        id: csv-quotevalues
+        description: |
+          Quotes exported values in CSV exports when activated.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "shortDots:enable"
+        id: shortdots-enable
+        description: |
+          Shortens long field names in visualizations. For example, shows `f.b.baz` instead of `foo.bar.baz`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "format:defaultTypeMap"
+        id: format-defaulttypemap
+        description: |
+          A map of the default format name for each field type. Field types that are not explicitly mentioned use "_default_".
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "format:number:defaultPattern"
+        id: format-number-defaultpattern
+        description: |
+          The [numeral pattern](docs-content://explore-analyze/numeral-formatting.md) for the "number" format.
+        datatype: string
+        default: "0,0.[000]"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "format:percent:defaultPattern"
+        id: format-percent-defaultpattern
+        description: |
+          The [numeral pattern](docs-content://explore-analyze/numeral-formatting.md) for the "percent" format.
+        datatype: string
+        default: "0,0.[000]%"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "format:bytes:defaultPattern"
+        id: format-bytes-defaultpattern
+        description: |
+          The default [numeral pattern](docs-content://explore-analyze/numeral-formatting.md) format for the "bytes" format.
+        datatype: string
+        default: "0,0.[0]b"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "format:currency:defaultPattern"
+        id: format-currency-defaultpattern
+        description: |
+          The default [numeral pattern](docs-content://explore-analyze/numeral-formatting.md) format for the "currency" format.
+        datatype: string
+        default: "($0,0.[00])"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "format:number:defaultLocale"
+        id: format-number-defaultlocale
+        description: |
+          The [numeral pattern](docs-content://explore-analyze/numeral-formatting.md) locale.
+        datatype: string
+        default: en
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "data_views:fields_excluded_data_tiers"
+        id: data_views-fields_excluded_data_tiers
+        description: |
+          Allows the exclusion of listed data tiers when getting a field list for faster performance.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "data_views:cache_max_age"
+        id: data-views-cache-max-age
+        description: |
+          Sets how long data view fields API requests are cached in seconds. A value of 0 turns off caching. Modifying this value might not take immediate effect, users need to clear browser cache or wait until the current cache expires. To get immediate changes, try a hard reload of {{product.kibana}}.
+        datatype: int
+        default: 5
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: metaFields
+        id: metafields
+        description: |
+          Fields that exist outside of `_source`. {{product.kibana}} merges these fields into the document when displaying it.
+        datatype: string
+        default: "_source, _id, _index, _score, _ignored"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "query:queryString:options"
+        id: query-querystring-options
+        description: |
+          Options for the Lucene query string parser. Only used when `search:queryLanguage` is set to **Lucene**.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "query:allowLeadingWildcards"
+        id: query-allowleadingwildcards
+        description: |
+          Allows a wildcard (*) as the first character in a query clause. To disallow leading wildcards in Lucene queries, use `query:queryString:options`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "search:queryLanguage"
+        id: search-querylanguage
+        description: |
+          The query language to use in the query bar. Choices are [KQL](elasticsearch://reference/query-languages/kql.md), a language built specifically for {{product.kibana}}, and the [Lucene query syntax](docs-content://explore-analyze/query-filter/languages/lucene-query-syntax.md).
+        datatype: string
+        default: KQL
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "sort:options"
+        id: sort-options
+        description: |
+          Options for the {{product.elasticsearch}} [sort](elasticsearch://reference/elasticsearch/rest-apis/sort-search-results.md) parameter.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: defaultIndex
+        id: defaultindex
+        description: |
+          The default data view to access if none is set in Discover and Dashboards.
+        datatype: string
+        default: "null"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "histogram:barTarget"
+        id: histogram-bartarget
+        description: |
+          When date histograms use the `auto` interval, {{product.kibana}} attempts to generate this number of bars.
+        datatype: int
+        default: 50
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "histogram:maxBars"
+        id: histogram-maxbars
+        description: |
+          Limits the density of date and number histograms across {{product.kibana}} using a test query to improve performance. When the test query contains too many buckets, the interval between buckets increases. Applies separately to each histogram aggregation, and does not apply to other types of aggregations. To find the maximum value, divide the {{product.elasticsearch}} `search.max_buckets` value by the maximum number of aggregations in each visualization.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "history:limit"
+        id: history-limit
+        description: |
+          In fields that have history, such as query inputs, shows this many recent values.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "timepicker:refreshIntervalDefaults"
+        id: timepicker-refreshintervaldefaults
+        description: |
+          The default refresh interval for the time filter. Specify the `value` parameter in milliseconds.
+        datatype: string
+        default: '{"pause": true, "value": 60000}'
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "timepicker:timeDefaults"
+        id: timepicker-timedefaults
+        description: |
+          The default selection in the time filter. Must be an object containing "from" and "to" (refer to [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)).
+        datatype: string
+        default: '{"from": "now-15m", "to": "now"}'
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "timepicker:quickRanges"
+        id: timepicker-quickranges
+        description: |
+          The list of ranges to show in the Quick section of the time filter. This must be an array of objects, with each object containing `from`, `to` (refer to [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)), and `display` (the title to be displayed).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "filters:pinnedByDefault"
+        id: filters-pinnedbydefault
+        description: |
+          Makes filters have a global state and be pinned by default when activated.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "filterEditor:suggestValues"
+        id: filtereditor-suggestvalues
+        description: |
+          Enables the filter editor and KQL autocomplete to suggest values for fields.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: defaultRoute
+        id: defaultroute
+        description: |
+          The default route when opening {{product.kibana}}. Use this setting to route users to a specific dashboard, application, or saved object as they enter each space.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "fileUpload:maxFileSize"
+        id: fileupload-maxfilesize
+        description: |
+          Sets the file size limit when importing files. The highest supported value for this setting is `1GB`.
+        datatype: string
+        default: 100MB
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: enableESQL
+        id: enableESQL
+        description: |
+          Enables {{esql}} in {{product.kibana}}.
+
+          When deactivated, hides the {{esql}} user interface from various applications. However, users can still access existing {{esql}}-based Discover sessions, visualizations, and other objects.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "metrics:max_buckets"
+        id: metrics-maxbuckets
+        description: |
+          Affects the **TSVB** histogram density. Must be set higher than `histogram:maxBars`.
+        datatype: int
+        default: 2000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "metrics:allowStringIndices"
+        id: "metrics:allowStringIndices"
+        description: |
+          Enables you to use {{es}} indices in **TSVB** visualizations.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "workflows:ui:enabled"
+        id: "workflows:ui:enabled"
+        description: |
+          Enables Elastic Workflows and related experiences.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: preview
+
+      - setting: "fields:popularLimit"
+        id: fields-popularlimit
+        description: |
+          The top N most popular fields to show.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "aiAssistant:preferredAIAssistantType"
+        id: "aiAssistant:preferredAIAssistantType"
+        description: |
+          This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other {{product.kibana}} applications (for example, Discover, Dashboards, and {{stack-manage-app}} pages), or nowhere.
+        datatype: string
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        note: "{applies_to}`stack: ga 9.2` Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md)."
+
+  - group: Presentation Labs
+    id: presentation-labs
+    settings:
+
+      - setting: "labs:dashboard:deferBelowFold"
+        id: labs-dashboard-defer-below-fold
+        description: |
+          Enables deferred loading of dashboard panels below the fold. *Below the fold* refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "labs:canvas:byValueEmbeddable"
+        id: labs-canvas-by-value-embeddable
+        description: |
+          Enables support for by-value embeddables in Canvas.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "labs:dashboard:enable_ui"
+        id: labs-dashboard-enable-ui
+        description: |
+          Provides access to the experimental **Labs** features for **Dashboard** when activated.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "labs:canvas:enable_ui"
+        id: labs-canvas-enable-ui
+        description: |
+          Provides access to the experimental **Labs** features for **Canvas** when activated.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Accessibility
+    id: kibana-accessibility-settings
+    settings:
+
+      - setting: "accessibility:disableAnimations"
+        id: accessibility-disableanimations
+        description: |
+          Turns off all optional animations in the {{product.kibana}} UI. Refresh the page to apply the changes.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+  - group: Autocomplete
+    id: kibana-autocomplete-settings
+    settings:
+
+      - setting: "autocomplete:valueSuggestionMethod"
+        id: autocomplete-valuesuggestionmethod
+        description: |
+          The method to retrieve values for KQL autocomplete suggestions.
+
+          - When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. {{product.kibana}} returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range. (Note that this API is incompatible with [Document-Level-Security](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level.md).)
+          - When set to `terms_agg`, {{product.kibana}} uses a terms aggregation for value suggestions, which is slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
+        datatype: enum
+        default: terms_enum
+        options:
+          - option: terms_enum
+          - option: terms_agg
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "autocomplete:useTimeRange"
+        id: auto-complete-use-time-range
+        description: |
+          When off, autocomplete suggestions come from your data set instead of the time range.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Banners
+    id: kibana-banners-settings
+    note: "Banners are a [subscription feature](https://www.elastic.co/subscriptions)."
+    settings:
+
+      - setting: "banners:placement"
+        id: banners-placement
+        description: |
+          The placement of the banner for this space. Set to `Top` to display a banner above the Elastic header. Uses the value of the `xpack.banners.placement` configuration property by default.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "banners:textContent"
+        id: banners-textcontent
+        description: |
+          The text to display inside the banner for this space, either plain text or Markdown. Uses the value of the `xpack.banners.textContent` configuration property by default.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "banners:textColor"
+        id: banners-textcolor
+        description: |
+          The color for the banner text for this space. Uses the value of the `xpack.banners.textColor` configuration property by default.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "banners:linkColor"
+        id: banners-linkcolor
+        description: |
+          The color for the banner link text for this space. Uses the value of the `xpack.banners.linkColor` configuration property by default.
+        datatype: string
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "banners:backgroundColor"
+        id: banners-backgroundcolor
+        description: |
+          The color of the banner background for this space. Uses the value of the `xpack.banners.backgroundColor` configuration property by default.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+  - group: Discover
+    id: kibana-discover-settings
+    settings:
+
+      - setting: "doc_table:highlight"
+        id: doctable-highlight
+        description: |
+          Highlights search results in **Discover** and Discover session panels on dashboards. Highlighting slows requests when working on large documents.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: defaultColumns
+        id: defaultcolumns
+        description: |
+          The columns that appear by default on the **Discover** page. When empty, displays a summary of the document.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "discover:maxDocFieldsDisplayed"
+        id: discover-max-doc-fields-displayed
+        description: |
+          Specifies the maximum number of fields to show in the document column of the **Discover** table.
+        datatype: int
+        default: 200
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:sampleSize"
+        id: discover-sample-size
+        description: |
+          Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {{product.elasticsearch}}.
+        datatype: int
+        default: 500
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:sampleRowsPerPage"
+        id: discover-sampleRowsPerPage
+        description: |
+          Limits the number of rows per page in the document table.
+        datatype: int
+        default: 100
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:sort:defaultOrder"
+        id: discover-sort-defaultorder
+        description: |
+          The default sort direction for time-based {{data-sources}}.
+        datatype: string
+        default: Descending
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:searchOnPageLoad"
+        id: discover-searchonpageload
+        description: |
+          Controls whether a search runs when **Discover** first loads. This setting does not have an effect when loading a saved Discover session.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "doc_table:hideTimeColumn"
+        id: doctable-hidetimecolumn
+        description: |
+          Hides the "Time" column in **Discover** and in all Discover session panels on dashboards.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "context:defaultSize"
+        id: context-defaultsize
+        description: |
+          The number of surrounding entries to display in the context view.
+        datatype: int
+        default: 5
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "context:step"
+        id: context-step
+        description: |
+          The number by which to increment or decrement the context size.
+        datatype: int
+        default: 5
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "context:tieBreakerFields"
+        id: context-tiebreakerfields
+        description: |
+          A comma-separated list of fields to use for breaking a tie between documents that have the same timestamp value. The first field that is present and sortable in the current data view is used.
+        datatype: string
+        default: _doc
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:modifyColumnsOnSwitch"
+        id: discover-modify-columns-on-switch
+        description: |
+          Removes columns that are not in the newly selected data view when changing {{data-sources}}.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:showFieldStatistics"
+        id: "discover:showFieldStatistics"
+        description: |
+          Enables the Field statistics view. Examine details such as the minimum and maximum values of a numeric field or a map of a geo field.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: beta
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "discover:showMultiFields"
+        id: "discover:showMultiFields"
+        description: |
+          Controls the display of multi-fields in the expanded document view. This option is only available when `searchFieldsFromSource` is off.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:rowHeightOption"
+        id: discover-row-height-option
+        description: |
+          The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.
+        datatype: int
+        default: 3
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: "{{product.machine-learning}}"
+    id: kibana-ml-settings
+    settings:
+
+      - setting: "ml:anomalyDetection:results:enableTimeDefaults"
+        id: ml-anomalydetection-results-enabletimedefaults
+        description: |
+          Uses the default time filter in the **Single Metric Viewer** and **Anomaly Explorer** when activated. When deactivated, shows results for the full time range.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+          security: ga
+
+      - setting: "ml:anomalyDetection:results:timeDefaults"
+        id: ml-anomalydetection-results-timedefaults
+        description: |
+          The default time filter for viewing {{anomaly-job}} results. Must contain from and to values (refer to [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)). Ignored unless the `ml:anomalyDetection:results:enableTimeDefaults` setting is activated.
+        datatype: string
+        default: '{"from": "now-15m", "to": "now"}'
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+          security: ga
+
+  - group: Notifications
+    id: kibana-notification-settings
+    settings:
+
+      - setting: "notifications:banner"
+        id: notifications-banner
+        description: |
+          A custom banner intended for temporary notices to all users. Supports [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "notifications:lifetime:banner"
+        id: notifications-lifetime-banner
+        description: |
+          The duration, in milliseconds, for banner notification displays.
+        datatype: int
+        default: 3000000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "notifications:lifetime:error"
+        id: notifications-lifetime-error
+        description: |
+          The duration, in milliseconds, for error notification displays.
+        datatype: int
+        default: 300000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "notifications:lifetime:warning"
+        id: notifications-lifetime-warning
+        description: |
+          The duration, in milliseconds, for warning notification displays.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "notifications:lifetime:info"
+        id: notifications-lifetime-info
+        description: |
+          The duration, in milliseconds, for information notification displays.
+        datatype: int
+        default: 5000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+  - group: "{{observability}}"
+    id: observability-advanced-settings
+    settings:
+
+      - setting: "ai:anonymizationSettings"
+        id: ai-anonymization-settings
+        description: |
+          List of anonymization rules for AI Assistant. Includes rules for Named Entity Recognition (NER) models and regular expression patterns to identify and anonymize sensitive data.
+
+          :::{dropdown} Default configuration
+          ```json
+          {
+            "rules": [
+              {
+                "entityClass": "EMAIL",
+                "type": "RegExp",
+                "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+                "enabled": false
+              },
+              {
+                "type": "NER",
+                "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
+                "enabled": false,
+                "allowedEntityClasses": [
+                  "PER",
+                  "ORG",
+                  "LOC"
+                ],
+                "timeoutSeconds": 30
+              }
+            ]
+          }
+          ```
+          :::
+        datatype: string
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+          elasticsearch: preview
+
+      - setting: "observability:logSources"
+        id: observability-log-sources
+        description: |
+          Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules.
+        datatype: string
+        default: "logs-*-*, logs-*, filebeat-*"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:streamsEnableContentPacks"
+        id: observability-streams-enable-content-packs
+        description: |
+          Enable Streams content packs.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+
+      - setting: "observability:aiAssistantSimulatedFunctionCalling"
+        id: observability-ai-assistant-simulated-function-calling
+        description: |
+          Simulated function calling does not need API support for functions or tools, but it can decrease performance. Currently always activated for connectors that do not have API support for Native function calling.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+          elasticsearch: preview
+
+      - setting: "observability:aiAssistantSearchConnectorIndexPattern"
+        id: observability-ai-assistant-search-connector-index-pattern
+        description: |
+          Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). Empty by default: the index for every search connector is queried.
+        datatype: string
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+          elasticsearch: ga
+
+      - setting: "observability:newLogsOverview"
+        id: observability-new-logs-overview
+        description: |
+          Enable the new logs overview experience.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+
+      - setting: "observability:enableInspectEsQueries"
+        id: observability-enable-inspect-es-queries
+        description: |
+          When activated, allows you to inspect {{es}} queries in API responses.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:maxSuggestions"
+        id: observability-max-suggestions
+        description: |
+          Maximum number of suggestions fetched in autocomplete selection boxes.
+        datatype: int
+        default: 100
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:enableComparisonByDefault"
+        id: observability-apm-enable-comparison
+        description: |
+          Enables the comparison feature by default in the {{product.apm}} app.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmDefaultServiceEnvironment"
+        id: observability-default-service-env
+        description: |
+          The default environment for the {{product.apm}} app. When left empty, displays data from all environments by default.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmProgressiveLoading"
+        id: observability-enable-progressive-loading
+        description: |
+          Enables progressive loading of some {{product.apm}} views. Data can be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
+        datatype: string
+        default: "Off"
+        applies_to:
+          stack: preview 9.0, ga 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmServiceInventoryOptimizedSorting"
+        id: observability-apm-optimized-sort
+        description: |
+          Sort services without anomaly detection rules on the {{product.apm}} Service inventory page by service name.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "observability:apmServiceGroupMaxNumberOfServices"
+        id: observability-apm-max-groups
+        description: |
+          Limit the number of services in a given service group.
+        datatype: int
+        default: 500
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmTraceExplorerTab"
+        id: observability-apm-trace-explorer-tab
+        description: |
+          Enable the {{product.apm}} Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "observability:apmLabsButton"
+        id: observability-apm-labs
+        description: |
+          Activates the {{product.apm}} Labs button, a quick way to enable and disable technical preview features in {{product.apm}}.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:enableInfrastructureProfilingIntegration"
+        id: observability-infrastructure-profiling-integration
+        description: |
+          Enables the Profiling view in Host details within Infrastructure.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "observability:enableInfrastructureAssetCustomDashboards"
+        id: observability-infrastructure-asset-custom-dashboard
+        description: |
+          Enables the option to link custom dashboards in the Asset Details view.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.0
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "observability:enableAwsLambdaMetrics"
+        id: observability-enable-aws-lambda-metrics
+        description: |
+          Display Amazon Lambda metrics in the service metrics tab.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "observability:apmAgentExplorerView"
+        id: apm-agent-explorer
+        description: |
+          Enable the Agent explorer view.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: beta 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:apmEnableTableSearchBar"
+        id: observability-apm-enable-table-search-bar
+        description: |
+          Enables faster searching in {{product.apm}} tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+
+      - setting: "observability:apmEnableServiceInventoryTableSearchBar"
+        id: observability-apm-enable-service-inventory-table-search-bar
+        description: |
+          Enables faster searching in the {{product.apm}} Service inventory table by adding a handy search bar with live filtering.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+
+      - setting: "observability:apmAWSLambdaPriceFactor"
+        id: apm-aws-price
+        description: |
+          Set the price per Gb-second for your AWS Lambda functions.
+        datatype: string
+        default: '{"x86_64": 0.0000166667,"arm": 0.0000133334}'
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmAWSLambdaRequestCostPerMillion"
+        id: apm-aws-request
+        description: |
+          Set the AWS Lambda cost per million requests.
+        datatype: float
+        default: 0.2
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmEnableServiceMetrics"
+        id: apm-enable-service-metrics
+        description: |
+          Enable the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: beta 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:apmEnableContinuousRollups"
+        id: apm-continuous-rollups
+        description: |
+          When continuous rollups is activated, the UI selects metrics with the appropriate resolution. On larger time ranges, lower resolution metrics are used, which improves loading times.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: beta 9.0, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:apmEnableCriticalPath"
+        id: observability-apm-critical-path
+        description: |
+          When activated, displays the critical path of a trace.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:syntheticsThrottlingEnabled"
+        id: observability-synthetics-throttling-enabled
+        description: |
+          Enable the throttling setting in Synthetics monitor configurations. Throttling might still not be available for your monitors even if the setting is active.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        warning: "This setting is intended for Elastic-internal use only. [Learn more](https://github.com/elastic/synthetics/blob/main/docs/throttling.md)"
+
+      - setting: "observability:enableLegacyUptimeApp"
+        id: observability-enable-legacy-uptime-app
+        description: |
+          By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enabling this option always shows it.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:apmEnableProfilingIntegration"
+        id: observability-apm-enable-profiling
+        description: |
+          Enable the Universal Profiling integration in {{product.apm}}.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingShowErrorFrames"
+        id: observability-profiling-show-error-frames
+        description: |
+          Show error frames in the Universal Profiling views to indicate stack unwinding failures.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingPervCPUWattX86"
+        id: observability-profiling-per-vcpu-watt-x86
+        description: |
+          The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
+        datatype: float
+        default: 7
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingPervCPUWattArm64"
+        id: observability-profiling-per-vcpu-watt-arm64
+        description: |
+          The average amortized per-core power consumption (based on 100% CPU utilization) for arm64 architecture.
+        datatype: float
+        default: "2.8"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingDatacenterPUE"
+        id: observability-profiling-datacenter-PUE
+        description: |
+          Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. The average on-premise data center PUE according to the [Uptime Institute](https://ela.st/uptimeinstitute) survey.
+        datatype: float
+        default: 1.7
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingCo2PerKWH"
+        id: observability-profiling-per-co2-per-kwh
+        description: |
+          Carbon intensity measures how clean your data center electricity is. Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region. Use the [cloud carbon footprint data sheet](https://ela.st/grid-datasheet) to update this value according to your region. Defaults to US East (N. Virginia).
+        datatype: float
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingAWSCostDiscountRate"
+        id: observability-profiling-aws-cost-discount-rate
+        description: |
+          If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.
+        datatype: float
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingAzureCostDiscountRate"
+        id: observability-profiling-azure-cost-discount-rate
+        description: |
+          If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
+        datatype: float
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingCostPervCPUPerHour"
+        id: observability-profiling-cost-per-vcpu-per-hour
+        description: |
+          Default Hourly Cost per CPU Core for machines not on AWS or Azure.
+        datatype: float
+        default: "0,0425"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:apmEnableTransactionProfiling"
+        id: observability-apm-enable-transaction-profiling
+        description: |
+          Enables Universal Profiling on Transaction view.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:profilingFetchTopNFunctionsFromStacktraces"
+        id: observability-profiling-use-topNFunctions-from-stacktraces
+        description: |
+          Switch to fetch the TopN Functions from the Stacktraces API.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:searchExcludedDataTiers"
+        id: observability-search-excluded-data-tiers
+        description: |
+          Specify the data tiers to exclude from search, such as data_cold or data_frozen. When configured, indices allocated in the selected tiers are ignored from search requests. Affected apps: {{product.apm}}, Infrastructure.
+        datatype: string
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "observability:enableDiagnosticMode"
+        id: observability-enable-diagnostic-mode
+        description: |
+          Enable diagnostic mode for debugging and troubleshooting capabilities. Currently available only in the Service map view.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+
+      - setting: "observability:streamsEnableSignificantEvents"
+        id: observability-streams-enable-significant-events
+        description: |
+          Enable streams significant events.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+
+  - group: Reporting
+    id: kibana-reporting-settings
+    settings:
+
+      - setting: "xpackReporting:customPdfLogo"
+        id: xpackreporting-custompdflogo
+        description: |
+          A custom image to use in the footer of the PDF.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Rollup
+    id: kibana-rollups-settings
+    warning: |
+      Rollups were deprecated in 8.11.0. Rollups are deprecated and will be removed in a future version. Use [downsampling](docs-content://manage-data/data-store/data-streams/downsampling-time-series-data-stream.md) instead.
+    settings:
+
+      - setting: "rollups:enableIndexPatterns"
+        id: rollups-enableindexpatterns
+        description: |
+          Enables the creation of {{data-sources}} that capture rollup indices, which in turn enables visualizations based on rollup data. Refresh the page to apply the changes.
+        datatype: bool
+        applies_to:
+          stack: deprecated 8.15
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: "{{product.elasticsearch}}"
+    id: kibana-search-settings
+    settings:
+
+
+      - setting: "query_activity:minRunningTime"
+        id: query-activity-minrunningtime
+        description: |
+          The minimum time in milliseconds that a query must be running before it appears on the [Query activity](docs-content://deploy-manage/monitor/query-activity.md) page. Increase this value to filter out fast-completing queries and focus on long-running ones. `100` by default.
+        datatype: int
+        default: 100
+        applies_to:
+          stack: preview 9.4
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          elasticsearch: preview 9.4
+          serverless: unavailable
+
+      - setting: "courier:ignoreFilterIfFieldNotInIndex"
+        id: courier-ignorefilteriffieldnotinindex
+        description: |
+          Enhances support for dashboards containing visualizations accessing several dissimilar {{data-sources}}. When activated, filters are ignored for a visualization when the visualization's data view does not contain the filtering field. When deactivated, all filters are applied to all visualizations.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          elasticsearch: ga
+
+      - setting: "courier:setRequestPreference"
+        id: courier-setrequestpreference
+        description: |
+          Sets which shards handle your search requests.
+
+          * **Session ID** (default): Restricts operations to execute all search requests on the same shards. This has the benefit of reusing shard caches across requests.
+          * **Custom**: Allows you to define your own preference. Use `courier:customRequestPreference` to customize your preference value.
+          * **None**: Do not set a preference. This might provide better performance because requests can be spread across all shard copies. However, results might be inconsistent because different shards might be in different refresh states.
+        datatype: string
+        default: Session ID
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "courier:customRequestPreference"
+        id: courier-customrequestpreference
+        description: |
+          [Request preference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search#operation-search-preference) to use when `courier:setRequestPreference` uses `custom`.
+        datatype: string
+        default: _local
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "courier:maxConcurrentShardRequests"
+        id: courier-maxconcurrentshardrequests
+        description: |
+          Controls the [max_concurrent_shard_requests](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch) setting used for `_msearch` requests sent by {{product.kibana}}. Set to 0 to disable this config and use the {{product.elasticsearch}} default.
+        datatype: int
+        default: 0
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "search:includeFrozen"
+        id: search-includefrozen
+        description: |
+          Includes [frozen indices](docs-content://manage-data/lifecycle/data-tiers.md#frozen-tier) in results. Searching through frozen indices might increase the search time.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: deprecated 7.16
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "search:timeout"
+        id: search-timeout
+        description: |
+          The maximum timeout, in milliseconds, for search requests. To deactivate the timeout and allow queries to run to completion, set to `0`.
+        datatype: int
+        default: 600000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Security solution
+    id: kibana-siem-settings
+    settings:
+
+      - setting: "securitySolution:refreshIntervalDefaults"
+        id: securitysolution-refreshintervaldefaults
+        description: |
+          The default refresh interval for the Security time filter, in milliseconds.
+        datatype: string
+        default: "300000"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:timeDefaults"
+        id: securitysolution-timedefaults
+        description: |
+          The default period of time of the Security solution time filter.
+        datatype: string
+        default: '{"from": "now/d","to": "now/d"}'
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:defaultIndex"
+        id: securitysolution-defaultindex
+        description: |
+          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events.
+        datatype: string
+        default: "apm-*-transaction*, auditbeat-*, endgame-*, filebeat-*, logs-*, packetbeat-*, traces-apm*, winlogbeat-*, -*elastic-cloud-logs-*"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:defaultThreatIndex"
+        id: securitysolution-threatindices
+        description: |
+          A comma-delimited list of Threat Intelligence indices from which the {{security-app}} collects indicators.
+        datatype: string
+        default: "logs-ti_*"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:defaultAnomalyScore"
+        id: securitysolution-defaultanomalyscore
+        description: |
+          The threshold above which {{ml}} job anomalies are displayed in the {{security-app}}. The value must be between `0` and `100`.
+        datatype: int
+        default: 50
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:enableNewsFeed"
+        id: securitysolution-enablenewsfeed
+        description: |
+          Enables the security news feed on the Security **Overview** page.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:excludeColdAndFrozenTiersInAnalyzer"
+        id: security-solution-exclude-cold-frozen-tiers-analyzer
+        description: |
+          Skips cold and frozen tiers in Analyzer's queries when activated.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "securitySolution:enableGraphVisualization"
+        id: security-solution-enable-graph-visualization
+        description: |
+          Enables the Graph Visualization feature within the Security solution.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: removed 9.4, preview 9.1-9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: removed
+
+      - setting: "securitySolution:enableAssetInventory"
+        id: security-solution-enable-asset-inventory
+        description: |
+          Enables the Asset Inventory experience within the Security solution. When activated, you can access the Inventory feature through the Security solution navigation.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: preview
+        note: "Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, visit the **Entity Store Management** page."
+
+      - setting: "securitySolution:enableCloudConnector"
+        id: security-solution-enable-cloud-connector
+        description: |
+          Enables the Cloud Connector experience within the Security solution.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: preview
+
+      - setting: "securitySolution:rulesTableRefresh"
+        id: security-solution-rules-table-refresh
+        description: |
+          Enables auto refresh on the rules and monitoring tables, in milliseconds.
+        datatype: string
+        default: '{"on": true,"value": 60000}'
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:newsFeedUrl"
+        id: securitysolution-newsfeedurl
+        description: |
+          The URL to retrieve the security news feed content from.
+        datatype: string
+        default: "https://feeds.elastic.co/security-solution"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:ipReputationLinks"
+        id: securitysolution-ipreputationlinks
+        description: |
+          A JSON array containing links for verifying the reputation of an IP address. The links are displayed on [IP detail](docs-content://solutions/security/explore/network-page.md) pages.
+
+          :::{dropdown} Default array
+          ```json
+          [
+            { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
+            { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
+          ]
+          ```
+          :::
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:enableCcsWarning"
+        id: securitysolution-enableCcsWarning
+        description: |
+          Enables privilege check warnings in rules for CCS indices.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.0-9.3, removed 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "securitySolution:suppressionBehaviorOnAlertClosure"
+        id: security-solution-suppression-behavior-on-alert-closure
+        description: |
+          If an alert is closed while suppression is active, you can choose whether suppression continues or resets.
+        datatype: string
+        default: Restart suppression
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:showRelatedIntegrations"
+        id: securitySolution-showRelatedIntegrations
+        description: |
+          Shows related integrations on the rules and monitoring tables.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:alertTags"
+        id: security-solution-alert-tags
+        description: |
+          List of tag options for use with alerts generated by Security Solution rules.
+        datatype: string
+        default: "Duplicate, False Positive, Further investigation required"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:excludedDataTiersForRuleExecution"
+        id: security-solution-excluded-data-tiers-for-rule-execution
+        description: |
+          Specifies data tiers to exclude from searching during rule execution. Excludes events from the specified data tiers, which might help improve rule performance or reduce execution time. For example: `data_frozen,data_cold`.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
+      - setting: "securitySolution:enablePrivilegedUserMonitoring"
+        id: security-solution-enable-privileged-user-monitoring
+        description: |
+          Enables the privileged user monitoring dashboard and onboarding experience, which are in technical preview.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.1, removed 9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "securitySolution:enableEsqlRiskScoring"
+        id: security-solution-enable-esql-risk-scoring
+        description: |
+          Enables risk scoring based on {{esql}} queries. Disabling this reverts to using scripted metrics.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.0, removed 9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "securitySolution:defaultAIConnector"
+        id: security-solution-default-ai-connector
+        description: |
+          Default AI connector for serverless AI features (Elastic AI SOC Engine).
+        datatype: string
+        default: Elastic Managed LLM
+        applies_to:
+          stack: unavailable
+          security: ga
+
+      - setting: "securitySolution:defaultValueReportMinutes"
+        id: security-solution-default-value-report-minutes
+        description: |
+          The average review time in minutes for an analyst to review an alert. Used for calculations in the Value report.
+        datatype: int
+        default: 8
+        applies_to:
+          stack: unavailable
+          security: ga
+
+      - setting: "securitySolution:defaultValueReportRate"
+        id: security-solution-default-value-report-rate
+        description: |
+          The average hourly rate for a security analyst. Used for calculations in the Value report.
+        datatype: int
+        default: 75
+        applies_to:
+          stack: unavailable
+          security: ga
+
+      - setting: "securitySolution:defaultValueReportTitle"
+        id: security-solution-default-value-report-title
+        description: |
+          The title of the Value report.
+        datatype: string
+        default: Elastic AI value report
+        applies_to:
+          stack: unavailable
+          security: ga
+
+  - group: Timelion
+    id: kibana-timelion-settings
+    settings:
+
+      - setting: "timelion:es.timefield"
+        id: timelion-estimefield
+        description: |
+          The default field containing a timestamp when using the `.es()` query.
+        datatype: string
+        default: "@timestamp"
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "timelion:es.default_index"
+        id: timelion-esdefaultindex
+        description: |
+          The default index when using the `.es()` query.
+        datatype: string
+        default: _all
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "timelion:target_buckets"
+        id: timelion-targetbuckets
+        description: |
+          Used for calculating automatic intervals in visualizations, this is the number of buckets to try to represent.
+        datatype: int
+        default: 200
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "timelion:max_buckets"
+        id: timelion-maxbuckets
+        description: |
+          The maximum number of buckets a single data source can return. This value is used for calculating automatic intervals in visualizations.
+        datatype: int
+        default: 2000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "timelion:min_interval"
+        id: timelion-mininterval
+        description: |
+          The smallest interval to calculate when using "auto".
+        datatype: string
+        default: 1ms
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Visualization
+    id: kibana-visualization-settings
+    settings:
+
+      - setting: "visualization:heatmap:maxBuckets"
+        id: visualization-heatmap-maxbuckets
+        description: |
+          The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
+        datatype: int
+        default: 50
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "visualization:visualize:legacyHeatmapChartsLibrary"
+        id: visualization-visualize-heatmapChartslibrary
+        description: |
+          Enables legacy charts library for heatmap charts in visualize.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: deprecated
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "visualization:useLegacyTimeAxis"
+        id: visualization-uselegacytimeaxis
+        description: |
+          Enables the legacy time axis for charts in Lens, Discover, Visualize, and TSVB.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: deprecated 8.10, removed 9.1
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Developer tools
+    id: developer-tools
+    settings:
+
+      - setting: "devTools:enablePersistentConsole"
+        id: dev-tools-enable-persistent-console
+        description: |
+          Enables a persistent console in the {{product.kibana}} UI. This setting does not affect the standard Console in Dev Tools.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          elasticsearch: ga

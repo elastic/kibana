@@ -297,7 +297,7 @@
                 "id": "def-server.mockRouter.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ routerPath = '' }",
                 "description": [],
                 "signature": [
                   "{ routerPath?: string | undefined; }"
@@ -336,7 +336,7 @@
                 "id": "def-server.mockRouter.createKibanaRequest.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  path = '/path',\n  headers = { accept: 'something/html' },\n  params = {},\n  body = {},\n  query = {},\n  method = 'get',\n  socket = new Socket(),\n  routeTags,\n  routeAuthRequired,\n  routePath,\n  validation = {},\n  kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },\n  kibanaRequestState = {\n    requestId: '123',\n    requestUuid: '123e4567-e89b-12d3-a456-426614174000',\n    startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),\n  },\n  auth = { isAuthenticated: true },\n}",
                 "description": [],
                 "signature": [
                   "RequestFixtureOptions",
@@ -346,6 +346,7 @@
                 "lineNumber": 69,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestFixtureOptions",
                 "trackAdoption": false
               }
             ]
@@ -374,7 +375,7 @@
                 "id": "def-server.mockRouter.createFakeKibanaRequest.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  headers = { accept: 'something/html' },\n}",
                 "description": [],
                 "signature": [
                   "{ headers?: Record<string, string> | undefined; }"

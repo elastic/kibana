@@ -23,7 +23,15 @@ export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPEN
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
 export const PRODUCTION_ENVIRONMENT = 'production';
+export const METRICS_ENVIRONMENT = 'metrics';
+
+// Service map multi-environment test data
+export const SERVICE_MAP_TEST_SERVICE = 'service-map-test';
+export const SERVICE_MAP_TEST_ENVIRONMENT_PRODUCTION = 'production';
+export const SERVICE_MAP_TEST_ENVIRONMENT_STAGING = 'staging';
+export const SERVICE_MAP_TEST_ENVIRONMENT_DEVELOPMENT = 'development';
 
 export const SERVICE_OTEL_SENDOTLP = 'sendotlp-otel-native-synth';
 export const OTEL_INSTANCE_ID = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
@@ -42,7 +50,10 @@ export const SERVICE_SYNTH_GO = 'synth-go-1';
 export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
 
+export { APM_METRICS_SERVICE_NAMES } from '@kbn/synthtrace/src/scenarios/helpers/apm_metrics_dashboards';
+
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
+export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';
 export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';
 // Error constants - based on opbeans synthtrace data
 export const ERROR_MESSAGE = '[MockError] Foo';
@@ -57,6 +68,14 @@ export const SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY = 'zzz-producer-internal-
 export const SERVICE_SPAN_LINKS_PRODUCER_EXTERNAL_ONLY = 'zzz-producer-external-only';
 export const SERVICE_SPAN_LINKS_PRODUCER_CONSUMER = 'zzz-producer-consumer';
 export const SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE = 'zzz-consumer-multiple';
+
+// APM alert index constants
+export const APM_ALERTS_INDEX_PATTERN =
+  '.alerts-observability.apm.alerts-*,.internal.alerts-observability.apm.alerts-*';
+// Stateful uses rollover index with .internal prefix
+export const STATEFUL_APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
+// Serverless uses data stream without .internal prefix or numeric suffix
+export const SERVERLESS_APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
 // APM-specific role definitions matching authentication.ts
 export const APM_ROLES = {

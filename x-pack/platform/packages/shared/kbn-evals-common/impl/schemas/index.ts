@@ -11,6 +11,7 @@ export * from './runs/get_runs_route.gen';
 export * from './runs/get_run_route.gen';
 export * from './runs/get_run_scores_route.gen';
 export * from './runs/get_run_dataset_examples_route.gen';
+export * from './runs/compare_runs_route.gen';
 
 export * from './datasets/get_datasets_route.gen';
 export * from './datasets/create_dataset_route.gen';

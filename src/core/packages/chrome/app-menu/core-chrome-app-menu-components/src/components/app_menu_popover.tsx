@@ -10,13 +10,15 @@
 import React, { useMemo, type ReactElement } from 'react';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
-import type { AppMenuPopoverItem, AppMenuPrimaryActionItem } from '../types';
+import type { AppMenuItemType, AppMenuPopoverItem, AppMenuPrimaryActionItem } from '../types';
 
 interface AppMenuContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   anchorElement: ReactElement;
+  anchorDomElement?: HTMLElement;
   items: AppMenuPopoverItem[];
+  staticItems?: AppMenuItemType[];
   isOpen: boolean;
   popoverWidth?: number;
   primaryActionItem?: AppMenuPrimaryActionItem;
@@ -27,7 +29,9 @@ interface AppMenuContextMenuProps {
 
 export const AppMenuPopover = ({
   items,
+  staticItems,
   anchorElement,
+  anchorDomElement,
   tooltipContent,
   tooltipTitle,
   isOpen,
@@ -41,13 +45,24 @@ export const AppMenuPopover = ({
     () =>
       getPopoverPanels({
         items,
+        staticItems,
         primaryActionItem,
         rootPanelWidth: popoverWidth,
         rootPopoverTestId: popoverTestId,
         onClose,
         onCloseOverflowButton,
+        anchorDomElement,
       }),
-    [items, primaryActionItem, popoverWidth, popoverTestId, onClose, onCloseOverflowButton]
+    [
+      items,
+      staticItems,
+      primaryActionItem,
+      popoverWidth,
+      popoverTestId,
+      onClose,
+      onCloseOverflowButton,
+      anchorDomElement,
+    ]
   );
 
   if (panels.length === 0) {

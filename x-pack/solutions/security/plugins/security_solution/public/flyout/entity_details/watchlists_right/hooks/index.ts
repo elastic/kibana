@@ -14,6 +14,6 @@ export { useCreateWatchlistFormState } from './use_watchlist_form_state_create';
 export { useEditWatchlistFormState } from './use_watchlist_form_state_edit';
 export {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';

@@ -32,6 +32,9 @@ const mockServerSetup = {
   pluginsStart: {
     encryptedSavedObjects: mockEncryptedSo,
   },
+  basePath: {
+    publicBaseUrl: 'https://localhost:5601',
+  },
   logger: mockLogger,
 } as unknown as SyntheticsServerSetup;
 
@@ -45,7 +48,7 @@ describe('DeployPrivateLocationMonitors.getAllMonitorConfigs', () => {
       {
         id: 'm1',
         namespaces: ['space1'],
-        attributes: { locations: [] },
+        attributes: { locations: [], schedule: {} },
       },
     ];
     // Mock MonitorConfigRepository implementation

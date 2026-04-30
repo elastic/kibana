@@ -120,6 +120,8 @@ export const EditPipelineFlyout = ({
       );
 
       reportPipelineEdited({
+        integrationId,
+        dataStreamId: dataStream.dataStreamId,
         linesAdded,
         linesRemoved,
         netLineChange,
@@ -207,14 +209,18 @@ export const EditPipelineFlyout = ({
         target.closest('.euiCodeBlock__copyButton') ||
         target.getAttribute('aria-label')?.toLowerCase().includes('copy')
       ) {
-        reportCodeEditorCopyClicked();
+        reportCodeEditorCopyClicked({ integrationId, dataStreamId: dataStream.dataStreamId });
       }
     },
-    [reportCodeEditorCopyClicked]
+    [integrationId, dataStream.dataStreamId, reportCodeEditorCopyClicked]
   );
 
   return (
-    <EuiFlyout onClose={handleFlyoutClose} aria-labelledby="editPipelineFlyoutTitle">
+    <EuiFlyout
+      onClose={handleFlyoutClose}
+      aria-labelledby="editPipelineFlyoutTitle"
+      data-test-subj="editPipelineFlyout"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="editPipelineFlyoutTitle">{dataStream.title}</h2>
@@ -247,7 +253,9 @@ export const EditPipelineFlyout = ({
               iconType="save"
               onClick={handleSave}
               isLoading={updateDataStreamPipelineMutation.isLoading}
-              isDisabled={selectedPipelineTab !== 'pipeline' || !pipelineText.trim()}
+              isDisabled={
+                selectedPipelineTab !== 'pipeline' || !pipelineText.trim() || !hasUnsavedChanges
+              }
               data-test-subj="editPipelineFlyoutSaveButton"
             >
               {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
@@ -264,7 +272,10 @@ export const EditPipelineFlyout = ({
           <EuiTab
             isSelected={selectedPipelineTab === 'pipeline'}
             onClick={() => {
-              reportEditPipelineTabOpened();
+              reportEditPipelineTabOpened({
+                integrationId,
+                dataStreamId: dataStream.dataStreamId,
+              });
               selectPipelineTab('pipeline');
             }}
           >

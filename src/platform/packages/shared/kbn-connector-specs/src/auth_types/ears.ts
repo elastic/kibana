@@ -10,8 +10,11 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import { isConnectorAuthorizationError } from '../errors/connector_authorization_error';
+import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import * as i18n from './translations';
 
+export const EARS_AUTH_ID = 'ears';
 export const EARS_PROVIDERS = ['google', 'microsoft', 'slack'] as const;
 
 const authSchema = z
@@ -41,7 +44,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * 6. Tokens are auto-refreshed when expired during connector execution
  */
 export const Ears: AuthTypeSpec<AuthSchemaType> = {
-  id: 'ears',
+  id: EARS_AUTH_ID,
   schema: authSchema,
   authMode: 'per-user',
   configure: async (
@@ -57,6 +60,9 @@ export const Ears: AuthTypeSpec<AuthSchemaType> = {
         scope: secret.scope,
       });
     } catch (error) {
+      if (isConnectorAuthorizationError(error)) {
+        throw error;
+      }
       throw new Error(
         `Unable to retrieve/refresh the access token. User may need to re-authorize: ${error.message}`
       );
@@ -67,7 +73,7 @@ export const Ears: AuthTypeSpec<AuthSchemaType> = {
     }
 
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization = normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },

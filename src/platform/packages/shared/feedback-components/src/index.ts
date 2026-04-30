@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackTriggerButton } from './components';
+export { FeedbackTriggerButton, FeedbackContainer } from './components';

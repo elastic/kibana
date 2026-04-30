@@ -29,7 +29,6 @@ export interface SuggestPartitionsParams {
     end: number;
     user_prompt?: string;
     existing_partitions?: Array<{ name: string; condition: z.infer<typeof conditionSchema> }>;
-    refinement_history?: string[];
   };
 }
 
@@ -43,7 +42,6 @@ export const suggestPartitionsSchema = z.object({
     existing_partitions: z
       .array(z.object({ name: z.string(), condition: conditionSchema }))
       .optional(),
-    refinement_history: z.array(z.string().max(2000)).max(10).optional(),
   }),
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
@@ -74,10 +72,12 @@ export const suggestPartitionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient, featureClient } =
+    const { inferenceClient, scopedClusterClient, streamsClient, getFeatureClient } =
       await getScopedClients({
         request,
       });
+
+    const { connector_id: connectorId } = params.body;
 
     const stream = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(stream)) {
@@ -86,7 +86,7 @@ export const suggestPartitionsRoute = createServerRoute({
 
     const partitionsPromise = partitionStream({
       definition: stream,
-      inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
+      inferenceClient: inferenceClient.bindTo({ connectorId }),
       esClient: scopedClusterClient.asCurrentUser,
       logger,
       start: params.body.start,
@@ -95,8 +95,8 @@ export const suggestPartitionsRoute = createServerRoute({
       signal: getRequestAbortSignal(request),
       userPrompt: params.body.user_prompt,
       existingPartitions: params.body.existing_partitions,
-      refinementHistory: params.body.refinement_history,
       getFeatures: async (filters) => {
+        const featureClient = await getFeatureClient();
         const { hits } = await featureClient.getFeatures(params.path.name, filters);
         return hits;
       },

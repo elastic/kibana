@@ -92,6 +92,9 @@ export class WorkflowsBaseTelemetry {
       tagCount: metadata.tagCount,
       constCount: metadata.constCount,
       hasTriggerConditions: metadata.hasTriggerConditions,
+      hasTriggerWorkflowEventsIgnore: metadata.hasTriggerWorkflowEventsIgnore,
+      hasTriggerWorkflowEventsAllow: metadata.hasTriggerWorkflowEventsAllow,
+      hasTriggerWorkflowEventsAvoidLoop: metadata.hasTriggerWorkflowEventsAvoidLoop,
       ...this.getBaseResultParams(error),
     });
   };
@@ -517,6 +520,24 @@ export class WorkflowsBaseTelemetry {
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowCreateOpened, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowCreateOpened],
       ...(params.editorType && { editorType: params.editorType }),
+    });
+  };
+
+  reportWorkflowAccessDeniedPrivileges = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+    });
+  };
+
+  reportWorkflowAccessDeniedLicense = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedLicense, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+    });
+  };
+
+  reportWorkflowAccessDeniedServerlessTier = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
     });
   };
 
