@@ -110,16 +110,15 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
+    const { bulkCreateRulesEnabled } = ctx.securitySolution.getConfig().experimentalFeatures;
     const BATCH_SIZE = 100;
     while (ruleInstallQueue.length > 0) {
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
       const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
-      const { results, errors } = await createPrebuiltRules(
-        detectionRulesClient,
-        ruleAssets,
-        logger
-      );
+      const { results, errors } = bulkCreateRulesEnabled
+        ? await detectionRulesClient.bulkCreatePrebuiltRules({ rules: ruleAssets })
+        : await createPrebuiltRules(detectionRulesClient, ruleAssets, logger);
 
       const batchInstalledRules = results.map(({ result: rule }) =>
         pick(rule, ['id', 'rule_id', 'version'])
