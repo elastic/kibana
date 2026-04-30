@@ -45,6 +45,12 @@ export const getConfiguration = (
     layerId,
     layerType: 'data',
     palette: params.metric.metricColorMode !== 'None' ? palette : undefined,
+    applyColorTo:
+      params.metric.metricColorMode !== 'None'
+        ? params.metric.metricColorMode === 'Background'
+          ? 'background'
+          : 'value'
+        : undefined,
     metricAccessor,
     breakdownByAccessor,
     collapseFn,
