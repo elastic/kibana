@@ -183,7 +183,7 @@ function applyDefaultsToObjectProperties(
 /**
  * Recursively checks if a schema has any defaults (direct or nested)
  */
-function hasDefaultsRecursive(
+export function hasDefaultsRecursive(
   schema: JSONSchema7,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): boolean {

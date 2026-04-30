@@ -59,6 +59,7 @@ describe('Telemetry Schema Checks', () => {
       'agentBuilder:experimentalFeatures',
       'agentBuilder:externalMcp',
       'agentBuilder:navEnabled',
+      'agentContextLayer:experimentalFeatures',
       'ai:anonymizationSettings',
       'aiAssistant:preferredAIAssistantType',
       'aiAssistant:preferredChatExperience',
