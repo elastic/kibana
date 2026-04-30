@@ -47,6 +47,7 @@ import { useGetRuleTypes } from '../hooks/use_get_rule_types';
 import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_window';
 import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
+import { EpisodeMatcherInput } from './episode_matcher_input';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
@@ -104,9 +105,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   );
   const [episodeQuery, setEpisodeQuery] = useState<string>(
     initialValue?.scopeEpisodeQuery?.kql || ''
-  );
-  const [episodeFilters, setEpisodeFilters] = useState<Filter[]>(
-    (initialValue?.scopeEpisodeQuery?.filters as Filter[]) || []
   );
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
@@ -166,15 +164,15 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (!isEpisodeQueryEnabled) {
       return null;
     }
-    if (!episodeQuery && !episodeFilters.length) {
+    if (!episodeQuery) {
       return null;
     }
 
     return {
       kql: episodeQuery,
-      filters: transformQueryFilters(episodeFilters),
+      filters: [],
     };
-  }, [isEpisodeQueryEnabled, episodeQuery, episodeFilters]);
+  }, [isEpisodeQueryEnabled, episodeQuery]);
 
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
@@ -527,14 +525,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                   {isEpisodeQueryEnabled && (
                     <>
                       <EuiSpacer size="m" />
-                      <MaintenanceWindowScopedQuery
-                        ruleTypeIds={ruleTypeIds}
-                        query={episodeQuery}
-                        filters={episodeFilters}
-                        isLoading={isLoadingRuleTypes}
-                        isEnabled={isEpisodeQueryEnabled}
-                        onQueryChange={setEpisodeQuery}
-                        onFiltersChange={setEpisodeFilters}
+                      <EpisodeMatcherInput
+                        value={episodeQuery}
+                        onChange={setEpisodeQuery}
+                        fullWidth
+                        data-test-subj="maintenanceWindowEpisodeDataFilterInput"
                         placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
                       />
                     </>
