@@ -27,19 +27,88 @@ export interface ModuleDiscoveryInfo {
   }[];
 }
 
-// Collect environment variables to pass through to test execution steps
-const scoutExtraEnv: Record<string, string> = {};
-if (process.env.SERVERLESS_TESTS_ONLY) {
-  scoutExtraEnv.SERVERLESS_TESTS_ONLY = process.env.SERVERLESS_TESTS_ONLY;
-}
+// Buildkite step-level env does not propagate to dynamically uploaded child steps, so
+// we explicitly forward an allow-list of env vars from the generator step's environment
+// (set on the parent "Scout Test Run Builder" step in the consuming pipeline YAMLs)
+// into each generated Scout Configs step's env. Allow-list (vs. spreading process.env)
+// avoids leaking secrets and agent-internal vars into child steps.
+const PASSTHROUGH_ENV_KEYS = [
+  'SERVERLESS_TESTS_ONLY',
+  'UIAM_DOCKER_IMAGE',
+  'UIAM_COSMOSDB_DOCKER_IMAGE',
+] as const;
 
-if (process.env.UIAM_DOCKER_IMAGE) {
-  scoutExtraEnv.UIAM_DOCKER_IMAGE = process.env.UIAM_DOCKER_IMAGE;
-}
+const scoutExtraEnv: Record<string, string> = Object.fromEntries(
+  PASSTHROUGH_ENV_KEYS.flatMap((key) => {
+    const value = process.env[key];
+    return value ? [[key, value]] : [];
+  })
+);
 
-if (process.env.UIAM_COSMOSDB_DOCKER_IMAGE) {
-  scoutExtraEnv.UIAM_COSMOSDB_DOCKER_IMAGE = process.env.UIAM_COSMOSDB_DOCKER_IMAGE;
-}
+// Heavy-suite modules whose test runs are too slow to share a single Buildkite step
+// across every (arch, domain) mode. Substring match (e.g. `streams_app_api` is also
+// covered) keeps the rule permissive without per-module bookkeeping.
+const HEAVY_MODULE_NAME_FRAGMENTS = ['streams_app', 'dashboard'] as const;
+
+const isHeavyModule = (moduleName: string): boolean =>
+  HEAVY_MODULE_NAME_FRAGMENTS.some((fragment) => moduleName.includes(fragment));
+
+const buildModeSuffix = (flag: string): string => {
+  // "--arch <arch> --domain <domain>" -> "<arch>-<domain>"
+  const archDomainMatch = flag.match(/--arch\s+(\S+)\s+--domain\s+(\S+)/);
+  if (archDomainMatch) {
+    return `${archDomainMatch[1]}-${archDomainMatch[2]}`;
+  }
+  return flag.replace(/^--/g, '').replace(/\s*--/g, '-').replace(/=/g, '-').replace(/\s+/g, '-');
+};
+
+/**
+ * For each module whose name matches `HEAVY_MODULE_NAME_FRAGMENTS`, fan it out into one
+ * virtual module per supported `(arch, domain)` mode so each mode gets its own Buildkite
+ * step. Each split module:
+ *   - keeps the original module's `group`/`type`/`isAffected` (via spread),
+ *   - is renamed to `<original>-<arch>-<domain>` so BK step keys remain unique,
+ *   - retains only the configs that support that specific mode,
+ *   - has each retained config narrowed to the single matching `serverRunFlag`.
+ *
+ * Non-matching modules are returned unchanged. Pure: no I/O, no input mutation.
+ *
+ * This used to live inside `kbn-scout`'s discovery CLI and ran before the manifest
+ * was saved to disk. That conflated "describe the codebase" with "schedule the build"
+ * and produced manifest entries with duplicate config paths, which broke downstream
+ * consumers (notably the flaky-test runner planner). Discovery now saves a canonical
+ * manifest; this scheduler is the only consumer that needs the split.
+ */
+const splitHeavyModulesByServerRunFlags = (modules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] =>
+  modules.flatMap((module) => {
+    if (!isHeavyModule(module.name)) {
+      return [module];
+    }
+
+    const allServerRunFlags = new Set<string>();
+    for (const config of module.configs) {
+      for (const flag of config.serverRunFlags) {
+        allServerRunFlags.add(flag);
+      }
+    }
+
+    if (allServerRunFlags.size === 0) {
+      // Nothing to split on; emit the module unchanged so the caller can still produce
+      // a step (or filter it out via its own checks).
+      return [module];
+    }
+
+    return Array.from(allServerRunFlags).map((flag) => ({
+      ...module,
+      name: `${module.name}-${buildModeSuffix(flag)}`,
+      configs: module.configs
+        .filter((config) => config.serverRunFlags.includes(flag))
+        .map((config) => ({
+          ...config,
+          serverRunFlags: [flag],
+        })),
+    }));
+  });
 
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
@@ -65,16 +134,28 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
           .filter(Boolean)
       : ['build_scout_tests', 'build'];
 
-  const scoutCiRunGroups = modulesWithTests.map((module) => {
-    // Check if any config in this module uses parallel workers
+  // Apply the heavy-suite split here, at scheduling time, so each (arch, domain) mode
+  // for streams_app/dashboard gets its own Buildkite step.
+  const scheduledModules = splitHeavyModulesByServerRunFlags(modulesWithTests);
+
+  const scoutCiRunGroups = scheduledModules.map((module) => {
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
     const affectedPrefix = module.isAffected ? 'affected ' : '';
+
+    // A module is "split" when scheduling narrowed it to exactly one config with one
+    // (arch, domain) mode. Those steps pass SCOUT_CONFIG + SCOUT_SERVER_RUN_FLAGS
+    // directly, so configs.sh skips the manifest jq lookup and runs the targeted mode.
+    // Non-split modules keep the manifest-driven SCOUT_CONFIG_GROUP_KEY contract.
+    const isSplitModule =
+      module.configs.length === 1 && module.configs[0].serverRunFlags.length === 1;
+    const splitConfig = isSplitModule ? module.configs[0] : undefined;
 
     return {
       label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
       key: module.name,
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       group: module.group,
+      splitConfig,
     };
   });
 
@@ -84,18 +165,26 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       key: 'scout-configs',
       depends_on: SCOUT_CONFIGS_DEPS,
       steps: scoutCiRunGroups.map(
-        ({ label, key, group, agents }): BuildkiteStep => ({
+        ({ label, key, group, agents, splitConfig }): BuildkiteStep => ({
           label,
           command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
           timeout_in_minutes: 60,
           key,
           agents,
-          env: {
-            SCOUT_CONFIG_GROUP_KEY: key,
-            SCOUT_CONFIG_GROUP_TYPE: group,
-            ...envFromlabels,
-            ...scoutExtraEnv,
-          },
+          env: splitConfig
+            ? {
+                SCOUT_CONFIG: splitConfig.path,
+                SCOUT_SERVER_RUN_FLAGS: splitConfig.serverRunFlags[0],
+                SCOUT_CONFIG_GROUP_TYPE: group,
+                ...envFromlabels,
+                ...scoutExtraEnv,
+              }
+            : {
+                SCOUT_CONFIG_GROUP_KEY: key,
+                SCOUT_CONFIG_GROUP_TYPE: group,
+                ...envFromlabels,
+                ...scoutExtraEnv,
+              },
           retry: {
             automatic: [
               { exit_status: '-1', limit: 3 },
