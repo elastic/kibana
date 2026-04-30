@@ -40,6 +40,8 @@ const { CiStatsReporter } = jest.requireMock('@kbn/ci-stats-reporter');
 const mockBasePathProxy = {
   targetPort: 9999,
   basePath: '/foo/bar',
+  host: 'localhost',
+  port: 5601,
   start: jest.fn(),
   stop: jest.fn(),
 };
@@ -78,7 +80,7 @@ const createDevConfig = (parts: Partial<CliDevConfig> = {}): CliDevConfig => ({
   dev: {
     basePathProxyTargetPort: 9000,
   },
-  http: {} as any,
+  http: { ssl: { enabled: false } } as any,
   ...parts,
 });
 
@@ -175,7 +177,11 @@ it('enables the basePath proxy', () => {
         "devConfig": Object {
           "basePathProxyTargetPort": 9000,
         },
-        "httpConfig": Object {},
+        "httpConfig": Object {
+          "ssl": Object {
+            "enabled": false,
+          },
+        },
         "log": <TestLog>,
       },
     ]
