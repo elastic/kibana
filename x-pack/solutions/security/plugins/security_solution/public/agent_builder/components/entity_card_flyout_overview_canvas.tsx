@@ -33,9 +33,9 @@ import {
   type RiskSeverity,
 } from '../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../common/lib/kibana';
-import { Content as HostPanelContent } from '../../flyout_v2/entity_details/host_right/content';
-import { Header as HostPanelHeader } from '../../flyout_v2/entity_details/host_right/header';
-import { useObservedHost } from '../../flyout_v2/entity_details/host_right/hooks/use_observed_host';
+import { Content as HostPanelContent } from '../../flyout_v2/entity_details/host/content';
+import { Header as HostPanelHeader } from '../../flyout_v2/entity_details/host/header';
+import { useObservedHost } from '../../flyout_v2/entity_details/host/hooks/use_observed_host';
 import { EntityType } from '../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -47,7 +47,7 @@ import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
 } from '../../flyout/document_details/shared/utils';
-import { HOST_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity_details/host_right/constants';
+import { HOST_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity_details/host/constants';
 import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
 import {

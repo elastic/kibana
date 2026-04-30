@@ -7,9 +7,13 @@
 
 import React from 'react';
 import { getEcsField } from '../../../flyout/document_details/right/components/table_field_name_cell';
-import { IP_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
+import {
+  HOST_NAME_FIELD_NAME,
+  IP_FIELD_TYPE,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { Network } from '../../network_details';
+import { Host } from '../../entity_details/host';
 
 /**
  * Returns the React element to render inside the system flyout for the given field/value,
@@ -17,8 +21,13 @@ import { Network } from '../../network_details';
  *
  * Currently supports:
  * - IP fields → Network details flyout
+ * - host.name → Host details flyout
  */
 export const buildFlyoutContent = (field: string, value: string): React.ReactElement | null => {
+  if (field === HOST_NAME_FIELD_NAME) {
+    return <Host hostName={value} />;
+  }
+
   const ecsField = getEcsField(field);
 
   if (ecsField?.type === IP_FIELD_TYPE) {

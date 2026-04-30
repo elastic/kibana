@@ -27,6 +27,12 @@ jest.mock('../../network_details', () => ({
   ),
 }));
 
+jest.mock('../../entity_details/host', () => ({
+  Host: ({ hostName }: { hostName: string }) => (
+    <div data-test-subj="mockHost">{hostName}</div>
+  ),
+}));
+
 jest.mock(
   '../../../one_discover/alert_flyout_overview_tab_component/data_view_manager_bootstrap',
   () => ({
@@ -55,10 +61,13 @@ describe('buildFlyoutContent', () => {
     );
   });
 
-  it('should return null for a non-IP field', () => {
+  it('should return a Host element for a host.name field', () => {
     const result = buildFlyoutContent('host.name', 'my-host');
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+
+    const { getByTestId } = render(result!);
+    expect(getByTestId('mockHost')).toHaveTextContent('my-host');
   });
 
   it('should return null for an unknown field', () => {
