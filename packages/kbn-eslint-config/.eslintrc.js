@@ -416,9 +416,9 @@ module.exports = {
          * @see https://github.com/elastic/kibana/pull/170856
          * @see https://github.com/elastic/kibana/issues/171080
          *
-         * Start as `off` until lazy-load `server/index.ts` migrations land on main; then set to `error`.
+         * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
          */
-        '@kbn/eslint/no_sync_import_from_plugin': 'off',
+        '@kbn/eslint/no_sync_import_from_plugin': 'error',
       },
     },
   ],
