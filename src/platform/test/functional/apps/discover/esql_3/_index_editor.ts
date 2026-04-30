@@ -270,7 +270,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
 
-      await browser.refresh();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
+      await discover.selectTextBaseLang();
+      await discover.waitUntilSearchingHasFinished();
 
       // Type lookup join query
       await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_EDITION}`);
