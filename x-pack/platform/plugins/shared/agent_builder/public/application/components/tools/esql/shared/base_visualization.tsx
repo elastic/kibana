@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSuperDatePicker } from '@elastic/eui';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { visualizationWrapper } from './styles';
+import {
+  visualizationEmbeddableStyles,
+  visualizationHeaderStyles,
+  visualizationWrapperStyles,
+} from './styles';
 import { VisualizationActions } from './visualization_actions';
+import { useTimeRange } from './use_time_range';
 
 const VISUALIZATION_HEIGHT = 240;
 
@@ -35,7 +40,13 @@ export function BaseVisualization({
     InlineEditLensEmbeddableContext['lensEvent'] | null
   >(null);
 
-  const { euiTheme } = useEuiTheme();
+  const timeRangeControl = useTimeRange({ timeRange: lensInput?.timeRange });
+  const selectedTimeRange = timeRangeControl?.selectedTimeRange;
+  const lensInputWithTimeRange = useMemo(
+    () =>
+      lensInput && selectedTimeRange ? { ...lensInput, timeRange: selectedTimeRange } : lensInput,
+    [lensInput, selectedTimeRange]
+  );
 
   const onLoad = useCallback(
     (
@@ -55,30 +66,49 @@ export function BaseVisualization({
 
   return (
     <>
-      <div
-        data-test-subj="lensVisualization"
-        css={visualizationWrapper(euiTheme, VISUALIZATION_HEIGHT)}
-      >
-        {!isLoading && lensInput && (
-          <VisualizationActions
-            onSave={onOpenSave}
-            uiActions={uiActions}
-            lensInput={lensInput}
-            lensLoadEvent={lensLoadEvent}
-            setLensInput={setLensInput}
-          />
-        )}
-        {isLoading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          lensInput && (
-            <lens.EmbeddableComponent {...lensInput} style={{ height: '100%' }} onLoad={onLoad} />
-          )
-        )}
+      <div data-test-subj="lensVisualization" css={visualizationWrapperStyles}>
+        <div css={visualizationHeaderStyles}>
+          {timeRangeControl && (
+            <EuiSuperDatePicker
+              data-test-subj="agentBuilderVisualizeLensTimeRangePicker"
+              start={timeRangeControl.selectedTimeRange.from}
+              end={timeRangeControl.selectedTimeRange.to}
+              onTimeChange={timeRangeControl.onTimeChange}
+              onRefresh={() => undefined}
+              showUpdateButton={false}
+              compressed
+              width="auto"
+            />
+          )}
+          {!isLoading && lensInput && (
+            <VisualizationActions
+              onSave={onOpenSave}
+              uiActions={uiActions}
+              lensInput={lensInput}
+              lensLoadEvent={lensLoadEvent}
+              setLensInput={setLensInput}
+            />
+          )}
+        </div>
+
+        <div css={visualizationEmbeddableStyles(VISUALIZATION_HEIGHT)}>
+          {isLoading ? (
+            <EuiLoadingSpinner />
+          ) : (
+            lensInputWithTimeRange && (
+              <lens.EmbeddableComponent
+                {...lensInputWithTimeRange}
+                style={{ height: '100%' }}
+                onBrushEnd={timeRangeControl?.onBrushEnd}
+                onLoad={onLoad}
+              />
+            )
+          )}
+        </div>
       </div>
-      {isSaveModalOpen && lensInput && (
+      {isSaveModalOpen && lensInputWithTimeRange && (
         <lens.SaveModalComponent
-          initialInput={lensInput}
+          initialInput={lensInputWithTimeRange}
           onClose={onCloseSave}
           isSaveable={false}
         />

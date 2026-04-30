@@ -8,9 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema } from './schema_runtime_field';
-import { fieldSettingsBaseSchema } from './schema_field_settings';
+import {
+  compositeRuntimeFieldSchema,
+  primitiveRuntimeFieldSchema,
+} from '../runtime_fields/schema_embedded_runtime_field';
+import { fieldSettingsBaseSchema } from '../schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
+import { fieldSettingsFieldNameSchema, indexPatternSchema, timeFieldSchema } from './common';
 
 export const fieldSettingsSchema = schema.oneOf(
   [compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema],
@@ -40,22 +44,10 @@ export const dataViewReferenceSchema = schema.object(
 export const dataViewSpecSchema = schema.object(
   {
     type: schema.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
-    index_pattern: schema.string({
-      meta: {
-        description:
-          'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".',
-      },
-    }),
-    time_field: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
-        },
-      })
-    ),
+    index_pattern: indexPatternSchema,
+    time_field: timeFieldSchema,
     field_settings: schema.maybe(
-      schema.recordOf(schema.string({ minLength: 1 }), fieldSettingsSchema)
+      schema.recordOf(fieldSettingsFieldNameSchema, fieldSettingsSchema)
     ),
   },
   { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }

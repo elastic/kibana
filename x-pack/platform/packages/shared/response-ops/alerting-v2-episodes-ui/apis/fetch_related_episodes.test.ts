@@ -8,15 +8,14 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
-import { buildRelatedAlertEpisodesEsqlQuery } from '../queries/related_episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchRelatedAlertEpisodes } from './fetch_related_alert_episodes';
+import { fetchRelatedEpisodes } from './fetch_related_episodes';
 
 jest.mock('../utils/execute_esql_query');
 
 const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 
-describe('fetchRelatedAlertEpisodes', () => {
+describe('fetchRelatedEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
 
   beforeEach(() => {
@@ -24,25 +23,19 @@ describe('fetchRelatedAlertEpisodes', () => {
     mockExecuteEsqlQuery.mockResolvedValue([]);
   });
 
-  it('calls executeEsqlQuery with the related-episodes ES|QL and page size variable', async () => {
+  it('calls executeEsqlQuery with the given query and page size variable', async () => {
     const pageSize = 5;
-    const ruleId = 'rule-1';
-    const excludeEpisodeId = 'ep-current';
-    const expectedQuery = buildRelatedAlertEpisodesEsqlQuery(ruleId, excludeEpisodeId).print(
-      'basic'
-    );
+    const query = 'FROM alert_episodes | WHERE true';
 
-    await fetchRelatedAlertEpisodes({
+    await fetchRelatedEpisodes({
       pageSize,
-      ruleId,
-      excludeEpisodeId,
-      services: { expressions: mockExpressions },
+      query,
+      expressions: mockExpressions,
     });
 
-    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
     expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
-      query: expectedQuery,
+      query,
       input: {
         type: 'kibana_context',
         esqlVariables: [
@@ -59,23 +52,18 @@ describe('fetchRelatedAlertEpisodes', () => {
 
   it('passes abortSignal when provided', async () => {
     const abortController = new AbortController();
-    const ruleId = 'r';
-    const excludeEpisodeId = 'e';
-    const expectedQuery = buildRelatedAlertEpisodesEsqlQuery(ruleId, excludeEpisodeId).print(
-      'basic'
-    );
+    const query = 'FROM alert_episodes | LIMIT 0';
 
-    await fetchRelatedAlertEpisodes({
+    await fetchRelatedEpisodes({
       pageSize: 3,
-      ruleId,
-      excludeEpisodeId,
+      query,
       abortSignal: abortController.signal,
-      services: { expressions: mockExpressions },
+      expressions: mockExpressions,
     });
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: expectedQuery,
+        query,
         abortSignal: abortController.signal,
       })
     );

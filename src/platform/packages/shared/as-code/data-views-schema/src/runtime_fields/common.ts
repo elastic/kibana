@@ -13,7 +13,6 @@ import type {
   PrimitiveRuntimeFieldTypes,
   RuntimeFieldCompositeType,
 } from '@kbn/data-views-plugin/common';
-import { fieldSettingsBaseSchema } from './schema_field_settings';
 
 export const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'keyword',
@@ -27,9 +26,9 @@ export const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
 
 export const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
 
-const MAX_NAME_LENGTH = 1000;
+export const MAX_NAME_LENGTH = 1000;
 
-const scriptSchema = schema.maybe(
+export const scriptSchema = schema.maybe(
   schema.string({
     minLength: 1,
     meta: {
@@ -41,41 +40,15 @@ const scriptSchema = schema.maybe(
   })
 );
 
-export const runtimeFieldBaseSchema = fieldSettingsBaseSchema.extends({
-  type: schema.oneOf(
-    PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
-      Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>
-    ],
-    {
-      meta: {
-        id: 'kbn-runtime-field-type',
-        title: 'Type',
-        description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
-      },
-    }
-  ),
-});
-
-export const primitiveRuntimeFieldSchema = runtimeFieldBaseSchema.extends(
+export const primitiveTypeSchema = schema.oneOf(
+  PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
+    Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>
+  ],
   {
-    script: scriptSchema,
-  },
-  { meta: { id: 'kbn-runtime-field-schema', title: 'Runtime field' } }
+    meta: {
+      id: 'kbn-runtime-field-type',
+      title: 'Type',
+      description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
+    },
+  }
 );
-
-export const compositeRuntimeFieldSchema = schema.object(
-  {
-    type: schema.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
-    fields: schema.recordOf(
-      schema.string({ minLength: 1, maxLength: MAX_NAME_LENGTH }),
-      runtimeFieldBaseSchema
-    ),
-    script: scriptSchema,
-  },
-  { meta: { id: 'kbn-composite-runtime-field-schema', title: 'Composite runtime field' } }
-);
-
-export const runtimeFieldSchema = schema.discriminatedUnion('type', [
-  primitiveRuntimeFieldSchema,
-  compositeRuntimeFieldSchema,
-]);
