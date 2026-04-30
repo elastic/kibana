@@ -14,6 +14,7 @@ import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
+import { endsWithNonWhitespace } from '../../../definitions/utils/regex';
 
 export const METADATA_FIELDS = [
   '_version',
@@ -61,7 +62,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
   // FROM something METADATA /
   // FROM something METADATA field/
   // FROM something METADATA field, /
-  if (/(?:,|METADATA)\s+$/i.test(innerText) || /\S$/.test(innerText)) {
+  if (/(?:,|METADATA)\s+$/i.test(innerText) || endsWithNonWhitespace(innerText)) {
     const prefix = getMetadataFragment(innerText);
 
     if (prefix && METADATA_FIELDS.includes(prefix)) {
