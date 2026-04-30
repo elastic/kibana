@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"ccd1c466b8f7c0b3ac43f3fb5161e31501b605bd08d12a87ed9857f0ef00566d","compiler_version":"v0.71.1","strict":true,"agent_id":"claude","agent_model":"opus[1m]"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"d26ada860ba192f06ccce1194d578ea0c379962e2f7e0439683d6a7b06792a0b","compiler_version":"v0.71.1","strict":true,"agent_id":"codex","agent_model":"gpt-5.4"}
 # gh-aw-manifest: {"version":1,"secrets":["GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","LITELLM_API_KEY"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"373c709c69115d41ff229c7e5df9f8788daa9553","version":"v9"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"239aec45b78c8799417efdd5bc6d8cc036629ec1","version":"v0.71.1"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.28","digest":"sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.25.28@sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.28","digest":"sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.28@sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.28","digest":"sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.25.28@sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.0"},{"image":"ghcr.io/github/github-mcp-server:v1.0.2"},{"image":"node:lts-alpine","digest":"sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f","pinned_image":"node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -168,11 +168,11 @@ jobs:
       - name: Generate agentic run info
         id: generate_aw_info
         env:
-          GH_AW_INFO_ENGINE_ID: "claude"
-          GH_AW_INFO_ENGINE_NAME: "Claude Code"
-          GH_AW_INFO_MODEL: "opus[1m]"
-          GH_AW_INFO_VERSION: "2.1.98"
-          GH_AW_INFO_AGENT_VERSION: "2.1.98"
+          GH_AW_INFO_ENGINE_ID: "codex"
+          GH_AW_INFO_ENGINE_NAME: "Codex"
+          GH_AW_INFO_MODEL: "gpt-5.4"
+          GH_AW_INFO_VERSION: "0.88.0"
+          GH_AW_INFO_AGENT_VERSION: "0.88.0"
           GH_AW_INFO_CLI_VERSION: "v0.71.1"
           GH_AW_INFO_WORKFLOW_NAME: "Codex Reviewer"
           GH_AW_INFO_EXPERIMENTAL: "false"
@@ -191,11 +191,12 @@ jobs:
             setupGlobals(core, github, context, exec, io, getOctokit);
             const { main } = require('${{ runner.temp }}/gh-aw/actions/generate_aw_info.cjs');
             await main(core, context);
-      - name: Validate ANTHROPIC_API_KEY secret
+      - name: Validate CODEX_API_KEY or OPENAI_API_KEY secret
         id: validate-secret
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/validate_multi_secret.sh" ANTHROPIC_API_KEY 'Claude Code' https://github.github.com/gh-aw/reference/engines/#anthropic-claude-code
+        run: bash "${RUNNER_TEMP}/gh-aw/actions/validate_multi_secret.sh" CODEX_API_KEY OPENAI_API_KEY Codex https://github.github.com/gh-aw/reference/engines/#openai-codex
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
       - name: Checkout .github and .agents folders
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -242,7 +243,7 @@ jobs:
         id: sanitized
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
-          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.playwright.dev,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
+          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,172.30.0.1,api.openai.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,openai.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,ppa.launchpad.net,raw.githubusercontent.com,s.symcb.com,s.symcd.com,security.ubuntu.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
         with:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
@@ -266,14 +267,14 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_0ff96c33a610e66e_EOF'
+          cat << 'GH_AW_PROMPT_6dbb980812932a6d_EOF'
           <system>
-          GH_AW_PROMPT_0ff96c33a610e66e_EOF
+          GH_AW_PROMPT_6dbb980812932a6d_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_0ff96c33a610e66e_EOF'
+          cat << 'GH_AW_PROMPT_6dbb980812932a6d_EOF'
           <safe-output-tools>
           Tools: add_comment, create_pull_request_review_comment(max:10), submit_pull_request_review, reply_to_pull_request_review_comment(max:10), missing_tool, missing_data, noop
           </safe-output-tools>
@@ -305,16 +306,16 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_0ff96c33a610e66e_EOF
+          GH_AW_PROMPT_6dbb980812932a6d_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
           if [ "$GITHUB_EVENT_NAME" = "issue_comment" ] && [ -n "$GH_AW_IS_PR_COMMENT" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review_comment" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review" ]; then
             cat "${RUNNER_TEMP}/gh-aw/prompts/pr_context_prompt.md"
           fi
-          cat << 'GH_AW_PROMPT_0ff96c33a610e66e_EOF'
+          cat << 'GH_AW_PROMPT_6dbb980812932a6d_EOF'
           </system>
           {{#runtime-import .github/agents/code-reviewer.md}}
           {{#runtime-import .github/workflows/reviewer-codex.md}}
-          GH_AW_PROMPT_0ff96c33a610e66e_EOF
+          GH_AW_PROMPT_6dbb980812932a6d_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
@@ -485,10 +486,10 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install Codex CLI
+        run: npm install --ignore-scripts -g @openai/codex@0.88.0
       - name: Install AWF binary
         run: bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.25.28
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code@2.1.98
       - name: Parse integrity filter lists
         id: parse-guard-vars
         env:
@@ -514,9 +515,9 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_00b3ac0d253ec6a5_EOF'
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_765286c405715086_EOF'
           {"add_comment":{"footer":false,"max":1,"target":"${{ env.PR_NUMBER }}"},"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"reply_to_pull_request_review_comment":{"footer":false,"max":10,"target":"${{ env.PR_NUMBER }}"},"report_incomplete":{},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"none","max":1,"target":"${{ env.PR_NUMBER }}"}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_00b3ac0d253ec6a5_EOF
+          GH_AW_SAFE_OUTPUTS_CONFIG_765286c405715086_EOF
       - name: Write Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -755,6 +756,7 @@ jobs:
       - name: Start MCP Gateway
         id: start-mcp-gateway
         env:
+          CODEX_HOME: /tmp/gh-aw/mcp-config
           GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
           GH_AW_SAFE_OUTPUTS_API_KEY: ${{ steps.safe-outputs-start.outputs.api_key }}
           GH_AW_SAFE_OUTPUTS_PORT: ${{ steps.safe-outputs-start.outputs.port }}
@@ -774,14 +776,44 @@ jobs:
           export MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD="524288"
           export DEBUG="*"
           
-          export GH_AW_ENGINE="claude"
+          export GH_AW_ENGINE="codex"
           MCP_GATEWAY_UID=$(id -u 2>/dev/null || echo '0')
           MCP_GATEWAY_GID=$(id -g 2>/dev/null || echo '0')
           DOCKER_SOCK_GID=$(stat -c '%g' /var/run/docker.sock 2>/dev/null || echo '0')
-          export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host --add-host host.docker.internal:127.0.0.1 --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v /var/run/docker.sock:/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e GH_AW_SAFE_OUTPUTS_PORT -e GH_AW_SAFE_OUTPUTS_API_KEY -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.3.0'
+          export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host --add-host host.docker.internal:127.0.0.1 --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v /var/run/docker.sock:/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e GH_AW_SAFE_OUTPUTS_PORT -e GH_AW_SAFE_OUTPUTS_API_KEY -e CODEX_HOME -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.3.0'
           
+          cat > "${RUNNER_TEMP}/gh-aw/mcp-config/config.toml" << GH_AW_MCP_CONFIG_d6e4d8fb2b221864_EOF
+          [history]
+          persistence = "none"
+          
+          [shell_environment_policy]
+          inherit = "core"
+          include_only = ["CODEX_API_KEY", "GH_AW_ASSETS_ALLOWED_EXTS", "GH_AW_ASSETS_BRANCH", "GH_AW_ASSETS_MAX_SIZE_KB", "GH_AW_SAFE_OUTPUTS", "GITHUB_PERSONAL_ACCESS_TOKEN", "GITHUB_REPOSITORY", "GITHUB_SERVER_URL", "HOME", "OPENAI_API_KEY", "PATH"]
+          
+          [mcp_servers.github]
+          user_agent = "codex-reviewer"
+          startup_timeout_sec = 120
+          tool_timeout_sec = 60
+          container = "ghcr.io/github/github-mcp-server:v1.0.2"
+          env = { "GITHUB_HOST" = "$GITHUB_SERVER_URL", "GITHUB_PERSONAL_ACCESS_TOKEN" = "$GH_AW_GITHUB_TOKEN", "GITHUB_READ_ONLY" = "1", "GITHUB_TOOLSETS" = "context,repos,issues,pull_requests" }
+          env_vars = ["GITHUB_HOST", "GITHUB_PERSONAL_ACCESS_TOKEN", "GITHUB_READ_ONLY", "GITHUB_TOOLSETS"]
+          
+          [mcp_servers.safeoutputs]
+          type = "http"
+          url = "http://host.docker.internal:$GH_AW_SAFE_OUTPUTS_PORT"
+          
+          [mcp_servers.safeoutputs.headers]
+          Authorization = "$GH_AW_SAFE_OUTPUTS_API_KEY"
+          
+          [mcp_servers.safeoutputs."guard-policies"]
+          
+          [mcp_servers.safeoutputs."guard-policies".write-sink]
+          accept = ["*"]
+          GH_AW_MCP_CONFIG_d6e4d8fb2b221864_EOF
+          
+          # Generate JSON config for MCP gateway
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_8423668dc4843e3e_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_d6e4d8fb2b221864_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "github": {
@@ -824,115 +856,64 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_8423668dc4843e3e_EOF
+          GH_AW_MCP_CONFIG_d6e4d8fb2b221864_EOF
+          
+          # Sync converter output to writable CODEX_HOME for Codex
+          mkdir -p /tmp/gh-aw/mcp-config
+          cat > "/tmp/gh-aw/mcp-config/config.toml" << GH_AW_CODEX_SHELL_POLICY_93060ca96e8a7a99_EOF
+
+          model_provider = "openai-proxy"
+
+          [model_providers.openai-proxy]
+          name = "OpenAI AWF proxy"
+          base_url = "http://172.30.0.30:10000"
+          env_key = "OPENAI_API_KEY"
+          supports_websockets = false
+          [shell_environment_policy]
+          inherit = "core"
+          include_only = ["CODEX_API_KEY", "GH_AW_ASSETS_ALLOWED_EXTS", "GH_AW_ASSETS_BRANCH", "GH_AW_ASSETS_MAX_SIZE_KB", "GH_AW_SAFE_OUTPUTS", "GITHUB_PERSONAL_ACCESS_TOKEN", "GITHUB_REPOSITORY", "GITHUB_SERVER_URL", "HOME", "OPENAI_API_KEY", "PATH"]
+          GH_AW_CODEX_SHELL_POLICY_93060ca96e8a7a99_EOF
+          awk '
+            BEGIN { skip_openai_proxy = 0 }
+            /^[[:space:]]*model_provider[[:space:]]*=/ { next }
+            /^\[model_providers\.openai-proxy\][[:space:]]*$/ { skip_openai_proxy = 1; next }
+            /^\[/ { skip_openai_proxy = 0 }
+            !skip_openai_proxy { print }
+          ' "${RUNNER_TEMP}/gh-aw/mcp-config/config.toml" >> "/tmp/gh-aw/mcp-config/config.toml"
+          chmod 600 "/tmp/gh-aw/mcp-config/config.toml"
+          mkdir -p "${CODEX_HOME}"
+          if [ "/tmp/gh-aw/mcp-config/config.toml" != "${CODEX_HOME}/config.toml" ]; then cp "/tmp/gh-aw/mcp-config/config.toml" "${CODEX_HOME}/config.toml"; fi
+          chmod 600 "${CODEX_HOME}/config.toml"
       - name: Clean git credentials
         continue-on-error: true
         run: bash "${RUNNER_TEMP}/gh-aw/actions/clean_git_credentials.sh"
-      - name: Execute Claude Code CLI
+      - name: Execute Codex CLI
         id: agentic_execution
-        # Allowed tools (sorted):
-        # - Bash
-        # - BashOutput
-        # - Edit
-        # - ExitPlanMode
-        # - Glob
-        # - Grep
-        # - KillBash
-        # - LS
-        # - MultiEdit
-        # - NotebookEdit
-        # - NotebookRead
-        # - Read
-        # - Task
-        # - TodoWrite
-        # - Write
-        # - mcp__github__download_workflow_run_artifact
-        # - mcp__github__get_code_scanning_alert
-        # - mcp__github__get_commit
-        # - mcp__github__get_dependabot_alert
-        # - mcp__github__get_discussion
-        # - mcp__github__get_discussion_comments
-        # - mcp__github__get_file_contents
-        # - mcp__github__get_job_logs
-        # - mcp__github__get_label
-        # - mcp__github__get_latest_release
-        # - mcp__github__get_me
-        # - mcp__github__get_notification_details
-        # - mcp__github__get_pull_request
-        # - mcp__github__get_pull_request_comments
-        # - mcp__github__get_pull_request_diff
-        # - mcp__github__get_pull_request_files
-        # - mcp__github__get_pull_request_review_comments
-        # - mcp__github__get_pull_request_reviews
-        # - mcp__github__get_pull_request_status
-        # - mcp__github__get_release_by_tag
-        # - mcp__github__get_secret_scanning_alert
-        # - mcp__github__get_tag
-        # - mcp__github__get_workflow_run
-        # - mcp__github__get_workflow_run_logs
-        # - mcp__github__get_workflow_run_usage
-        # - mcp__github__issue_read
-        # - mcp__github__list_branches
-        # - mcp__github__list_code_scanning_alerts
-        # - mcp__github__list_commits
-        # - mcp__github__list_dependabot_alerts
-        # - mcp__github__list_discussion_categories
-        # - mcp__github__list_discussions
-        # - mcp__github__list_issue_types
-        # - mcp__github__list_issues
-        # - mcp__github__list_label
-        # - mcp__github__list_notifications
-        # - mcp__github__list_pull_requests
-        # - mcp__github__list_releases
-        # - mcp__github__list_secret_scanning_alerts
-        # - mcp__github__list_starred_repositories
-        # - mcp__github__list_tags
-        # - mcp__github__list_workflow_jobs
-        # - mcp__github__list_workflow_run_artifacts
-        # - mcp__github__list_workflow_runs
-        # - mcp__github__list_workflows
-        # - mcp__github__pull_request_read
-        # - mcp__github__search_code
-        # - mcp__github__search_issues
-        # - mcp__github__search_orgs
-        # - mcp__github__search_pull_requests
-        # - mcp__github__search_repositories
-        # - mcp__github__search_users
-        # - mcp__safeoutputs
-        timeout-minutes: 20
         run: |
           set -o pipefail
-          touch /tmp/gh-aw/agent-step-summary.md
+          mkdir -p "$CODEX_HOME/logs" && touch /tmp/gh-aw/agent-step-summary.md
           (umask 177 && touch /tmp/gh-aw/agent-stdio.log)
           # shellcheck disable=SC1003
-          sudo -E awf --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" --tty --env-all --exclude-env ANTHROPIC_API_KEY --exclude-env GITHUB_MCP_SERVER_TOKEN --exclude-env MCP_GATEWAY_API_KEY --allow-domains '*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.playwright.dev,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com' --log-level info --proxy-logs-dir /tmp/gh-aw/sandbox/firewall/logs --audit-dir /tmp/gh-aw/sandbox/firewall/audit --enable-host-access --allow-host-ports 80,443,8080 --image-tag 0.25.28,squid=sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474,agent=sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a,api-proxy=sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb,cli-proxy=sha256:fdf310e4678ce58d248c466b89399e9680a3003038fd19322c388559016aaac7 --skip-pull --enable-api-proxy --anthropic-api-target "${{ vars.LITELLM_BASE_URL }}" \
-            -- /bin/bash -c 'export PATH="$(find /opt/hostedtoolcache -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && claude --print --no-chrome --max-turns 120 --mcp-config "${{ runner.temp }}/gh-aw/mcp-config/mcp-servers.json" --allowed-tools Bash,BashOutput,Edit,ExitPlanMode,Glob,Grep,KillBash,LS,MultiEdit,NotebookEdit,NotebookRead,Read,Task,TodoWrite,Write,mcp__github__download_workflow_run_artifact,mcp__github__get_code_scanning_alert,mcp__github__get_commit,mcp__github__get_dependabot_alert,mcp__github__get_discussion,mcp__github__get_discussion_comments,mcp__github__get_file_contents,mcp__github__get_job_logs,mcp__github__get_label,mcp__github__get_latest_release,mcp__github__get_me,mcp__github__get_notification_details,mcp__github__get_pull_request,mcp__github__get_pull_request_comments,mcp__github__get_pull_request_diff,mcp__github__get_pull_request_files,mcp__github__get_pull_request_review_comments,mcp__github__get_pull_request_reviews,mcp__github__get_pull_request_status,mcp__github__get_release_by_tag,mcp__github__get_secret_scanning_alert,mcp__github__get_tag,mcp__github__get_workflow_run,mcp__github__get_workflow_run_logs,mcp__github__get_workflow_run_usage,mcp__github__issue_read,mcp__github__list_branches,mcp__github__list_code_scanning_alerts,mcp__github__list_commits,mcp__github__list_dependabot_alerts,mcp__github__list_discussion_categories,mcp__github__list_discussions,mcp__github__list_issue_types,mcp__github__list_issues,mcp__github__list_label,mcp__github__list_notifications,mcp__github__list_pull_requests,mcp__github__list_releases,mcp__github__list_secret_scanning_alerts,mcp__github__list_starred_repositories,mcp__github__list_tags,mcp__github__list_workflow_jobs,mcp__github__list_workflow_run_artifacts,mcp__github__list_workflow_runs,mcp__github__list_workflows,mcp__github__pull_request_read,mcp__github__search_code,mcp__github__search_issues,mcp__github__search_orgs,mcp__github__search_pull_requests,mcp__github__search_repositories,mcp__github__search_users,mcp__safeoutputs --debug-file /tmp/gh-aw/agent-stdio.log --verbose --permission-mode bypassPermissions --output-format stream-json "$(cat /tmp/gh-aw/aw-prompts/prompt.txt)"' 2>&1 | tee -a /tmp/gh-aw/agent-stdio.log
+          sudo -E awf --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" --env-all --exclude-env CODEX_API_KEY --exclude-env GITHUB_MCP_SERVER_TOKEN --exclude-env MCP_GATEWAY_API_KEY --exclude-env OPENAI_API_KEY --allow-domains '*.githubusercontent.com,172.30.0.1,api.openai.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,openai.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,ppa.launchpad.net,raw.githubusercontent.com,s.symcb.com,s.symcd.com,security.ubuntu.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com' --log-level info --proxy-logs-dir /tmp/gh-aw/sandbox/firewall/logs --audit-dir /tmp/gh-aw/sandbox/firewall/audit --enable-host-access --allow-host-ports 80,443,8080 --image-tag 0.25.28,squid=sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474,agent=sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a,api-proxy=sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb,cli-proxy=sha256:fdf310e4678ce58d248c466b89399e9680a3003038fd19322c388559016aaac7 --skip-pull --enable-api-proxy --openai-api-target "${{ vars.LITELLM_BASE_URL }}" --openai-api-base-path /v1 \
+            -- /bin/bash -c 'export PATH="$(find /opt/hostedtoolcache -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && INSTRUCTION="$(cat /tmp/gh-aw/aw-prompts/prompt.txt)" && codex ${GH_AW_MODEL_AGENT_CODEX:+-c model="$GH_AW_MODEL_AGENT_CODEX" }exec -c web_search="disabled" -c fetch="disabled" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -c model=llm-gateway/gpt-5.4 -c model_context_window=1050000 -c features.plugins=false -c features.apps=false -c model_supports_reasoning_summaries=true -c model_reasoning_effort=medium -c model_reasoning_summary=auto "$INSTRUCTION"' 2>&1 | tee -a /tmp/gh-aw/agent-stdio.log
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-          ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
-          ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/gpt-5.4[1m]
-          ANTHROPIC_MODEL: opus[1m]
-          BASH_DEFAULT_TIMEOUT_MS: 60000
-          BASH_MAX_TIMEOUT_MS: 60000
-          DISABLE_BUG_COMMAND: 1
-          DISABLE_ERROR_REPORTING: 1
-          DISABLE_TELEMETRY: 1
-          ENABLE_PROMPT_CACHING_1H: 1
-          GH_AW_MAX_TURNS: 120
-          GH_AW_MCP_CONFIG: ${{ runner.temp }}/gh-aw/mcp-config/mcp-servers.json
+          CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          CODEX_HOME: /tmp/gh-aw/mcp-config
+          GH_AW_MCP_CONFIG: ${{ runner.temp }}/gh-aw/mcp-config/config.toml
+          GH_AW_MODEL_AGENT_CODEX: gpt-5.4
           GH_AW_PHASE: agent
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
           GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
           GH_AW_VERSION: v0.71.1
           GITHUB_AW: true
           GITHUB_STEP_SUMMARY: /tmp/gh-aw/agent-step-summary.md
-          GITHUB_WORKSPACE: ${{ github.workspace }}
           GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
           GIT_AUTHOR_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: github-actions[bot]
-          MCP_TIMEOUT: 120000
-          MCP_TOOL_TIMEOUT: 60000
+          OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
+          RUST_LOG: trace,hyper_util=info,mio=info,reqwest=info,os_info=info,codex_otel=warn,codex_core=debug,ocodex_exec=debug
       - name: Configure Git credentials
         env:
           REPO_NAME: ${{ github.repository }}
@@ -986,7 +967,7 @@ jobs:
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
-          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.playwright.dev,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
+          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,172.30.0.1,api.openai.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,openai.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,ppa.launchpad.net,raw.githubusercontent.com,s.symcb.com,s.symcd.com,security.ubuntu.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
         with:
@@ -1004,7 +985,7 @@ jobs:
           script: |
             const { setupGlobals } = require('${{ runner.temp }}/gh-aw/actions/setup_globals.cjs');
             setupGlobals(core, github, context, exec, io, getOctokit);
-            const { main } = require('${{ runner.temp }}/gh-aw/actions/parse_claude_log.cjs');
+            const { main } = require('${{ runner.temp }}/gh-aw/actions/parse_codex_log.cjs');
             await main();
       - name: Parse MCP Gateway logs for step summary
         if: always()
@@ -1055,6 +1036,8 @@ jobs:
           name: agent
           path: |
             /tmp/gh-aw/aw-prompts/prompt.txt
+            /tmp/gh-aw/mcp-config/logs/
+            /tmp/gh-aw/redacted-urls.log
             /tmp/gh-aw/mcp-logs/
             /tmp/gh-aw/proxy-logs/
             !/tmp/gh-aw/proxy-logs/proxy-tls/
@@ -1187,7 +1170,7 @@ jobs:
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_WORKFLOW_ID: "reviewer-codex"
           GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS: "168"
-          GH_AW_ENGINE_ID: "claude"
+          GH_AW_ENGINE_ID: "codex"
           GH_AW_SECRET_VERIFICATION_RESULT: ${{ needs.activation.outputs.secret_verification_result }}
           GH_AW_CHECKOUT_PR_SUCCESS: ${{ needs.agent.outputs.checkout_pr_success }}
           GH_AW_LOCKDOWN_CHECK_FAILED: ${{ needs.activation.outputs.lockdown_check_failed }}
@@ -1248,8 +1231,6 @@ jobs:
         run: |
           rm -rf /tmp/gh-aw/sandbox/firewall/logs
           rm -rf /tmp/gh-aw/sandbox/firewall/audit
-      - name: Download container images
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.25.28@sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a ghcr.io/github/gh-aw-firewall/api-proxy:0.25.28@sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb ghcr.io/github/gh-aw-firewall/squid:0.25.28@sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474
       - name: Check if detection needed
         id: detection_guard
         if: always()
@@ -1307,56 +1288,112 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install Codex CLI
+        run: npm install --ignore-scripts -g @openai/codex@0.88.0
       - name: Install AWF binary
         run: bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.25.28
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code@2.1.98
-      - name: Execute Claude Code CLI
+      - name: Download container images
+        run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.25.28@sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a ghcr.io/github/gh-aw-firewall/api-proxy:0.25.28@sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb ghcr.io/github/gh-aw-firewall/squid:0.25.28@sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474 ghcr.io/github/gh-aw-mcpg:v0.3.0
+      - name: Start MCP Gateway
+        id: start-mcp-gateway
+        env:
+          CODEX_HOME: /tmp/gh-aw/mcp-config
+        run: |
+          set -eo pipefail
+          mkdir -p "${RUNNER_TEMP}/gh-aw/mcp-config"
+          
+          # Export gateway environment variables for MCP config and gateway script
+          export MCP_GATEWAY_PORT="8080"
+          export MCP_GATEWAY_DOMAIN="host.docker.internal"
+          MCP_GATEWAY_API_KEY=$(openssl rand -base64 45 | tr -d '/+=')
+          echo "::add-mask::${MCP_GATEWAY_API_KEY}"
+          export MCP_GATEWAY_API_KEY
+          export MCP_GATEWAY_PAYLOAD_DIR="/tmp/gh-aw/mcp-payloads"
+          mkdir -p "${MCP_GATEWAY_PAYLOAD_DIR}"
+          export MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD="524288"
+          export DEBUG="*"
+          
+          export GH_AW_ENGINE="codex"
+          MCP_GATEWAY_UID=$(id -u 2>/dev/null || echo '0')
+          MCP_GATEWAY_GID=$(id -g 2>/dev/null || echo '0')
+          DOCKER_SOCK_GID=$(stat -c '%g' /var/run/docker.sock 2>/dev/null || echo '0')
+          export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host --add-host host.docker.internal:127.0.0.1 --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v /var/run/docker.sock:/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e CODEX_HOME -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.3.0'
+          
+          cat > "${RUNNER_TEMP}/gh-aw/mcp-config/config.toml" << GH_AW_MCP_CONFIG_f4c30276579b8e12_EOF
+          [history]
+          persistence = "none"
+          
+          [shell_environment_policy]
+          inherit = "core"
+          include_only = ["CODEX_API_KEY", "HOME", "OPENAI_API_KEY", "PATH"]
+          GH_AW_MCP_CONFIG_f4c30276579b8e12_EOF
+          
+          # Generate JSON config for MCP gateway
+          GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
+          cat << GH_AW_MCP_CONFIG_97ac32bc24f0aced_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          {
+            "mcpServers": {
+            },
+            "gateway": {
+              "port": $MCP_GATEWAY_PORT,
+              "domain": "${MCP_GATEWAY_DOMAIN}",
+              "apiKey": "${MCP_GATEWAY_API_KEY}",
+              "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
+            }
+          }
+          GH_AW_MCP_CONFIG_97ac32bc24f0aced_EOF
+          
+          # Sync converter output to writable CODEX_HOME for Codex
+          mkdir -p /tmp/gh-aw/mcp-config
+          cat > "/tmp/gh-aw/mcp-config/config.toml" << GH_AW_CODEX_SHELL_POLICY_836b2931ea24173f_EOF
+          model_provider = "openai-proxy"
+          [model_providers.openai-proxy]
+          name = "OpenAI AWF proxy"
+          base_url = "http://172.30.0.30:10000"
+          env_key = "OPENAI_API_KEY"
+          supports_websockets = false
+          [shell_environment_policy]
+          inherit = "core"
+          include_only = ["CODEX_API_KEY", "HOME", "OPENAI_API_KEY", "PATH"]
+          GH_AW_CODEX_SHELL_POLICY_836b2931ea24173f_EOF
+          awk '
+            BEGIN { skip_openai_proxy = 0 }
+            /^[[:space:]]*model_provider[[:space:]]*=/ { next }
+            /^\[model_providers\.openai-proxy\][[:space:]]*$/ { skip_openai_proxy = 1; next }
+            /^\[/ { skip_openai_proxy = 0 }
+            !skip_openai_proxy { print }
+          ' "${RUNNER_TEMP}/gh-aw/mcp-config/config.toml" >> "/tmp/gh-aw/mcp-config/config.toml"
+          chmod 600 "/tmp/gh-aw/mcp-config/config.toml"
+          mkdir -p "${CODEX_HOME}"
+          if [ "/tmp/gh-aw/mcp-config/config.toml" != "${CODEX_HOME}/config.toml" ]; then cp "/tmp/gh-aw/mcp-config/config.toml" "${CODEX_HOME}/config.toml"; fi
+          chmod 600 "${CODEX_HOME}/config.toml"
+      - name: Execute Codex CLI
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         id: detection_agentic_execution
-        # Allowed tools (sorted):
-        # - Bash
-        # - BashOutput
-        # - ExitPlanMode
-        # - Glob
-        # - Grep
-        # - KillBash
-        # - LS
-        # - NotebookRead
-        # - Read
-        # - Task
-        # - TodoWrite
-        timeout-minutes: 20
         run: |
           set -o pipefail
-          touch /tmp/gh-aw/agent-step-summary.md
+          mkdir -p "$CODEX_HOME/logs" && touch /tmp/gh-aw/agent-step-summary.md
           (umask 177 && touch /tmp/gh-aw/threat-detection/detection.log)
           # shellcheck disable=SC1003
-          sudo -E awf --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" --tty --env-all --exclude-env ANTHROPIC_API_KEY --allow-domains '*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.playwright.dev,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com' --log-level info --proxy-logs-dir /tmp/gh-aw/sandbox/firewall/logs --audit-dir /tmp/gh-aw/sandbox/firewall/audit --enable-host-access --allow-host-ports 80,443,8080 --image-tag 0.25.28,squid=sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474,agent=sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a,api-proxy=sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb,cli-proxy=sha256:fdf310e4678ce58d248c466b89399e9680a3003038fd19322c388559016aaac7 --skip-pull --enable-api-proxy --anthropic-api-target "${{ vars.LITELLM_BASE_URL }}" \
-            -- /bin/bash -c 'export PATH="$(find /opt/hostedtoolcache -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && claude --print --no-chrome --allowed-tools Bash,BashOutput,ExitPlanMode,Glob,Grep,KillBash,LS,NotebookRead,Read,Task,TodoWrite --debug-file /tmp/gh-aw/threat-detection/detection.log --verbose --permission-mode bypassPermissions --output-format stream-json "$(cat /tmp/gh-aw/aw-prompts/prompt.txt)"' 2>&1 | tee -a /tmp/gh-aw/threat-detection/detection.log
+          sudo -E awf --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" --env-all --exclude-env CODEX_API_KEY --exclude-env OPENAI_API_KEY --allow-domains 172.30.0.1,api.openai.com,host.docker.internal,openai.com --log-level info --proxy-logs-dir /tmp/gh-aw/sandbox/firewall/logs --audit-dir /tmp/gh-aw/sandbox/firewall/audit --enable-host-access --allow-host-ports 80,443,8080 --image-tag 0.25.28,squid=sha256:844c18280f82cd1b06345eb2f4e91966b34185bfc51c9f237c3e022e848fb474,agent=sha256:a8834e285807654bf680154faa710d43fe4365a0868142f5c20e48c85e137a7a,api-proxy=sha256:93290f2393752252911bd7c39a047f776c0b53063575e7bde4e304962a9a61cb,cli-proxy=sha256:fdf310e4678ce58d248c466b89399e9680a3003038fd19322c388559016aaac7 --skip-pull --enable-api-proxy --openai-api-target "${{ vars.LITELLM_BASE_URL }}" --openai-api-base-path /v1 \
+            -- /bin/bash -c 'export PATH="$(find /opt/hostedtoolcache -maxdepth 4 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')$PATH"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true && INSTRUCTION="$(cat /tmp/gh-aw/aw-prompts/prompt.txt)" && codex ${GH_AW_MODEL_DETECTION_CODEX:+-c model="$GH_AW_MODEL_DETECTION_CODEX" }exec -c web_search="disabled" -c fetch="disabled" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -c model=llm-gateway/gpt-5.4 -c model_context_window=1050000 -c features.plugins=false -c features.apps=false -c model_supports_reasoning_summaries=true -c model_reasoning_effort=medium -c model_reasoning_summary=auto "$INSTRUCTION"' 2>&1 | tee -a /tmp/gh-aw/threat-detection/detection.log
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-          ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
-          ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/gpt-5.4[1m]
-          ANTHROPIC_MODEL: opus[1m]
-          BASH_DEFAULT_TIMEOUT_MS: 60000
-          BASH_MAX_TIMEOUT_MS: 60000
-          DISABLE_BUG_COMMAND: 1
-          DISABLE_ERROR_REPORTING: 1
-          DISABLE_TELEMETRY: 1
-          ENABLE_PROMPT_CACHING_1H: 1
+          CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          CODEX_HOME: /tmp/gh-aw/mcp-config
+          GH_AW_MCP_CONFIG: ${{ runner.temp }}/gh-aw/mcp-config/config.toml
+          GH_AW_MODEL_DETECTION_CODEX: gpt-5.4
           GH_AW_PHASE: detection
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
           GH_AW_VERSION: v0.71.1
           GITHUB_AW: true
           GITHUB_STEP_SUMMARY: /tmp/gh-aw/agent-step-summary.md
-          GITHUB_WORKSPACE: ${{ github.workspace }}
           GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
           GIT_AUTHOR_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: github-actions[bot]
-          MCP_TIMEOUT: 120000
-          MCP_TOOL_TIMEOUT: 60000
+          OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
+          RUST_LOG: trace,hyper_util=info,mio=info,reqwest=info,os_info=info,codex_otel=warn,codex_core=debug,ocodex_exec=debug
       - name: Upload threat detection log
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -1472,9 +1509,9 @@ jobs:
       GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
       GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
       GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens }}
-      GH_AW_ENGINE_ID: "claude"
-      GH_AW_ENGINE_MODEL: "opus[1m]"
-      GH_AW_ENGINE_VERSION: "2.1.98"
+      GH_AW_ENGINE_ID: "codex"
+      GH_AW_ENGINE_MODEL: "gpt-5.4"
+      GH_AW_ENGINE_VERSION: "0.88.0"
       GH_AW_WORKFLOW_ID: "reviewer-codex"
       GH_AW_WORKFLOW_NAME: "Codex Reviewer"
     outputs:
@@ -1522,7 +1559,7 @@ jobs:
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.playwright.dev,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
+          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,172.30.0.1,api.openai.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,elastic.litellm-prod.ai,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,openai.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,ppa.launchpad.net,raw.githubusercontent.com,s.symcb.com,s.symcd.com,security.ubuntu.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
           GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"footer\":false,\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"},\"create_pull_request_review_comment\":{\"max\":10,\"side\":\"RIGHT\",\"target\":\"${{ env.PR_NUMBER }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"reply_to_pull_request_review_comment\":{\"footer\":false,\"max\":10,\"target\":\"${{ env.PR_NUMBER }}\"},\"report_incomplete\":{},\"submit_pull_request_review\":{\"allowed_events\":[\"COMMENT\"],\"footer\":\"none\",\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"}}"

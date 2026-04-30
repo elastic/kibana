@@ -18,38 +18,43 @@ resources:
 imports:
   - .github/agents/code-reviewer.md
 engine:
-  id: claude
-  version: "2.1.98"
-  model: opus[1m]
-  max-turns: 120
-  # args:
-  #   - -c
-  #   - model=llm-gateway/gpt-5.3-codex
-  #   - -c
-  #   - model_context_window=1050000
-  #   # Disable plugins and apps to remove context bloat
-  #   - -c
-  #   - features.plugins=false
-  #   - -c
-  #   - features.apps=false
-  #   # Codex disables settings for unrecognized model names like the llm-gateway/ prefix.
-  #   # Force reasoning on
-  #   - -c
-  #   - model_supports_reasoning_summaries=true
-  #   # Reasoning effort: minimal | low | medium | high.
-  #   - -c
-  #   - model_reasoning_effort=medium
-  #   # Reasoning summary verbosity: auto | concise | detailed | none.
-  #   - -c
-  #   - model_reasoning_summary=auto
+  # id: claude
+  # version: "2.1.98"
+  # model: opus[1m]
+  # max-turns: 120
+  # env:
+  #   ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+  #   ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
+  #   ENABLE_PROMPT_CACHING_1H: "1"
+  #   ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/gpt-5.4[1m]
+  
+  id: codex
+  version: "0.88.0"
+  model: gpt-5.4
+  args:
+    - -c
+    - model=llm-gateway/gpt-5.4
+    - -c
+    - model_context_window=1050000
+    # Disable plugins and apps to remove context bloat
+    - -c
+    - features.plugins=false
+    - -c
+    - features.apps=false
+    # Codex disables settings for unrecognized model names like the llm-gateway/ prefix.
+    # Force reasoning on
+    - -c
+    - model_supports_reasoning_summaries=true
+    # Reasoning effort: minimal | low | medium | high.
+    - -c
+    - model_reasoning_effort=medium
+    # Reasoning summary verbosity: auto | concise | detailed | none.
+    - -c
+    - model_reasoning_summary=auto
   env:
-    # CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    # OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    # OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
-    ENABLE_PROMPT_CACHING_1H: "1"
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/gpt-5.4[1m]
+    CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
