@@ -13,7 +13,7 @@ import {
   SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { DistributiveOmit } from '@elastic/eui';
+import type { DistributiveOmit } from '@elastic/eui';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;

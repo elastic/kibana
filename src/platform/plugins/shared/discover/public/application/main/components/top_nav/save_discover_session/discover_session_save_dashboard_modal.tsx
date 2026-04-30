@@ -17,7 +17,7 @@ import {
   SavedObjectSaveModalDashboard,
 } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 export type DiscoverSessionSaveDashboardModalSaveProps = OnSaveProps & {
   addToLibrary?: boolean;
