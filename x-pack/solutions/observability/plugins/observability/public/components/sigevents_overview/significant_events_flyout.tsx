@@ -57,9 +57,9 @@ export interface SignificantEventsFlyoutProps {
 export function SignificantEventsFlyout({
   onClose,
   events,
-  healthyEntities = 24,
-  affectedSystems = 20,
-  atRiskCount = 4,
+  healthyEntities,
+  affectedSystems,
+  atRiskCount,
   summaryDescription,
   recommendationSteps,
   onAttachEvent,
@@ -126,7 +126,7 @@ export function SignificantEventsFlyout({
                     { defaultMessage: 'Healthy entities' }
                   )}
                   iconType="alert"
-                  value={String(healthyEntities)}
+                  value={healthyEntities != null ? String(healthyEntities) : '—'}
                   color={euiTheme.colors.backgroundLightSuccess}
                   iconColor={euiTheme.colors.severity.success}
                 />
@@ -138,7 +138,7 @@ export function SignificantEventsFlyout({
                     { defaultMessage: 'Affected systems' }
                   )}
                   iconType="indexOpen"
-                  value={String(affectedSystems)}
+                  value={affectedSystems != null ? String(affectedSystems) : '—'}
                   color={euiTheme.colors.backgroundLightDanger}
                   iconColor={euiTheme.colors.severity.danger}
                 />
@@ -150,7 +150,7 @@ export function SignificantEventsFlyout({
                     { defaultMessage: 'At risk' }
                   )}
                   iconType="clock"
-                  value={String(atRiskCount)}
+                  value={atRiskCount != null ? String(atRiskCount) : '—'}
                   color={euiTheme.colors.backgroundLightRisk}
                   iconColor={euiTheme.colors.severity.risk}
                 />
@@ -283,7 +283,7 @@ export function SignificantEventsFlyout({
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
-                            data-test-subj="o11ySignificantEventsFlyoutButton"
+                            data-test-subj="o11ySignificantEventsFlyoutMoreActionsButton"
                             iconType="boxesVertical"
                             display="empty"
                             size="xs"

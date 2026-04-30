@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-/**
- * NOTE: This suite runs sequentially (not alongside `parallel_tests/`) because it
- * toggles the `observability.sigeventsOverviewEnabled` feature flag, which is
- * server-wide. Placing it in `parallel_tests/` would cause the flag change to
- * spill into other parallel workers.
- *
- * Tests run in order: first with flag enabled, then with flag disabled.
- */
-
 import { apm, timerange } from '@kbn/synthtrace-client';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-
-const SIGEVENTS_FEATURE_FLAG = 'observability.sigeventsOverviewEnabled';
-const sigEventsFeatureFlagInitalValue = true;
 
 const SIGEVENTS_EVENTS_INDEX = 'sigevents-events-ms';
 const SIGEVENTS_DETECTIONS_INDEX = 'sigevents-detections-ms';
@@ -33,30 +21,255 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterEach(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          [SIGEVENTS_FEATURE_FLAG]: sigEventsFeatureFlagInitalValue,
-        },
+    test.afterAll(async ({ esClient, apmSynthtraceEsClient }) => {
+      await esClient.deleteByQuery({
+        index: SIGEVENTS_EVENTS_INDEX,
+        refresh: true,
+        query: { prefix: { event_id: 'scout-event-' } },
       });
+      await esClient.deleteByQuery({
+        index: SIGEVENTS_DETECTIONS_INDEX,
+        refresh: true,
+        query: { prefix: { detection_id: 'scout-det-' } },
+      });
+      await apmSynthtraceEsClient.clean();
     });
 
-    test('shows default overview when flag is disabled', async ({ page, kbnUrl, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          [SIGEVENTS_FEATURE_FLAG]: false,
-        },
+    test('no critical events — shows healthy overview with lower priority events', async ({
+      page,
+      kbnUrl,
+      esClient,
+      apmSynthtraceEsClient,
+    }) => {
+      await test.step('seed test data — acknowledged events only (no promoted)', async () => {
+        const now = new Date();
+        const timestamp = now.toISOString();
+
+        // Remove any promoted events so the page renders in healthy state
+        await esClient.updateByQuery({
+          index: SIGEVENTS_EVENTS_INDEX,
+          refresh: true,
+          script: {
+            source: "ctx._source.verdict = 'demoted'",
+            lang: 'painless',
+          },
+          query: { term: { verdict: 'promoted' } },
+        });
+
+        // Seed acknowledged events (lower priority)
+        const acknowledgedEventDocs = [
+          {
+            '@timestamp': timestamp,
+            event_id: 'scout-event-stderr-output',
+            verdict_id: 'scout-verdict-stderr-output',
+            discovery_id: 'scout-disc-stderr-output',
+            discovery_slug: 'multi-service__stderr-output-across-services',
+            verdict: 'acknowledged',
+            title: 'multi-service — elevated stderr output',
+            summary:
+              'Stderr output across services shifted at 19:28Z with high sustained volume (2031 alerts). Direct keyword search for stderr text returned no hits in the same stream.',
+            root_cause:
+              'Multiple services are emitting more stderr-formatted output, consistent with increased exception/stack-trace style logging.',
+            rule_names: ['Stderr output across services'],
+            stream_names: ['logs.otel'],
+            cause_kis: [],
+            evidences: [],
+            criticality: 40,
+            impact: 'medium',
+            recommended_action: 'investigate',
+            recommendations: [
+              'Query logs.otel using a stats aggregation on resource.attributes.app to identify which services are generating the increased output volume.',
+              'Inspect log level distribution in logs.otel over the last hour using severity_text fields.',
+            ],
+            last_reviewed_at: timestamp,
+          },
+          {
+            '@timestamp': timestamp,
+            event_id: 'scout-event-otel-retries',
+            verdict_id: 'scout-verdict-otel-retries',
+            discovery_id: 'scout-disc-otel-retries',
+            discovery_slug: 'otel-collector__otel-exporter-retry-activity',
+            verdict: 'acknowledged',
+            title: 'otel-collector — OTLP exporter retries',
+            summary:
+              'OTel exporter retry activity spiked at 19:28Z (3 alerts). Dependencies in this environment show multiple services exporting to the otel-collector.',
+            root_cause:
+              'Telemetry exporters are retrying because the otel-collector endpoint is unavailable to clients (transport-level connection failures).',
+            rule_names: ['OTel exporter retry activity'],
+            stream_names: ['logs.otel'],
+            dependency_edges: [
+              {
+                exposure: 'exposed',
+                protocol: 'grpc',
+                source: 'recommendation',
+                target: 'otel-collector',
+              },
+            ],
+            cause_kis: [],
+            evidences: [],
+            criticality: 30,
+            impact: 'low',
+            recommended_action: 'monitor',
+            recommendations: [
+              'Verify otel-collector pod health and readiness in the otel-demo namespace.',
+              'Inspect recommendation service logs for StatusCode.UNAVAILABLE export errors.',
+            ],
+            last_reviewed_at: timestamp,
+          },
+        ];
+
+        await esClient.bulk({
+          refresh: 'wait_for',
+          operations: acknowledgedEventDocs.flatMap((doc) => [
+            { index: { _index: SIGEVENTS_EVENTS_INDEX } },
+            doc,
+          ]),
+        });
+
+        // Seed detections (non-superseded so counts appear)
+        const detectionDocs = [
+          {
+            '@timestamp': timestamp,
+            detection_id: 'scout-det-stderr',
+            parent_detection_id: '',
+            rule_name: 'Stderr output across services',
+            rule_uuid: '4d80d275-02b7-5503-8764-e72663b75879',
+            stream: 'logs.otel',
+            alert_count: 2065,
+          },
+          {
+            '@timestamp': timestamp,
+            detection_id: 'scout-det-otel-retry',
+            parent_detection_id: '',
+            rule_name: 'OTel exporter retry activity',
+            rule_uuid: 'e2f233d1-c56e-51af-8b05-4422b645a8d4',
+            stream: 'logs.otel',
+            alert_count: 3,
+          },
+        ];
+
+        await esClient.bulk({
+          refresh: 'wait_for',
+          operations: detectionDocs.flatMap((doc) => [
+            { index: { _index: SIGEVENTS_DETECTIONS_INDEX } },
+            doc,
+          ]),
+        });
+
+        // Generate APM traces so service count is populated
+        const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
+        const traceData = timerange(fifteenMinutesAgo, Date.now())
+          .interval('1m')
+          .rate(1)
+          .generator((ts) => [
+            apm
+              .service({
+                name: 'payment',
+                environment: 'production',
+                agentName: 'java',
+              })
+              .instance('payment-1')
+              .transaction({ transactionName: 'POST /charge' })
+              .timestamp(ts)
+              .duration(150)
+              .success(),
+            apm
+              .service({
+                name: 'frontend',
+                environment: 'production',
+                agentName: 'nodejs',
+              })
+              .instance('frontend-1')
+              .transaction({ transactionName: 'GET /' })
+              .timestamp(ts)
+              .duration(100)
+              .success(),
+            apm
+              .service({
+                name: 'checkout',
+                environment: 'production',
+                agentName: 'nodejs',
+              })
+              .instance('checkout-1')
+              .transaction({ transactionName: 'POST /checkout' })
+              .timestamp(ts)
+              .duration(200)
+              .success(),
+          ]);
+
+        await apmSynthtraceEsClient.index(traceData);
       });
 
-      await page.goto(kbnUrl.get('/app/observability/overview'));
+      await test.step('navigate to overview', async () => {
+        await page.goto(kbnUrl.get('/app/observability/overview'));
+      });
 
-      await expect(page.getByTestId('obltOverviewPageHeader')).toBeVisible();
+      await test.step('verify healthy state — no critical events header', async () => {
+        await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
+        await expect(page.getByTestId('sigeventsOverview')).toBeVisible();
+        await expect(page.getByTestId('sigeventsOverviewStatusHeader')).toBeVisible();
+        await expect(
+          page.getByRole('heading', { name: 'You have no critical significant events' })
+        ).toBeVisible();
+      });
+
+      await test.step('verify healthy metrics are shown', async () => {
+        await expect(page.getByTestId('sigeventsOverviewHealthyMetrics')).toBeVisible();
+      });
+
+      await test.step('verify lower priority events table is shown', async () => {
+        await expect(page.getByTestId('sigeventsLowerPriorityEvents')).toBeVisible();
+        await expect(
+          page.getByRole('heading', { name: 'Lower priority items to review' })
+        ).toBeVisible();
+      });
+
+      await test.step('click on an event to open the flyout', async () => {
+        const eventLink = page.getByRole('link', {
+          name: 'multi-service — elevated stderr output',
+        });
+        await expect(eventLink).toBeVisible();
+        await eventLink.click();
+
+        await expect(page.getByTestId('eventDetailFlyout')).toBeVisible();
+        await expect(
+          page.getByRole('heading', { name: 'multi-service — elevated stderr output' })
+        ).toBeVisible();
+      });
+
+      await test.step('close the flyout', async () => {
+        await page.getByTestId('eventDetailFlyout').getByRole('button', { name: 'Close' }).click();
+        await expect(page.getByTestId('eventDetailFlyout')).toBeHidden();
+      });
+
+      await test.step('click Go to Significant events and verify KIs page', async () => {
+        await page.getByTestId('sigeventsViewAllKnowledgeIndicators').click();
+        await page.waitForURL('**/app/streams/_discovery/knowledge_indicators');
+        await expect(page).toHaveURL(/\/app\/streams\/_discovery\/knowledge_indicators/);
+      });
+
+      await test.step('restore promoted events', async () => {
+        // Restore any events that were demoted during this test
+        await esClient.updateByQuery({
+          index: SIGEVENTS_EVENTS_INDEX,
+          refresh: true,
+          script: {
+            source: "ctx._source.verdict = 'promoted'",
+            lang: 'painless',
+          },
+          query: {
+            bool: {
+              must: [{ term: { verdict: 'demoted' } }],
+              must_not: [{ prefix: { event_id: 'scout-event-' } }],
+            },
+          },
+        });
+      });
     });
 
     test('renders populated overview with seeded data', async ({
       page,
       kbnUrl,
-      apiServices,
       esClient,
       apmSynthtraceEsClient,
     }) => {
@@ -369,13 +582,7 @@ test.describe(
         await apmSynthtraceEsClient.index(traceData);
       });
 
-      await test.step('enable feature flag and navigate', async () => {
-        await apiServices.core.settings({
-          'feature_flags.overrides': {
-            [SIGEVENTS_FEATURE_FLAG]: true,
-          },
-        });
-
+      await test.step('navigate to overview', async () => {
         await page.goto(kbnUrl.get('/app/observability/overview'));
       });
 
@@ -402,20 +609,6 @@ test.describe(
 
       await test.step('verify conversation container renders', async () => {
         await expect(page.getByTestId('obltSigeventsConversation')).toBeVisible();
-      });
-
-      await test.step('clean up seeded data', async () => {
-        await esClient.deleteByQuery({
-          index: SIGEVENTS_EVENTS_INDEX,
-          refresh: true,
-          query: { prefix: { event_id: 'scout-event-' } },
-        });
-        await esClient.deleteByQuery({
-          index: SIGEVENTS_DETECTIONS_INDEX,
-          refresh: true,
-          query: { prefix: { detection_id: 'scout-det-' } },
-        });
-        await apmSynthtraceEsClient.clean();
       });
     });
   }

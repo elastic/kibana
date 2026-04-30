@@ -12,4 +12,4 @@ export const OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG =
 /**
  * Fallback when the flag is unset and no override exists.
  */
-export const OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT = true;
+export const OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT = false;

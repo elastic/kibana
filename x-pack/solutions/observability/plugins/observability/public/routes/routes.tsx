@@ -20,10 +20,6 @@ import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { RulePage } from '../pages/rules/rule';
 import {
-  OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
-  OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT,
-} from '../../common';
-import {
   ALERT_DETAIL_PATH,
   ALERTS_PATH,
   ANNOTATIONS_PATH,
@@ -226,19 +222,6 @@ const routes: Record<RoutePath, RouteDefinition> = {
   },
 };
 
-function SigeventsOrOverviewPage() {
-  const { featureFlags } = useKibana().services;
-  const isSigeventsEnabled = featureFlags.getBooleanValue(
-    OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
-    OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT
-  );
-
-  if (isSigeventsEnabled) {
-    return <SigeventsOverviewPage />;
-  }
-  return <OverviewPage />;
-}
-
 const sigeventsAwareCompleteRoutes: Record<RoutePath, RouteDefinition> = {
   ...completeRoutes,
   [OVERVIEW_PATH]: {
@@ -246,7 +229,7 @@ const sigeventsAwareCompleteRoutes: Record<RoutePath, RouteDefinition> = {
       return (
         <HasDataContextProvider>
           <DatePickerContextProvider>
-            <SigeventsOrOverviewPage />
+            <SigeventsOverviewPage />
           </DatePickerContextProvider>
         </HasDataContextProvider>
       );

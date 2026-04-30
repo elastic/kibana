@@ -59,7 +59,11 @@ export function SigeventsOverviewPage() {
   const { euiTheme } = useEuiTheme();
 
   const { loading, error, data: eventData, otherPromotedEvents } = useFetchLatestSignificantEvent();
-  const { loading: overviewLoading, data: overviewData } = useFetchSystemOverview();
+  const {
+    loading: overviewLoading,
+    error: overviewError,
+    data: overviewData,
+  } = useFetchSystemOverview();
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
@@ -283,7 +287,7 @@ export function SigeventsOverviewPage() {
                     </h2>
                   }
                 />
-              ) : error ? (
+              ) : error || overviewError ? (
                 <EuiEmptyPrompt
                   iconType="warning"
                   color="danger"
@@ -294,7 +298,7 @@ export function SigeventsOverviewPage() {
                       })}
                     </h2>
                   }
-                  body={<p>{error.message}</p>}
+                  body={<p>{(error ?? overviewError)!.message}</p>}
                 />
               ) : eventData ? (
                 <SigeventsOverview
