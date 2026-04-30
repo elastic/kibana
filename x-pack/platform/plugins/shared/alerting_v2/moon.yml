@@ -102,6 +102,7 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
   - '@kbn/user-profile-components'
+  - '@kbn/spaces-utils'
 tags:
   - plugin
   - prod
