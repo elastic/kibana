@@ -59,39 +59,75 @@ const compareToSchemaShared = schema.object(
   {
     palette: schema.maybe(
       schema.string({
-        meta: { description: 'Palette' },
+        meta: {
+          description:
+            "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+        },
         defaultValue: DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
       })
     ),
-    icon: schema.maybe(schema.boolean({ meta: { description: 'Show icon' }, defaultValue: true })),
+    icon: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When `true`, displays the icon for the secondary value.' },
+        defaultValue: true,
+      })
+    ),
     value: schema.maybe(
-      schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })
+      schema.boolean({
+        meta: { description: 'When `true`, displays the secondary value.' },
+        defaultValue: true,
+      })
     ),
   },
-  { meta: { id: 'metricChartCompareToShared', title: 'Compare To Shared' } }
+  {
+    meta: {
+      id: 'metricChartCompareToShared',
+      title: 'Compare To Shared',
+      description: 'Shared configuration for compare-to options (palette, icon, value visibility).',
+    },
+  }
 );
 
-const barBackgroundChartSchema = schema.object({
-  type: schema.literal('bar'),
-  /**
-   * Direction of the bar. Possible values:
-   * - 'vertical': Bar is oriented vertically
-   * - 'horizontal': Bar is oriented horizontally
-   */
-  orientation: schema.maybe(builderEnums.simpleOrientation()),
-});
-
-export const complementaryVizSchemaNoESQL = schema.oneOf([
-  barBackgroundChartSchema.extends({
+const barBackgroundChartSchema = schema.object(
+  {
+    type: schema.literal('bar'),
     /**
-     * Max value
+     * Direction of the bar. Possible values:
+     * - 'vertical': Bar is oriented vertically
+     * - 'horizontal': Bar is oriented horizontally
      */
-    max_value: metricOperationDefinitionSchema,
-  }),
-  schema.object({
-    type: schema.literal('trend'),
-  }),
-]);
+    orientation: schema.maybe(builderEnums.simpleOrientation()),
+  },
+  {
+    meta: {
+      id: 'metricBarBackgroundChart',
+      title: 'Bar Background Chart',
+      description: 'Bar chart shown as background context behind the primary metric value.',
+    },
+  }
+);
+
+export const complementaryVizSchemaNoESQL = schema.oneOf(
+  [
+    barBackgroundChartSchema.extends({
+      /**
+       * Max value
+       */
+      max_value: metricOperationDefinitionSchema,
+    }),
+    schema.object({
+      type: schema.literal('trend'),
+    }),
+  ],
+  {
+    meta: {
+      id: 'metricComplementaryViz',
+      title: 'Complementary Visualization',
+      description:
+        'Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.',
+    },
+  }
+);
 
 // Note: 'trend' type is not supported for ES|QL yet
 export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
@@ -158,7 +194,10 @@ const metricStylingSchema = schema.object(
            */
           alignment: schema.maybe(
             leftRightAlignmentSchema({
-              meta: { description: 'Icon alignment' },
+              meta: {
+                description:
+                  'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
+              },
               defaultValue: DEFAULT_PRIMARY_ICON_ALIGNMENT,
             })
           ),
@@ -182,7 +221,7 @@ const metricStylingSchema = schema.object(
          */
         position: schema.maybe(
           metricValuePositionSchema({
-            meta: { description: 'Position of the primary metric value (top, middle, or bottom)' },
+            meta: { description: 'Position of the primary metric value (top, middle, or bottom).' },
             defaultValue: DEFAULT_PRIMARY_POSITION,
           })
         ),
@@ -202,7 +241,7 @@ const metricStylingSchema = schema.object(
                 horizontalAlignmentSchema({
                   meta: {
                     description:
-                      'Horizontal alignment for the title and subtitle text (left, center or right)',
+                      'Horizontal alignment for the title and subtitle text. Accepted values: `left`, `center`, `right`. Defaults to `left`.',
                   },
                   defaultValue: DEFAULT_PRIMARY_LABELS_ALIGNMENT,
                 })
@@ -228,7 +267,8 @@ const metricStylingSchema = schema.object(
               alignment: schema.maybe(
                 horizontalAlignmentSchema({
                   meta: {
-                    description: 'Alignment for the primary metric value (left, center or right)',
+                    description:
+                      'Alignment for the primary metric value. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
                   },
                   defaultValue: DEFAULT_PRIMARY_VALUE_ALIGNMENT,
                 })
@@ -268,7 +308,7 @@ const metricStylingSchema = schema.object(
              */
             visible: schema.maybe(
               schema.boolean({
-                meta: { description: 'Whether to display the label' },
+                meta: { description: 'When `true`, displays the label.' },
                 defaultValue: DEFAULT_SECONDARY_LABEL_VISIBLE,
               })
             ),
@@ -281,7 +321,7 @@ const metricStylingSchema = schema.object(
               placementSchema({
                 meta: {
                   description:
-                    'Label placement relative to the secondary metric value (before or after)',
+                    'Label placement relative to the secondary metric value (before or after).',
                 },
                 defaultValue: DEFAULT_SECONDARY_LABEL_PLACEMENT,
               })
@@ -299,7 +339,10 @@ const metricStylingSchema = schema.object(
                */
               alignment: schema.maybe(
                 horizontalAlignmentSchema({
-                  meta: { description: 'Alignment for secondary values (left, center or right)' },
+                  meta: {
+                    description:
+                      'Alignment for secondary values. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
+                  },
                   defaultValue: DEFAULT_SECONDARY_VALUE_ALIGNMENT,
                 })
               ),
@@ -327,13 +370,14 @@ const metricConfigPrimaryMetricOptionsSchema = {
    * Subtitle
    */
   subtitle: schema.maybe(
-    schema.string({ meta: { description: 'Subtitle below the primary metric value' } })
+    schema.string({ meta: { description: 'Subtitle below the primary metric value.' } })
   ),
   /**
    * Color configuration
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, staticColorSchema, autoColorSchema], {
+      meta: { description: 'Color configuration for the primary metric value or background.' },
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -352,21 +396,28 @@ const metricConfigSecondaryMetricOptionsSchema = {
    * Compare to
    */
   compare: schema.maybe(
-    schema.oneOf([
-      compareToSchemaShared.extends(
-        {
-          to: schema.literal('baseline'),
-          baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
+    schema.oneOf(
+      [
+        compareToSchemaShared.extends(
+          {
+            to: schema.literal('baseline'),
+            baseline: schema.number({ meta: { description: 'Baseline value.' }, defaultValue: 0 }),
+          },
+          { meta: { id: 'metricCompareToBaseline', title: 'Compare To Baseline' } }
+        ),
+        compareToSchemaShared.extends(
+          {
+            to: schema.literal('primary'),
+          },
+          { meta: { id: 'metricCompareToPrimary', title: 'Compare To Primary' } }
+        ),
+      ],
+      {
+        meta: {
+          description: 'Compare the secondary metric to a baseline value or to the primary metric.',
         },
-        { meta: { id: 'metricCompareToBaseline', title: 'Compare To Baseline' } }
-      ),
-      compareToSchemaShared.extends(
-        {
-          to: schema.literal('primary'),
-        },
-        { meta: { id: 'metricCompareToPrimary', title: 'Compare To Primary' } }
-      ),
-    ])
+      }
+    )
   ),
   /**
    * Color configuration
@@ -384,7 +435,7 @@ const metricConfigBreakdownByOptionsSchema = {
    */
   columns: schema.number({
     defaultValue: LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
-    meta: { description: 'Number of columns' },
+    meta: { description: 'Number of columns.' },
   }),
   /**
    * Collapse by function. This parameter is used to collapse the
@@ -456,6 +507,10 @@ export const metricConfigSchemaNoESQL = schema.object(
         minSize: 1,
         maxSize: 2,
         validate: validateMetrics,
+        meta: {
+          description:
+            'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
+        },
       }
     ),
     /**
@@ -508,6 +563,10 @@ export const metricConfigSchemaESQL = schema.object(
       minSize: 1,
       maxSize: 2,
       validate: validateMetrics,
+      meta: {
+        description:
+          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
+      },
     }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
@@ -535,7 +594,12 @@ export const metricConfigSchemaESQL = schema.object(
 );
 
 export const metricConfigSchema = objectUnion([metricConfigSchemaNoESQL, metricConfigSchemaESQL], {
-  meta: { id: 'metricChart', title: 'Metric Chart' },
+  meta: {
+    id: 'metricChart',
+    title: 'Metric Chart',
+    description:
+      'One or two metric values with optional color coding, trend line, and breakdown by dimension.',
+  },
 });
 
 export type MetricConfig = TypeOf<typeof metricConfigSchema>;

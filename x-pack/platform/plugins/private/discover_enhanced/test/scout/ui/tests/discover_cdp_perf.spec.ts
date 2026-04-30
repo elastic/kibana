@@ -78,7 +78,6 @@ test.describe(
         'kql',
         'lens',
         'maps',
-        'presentationPanel',
         ...(config.projectType === 'security' ? ['securitySolution'] : []),
         'unifiedSearch',
       ]);
