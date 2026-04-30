@@ -14,8 +14,9 @@ version: "1"
 name: ".streams-continuous-ki-extraction"
 description: "This workflow is used by the system and should not be modified."
 settings:
-  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
-  timeout: "9m"
+  # Timeout is 1 minute shorter than the schedule; the concurrency key
+  # prevents overlapping runs regardless, but this avoids stale executions.
+  timeout: "14m"
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
   concurrency:
     key: streams-continuous-ki-extraction
@@ -24,7 +25,7 @@ settings:
 triggers:
   - type: scheduled
     with:
-      every: "10m"
+      every: "15m"
 inputs:
   - name: maxScheduledStreams
     type: number

@@ -73,7 +73,7 @@ export const KI_FEATURES_IDENTIFICATION_WORKFLOW_UUID =
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
-export const COORDINATOR_INTERVAL_MINUTES = 10;
+export const COORDINATOR_INTERVAL_MINUTES = 15;
 
 // Stream selection: how many streams to process per run and how often
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;

@@ -10,7 +10,6 @@ import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskResult } from '@kbn/streams-schema';
 import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
-import { EMPTY_TOKENS } from '@kbn/streams-ai';
 import { notFound } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -35,9 +34,7 @@ import {
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
-import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import type { MemoryGenerationResult } from '../../../lib/sig_events/memory_generation';
 import { generateMemory } from '../../../lib/sig_events/memory_generation';
 
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
@@ -551,21 +548,14 @@ const generateMemoryRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<
-    MemoryGenerationResult & { skipped?: boolean; reason?: string; connectorId?: string }
-  > => {
+  }): Promise<{ acknowledged: boolean }> => {
     const { inferenceClient, uiSettingsClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const memoryEnabled = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
     if (!memoryEnabled) {
-      return {
-        streamsProcessed: 0,
-        tokensUsed: EMPTY_TOKENS,
-        skipped: true,
-        reason: 'memory_disabled',
-      };
+      return { acknowledged: false };
     }
 
     const { streamName } = params.path;
@@ -579,18 +569,26 @@ const generateMemoryRoute = createServerRoute({
       request,
     });
 
-    const result = await generateMemory(
+    const memoryLogger = logger.get('memory_generation');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10 * 60_000);
+
+    generateMemory(
       { features, queries },
       {
         inferenceClient,
         connectorId,
         esClient: server.core.elasticsearch.client.asInternalUser,
-        logger: logger.get('memory_generation'),
-        signal: getRequestAbortSignal(request),
+        logger: memoryLogger,
+        signal: controller.signal,
       }
-    );
+    )
+      .catch((err) =>
+        memoryLogger.warn(`Background memory generation failed for ${streamName}: ${err}`)
+      )
+      .finally(() => clearTimeout(timeout));
 
-    return { ...result, connectorId };
+    return { acknowledged: true };
   },
 });
 
