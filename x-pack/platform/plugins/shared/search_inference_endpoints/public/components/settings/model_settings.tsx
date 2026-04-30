@@ -94,7 +94,7 @@ export const ModelSettings: React.FC = () => {
       return;
     }
 
-    // Telemetry: count a save only when at least one dirty slice finished successfully (no placeholder promises).
+    // Telemetry: count a save only when every dirty part finished successfully.
     const saveOperations: Array<Promise<unknown>> = [];
     if (isFeatureDirty) {
       saveOperations.push(saveFeatures());
@@ -104,8 +104,8 @@ export const ModelSettings: React.FC = () => {
     }
 
     const results = await Promise.allSettled(saveOperations);
-    const anySaveSucceeded = results.some((result) => result.status === 'fulfilled');
-    if (anySaveSucceeded) {
+    const allSavesSucceeded = results.every((result) => result.status === 'fulfilled');
+    if (allSavesSucceeded) {
       usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
     }
   }, [

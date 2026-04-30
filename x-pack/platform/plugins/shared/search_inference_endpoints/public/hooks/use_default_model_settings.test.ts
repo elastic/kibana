@@ -269,7 +269,7 @@ describe('useDefaultModelSettings', () => {
     });
 
     await act(async () => {
-      await result.current.save();
+      await expect(result.current.save()).rejects.toThrow('Network error');
     });
 
     expect(notifications.toasts.addDanger).toHaveBeenCalled();

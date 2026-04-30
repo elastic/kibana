@@ -9,18 +9,18 @@ import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface Props {
+interface ResetDefaultsModalProps {
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export const ResetToDefaultsModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
-  const titleId = useGeneratedHtmlId();
+export const ResetDefaultsModal: React.FC<ResetDefaultsModalProps> = ({ onConfirm, onCancel }) => {
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
-      aria-labelledby={titleId}
-      titleProps={{ id: titleId }}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.title', {
         defaultMessage: 'Reset to defaults',
       })}

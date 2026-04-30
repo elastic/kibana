@@ -37,7 +37,7 @@ import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../.
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
-import { ResetToDefaultsModal } from './reset_to_defaults_modal';
+import { ResetDefaultsModal } from './reset_defaults_modal';
 import { useConnectors } from '../../hooks/use_connectors';
 
 const COLLAPSED_COUNT = 5;
@@ -481,7 +481,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         />
       )}
       {isResetModalOpen && (
-        <ResetToDefaultsModal
+        <ResetDefaultsModal
           onConfirm={confirmResetToDefaults}
           onCancel={() => setIsResetModalOpen(false)}
         />

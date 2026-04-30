@@ -170,6 +170,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
         }),
         text: (e as Error)?.message ?? 'Unknown error',
       });
+      throw e instanceof Error ? e : new Error(String(e));
     }
   }, [state, savedState, settingsClient, getPersistedState, notifications]);
 
