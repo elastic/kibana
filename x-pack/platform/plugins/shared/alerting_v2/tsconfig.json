@@ -97,7 +97,8 @@
     "@kbn/deeplinks-analytics",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-user-profile-browser",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/spaces-utils"
   ],
   "exclude": ["target/**/*"]
 }
