@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { copyToClipboard, EuiButtonIcon, EuiFlexGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldActionsProvider, useUIFieldActions } from '@kbn/unified-doc-viewer';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { CellActionRendererProps } from '../../flyout_v2/shared/components/cell_actions';
 
@@ -16,57 +17,7 @@ type DiscoverCellActionRendererDeps = Pick<
   'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
 >;
 
-interface DiscoverCellActionsProps {
-  /** Cell value content rendered as the popover anchor. */
-  children: CellActionRendererProps['children'];
-  /** Name of the Discover field for the current cell. */
-  field: CellActionRendererProps['field'];
-  /** Raw value from the current Discover cell. */
-  value: CellActionRendererProps['value'];
-  /** Fields currently displayed as Discover table columns. */
-  columns: DiscoverCellActionRendererDeps['columns'];
-  /** Adds include, exclude, or exists filters for the field value. */
-  filter: DiscoverCellActionRendererDeps['filter'];
-  /** Adds the field to the Discover table columns. */
-  onAddColumn: DiscoverCellActionRendererDeps['onAddColumn'];
-  /** Removes the field from the Discover table columns. */
-  onRemoveColumn: DiscoverCellActionRendererDeps['onRemoveColumn'];
-}
-
-const filterForValueLabel = i18n.translate(
-  'xpack.securitySolution.oneDiscover.flyoutCellActions.filterForValue',
-  {
-    defaultMessage: 'Filter for value',
-  }
-);
-
-const filterOutValueLabel = i18n.translate(
-  'xpack.securitySolution.oneDiscover.flyoutCellActions.filterOutValue',
-  {
-    defaultMessage: 'Filter out value',
-  }
-);
-
-const filterForFieldPresentLabel = i18n.translate(
-  'xpack.securitySolution.oneDiscover.flyoutCellActions.filterForFieldPresent',
-  {
-    defaultMessage: 'Filter for field present',
-  }
-);
-
-const toggleColumnLabel = i18n.translate(
-  'xpack.securitySolution.oneDiscover.flyoutCellActions.toggleColumn',
-  {
-    defaultMessage: 'Toggle column in table',
-  }
-);
-
-const copyToClipboardLabel = i18n.translate(
-  'xpack.securitySolution.oneDiscover.flyoutCellActions.copyToClipboard',
-  {
-    defaultMessage: 'Copy to clipboard',
-  }
-);
+type DiscoverCellActionsPanelProps = Omit<DiscoverCellActionsProps, 'columns'>;
 
 const fieldValueActionsLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.ariaLabel',
@@ -77,16 +28,33 @@ const fieldValueActionsLabel = i18n.translate(
 
 const closePopoverPlaceholder = () => {};
 
-// Wraps Discover cell values with hover actions for filtering, column toggling, and copying.
-export const DiscoverCellActions = ({
+const FILTER_ACTION_IDS = new Set([
+  'addFilterInAction',
+  'addFilterOutremoveFromFilterAction',
+  'addFilterExistAction',
+]);
+
+const TOGGLE_COLUMN_ACTION_ID = 'toggleFieldColumnAction';
+
+const ACTION_TEST_SUBJ_IDS: Record<string, string> = {
+  addFilterInAction: 'filterIn',
+  addFilterOutremoveFromFilterAction: 'filterOut',
+  addFilterExistAction: 'filterExists',
+  toggleFieldColumnAction: 'toggleColumn',
+  copyToClipboardAction: 'copyToClipboard',
+};
+
+/**
+ * Renders Discover cell action buttons in a popover. This component is used as the content of the popover, while the anchor is provided by the caller (DiscoverCellActions).
+ */
+const DiscoverCellActionsPanel = ({
   children,
   field,
   value,
-  columns,
   filter,
   onAddColumn,
   onRemoveColumn,
-}: DiscoverCellActionsProps) => {
+}: DiscoverCellActionsPanelProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -98,53 +66,21 @@ export const DiscoverCellActions = ({
     };
   }, []);
 
-  const isColumnAdded = columns?.includes(field) ?? false;
   const copyValue = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
-
-  const actions = [];
-
-  if (filter) {
-    actions.push(
-      {
-        id: 'filterIn',
-        iconType: 'plusCircle',
-        label: filterForValueLabel,
-        onClick: () => filter(field, value, '+'),
-      },
-      {
-        id: 'filterOut',
-        iconType: 'minusCircle',
-        label: filterOutValueLabel,
-        onClick: () => filter(field, value, '-'),
-      },
-      {
-        id: 'filterExists',
-        iconType: 'filter',
-        label: filterForFieldPresentLabel,
-        onClick: () => filter('_exists_', field, '+'),
-      }
-    );
-  }
-
-  if (onAddColumn || onRemoveColumn) {
-    actions.push({
-      id: 'toggleColumn',
-      iconType: isColumnAdded ? 'cross' : 'plusCircle',
-      label: toggleColumnLabel,
-      onClick: () => (isColumnAdded ? onRemoveColumn?.(field) : onAddColumn?.(field)),
-    });
-  }
-
-  actions.push({
-    id: 'copyToClipboard',
-    iconType: 'copy',
-    label: copyToClipboardLabel,
-    onClick: () => copyToClipboard(copyValue),
-  });
-
-  if (actions.length === 0) {
-    return <>{children}</>;
-  }
+  const actions = useUIFieldActions({ field, value, formattedValue: copyValue });
+  const visibleActions = useMemo(
+    () =>
+      actions.filter(({ id }) => {
+        if (FILTER_ACTION_IDS.has(id)) {
+          return Boolean(filter);
+        }
+        if (id === TOGGLE_COLUMN_ACTION_ID) {
+          return Boolean(onAddColumn || onRemoveColumn);
+        }
+        return true;
+      }),
+    [actions, filter, onAddColumn, onRemoveColumn]
+  );
 
   const onMouseEnter = () => {
     if (leaveTimer.current) {
@@ -175,10 +111,12 @@ export const DiscoverCellActions = ({
         aria-label={fieldValueActionsLabel}
       >
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-          {actions.map((action) => (
+          {visibleActions.map((action) => (
             <EuiToolTip content={action.label} key={action.id} disableScreenReaderOutput>
               <EuiButtonIcon
-                data-test-subj={`securitySolutionOneDiscoverCellAction-${action.id}`}
+                data-test-subj={`securitySolutionOneDiscoverCellAction-${
+                  ACTION_TEST_SUBJ_IDS[action.id] ?? action.id
+                }`}
                 size="xs"
                 iconSize="s"
                 iconType={action.iconType}
@@ -195,3 +133,48 @@ export const DiscoverCellActions = ({
     </span>
   );
 };
+
+interface DiscoverCellActionsProps {
+  /**
+   * Cell value content rendered as the popover anchor.
+   */
+  children: CellActionRendererProps['children'];
+  /**
+   * Name of the Discover field for the current cell.
+   */
+  field: CellActionRendererProps['field'];
+  /**
+   * Raw value from the current Discover cell.
+   */
+  value: CellActionRendererProps['value'];
+  /**
+   * Fields currently displayed as Discover table columns.
+   */
+  columns: DiscoverCellActionRendererDeps['columns'];
+  /**
+   * Adds include, exclude, or exists filters for the field value.
+   * */
+  filter: DiscoverCellActionRendererDeps['filter'];
+  /**
+   * Adds the field to the Discover table columns.
+   */
+  onAddColumn: DiscoverCellActionRendererDeps['onAddColumn'];
+  /**
+   * Removes the field from the Discover table columns.
+   */
+  onRemoveColumn: DiscoverCellActionRendererDeps['onRemoveColumn'];
+}
+
+/**
+ * Wraps Discover cell values with hover actions for filtering, column toggling, and copying.
+ */
+export const DiscoverCellActions = ({ columns, ...panelProps }: DiscoverCellActionsProps) => (
+  <FieldActionsProvider
+    columns={columns}
+    filter={panelProps.filter}
+    onAddColumn={panelProps.onAddColumn}
+    onRemoveColumn={panelProps.onRemoveColumn}
+  >
+    <DiscoverCellActionsPanel {...panelProps} />
+  </FieldActionsProvider>
+);

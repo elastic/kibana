@@ -12,8 +12,8 @@ import createContainer from 'constate';
 import type { IconType } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
+import type { DocViewRenderProps } from '../types';
+import type { FieldMapping } from '../services/types';
 
 interface WithFieldParam {
   field: string;
@@ -24,7 +24,7 @@ interface WithValueParam {
   value: unknown;
 }
 
-interface TFieldActionParams extends WithFieldParam, WithValueParam {
+interface FieldActionParams extends WithFieldParam, WithValueParam {
   formattedValue?: string;
 }
 
@@ -35,22 +35,19 @@ export interface TFieldAction {
   onClick: () => void;
 }
 
-type UseFieldActionsDeps = Pick<
+export type UseFieldActionsDeps = Pick<
   DocViewRenderProps,
   'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
 >;
 
-/**
- * Higher level hook that wraps the logic for the requires actions on a field.
- */
 const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFieldActionsDeps) => {
   return useMemo(
     () => ({
       addColumn: onAddColumn,
       addFilterExist: ({ field }: WithFieldParam) => filter && filter('_exists_', field, '+'),
-      addFilterIn: ({ field, value, mapping }: TFieldActionParams) =>
+      addFilterIn: ({ field, value, mapping }: FieldActionParams) =>
         filter && filter(mapping ?? field, value, '+'),
-      addFilterOut: ({ field, value, mapping }: TFieldActionParams) =>
+      addFilterOut: ({ field, value, mapping }: FieldActionParams) =>
         filter && filter(mapping ?? field, value, '-'),
       copyToClipboard,
       removeColumn: onRemoveColumn,
@@ -71,15 +68,12 @@ const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFi
 
 export const [FieldActionsProvider, useFieldActionsContext] = createContainer(useFieldActions);
 
-/**
- * This is a preset of the UI elements and related actions that can be used to build an action bar anywhere in a DocView
- */
 export const useUIFieldActions = ({
   field,
   value,
   mapping,
   formattedValue,
-}: TFieldActionParams): TFieldAction[] => {
+}: FieldActionParams): TFieldAction[] => {
   const actions = useFieldActionsContext();
 
   return useMemo(

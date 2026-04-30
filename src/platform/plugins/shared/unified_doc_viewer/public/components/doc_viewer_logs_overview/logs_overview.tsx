@@ -22,13 +22,13 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
+import { FieldActionsProvider } from '@kbn/unified-doc-viewer';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import { LogsOverviewHeader } from './logs_overview_header';
-import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
 import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_section';
