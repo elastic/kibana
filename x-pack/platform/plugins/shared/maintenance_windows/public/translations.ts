@@ -478,30 +478,37 @@ export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
   }
 );
 
-export const CREATE_FORM_EPISODE_DATA_FILTER_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.episodeDataFilterTitle',
+export const CREATE_FORM_ALERTINGV2_FILTERS_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersTitle',
   {
     defaultMessage: 'Episode data filter',
   }
 );
 
-export const CREATE_FORM_EPISODE_DATA_FILTER_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.createForm.episodeDataFilterDescription',
+export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
   {
-    defaultMessage:
-      'Suppress alerting v2 episodes whose data matches this query while the maintenance window is active.',
+    defaultMessage: 'Episode filters (e.g. data.host.name:"my-host" or data.severity:"low")',
   }
 );
 
-export const CREATE_FORM_EPISODE_DATA_FILTER_TOGGLE_LABEL = i18n.translate(
-  'xpack.maintenanceWindows.createForm.episodeDataFilterToggleLabel',
+export const CREATE_FORM_ALERTINGV2_FILTERS_DESCRIPTION = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersDescription',
+  {
+    defaultMessage:
+      'Suppress episodes whose data matches this query while the maintenance window is active.',
+  }
+);
+
+export const CREATE_FORM_ALERTINGV2_FILTERS_TOGGLE_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersToggleLabel',
   {
     defaultMessage: 'Filter episodes by data',
   }
 );
 
-export const CREATE_FORM_EPISODE_DATA_FILTER_TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
-  'xpack.maintenanceWindows.createForm.episodeDataFilterTechnicalPreviewTooltip',
+export const CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.maintenanceWindows.createForm.alertingV2FiltersTechnicalPreviewTooltip',
   {
     defaultMessage:
       'This feature is in technical preview and may change or be removed in future releases.',

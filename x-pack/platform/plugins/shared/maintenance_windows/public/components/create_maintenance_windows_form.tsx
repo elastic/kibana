@@ -4,18 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import moment from 'moment';
-import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  FIELD_TYPES,
-  Form,
-  getUseField,
-  useForm,
-  useFormData,
-  UseMultiFields,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiBetaBadge,
@@ -34,25 +22,37 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import type { Filter } from '@kbn/es-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  FIELD_TYPES,
+  Form,
+  getUseField,
+  useForm,
+  useFormData,
+  UseMultiFields,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
+import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
+import moment from 'moment';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isScopedQueryError } from '../../common';
-import type { FormProps } from './schema';
-import { schema } from './schema';
-import * as i18n from '../translations';
-import { SubmitButton } from './submit_button';
+import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
 import { useCreateMaintenanceWindow } from '../hooks/use_create_maintenance_window';
-import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_window';
 import { useGetRuleTypes } from '../hooks/use_get_rule_types';
+import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_window';
+import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
-import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
+import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import { SubmitButton } from './submit_button';
 
 const UseField = getUseField({ component: Field });
 
@@ -495,14 +495,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
-                  <h4>{i18n.CREATE_FORM_EPISODE_DATA_FILTER_TITLE}</h4>
+                  <h4>{i18n.CREATE_FORM_ALERTINGV2_FILTERS_TITLE}</h4>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
                   label={i18n.TECHNICAL_PREVIEW_LABEL}
                   iconType="flask"
-                  tooltipContent={i18n.CREATE_FORM_EPISODE_DATA_FILTER_TECHNICAL_PREVIEW_TOOLTIP}
+                  tooltipContent={i18n.CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP}
                   size="s"
                 />
               </EuiFlexItem>
@@ -510,7 +510,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <EuiText size="s">
               <p>
                 <EuiTextColor color="subdued">
-                  {i18n.CREATE_FORM_EPISODE_DATA_FILTER_DESCRIPTION}
+                  {i18n.CREATE_FORM_ALERTINGV2_FILTERS_DESCRIPTION}
                 </EuiTextColor>
               </p>
             </EuiText>
@@ -520,7 +520,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 <>
                   <EuiSwitch
                     data-test-subj="maintenanceWindowEpisodeDataFilterSwitch"
-                    label={i18n.CREATE_FORM_EPISODE_DATA_FILTER_TOGGLE_LABEL}
+                    label={i18n.CREATE_FORM_ALERTINGV2_FILTERS_TOGGLE_LABEL}
                     checked={isEpisodeQueryEnabled}
                     onChange={onEpisodeQueryToggle}
                   />
@@ -535,6 +535,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                         isEnabled={isEpisodeQueryEnabled}
                         onQueryChange={setEpisodeQuery}
                         onFiltersChange={setEpisodeFilters}
+                        placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
                       />
                     </>
                   )}

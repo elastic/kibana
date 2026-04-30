@@ -21,6 +21,7 @@ export interface MaintenanceWindowScopedQueryProps {
   isEnabled?: boolean;
   onQueryChange: (query: string) => void;
   onFiltersChange: (filters: Filter[]) => void;
+  placeholder?: string;
 }
 
 export const MaintenanceWindowScopedQuery = React.memo(
@@ -34,6 +35,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
       isEnabled = true,
       onQueryChange,
       onFiltersChange,
+      placeholder,
     } = props;
 
     const {
@@ -74,6 +76,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
         <EuiFlexItem>
           <EuiFormRow fullWidth isInvalid={errors.length !== 0} error={errors[0]}>
             <AlertsSearchBar
+              placeholder={placeholder}
               appName={PLUGIN.getI18nName(i18n)}
               ruleTypeIds={ruleTypeIds}
               disableQueryLanguageSwitcher={true}
