@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/saved_objects_tagging
 dependsOn:
   - '@kbn/core'
+  - '@kbn/scout'
   - '@kbn/usage-collection-plugin'
   - '@kbn/management-plugin'
   - '@kbn/saved-objects-tagging-oss-plugin'

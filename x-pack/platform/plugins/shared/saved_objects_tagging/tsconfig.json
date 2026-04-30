@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/scout",
     "@kbn/usage-collection-plugin",
     "@kbn/management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
