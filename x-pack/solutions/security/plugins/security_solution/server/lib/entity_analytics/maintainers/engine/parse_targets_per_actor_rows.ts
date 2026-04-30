@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
+
 import type { RelationshipIntegrationConfig, ProcessedEngineRecord } from './types';
 
 interface EsqlColumn {
@@ -19,11 +21,52 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
+/**
+ * Safety net for developer-provided `esqlQueryOverride` configs.
+ *
+ * Overrides are required to emit a fixed set of column names (see the column
+ * contract documented on `RelationshipIntegrationConfig.esqlQueryOverride`).
+ * If they don't, every row below silently parses as null/empty and the engine
+ * produces zero records — a slow, silent failure that's painful to debug.
+ *
+ * This emits a single actionable warning naming the missing columns. It only
+ * runs on the override path because the default builder generates the columns
+ * itself and cannot drift.
+ */
+function warnIfOverrideColumnsMissing(
+  columns: EsqlColumn[],
+  config: Pick<
+    RelationshipIntegrationConfig,
+    'id' | 'relationshipType' | 'enableFrequencyClassification' | 'esqlQueryOverride'
+  >,
+  logger: Logger
+): void {
+  if (!config.esqlQueryOverride) return;
+  const colNames = new Set(columns.map((c) => c.name));
+  const expected = config.enableFrequencyClassification
+    ? ['actorUserId', 'accesses_frequently', 'accesses_infrequently']
+    : ['actorUserId', config.relationshipType];
+  const missing = expected.filter((n) => !colNames.has(n));
+  if (missing.length > 0) {
+    logger.warn(
+      `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(
+        ', '
+      )} — results will be empty`
+    );
+  }
+}
+
 export const parseTargetsPerActorRows = (
   columns: EsqlColumn[],
   values: unknown[][],
-  config: Pick<RelationshipIntegrationConfig, 'relationshipType' | 'enableFrequencyClassification'>
+  config: Pick<
+    RelationshipIntegrationConfig,
+    'id' | 'relationshipType' | 'enableFrequencyClassification' | 'esqlQueryOverride'
+  >,
+  logger: Logger
 ): ProcessedEngineRecord[] => {
+  warnIfOverrideColumnsMissing(columns, config, logger);
+
   return values.map((row): ProcessedEngineRecord => {
     const record: Record<string, unknown> = {};
     columns.forEach((col, idx) => {

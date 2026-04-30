@@ -145,4 +145,36 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       expect(buildTargetsPerActorQuery(commWithUserConfig, 'default')).toContain('"user:@okta"');
     });
   });
+
+  // Regression guard for an ES|QL quirk where `WHERE col IS NOT NULL`
+  // evaluates to FALSE for every row when `col` is produced by CONCAT() over
+  // a CASE() with nested CASE arms (as the user EUID actorEval does). Using
+  // COALESCE(col, "") != "" preserves the original semantic intent while
+  // sidestepping the bug.
+  describe('null/empty filter form (ES|QL CONCAT(CASE) quirk workaround)', () => {
+    it('uses COALESCE(actorUserId, "") != "" rather than `IS NOT NULL AND`', () => {
+      const query = buildTargetsPerActorQuery(accessesConfig, 'default');
+      expect(query).toContain('| WHERE COALESCE(actorUserId, "") != ""');
+      expect(query).not.toMatch(/WHERE\s+actorUserId\s+IS\s+NOT\s+NULL/);
+    });
+
+    it('uses COALESCE(targetEntityId, "") != "" rather than `IS NOT NULL AND`', () => {
+      const query = buildTargetsPerActorQuery(accessesConfig, 'default');
+      expect(query).toContain('| WHERE COALESCE(targetEntityId, "") != ""');
+      expect(query).not.toMatch(/WHERE\s+targetEntityId\s+IS\s+NOT\s+NULL/);
+    });
+
+    it('applies the COALESCE form for non-frequency-classification configs as well', () => {
+      const query = buildTargetsPerActorQuery(commWithHostConfig, 'default');
+      expect(query).toContain('| WHERE COALESCE(actorUserId, "") != ""');
+      expect(query).toContain('| WHERE COALESCE(targetEntityId, "") != ""');
+    });
+
+    it('still composes the additionalTargetFilter immediately after the targetEntityId filter', () => {
+      const query = buildTargetsPerActorQuery(commWithUserConfig, 'default');
+      expect(query).toContain(
+        '| WHERE COALESCE(targetEntityId, "") != ""\n    AND targetEntityId != "user:@okta"'
+      );
+    });
+  });
 });

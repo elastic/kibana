@@ -52,15 +52,22 @@ function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace:
       })()
     : `| STATS ${config.relationshipType} = VALUES(targetEntityId) BY actorUserId`;
 
+  // NOTE: We use `COALESCE(col, "") != ""` rather than the more natural
+  // `col IS NOT NULL AND col != ""` because ES|QL has a quirk where
+  // `WHERE col IS NOT NULL` evaluates to FALSE for all rows when `col` is
+  // produced by a CONCAT() over a CASE() expression with nested CASE arms
+  // (as our user EUID actorEval does). That would silently drop every row
+  // from the pipeline. COALESCE is semantically equivalent to the original
+  // intent (treat NULL as empty, then check non-empty) and sidesteps the bug.
   return `SET unmapped_fields="nullify";
 FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
 ${outcomeFilterLine}    AND (${userIdFilter})
 ${hostIdFilterLine}${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
-| WHERE actorUserId IS NOT NULL AND actorUserId != ""
+| WHERE COALESCE(actorUserId, "") != ""
 | EVAL targetEntityId = ${targetEval}
 | MV_EXPAND targetEntityId
-| WHERE targetEntityId IS NOT NULL AND targetEntityId != ""${additionalTargetFilter}
+| WHERE COALESCE(targetEntityId, "") != ""${additionalTargetFilter}
 ${statsClause}
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }

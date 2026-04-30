@@ -165,21 +165,7 @@ async function runIntegration(
     if (esqlResult === null) break;
 
     const { columns, values } = esqlResult;
-    if (config.esqlQueryOverride) {
-      const colNames = new Set(columns.map((c) => c.name));
-      const expected = config.enableFrequencyClassification
-        ? ['actorUserId', 'accesses_frequently', 'accesses_infrequently']
-        : ['actorUserId', config.relationshipType];
-      const missing = expected.filter((n) => !colNames.has(n));
-      if (missing.length > 0) {
-        logger.warn(
-          `[${config.id}] esqlQueryOverride is missing expected columns: ${missing.join(
-            ', '
-          )} — results will be empty`
-        );
-      }
-    }
-    const pageRecords = parseTargetsPerActorRows(columns, values, config);
+    const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
     records.push(...pageRecords);
     logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
 
