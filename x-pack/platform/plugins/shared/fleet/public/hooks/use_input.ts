@@ -36,7 +36,7 @@ export function useInput(
       setValue(newValue);
       if (errors && validate) {
         const newErrors = validate(newValue);
-        if (newErrors?.[0] !== errors[0]) {
+        if (newErrors?.join() !== errors.join()) {
           setErrors(newErrors);
         }
       }
@@ -103,7 +103,7 @@ export function useSecretInput(
       setValue(newValue);
       if (errors && validate) {
         const newErrors = validate(newValue);
-        if (newErrors?.[0] !== errors[0]) {
+        if (newErrors?.join() !== errors.join()) {
           setErrors(newErrors);
         }
       }
