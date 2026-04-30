@@ -31,6 +31,7 @@ import {
   spacesService,
 } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSaveModalProps {
   onSave: ({
@@ -40,9 +41,7 @@ interface DashboardSaveModalProps {
     newTags,
     newTimeRestore,
     newProjectRoutingRestore,
-    isTitleDuplicateConfirmed,
     newAccessMode,
-    onTitleDuplicate,
   }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
@@ -62,8 +61,6 @@ type SaveDashboardHandler = (args: {
   newTitle: string;
   newDescription: string;
   newCopyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
 }) => ReturnType<DashboardSaveModalProps['onSave']>;
 
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
@@ -90,21 +87,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    async ({
-      newTitle,
-      newDescription,
-      newCopyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }) =>
+    async ({ newTitle, newDescription, newCopyOnSave }) =>
       onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
         newProjectRoutingRestore: persistSelectedProjectRouting,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
         newTags: selectedTags,
         newAccessMode: selectedAccessMode,
       }),
@@ -223,6 +212,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
 
   return (
     <SavedObjectSaveModalWithSaveResult
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
       onClose={onClose}
       title={title}

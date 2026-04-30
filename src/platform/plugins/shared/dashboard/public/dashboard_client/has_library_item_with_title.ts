@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { hasLibraryItemWithTitle } from './has_library_item_with_title';
-export { dashboardClient } from './dashboard_client';
-export { findService } from './find_service';
-export { searchAction } from './search_action';
-export { getDashboardsByIdsAction } from './get_dashboard_by_id_action';
+import { dashboardClient } from './dashboard_client';
 
-export type { FindDashboardsByIdResponse, FindDashboardsService } from './types';
+export async function hasLibraryItemWithTitle(title: string): Promise<boolean> {
+  const { dashboards } = await dashboardClient.search({
+    query: title,
+    per_page: 20,
+  });
+
+  return dashboards.some(({ data }) => data.title === title);
+}

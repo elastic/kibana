@@ -89,9 +89,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
         byRefPackage: PanelPackage;
         libraryTitle: string;
       }>((resolve, reject) => {
-        const onSave = async ({
-          newTitle,
-        }: OnSaveProps): Promise<SaveResult> => {
+        const onSave = async ({ newTitle }: OnSaveProps): Promise<SaveResult> => {
           try {
             const libraryId = await embeddable.saveToLibrary(newTitle);
             const byReferenceState = embeddable.getSerializedStateByReference(libraryId);
