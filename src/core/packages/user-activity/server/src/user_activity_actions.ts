@@ -64,8 +64,8 @@ export const userActivityActions = {
     groupName: 'Dashboard',
     versionAddedAt: '9.5',
   },
-  dashboard_manual_refresh: {
-    description: 'User refreshed the data of a dashboard.',
+  dashboard_refresh: {
+    description: 'The dashboard was refreshed (either by the user or auto-refresh interval).',
     ownerTeam: '@elastic/kibana-presentation',
     groupName: 'Dashboard',
     versionAddedAt: '9.5',

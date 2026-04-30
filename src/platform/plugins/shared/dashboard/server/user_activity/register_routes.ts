@@ -19,14 +19,18 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
       path: '/internal/dashboard/user_activity/{type}/{id}',
       validate: {
         params: schema.object({
-          type: schema.oneOf([schema.literal('view'), schema.literal('refresh')]),
+          type: schema.oneOf([
+            schema.literal('view'),
+            schema.literal('refresh_manual'),
+            schema.literal('refresh_auto'),
+          ]),
           id: schema.string(),
         }),
         body: schema.object({
           title: schema.string(),
           start: schema.number(),
           end: schema.number(),
-          tags: schema.maybe(schema.arrayOf(schema.string())),
+          tags: schema.arrayOf(schema.string()),
         }),
       },
       security: {
@@ -39,11 +43,14 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
       const user = (await ctx.core).security.authc.getCurrentUser();
       const duration = req.body.start !== undefined ? req.body.end - req.body.start : 0;
       coreServices.userActivity.trackUserAction({
-        message: `User ${user ? `"${user.username}" (id: ${user.profile_uid})` : ''} ${
-          req.params.type === 'view' ? 'viewed' : 'manually refreshed'
-        } dashboard "${req.body.title}" (id: ${req.params.id}).`,
+        message:
+          req.params.type === 'refresh_auto'
+            ? `Dashboard "${req.body.title}" (id: ${req.params.id}) was refreshed automatically.`
+            : `User ${user ? `"${user.username}" (id: ${user.profile_uid})` : ''} ${
+                req.params.type === 'view' ? 'viewed' : 'manually refreshed'
+              } dashboard "${req.body.title}" (id: ${req.params.id}).`,
         event: {
-          action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_manual_refresh',
+          action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_refresh',
           type: 'access',
           start: new Date(req.body.start).toISOString(),
           end: new Date(req.body.end).toISOString(),
@@ -58,7 +65,7 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           duration,
         },
       });
-      return res.ok({ body: {} });
+      return res.ok();
     }
   );
 }

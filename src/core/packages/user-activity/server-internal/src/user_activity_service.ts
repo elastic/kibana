@@ -92,7 +92,6 @@ export class UserActivityService
   }
 
   private trackUserAction = ({ message, event, object, metadata }: TrackUserActionParams) => {
-    console.log('TRACK!!', { message, event, metadata });
     if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
