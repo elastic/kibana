@@ -178,13 +178,7 @@
             ],
             "signature": [
               "(elasticsearchClient: ",
-              {
-                "pluginId": "@kbn/core",
-                "scope": "common",
-                "docId": "kibKbnCorePluginApi",
-                "section": "def-common.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
@@ -203,13 +197,7 @@
                   "The privileged elasticsearch client `core.elasticsearch.client.asInternalUser`."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginApi",
-                    "section": "def-common.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
+                  "ElasticsearchClient"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
                 "lineNumber": 103,
@@ -267,7 +255,7 @@
                 "tags": [],
                 "label": "change",
                 "description": [
-                  "- The changes to object that was affected."
+                  "- The affected object; `change.snapshot` must be the **after** (post-change) state persisted as `object.snapshot`."
                 ],
                 "signature": [
                   {
@@ -360,7 +348,7 @@
                 "tags": [],
                 "label": "changes",
                 "description": [
-                  "- The changes to objects that were affected."
+                  "- The affected objects; each `snapshot` is the **after** (post-change) state for that object."
                 ],
                 "signature": [
                   {
@@ -611,7 +599,7 @@
             "label": "event",
             "description": [],
             "signature": [
-              "{ id: string; module: string; dataset: string; action: string; type: \"change\" | \"creation\" | \"deletion\"; reason?: string | undefined; created?: string | undefined; }"
+              "{ id: string; module: string; dataset: string; action: string; type: \"deletion\" | \"creation\" | \"change\"; reason?: string | undefined; created?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
             "lineNumber": 32,
@@ -716,7 +704,7 @@
           "\nFields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)"
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 134,
+        "lineNumber": 137,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -739,7 +727,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -755,7 +743,7 @@
         "label": "GetChangeHistoryOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 119,
+        "lineNumber": 122,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -772,7 +760,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -789,7 +777,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 121,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +793,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 122,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -821,7 +809,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -839,7 +827,7 @@
           "\nResult from a history query."
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 126,
+        "lineNumber": 129,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -852,7 +840,7 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -875,7 +863,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -923,13 +911,7 @@
             "description": [],
             "signature": [
               "(elasticsearchClient: ",
-              {
-                "pluginId": "@kbn/core",
-                "scope": "common",
-                "docId": "kibKbnCorePluginApi",
-                "section": "def-common.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
@@ -946,13 +928,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginApi",
-                    "section": "def-common.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
+                  "ElasticsearchClient"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
                 "lineNumber": 44,
@@ -1253,7 +1229,7 @@
         "label": "LogChangeHistoryOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 97,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1268,7 +1244,7 @@
               "Action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging)"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1283,7 +1259,7 @@
               "Current login name for user that generated the change."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1301,7 +1277,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1316,7 +1292,7 @@
               "Kibana space that the event belongs to. (ie `default` etc)."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1334,7 +1310,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1357,10 +1333,10 @@
                 "section": "def-common.ChangeHistoryDocument",
                 "text": "ChangeHistoryDocument"
               },
-              ", \"event\" | \"tags\" | \"metadata\">> | undefined"
+              ", \"tags\" | \"event\" | \"metadata\">> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1385,7 +1361,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1404,7 +1380,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1418,11 +1394,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ObjectChange",
-        "description": [
-          "Input for logging one change. Callers supply the object state after the change succeeds; the package persists it as `object.snapshot` on the stored document. There is no stored \"before\" payload—derive diffs by comparing this event's snapshot to a prior history entry (or keep a separate before image in your domain if needed)."
-        ],
+        "description": [],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 90,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1440,7 +1414,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1455,7 +1429,7 @@
               "The `object.type`. Allows multiple object types per data stream."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1470,7 +1444,7 @@
               "The `object.id`. Uniquely identifies this object in Kibana within its `type`"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 96,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1488,7 +1462,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1500,13 +1474,13 @@
             "tags": [],
             "label": "snapshot",
             "description": [
-              "Full snapshot of the object after this change (post-write state). Persisted as `object.snapshot`. Do not pass the pre-change state here unless you intentionally want that older version recorded for this event (e.g. a deletion may use the last known state)."
+              "\nFull snapshot of the object **after** the change (post-write state). Persisted as\n`object.snapshot`."
             ],
             "signature": [
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

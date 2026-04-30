@@ -31928,10 +31928,6 @@
           },
           {
             "plugin": "entityStore",
-            "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/utils/log_extraction_validator.ts"
-          },
-          {
-            "plugin": "entityStore",
             "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install/validator.ts"
           },
           {
