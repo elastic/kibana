@@ -164,9 +164,7 @@ describe('buildPackLookup', () => {
 
   test('sets ecsMapping to undefined when the query has no ecs_mapping', () => {
     const packSOs = [
-      makePackSO('pack-1', 'my_pack', [
-        { id: 'q1', query: 'SELECT 1', schedule_id: 'sched-uuid' },
-      ]),
+      makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1', schedule_id: 'sched-uuid' }]),
     ];
 
     const lookup = buildPackLookup(packSOs);
