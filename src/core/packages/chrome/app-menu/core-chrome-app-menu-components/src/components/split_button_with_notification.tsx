@@ -114,6 +114,7 @@ export const SplitButtonWithNotification = ({
       css={{
         position: 'relative' as const,
         display: fullWidth ? 'block' : 'inline-block',
+        padding: `0 ${euiTheme.size.s}`,
       }}
     >
       <EuiSplitButton
@@ -147,6 +148,7 @@ export const SplitButtonWithNotification = ({
           {children}
         </EuiSplitButton.ActionPrimary>
         <EuiSplitButton.ActionSecondary
+          data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
           iconType={secondaryButtonIcon}
           aria-label={secondaryButtonAriaLabel ?? ''}
           title={secondaryButtonTitle}
