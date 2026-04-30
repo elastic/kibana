@@ -15,6 +15,7 @@ export interface TracesCharts {
   readonly redMetricsCharts: Locator;
   readonly expectedTitles: readonly string[];
   getChartTitle(title: string): Locator;
+  getChartError(title: string): Locator;
 }
 
 export function createTracesCharts(page: ScoutPage): TracesCharts {
@@ -24,5 +25,12 @@ export function createTracesCharts(page: ScoutPage): TracesCharts {
     redMetricsCharts,
     expectedTitles: RED_METRICS_CHART_TITLES,
     getChartTitle: (title: string): Locator => redMetricsCharts.getByText(title),
+    getChartError: (title: string): Locator => {
+      const headingTestSubj = `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
+      return redMetricsCharts
+        .locator('[data-test-subj="embeddablePanel"]')
+        .filter({ has: page.testSubj.locator(headingTestSubj) })
+        .locator('[data-test-subj="embeddable-lens-failure"]');
+    },
   };
 }

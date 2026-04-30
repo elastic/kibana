@@ -5,176 +5,197 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiSpacer,
-  EuiSuperSelect,
   EuiButton,
+  EuiIcon,
   EuiText,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { elasticsearchOnboardingAgent } from '@kbn/search-agent';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+
+import anthropicIcon from '../../assets/anthropic.svg';
+import cursorIcon from '../../assets/cursor.svg';
+import vsCodeIcon from '../../assets/visual-studio-code.svg';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { PromptModal } from './prompt_modal';
-import { USE_CASE_OPTIONS, type UseCaseId } from './constants';
 import { buildPrompt } from './util';
+import { AgentBuilderPanelContainer } from './styles';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
-const selectOptions = USE_CASE_OPTIONS.map((option) => ({
-  value: option.id,
-  inputDisplay: option.label,
-  'data-test-subj': `useCase-option-${option.id}`,
-}));
+const AgentInstallPanel: React.FC<{
+  icon: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}> = ({ icon, title, description, children }) => {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" direction="column">
+      <EuiFlexItem grow={false}>
+        <EuiPanel color="subdued" paddingSize="s" grow={false}>
+          <EuiIcon color="subdued" size="m" type={icon} title={title} />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h5>{title}</h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const AgentInstallSection = () => {
   const { services } = useKibana();
-  const [selectedUseCase, setSelectedUseCase] = useState<UseCaseId>('general-search');
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
+  const usageTracker = useUsageTracker();
 
-  const cursorDeeplinkUrl = useMemo(
-    () =>
-      `cursor://anysphere.cursor-deeplink/prompt?text=${encodeURIComponent(
-        buildPrompt(selectedUseCase, 'cursor')
-      )}`,
-    [selectedUseCase]
-  );
-
-  const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const closePromptModal = useCallback(() => setIsPromptModalOpen(false), []);
 
-  const handleOpenInCursor = useCallback(() => {
-    closePopover();
-    window.open(cursorDeeplinkUrl, '_blank');
-  }, [cursorDeeplinkUrl, closePopover]);
-
   const handleOpenInClaudeCli = useCallback(() => {
-    closePopover();
-    const prompt = buildPrompt(selectedUseCase, 'cli');
+    const prompt = buildPrompt('cli');
     // Show a modal with the Claude/CLI prompt for the selected use case
     setIsPromptModalOpen(true);
     setModalPrompt(prompt);
-  }, [selectedUseCase, closePopover]);
+  }, []);
 
   const handleOpenInAgentBuilder = useCallback(() => {
-    closePopover();
+    usageTracker.click(AnalyticsEvents.agentBuilderOpened);
     services.agentBuilder?.openChat({
-      agentId: elasticsearchOnboardingAgent.id,
-      initialMessage: buildPrompt(selectedUseCase, 'agent-builder'),
-      autoSendInitialMessage: false,
+      initialMessage: buildPrompt('agent-builder'),
+      autoSendInitialMessage: true,
       newConversation: true,
       sessionTag: 'search-getting-started',
     });
-  }, [closePopover, selectedUseCase, services.agentBuilder]);
+  }, [services.agentBuilder, usageTracker]);
 
   return (
     <>
-      <SearchGettingStartedSectionHeading
-        icon="sparkles"
-        title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
-          defaultMessage: 'Build search with your AI assistant',
-        })}
-        description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
-          defaultMessage:
-            'Install the Elasticsearch assistant into your LLM environment to get AI-powered help with building your search application.',
-        })}
-      />
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.gettingStarted.agentInstall.useCaseDescription', {
-                defaultMessage: 'Have a specific use case in mind?',
-              })}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSuperSelect<UseCaseId>
-            options={selectOptions}
-            valueOfSelected={selectedUseCase}
-            onChange={setSelectedUseCase}
-            aria-label={i18n.translate('xpack.gettingStarted.agentInstall.useCaseSelectLabel', {
-              defaultMessage: 'Select a use case',
-            })}
-            data-test-subj="agentInstallUseCaseSelect"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButton
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={togglePopover}
-                data-test-subj="agentInstallLaunchBtn"
-              >
-                {i18n.translate('xpack.gettingStarted.agentInstall.launchButton', {
-                  defaultMessage: 'Open in...',
+      <EuiPanel color="plain" hasShadow={true} paddingSize="none">
+        <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="row">
+          <EuiFlexItem>
+            <EuiPanel color="transparent" paddingSize="l">
+              <AgentInstallPanel
+                icon="commandLine"
+                title={i18n.translate('xpack.gettingStarted.agentInstall.ide.title', {
+                  defaultMessage: 'Build in your IDE',
                 })}
-              </EuiButton>
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            data-test-subj="agentInstallLaunchPopover"
-            aria-label={i18n.translate('xpack.gettingStarted.agentInstall.agentInstallPopover', {
-              defaultMessage:
-                'Select which agent to use for AI-powered help with building your search application',
-            })}
-          >
-            <EuiContextMenuPanel
-              data-test-subj="agentInstallLaunchMenu"
-              items={[
-                <EuiContextMenuItem
-                  key="cursor"
-                  icon="launch"
-                  onClick={handleOpenInCursor}
-                  data-test-subj="agentInstallOpenInCursor"
-                >
-                  {i18n.translate('xpack.gettingStarted.agentInstall.menuCursor', {
-                    defaultMessage: 'Cursor',
+                description={i18n.translate('xpack.gettingStarted.agentInstall.ide.description', {
+                  defaultMessage: 'Code with context using Elastic-certified skills.',
+                })}
+              >
+                <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={handleOpenInClaudeCli}
+                      data-test-subj="agentInstallLaunchBtn"
+                      color="primary"
+                      fill
+                    >
+                      {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
+                        defaultMessage: 'Copy prompt',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      direction="row"
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          color="subdued"
+                          size="m"
+                          title={i18n.translate(
+                            'xpack.gettingStarted.agentInstall.anthropicIcon.title',
+                            {
+                              defaultMessage: 'Anthropic Claude Code logo',
+                            }
+                          )}
+                          type={anthropicIcon}
+                        />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          color="subdued"
+                          size="m"
+                          title={i18n.translate(
+                            'xpack.gettingStarted.agentInstall.cursorIcon.title',
+                            {
+                              defaultMessage: 'Cursor AI logo',
+                            }
+                          )}
+                          type={cursorIcon}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          color="subdued"
+                          size="m"
+                          title={i18n.translate(
+                            'xpack.gettingStarted.agentInstall.vsCodeIcon.title',
+                            {
+                              defaultMessage: 'Visual Studio Code logo',
+                            }
+                          )}
+                          type={vsCodeIcon}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </AgentInstallPanel>
+            </EuiPanel>
+          </EuiFlexItem>
+          {services.agentBuilder ? (
+            <EuiFlexItem css={AgentBuilderPanelContainer}>
+              <EuiPanel color="transparent" paddingSize="l">
+                <AgentInstallPanel
+                  icon="productAgent"
+                  title={i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.title', {
+                    defaultMessage: 'Build with the Elastic AI Agent',
                   })}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key="claude-cli"
-                  icon="console"
-                  onClick={handleOpenInClaudeCli}
-                  data-test-subj="agentInstallOpenInClaudeCli"
+                  description={i18n.translate(
+                    'xpack.gettingStarted.agentInstall.agentBuilder.description',
+                    {
+                      defaultMessage: 'Chat directly with our built-in agentic assistant.',
+                    }
+                  )}
                 >
-                  {i18n.translate('xpack.gettingStarted.agentInstall.menuClaudeCli', {
-                    defaultMessage: 'Claude / CLI',
-                  })}
-                </EuiContextMenuItem>,
-                ...(services.agentBuilder
-                  ? [
-                      <EuiContextMenuItem
-                        key="agent-builder"
-                        icon="wrench"
-                        onClick={handleOpenInAgentBuilder}
-                        data-test-subj="agentInstallOpenInAgentBuilder"
-                      >
-                        {i18n.translate('xpack.gettingStarted.agentInstall.menuAgentBuilder', {
-                          defaultMessage: 'Kibana Agent Builder',
-                        })}
-                      </EuiContextMenuItem>,
-                    ]
-                  : []),
-              ]}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                  <AiButton
+                    variant="outlined"
+                    onClick={handleOpenInAgentBuilder}
+                    data-test-subj="agentInstallOpenInAgentBuilder"
+                  >
+                    {i18n.translate('xpack.gettingStarted.agentInstall.agentBuilder.cta', {
+                      defaultMessage: 'Open Elastic AI Agent',
+                    })}
+                  </AiButton>
+                </AgentInstallPanel>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiPanel>
       {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
     </>
   );

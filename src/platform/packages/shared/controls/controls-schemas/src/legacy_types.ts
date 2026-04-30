@@ -34,6 +34,7 @@ export interface LegacyStoredDataControlState extends SerializedTitles {
   useGlobalFilters?: boolean;
   ignoreValidations?: boolean;
   dataViewRefName?: string;
+  dataViewId?: string;
 }
 
 export type LegacyStoredOptionsListExplicitInput = LegacyStoredDataControlState & {

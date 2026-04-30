@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
-import type { WorkflowsRouter } from '../../../types';
+import type { RouteDependencies } from '../types';
 
-export function registerInternalRoutes({
-  router,
-  getWorkflowExecutionEngine,
-}: {
-  router: WorkflowsRouter;
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
-}) {
-  registerGetConfigRoute({ router, getWorkflowExecutionEngine });
+export function registerInternalRoutes(deps: RouteDependencies) {
+  registerGetConfigRoute(deps);
+  registerDisableAllWorkflowsRoute(deps);
 }

@@ -20,7 +20,10 @@ import {
 } from './investigation_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { useKibana } from '../../../common/lib/kibana';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { HighlightedFields } from './highlighted_fields';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../constants/flyout_history';
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -29,9 +32,23 @@ jest.mock('../../shared/hooks/use_expand_section', () => ({
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('../../shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+jest.mock('../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(),
+}));
 
 jest.mock('./investigation_guide', () => ({
-  InvestigationGuide: () => <div data-test-subj="investigationGuideMock" />,
+  InvestigationGuide: ({ onShowInvestigationGuide }: { onShowInvestigationGuide: () => void }) => (
+    <button
+      type="button"
+      data-test-subj="investigationGuideMock"
+      onClick={onShowInvestigationGuide}
+    >
+      {'InvestigationGuide'}
+    </button>
+  ),
 }));
 
 jest.mock('./highlighted_fields', () => ({
@@ -58,6 +75,11 @@ const nonSignalMockHit = createMockHit({
   'event.kind': 'event',
 });
 
+const remoteAlertMockHit = createMockHit({
+  'event.kind': 'signal',
+  _index: 'remote-cluster:index-name',
+});
+
 const mockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
@@ -65,7 +87,9 @@ const mockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode
 describe('InvestigationSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
   const mockUseKibana = jest.mocked(useKibana);
+  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
   const mockHighlightedFields = jest.mocked(HighlightedFields);
+  const mockOpenSystemFlyout = jest.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -74,10 +98,11 @@ describe('InvestigationSection', () => {
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
-          openSystemFlyout: jest.fn(),
+          openSystemFlyout: mockOpenSystemFlyout,
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
+    mockUseIsInSecurityApp.mockReturnValue(true);
     mockHighlightedFields.mockReturnValue(<div data-test-subj="highlightedFieldsMock" />);
   });
 
@@ -170,6 +195,25 @@ describe('InvestigationSection', () => {
     expect(queryByTestId('investigationGuideMock')).not.toBeInTheDocument();
   });
 
+  it('does not render investigation guide for a remote alert', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    const { queryByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection
+              hit={remoteAlertMockHit}
+              renderCellActions={mockRenderCellActions}
+            />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId('investigationGuideMock')).not.toBeInTheDocument();
+  });
+
   it('passes renderCellActions to HighlightedFields', () => {
     mockUseExpandSection.mockReturnValue(true);
     const localMockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
@@ -189,6 +233,56 @@ describe('InvestigationSection', () => {
     expect(mockHighlightedFields).toHaveBeenCalledWith(
       expect.objectContaining({ renderCellActions: localMockRenderCellActions }),
       expect.anything()
+    );
+  });
+
+  it('uses Security history key when opening flyout inside Security app', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseIsInSecurityApp.mockReturnValue(true);
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    act(() => getByTestId('investigationGuideMock').click());
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: alertFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('uses Discover history key when opening flyout outside Security app', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseIsInSecurityApp.mockReturnValue(false);
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    act(() => getByTestId('investigationGuideMock').click());
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
+        session: 'start',
+      })
     );
   });
 });

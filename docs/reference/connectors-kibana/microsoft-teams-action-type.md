@@ -24,6 +24,14 @@ Microsoft Teams connectors have the following configuration properties:
 Microsoft API token
 :   A Microsoft bearer token obtained through the delegated OAuth flow (for example, a user access token). Provides access to the authenticated user's teams, channels, chats, and messages.
 
+#### OAuth authorization code (delegated auth)
+
+Authorization URL
+:   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
+
+Token URL
+:   The Microsoft Entra ID token endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`. Replace `{tenant-id}` with your Azure AD tenant ID.
+
 #### OAuth client credentials (app-only auth)
 
 Client ID
@@ -43,7 +51,7 @@ The Microsoft Teams connector has the following actions:
 
 **List joined teams**
 :   Returns the authenticated user's joined teams when using delegated auth, or the specified user's joined teams when `userId` is provided for app-only auth.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token or OAuth authorization code).
 
 **List channels**
 :   Returns channels for the specified team.
@@ -57,7 +65,7 @@ The Microsoft Teams connector has the following actions:
 
 **List chats**
 :   Returns chats for the authenticated user.
-    - `userId` (optional): User ID for app-only auth through client credentials.
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token or OAuth authorization code).
     - `top` (optional): Number of chats to return, up to 50.
 
 **List chat messages**
@@ -66,7 +74,7 @@ The Microsoft Teams connector has the following actions:
     - `top` (optional): Number of messages to return, up to 50.
 
 **Search messages**
-:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports KQL syntax.
+:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth.
     - `query` (required): Search query string (for example, `from:alice sent>2024-01-01`).
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return, up to 25.
@@ -91,6 +99,25 @@ To use the Microsoft Teams connector, you need a Microsoft Azure AD application 
    - `Chat.ReadBasic` — List chats
 4. Obtain a user access token through the OAuth delegated flow (for example, Authorization Code flow).
 5. In the **Microsoft API token** field, enter your user access token.
+
+### OAuth authorization code (delegated auth)
+
+1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
+2. Create a new application registration.
+3. Under **Authentication**, select **Add a platform**, choose **Web**, and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_callback`).
+4. Under **API permissions**, add the following **Delegated** permissions for Microsoft Graph:
+   - `Team.ReadBasic.All` — List joined teams
+   - `Channel.ReadBasic.All` — List channels
+   - `Chat.Read` — Read chat messages
+   - `ChannelMessage.Read.All` — Read channel messages
+   - `offline_access` — Maintain access through refresh tokens
+5. Copy the **Application (client) ID** and your **tenant ID** from the app registration **Overview** page.
+6. Under **Certificates & secrets**, create a new client secret and copy the value.
+7. In the connector configuration, enter:
+   - **Authorization URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/authorize`
+   - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
+   - **Client ID**: your Application (client) ID
+   - **Client Secret**: the secret value from step 6
 
 ### OAuth client credentials (app-only auth)
 

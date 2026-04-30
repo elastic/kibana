@@ -16,10 +16,14 @@ import { EnrollmentAPIKeySchema } from '../models';
 
 export const GetEnrollmentAPIKeysRequestSchema = {
   query: schema.object({
-    page: schema.number({ defaultValue: 1 }),
-    perPage: schema.number({ defaultValue: 20 }),
+    page: schema.number({ defaultValue: 1, meta: { description: 'Page number' } }),
+    perPage: schema.number({
+      defaultValue: 20,
+      meta: { description: 'Number of results per page' },
+    }),
     kuery: schema.maybe(
       schema.string({
+        meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(
             value,
@@ -38,7 +42,7 @@ export const GetEnrollmentAPIKeysRequestSchema = {
 
 export const GetOneEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
-    keyId: schema.string(),
+    keyId: schema.string({ meta: { description: 'The ID of the enrollment API key' } }),
   }),
 };
 
@@ -48,7 +52,7 @@ export const EnrollmentAPIKeyResponseSchema = schema.object({
 
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
-    keyId: schema.string(),
+    keyId: schema.string({ meta: { description: 'The ID of the enrollment API key' } }),
   }),
 };
 

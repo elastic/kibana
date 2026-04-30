@@ -8,7 +8,6 @@
  */
 
 import {
-  AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -23,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { MetricUnit } from '../../../types';
+import { createTimeBucketAggregation } from '../../../common/utils/esql/create_aggregation';
 import { chartPalette } from '.';
 
 interface TraceChart {
@@ -70,7 +70,9 @@ export function getErrorRateChart({
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(
-      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = ${createTimeBucketAggregation(
+        {}
+      )}`
     );
     query.pipe('EVAL error_rate = TO_DOUBLE(failure) / all');
     query.pipe('KEEP timestamp, error_rate');
@@ -106,7 +108,7 @@ export function getLatencyChart({
     query.pipe(`EVAL duration_ms_otel = ROUND(${DURATION})/1000/1000`);
     // need to convert both to the same type to make sure the COALESCE works
     query.pipe('EVAL duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))');
-    query.pipe(`STATS AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`);
+    query.pipe(`STATS AVG(duration_ms) BY ${createTimeBucketAggregation({})}`);
 
     return {
       id: 'latency',
@@ -131,7 +133,7 @@ export function getThroughputChart({
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(`EVAL id = COALESCE(${TRANSACTION_ID}, ${SPAN_ID})`);
-    query.pipe(`STATS COUNT(id) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`);
+    query.pipe(`STATS COUNT(id) BY ${createTimeBucketAggregation({})}`);
 
     return {
       id: 'throughput',

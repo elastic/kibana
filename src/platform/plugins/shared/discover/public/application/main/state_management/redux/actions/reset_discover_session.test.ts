@@ -167,4 +167,54 @@ describe('resetDiscoverSession', () => {
     const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
   });
+
+  it('should keep current tab runtime state available while replacing all session tabs', async () => {
+    const { internalState, runtimeStateManager, persistedDiscoverSession } = await setup();
+
+    const updatedDiscoverSession = {
+      ...persistedDiscoverSession,
+      id: 'copied-session-id',
+      title: 'Copied session',
+      tabs: cloneDeep(persistedDiscoverSession.tabs).map((tab, index) => ({
+        ...tab,
+        id: `copied-tab-${index + 1}`,
+      })),
+    };
+
+    const observedTabIds: string[] = [];
+    const unavailableRuntimeStateTabIds: string[] = [];
+    const unsubscribe = internalState.subscribe(() => {
+      const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+
+      observedTabIds.push(currentTabId);
+
+      if (!currentTabRuntimeState) {
+        unavailableRuntimeStateTabIds.push(currentTabId);
+      }
+    });
+
+    try {
+      await internalState
+        .dispatch(
+          internalStateActions.resetDiscoverSession({
+            updatedDiscoverSession,
+            nextSelectedTabId: updatedDiscoverSession.tabs[0].id,
+          })
+        )
+        .unwrap();
+    } finally {
+      unsubscribe();
+    }
+
+    expect(observedTabIds.length).toBeGreaterThan(0);
+    expect(observedTabIds).toContain(persistedDiscoverSession.tabs[0].id);
+    expect(observedTabIds).toContain(updatedDiscoverSession.tabs[0].id);
+    expect(unavailableRuntimeStateTabIds).toHaveLength(0);
+    expect(internalState.getState().persistedDiscoverSession).toBe(updatedDiscoverSession);
+    expect(internalState.getState().tabs.unsafeCurrentId).toBe(updatedDiscoverSession.tabs[0].id);
+    expect(
+      selectTabRuntimeState(runtimeStateManager, updatedDiscoverSession.tabs[0].id)
+    ).toBeDefined();
+  });
 });

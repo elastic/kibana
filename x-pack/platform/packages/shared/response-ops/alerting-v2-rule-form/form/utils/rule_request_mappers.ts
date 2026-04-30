@@ -12,6 +12,7 @@ import type {
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
 
 const createRunbookArtifactId = () =>
@@ -25,30 +26,14 @@ type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
 /**
  * Builds the `recovery_policy.query` portion of the API payload.
  *
- * Two modes:
- * 1. **Condition mode** – The user specified an evaluation condition (WHERE clause)
- *    and wrote a recovery condition. The base query for recovery is the same
- *    evaluation base query.
- * 2. **Full-query mode** – The user wrote a standalone recovery base query
- *    (no evaluation condition was split out).
+ * Only full-query mode is supported: the user provides a standalone recovery
+ * base query.
  */
 const buildRecoveryQuery = (
-  recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>,
-  evaluation: FormValues['evaluation']
-): { query: { base: string; condition?: string } } | Record<string, never> => {
+  recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>
+): { query: { base: string } } | Record<string, never> => {
   const { query } = recoveryPolicy;
 
-  // Condition-only mode: recovery WHERE clause applied to the evaluation base query
-  if (query?.condition) {
-    return {
-      query: {
-        base: query.base || evaluation.query.base,
-        condition: query.condition,
-      },
-    };
-  }
-
-  // Full-query mode: user provided a standalone recovery base query
   if (query?.base) {
     return { query: { base: query.base } };
   }
@@ -60,7 +45,7 @@ const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
   owner: metadata.owner,
-  labels: metadata.labels,
+  tags: metadata.tags,
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({
@@ -71,21 +56,17 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
 const mapEvaluation = (evaluation: FormValues['evaluation']) => ({
   query: {
     base: evaluation.query.base,
-    ...(evaluation.query.condition ? { condition: evaluation.query.condition } : {}),
   },
 });
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
 
-const mapRecoveryPolicy = (
-  recoveryPolicy: FormValues['recoveryPolicy'],
-  evaluation: FormValues['evaluation']
-) => {
+const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
   if (!recoveryPolicy) return undefined;
   return {
     type: recoveryPolicy.type,
-    ...(recoveryPolicy.type === 'query' ? buildRecoveryQuery(recoveryPolicy, evaluation) : {}),
+    ...(recoveryPolicy.type === 'query' ? buildRecoveryQuery(recoveryPolicy) : {}),
   };
 };
 
@@ -93,23 +74,25 @@ const mapRecoveryPolicy = (
 export const deriveAlertDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return 'duration';
-  if (stateTransition?.pendingCount != null) return 'breaches';
-  return 'immediate';
+  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
+    return DELAY_MODE.breaches;
+  return DELAY_MODE.immediate;
 };
 
 /** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
 export const deriveRecoveryDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return 'duration';
-  if (stateTransition?.recoveringCount != null) return 'breaches';
-  return 'immediate';
+  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
+    return DELAY_MODE.recoveries;
+  return DELAY_MODE.immediate;
 };
 
 const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
-  if (kind !== 'alert' || stateTransition == null) return undefined;
+  if (kind !== 'alert') return undefined;
 
   const alertMode =
     formValues.stateTransitionAlertDelayMode ??
@@ -120,31 +103,29 @@ const mapStateTransition = (formValues: FormValues) => {
 
   const out: NonNullable<RuleRequestCommon['state_transition']> = {};
 
-  if (alertMode !== 'immediate') {
-    if (alertMode === 'breaches' && stateTransition.pendingCount != null) {
-      out.pending_count = stateTransition.pendingCount;
+  if (alertMode === DELAY_MODE.immediate) {
+    out.pending_count = 0;
+  } else if (alertMode === DELAY_MODE.breaches && stateTransition?.pendingCount != null) {
+    out.pending_count = stateTransition.pendingCount;
+  } else if (alertMode === DELAY_MODE.duration) {
+    if (stateTransition?.pendingTimeframe != null) {
+      out.pending_timeframe = stateTransition.pendingTimeframe;
     }
-    if (alertMode === 'duration') {
-      if (stateTransition.pendingTimeframe != null) {
-        out.pending_timeframe = stateTransition.pendingTimeframe;
-      }
-      if (stateTransition.pendingCount != null) {
-        out.pending_count = stateTransition.pendingCount;
-      }
+    if (stateTransition?.pendingCount != null) {
+      out.pending_count = stateTransition.pendingCount;
     }
   }
 
-  if (recoveryMode !== 'immediate') {
-    if (recoveryMode === 'breaches' && stateTransition.recoveringCount != null) {
-      out.recovering_count = stateTransition.recoveringCount;
+  if (recoveryMode === DELAY_MODE.immediate) {
+    out.recovering_count = 0;
+  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
+    out.recovering_count = stateTransition.recoveringCount;
+  } else if (recoveryMode === DELAY_MODE.duration) {
+    if (stateTransition?.recoveringTimeframe != null) {
+      out.recovering_timeframe = stateTransition.recoveringTimeframe;
     }
-    if (recoveryMode === 'duration') {
-      if (stateTransition.recoveringTimeframe != null) {
-        out.recovering_timeframe = stateTransition.recoveringTimeframe;
-      }
-      if (stateTransition.recoveringCount != null) {
-        out.recovering_count = stateTransition.recoveringCount;
-      }
+    if (stateTransition?.recoveringCount != null) {
+      out.recovering_count = stateTransition.recoveringCount;
     }
   }
 
@@ -157,12 +138,12 @@ const mapStateTransition = (formValues: FormValues) => {
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; owner?: string; labels?: string[] };
+  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
-  evaluation: { query: { base: string; condition?: string } };
+  evaluation: { query: { base: string } };
   grouping?: { fields: string[] };
-  recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string; condition?: string } };
+  recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string } };
   state_transition?: {
     pending_count?: number;
     pending_timeframe?: string;
@@ -217,7 +198,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     schedule: mapSchedule(schedule),
     evaluation: mapEvaluation(evaluation),
     grouping: mapGrouping(grouping),
-    recovery_policy: mapRecoveryPolicy(recoveryPolicy, evaluation),
+    recovery_policy: mapRecoveryPolicy(recoveryPolicy),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
@@ -275,7 +256,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       description: rule.metadata.description,
       enabled: rule.enabled,
       owner: rule.metadata.owner,
-      labels: rule.metadata.labels,
+      tags: rule.metadata.tags,
     },
     timeField: rule.time_field,
     schedule: {
@@ -285,7 +266,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     evaluation: {
       query: {
         base: rule.evaluation.query.base,
-        condition: rule.evaluation.query.condition,
       },
     },
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
@@ -297,7 +277,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
               ? {
                   query: {
                     base: rule.recovery_policy.query.base,
-                    condition: rule.recovery_policy.query.condition,
                   },
                 }
               : {}),

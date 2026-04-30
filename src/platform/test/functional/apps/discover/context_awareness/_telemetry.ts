@@ -31,6 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const toasts = getService('toasts');
+  const performanceMetricTimeoutMs = 1500;
 
   describe('telemetry', () => {
     describe('context', () => {
@@ -60,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
@@ -80,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
@@ -399,6 +401,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
 
         // event 3
+        // preventing flakiness in this case, there were 2 toasts displayed, covering the cell in the flaky case
+        await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();

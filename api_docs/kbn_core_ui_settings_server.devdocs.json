@@ -34,7 +34,14 @@
             "tags": [],
             "label": "getRegistered",
             "description": [
-              "\nReturns registered uiSettings values {@link UiSettingsParams}"
+              "\nReturns registered uiSettings values ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.UiSettingsParams",
+                "text": "UiSettingsParams"
+              }
             ],
             "signature": [
               "() => Readonly<Record<string, Omit<",
@@ -101,6 +108,7 @@
                 "lineNumber": 37,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetUiSettingsContext",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -142,6 +150,7 @@
                 "lineNumber": 41,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetUiSettingsContext",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -155,10 +164,10 @@
             "tags": [],
             "label": "getUserProvided",
             "description": [
-              "\nRetrieves a set of all uiSettings values set by the user."
+              "\nRetrieves a set of all uiSettings values set by the user.\n\nbypassCache - if true, forces retrieval of user-provided values from the source (e.g. elasticsearch) instead of cache. This is useful in scenarios where we know the cache may be stale and want to ensure we have the latest values, such as during a full page reload. In typical usage, this would be false to take advantage of caching for performance.\n\nNote: When bypassCache is true, the cache will be eventually be freshened with new values, but other concurrent requests will keep using the existing entry if it exists. This allows for a faster fallback in cases where the cache is stale but still available. This behavior differs from what occurs during a usual cache miss, where the first request would trigger a fetch and populate the cache, while subsequent requests would wait for that fetch to complete and then use the updated cache."
             ],
             "signature": [
-              "<T = any>() => Promise<Record<string, ",
+              "<T = any>(bypassCache?: boolean | undefined) => Promise<Record<string, ",
               "UserProvidedValues",
               "<T>>>"
             ],
@@ -167,7 +176,25 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-server.IUiSettingsClient.getUserProvided.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "bypassCache",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -183,7 +210,7 @@
               "(changes: Record<string, any>) => Promise<void>"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 46,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -199,9 +226,10 @@
                   "Record<string, any>"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 49,
+                "lineNumber": 55,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -221,7 +249,7 @@
               "(key: string, value: any) => Promise<void>"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 50,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -237,7 +265,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 53,
+                "lineNumber": 59,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -254,7 +282,7 @@
                   "any"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 53,
+                "lineNumber": 59,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -276,7 +304,7 @@
               "(key: string) => Promise<void>"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 54,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -292,7 +320,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 57,
+                "lineNumber": 63,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -314,7 +342,7 @@
               "(keys: string[], options?: { validateKeys?: boolean | undefined; handleWriteErrors?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 58,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -330,7 +358,7 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 62,
+                "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -344,7 +372,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 63,
+                "lineNumber": 69,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -360,7 +388,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                    "lineNumber": 63,
+                    "lineNumber": 69,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -376,7 +404,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                    "lineNumber": 63,
+                    "lineNumber": 69,
                     "columnNumber": 41,
                     "deprecated": false,
                     "trackAdoption": false
@@ -399,7 +427,7 @@
               "(key: string) => boolean"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 65,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -415,7 +443,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 68,
+                "lineNumber": 74,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -437,7 +465,7 @@
               "(key: string) => boolean"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 69,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -453,7 +481,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 72,
+                "lineNumber": 78,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -475,7 +503,7 @@
               "(key: string, value: unknown) => Promise<ValueValidation>"
             ],
             "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-            "lineNumber": 73,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -491,7 +519,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 76,
+                "lineNumber": 82,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -508,7 +536,7 @@
                   "unknown"
                 ],
                 "path": "src/core/packages/ui-settings/server/src/ui_settings_client.ts",
-                "lineNumber": 76,
+                "lineNumber": 82,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -619,6 +647,7 @@
                 "lineNumber": 33,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -661,6 +690,7 @@
                 "lineNumber": 51,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -728,7 +758,23 @@
             "tags": [],
             "label": "asScopedToClient",
             "description": [
-              "\nCreates a {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a {@link RequestHandler}.\n"
+              "\nCreates a ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              " with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              ".\n"
             ],
             "signature": [
               "(savedObjectsClient: ",
@@ -756,6 +802,7 @@
                 "lineNumber": 83,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -769,7 +816,23 @@
             "tags": [],
             "label": "globalAsScopedToClient",
             "description": [
-              "\nCreates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a {@link RequestHandler}.\n"
+              "\nCreates a global ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              " with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside the scope of a ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              ".\n"
             ],
             "signature": [
               "(savedObjectsClient: ",
@@ -797,6 +860,7 @@
                 "lineNumber": 99,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import path from 'node:path';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -19,6 +20,9 @@ import type {
 import { unarchiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../schemas/maintenance_window/external/request/unarchive';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenance_window/external/response';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
+
+const unarchiveMaintenanceWindowExamples = () =>
+  path.join(__dirname, 'unarchive_maintenance_window_examples.yaml');
 
 export const unarchiveMaintenanceWindowRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,
@@ -56,6 +60,7 @@ export const unarchiveMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Unarchive a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        oasOperationObject: unarchiveMaintenanceWindowExamples,
         availability: {
           since: '9.1.0',
           stability: 'stable',

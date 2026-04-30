@@ -169,6 +169,10 @@ Follow existing patterns in the target area first; below are common defaults.
 - Use `useEuiTheme()` for theme tokens.
 - Use `camelCase` for `data-test-subj` attribute values (e.g., `data-test-subj="myButton"`).
 
+## Internationalization (i18n)
+- Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
+- Run `node scripts/i18n_check --fix` to check for and fix errors.
+
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).

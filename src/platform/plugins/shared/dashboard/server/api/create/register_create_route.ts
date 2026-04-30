@@ -9,21 +9,26 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { writeErrorHandler } from '../write_error_handler';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
     path: basePath,
-    summary: 'Create a dashboard with an auto-generated ID or a specified ID',
+    summary: 'Create a dashboard',
     ...routeConfig,
+    description: 'Creates a new dashboard and returns its ID, full state, and metadata.',
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -54,22 +59,20 @@ export function registerCreateRoute(
         },
       }),
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await create(
-          ctx,
-          getCachedDashboardStateSchema(),
-          req.body,
-          isDashboardAppRequest
-        );
-        return res.created({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await create(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.body,
+            req.serverTiming,
+            isDashboardAppRequest
+          );
+          return res.created({ body: result });
+        } catch (e) {
+          return writeErrorHandler(e, res);
         }
-
-        return res.badRequest({ body: { message: e.message } });
-      }
-    }
+      })
   );
 }

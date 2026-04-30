@@ -31,12 +31,14 @@ Follow the GitHub and Tavily connectors as reference:
    }),
    ```
 
-2. **Typed actions**: Create a typed action for each MCP tool, using `withMcpClient`:
+2. **Typed actions**: Create a typed action for each MCP tool, using `withMcpClient`. Set `isTool: true` and add a plain-string `description`:
    ```typescript
    import { withMcpClient } from '../../lib/mcp/with_mcp_client';
 
    actions: {
      search: {
+       isTool: true,
+       description: 'Search for items by keyword. Returns matching results with IDs and summaries.',
        input: SearchInputSchema,
        handler: withMcpClient(async (client, input) => {
          return client.callTool({ name: 'exact_mcp_tool_name', arguments: input });
@@ -48,15 +50,19 @@ Follow the GitHub and Tavily connectors as reference:
 3. **Escape hatches**: Always include `listTools` and `callTool` actions for dynamic tool discovery:
    ```typescript
    listTools: {
+     isTool: true,
+     description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
      input: z.object({}),
      handler: withMcpClient(async (client) => {
        return client.listTools();
      }),
    },
    callTool: {
+     isTool: true,
+     description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
      input: z.object({
-       name: z.string(),
-       arguments: z.record(z.unknown()).optional(),
+       name: z.string().describe('The MCP tool name (from listTools)'),
+       arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
      }),
      handler: withMcpClient(async (client, input) => {
        return client.callTool(input);
@@ -68,7 +74,7 @@ Follow the GitHub and Tavily connectors as reference:
 
 ## MCP Tool Discovery
 
-Use the connector's `listTools` action to discover the **exact MCP tool names** before writing workflows. Tool names often use underscores (e.g., `tavily_search`) even when documentation shows hyphens.
+Use the connector's `listTools` action to discover the **exact MCP tool names** before writing action handlers. Tool names often use underscores (e.g., `tavily_search`) even when documentation shows hyphens.
 
 After creating the connector instance in Kibana, verify tool names via:
 
@@ -81,22 +87,37 @@ kibana_curl -X POST -H "Content-Type: application/json" \
 
 During initial creation, use names from MCP server documentation but be prepared to fix them during testing.
 
-## Create Workflows
+## Write LLM-Quality Descriptions and Skill Content
 
-Workflows for MCP-native connectors call the typed actions directly (not the generic `mcp.callTool`):
+Good descriptions make typed actions discoverable and usable by LLMs. Apply descriptions at three levels:
 
-```yaml
-steps:
-  - id: search_step
-    type: your_connector.search
-    connector-id: <%= your_connector-stack-connector-id %>
-    params:
-      query: ${{ inputs.query }}
-```
+1. **Action-level `description`**: Describe what the action does and when to use it. Use plain strings (not `i18n.translate()`) — action descriptions are for LLM consumption only.
+   ```typescript
+   actions: {
+     search: {
+       isTool: true,
+       description: 'Search for repositories, code, issues, and other GitHub content using GitHub search syntax.',
+       input: SearchInputSchema,
+       handler: withMcpClient(async (client, input) => { ... }),
+     },
+   },
+   ```
 
-The step `type` should be `{connectorSpecId_without_dot}.{actionName}` (e.g., `github.searchCode`).
+2. **Param-level `.describe()`**: Add `.describe()` to every Zod field in the input schema. This tells the LLM what each parameter means and what values are valid.
+   ```typescript
+   const SearchInputSchema = z.object({
+     query: z.string().describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
+     type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
+   });
+   ```
 
-See [connector-patterns.md](connector-patterns.md) for the full workflow YAML pattern.
+3. **`skill` property** (optional): Provide a `skill` string on the connector spec to give the LLM high-level guidance on multi-step patterns and gotchas. Use the `[...].join('\n')` pattern:
+   ```typescript
+   skill: [
+     'Use search to find items by keyword, then getItem to retrieve full details by ID.',
+     'For tools not covered by typed actions, use listTools to discover available MCP tools, then call them with callTool.',
+   ].join('\n'),
+   ```
 
 ## Shared MCP Library
 

@@ -49,6 +49,7 @@
             "lineNumber": 15,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "MockedCodeEditorProps",
             "trackAdoption": false,
             "isRequired": true
           }

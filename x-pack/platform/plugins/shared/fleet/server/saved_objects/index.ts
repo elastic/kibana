@@ -37,6 +37,7 @@ import {
 import {
   AgentPolicySchemaV3,
   AgentPolicySchemaV4,
+  AgentPolicySchemaV5,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
@@ -45,6 +46,7 @@ import {
   SettingsSchemaV7,
   SettingsSchemaV8,
   PackagePolicySchemaV22,
+  CloudConnectorSchemaV4,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -351,6 +353,7 @@ export const getSavedObjectTypes = (
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          is_verifier: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
           package_agent_version_conditions: { dynamic: false, properties: {} },
         },
@@ -469,6 +472,20 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -519,6 +536,7 @@ export const getSavedObjectTypes = (
           },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          is_verifier: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
           package_agent_version_conditions: { dynamic: false, properties: {} },
         },
@@ -571,6 +589,20 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -595,6 +627,8 @@ export const getSavedObjectTypes = (
           service_token: { type: 'keyword', index: false },
           config: { type: 'flattened' },
           config_yaml: { type: 'text' },
+          otel_exporter_config_yaml: { type: 'text' },
+          otel_disable_beatsauth: { type: 'boolean' },
           is_preconfigured: { type: 'boolean', index: false },
           is_internal: { type: 'boolean', index: false },
           ssl: { type: 'binary' },
@@ -801,6 +835,46 @@ export const getSavedObjectTypes = (
               addedMappings: {},
             },
           ],
+        },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_exporter_config_yaml: { type: 'text' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_exporter_config_yaml: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_disable_beatsauth: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_disable_beatsauth: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
         },
       },
       migrations: {
@@ -1621,6 +1695,9 @@ export const getSavedObjectTypes = (
           packagePolicyCount: { type: 'integer' },
           created_at: { type: 'date' },
           updated_at: { type: 'date' },
+          verification_status: { type: 'keyword' },
+          verification_started_at: { type: 'date' },
+          verification_failed_at: { type: 'date' },
         },
       },
       modelVersions: {
@@ -1718,6 +1795,22 @@ export const getSavedObjectTypes = (
               created_at: schema.string(),
               updated_at: schema.string(),
             }),
+          },
+        },
+        4: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                verification_status: { type: 'keyword' },
+                verification_started_at: { type: 'date' },
+                verification_failed_at: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV4,
           },
         },
       },

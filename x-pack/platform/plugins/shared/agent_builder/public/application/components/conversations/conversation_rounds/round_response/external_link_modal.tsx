@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, euiTextBreakWord, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+
+const linkStyles = css`
+  ${euiTextBreakWord()}
+`;
 
 interface ExternalLinkModalProps {
   url: string | null;
@@ -55,7 +60,7 @@ export const ExternalLinkModal: React.FC<ExternalLinkModalProps> = ({ url, onClo
           defaultMessage="You are about to navigate to an external site:{lineBreak}{url}"
           values={{
             lineBreak: <br />,
-            url: <strong>{url}</strong>,
+            url: <strong css={linkStyles}>{url}</strong>,
           }}
         />
       </p>

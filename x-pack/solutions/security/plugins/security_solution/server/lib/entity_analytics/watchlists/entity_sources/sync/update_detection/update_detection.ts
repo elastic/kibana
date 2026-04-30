@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
@@ -55,40 +54,7 @@ const pickLaterTimestamp = (
   return current;
 };
 
-const getExistingEntitiesMap = async (
-  esClient: ElasticsearchClient,
-  watchlist: { name: string; id: string; index: string },
-  euids: string[]
-): Promise<Map<string, string>> => {
-  if (euids.length === 0) {
-    return new Map();
-  }
-
-  const uniqueEuids = uniq(euids);
-  const response = await esClient.search<{ entity?: { id?: string } }>({
-    index: watchlist.index,
-    size: uniqueEuids.length,
-    query: {
-      bool: {
-        must: [{ terms: { 'entity.id': uniqueEuids } }, { term: { 'watchlist.id': watchlist.id } }],
-      },
-    },
-    _source: ['entity.id'],
-  });
-
-  const map = new Map<string, string>();
-  for (const hit of response.hits.hits) {
-    const euid = hit._source?.entity?.id;
-    if (euid && hit._id) {
-      map.set(euid, hit._id);
-    }
-  }
-  return map;
-};
-
 const paginatedDetection = async <B>(
-  esClient: ElasticsearchClient,
-  watchlist: { name: string; id: string; index: string },
   search: SearchPage<B>,
   mapBucket: MapBucket<B>
 ): Promise<{ entities: WatchlistBulkEntity[]; maxTimestamp?: string }> => {
@@ -109,11 +75,7 @@ const paginatedDetection = async <B>(
         return acc;
       }, []);
 
-      const batchEuids = mapped.map((m) => m.euid);
-      const existingMap = await getExistingEntitiesMap(esClient, watchlist, batchEuids);
-
-      for (const { euid, entity, timestamp } of mapped) {
-        entity.existingEntityId = existingMap.get(euid);
+      for (const { entity, timestamp } of mapped) {
         maxTimestamp = pickLaterTimestamp(maxTimestamp, timestamp);
         allEntities.push(entity);
       }
@@ -164,7 +126,9 @@ export const createUpdateDetectionService = ({
         afterKey,
         pageSize,
         syncMarker,
-        allowedEntityIds
+        allowedEntityIds,
+        source.queryRule,
+        source.range
       );
       const response = await esClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
@@ -190,7 +154,7 @@ export const createUpdateDetectionService = ({
       return { euid, entity, timestamp: typeof ts === 'string' ? ts : undefined };
     };
 
-    return paginatedDetection(esClient, watchlist, search, mapBucket);
+    return paginatedDetection(search, mapBucket);
   };
 
   const detectForIndexSource = async (
@@ -217,7 +181,8 @@ export const createUpdateDetectionService = ({
         correlationValues,
         afterKey,
         pageSize,
-        source.queryRule
+        source.queryRule,
+        source.range
       );
       const response = await esClient.search<never, IndexSourceAggregation>({
         index: source.indexPattern,
@@ -236,7 +201,7 @@ export const createUpdateDetectionService = ({
       };
     };
 
-    return paginatedDetection(esClient, watchlist, search, mapBucket);
+    return paginatedDetection(search, mapBucket);
   };
 
   const detectForStoreSource = async (
@@ -248,21 +213,6 @@ export const createUpdateDetectionService = ({
       const euids = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
       for (const euid of euids) {
         allEntities.push({ euid, type: entityType, sourceId: source.id });
-      }
-    }
-
-    if (allEntities.length === 0) {
-      return { entities: [] as WatchlistBulkEntity[] };
-    }
-
-    // Check which entities already exist in the target index
-    const pageSize = 100;
-    for (let start = 0; start < allEntities.length; start += pageSize) {
-      const batch = allEntities.slice(start, start + pageSize);
-      const batchEuids = batch.map((e) => e.euid);
-      const existingMap = await getExistingEntitiesMap(esClient, watchlist, batchEuids);
-      for (const entity of batch) {
-        entity.existingEntityId = existingMap.get(entity.euid);
       }
     }
 

@@ -31,19 +31,20 @@ interface RetryServiceLike {
   waitForWithTimeout: (
     label: string,
     timeout: number,
-    predicate: () => Promise<boolean> | boolean
+    predicate: () => Promise<boolean>
   ) => Promise<void>;
 }
 
 type MaintainerRoutesLike = Pick<
   ReturnType<typeof entityMaintainerRouteHelpersFactory>,
-  'getMaintainers' | 'runMaintainer'
+  'getMaintainers' | 'runMaintainer' | 'runMaintainerSync' | 'startMaintainer' | 'stopMaintainer'
 >;
 
 interface EntityStoreUtilsLike {
   installEntityStoreV2: (body?: {
     entityTypes: string[];
     dataViewPattern?: string;
+    maintainerAutoStart?: boolean;
   }) => Promise<unknown>;
   forceUpdateEntityViaCrud: (params: {
     entityType: EntityType;
@@ -87,6 +88,82 @@ export const indexListOfDocumentsFactory = ({
       throw new Error(firstError.reason ?? firstError.type ?? 'bulk_create_error');
     }
   };
+};
+
+const maintainerLogsProperties = {
+  '@timestamp': { type: 'date' },
+  data_stream: {
+    properties: {
+      type: { type: 'keyword' },
+      dataset: { type: 'keyword' },
+      namespace: { type: 'keyword' },
+    },
+  },
+  event: {
+    properties: {
+      kind: { type: 'keyword' },
+      category: { type: 'keyword' },
+      type: { type: 'keyword' },
+      outcome: { type: 'keyword' },
+      module: { type: 'keyword' },
+    },
+  },
+  host: {
+    properties: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+    },
+  },
+  user: {
+    properties: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+      email: { type: 'keyword' },
+      domain: { type: 'keyword' },
+    },
+  },
+  service: {
+    properties: {
+      name: { type: 'keyword' },
+    },
+  },
+} as const;
+
+export const setupMaintainerLogsDataStream = async ({
+  es,
+  index,
+  template,
+}: {
+  es: Client;
+  index: string;
+  template: string;
+}): Promise<void> => {
+  await es.indices.deleteIndexTemplate({ name: template }, { ignore: [404] });
+  await es.indices.putIndexTemplate({
+    name: template,
+    index_patterns: [index],
+    data_stream: {},
+    template: {
+      mappings: {
+        properties: maintainerLogsProperties,
+      },
+    },
+  });
+  await es.indices.deleteDataStream({ name: index }, { ignore: [404] });
+  await es.indices.createDataStream({ name: index });
+};
+
+export const cleanupMaintainerLogsDataStream = async ({
+  es,
+  index,
+  template,
+}: {
+  es: Client;
+  index: string;
+  template: string;
+}): Promise<void> => {
+  await es.indices.deleteDataStream({ name: index }, { ignore: [404] });
+  await es.indices.deleteIndexTemplate({ name: template }, { ignore: [404] });
 };
 
 export type MaintainerEntitySeed =
@@ -272,15 +349,29 @@ export const riskScoreMaintainerScenarioFactory = ({
   const installAndRunMaintainer = async ({
     entityTypes = ['user', 'host'],
     dataViewPattern,
+    runMode = 'sync',
     minRuns = 1,
     timeoutMs = 60_000,
   }: {
     entityTypes?: string[];
     dataViewPattern?: string;
+    runMode?: 'sync' | 'async';
     minRuns?: number;
     timeoutMs?: number;
   } = {}) => {
-    await entityStoreUtils.installEntityStoreV2({ entityTypes, dataViewPattern });
+    await entityStoreUtils.installEntityStoreV2({
+      entityTypes,
+      dataViewPattern,
+      maintainerAutoStart: false,
+    });
+    await routes.stopMaintainer('risk-score');
+
+    if (runMode === 'sync') {
+      await routes.runMaintainerSync('risk-score');
+      return;
+    }
+
+    await routes.startMaintainer('risk-score');
     await waitForMaintainerRun({ retry, routes, minRuns, timeoutMs });
   };
 
@@ -324,6 +415,28 @@ export const riskScoreMaintainerScenarioFactory = ({
     });
   };
 
+  const setEntityResolutionTarget = async ({
+    testEntity,
+    resolvedToEntityId,
+  }: {
+    testEntity: TestMaintainerEntity;
+    resolvedToEntityId: string;
+  }) => {
+    await entityStoreUtils.forceUpdateEntityViaCrud({
+      entityType: getEntityTypeForTestEntity(testEntity),
+      body: {
+        entity: {
+          id: testEntity.expectedEuid,
+          relationships: {
+            resolution: {
+              resolved_to: resolvedToEntityId,
+            },
+          },
+        },
+      },
+    });
+  };
+
   const setupAndRun = async ({
     entities,
     alerts,
@@ -332,6 +445,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     riskScoreOverride,
     entityTypes = ['user', 'host'],
     dataViewPattern,
+    runMode = 'sync',
     minRuns = 1,
     timeoutMs = 60_000,
   }: {
@@ -342,6 +456,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     riskScoreOverride?: string;
     entityTypes?: string[];
     dataViewPattern?: string;
+    runMode?: 'sync' | 'async';
     minRuns?: number;
     timeoutMs?: number;
   }) => {
@@ -353,7 +468,7 @@ export const riskScoreMaintainerScenarioFactory = ({
       maxSignals,
       riskScoreOverride,
     });
-    await installAndRunMaintainer({ entityTypes, dataViewPattern, minRuns, timeoutMs });
+    await installAndRunMaintainer({ entityTypes, dataViewPattern, runMode, minRuns, timeoutMs });
     return { documentIds, testEntities };
   };
 
@@ -364,6 +479,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     installAndRunMaintainer,
     setEntityWatchlists,
     setEntityCriticality,
+    setEntityResolutionTarget,
     setupAndRun,
   };
 };

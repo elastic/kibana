@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IlmPolicyPhases } from '@kbn/streams-schema';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +20,6 @@ import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { SearchableSnapshotRepositoryField } from '../form';
 
 export interface SearchableSnapshotFieldSectionProps {
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   phaseName: 'cold' | 'frozen';
   dataTestSubj: string;
   searchableSnapshotRepositories: string[];
@@ -33,7 +30,6 @@ export interface SearchableSnapshotFieldSectionProps {
 }
 
 export const SearchableSnapshotFieldSection = ({
-  form,
   phaseName,
   dataTestSubj,
   searchableSnapshotRepositories,
@@ -42,8 +38,11 @@ export const SearchableSnapshotFieldSection = ({
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
 }: SearchableSnapshotFieldSectionProps) => {
-  const repositoryPath = `_meta.searchableSnapshot.repository`;
-  const enabledPath = `_meta.cold.searchableSnapshotEnabled`;
+  const { control, getValues, setValue, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
+  const repositoryPath =
+    `_meta.searchableSnapshot.repository` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+  const enabledPath =
+    `_meta.cold.searchableSnapshotEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({
     prefix: dataTestSubj,
@@ -51,19 +50,17 @@ export const SearchableSnapshotFieldSection = ({
 
   const isFrozenPhase = phaseName === 'frozen';
 
-  useFormData({ form, watch: isFrozenPhase ? [repositoryPath] : [enabledPath, repositoryPath] });
-
-  const enabledField = isFrozenPhase ? undefined : form.getFields()[enabledPath];
-  const repositoryField = form.getFields()[repositoryPath];
+  const watchPaths: Array<FieldPath<IlmPhasesFlyoutFormInternal>> = isFrozenPhase
+    ? [repositoryPath]
+    : [enabledPath, repositoryPath];
+  useWatch({ control, name: watchPaths });
 
   // Frozen phase always requires searchable snapshots.
-  const isEnabled = isFrozenPhase ? true : Boolean(enabledField?.value);
+  const isEnabled = isFrozenPhase ? true : Boolean(getValues(enabledPath));
 
   const repositoryOptions = [
     ...searchableSnapshotRepositories.map((repo) => ({ value: repo, text: repo })),
   ];
-
-  if (!repositoryField || (!isFrozenPhase && !enabledField)) return null;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -103,7 +100,8 @@ export const SearchableSnapshotFieldSection = ({
               data-test-subj={`${dataTestSubj}SearchableSnapshotSwitch`}
               onChange={(e) => {
                 const enabled = e.target.checked;
-                enabledField!.setValue(enabled);
+                setValue(enabledPath, enabled);
+                setTimeout(() => void trigger(), 0);
 
                 if (!enabled) return;
                 if (searchableSnapshotRepositories.length !== 1) return;
@@ -111,10 +109,10 @@ export const SearchableSnapshotFieldSection = ({
                 const repository = searchableSnapshotRepositories[0];
                 if (!repository) return;
 
-                const currentValue = String(repositoryField.value ?? '').trim();
+                const currentValue = String(getValues(repositoryPath) ?? '').trim();
                 if (currentValue !== '') return;
 
-                repositoryField.setValue(repository);
+                setValue(repositoryPath, repository);
               }}
             />
           </EuiFlexItem>
@@ -123,7 +121,6 @@ export const SearchableSnapshotFieldSection = ({
 
       {isEnabled && (
         <SearchableSnapshotRepositoryField
-          form={form}
           repositoryOptions={repositoryOptions}
           isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
           onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}

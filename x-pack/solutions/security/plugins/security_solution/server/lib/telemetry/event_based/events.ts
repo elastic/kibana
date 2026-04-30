@@ -320,6 +320,8 @@ export type RiskScoreMaintainerSkipReason =
   | 'feature_disabled'
   | 'risk_engine_disabled'
   | 'reset_to_zero_disabled'
+  | 'lookup_empty'
+  | 'resolution_disabled'
   | 'phase_not_available';
 export type RiskScoreMaintainerErrorKind =
   | 'esql_query_failed'
@@ -327,7 +329,11 @@ export type RiskScoreMaintainerErrorKind =
   | 'entity_store_write_failed'
   | 'entity_fetch_failed'
   | 'unexpected';
-export type RiskScoreMaintainerStage = 'phase1_base_scoring' | 'reset_to_zero';
+export type RiskScoreMaintainerStage =
+  | 'phase1_base_scoring'
+  | 'phase1_lookup_sync'
+  | 'phase2_resolution_scoring'
+  | 'reset_to_zero';
 
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
@@ -338,12 +344,15 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   durationMs: number;
   scoresWrittenTotal: number;
   scoresWrittenBase: number;
+  scoresWrittenResolution: number;
   scoresWrittenResetToZero: number;
   pagesProcessed: number;
   deferToPhase2Count: number;
   notInStoreCount: number;
+  lookupDocsUpserted: number;
+  lookupDocsDeleted: number;
+  lookupPrunedDocs: number;
   idBasedRiskScoringEnabled: boolean;
-  pipelineVersion: string;
 }> = {
   eventType: 'risk_score_maintainer_run_summary',
   schema: {
@@ -364,6 +373,10 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: { description: 'Risk score docs written during base scoring stage' },
     },
+    scoresWrittenResolution: {
+      type: 'long',
+      _meta: { description: 'Risk score docs written during resolution scoring stage' },
+    },
     scoresWrittenResetToZero: {
       type: 'long',
       _meta: { description: 'Risk score docs written during reset-to-zero stage' },
@@ -380,13 +393,21 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: { description: 'Entities classified as not_in_store' },
     },
+    lookupDocsUpserted: {
+      type: 'long',
+      _meta: { description: 'Lookup docs upserted during phase-1 lookup synchronization' },
+    },
+    lookupDocsDeleted: {
+      type: 'long',
+      _meta: { description: 'Lookup docs deleted during phase-1 lookup synchronization' },
+    },
+    lookupPrunedDocs: {
+      type: 'long',
+      _meta: { description: 'Lookup docs pruned after reset-to-zero cleanup' },
+    },
     idBasedRiskScoringEnabled: {
       type: 'boolean',
       _meta: { description: 'Whether Entity Store dual-write was enabled' },
-    },
-    pipelineVersion: {
-      type: 'keyword',
-      _meta: { description: 'Version identifier for V2 telemetry evolution' },
     },
   },
 };
@@ -403,15 +424,16 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
   scoresWritten?: number;
   deferToPhase2Count?: number;
   notInStoreCount?: number;
+  lookupDocsUpserted?: number;
+  lookupDocsDeleted?: number;
   resetBatchLimitHit?: boolean;
   idBasedRiskScoringEnabled: boolean;
-  pipelineVersion: string;
 }> = {
   eventType: 'risk_score_maintainer_stage_summary',
   schema: {
     namespace: { type: 'keyword', _meta: { description: 'Kibana space where scoring ran' } },
     entityType: { type: 'keyword', _meta: { description: 'Entity type scored (e.g. host, user)' } },
-    stage: { type: 'keyword', _meta: { description: 'Phase-1 stage identifier' } },
+    stage: { type: 'keyword', _meta: { description: 'Maintainer stage identifier' } },
     status: { type: 'keyword', _meta: { description: 'Stage outcome status' } },
     skipReason: {
       type: 'keyword',
@@ -438,6 +460,14 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: { optional: true, description: 'Entities classified as not_in_store' },
     },
+    lookupDocsUpserted: {
+      type: 'long',
+      _meta: { optional: true, description: 'Lookup docs upserted in this stage' },
+    },
+    lookupDocsDeleted: {
+      type: 'long',
+      _meta: { optional: true, description: 'Lookup docs deleted in this stage' },
+    },
     resetBatchLimitHit: {
       type: 'boolean',
       _meta: { optional: true, description: 'Whether reset-to-zero hit per-run batch limit' },
@@ -445,10 +475,6 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
     idBasedRiskScoringEnabled: {
       type: 'boolean',
       _meta: { description: 'Whether Entity Store dual-write was enabled' },
-    },
-    pipelineVersion: {
-      type: 'keyword',
-      _meta: { description: 'Version identifier for V2 telemetry evolution' },
     },
   },
 };
@@ -803,6 +829,66 @@ export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
       _meta: {
         description: 'Error message for a resource initialization failure',
       },
+    },
+  },
+};
+
+export const WATCHLIST_API_CALL_EVENT: EventTypeOpts<{
+  endpoint: string;
+  watchlist_id?: string;
+  watchlist_name?: string;
+  risk_modifier?: number;
+  is_managed?: boolean;
+  entity_source_count?: number;
+  entity_source_types?: string[];
+  error?: string;
+}> = {
+  eventType: 'watchlist_api_call',
+  schema: {
+    endpoint: {
+      type: 'keyword',
+      _meta: { description: 'The watchlist route path that was called' },
+    },
+    watchlist_id: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'The ID of the watchlist' },
+    },
+    watchlist_name: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Name of the watchlist, only captured for managed/prebuilt watchlists',
+      },
+    },
+    risk_modifier: {
+      type: 'float',
+      _meta: { optional: true, description: 'Risk modifier value applied to the watchlist (0–2)' },
+    },
+    is_managed: {
+      type: 'boolean',
+      _meta: {
+        optional: true,
+        description: 'Whether the watchlist is a managed/prebuilt watchlist',
+      },
+    },
+    entity_source_count: {
+      type: 'integer',
+      _meta: { optional: true, description: 'Number of entity sources linked at creation time' },
+    },
+    entity_source_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of entity source (index, entity_analytics_integration, store)',
+          optional: false,
+        },
+      },
+      _meta: { optional: true, description: 'Types of entity sources linked at creation time' },
+    },
+    error: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Error message if the call failed' },
     },
   },
 };
@@ -1763,13 +1849,123 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
 
 export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
   insightId: string;
+  insightType: string;
 }> = {
   eventType: 'endpoint_workflow_insights_remediated_event',
   schema: {
     insightId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID of the action that was sent to the endpoint',
+        description: 'The ID of the workflow insight that was remediated',
+        optional: false,
+      },
+    },
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The type of the workflow insight (e.g. incompatible_antivirus, policy_response_failure)',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT: EventTypeOpts<{
+  insightTypes: string[];
+  endpointCount: number;
+  hasConnectorId: boolean;
+  newExecutions: number;
+  deduplicatedExecutions: number;
+  failures: number;
+}> = {
+  eventType: 'endpoint_workflow_insights_scan_triggered_event',
+  schema: {
+    insightTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'An insight type requested in the scan',
+          optional: false,
+        },
+      },
+      _meta: {
+        description: 'The insight types requested in the scan',
+        optional: false,
+      },
+    },
+    endpointCount: {
+      type: 'long',
+      _meta: {
+        description: 'Number of endpoints targeted by the scan',
+        optional: false,
+      },
+    },
+    hasConnectorId: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a specific connector was selected for the scan',
+        optional: false,
+      },
+    },
+    newExecutions: {
+      type: 'long',
+      _meta: {
+        description: 'Number of new agent executions created',
+        optional: false,
+      },
+    },
+    deduplicatedExecutions: {
+      type: 'long',
+      _meta: {
+        description: 'Number of executions skipped because they were already in-flight',
+        optional: false,
+      },
+    },
+    failures: {
+      type: 'long',
+      _meta: {
+        description: 'Number of executions that failed to start',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT: EventTypeOpts<{
+  insightType: string;
+  count: number;
+}> = {
+  eventType: 'endpoint_workflow_insights_created_event',
+  schema: {
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of insights created',
+        optional: false,
+      },
+    },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'Number of insights created in this batch',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT: EventTypeOpts<{
+  insightType: string;
+}> = {
+  eventType: 'endpoint_workflow_insights_dismissed_event',
+  schema: {
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The type of the workflow insight (e.g. incompatible_antivirus, policy_response_failure)',
         optional: false,
       },
     },
@@ -1833,6 +2029,34 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
   },
 };
 
+export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
+  spaceId: string;
+  leadsGenerated: number;
+  sourceType: string;
+}> = {
+  eventType: 'lead_generation_execution',
+  schema: {
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space ID where lead generation was run',
+      },
+    },
+    leadsGenerated: {
+      type: 'long',
+      _meta: {
+        description: 'Number of leads successfully generated',
+      },
+    },
+    sourceType: {
+      type: 'keyword',
+      _meta: {
+        description: 'How lead generation was triggered: "adhoc" or "scheduled"',
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -1847,6 +2071,9 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
@@ -1858,6 +2085,7 @@ export const events = [
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+  WATCHLIST_API_CALL_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
@@ -1870,4 +2098,5 @@ export const events = [
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
+  LEAD_GENERATION_EXECUTION_EVENT,
 ];

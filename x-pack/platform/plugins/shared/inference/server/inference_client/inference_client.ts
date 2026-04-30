@@ -26,6 +26,7 @@ import type { RegexWorkerService } from '../chat_complete/anonymization/regex_wo
 import { createCallbackManager } from './callback_manager';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
 
 export function createInferenceClient({
   request,
@@ -39,6 +40,8 @@ export function createInferenceClient({
   endpointIdCache,
   callbacks,
   anonymization,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -51,6 +54,8 @@ export function createInferenceClient({
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -71,6 +76,8 @@ export function createInferenceClient({
         ...(replacementsEsClient ? { esClient: replacementsEsClient } : {}),
       },
     },
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
   });
 
   const chatComplete = createChatCompleteApi({

@@ -209,7 +209,6 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,
@@ -352,7 +351,6 @@ export {
 export {
   LENS_HEATMAP_ID,
   LENS_HEATMAP_CHART_SHAPES,
-  LENS_HEATMAP_CHART_NAMES,
   LENS_HEATMAP_GROUP_ID,
   HEATMAP_NAME,
   HEATMAP_LEGEND_NAME,
@@ -395,8 +393,6 @@ export {
 export {
   YAxisModes,
   SeriesTypes,
-  visualizationSubtypes,
-  visualizationTypes,
   AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
@@ -416,3 +412,4 @@ export {
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
 export { LENS_DATASOURCE_ID } from './embeddable/types';
 export type { LensDatasourceId } from './embeddable/types';
+export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';

@@ -80,7 +80,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
           </EuiTextColor>
         </EuiTitle>
       );
-    }, [dataTestSubj, title, isLink, euiTheme.colors.textPrimary]);
+    }, [dataTestSubj, isLink, title, euiTheme.colors.textPrimary]);
 
     const linkIcon = useMemo(() => {
       return (

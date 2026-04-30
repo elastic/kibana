@@ -19,6 +19,7 @@ import { getAlertsDefaultModel } from './default_config';
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 
 const onRowSelected = () => {};
 
@@ -31,8 +32,6 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   colIndex,
   setCellProps,
   alert,
-  ecsAlert,
-  legacyAlert,
   setIsActionLoading,
   refresh: alertsTableRefresh,
   clearSelection,
@@ -49,25 +48,38 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   } = useSelector((state: State) => selectTableById(state, tableType) ?? defaults);
   const eventContext = useContext(StatefulEventContext);
 
+  // Derive ecsAlert (nested) from alert
+  const ecsAlert = useMemo(() => expandDottedObject(alert) as Ecs, [alert]);
+
+  // Derive legacyAlert (flat {field, value[]} array) from alert
+  const legacyData = useMemo<TimelineItem['data']>(
+    () =>
+      Object.entries(alert).map(([field, value]) => ({
+        field,
+        value: (Array.isArray(value) ? value : [value]) as string[],
+      })),
+    [alert]
+  );
+
   const timelineItem = useMemo<TimelineItem>(
     () => ({
-      _id: (ecsAlert as Ecs)._id,
-      _index: (ecsAlert as Ecs)._index,
-      ecs: ecsAlert as Ecs,
-      data: legacyAlert as TimelineItem['data'],
+      _id: alert._id,
+      _index: alert._index,
+      ecs: ecsAlert,
+      data: legacyData,
     }),
-    [ecsAlert, legacyAlert]
+    [alert._id, alert._index, ecsAlert, legacyData]
   );
 
   // We are creating this object here so we can pass it to the cell action, which will then pass it to the flyout.
   // This way we can use the same flyout content code between Security Solution and Discover.
   const esHitRecord: EsHitRecord = useMemo(
     () => ({
-      _id: ecsAlert._id,
-      _index: ecsAlert._index,
+      _id: alert._id,
+      _index: alert._index,
       _source: alert,
     }),
-    [alert, ecsAlert]
+    [alert]
   );
 
   const setEventsLoading = useCallback<SetEventsLoading>(

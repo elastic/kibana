@@ -13,7 +13,10 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('inspectSyntheticsMonitor', function () {
@@ -25,6 +28,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const config = getService('config');
+    const kibanaServerUrl = `${config.get('servers.kibana.protocol')}://${config.get(
+      'servers.kibana.hostname'
+    )}:${config.get('servers.kibana.port')}`;
 
     let _monitors: MonitorFields[];
     let editorUser: RoleCredentials;
@@ -35,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await kibanaServer.savedObjects.clean({ types: ['synthetics-param'] });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       adminUser = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -79,7 +86,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
-              cloud_id: 'ftr_fake_cloud_id',
+              cloud_id: rawExpect.any(String),
               license_level: rawExpect.any(String),
               monitors: [
                 {
@@ -114,7 +121,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ipv4: true,
                       ipv6: true,
                       fields: {
+                        kibanaUrl: kibanaServerUrl,
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 300,
                       },
                       fields_under_root: true,
                       spaces: ['default'],
@@ -123,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ],
                 },
               ],
-              output: { hosts: [] },
+              output: { hosts: rawExpect.any(Array) },
             }),
           ],
           privateConfig: null,
@@ -183,7 +192,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       throttling: { download: 5, upload: 3, latency: 20 },
                       original_space: 'default',
                       fields: {
+                        kibanaUrl: kibanaServerUrl,
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 600,
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                         'monitor.project.id': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                       },
@@ -196,8 +207,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               ],
               license_level: rawExpect.any(String),
-              cloud_id: 'ftr_fake_cloud_id',
-              output: { hosts: [] },
+              cloud_id: rawExpect.any(String),
+              output: { hosts: rawExpect.any(Array) },
             }),
           ],
           privateConfig: null,
@@ -237,6 +248,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       delete compiledStream.id;
       delete compiledStream.processors[0].add_fields.fields.config_id;
+      delete compiledStream.processors[0].add_fields.fields.kibanaUrl;
 
       expect(enabledStream?.vars?.password.value).eql(
         '"-----BEGIN CERTIFICATE-----\n\nMIICMzBgNV\n\n\npAqEAJlQND\n\n-----END CERTIFICATE-----"'
@@ -276,6 +288,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {
                 meta: { space_id: 'default' },
                 'monitor.fleet_managed': true,
+                'monitor.interval': 300,
               },
             },
           },

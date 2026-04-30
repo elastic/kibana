@@ -59,7 +59,6 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
     evaluation: {
       query: {
         base: 'FROM logs-* | LIMIT 10',
-        condition: 'WHERE true',
       },
     },
     grouping: { fields: [] },
@@ -86,7 +85,6 @@ export function createRuleSoAttributes(
     evaluation: {
       query: {
         base: 'FROM logs-* | LIMIT 10',
-        condition: 'WHERE true',
       },
     },
     grouping: { fields: [] },
@@ -198,6 +196,7 @@ export function createAlertEvent(overrides: Partial<AlertEvent> = {}): AlertEven
     status: 'breached',
     source: 'internal',
     type: 'signal',
+    space_id: 'default',
     ...overrides,
   };
 }

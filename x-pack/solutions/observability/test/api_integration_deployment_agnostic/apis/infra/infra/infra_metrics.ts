@@ -38,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
     to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
     query: { bool: { must_not: [], filter: [], should: [], must: [] } },
+    schema: 'ecs',
   };
 
   describe('Hosts', () => {

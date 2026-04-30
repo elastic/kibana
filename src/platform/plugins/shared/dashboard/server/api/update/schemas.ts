@@ -13,12 +13,19 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
   // changing access control is not allowed through update endpoint
-  return getDashboardStateSchema(isDashboardAppRequest, { allowAccessControl: false });
+  const { access_control, ...rest } =
+    getDashboardStateSchema(isDashboardAppRequest).getPropSchemas();
+  return schema.object(rest);
 }
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
-    id: schema.string(),
+    id: schema.string({
+      meta: {
+        description:
+          'The unique ID of the dashboard, as returned by the create or search endpoints.',
+      },
+    }),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: asCodeMetaSchema,
   });

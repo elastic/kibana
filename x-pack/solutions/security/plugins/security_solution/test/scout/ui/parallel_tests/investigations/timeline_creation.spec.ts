@@ -87,7 +87,7 @@ spaceTest.describe(
 
       await spaceTest.step('Verify no timelines exist initially', async () => {
         await expect(timelinePage.timelinesTable).toContainText(
-          '0 timelines match the search criteria'
+          '0 Timelines match the search criteria'
         );
       });
 
