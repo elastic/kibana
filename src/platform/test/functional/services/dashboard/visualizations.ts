@@ -92,7 +92,7 @@ export class DashboardVisualizationsService extends FtrService {
     if (inViewMode) {
       await this.dashboard.switchToEditMode();
     }
-    await this.dashboardAddPanel.clickAddCustomVisualization();
+    await this.dashboardAddPanel.clickAddVega();
     await this.visualize.saveVisualizationExpectSuccess(name, {
       saveAsNew: false,
       redirectToOrigin: true,

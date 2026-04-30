@@ -120,6 +120,16 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
+  /**
+   * Event-chain hop depth when scheduled by the event-driven trigger handler.
+   * Root copy survives partial `context` updates (same pattern as telemetry extraction).
+   */
+  eventChainDepth?: number;
+  /**
+   * Workflow ids that already ran earlier in this event chain (for cycle detection).
+   * Root copy survives partial `context` updates.
+   */
+  eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
 }

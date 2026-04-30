@@ -72,6 +72,7 @@ export function registerReadRoute(
             ctx,
             getCachedDashboardStateSchema(),
             req.params.id,
+            req.serverTiming,
             isDashboardAppRequest
           );
           return res.ok({
