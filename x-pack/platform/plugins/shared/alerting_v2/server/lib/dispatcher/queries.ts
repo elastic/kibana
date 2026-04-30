@@ -80,7 +80,8 @@ export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
  *
  * Each literal is rendered as `"<value>", ` — that's two surrounding quotes,
  * a comma, and a space (4 bytes) on top of the literal length. We add 2 more
- * bytes as a margin for backslash escapes when the value contains quotes.
+ * bytes as a margin for backslash escapes when the value contains quotes,
+ * for a total overhead of `length + 6` bytes per literal.
  */
 const PER_LITERAL_OVERHEAD_BYTES = 6;
 
