@@ -100,26 +100,18 @@ pivot:
   #   - ">release-highlight"
 
   # Area definitions with labels
-  # Keys are area display names, values are label strings or lists
-  # String form: "label1, label2" | List form: [label1, label2]
   areas:
-    "Agent Builder": "feature:agent-builder"
-    "AI for security":
-      - "Feature:AutomaticImport"
-      - "Feature:SIEMMigrations"
-      - "Team:Automatic Migrations"
-      - "Team:Security Generative AI"
-      - "Team:Security-Scalability"
-    Alerting:
+    "Alerting and Reporting":
       - "Feature:Alerting"
       - "Team:Alerting Services"
       - "Feature:Actions"
       - "Team:ResponseOps"
       - "Team:Cases"
       - "Feature:Cases"
-    "Cloud security":
-      - "Team:Cloud Security"
-    Connectivity: "Feature:Actions/ConnectorTypes"
+      - "Feature:Embedding"
+      - "Feature:SharingURLs"
+      - "Feature:Reporting"
+      - "Team:Reporting Services"
     "Dashboards and Visualizations":
       - "Feature:Dashboard"
       - "Feature:Drilldowns"
@@ -146,118 +138,30 @@ pivot:
       - "Feature:XYAxis"
       - "Feature:Graph"
       - "Feature:MetricVis"
-      - "Team:Visualizations"
+      - Team:Visualizations"
       - "Feature:Canvas"
       - "Feature:Maps"
-    "Data ingestion and Fleet":
-      - "Team:Fleet"
-      - "Feature:Fleet"
-      - "Ingest"
-      - "Feature:Ingest Node Pipelines"
-    "Data management":
-      - "Feature:Data Views"
-      - "Feature:Index Management"
-      - "Feature:FieldFormatters"
-      - "Feature:ILM"
-      - "Feature:Transforms"
-    "Detection rules and alerts":
-      - "Feature:Detection Rules"
-      - "Feature:Detection Alerts"
-      - "Team:Detections and Resp"
-      - "Team:Detection Rule Management"
-      - "Feature:Rule Exceptions"
-      - "Team:Detection Engine"
-      - "Team:Detection Alerts"
-    "Developer tools":
-      - "Feature:Console"
-      - "Feature:Dev Tools"
-      - "Feature:Inspector"
-    Discover:
+    "Discover and ES|QL":
       - "Feature:Discover"
       - "Team:DataDiscovery"
+      - "Team:ESQL"
       - "Feature:BackgroundSearch"
       - "Feature:DiscoverTabs"
       - "Feature:UnifiedDataTable"
       - "Feature:UnifiedDocViewer"
       - "Feature:UnifiedFieldList"
-    "Endpoint security":
-      - "Team:Defend Workflows"
-    "Entity analytics":
-      - "Feature:Entity Analytics"
-      - "Team:Entity Analytics"
-    "ES|QL editor":
-      - "Team:ESQL"
-      # - "Feature:ESQL Editor"
-    "Investigations":
-      - "Feature:Osquery"
-      - "Feature:Timeline"
-      - "Team:Threat Hunting:Investigations"
-      - "Team:Cases"
-      - "Osquery"
-    "Kibana platform":
-      - "Team:SharedUX"
-      - "Team:Design"
-      - "Feature:Add Data"
-      - "Feature:Home"
-      - "EUI"
-      - "Feature:license"
-      - "Feature:watcher"
-      - "Feature:Kibana Management"
-      - "Feature:Snapshot and Restore"
-      - "Team:Stack Management"
-      - "Feature:CCR"
-      - "Feature:Upgrade Assistant"
-      - "Team:Monitoring"
-      - "Feature:Telemetry"
-      - "Feature:Stack Monitoring"
-      - "Team:Operations"
-      - "Kibana UI"
-      - "Feature:Header"
-      - "Team:Core"
-      - "Feature:Plugins"
-      - "Project:i18n"
-      - "Feature:Saved Objects"
-      - "Team:Security"
-      - "Feature:Security/Spaces"
-      - "Feature:users and roles"
-      - "Feature:Security/Authentication"
-      - "Feature:Security/Authorization"
-      - "Feature:Security/Feature Controls"
-      - "Feature:Query Bar"
-      - "Feature:Courier"
-      - "Feature:Filters"
-      - "Feature:Timepicker"
-      - "Feature:Highlight"
-      - "Feature:KQL"
-      - "Feature:Rollups"
-      - "Feature:Chrome"
-      - "Feature:http"
-      - "Feature:OAS"
-      - "Feature:logging"
-    "Machine learning":
-      - ":ml"
-      - "Feature:Anomaly Detection"
-      - "Feature:Data Frames"
-      - "Feature:File Data Viz"
-      - "Feature:ml-results"
-      - "Feature:Data Frame Analytics"
-      - "Feature:Inference UI"
-      - "Feature:ML/AIOps"
-    "Sharing and reporting":
-      - "Feature:Embedding"
-      - "Feature:SharingURLs"
-      - "Feature:Reporting"
-      - "Team:Reporting Services"
-    Workflows:
-      # - "Feature:Workflows"
-      - "Team:One Workflow" 
-    "Elastic Observability solution":
+    "Other": "release_note_area:other"
+
+  # Product definitions with labels (optional).
+  products:
+    'observability':
       - "Feature:Observability Home"
       - "Feature:SLO"
       - "Team:obs-ux-management"
       - "Team:Obs AI Assistant"
-      - "Team:obs-ux-infra_services"
+      - "Team:obs-ux-infra_services - DEPRECATED"
       - "Team:obs-ux-logs"
+      - "Team:obs-onboarding"
       - "Team:obs-knowledge"
       - "Team:obs-entities"
       - "ci:project-deploy-observability"
@@ -270,29 +174,46 @@ pivot:
       - "Feature:Logs UI"
       - "Feature:Infra UI"
       - "Feature:Service Maps"
+      - "Team:actionable-obs"
+      - "Team:obs-exploration"
+      - "Team:obs-presentation"
+      - "Team:obs-ai"
+      - "Team:Observability"
+      - "author:actionable-obs"
       - "Feature:Streams"
-    "Elastic Security solution":
+    'security':
+      - "Team:SIEM"
+      - "Team:SecuritySolution"
       - "Team: SecuritySolution"
+      - "Team:Endpoint Response"
+      - "Team:Entity Analytics"
+      - "Team:Security Generative AI"
       - "Team:Threat Hunting"
-    "Elasticsearch solution":
-      - "Team:Search"
-      - "Feature:Search Profiler"
-      - "Team:Elasticsearch UI"
-      - "Feature:Search"
-      - "Project:AsyncSearch"
+      - "Team:Threat Hunting:Explore"
+      - "Team:Threat Hunting:Investigations"
+      - "Team:Detections and Resp"
+      - "Team:Asset Management"
+      - "Team:Onboarding and Lifecycle Mgt"
+      - "Team:Security Solution Platform"
+      - "Team:Detection Alerts"
+      - "Team: CTI"
+      - "Team:CTI"
+      - "Team:Threat Hunting:Cases"
+      - "Team:Cloud Security"
+      - "Team:Detection Engine"
+      - "Team:Defend Workflows"
+      - "Team:Detection Rules"
+      - "Team:Security-Scalability"
+      - "Team:Detection Rule Management"
+      - "Feature:SIEMMigrations"
+      - "Feature:Timeline"
+      - "Feature:Detection Rules"
+      - "Feature:Detection Alerts"
+      - "Feature:Entity Analytics"
+      - "Feature:Rule Exceptions"
+      - "Feature:AutomaticImport"
+      - "Feature:Event Correlation (EQL) Rule"
 
-  # Product definitions with labels (optional).
-  # Keys are product spec strings; values are label strings or lists that trigger that product.
-  # A product spec string is: "<product-id> [<target-version>] [<lifecycle>]"
-  #   - Product ID only:           "elasticsearch"
-  #   - Product + target:          "kibana 9.2.0"
-  #   - Full spec:                 "cloud-serverless 2025-06 ga"
-  # When a PR has labels matching any product entry, all matching products are added.
-  # Precedence: --products CLI option > pivot.products label mapping > products.default > repo inference.
-  #
-  # products:
-  #   'elasticsearch':
-  #     - ":stack/elasticsearch"
   #   'kibana':
   #     - ":stack/kibana"
   #   'cloud-serverless':
@@ -361,46 +282,46 @@ rules:
   #   #   - cloud-serverless
   #   #   - cloud-hosted
   #   # Type/area filtering:
-  #   # exclude_types: "deprecation, known-issue"
+    exclude_types: "docs"
   #   # exclude_areas:
   #   #   - "Internal"
   #   # Per-product overrides:
-      products:
-        'cloud-serverless':
-          exclude_types:
-            - docs
-        'kibana':
-          exclude_types:
-            - docs
-          match_areas: all
-          exclude_areas:
-          - "AI for security"
-          - "Cloud security"
-          - "Detection rules and alerts"
-          - "Endpoint security"
-          - "Entity analytics"
-          - "Elastic Observability solution"
-          - "Elastic Security solution"
-          - "Investigations"
-        'observability':
-          exclude_types:
-            - docs
+      # products:
+        # 'cloud-serverless':
+        #   exclude_types:
+        #     - docs
+        # 'kibana':
+        #   exclude_types:
+        #     - docs
+          # match_areas: all
+          # exclude_areas:
+          # - "AI for security"
+          # - "Cloud security"
+          # - "Detection rules and alerts"
+          # - "Endpoint security"
+          # - "Entity analytics"
+          # - "Elastic Observability solution"
+          # - "Elastic Security solution"
+          # - "Investigations"
+        # 'observability':
+        #   exclude_types:
+        #     - docs
           # Include changelogs that have (at least) the following areas:
-          match_areas: any
-          include_areas:
-            - "Elastic Observability solution"
-        'security':
-          exclude_types:
-            - docs
-          match_areas: any
-          include_areas:
-            - "AI for security"
-            - "Cloud security"
-            - "Detection rules and alerts"
-            - "Endpoint security"
-            - "Elastic Security solution"   
-            - "Entity analytics"
-            - "Investigations"
+          # match_areas: any
+          # include_areas:
+          #   - "Elastic Observability solution"
+        # 'security':
+        #   exclude_types:
+        #     - docs
+          # match_areas: any
+          # include_areas:
+          #   - "AI for security"
+          #   - "Cloud security"
+          #   - "Detection rules and alerts"
+          #   - "Endpoint security"
+          #   - "Elastic Security solution"   
+          #   - "Entity analytics"
+          #   - "Investigations"
 
 # Bundle configuration (profiles and defaults)
 bundle:
@@ -422,21 +343,18 @@ bundle:
   # Use YAML literal block scalar (|) for multiline descriptions. See docs/contribute/changelog.md for examples.
   # description: |
   #   This release includes new features and bug fixes.
-  # PR/issue link allowlist: when set (including []), only links to these owner/repo pairs are kept
-  # in bundle output; others are rewritten to '# PRIVATE:' sentinels (requires resolve: true).
-  # There is no implicit allow: you must list every repo whose links should appear...
 
   # Named bundle profiles for different release scenarios
   profiles:
     kibana-release:
-      output_products: "kibana {version}"
+      output_products: "kibana {version} {lifecycle}"
       output: "kibana/{version}.yaml"
     observability-release:
-      output_products: "observability {version}"
+      output_products: "observability {version} {lifecycle}"
       output: "observability/{version}.yaml"
     security-release:
-      output_products: "security {version}"
+      output_products: "security {version} {lifecycle}"
       output: "security/{version}.yaml"
     serverless-release:
-      output_products: "cloud-serverless {version}"
+      output_products: "cloud-serverless {version} {lifecycle}"
       output: "cloud-serverless/{version}.yaml"
