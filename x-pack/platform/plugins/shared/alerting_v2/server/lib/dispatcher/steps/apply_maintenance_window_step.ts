@@ -5,31 +5,26 @@
  * 2.0.
  */
 
+import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
 import { inject, injectable } from 'inversify';
-import type { MatcherContext } from '@kbn/alerting-v2-schemas';
-import type {
-  ActiveMaintenanceWindow,
-  MaintenanceWindowServiceContract,
-} from '../../services/maintenance_window_service/maintenance_window_service';
+import type { MaintenanceWindowServiceContract } from '../../services/maintenance_window_service/maintenance_window_service';
 import { MaintenanceWindowServiceInternalToken } from '../../services/maintenance_window_service/tokens';
+import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
 import type {
   AlertEpisode,
-  DispatcherStep,
   DispatcherPipelineState,
+  DispatcherStep,
   DispatcherStepOutput,
   Rule,
 } from '../types';
+import { createMatcherContext } from './utils/matcher_context';
 
 /**
  * Suppresses episodes whose `last_event_timestamp` falls within an active
  * maintenance window in the same space, and whose `episode.data` matches the
  * maintenance window's optional episode-data KQL filter (`scope.episodes.kql`,
  * experimental).
- *
- * The category filter (`mw.categoryIds`) is intentionally NOT applied here —
- * v2 rules have no category concept yet. Once v2 introduces a category
- * vocabulary, gate the candidate set on it before the schedule check.
  *
  * The DSL form of `scope.episodes` is built and stored on save but is not
  * evaluated at runtime; only the KQL string is consulted in-memory.
@@ -44,25 +39,17 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], suppressed = [], rules = new Map(), input } = state;
+    const { dispatchable = [], suppressed = [], rules = new Map() } = state;
     if (dispatchable.length === 0) {
       return { type: 'continue' };
     }
 
-    const activeWindows = await this.maintenanceWindowService.getActiveMaintenanceWindows(
-      input.startedAt
-    );
-    if (activeWindows.length === 0) {
+    const enabledWindows = await this.maintenanceWindowService.getEnabledMaintenanceWindows();
+    if (enabledWindows.length === 0) {
       return { type: 'continue' };
     }
 
-    const windowsBySpace = new Map<string, ActiveMaintenanceWindow[]>();
-    for (const mw of activeWindows) {
-      const arr = windowsBySpace.get(mw.spaceId);
-      if (arr) arr.push(mw);
-      else windowsBySpace.set(mw.spaceId, [mw]);
-    }
-
+    const windowsBySpace = Map.groupBy(enabledWindows, (mw) => mw.spaceId);
     const newDispatchable: AlertEpisode[] = [];
     const newlySuppressed: Array<AlertEpisode & { reason: string }> = [];
 
@@ -74,9 +61,9 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
       }
 
       const candidates = windowsBySpace.get(rule.spaceId) ?? [];
-      const matched = findMatchingMaintenanceWindow(candidates, episode, rule);
-      if (matched) {
-        newlySuppressed.push({ ...episode, reason: `maintenance_window:${matched.id}` });
+      const maintenanceWindow = findMatchingMaintenanceWindow(candidates, episode, rule);
+      if (maintenanceWindow) {
+        newlySuppressed.push({ ...episode, reason: `maintenance_window:${maintenanceWindow.id}` });
       } else {
         newDispatchable.push(episode);
       }
@@ -126,26 +113,5 @@ function findMatchingMaintenanceWindow(
 }
 
 function isEventTimestampWithinWindow(mw: ActiveMaintenanceWindow, eventTimeMs: number): boolean {
-  return mw.events.some(
-    (event) => Date.parse(event.gte) <= eventTimeMs && eventTimeMs <= Date.parse(event.lte)
-  );
-}
-
-function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
-  return {
-    last_event_timestamp: episode.last_event_timestamp,
-    group_hash: episode.group_hash,
-    episode_id: episode.episode_id,
-    episode_status: episode.episode_status,
-    ...(episode.data ? { data: episode.data } : {}),
-    rule: {
-      id: rule.id,
-      name: rule.name,
-      description: rule.description,
-      tags: rule.tags,
-      enabled: rule.enabled,
-      createdAt: rule.createdAt,
-      updatedAt: rule.updatedAt,
-    },
-  };
+  return mw.events.some((event) => event.gteMs <= eventTimeMs && eventTimeMs <= event.lteMs);
 }

@@ -17,3 +17,5 @@ export {
 } from './get_maintenance_window_date_and_status';
 
 export { getMaintenanceWindowExpirationDate } from './get_maintenance_window_expiration_date';
+
+export { buildScopeWithDsl } from './build_scope_with_dsl';

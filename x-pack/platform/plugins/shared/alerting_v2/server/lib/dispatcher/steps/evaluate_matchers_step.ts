@@ -8,6 +8,7 @@
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
+import { createMatcherContext } from './utils/matcher_context';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
@@ -67,23 +68,4 @@ export function evaluateMatchers(
   }
 
   return matched;
-}
-
-function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
-  return {
-    last_event_timestamp: episode.last_event_timestamp,
-    group_hash: episode.group_hash,
-    episode_id: episode.episode_id,
-    episode_status: episode.episode_status,
-    ...(episode.data ? { data: episode.data } : {}),
-    rule: {
-      id: rule.id,
-      name: rule.name,
-      description: rule.description,
-      tags: rule.tags,
-      enabled: rule.enabled,
-      createdAt: rule.createdAt,
-      updatedAt: rule.updatedAt,
-    },
-  };
 }

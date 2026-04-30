@@ -7,8 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
 import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
@@ -22,7 +20,7 @@ import {
 } from '../../transforms';
 import { createMaintenanceWindowSo } from '../../../data';
 import { createMaintenanceWindowParamsSchema } from './schemas';
-import { getMaintenanceWindowExpirationDate } from '../../lib';
+import { buildScopeWithDsl, getMaintenanceWindowExpirationDate } from '../../lib';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -45,35 +43,18 @@ export async function createMaintenanceWindow(
 
   try {
     if (scope?.alerting) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          indexPattern,
-          [{ query: scope.alerting.kql, language: 'kuery' }],
-          scope.alerting.filters as Filter[],
-          esQueryConfig
-        )
+      scopedQueryWithGeneratedValue = buildScopeWithDsl(
+        scope.alerting,
+        indexPattern,
+        esQueryConfig
       );
-
-      scopedQueryWithGeneratedValue = {
-        ...scope.alerting,
-        dsl,
-      };
     }
-
     if (scope?.episodes) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          indexPattern,
-          [{ query: scope.episodes.kql, language: 'kuery' }],
-          scope.episodes.filters as Filter[],
-          esQueryConfig
-        )
+      scopeEpisodesWithGeneratedValue = buildScopeWithDsl(
+        scope.episodes,
+        indexPattern,
+        esQueryConfig
       );
-
-      scopeEpisodesWithGeneratedValue = {
-        ...scope.episodes,
-        dsl,
-      };
     }
   } catch (error) {
     throw Boom.badRequest(

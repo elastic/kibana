@@ -9,5 +9,5 @@ import type { MaintenanceWindowServiceContract } from './maintenance_window_serv
 
 export const createMaintenanceWindowServiceMock =
   (): jest.Mocked<MaintenanceWindowServiceContract> => ({
-    getActiveMaintenanceWindows: jest.fn().mockResolvedValue([]),
+    getEnabledMaintenanceWindows: jest.fn().mockResolvedValue([]),
   });

@@ -6,11 +6,11 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
 import {
-  MaintenanceWindowService,
   DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS,
+  MaintenanceWindowService,
 } from './maintenance_window_service';
 
 const buildSo = (
@@ -64,27 +64,32 @@ describe('MaintenanceWindowService', () => {
     client = savedObjectsClientMock.create();
   });
 
-  it('returns only enabled MWs whose schedule covers the given time', async () => {
-    const inWindow = buildSo('mw-active', 'default', {
-      events: [{ gte: '2026-04-29T10:00:00.000Z', lte: '2026-04-29T12:00:00.000Z' }],
+  it('returns all enabled MWs across spaces with events pre-parsed to ms', async () => {
+    const past = buildSo('mw-past', 'default', {
+      events: [{ gte: '2025-01-01T00:00:00.000Z', lte: '2025-01-01T01:00:00.000Z' }],
     });
-    const outOfWindow = buildSo('mw-future', 'default', {
+    const future = buildSo('mw-future', 'team-a', {
       events: [{ gte: '2099-01-01T00:00:00.000Z', lte: '2099-01-01T01:00:00.000Z' }],
     });
 
     client.createPointInTimeFinder.mockReturnValue(
-      mockFinderForSavedObjects([inWindow, outOfWindow]) as ReturnType<
+      mockFinderForSavedObjects([past, future]) as ReturnType<
         SavedObjectsClientContract['createPointInTimeFinder']
       >
     );
 
     const service = new MaintenanceWindowService(client, buildLogger());
-    const now = new Date('2026-04-29T11:00:00.000Z');
 
-    const result = await service.getActiveMaintenanceWindows(now);
+    const result = await service.getEnabledMaintenanceWindows();
 
-    expect(result.map((mw) => mw.id)).toEqual(['mw-active']);
-    expect(result[0].spaceId).toBe('default');
+    expect(result.map((mw) => mw.id).sort()).toEqual(['mw-future', 'mw-past']);
+    expect(result.find((mw) => mw.id === 'mw-past')!.events).toEqual([
+      {
+        gteMs: Date.parse('2025-01-01T00:00:00.000Z'),
+        lteMs: Date.parse('2025-01-01T01:00:00.000Z'),
+      },
+    ]);
+    expect(result.find((mw) => mw.id === 'mw-future')!.spaceId).toBe('team-a');
   });
 
   it('passes namespaces:["*"] for cross-space find', async () => {
@@ -95,7 +100,7 @@ describe('MaintenanceWindowService', () => {
     );
 
     const service = new MaintenanceWindowService(client, buildLogger());
-    await service.getActiveMaintenanceWindows(new Date());
+    await service.getEnabledMaintenanceWindows();
 
     expect(client.createPointInTimeFinder).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -118,11 +123,9 @@ describe('MaintenanceWindowService', () => {
     );
 
     const service = new MaintenanceWindowService(client, buildLogger());
-    const now = new Date('2026-04-29T12:00:00.000Z');
-
-    await service.getActiveMaintenanceWindows(now);
-    await service.getActiveMaintenanceWindows(now);
-    await service.getActiveMaintenanceWindows(now);
+    await service.getEnabledMaintenanceWindows();
+    await service.getEnabledMaintenanceWindows();
+    await service.getEnabledMaintenanceWindows();
 
     expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(1);
   });
@@ -138,12 +141,10 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, buildLogger(), 10);
-    const now = new Date('2026-04-29T12:00:00.000Z');
-
-    await service.getActiveMaintenanceWindows(now);
+    const service = new MaintenanceWindowService(client, buildLogger(), { cacheIntervalMs: 10 });
+    await service.getEnabledMaintenanceWindows();
     await new Promise((resolve) => setTimeout(resolve, 25));
-    await service.getActiveMaintenanceWindows(now);
+    await service.getEnabledMaintenanceWindows();
 
     expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(2);
   });
@@ -162,7 +163,7 @@ describe('MaintenanceWindowService', () => {
     const logger = buildLogger();
     const service = new MaintenanceWindowService(client, logger);
 
-    const result = await service.getActiveMaintenanceWindows(new Date());
+    const result = await service.getEnabledMaintenanceWindows();
 
     expect(result).toEqual([]);
     expect(logger.error).toHaveBeenCalled();
@@ -181,7 +182,7 @@ describe('MaintenanceWindowService', () => {
     );
 
     const service = new MaintenanceWindowService(client, buildLogger());
-    const result = await service.getActiveMaintenanceWindows(new Date('2026-04-29T12:00:00.000Z'));
+    const result = await service.getEnabledMaintenanceWindows();
 
     expect(result).toEqual([]);
   });

@@ -5,62 +5,50 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
+import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
+import type { ActiveMaintenanceWindow, CacheEntry, MaintenanceWindowServiceOptions } from './types';
 
-/** Default cache TTL for active maintenance window lookups. */
 export const DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS = 60 * 1000;
-
-export interface ActiveMaintenanceWindow {
-  id: string;
-  spaceId: string;
-  enabled: boolean;
-  events: Array<{ gte: string; lte: string }>;
-  scope?: MaintenanceWindowAttributes['scope'];
-}
 
 export interface MaintenanceWindowServiceContract {
   /**
-   * Returns enabled maintenance windows whose schedule is active at the given time,
-   * across all spaces. Uses an internal-user saved-object client and caches results
-   * for {@link DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS}.
+   * Returns all enabled maintenance windows across all spaces, with each MW's
+   * event windows pre-parsed to numeric ms. Callers do per-event matching
+   * against the relevant timestamp (e.g. an episode's `last_event_timestamp`),
+   * not "is the MW active right now" — an episode that fired during a window
+   * that has since closed must still be suppressed when its timestamp falls
+   * inside the window.
    */
-  getActiveMaintenanceWindows(now: Date): Promise<ActiveMaintenanceWindow[]>;
-}
-
-interface CacheEntry {
-  expiresAt: number;
-  windows: Array<Omit<ActiveMaintenanceWindow, 'spaceId'> & { spaceId: string }>;
+  getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]>;
 }
 
 @injectable()
 export class MaintenanceWindowService implements MaintenanceWindowServiceContract {
   private cache: CacheEntry | null = null;
-  private inFlight: Promise<CacheEntry['windows']> | null = null;
+  private inFlight: Promise<ActiveMaintenanceWindow[]> | null = null;
+  private readonly cacheIntervalMs: number;
 
   constructor(
     @inject(MaintenanceWindowSavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
     @inject(LoggerServiceToken)
     private readonly logger: LoggerServiceContract,
-    private readonly cacheIntervalMs: number = DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS
-  ) {}
-
-  public async getActiveMaintenanceWindows(now: Date): Promise<ActiveMaintenanceWindow[]> {
-    const enabledWindows = await this.getEnabledWindows();
-    const nowMs = now.getTime();
-
-    return enabledWindows.filter((mw) =>
-      mw.events.some((event) => Date.parse(event.gte) <= nowMs && nowMs <= Date.parse(event.lte))
-    );
+    options: MaintenanceWindowServiceOptions = {}
+  ) {
+    this.cacheIntervalMs = options.cacheIntervalMs ?? DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS;
   }
 
-  private async getEnabledWindows(): Promise<CacheEntry['windows']> {
+  public async getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]> {
+    return this.getEnabledWindows();
+  }
+
+  private async getEnabledWindows(): Promise<ActiveMaintenanceWindow[]> {
     const now = Date.now();
     if (this.cache && this.cache.expiresAt > now) {
       return this.cache.windows;
@@ -85,8 +73,8 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
     return this.inFlight;
   }
 
-  private async fetchEnabledWindows(): Promise<CacheEntry['windows']> {
-    const windows: CacheEntry['windows'] = [];
+  private async fetchEnabledWindows(): Promise<ActiveMaintenanceWindow[]> {
+    const windows: ActiveMaintenanceWindow[] = [];
 
     try {
       const finder = this.client.createPointInTimeFinder<MaintenanceWindowAttributes>({
@@ -107,7 +95,10 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
             id: doc.id,
             spaceId,
             enabled: doc.attributes.enabled,
-            events: doc.attributes.events,
+            events: doc.attributes.events.map((event) => ({
+              gteMs: Date.parse(event.gte),
+              lteMs: Date.parse(event.lte),
+            })),
             ...(doc.attributes.scope !== undefined ? { scope: doc.attributes.scope } : {}),
           });
         }

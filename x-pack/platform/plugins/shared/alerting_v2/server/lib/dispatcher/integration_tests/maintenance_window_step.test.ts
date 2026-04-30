@@ -51,7 +51,9 @@ describe('MaintenanceWindowService integration', () => {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
     });
 
-    service = new MaintenanceWindowService(client, createLoggerService().loggerService, 0);
+    service = new MaintenanceWindowService(client, createLoggerService().loggerService, {
+      cacheIntervalMs: 0,
+    });
   });
 
   afterAll(async () => {
@@ -91,28 +93,34 @@ describe('MaintenanceWindowService integration', () => {
     return created.id;
   };
 
-  it('returns enabled MW whose schedule covers the given time, with spaceId derived from namespace', async () => {
+  it('returns enabled MWs with events pre-parsed to ms and spaceId derived from namespace', async () => {
     const id = await createMw({
       title: 'in-window',
       events: [{ gte: '2026-01-22T07:00:00.000Z', lte: '2026-01-22T08:00:00.000Z' }],
     });
 
-    const result = await service.getActiveMaintenanceWindows(new Date('2026-01-22T07:30:00.000Z'));
+    const result = await service.getEnabledMaintenanceWindows();
 
     const found = result.find((mw) => mw.id === id);
     expect(found).toBeDefined();
     expect(found?.spaceId).toBe('default');
+    expect(found?.events).toEqual([
+      {
+        gteMs: Date.parse('2026-01-22T07:00:00.000Z'),
+        lteMs: Date.parse('2026-01-22T08:00:00.000Z'),
+      },
+    ]);
   });
 
-  it('omits MW whose schedule is outside the given time', async () => {
+  it('returns enabled MWs whose events are entirely in the past (per-episode filtering happens in the dispatcher step)', async () => {
     const id = await createMw({
       title: 'past',
       events: [{ gte: '2025-01-01T00:00:00.000Z', lte: '2025-01-01T01:00:00.000Z' }],
     });
 
-    const result = await service.getActiveMaintenanceWindows(new Date('2026-01-22T07:30:00.000Z'));
+    const result = await service.getEnabledMaintenanceWindows();
 
-    expect(result.find((mw) => mw.id === id)).toBeUndefined();
+    expect(result.find((mw) => mw.id === id)).toBeDefined();
   });
 
   it('omits disabled MW', async () => {
@@ -122,7 +130,7 @@ describe('MaintenanceWindowService integration', () => {
       events: [{ gte: '2026-01-22T07:00:00.000Z', lte: '2026-01-22T08:00:00.000Z' }],
     });
 
-    const result = await service.getActiveMaintenanceWindows(new Date('2026-01-22T07:30:00.000Z'));
+    const result = await service.getEnabledMaintenanceWindows();
 
     expect(result.find((mw) => mw.id === id)).toBeUndefined();
   });
@@ -140,7 +148,7 @@ describe('MaintenanceWindowService integration', () => {
       },
     });
 
-    const result = await service.getActiveMaintenanceWindows(new Date('2026-01-22T07:30:00.000Z'));
+    const result = await service.getEnabledMaintenanceWindows();
 
     const found = result.find((mw) => mw.id === id);
     expect(found?.scope?.episodes?.kql).toBe('data.severity: "critical"');
