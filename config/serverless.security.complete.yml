@@ -3,6 +3,10 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
+# AlertingV2 dispatcher (in development). Enable for serverless smoke testing
+# on the Security Complete tier; the feature itself is opt-in via this flag.
+xpack.alerting_v2.enabled: true
+
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"
