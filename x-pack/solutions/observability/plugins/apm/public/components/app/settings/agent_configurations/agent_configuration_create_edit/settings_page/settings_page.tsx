@@ -38,10 +38,7 @@ import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
 import { AdvancedConfiguration } from './advanced_configuration';
 import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
-import {
-  isEDOTAgentName,
-  isOTELAgentName,
-} from '../../../../../../../common/agent_name';
+import { isEDOTAgentName, isOTELAgentName } from '../../../../../../../common/agent_name';
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(

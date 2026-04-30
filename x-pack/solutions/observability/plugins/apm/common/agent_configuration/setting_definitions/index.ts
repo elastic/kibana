@@ -115,7 +115,8 @@ export function filterByAgent(agentName?: AgentName) {
       // only options that apply to every agent (ignoring RUM, EDOT and OTEL) should be returned
       if (setting.excludeAgents) {
         return setting.excludeAgents.every(
-          (agent) => isRumOrMobileAgentName(agent) || isEDOTAgentName(agent) || isOTELAgentName(agent)
+          (agent) =>
+            isRumOrMobileAgentName(agent) || isEDOTAgentName(agent) || isOTELAgentName(agent)
         );
       }
 
