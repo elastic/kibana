@@ -12,9 +12,18 @@ import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
-import type { ActiveMaintenanceWindow, CacheEntry, MaintenanceWindowServiceOptions } from './types';
+import type { ActiveMaintenanceWindow } from './types';
 
 export const DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS = 60 * 1000;
+
+interface MaintenanceWindowServiceOptions {
+  cacheIntervalMs?: number;
+}
+
+interface CacheEntry {
+  expiresAt: number;
+  windows: ActiveMaintenanceWindow[];
+}
 
 export interface MaintenanceWindowServiceContract {
   /**

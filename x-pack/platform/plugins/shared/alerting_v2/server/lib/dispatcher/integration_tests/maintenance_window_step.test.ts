@@ -112,7 +112,7 @@ describe('MaintenanceWindowService integration', () => {
     ]);
   });
 
-  it('returns enabled MWs whose events are entirely in the past (per-episode filtering happens in the dispatcher step)', async () => {
+  it('returns enabled MWs even when their events are entirely in the past', async () => {
     const id = await createMw({
       title: 'past',
       events: [{ gte: '2025-01-01T00:00:00.000Z', lte: '2025-01-01T01:00:00.000Z' }],

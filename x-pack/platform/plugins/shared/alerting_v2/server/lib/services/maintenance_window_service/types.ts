@@ -19,12 +19,3 @@ export interface ActiveMaintenanceWindow {
   events: ActiveMaintenanceWindowEvent[];
   scope?: MaintenanceWindowAttributes['scope'];
 }
-
-export interface MaintenanceWindowServiceOptions {
-  cacheIntervalMs?: number;
-}
-
-export interface CacheEntry {
-  expiresAt: number;
-  windows: ActiveMaintenanceWindow[];
-}
