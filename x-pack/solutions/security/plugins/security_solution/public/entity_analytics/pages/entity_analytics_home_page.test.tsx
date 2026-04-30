@@ -293,8 +293,9 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    // EmptyPrompt should be rendered
-    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+    // EmptyPrompt should be rendered; main content should not
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dynamic-risk-level-panel')).not.toBeInTheDocument();
   });
 
   it("renders entity store disabled empty prompt when status is 'not_installed'", () => {
@@ -313,7 +314,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
-    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
   it("renders entity store disabled empty prompt when status is 'stopped'", () => {
@@ -332,7 +333,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
-    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
   it("does not render disabled empty prompt when status is 'running'", () => {
@@ -453,7 +454,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
-  it('renders Priviles Callout when user lacks risk engine read permissions', () => {
+  it('renders Privileges Callout when user lacks risk engine read permissions', () => {
     mockUseMissingRiskEnginePrivileges.mockReturnValue({
       isLoading: false,
       hasAllRequiredPrivileges: false,
@@ -499,6 +500,6 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 });
