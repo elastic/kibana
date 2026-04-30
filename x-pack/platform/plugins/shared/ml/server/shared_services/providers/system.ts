@@ -10,11 +10,11 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlInfoResponse } from '@kbn/ml-common-types/ml_server_info';
 import type {
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
-} from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
 import type { GetGuards } from '../shared_services';
 import type { MlLicense } from '../../../common/license';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';

@@ -181,6 +181,7 @@
                 "lineNumber": 39,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentInsightsEventTypes",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -242,6 +243,7 @@
                 "lineNumber": 49,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentInsightsEventTypes",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -297,6 +299,7 @@
             "lineNumber": 32,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ActivityViewProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -563,6 +566,7 @@
                 "lineNumber": 23,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentInsightsEventTypes",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -624,6 +628,7 @@
                 "lineNumber": 24,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentInsightsEventTypes",
                 "trackAdoption": false,
                 "isRequired": true
               }

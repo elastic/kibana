@@ -600,6 +600,7 @@
                 "lineNumber": 35,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatsGetConfigFn",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -867,6 +868,7 @@
               "lineNumber": 18,
               "columnNumber": 14,
               "deprecated": false,
+              "docsReferencedTypeName": "FieldFormatInstanceType",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -934,6 +936,7 @@
               "lineNumber": 26,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "IUiSettingsClient",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1811,12 +1814,7 @@
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "dataViewFieldEditor",
-                "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/setup_environment.tsx"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "fieldFormats",
@@ -2098,6 +2096,7 @@
                 "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatsGetConfigFn",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2185,6 +2184,7 @@
                 "lineNumber": 174,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatsContentType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2280,6 +2280,7 @@
                 "lineNumber": 187,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatsContentType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2489,6 +2490,7 @@
                 "lineNumber": 261,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatConvertFunction",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2841,6 +2843,7 @@
                 "lineNumber": 36,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedFieldFormat",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2924,6 +2927,7 @@
                 "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatsGetConfigFn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2947,6 +2951,7 @@
                 "lineNumber": 55,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatMetaParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3042,6 +3047,7 @@
                 "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3118,6 +3124,7 @@
                 "lineNumber": 93,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3162,6 +3169,7 @@
                 "lineNumber": 107,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3232,6 +3240,7 @@
                 "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3400,6 +3409,7 @@
                 "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3479,6 +3489,7 @@
                 "lineNumber": 167,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatId",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3502,6 +3513,7 @@
                 "lineNumber": 167,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3579,6 +3591,7 @@
                 "lineNumber": 196,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3626,6 +3639,7 @@
                 "lineNumber": 198,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3688,6 +3702,7 @@
                 "lineNumber": 219,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3774,6 +3789,7 @@
                 "lineNumber": 233,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3851,6 +3867,7 @@
                 "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KBN_FIELD_TYPES",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3898,6 +3915,7 @@
                 "lineNumber": 257,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3950,6 +3968,7 @@
                 "lineNumber": 267,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5166,12 +5185,7 @@
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "dataViewFieldEditor",
-                "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/setup_environment.tsx"
-              }
-            ],
+            "references": [],
             "children": [
               {
                 "parentPluginId": "fieldFormats",
@@ -6070,6 +6084,7 @@
                 "lineNumber": 77,
                 "columnNumber": 51,
                 "deprecated": false,
+                "docsReferencedTypeName": "TextContextTypeOptions",
                 "trackAdoption": false
               }
             ]
@@ -6136,6 +6151,7 @@
                 "lineNumber": 45,
                 "columnNumber": 51,
                 "deprecated": false,
+                "docsReferencedTypeName": "HtmlContextTypeOptions",
                 "trackAdoption": false
               }
             ]
@@ -6455,7 +6471,15 @@
         "tags": [],
         "label": "FieldFormatInstanceType",
         "description": [
-          "\nAlternative to typeof {@link FieldFormat} but with specified ids"
+          "\nAlternative to typeof ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          },
+          " but with specified ids"
         ],
         "signature": [
           "(new (params?: ",
@@ -6547,35 +6571,23 @@
         "references": [
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.ts"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx"
-          },
-          {
-            "plugin": "dataViewFieldEditor",
-            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx"
+            "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
             "plugin": "expressionLegacyMetricVis",
@@ -6650,6 +6662,7 @@
             "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -6981,6 +6994,7 @@
             "lineNumber": 201,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedFieldFormat",
             "trackAdoption": false
           }
         ],
@@ -7073,6 +7087,7 @@
             "lineNumber": 45,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "HtmlContextTypeOptions",
             "trackAdoption": false
           }
         ],
@@ -7501,6 +7516,7 @@
             "lineNumber": 51,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactContextTypeOptions",
             "trackAdoption": false
           }
         ],
@@ -7513,7 +7529,15 @@
         "tags": [],
         "label": "ReactContextTypeSingleConvert",
         "description": [
-          "\nSingle-value React node converter. Like {@link ReactContextTypeConvert} but explicitly\nexcludes arrays — use this for `reactConvertSingle` overrides so that callers cannot\naccidentally pass an array where only scalar values are expected."
+          "\nSingle-value React node converter. Like ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.ReactContextTypeConvert",
+            "text": "ReactContextTypeConvert"
+          },
+          " but explicitly\nexcludes arrays — use this for `reactConvertSingle` overrides so that callers cannot\naccidentally pass an array where only scalar values are expected."
         ],
         "signature": [
           "(value: string | number | boolean | Record<string, unknown> | null | undefined, options?: ",
@@ -7570,6 +7594,7 @@
             "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactContextTypeOptions",
             "trackAdoption": false
           }
         ],
@@ -7675,6 +7700,7 @@
             "lineNumber": 77,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "TextContextTypeOptions",
             "trackAdoption": false
           }
         ],

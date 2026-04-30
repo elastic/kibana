@@ -9,11 +9,11 @@ import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
 import type {
+  ActionGroup,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationGroup,
 } from '../types';
 
 @injectable()
@@ -23,14 +23,14 @@ export class BuildGroupsStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { matched = [] } = state;
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     return { type: 'continue', data: { groups } };
   }
 }
 
-export function buildNotificationGroups(matched: readonly MatchedPair[]): NotificationGroup[] {
-  const groupMap = new Map<string, NotificationGroup>();
+export function buildActionGroups(matched: readonly MatchedPair[]): ActionGroup[] {
+  const groupMap = new Map<string, ActionGroup>();
 
   for (const { episode, policy } of matched) {
     let groupKey: Record<string, unknown>;
@@ -51,14 +51,14 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
         break;
     }
 
-    const notificationGroupId = objectHash({
+    const actionGroupId = objectHash({
       policyId: policy.id,
       groupKey,
     });
 
-    if (!groupMap.has(notificationGroupId)) {
-      groupMap.set(notificationGroupId, {
-        id: notificationGroupId,
+    if (!groupMap.has(actionGroupId)) {
+      groupMap.set(actionGroupId, {
+        id: actionGroupId,
         spaceId: policy.spaceId,
         policyId: policy.id,
         destinations: policy.destinations,
@@ -67,7 +67,7 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
       });
     }
 
-    groupMap.get(notificationGroupId)!.episodes.push(episode);
+    groupMap.get(actionGroupId)!.episodes.push(episode);
   }
 
   return [...groupMap.values()];

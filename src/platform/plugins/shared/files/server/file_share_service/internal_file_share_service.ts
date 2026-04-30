@@ -240,7 +240,7 @@ export class InternalFileShareService implements FileShareServiceStart {
     if (!share) {
       throw new FileShareNotFoundError(`Could not find file share with token "${token}".`);
     }
-    if (share.attributes.valid_until < Date.now() / 1000) {
+    if (share.attributes.valid_until < Date.now()) {
       throw new FileShareTokenInvalidError(`Share "${token}" has expired.`);
     }
     return toFileShareJSON(share);

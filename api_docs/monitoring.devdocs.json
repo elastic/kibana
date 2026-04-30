@@ -93,6 +93,7 @@
                 "lineNumber": 107,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               }

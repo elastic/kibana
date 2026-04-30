@@ -110,3 +110,11 @@ export const SYNTHETICS_DEFAULT_GROUPINGS = ['monitor.name', 'observer.geo.name'
 export const DEFAULT_STALE_SLO_THRESHOLD_HOURS = 48;
 export const DEFAULT_SLO_PAGE_SIZE = 25;
 export const DEFAULT_SLO_GROUPS_PAGE_SIZE = 25;
+
+export const COMPOSITE_SLO_RESOURCES_VERSION = 1.0;
+export const COMPOSITE_SLO_RESOURCES_VERSION_MAJOR = 1;
+
+export const COMPOSITE_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME = `.slo-observability.composite-summary-mappings-v${COMPOSITE_SLO_RESOURCES_VERSION}`;
+export const COMPOSITE_SUMMARY_INDEX_TEMPLATE_NAME = `.slo-observability.composite-summary-v${COMPOSITE_SLO_RESOURCES_VERSION}`;
+export const COMPOSITE_SUMMARY_INDEX_TEMPLATE_PATTERN = `.slo-observability.composite-summary-v${COMPOSITE_SLO_RESOURCES_VERSION_MAJOR}*`;
+export const COMPOSITE_SUMMARY_INDEX_NAME = `.slo-observability.composite-summary-v${COMPOSITE_SLO_RESOURCES_VERSION}`;
