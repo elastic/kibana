@@ -128,6 +128,7 @@ export const UserPanelContent = ({
       />
       <ObservedDataSection
         identityFields={identityFields}
+        entityRecord={entityRecord}
         userName={userName}
         observedUser={observedUser}
         contextID={contextID}
