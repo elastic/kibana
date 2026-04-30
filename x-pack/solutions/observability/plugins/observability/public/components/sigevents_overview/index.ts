@@ -17,6 +17,9 @@ export type {
 export { LowerPriorityVerdicts } from './lower_priority_verdicts';
 export type { LowerPriorityVerdictsProps } from './lower_priority_verdicts';
 
+export { OtherPromotedEvents } from './other_promoted_events';
+export type { OtherPromotedEventsProps } from './other_promoted_events';
+
 export { StatusHeader } from './status_header';
 export type { StatusHeaderProps, StatusHeaderVariant } from './status_header';
 

@@ -139,6 +139,7 @@ export function useFetchLatestSignificantEvent(): {
   loading: boolean;
   error: Error | null;
   data: LatestSignificantEventData | null;
+  otherPromotedEvents: LatestSignificantEventData[];
   refetch: () => void;
 } {
   const { services } = useKibana();
@@ -151,7 +152,7 @@ export function useFetchLatestSignificantEvent(): {
         term: { verdict: 'promoted' },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
-      size: 1,
+      size: 100,
     }),
     []
   );
@@ -179,18 +180,31 @@ export function useFetchLatestSignificantEvent(): {
     }
   );
 
-  const eventData = useMemo(() => {
+  const { primaryEvent, otherEvents } = useMemo(() => {
     if (!result?.hits?.hits?.length) {
-      return null;
+      return { primaryEvent: null, otherEvents: [] };
     }
-    const doc = result.hits.hits[0]._source;
-    return doc ? mapDocumentToData(doc) : null;
+
+    const docs = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is SignificantEventDocument => doc !== undefined);
+
+    // Primary event: most recent promoted event with high impact
+    const highImpactIndex = docs.findIndex((doc) => doc.impact === 'high');
+    const primaryDoc = highImpactIndex >= 0 ? docs[highImpactIndex] : docs[0];
+    const others = docs.filter((doc) => doc !== primaryDoc);
+
+    return {
+      primaryEvent: primaryDoc ? mapDocumentToData(primaryDoc) : null,
+      otherEvents: others.map(mapDocumentToData),
+    };
   }, [result]);
 
   return {
     loading: isLoading,
     error: error ?? null,
-    data: eventData,
+    data: primaryEvent,
+    otherPromotedEvents: otherEvents,
     refetch,
   };
 }
