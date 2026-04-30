@@ -9,18 +9,15 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
-import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
-import type {
-  PhaseEvent,
-  PhaseEventType,
-  PresentationContainer,
-} from '@kbn/presentation-publishing';
+import type { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { PerformanceState } from './query_performance_tracking';
 import { startQueryPerformanceTracking } from './query_performance_tracking';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
+import type { DashboardApi } from '../types';
+import { buildMockDashboardApi } from '../../mocks';
 
 const mockMetricEvent = jest.fn();
 jest.mock('@kbn/ebt-tools', () => ({
@@ -33,14 +30,15 @@ jest.mock('@kbn/ebt-tools', () => ({
 const mockDashboard = (
   children: {} = {}
 ): {
-  dashboard: PresentationContainer;
+  dashboard: DashboardApi;
   performanceState: PerformanceState;
   children$: BehaviorSubject<{ [key: string]: unknown }>;
 } => {
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>(children);
+  const { api: dashboardApi } = buildMockDashboardApi();
   return {
     dashboard: {
-      ...getMockPresentationContainer(),
+      ...dashboardApi,
       children$,
       getPanelCount: () => Object.keys(children$.value).length,
     },
