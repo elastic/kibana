@@ -9,9 +9,11 @@ import Boom from '@hapi/boom';
 
 import { validateSslCertPath } from '../../../common/services';
 
-export function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
+export function throwIfSslPathInvalid(
+  paths: Array<string | Record<string, unknown> | undefined | null>
+) {
   for (const p of paths) {
-    if (!p) continue;
+    if (!p || typeof p === 'object') continue;
     const err = validateSslCertPath(p);
     if (err) throw Boom.badRequest(err);
   }

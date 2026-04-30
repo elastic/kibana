@@ -35,6 +35,9 @@ function validateFleetServerHostSsl(fleetServerHost: Partial<FleetServerHost>) {
     ...(fleetServerHost.ssl?.agent_certificate_authorities ?? []),
     fleetServerHost.ssl?.agent_certificate,
     fleetServerHost.ssl?.agent_key,
+    fleetServerHost.secrets?.ssl?.key,
+    fleetServerHost.secrets?.ssl?.es_key,
+    fleetServerHost.secrets?.ssl?.agent_key,
   ]);
 }
 

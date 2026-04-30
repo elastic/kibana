@@ -39,6 +39,7 @@ function validateOutputSslPaths(output: Partial<Output>) {
     ...(output.ssl?.certificate_authorities ?? []),
     output.ssl?.certificate,
     output.ssl?.key,
+    output.secrets?.ssl?.key,
   ]);
 }
 

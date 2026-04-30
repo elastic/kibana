@@ -47,6 +47,7 @@ export function validateDownloadSource(downloadSource: DownloadSourceWithNullabl
     ...(downloadSource.ssl?.certificate_authorities ?? []),
     downloadSource.ssl?.certificate,
     downloadSource.ssl?.key,
+    downloadSource.secrets?.ssl?.key,
   ]);
 
   // For settings that can be stored as secrets, only allow either plain text or secret reference.
