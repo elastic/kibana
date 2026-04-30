@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kbnTestServer.serverArgs,
         // Increase scroll duration for large CSV exports to avoid connection timeouts
-        '--xpack.reporting.csv.scroll.duration=5m',
+        '--xpack.reporting.csv.scroll.duration=10m',
       ],
     },
     testFiles: [
