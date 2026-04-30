@@ -49,6 +49,8 @@ const getDefaultWorkflowInput = (inputs?: JsonModelSchemaType): Record<string, u
     if (hasDefaults && resolvedValue !== undefined) {
       result[propertyName] = resolvedValue;
     } else if (isRequired) {
+      // generateSampleFromJsonSchema does not resolve $ref; required $ref-only fields with
+      // no resolvable sample can be omitted (follow-up: teach samples to resolve $ref).
       const sample = generateSampleFromJsonSchema(jsonSchema);
       if (sample !== undefined) {
         result[propertyName] = sample;

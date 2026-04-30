@@ -204,5 +204,35 @@ describe('WorkflowExecuteManualForm', () => {
         maxIterations: 5,
       });
     });
+
+    it('resolves $ref nested defaults and omits optional array/boolean/integer without defaults', () => {
+      // Catches regressions in applyInputDefaults $ref resolution; optional top-level fields
+      // with no default must not appear (see PR #264633 / security-team#16857).
+      expect(
+        getInitialJson({
+          properties: {
+            streamName: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            dryRun: { type: 'boolean' },
+            priority: { type: 'integer' },
+            owner: { $ref: '#/definitions/UserSchema' },
+          },
+          required: ['streamName'],
+          definitions: {
+            UserSchema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', default: 'Jane Doe' },
+                team: { type: 'string' },
+              },
+              required: ['name'],
+            },
+          },
+        } as JsonModelSchemaType)
+      ).toEqual({
+        streamName: INPUT_STRING_PLACEHOLDER,
+        owner: { name: 'Jane Doe' },
+      });
+    });
   });
 });
