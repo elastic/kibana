@@ -133,6 +133,7 @@ export async function update(
       }
     );
   } catch (e) {
+    // if update failed, let's attempt to roll back the access mode change if we changed it
     if (shouldChangeAccessMode) {
       try {
         await core.savedObjects.client.changeAccessMode(
