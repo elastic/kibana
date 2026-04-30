@@ -78,8 +78,7 @@ const KibanaContentListPageHeader = ({
   );
 
   const dataTestSubj = dataTestSubjProp ?? `${pageDataTestSubj}-header`;
-  const rightSideItems =
-    actions == null ? undefined : Array.isArray(actions) ? actions : [actions];
+  const rightSideItems = actions == null ? undefined : Array.isArray(actions) ? actions : [actions];
 
   return (
     <KibanaPageTemplate.Header
