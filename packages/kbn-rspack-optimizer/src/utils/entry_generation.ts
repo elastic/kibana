@@ -15,7 +15,7 @@ import { createCoreEntry } from './plugin_discovery';
 
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v10';
+const ENTRY_VERSION = 'v11';
 
 /**
  * Find the index entry file for a given target directory within a plugin.
@@ -239,6 +239,17 @@ function registerPlugin(bundleId, moduleExports) {
 // Batches of ${BATCH_SIZE} imports run in parallel within each batch, with a
 // setTimeout(0) yield between batches to break up the long task.
 window.__kbnPluginsLoaded = (async () => {
+  try {
+    var metaEl = document.querySelector('kbn-injected-metadata');
+    if (metaEl && typeof __kbnSharedDeps__ !== 'undefined') {
+      var meta = JSON.parse(metaEl.getAttribute('data'));
+      if (meta.i18n && meta.i18n.translationsUrl) {
+        await __kbnSharedDeps__.KbnI18n.i18n.load(meta.i18n.translationsUrl);
+      }
+    }
+  } catch (e) {
+    // Non-fatal: plugins will load with English defaults
+  }
 ${batchBlocks}
   console.log('[@kbn/rspack-optimizer] All plugins loaded');
 })().catch(err => {
