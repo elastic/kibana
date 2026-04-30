@@ -30,11 +30,7 @@ import {
   CASE_SAVED_OBJECT,
   OWNER_FIELD,
 } from '../../../common/constants';
-import {
-  SECURITY_ALERT_ATTACHMENT_TYPE,
-  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
-  STACK_ALERT_ATTACHMENT_TYPE,
-} from '../../../common/constants/attachments';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 
 import {
   createIncident,
@@ -78,20 +74,21 @@ const changeAlertsStatusToClose = async (
     `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
     AttachmentType.alert
   );
-  const unifiedAlertFilter = buildFilter({
-    filters: [
-      SECURITY_ALERT_ATTACHMENT_TYPE,
-      OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
-      STACK_ALERT_ATTACHMENT_TYPE,
-    ],
-    field: 'type',
-    operator: 'or',
-    type: CASE_ATTACHMENT_SAVED_OBJECT,
-  });
-  const alertFilter = combineFilters(
-    [legacyAlertFilter, unifiedAlertFilter],
-    NodeBuilderOperators.or
-  );
+
+  const alertFilter = isCasesAttachmentsEnabled
+    ? combineFilters(
+        [
+          legacyAlertFilter,
+          buildFilter({
+            filters: UNIFIED_ALERT_TYPES_ARRAY,
+            field: 'type',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
+        ],
+        NodeBuilderOperators.or
+      )
+    : legacyAlertFilter;
 
   const alertAttachments = await caseService.getAllCaseComments({
     id: [caseId],
