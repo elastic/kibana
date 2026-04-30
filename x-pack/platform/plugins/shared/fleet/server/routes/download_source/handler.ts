@@ -32,6 +32,16 @@ export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
   auth?: DownloadSource['auth'] | null;
 };
 
+/**
+ * Validates download source auth configuration.
+ *
+ * Allowed auth configurations:
+ * - auth headers only (no credentials)
+ * - username + password (together), optionally with headers (no api_key)
+ * - api_key, optionally with headers (no username/password)
+ * - auth: null (to clear all auth data)
+ * - auth: undefined (no changes to auth)
+ */
 export function validateDownloadSource(downloadSource: DownloadSourceWithNullableAuth) {
   throwIfSslPathInvalid([
     ...(downloadSource.ssl?.certificate_authorities ?? []),

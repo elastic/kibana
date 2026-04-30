@@ -1237,10 +1237,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       (!isKafka &&
         (sslCertificateAuthoritiesInput.props.isInvalid ||
           sslCertificateInput.props.isInvalid ||
-          sslKeyInput.props.isInvalid)) ||
+          (sslKeySecretInput.value
+            ? sslKeySecretInput.props.isInvalid
+            : sslKeyInput.props.isInvalid))) ||
       (isKafka &&
         (kafkaSslCertificateAuthoritiesInput.props.isInvalid ||
           kafkaSslCertificateInput.props.isInvalid ||
-          kafkaSslKeyInput.props.isInvalid)),
+          (kafkaSslKeySecretInput.value
+            ? kafkaSslKeySecretInput.props.isInvalid
+            : kafkaSslKeyInput.props.isInvalid))),
   };
 }
