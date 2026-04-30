@@ -39,7 +39,11 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
 };
 
 const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest) => {
-  return (user != null && isRequestApiKeyType(user)) || request.isFakeRequest;
+  // Check `request.isFakeRequest` first so we don't read identity fields on a
+  // fake-request-enriched user (whose proxy throws on every field other than
+  // `profile_uid`). Fake requests always carry an API key, so this short
+  // circuit is functionally equivalent for the fake-request branch.
+  return request.isFakeRequest || (user != null && isRequestApiKeyType(user));
 };
 
 export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
