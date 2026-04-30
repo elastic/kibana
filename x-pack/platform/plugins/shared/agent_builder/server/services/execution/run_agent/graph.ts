@@ -85,15 +85,17 @@ export const createAgentGraph = ({
     try {
       const response = await researcherModel.invoke(
         await promptFactory.getMainPrompt({
+          cycleLimit: state.cycleLimit,
           actions: state.mainActions,
         })
       );
 
-      const action = processResearchResponse(response);
+      const currentCycle = state.currentCycle + 1;
+      const action = processResearchResponse(response, { cycle: currentCycle });
 
       return {
         mainActions: [action],
-        currentCycle: state.currentCycle + 1,
+        currentCycle,
         errorCount: 0,
       };
     } catch (error) {
@@ -147,7 +149,7 @@ export const createAgentGraph = ({
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const actions = processToolNodeResponse(toolNodeResult);
+    const actions = processToolNodeResponse(toolNodeResult, { cycle: state.currentCycle });
 
     return {
       mainActions: actions,
@@ -199,6 +201,7 @@ export const createAgentGraph = ({
         await promptFactory.getAnswerPrompt({
           actions: state.mainActions,
           answerActions: state.answerActions,
+          cycleLimit: state.cycleLimit,
         })
       );
 

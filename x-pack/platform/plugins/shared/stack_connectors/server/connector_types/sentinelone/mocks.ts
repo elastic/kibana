@@ -7,7 +7,7 @@
 
 import type { DeepPartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import type { AxiosResponse } from 'axios/index';
+import type { AxiosResponse } from 'axios';
 import type {
   ServiceParams,
   SubActionRequestParams,
