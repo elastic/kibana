@@ -24,6 +24,13 @@ export type { StepDocumentation } from '@kbn/workflows';
 
 export { createPublicStepDefinition } from './step_registry/types';
 
+// Exposed so host plugins (Storybook, tests) can build a populated registry
+// without a running Kibana — same registration calls used in setup().
+export { PublicStepRegistry } from './step_registry';
+export { registerInternalStepDefinitions } from './steps';
+export { PublicTriggerRegistry } from './trigger_registry';
+export { registerInternalTriggerDefinitions } from './triggers';
+
 export type {
   PublicTriggerDefinition,
   TriggerDocumentation,

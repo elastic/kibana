@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
@@ -40,10 +39,10 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        healthStatuses: [
+        anomalyScores: [
           {
-            healthStatus: ServiceHealthStatus.healthy,
             serviceName: 'opbeans-java',
+            anomalyScore: 75,
           },
         ],
         alertCounts: [
@@ -73,7 +72,7 @@ describe('mergeServiceStats', () => {
       {
         agentName: 'java',
         environments: ['production'],
-        healthStatus: ServiceHealthStatus.healthy,
+        anomalyScore: 75,
         serviceName: 'opbeans-java',
         latency: 1,
         throughput: 2,
@@ -97,10 +96,10 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        healthStatuses: [
+        anomalyScores: [
           {
-            healthStatus: ServiceHealthStatus.healthy,
             serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
+            anomalyScore: 80,
           },
         ],
         alertCounts: [
@@ -146,10 +145,10 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        healthStatuses: [
+        anomalyScores: [
           {
-            healthStatus: ServiceHealthStatus.healthy,
             serviceName: 'opbeans-java',
+            anomalyScore: 75,
           },
         ],
         alertCounts: [

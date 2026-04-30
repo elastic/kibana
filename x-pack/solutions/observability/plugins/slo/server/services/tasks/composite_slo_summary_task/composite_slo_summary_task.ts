@@ -22,6 +22,10 @@ import { computeAndPersistCompositeSummaries } from './compute_and_persist_compo
 
 export const TYPE = 'slo:composite-slo-summary-task';
 
+export function getCompositeSloSummaryTaskId(): string {
+  return `${TYPE}:1.0.0`;
+}
+
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
   core: CoreSetup;
@@ -36,7 +40,7 @@ export class CompositeSloSummaryTask {
 
   constructor(setupContract: TaskSetupContract) {
     const { core, config, taskManager, logFactory } = setupContract;
-    this.logger = logFactory.get(this.taskId);
+    this.logger = logFactory.get(getCompositeSloSummaryTaskId());
     this.config = config;
 
     taskManager.registerTaskDefinitions({
@@ -63,7 +67,7 @@ export class CompositeSloSummaryTask {
   }
 
   private get taskId() {
-    return `${TYPE}:1.0.0`;
+    return getCompositeSloSummaryTaskId();
   }
 
   public async start(plugins: SLOPluginStartDependencies) {
@@ -111,7 +115,7 @@ export class CompositeSloSummaryTask {
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
     abortController: AbortController
-  ) {
+  ): Promise<{ state: Record<string, unknown> } | void> {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -136,5 +140,7 @@ export class CompositeSloSummaryTask {
       logger: this.logger,
       abortController,
     });
+
+    return { state: { ...taskInstance.state } };
   }
 }
