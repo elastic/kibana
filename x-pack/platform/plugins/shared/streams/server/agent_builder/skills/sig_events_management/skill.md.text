@@ -18,6 +18,7 @@ You have 3 SigEvents tools in this skill:
 
 - `event_search`
   Use this first to find existing similar significant events.
+  `query` is optional; if omitted (or empty), search uses stream and verdict filters only.
 
 - `event_create`
   Use this only after confirming there is no similar existing event.
@@ -35,7 +36,7 @@ Additional globally-available helper guidance:
 <required_workflow>
 Always follow this workflow:
 1. Detect potential significant-event signals from the conversation.
-2. Search existing events with `event_search` using the target stream and a concise query.
+2. Search existing events with `event_search` using the target stream and optional query.
 3. Compare returned events for semantic similarity (same issue class/root cause/impact).
 4. If a similar event exists, do not create a duplicate; reference the existing event.
 5. If no similar event exists, investigate and validate:
@@ -128,6 +129,13 @@ Example: search existing events first
 Tool: `event_search`
 {
   "query": "checkout latency spike with timeout burst",
+  "stream_name": "logs.checkout",
+  "verdict": ["promoted", "acknowledged"]
+}
+
+Example: filter-only search (no query text)
+Tool: `event_search`
+{
   "stream_name": "logs.checkout",
   "verdict": ["promoted", "acknowledged"]
 }

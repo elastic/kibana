@@ -32,7 +32,7 @@ import {
   EVENT_WORKFLOW_EXECUTION_ID,
 } from './fields';
 
-export const EVENTS_INDEX_NAME = '.kibana_streams_sig_events';
+export const EVENTS_INDEX_NAME = 'sigevents-events-ms';
 
 export const eventsStorageSettings = {
   name: EVENTS_INDEX_NAME,

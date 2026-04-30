@@ -186,7 +186,7 @@ export class StreamsPlugin
             rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
           }),
           insightService.getInternalClient(),
-          eventsService.getInternalClient(),
+          eventsService.getScopedClient(request),
           contentService.getClient(),
           getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
         ]);

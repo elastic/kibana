@@ -14,7 +14,7 @@ export async function searchEventsToolHandler({
 }: {
   eventsClient: EventsClient;
   params: {
-    query: string;
+    query?: string;
     stream_name: string;
     verdict?: SigEventVerdict[];
   };

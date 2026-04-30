@@ -22,7 +22,7 @@ interface EventsBulkDeleteOperation {
 export type EventsBulkOperation = EventsBulkIndexOperation | EventsBulkDeleteOperation;
 
 interface FindEventsFilters {
-  query: string;
+  query?: string;
   streamName: string;
   verdict?: SigEventVerdict[];
 }
@@ -76,13 +76,25 @@ export class EventsClient {
 
   async find(filters: FindEventsFilters): Promise<SigEvent[]> {
     const { query, streamName, verdict } = filters;
+    const normalizedQuery = (query ?? '').trim();
     const filterClauses: QueryDslQueryContainer[] = [
       { term: { [EVENT_STREAM_NAMES]: streamName } },
     ];
+    const mustClauses: QueryDslQueryContainer[] = [];
 
     if (verdict?.length) {
       filterClauses.push({
         terms: { [EVENT_VERDICT]: verdict },
+      });
+    }
+
+    if (normalizedQuery.length > 0) {
+      mustClauses.push({
+        multi_match: {
+          query: normalizedQuery,
+          fields: [EVENT_TITLE, EVENT_SUMMARY],
+          type: 'best_fields',
+        },
       });
     }
 
@@ -92,15 +104,7 @@ export class EventsClient {
       query: {
         bool: {
           filter: filterClauses,
-          must: [
-            {
-              multi_match: {
-                query,
-                fields: [EVENT_TITLE, EVENT_SUMMARY],
-                type: 'best_fields',
-              },
-            },
-          ],
+          ...(mustClauses.length > 0 ? { must: mustClauses } : {}),
         },
       },
     });

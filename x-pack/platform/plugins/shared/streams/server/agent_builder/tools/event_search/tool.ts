@@ -20,7 +20,10 @@ import { searchEventsToolHandler } from './handler';
 export const STREAMS_SEARCH_EVENTS_TOOL_ID = 'platform.streams.sig_events.event_search';
 
 const searchEventsSchema = z.object({
-  query: z.string().describe('Required search text to match in event title and summary.'),
+  query: z
+    .string()
+    .optional()
+    .describe('Optional search text to match in event title and summary.'),
   stream_name: z.string().describe('Target stream name to search events in.'),
   verdict: z
     .array(sigEventVerdictSchema)
