@@ -9,14 +9,7 @@
 
 import { visualizationsClient } from '../../content_management';
 
-/**
- * Returns an object matching a given title
- */
-export async function findVisualizationByTitle(title: string) {
-  if (!title) {
-    return;
-  }
-
+export async function hasLibraryItemWithTitle(title: string) {
   // Elasticsearch will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
   const response = await visualizationsClient.search(
@@ -28,5 +21,5 @@ export async function findVisualizationByTitle(title: string) {
       searchFields: ['title'],
     }
   );
-  return response.hits.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+  return response.hits.some((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
 }

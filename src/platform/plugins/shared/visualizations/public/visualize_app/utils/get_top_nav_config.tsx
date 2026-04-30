@@ -53,6 +53,7 @@ import { getUiActions } from '../../services';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { serializeState } from '../../embeddable/state';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -563,8 +564,6 @@ export const getTopNavConfig = (
               const onSave = async ({
                 newTitle,
                 newCopyOnSave,
-                isTitleDuplicateConfirmed,
-                onTitleDuplicate,
                 newDescription,
                 returnToOrigin,
                 dashboardId,
@@ -621,8 +620,6 @@ export const getTopNavConfig = (
                 // add to a dashboard if necessary
                 const response = await doSave({
                   confirmOverwrite: false,
-                  isTitleDuplicateConfirmed,
-                  onTitleDuplicate,
                   returnToOrigin: resolvedReturnToOrigin,
                   dashboardId: !!dashboardId ? dashboardId : undefined,
                   copyOnSave: newCopyOnSave,
@@ -659,6 +656,7 @@ export const getTopNavConfig = (
                 saveModal = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
+                    hasLibraryItemWithTitle={hasLibraryItemWithTitle}
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
@@ -691,6 +689,7 @@ export const getTopNavConfig = (
                       description: savedVis?.description || '',
                     }}
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
+                    hasLibraryItemWithTitle={hasLibraryItemWithTitle}
                     onSave={onSave}
                     tagOptions={tagOptions}
                     objectType={i18n.translate(
