@@ -42,6 +42,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
       hooks,
       getExecutionService,
       modelProviderFactory: createModelProviderFactory({
+        logger: this.deps.logger.get('modelProvider'),
         inference,
         trackingService,
         uiSettings,

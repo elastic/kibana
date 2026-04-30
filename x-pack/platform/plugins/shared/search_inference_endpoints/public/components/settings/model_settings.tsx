@@ -28,6 +28,8 @@ import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -78,6 +80,8 @@ export const ModelSettings: React.FC = () => {
     };
   }, [isDirty, history]);
 
+  const usageTracker = useUsageTracker();
+
   const handleSave = useCallback(async () => {
     if (isFeatureDirty) {
       saveFeatures();
@@ -85,7 +89,8 @@ export const ModelSettings: React.FC = () => {
     if (defaultModelSettings.isDirty) {
       await defaultModelSettings.save();
     }
-  }, [isFeatureDirty, saveFeatures, defaultModelSettings]);
+    usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
+  }, [isFeatureDirty, saveFeatures, defaultModelSettings, usageTracker]);
 
   const handleDiscardAndLeave = useCallback(() => {
     defaultModelSettings.reset();
@@ -156,10 +161,10 @@ export const ModelSettings: React.FC = () => {
             flush="both"
             target="_blank"
             data-test-subj="settings-api-documentation"
-            href={docLinks.createInferenceEndpoint}
+            href={docLinks.featureSettings}
           >
-            {i18n.translate('xpack.searchInferenceEndpoints.apiDocumentationLink', {
-              defaultMessage: 'API Documentation',
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.documentationLabel', {
+              defaultMessage: 'Documentation',
             })}
           </EuiButtonEmpty>,
         ]}

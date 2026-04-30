@@ -53,6 +53,7 @@
             "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseTrackedPromiseArgs",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -70,6 +71,7 @@
             "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           }
