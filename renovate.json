@@ -2510,15 +2510,6 @@
       "enabled": true
     },
     {
-      "groupName": "canvas-confetti",
-      "matchDepNames": ["canvas-confetti", "@types/canvas-confetti"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:SharedUX", "release_note:skip", "backport:previous-minor"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "xml Format Util",
       "matchDepNames": ["xml-formatter"],
       "reviewers": ["team:security-threat-hunting"],
