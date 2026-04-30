@@ -49,5 +49,4 @@ describe('use_last_agent_id', () => {
 
     expect(getLastAgentId()).toBe('agent-z');
   });
-
 });
