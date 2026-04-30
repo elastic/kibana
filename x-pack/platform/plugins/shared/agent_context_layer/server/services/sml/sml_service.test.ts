@@ -208,10 +208,19 @@ describe('SmlService', () => {
         bool: {
           must: [
             {
-              multi_match: {
-                query: 'foo bar',
-                type: 'bool_prefix',
-                fields: saytBoolPrefixFields,
+              bool: {
+                should: [
+                  {
+                    multi_match: {
+                      query: 'foo bar',
+                      type: 'bool_prefix',
+                      fields: saytBoolPrefixFields,
+                    },
+                  },
+                  { match: { content: 'foo bar' } },
+                  { match: { description: 'foo bar' } },
+                ],
+                minimum_should_match: 1,
               },
             },
           ],
@@ -247,7 +256,7 @@ describe('SmlService', () => {
       });
 
       const call = esClient.search.mock.calls[0]![0]!;
-      expect(call._source).toEqual({ excludes: ['content'] });
+      expect(call._source).toEqual({ excludes: ['content', 'description'] });
     });
 
     it('uses match_all for query "*"', async () => {
@@ -312,6 +321,9 @@ describe('SmlService', () => {
                 title: 'My Viz',
                 origin_id: 'ref-1',
                 content: 'content text',
+                description: 'A lens viz',
+                user_id: 'user-1',
+                references: ['lens:other:uuid'],
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
                 spaces: ['default'],
@@ -338,6 +350,9 @@ describe('SmlService', () => {
         title: 'My Viz',
         origin_id: 'ref-1',
         content: 'content text',
+        description: 'A lens viz',
+        user_id: 'user-1',
+        references: ['lens:other:uuid'],
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
@@ -803,6 +818,9 @@ describe('SmlService', () => {
                 title: 'Doc 2',
                 origin_id: 'ref-2',
                 content: 'content 2',
+                description: 'dash desc',
+                user_id: 'u2',
+                references: ['lens:x:y'],
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
                 spaces: ['default'],
@@ -837,6 +855,9 @@ describe('SmlService', () => {
         title: 'Doc 2',
         origin_id: 'ref-2',
         content: 'content 2',
+        description: 'dash desc',
+        user_id: 'u2',
+        references: ['lens:x:y'],
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
