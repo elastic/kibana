@@ -84,15 +84,14 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
 
   private async fetchEnabledWindows(): Promise<ActiveMaintenanceWindow[]> {
     const windows: ActiveMaintenanceWindow[] = [];
+    const finder = this.client.createPointInTimeFinder<MaintenanceWindowAttributes>({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      namespaces: ['*'],
+      filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+    });
 
     try {
-      const finder = this.client.createPointInTimeFinder<MaintenanceWindowAttributes>({
-        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-        namespaces: ['*'],
-        filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
-      });
-
       for await (const response of finder.find()) {
         for (const doc of response.saved_objects) {
           if ('error' in doc && doc.error) continue;
@@ -112,14 +111,14 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
           });
         }
       }
-
-      await finder.close();
     } catch (error) {
       this.logger.error({
         error,
         type: 'MaintenanceWindowFetchError',
       });
       return [];
+    } finally {
+      await finder.close();
     }
 
     return windows;

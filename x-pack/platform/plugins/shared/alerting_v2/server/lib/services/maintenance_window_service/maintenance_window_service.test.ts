@@ -149,12 +149,13 @@ describe('MaintenanceWindowService', () => {
     expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(2);
   });
 
-  it('returns empty array on fetch error and logs', async () => {
+  it('returns empty array on fetch error, logs, and still closes the PIT finder', async () => {
+    const close = jest.fn().mockResolvedValue(undefined);
     const finderThatThrows = {
       async *find() {
         throw new Error('boom');
       },
-      close: jest.fn().mockResolvedValue(undefined),
+      close,
     };
     client.createPointInTimeFinder.mockReturnValue(
       finderThatThrows as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>
@@ -167,6 +168,7 @@ describe('MaintenanceWindowService', () => {
 
     expect(result).toEqual([]);
     expect(logger.error).toHaveBeenCalled();
+    expect(close).toHaveBeenCalledTimes(1);
   });
 
   it('skips docs without a namespace', async () => {
