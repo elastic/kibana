@@ -22,7 +22,10 @@ export function registerInstall(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Install the Entity Store',
       description:
-        'Install the Entity Store, creating engines for the specified entity types and configuring log extraction.',
+        'Install the Entity Store and create engines for the specified entity types. ' +
+        'A single `logExtraction` configuration is shared across all entity types. ' +
+        'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
+        'To change settings after install, use the update endpoint.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },

@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   describe.skip('Upgrade Assistant', function () {
     describe('Reindex operation saved object', () => {
       const dotKibanaIndex = '.kibana';

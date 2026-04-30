@@ -268,6 +268,7 @@ export const ManageIntegrationsTable: React.FC<{
           title: string;
           version?: string;
           dataStreams: DataStreamResponse[];
+          categories?: string[];
         };
       }>(`/api/automatic_import/integrations/${encodeURIComponent(integrationId)}`, {
         version: '1',
@@ -278,6 +279,7 @@ export const ManageIntegrationsTable: React.FC<{
         title: integrationResponse.title,
         version: integrationResponse.version,
         dataStreams: integrationResponse.dataStreams ?? [],
+        categories: integrationResponse.categories,
       };
     },
     [http]
