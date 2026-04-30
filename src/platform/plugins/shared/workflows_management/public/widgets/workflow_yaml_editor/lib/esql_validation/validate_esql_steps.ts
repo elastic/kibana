@@ -268,6 +268,12 @@ function resolveSeverity(
 ): 'error' | 'warning' | 'info' {
   const d = diagnostic as { type?: string; severity?: string | number };
   const raw = d.type ?? d.severity ?? fallback;
+  if (typeof raw === 'number') {
+    // Monaco MarkerSeverity: Hint = 1, Info = 2, Warning = 4, Error = 8
+    if (raw === 4) return 'warning';
+    if (raw === 2 || raw === 1) return 'info';
+    return 'error';
+  }
   if (raw === 'warning') return 'warning';
   if (raw === 'info') return 'info';
   return 'error';

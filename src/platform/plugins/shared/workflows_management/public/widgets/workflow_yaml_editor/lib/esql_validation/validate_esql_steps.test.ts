@@ -308,5 +308,37 @@ describe('validateEsqlSteps — Liquid policy', () => {
       expect(markers).toHaveLength(1);
       expect(markers[0].severity).toBe('warning');
     });
+
+    it('maps Monaco numeric severities (Warning=4, Info=2) on EditorError diagnostics', async () => {
+      const text = buildStep('FROM logs-* | LIMIT 1000000');
+      const model = createTextModel(text);
+      mockValidate.mockResolvedValue({
+        errors: [],
+        warnings: [
+          {
+            message: 'large LIMIT',
+            code: 'esql.largeLimit',
+            severity: 4,
+            startLineNumber: 1,
+            startColumn: 1,
+            endLineNumber: 1,
+            endColumn: 5,
+          },
+          {
+            message: 'hint about projection',
+            code: 'esql.projectionHint',
+            severity: 2,
+            startLineNumber: 1,
+            startColumn: 1,
+            endLineNumber: 1,
+            endColumn: 5,
+          },
+        ],
+      });
+      const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
+      expect(markers).toHaveLength(2);
+      expect(markers[0].severity).toBe('warning');
+      expect(markers[1].severity).toBe('info');
+    });
   });
 });
