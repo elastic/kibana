@@ -54,10 +54,6 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
   }
 
   public async getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]> {
-    return this.getEnabledWindows();
-  }
-
-  private async getEnabledWindows(): Promise<ActiveMaintenanceWindow[]> {
     const now = Date.now();
     if (this.cache && this.cache.expiresAt > now) {
       return this.cache.windows;
