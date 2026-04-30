@@ -52,10 +52,10 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       const text = await notification.getVisibleText();
       return text.includes('Unable to profile');
     },
-    async editorHasIndexNotFoundNotification() {
-      const notification = await testSubjects.find('noShardsNotification');
-      const text = await notification.getVisibleText();
-      return text.includes('no such index');
+    async editorHasIndexNotFoundNotification(indexName: string) {
+      const notifications = await testSubjects.findAll('profilerErrorNotification');
+      const texts = await Promise.all(notifications.map((n) => n.getVisibleText()));
+      return texts.some((text) => text.includes(`no such index [${indexName}]`));
     },
     async editorHasJsonParseErrorNotification() {
       return await testSubjects.exists('jsonParseErrorToast');

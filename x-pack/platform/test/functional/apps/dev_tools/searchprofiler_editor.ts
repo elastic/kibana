@@ -182,7 +182,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.searchProfiler.clickProfileButton();
 
         await retry.waitFor('index not found notification renders', async () => {
-          return await PageObjects.searchProfiler.editorHasIndexNotFoundNotification();
+          return await PageObjects.searchProfiler.editorHasIndexNotFoundNotification(
+            'non_existent_test_index'
+          );
         });
       });
     });

@@ -108,19 +108,15 @@ export const useRequestProfile = () => {
       return { data: resp.resp.profile!.shards };
     } catch (e) {
       const profilerErrorMessage = extractProfilerErrorMessage(e);
-      if (profilerErrorMessage) {
-        notifications.addError(e, {
-          title: e.message,
-          toastMessage: profilerErrorMessage,
-        });
-      } else {
-        // Otherwise just report the original error
-        notifications.addError(e, {
-          title: i18n.translate('xpack.searchProfiler.errorSomethingWentWrongTitle', {
-            defaultMessage: 'Something went wrong',
-          }),
-        });
-      }
+      notifications.addDanger({
+        'data-test-subj': 'profilerErrorNotification',
+        title: profilerErrorMessage
+          ? e.message
+          : i18n.translate('xpack.searchProfiler.errorSomethingWentWrongTitle', {
+              defaultMessage: 'Something went wrong',
+            }),
+        text: profilerErrorMessage,
+      });
       return { data: null };
     }
   };
