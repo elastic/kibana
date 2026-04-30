@@ -126,7 +126,17 @@ describe('WorkflowExecuteHistoricalForm', () => {
     });
   });
 
-  describe('execution loading', () => {
+  describe('loading state', () => {
+    it('should show loading selector when executions are loading', () => {
+      mockUseWorkflowExecutions.mockReturnValue({ data: undefined, isInitialLoading: true });
+      renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
+      expect(
+        screen
+          .getByTestId('workflowExecuteModalReplayExecutionComboBox')
+          .querySelector('.euiLoadingSpinner')
+      ).toBeInTheDocument();
+    });
+
     it('should show loading text when execution is loading', () => {
       mockUseWorkflowExecution.mockReturnValue({ data: null, isLoading: true });
       mockUseWorkflowExecutions.mockReturnValue({

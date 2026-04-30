@@ -67,7 +67,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     const [end, setEnd] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
 
-    const { data: executionsList } = useWorkflowExecutions({
+    const { data: executionsList, isInitialLoading: isLoadingExecutions } = useWorkflowExecutions({
       workflowId: workflowId ?? null,
       omitStepRuns: true,
       size: 100,
@@ -222,7 +222,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                   onChange={handleExecutionChange}
                   isClearable
                   fullWidth
-                  isLoading={!executionsList && !!workflowId}
+                  isLoading={isLoadingExecutions}
                   placeholder={translations.selectExecutionPlaceholder}
                   data-test-subj="workflowExecuteModalReplayExecutionComboBox"
                 />
@@ -242,7 +242,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {selectedExecutionId && isLoadingExecution && (
+        {selectedExecutionId && !isLoadingExecutions && isLoadingExecution && (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               {translations.loadingExecution}

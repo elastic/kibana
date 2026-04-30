@@ -85,7 +85,7 @@ describe('StepExecuteHistoricalForm', () => {
     });
     mockUseStepExecution.mockReturnValue({ data: null, isLoading: false });
     mockUseWorkflowExecution.mockReturnValue({ data: null, isLoading: false });
-    mockUseWorkflowStepExecutions.mockReturnValue({ data: undefined });
+    mockUseWorkflowStepExecutions.mockReturnValue({ data: undefined, isLoading: false });
     mockBuildContextOverrideFromExecution.mockReturnValue({ stepContext: {} });
   });
 
@@ -345,6 +345,16 @@ describe('StepExecuteHistoricalForm', () => {
   });
 
   describe('loading state', () => {
+    it('should show loading selector when step executions are loading', () => {
+      mockUseWorkflowStepExecutions.mockReturnValue({ data: undefined, isLoading: true });
+      renderWithProviders(<StepExecuteHistoricalForm {...defaultProps} />);
+      expect(
+        screen
+          .getByTestId('workflowTestStepModalReplayExecutionComboBox')
+          .querySelector('.euiLoadingSpinner')
+      ).toBeInTheDocument();
+    });
+
     it('should show loading text when step execution is loading', () => {
       mockUseStepExecution.mockReturnValue({ data: null, isLoading: true });
       mockUseWorkflowStepExecutions.mockReturnValue({
@@ -359,6 +369,33 @@ describe('StepExecuteHistoricalForm', () => {
             },
           ],
         },
+        isLoading: false,
+      });
+      renderWithProviders(
+        <StepExecuteHistoricalForm
+          {...defaultProps}
+          initialStepExecutionId="step-exec-1"
+          initialWorkflowRunId="run-1"
+        />
+      );
+      expect(screen.getByText(/Loading step execution/)).toBeInTheDocument();
+    });
+
+    it('should show loading text when workflow execution is loading', () => {
+      mockUseWorkflowExecution.mockReturnValue({ data: null, isLoading: true });
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: {
+          total: 1,
+          results: [
+            {
+              id: 'step-exec-1',
+              workflowRunId: 'run-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              status: 'completed',
+            },
+          ],
+        },
+        isLoading: false,
       });
       renderWithProviders(
         <StepExecuteHistoricalForm

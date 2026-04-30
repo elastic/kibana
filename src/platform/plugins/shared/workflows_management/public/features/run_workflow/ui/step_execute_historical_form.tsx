@@ -84,13 +84,14 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
 
     const workflowId = useSelector(selectWorkflowId);
 
-    const { data: stepExecutionsList } = useWorkflowStepExecutions({
-      workflowId: workflowId ?? null,
-      stepId,
-      size: 100,
-      start,
-      end,
-    });
+    const { data: stepExecutionsList, isLoading: isLoadingStepExecutions } =
+      useWorkflowStepExecutions({
+        workflowId: workflowId ?? null,
+        stepId,
+        size: 100,
+        start,
+        end,
+      });
 
     const selectedItem = useMemo(() => {
       const results = stepExecutionsList?.results ?? [];
@@ -303,7 +304,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                   onChange={handleExecutionChange}
                   isClearable
                   fullWidth
-                  isLoading={stepExecutionsList === undefined && !!workflowId}
+                  isLoading={isLoadingStepExecutions}
                   placeholder={translations.selectStepExecutionPlaceholder}
                   data-test-subj="workflowTestStepModalReplayExecutionComboBox"
                 />
@@ -324,13 +325,15 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {selectedStepExecutionId && (isLoadingStepExecution || isLoadingWorkflowExecution) && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {translations.loadingExecution}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+        {selectedStepExecutionId &&
+          !isLoadingStepExecutions &&
+          (isLoadingStepExecution || isLoadingWorkflowExecution) && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {translations.loadingExecution}
+              </EuiText>
+            </EuiFlexItem>
+          )}
         {selectedStepExecution && selectedStepExecution.id === selectedStepExecutionId && (
           <EuiFlexItem
             css={css`
