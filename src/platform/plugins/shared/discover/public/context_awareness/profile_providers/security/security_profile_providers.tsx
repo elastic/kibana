@@ -13,6 +13,7 @@ import {
   EnhancedAlertFlyoutFooterLazy,
   EnhancedAlertFlyoutHeaderLazy,
   EnhancedIOCFlyoutFooterLazy,
+  EnhancedIOCFlyoutHeaderLazy,
   EnhancedIOCOverviewLazy,
 } from './components';
 import { SECURITY_PROFILE_ID } from './constants';
@@ -54,18 +55,28 @@ export const createSecurityDocumentProfileProviders = (
           );
         }
 
+        let renderHeader = prevDocViewer.renderHeader;
+        if (isIOC) {
+          renderHeader = (props) => (
+            <EnhancedIOCFlyoutHeaderLazy
+              {...props}
+              providerServices={providerServices}
+              fallbackRenderHeader={prevDocViewer.renderHeader}
+            />
+          );
+        } else if (isAlert || isEvent) {
+          renderHeader = (props) => (
+            <EnhancedAlertFlyoutHeaderLazy
+              {...props}
+              providerServices={providerServices}
+              fallbackRenderHeader={prevDocViewer.renderHeader}
+            />
+          );
+        }
+
         return {
           ...prevDocViewer,
-          renderHeader:
-            isAlert || isEvent
-              ? (props) => (
-                  <EnhancedAlertFlyoutHeaderLazy
-                    {...props}
-                    providerServices={providerServices}
-                    fallbackRenderHeader={prevDocViewer.renderHeader}
-                  />
-                )
-              : prevDocViewer.renderHeader,
+          renderHeader,
           docViewsRegistry: (registry) => {
             if (isIOC) {
               registry.add({

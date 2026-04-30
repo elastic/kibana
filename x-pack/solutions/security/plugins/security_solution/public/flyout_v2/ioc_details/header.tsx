@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { FlyoutTitle } from '../shared/components/flyout_title';
-import { Timestamp } from '../shared/components/timestamp';
+import { HeaderTitle } from './header_title';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
-import { RawIndicatorFieldId } from '../../../common/threat_intelligence/types/indicator';
 import type { RightPanelTabType, RightPanelPaths } from './tabs';
-import { IOC_DETAILS_TITLE_TEST_ID, IOC_DETAILS_SUBTITLE_TEST_ID } from './test_ids';
 
 export interface HeaderProps {
   /**
@@ -73,21 +68,7 @@ export const Header: FC<HeaderProps> = memo(
 
     return (
       <>
-        <FlyoutTitle
-          title={i18n.translate('xpack.securitySolution.flyout.iocDetails.panelTitle', {
-            defaultMessage: 'Indicator details',
-          })}
-          data-test-subj={IOC_DETAILS_TITLE_TEST_ID}
-        />
-        <EuiText size={'xs'}>
-          <p data-test-subj={IOC_DETAILS_SUBTITLE_TEST_ID}>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.iocDetails.panelSubTitle"
-              defaultMessage="First seen: "
-            />
-            <Timestamp hit={hit} field={RawIndicatorFieldId.FirstSeen} />
-          </p>
-        </EuiText>
+        <HeaderTitle hit={hit} />
         <EuiSpacer size="m" />
         <EuiTabs size="l" expand>
           {renderTabs}

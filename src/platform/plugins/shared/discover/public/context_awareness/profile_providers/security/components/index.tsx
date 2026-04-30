@@ -57,3 +57,11 @@ export const EnhancedIOCFlyoutFooterLazy = withSuspense(
     }))
   )
 );
+
+export const EnhancedIOCFlyoutHeaderLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_flyout_header').then((module) => ({
+      default: module.EnhancedIOCFlyoutHeader,
+    }))
+  )
+);

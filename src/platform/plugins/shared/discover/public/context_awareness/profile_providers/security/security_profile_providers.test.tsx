@@ -229,5 +229,33 @@ describe('createSecurityDocumentProfileProviders', () => {
         expect.objectContaining({ id: 'doc_view_alerts_overview' })
       );
     });
+
+    it('overrides renderHeader for IOC documents', () => {
+      const { result, prevRenderHeader } = getDocViewerResult(
+        createRecord({ 'event.type': 'indicator' })
+      );
+
+      expect(result.renderHeader).toBeDefined();
+      expect(result.renderHeader).not.toBe(prevRenderHeader);
+    });
+
+    it('overrides renderFooter for IOC documents', () => {
+      const { result, prevRenderFooter } = getDocViewerResult(
+        createRecord({ 'event.type': 'indicator' })
+      );
+
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
+    });
+
+    it('adds the overview tab to the registry for IOC documents', () => {
+      const { result } = getDocViewerResult(createRecord({ 'event.type': 'indicator' }));
+      const registry = { add: jest.fn() };
+      result.docViewsRegistry(registry as never);
+
+      expect(registry.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'doc_view_ioc_overview' })
+      );
+    });
   });
 });
