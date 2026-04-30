@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import { EuiIcon } from '@elastic/eui';
 import type { Phase } from '../../../../../common/types';
 import { usePhaseColors } from '../../../lib';
 
 export const PhaseIndicator = ({ phase }: { phase: Phase }) => {
   const phaseToIndicatorColors = usePhaseColors();
+
+  if (phase === 'delete') {
+    return <EuiIcon type="trash" size="m" aria-hidden={true} />;
+  }
 
   return (
     <div
