@@ -123,6 +123,18 @@ export interface ReportWorkflowCreatedActionParams
    * Only presence is tracked; condition contents are never reported.
    */
   hasTriggerConditions: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: ignore`.
+   */
+  hasTriggerWorkflowEventsIgnore: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: allow-all`.
+   */
+  hasTriggerWorkflowEventsAllow: boolean;
+  /**
+   * Whether any trigger explicitly sets `on.workflowEvents: avoid-loop`.
+   */
+  hasTriggerWorkflowEventsAvoidLoop: boolean;
 }
 
 /**
