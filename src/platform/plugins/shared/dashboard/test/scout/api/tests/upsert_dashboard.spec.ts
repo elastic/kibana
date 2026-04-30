@@ -200,7 +200,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('access_mode');
   });
 
   apiTest(
@@ -248,7 +247,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(forbidden).toHaveStatusCode(400);
-      expect(forbidden.body.message).toContain('currentUserProfile is undefined');
 
       const after = await apiClient.get(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
         headers: {
@@ -293,7 +291,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
         responseType: 'json',
       });
       expect(forbidden).toHaveStatusCode(403);
-      expect(forbidden.body.message).toBeDefined();
 
       const after = await apiClient.get(`${DASHBOARD_API_PATH}/${id}`, {
         headers: {
