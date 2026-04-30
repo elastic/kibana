@@ -181,13 +181,18 @@ When the bug is about missing, empty, or stale data in the UI:
 
 This trace is your primary evidence for choosing what to fix. Without it, you risk fixing a symptom while the real data path remains broken.
 
-Summarize: failing endpoints, console errors, component names, request/response data, and the data path trace. Present findings to the user before proceeding.
+Summarize: failing endpoints, console errors, component names, request/response data, and the data path trace. Present findings to the user and wait for their response before doing anything else. This is a hard stop — the user must see what the browser showed before investigation turns into implementation.
 
-If the bug reproduced, move to Phase 4 with your diagnostics. If not, inform the user and ask how to proceed.
+- Bug reproduced → wait for user acknowledgement, then move to Phase 4
+- Could not reproduce → tell the user what you tried and what you observed, ask how to proceed. Do not enter Phase 4.
 
 ### Phase 4: Fix (TDD)
 
-Don't write any code until the user has approved the fix plan in Step 1. Engineers reviewing PRs need to validate the diagnosis before implementation starts — presenting the plan and waiting for explicit sign-off is what prevents misdiagnosed fixes from wasting hours of review time.
+Before entering this phase, verify two things:
+1. Phase 3 is complete — you have browser diagnostics (console logs, network traces) from a confirmed reproduction. If you don't, return to Phase 3. A fix without reproduction data is a guess.
+2. The user has seen and acknowledged your Phase 3 findings. If they haven't responded yet, wait.
+
+Once both are true, proceed — but don't write any code until the user has explicitly approved the fix plan in Step 1. Presenting the plan first is what allows engineers to catch misdiagnoses before implementation, not during code review.
 
 #### Step 1: Root cause analysis and fix plan
 
@@ -208,11 +213,11 @@ Present your Root Cause Analysis and Fix Plan to the user using the template in 
 
 > _"I am waiting for your approval before writing any code or tests. Do you approve this plan as written?"_
 
-Stop there. If the user identifies a misdiagnosis or a better approach, revise the plan and ask for approval again.
+Stop there and wait. Do not write code, open files for editing, or call any tool. Your turn ends at that question. If the user identifies a misdiagnosis or a better approach, revise the plan and ask for approval again.
 
 #### Step 2: Red — write failing test
 
-Before starting, re-read the user's last message and confirm they explicitly approved the plan (e.g., "yes", "proceed", "approved", "looks good"). Ambiguous responses aren't approval — present the plan again if unclear. Explicit sign-off protects both of you from spending time on a fix that turns out to be in the wrong place.
+Re-read the user's last message before doing anything. Did they explicitly approve — "yes", "proceed", "approved", "looks good", or similar? If the response is ambiguous or missing, present the plan again and wait. Don't interpret silence or a question as approval. This sign-off is the only thing that separates a validated fix from an hour of work in the wrong direction.
 
 Write a test asserting correct behavior. Use diagnostic evidence to target precisely.
 
