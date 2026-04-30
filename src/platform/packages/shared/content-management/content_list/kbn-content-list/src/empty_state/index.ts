@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomRequestHandlerContext } from '@kbn/core/server';
-import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server';
-
-/** Request handler context for example routes; includes workflows from workflows_extensions. */
-export type ExampleRequestHandlerContext = CustomRequestHandlerContext<{
-  workflows: WorkflowsApiRequestHandlerContext;
-}>;
+export {
+  ContentListEmptyState,
+  type ContentListEmptyStateProps,
+  type ContentListEmptyStatePrimaryAction,
+} from './content_list_empty_state';

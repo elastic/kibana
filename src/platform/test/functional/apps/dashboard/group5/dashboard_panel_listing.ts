@@ -40,15 +40,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardAddPanel.openAddPanelFlyout();
 
-      const panelSelectionList = await testSubjects.find('dashboardPanelSelectionList');
-
+      const panelSelectionFlyout = await testSubjects.find('dashboardPanelSelectionFlyout');
       const panelGroupByOrder = new Map();
-
-      const panelGroups = await panelSelectionList.findAllByCssSelector(
+      const panelGroups = await panelSelectionFlyout.findAllByCssSelector(
         '[data-test-subj*="dashboardEditorMenu-"]'
       );
-
-      const panelTypes = await panelSelectionList.findAllByCssSelector('li');
+      const panelTypes = await panelSelectionFlyout.findAllByCssSelector(
+        '[data-test-subj*="create-action-"]'
+      );
 
       for (let i = 0; i < panelGroups.length; i++) {
         const panelGroup = panelGroups[i];
@@ -72,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
-      expect(panelTypes.length).to.eql(16);
+      expect(panelTypes.length).to.eql(17);
     });
   });
 }
