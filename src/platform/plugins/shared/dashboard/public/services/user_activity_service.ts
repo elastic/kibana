@@ -11,13 +11,12 @@ import { type Subscription } from 'rxjs';
 import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from './kibana_services';
 
-let session: DashboardUserActivitySession | undefined;
-
+const sessions = new Map<string, DashboardUserActivitySession>();
 export const getDashboardUserActivityService = (api: DashboardApi) => {
-  if (!session) {
-    session = new DashboardUserActivitySession(api);
+  if (!sessions.has(api.uuid)) {
+    sessions.set(api.uuid, new DashboardUserActivitySession(api));
   }
-  return session;
+  return sessions.get(api.uuid)!;
 };
 
 class DashboardUserActivitySession {
@@ -67,7 +66,7 @@ class DashboardUserActivitySession {
   }
 
   public cleanup() {
-    session = undefined;
+    sessions.delete(this.api.uuid);
     this.activitySubscription.unsubscribe();
     document.removeEventListener('visibilitychange', this.bindedVisibilityHandler);
   }

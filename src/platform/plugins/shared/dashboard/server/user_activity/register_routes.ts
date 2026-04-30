@@ -24,7 +24,7 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
         }),
         body: schema.object({
           title: schema.string(),
-          start: schema.maybe(schema.number()),
+          start: schema.number(),
           end: schema.number(),
           tags: schema.maybe(schema.arrayOf(schema.string())),
         }),
@@ -45,7 +45,7 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
         event: {
           action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_manual_refresh',
           type: 'access',
-          start: new Date(req.body.start ?? 0).toISOString(),
+          start: new Date(req.body.start).toISOString(),
           end: new Date(req.body.end).toISOString(),
           duration,
         },

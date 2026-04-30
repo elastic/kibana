@@ -71,8 +71,11 @@ export function registerCreateRoute(
             req.body,
             isDashboardAppRequest
           );
-          await trackCreateDashboardAction(result, req);
-
+          try {
+            await trackCreateDashboardAction(result, req);
+          } catch (e) {
+            // if traccking throws, just silence the error
+          }
           return res.created({ body: result });
         } catch (e) {
           return writeErrorHandler(e, res);
