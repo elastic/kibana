@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { TagsPluginRouter } from '../../types';
-import { registerCreateRoute } from './register_create_route';
-import { registerDeleteRoute } from './register_delete_route';
-import { registerListRoute } from './register_list_route';
-import { registerReadRoute } from './register_read_route';
-import { registerUpsertRoute } from './register_upsert_route';
+import { registerCreateRoute } from './create/register_create_route';
+import { registerDeleteRoute } from './delete/register_delete_route';
+import { registerListRoute } from './list/register_list_route';
+import { registerReadRoute } from './read/register_read_route';
+import { registerUpsertRoute } from './upsert/register_upsert_route';
 
-export const registerApiRoutes = (router: TagsPluginRouter) => {
-  registerListRoute(router);
-  registerReadRoute(router);
-  registerCreateRoute(router);
-  registerUpsertRoute(router);
-  registerDeleteRoute(router);
+export const registerApiRoutes = (router: TagsPluginRouter, usageCounter?: UsageCounter) => {
+  registerListRoute(router, usageCounter);
+  registerReadRoute(router, usageCounter);
+  registerCreateRoute(router, usageCounter);
+  registerUpsertRoute(router, usageCounter);
+  registerDeleteRoute(router, usageCounter);
 };

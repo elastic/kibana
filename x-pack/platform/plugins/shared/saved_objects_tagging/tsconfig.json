@@ -24,7 +24,8 @@
     "@kbn/as-code-shared-schemas",
     "@kbn/core-http-server",
     "@kbn/core-http-browser",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/as-code-shared-telemetry"
   ],
   "exclude": [
     "target/**/*",

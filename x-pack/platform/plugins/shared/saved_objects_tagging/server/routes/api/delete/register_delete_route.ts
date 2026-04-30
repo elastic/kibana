@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { TagsPluginRouter } from '../../types';
-import { handleRouteError } from './error_handler';
-import { getRouteConfig } from './get_route_config';
-import { tagIdParamSchema } from './schemas';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import type { TagsPluginRouter } from '../../../types';
+import { handleRouteError } from '../error_handler';
+import { getRouteConfig } from '../get_route_config';
+import { tagIdParamSchema } from '../schemas';
+import { deleteTag } from './delete';
 
-export const registerDeleteRoute = (router: TagsPluginRouter) => {
+export const registerDeleteRoute = (router: TagsPluginRouter, usageCounter?: UsageCounter) => {
   const { basePath, routeConfig, routeVersion } = getRouteConfig();
 
   const deleteRoute = router.versioned.delete({
@@ -41,23 +43,17 @@ export const registerDeleteRoute = (router: TagsPluginRouter) => {
         },
       },
     },
-    async (ctx, req, res) => {
-      const { id } = req.params;
-      try {
-        const { tagsClient } = await ctx.tags;
-        await tagsClient.delete(id);
-        return res.noContent();
-      } catch (e) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(e as Error)) {
-          return res.notFound({
-            body: {
-              message: `A tag with ID [${id}] was not found.`,
-            },
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const { id } = req.params;
+        try {
+          await deleteTag(ctx, id);
+          return res.noContent();
+        } catch (e) {
+          return handleRouteError(e as Error, res, {
+            notFoundMessage: `A tag with ID [${id}] was not found.`,
           });
         }
-
-        return handleRouteError(e as Error, res);
-      }
-    }
+      })
   );
 };

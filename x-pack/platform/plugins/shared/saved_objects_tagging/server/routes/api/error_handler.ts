@@ -27,6 +27,10 @@ export function handleRouteError(
     return res.forbidden({ body: { message: error.message } });
   }
 
+  if (SavedObjectsErrorHelpers.isConflictError(error)) {
+    return res.conflict({ body: { message: error.message } });
+  }
+
   if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
     return res.notFound({
       body: {

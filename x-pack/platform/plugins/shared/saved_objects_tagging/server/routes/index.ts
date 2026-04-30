@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   registerUpdateTagRoute,
   registerGetAllTagsRoute,
@@ -21,9 +22,15 @@ import {
 import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
 import type { TagsPluginRouter } from '../types';
 
-export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
+export const registerRoutes = ({
+  router,
+  usageCounter,
+}: {
+  router: TagsPluginRouter;
+  usageCounter?: UsageCounter;
+}) => {
   // public API
-  registerApiRoutes(router);
+  registerApiRoutes(router, usageCounter);
 
   // deprecated tags API
   registerCreateTagRoute(router);
