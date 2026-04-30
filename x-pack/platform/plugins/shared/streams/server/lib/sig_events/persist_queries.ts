@@ -15,8 +15,8 @@ import type {
 import type { StreamsClient } from '../streams/client';
 
 export interface PersistQueriesResult {
-  persisted: number;
-  skipped: number;
+  persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }>;
+  skippedQueries: GeneratedSignificantEventQuery[];
 }
 
 export async function persistQueries(
@@ -30,7 +30,7 @@ export async function persistQueries(
   const { queryClient, streamsClient } = deps;
 
   if (queries.length === 0) {
-    return { persisted: 0, skipped: 0 };
+    return { persistedQueries: [], skippedQueries: [] };
   }
 
   const definition = await streamsClient.getStream(streamName);
@@ -46,43 +46,34 @@ export async function persistQueries(
 
   const standardOps: QueryClientBulkIndexOperation[] = [];
   const ruleBackedReplaceOps: QueryClientBulkIndexOperation[] = [];
-  let skipped = 0;
+  const persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }> = [];
+  const skippedQueries: GeneratedSignificantEventQuery[] = [];
 
   for (const query of queries) {
-    const fields = {
-      type: query.type,
-      esql: query.esql,
-      title: query.title,
-      description: query.description,
-      severity_score: query.severity_score,
-      evidence: query.evidence,
-    };
+    const { replaces, ...indexFields } = query;
 
     const normalizedEsql = normalizeEsqlSafe(query.esql.query);
 
     if (existingEsqls.has(normalizedEsql)) {
-      skipped++;
+      skippedQueries.push(query);
       continue;
     }
 
     existingEsqls.add(normalizedEsql);
 
-    if (query.replaces && existingById.has(query.replaces)) {
-      const op = { index: { id: query.replaces, ...fields } };
-      if (ruleBackedIds.has(query.replaces)) {
+    if (replaces && existingById.has(replaces)) {
+      const op = { index: { id: replaces, ...indexFields } };
+      if (ruleBackedIds.has(replaces)) {
         ruleBackedReplaceOps.push(op);
       } else {
         standardOps.push(op);
       }
+      persistedQueries.push({ ...query, id: replaces });
     } else {
-      standardOps.push({ index: { id: v4(), ...fields } });
+      const id = v4();
+      standardOps.push({ index: { id, ...indexFields } });
+      persistedQueries.push({ ...query, id });
     }
-  }
-
-  const persisted = standardOps.length + ruleBackedReplaceOps.length;
-
-  if (persisted === 0) {
-    return { persisted: 0, skipped };
   }
 
   if (standardOps.length > 0) {
@@ -96,5 +87,5 @@ export async function persistQueries(
     await queryClient.bulk(definition, ruleBackedReplaceOps);
   }
 
-  return { persisted, skipped };
+  return { persistedQueries, skippedQueries };
 }
