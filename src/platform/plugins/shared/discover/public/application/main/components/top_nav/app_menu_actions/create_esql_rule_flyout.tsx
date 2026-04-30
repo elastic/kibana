@@ -49,7 +49,7 @@ export function CreateESQLRuleFlyout({
   const esqlVariables = useSyncExternalStore(subscribe, getVariables);
 
   const inlineResult = useMemo(
-    () => (query === null ? null : inlineEsqlVariables(query, esqlVariables)),
+    () => inlineEsqlVariables(query ?? '', esqlVariables),
     [query, esqlVariables]
   );
 
@@ -91,7 +91,7 @@ export function CreateESQLRuleFlyout({
     };
   }, [history, core.application.currentAppId$]);
 
-  if (query === null || inlineResult === null) {
+  if (query === null) {
     return null;
   }
 

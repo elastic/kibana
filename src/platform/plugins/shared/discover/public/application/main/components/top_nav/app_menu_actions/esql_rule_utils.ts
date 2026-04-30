@@ -57,8 +57,21 @@ export const esqlControlVariableIsComposerInlinable = (v: ESQLControlVariable): 
 
 const PLACEHOLDER_RE = /\?\??[A-Za-z_]\w*/g;
 
+/**
+ * Names the alerting v2 rule executor substitutes itself with the rule's time
+ * window at execution time. They are valid in a
+ * persisted rule and must not be flagged as unresolved.
+ */
+const RESERVED_RULE_PARAM_NAMES: ReadonlySet<string> = new Set(['_tstart', '_tend']);
+
+const placeholderName = (token: string): string => token.replace(/^\?\??/, '');
+
 const findPlaceholderTokens = (query: string): string[] => [
-  ...new Set(query.match(PLACEHOLDER_RE) ?? []),
+  ...new Set(
+    (query.match(PLACEHOLDER_RE) ?? []).filter(
+      (token) => !RESERVED_RULE_PARAM_NAMES.has(placeholderName(token))
+    )
+  ),
 ];
 
 type PlaceholderShape = 'value' | 'identifier';
@@ -76,7 +89,7 @@ const naturalPlaceholderShape = (v: ESQLControlVariable): PlaceholderShape => {
 const collectPlaceholderShapesByName = (query: string): Map<string, Set<PlaceholderShape>> => {
   const byName = new Map<string, Set<PlaceholderShape>>();
   for (const token of query.match(PLACEHOLDER_RE) ?? []) {
-    const name = token.replace(/^\?\??/, '');
+    const name = placeholderName(token);
     const shape: PlaceholderShape = token.startsWith('??') ? 'identifier' : 'value';
     let shapes = byName.get(name);
     if (!shapes) {

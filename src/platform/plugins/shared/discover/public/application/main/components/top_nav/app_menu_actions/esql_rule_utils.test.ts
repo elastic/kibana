@@ -270,6 +270,34 @@ describe('inlineEsqlVariables', () => {
       const result = inlineEsqlVariables('FROM logs* | KEEP ??col | LIMIT 10', []);
       expect(result.unresolved).toEqual(['??col']);
     });
+
+    it('does not report ?_tstart / ?_tend — the rule executor binds them at run time', () => {
+      const query =
+        'FROM kibana_sample_data_ecommerce | WHERE order_date >= ?_tstart AND order_date <= ?_tend';
+      const result = inlineEsqlVariables(query, undefined);
+      expect(result.query).toBe(query);
+      expect(result.unresolved).toEqual([]);
+    });
+
+    it('reports a user placeholder alongside reserved time params without flagging the reserved ones', () => {
+      const result = inlineEsqlVariables(
+        'FROM logs* | WHERE @timestamp >= ?_tstart AND host == ?host | LIMIT 10',
+        []
+      );
+      expect(result.unresolved).toEqual(['?host']);
+    });
+
+    it('inlines a bound control and leaves reserved params untouched', () => {
+      const result = inlineEsqlVariables(
+        'FROM logs* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend AND host == ?host | LIMIT 10',
+        [makeVar({ key: 'host', type: ESQLVariableType.VALUES, value: 'web-1' })]
+      );
+      expect(result.query).toContain('"web-1"');
+      expect(result.query).not.toContain('?host');
+      expect(result.query).toContain('?_tstart');
+      expect(result.query).toContain('?_tend');
+      expect(result.unresolved).toEqual([]);
+    });
   });
 
   describe('shape gating (token vs control type)', () => {
