@@ -17,23 +17,12 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
-engine:
-  # id: claude
-  # version: "2.1.98"
-  # model: opus[1m]
-  # max-turns: 120
-  # env:
-  #   ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-  #   ANTHROPIC_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
-  #   ENABLE_PROMPT_CACHING_1H: "1"
-  #   ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/gpt-5.4[1m]
-  
+engine:  
   id: codex
-  version: "0.88.0"
-  model: gpt-5.4
+  model: gpt-5.3-codex
   args:
     - -c
-    - model=llm-gateway/gpt-5.4
+    - model=llm-gateway/gpt-5.3-codex
     - -c
     - model_context_window=1050000
     # Disable plugins and apps to remove context bloat
