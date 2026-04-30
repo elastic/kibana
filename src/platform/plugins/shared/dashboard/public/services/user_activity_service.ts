@@ -24,7 +24,7 @@ class DashboardUserActivitySession {
   private bindedVisibilityHandler;
 
   private activitySubscription: Subscription;
-  private eventStacks: {
+  private eventQueues: {
     view: Array<{ start: number }>;
     refresh: Array<{ type: 'manual' | 'auto'; start: number }>;
   } = {
@@ -37,22 +37,22 @@ class DashboardUserActivitySession {
     this.activitySubscription = api.userActivity$.subscribe((activity) => {
       if (activity.start) {
         if (activity.type === 'view') {
-          this.eventStacks.view.push({ start: activity.start });
+          this.eventQueues.view.push({ start: activity.start });
         } else {
-          this.eventStacks.refresh.push({
+          this.eventQueues.refresh.push({
             type: activity.refreshType,
             start: activity.start,
           });
         }
       } else {
-        const start = this.eventStacks[activity.type].pop();
-        if (!start) {
+        const event = this.eventQueues[activity.type].shift();
+        if (!event) {
           return;
         }
         if (activity.type === 'view') {
-          this.logUserActivity(activity.type, start.start, activity.end!);
+          this.logUserActivity(activity.type, event.start, activity.end!);
         } else {
-          const refreshStart = start as (typeof this.eventStacks)['refresh'][number];
+          const refreshStart = event as (typeof this.eventQueues)['refresh'][number];
           this.logUserActivity(
             `${activity.type}_${refreshStart.type}`,
             refreshStart.start,
