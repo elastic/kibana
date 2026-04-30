@@ -17,6 +17,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionStateSuccessResponse'
+              examples:
+                actionsState:
+                  summary: Response actions state with encryption enabled
+                  value:
+                    body:
+                      data:
+                        canEncrypt: true
 components:
   schemas:
     ActionStateSuccessResponse:

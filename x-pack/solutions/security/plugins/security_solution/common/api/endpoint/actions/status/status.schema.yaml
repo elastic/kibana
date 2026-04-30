@@ -24,6 +24,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionStatusSuccessResponse'
+              examples:
+                actionStatus:
+                  summary: Pending response actions per agent
+                  value:
+                    body:
+                      data:
+                        agent_id: 'afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0'
+                        pending_actions:
+                          isolate: 0
+                          unisolate: 0
+                          kill-process: 1
+                          running-processes: 0
+                          get-file: 0
+                          execute: 0
+                          upload: 0
+                          scan: 0
 
 components:
   schemas:
