@@ -14,8 +14,9 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
+import { isWorkflowValidationError } from '../../../common/lib/errors/workflow_validation_error';
 import type { StepInfo, WorkflowLookup } from '../../../common/lib/yaml';
-import { buildWorkflowLookup } from '../../../common/lib/yaml';
+import { buildWorkflowLookup, NESTED_STEP_KEYS } from '../../../common/lib/yaml';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
@@ -50,6 +51,7 @@ const SAFE_STEP_TYPES = new Set([
 
 const POLL_INTERVAL_MS = 1000;
 const POLL_TIMEOUT_MS = 30_000;
+const STUB_SEQUENCE_KEYS = ['steps', 'else', 'fallback'] as const;
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -73,6 +75,18 @@ const buildLookup = (yaml: string): WorkflowLookup => {
   const lineCounter = new LineCounter();
   const doc = parseDocument(yaml, { lineCounter });
   return buildWorkflowLookup(doc, lineCounter);
+};
+
+const getYamlParseError = (yaml: string): string | null => {
+  try {
+    const doc = parseDocument(yaml);
+    if (doc.errors.length > 0) {
+      return doc.errors[0].message;
+    }
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
 };
 
 /**
@@ -116,7 +130,9 @@ const findUnsafeStep = (stepId: string, allSteps: Record<string, StepInfo>): Ste
  */
 const ensureMinimalWorkflow = (yamlStr: string): string => {
   const doc = parseDocument(yamlStr);
-  if (!YAML.isMap(doc.contents)) return yamlStr;
+  if (!YAML.isMap(doc.contents) || doc.errors.length > 0) {
+    return yamlStr;
+  }
 
   const contents = doc.contents as YAML.YAMLMap;
   if (!contents.get('version')) {
@@ -152,39 +168,99 @@ const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
       with: { message: `condition_test: ${branch} branch taken` },
     });
 
-  const replaceChildren = (node: YAML.YAMLMap) => {
-    for (const key of ['steps', 'else']) {
-      const child = node.get(key);
-      if (child) {
-        const stubSeq = doc.createNode([]);
-        (stubSeq as YAML.YAMLSeq).add(stubStep(key === 'steps' ? 'then' : 'else'));
-        node.set(key, stubSeq);
+  const replaceBranch = (node: YAML.YAMLMap, key: (typeof STUB_SEQUENCE_KEYS)[number]) => {
+    const child = node.get(key);
+    if (YAML.isSeq(child)) {
+      const stubSeq = doc.createNode([]);
+      (stubSeq as YAML.YAMLSeq).add(stubStep(key === 'steps' ? 'then' : key));
+      node.set(key, stubSeq);
+    }
+  };
+
+  const replaceNestedFailureBranches = (node: YAML.YAMLMap | YAML.YAMLSeq) => {
+    if (YAML.isSeq(node)) {
+      for (const item of node.items) {
+        if (YAML.isMap(item) || YAML.isSeq(item)) {
+          replaceNestedFailureBranches(item);
+        }
+      }
+      return;
+    }
+
+    replaceBranch(node, 'fallback');
+
+    for (const pair of node.items) {
+      if (YAML.isPair(pair) && YAML.isScalar(pair.key)) {
+        const key = pair.key.value as string;
+        if (
+          NESTED_STEP_KEYS.includes(key as (typeof NESTED_STEP_KEYS)[number]) &&
+          key !== 'fallback' &&
+          (YAML.isMap(pair.value) || YAML.isSeq(pair.value))
+        ) {
+          replaceNestedFailureBranches(pair.value);
+        }
       }
     }
   };
 
-  const findAndReplace = (seq: YAML.YAMLSeq): boolean => {
-    for (const item of seq.items) {
-      if (YAML.isMap(item)) {
-        const name = (item as YAML.YAMLMap).get('name');
-        if (name === stepName) {
-          replaceChildren(item as YAML.YAMLMap);
-          return true;
-        }
+  const replaceChildren = (node: YAML.YAMLMap) => {
+    for (const key of ['steps', 'else'] as const) {
+      replaceBranch(node, key);
+    }
 
-        for (const key of ['steps', 'else']) {
-          const child = (item as YAML.YAMLMap).get(key);
-          if (YAML.isSeq(child) && findAndReplace(child)) {
-            return true;
-          }
-        }
+    for (const key of ['on-failure', 'iteration-on-failure'] as const) {
+      const child = node.get(key);
+      if (YAML.isMap(child) || YAML.isSeq(child)) {
+        replaceNestedFailureBranches(child);
       }
     }
+
+    replaceBranch(node, 'fallback');
+  };
+
+  const findAndReplaceNode = (node: YAML.YAMLMap | YAML.YAMLSeq): boolean => {
+    if (YAML.isSeq(node)) {
+      for (const item of node.items) {
+        if ((YAML.isMap(item) || YAML.isSeq(item)) && findAndReplaceNode(item)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    const name = node.get('name');
+    if (name === stepName) {
+      replaceChildren(node);
+      return true;
+    }
+
+    for (const key of NESTED_STEP_KEYS) {
+      const child = node.get(key);
+      if ((YAML.isMap(child) || YAML.isSeq(child)) && findAndReplaceNode(child)) {
+        return true;
+      }
+    }
+
     return false;
   };
 
-  findAndReplace(stepsNode);
+  findAndReplaceNode(stepsNode);
   return doc.toString();
+};
+
+const formatToolError = (error: unknown) => {
+  if (isWorkflowValidationError(error)) {
+    return {
+      success: false,
+      error: error.message,
+      ...(error.validationErrors ? { validationErrors: error.validationErrors } : {}),
+    };
+  }
+
+  return {
+    success: false,
+    error: error instanceof Error ? error.message : String(error),
+  };
 };
 
 const pollExecution = async (
@@ -298,6 +374,21 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
         workflowId = attachment.workflowId;
       }
 
+      const yamlParseError = getYamlParseError(yaml);
+      if (yamlParseError) {
+        return {
+          results: [
+            {
+              type: 'other' as const,
+              data: {
+                success: false,
+                error: `Invalid workflow YAML: ${yamlParseError}`,
+              },
+            },
+          ],
+        };
+      }
+
       const lookup = buildLookup(yaml);
       const stepInfo = lookup.steps[stepName];
       if (!stepInfo) {
@@ -355,12 +446,11 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
               ],
             };
           } catch (e) {
-            const message = e instanceof Error ? e.message : String(e);
             return {
               results: [
                 {
                   type: 'other' as const,
-                  data: { success: false, error: message },
+                  data: formatToolError(e),
                 },
               ],
             };
@@ -436,15 +526,11 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
           ],
         };
       } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
         return {
           results: [
             {
               type: 'other' as const,
-              data: {
-                success: false,
-                error: message,
-              },
+              data: formatToolError(e),
             },
           ],
         };

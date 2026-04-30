@@ -14,6 +14,7 @@ import {
   registerWorkflowExecuteStepTool,
   WORKFLOW_EXECUTE_STEP_TOOL_ID,
 } from './workflow_execute_step_tool';
+import { WorkflowValidationError } from '../../../common/lib/errors/workflow_validation_error';
 
 const VALID_WORKFLOW_YAML = `version: '1'
 name: test-workflow
@@ -87,6 +88,28 @@ steps:
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
+
+const VALID_WORKFLOW_WITH_FAILURE_BRANCHES = `version: '1'
+name: test-workflow
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: check_with_fallback
+    type: if
+    condition: "true"
+    steps:
+      - name: safe_log
+        type: console
+        with:
+          message: "safe"
+    on-failure:
+      fallback:
+        - name: fallback_http
+          type: http
+          with:
+            url: "https://example.com"
+`;
 
 const createMockContext = (yaml?: string) => ({
   spaceId: 'default',
@@ -345,6 +368,62 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.success).toBe(false);
       expect(data.error).toBe('Workflow validation failed');
     });
+
+    it('preserves validationErrors when testStep throws WorkflowValidationError', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockRejectedValue(
+        new WorkflowValidationError('Workflow validation failed', ['Step names must be unique'])
+      );
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'log_step' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Workflow validation failed');
+      expect(data.validationErrors).toEqual(['Step names must be unique']);
+    });
+
+    it('returns timeout when polling does not reach a terminal status', async () => {
+      mockApi.testStep.mockResolvedValue('exec-timeout');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: 'running',
+        stepExecutions: [],
+        error: null,
+        duration: null,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const resultPromise = invokeHandler(registeredTool, { stepName: 'log_step' }, context);
+
+      await jest.advanceTimersByTimeAsync(30_000);
+
+      const result = await resultPromise;
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(false);
+      expect(data.status).toBe('timeout');
+      expect(data.error).toBe(
+        'Step execution did not complete within 30s. The execution may still be running.'
+      );
+    });
+
+    it('returns success false for malformed inline YAML instead of throwing', async () => {
+      const context = createMockContext();
+      const result = await invokeHandler(
+        registeredTool,
+        {
+          stepName: 'log_step',
+          yaml: `steps:\n  - name: log_step\n    type: console\n    with:\n      message: [`,
+        },
+        context
+      );
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(false);
+      expect(typeof data.error).toBe('string');
+    });
   });
 
   describe('unsafe step blocking', () => {
@@ -452,6 +531,32 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.success).toBe(true);
       expect(data.blocked).toBeUndefined();
       expect(mockApi.testStep).toHaveBeenCalled();
+    });
+
+    it('stubs unsafe fallback children under on-failure when the flag is enabled', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockResolvedValue('exec-fallback');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'check_with_fallback', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 90,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_WITH_FAILURE_BRANCHES);
+      const result = await invokeHandler(
+        registeredTool,
+        { stepName: 'check_with_fallback' },
+        context
+      );
+      const data = result.results[0].data as Record<string, unknown>;
+      const stubbedYaml = mockApi.testStep.mock.calls[0][0] as string;
+
+      expect(data.success).toBe(true);
+      expect(data.conditionTest).toBe(true);
+      expect(stubbedYaml).toContain('name: __stub_fallback');
+      expect(stubbedYaml).not.toContain('name: fallback_http');
     });
   });
 });

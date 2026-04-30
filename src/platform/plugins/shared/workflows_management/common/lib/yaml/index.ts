@@ -37,6 +37,7 @@ export {
   buildWorkflowLookup,
   inspectStep,
   getValueFromValueNode,
+  NESTED_STEP_KEYS,
   type StepInfo,
   type StepPropInfo,
   type WorkflowLookup,

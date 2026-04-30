@@ -113,7 +113,13 @@ export function buildWorkflowLookup(
   };
 }
 
-const NESTED_STEP_KEYS = ['steps', 'else', 'on-failure', 'iteration-on-failure', 'fallback'];
+export const NESTED_STEP_KEYS = [
+  'steps',
+  'else',
+  'on-failure',
+  'iteration-on-failure',
+  'fallback',
+] as const;
 
 export function inspectStep(
   node: any,
