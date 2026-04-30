@@ -524,9 +524,9 @@ function GraphInner({
           minZoom={0.2}
           maxZoom={3}
           proOptions={{ hideAttribution: true }}
-          nodesDraggable={true}
+          nodesDraggable
           nodesConnectable={false}
-          nodesFocusable={true}
+          nodesFocusable
           edgesFocusable={false}
         >
           <Background gap={24} size={1} color={euiTheme.colors.lightShade} />

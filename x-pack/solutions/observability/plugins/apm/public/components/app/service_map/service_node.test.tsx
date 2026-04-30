@@ -242,6 +242,11 @@ describe('ServiceNode', () => {
   });
 
   describe('search highlight', () => {
+    const getSearchHighlightWrapper = () => {
+      const node = screen.getByTestId('serviceMapNode-service-test-service');
+      return node.closest('[data-search-match]') ?? node.parentElement?.parentElement;
+    };
+
     afterEach(() => {
       jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
         isSearchMatch: false,
@@ -251,9 +256,9 @@ describe('ServiceNode', () => {
 
     it('does not set search data attributes when there is no search match', () => {
       renderServiceNode();
-      const node = screen.getByTestId('serviceMapNode-service-test-service');
-      expect(node).not.toHaveAttribute('data-search-match');
-      expect(node).not.toHaveAttribute('data-search-active-match');
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).not.toHaveAttribute('data-search-match');
+      expect(wrapper).not.toHaveAttribute('data-search-active-match');
     });
 
     it('sets data-search-match when the node is an inactive search match', () => {
@@ -262,9 +267,9 @@ describe('ServiceNode', () => {
         isActiveSearchMatch: false,
       });
       renderServiceNode();
-      const node = screen.getByTestId('serviceMapNode-service-test-service');
-      expect(node).toHaveAttribute('data-search-match', 'true');
-      expect(node).not.toHaveAttribute('data-search-active-match');
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).toHaveAttribute('data-search-match', 'true');
+      expect(wrapper).not.toHaveAttribute('data-search-active-match');
     });
 
     it('sets both data attributes when the node is the active search match', () => {
@@ -273,9 +278,9 @@ describe('ServiceNode', () => {
         isActiveSearchMatch: true,
       });
       renderServiceNode();
-      const node = screen.getByTestId('serviceMapNode-service-test-service');
-      expect(node).toHaveAttribute('data-search-match', 'true');
-      expect(node).toHaveAttribute('data-search-active-match', 'true');
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).toHaveAttribute('data-search-match', 'true');
+      expect(wrapper).toHaveAttribute('data-search-active-match', 'true');
     });
   });
 });

@@ -97,16 +97,18 @@ export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
     );
   }, [searchResults.length]);
 
+  const matchNodeIds = useMemo(() => new Set(searchResults.map((n) => n.id)), [searchResults]);
+
   useEffect(() => {
     if (isFocused && searchResults.length > 0) {
       setSearchHighlight({
-        matchNodeIds: new Set(searchResults.map((n) => n.id)),
+        matchNodeIds,
         activeMatchNodeId: searchResults[selectedIndex]?.id ?? null,
       });
     } else {
       setSearchHighlight({ matchNodeIds: new Set(), activeMatchNodeId: null });
     }
-  }, [searchResults, selectedIndex, isFocused, setSearchHighlight]);
+  }, [matchNodeIds, searchResults, selectedIndex, isFocused, setSearchHighlight]);
 
   const centerMapOnNode = useCallback(
     (node: ServiceMapNode) => {

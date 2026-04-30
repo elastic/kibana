@@ -18,6 +18,7 @@ import {
   NODE_BORDER_WIDTH_SELECTED,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
+import { SearchHighlightWrapper } from './search_highlight_wrapper';
 
 interface DiamondNodeProps {
   id: string;
@@ -164,34 +165,10 @@ export const DiamondNode = memo(
       display: block;
     `;
 
-    const searchFrameStyles = useMemo(
-      () => css`
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 100%;
-        padding: ${euiTheme.size.s};
-        border: ${euiTheme.border.width.thick} solid transparent;
-        border-radius: ${euiTheme.border.radius.medium};
-        ${isActiveSearchMatch
-          ? `
-          padding: ${euiTheme.size.s};
-          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.textSubdued};
-          outline-offset: -${euiTheme.border.width.thick};
-          border-radius: ${euiTheme.border.radius.medium};
-          background-color: ${euiTheme.colors.backgroundBaseSubdued};
-        `
-          : ''}
-      `,
-      [euiTheme, isActiveSearchMatch]
-    );
-
     return (
-      <div
-        data-test-subj={isActiveSearchMatch ? 'serviceMapNodeSearchHighlightFrame' : undefined}
-        css={searchFrameStyles}
-        data-search-match={isSearchMatch || undefined}
-        data-search-active-match={isActiveSearchMatch || undefined}
+      <SearchHighlightWrapper
+        isSearchMatch={isSearchMatch}
+        isActiveSearchMatch={isActiveSearchMatch}
       >
         <EuiFlexGroup
           direction="column"
@@ -226,7 +203,7 @@ export const DiamondNode = memo(
           </EuiFlexItem>
           <NodeLabel label={label} selected={selected} />
         </EuiFlexGroup>
-      </div>
+      </SearchHighlightWrapper>
     );
   }
 );
