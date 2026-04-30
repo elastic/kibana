@@ -52,6 +52,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
               startDate={data?.['@timestamp']}
               expirationDate={data?.expiration}
               agentIds={data?.agents}
+              tags={data?.tags}
               addToTimeline={addToTimeline}
             />
           )}
