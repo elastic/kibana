@@ -32,6 +32,7 @@ import { withPackageSpan } from '../../utils';
 import { PackageDependencyError } from '../../../../../../common/errors';
 import { mergeIsDependencyOf } from '../../dependencies';
 import { auditLoggingService } from '../../../../audit_logging';
+import { getErrorMessage } from '../../../../../errors/utils';
 
 const FLEET_RESOLVE_DEPENDENCIES_LOCK_ID = 'fleet-resolve-package-dependencies';
 
@@ -68,14 +69,23 @@ export async function stepResolveDependencies(context: InstallContext) {
         .filter((d) => d.status === 'to_install' || d.status === 'to_update')
         .map((d) => ({
           name: d.name,
-          previousVersion: d.status === 'to_update' ? d.previousVersion! : null,
+          previous_version: d.status === 'to_update' ? d.previousVersion! : null,
         }));
       if (dependencyDelta.length > 0) {
-        await context.savedObjectsClient.update(
-          PACKAGES_SAVED_OBJECT_TYPE,
-          context.packageInstallContext.packageInfo.name,
-          { previous_dependency_versions: dependencyDelta }
-        );
+        try {
+          await context.savedObjectsClient.update(
+            PACKAGES_SAVED_OBJECT_TYPE,
+            context.packageInstallContext.packageInfo.name,
+            { previous_dependency_versions: dependencyDelta }
+          );
+        } catch (err) {
+          logger.error(
+            `stepResolveDependencies: failed to save previous_dependency_versions for rollback: ${getErrorMessage(
+              err
+            )}`
+          );
+          throw err;
+        }
       }
 
       const completed: Array<{

@@ -662,7 +662,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
   });
 
   const buildSavedObjectsClient = (
-    previousDependencyVersions: Array<{ name: string; previousVersion: string | null }>,
+    previousDependencyVersions: Array<{ name: string; previous_version: string | null }>,
     depIsDependencyOf: Array<{ name: string; version: string }>
   ) => {
     return {
@@ -706,7 +706,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
 
   it('re-installs an upgraded dependency at its previous version', async () => {
     const savedObjectsClient = buildSavedObjectsClient(
-      [{ name: depName, previousVersion: depPreviousVersion }],
+      [{ name: depName, previous_version: depPreviousVersion }],
       [{ name: pkgName, version: newPkgVersion }]
     );
     (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
@@ -728,7 +728,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
 
   it('removes a freshly-installed dependency when no other package depends on it', async () => {
     const savedObjectsClient = buildSavedObjectsClient(
-      [{ name: depName, previousVersion: null }],
+      [{ name: depName, previous_version: null }],
       [{ name: pkgName, version: newPkgVersion }]
     );
     (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
@@ -749,7 +749,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
   it('skips removing a freshly-installed dependency still needed by another package', async () => {
     // availability check passes because feature flag is on but we override find to allow it through
     const savedObjectsClient = buildSavedObjectsClient(
-      [{ name: depName, previousVersion: null }],
+      [{ name: depName, previous_version: null }],
       [
         { name: pkgName, version: newPkgVersion },
         { name: 'other-composable', version: '2.0.0' },
@@ -773,7 +773,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
 
   it('throws and preserves the snapshot when a dependency rollback fails', async () => {
     const savedObjectsClient = buildSavedObjectsClient(
-      [{ name: depName, previousVersion: depPreviousVersion }],
+      [{ name: depName, previous_version: depPreviousVersion }],
       [{ name: pkgName, version: newPkgVersion }]
     );
     (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
@@ -816,8 +816,8 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
                   previous_version: oldPkgVersion,
                   version: newPkgVersion,
                   previous_dependency_versions: [
-                    { name: depName, previousVersion: depPreviousVersion },
-                    { name: dep2Name, previousVersion: '2.0.0' },
+                    { name: depName, previous_version: depPreviousVersion },
+                    { name: dep2Name, previous_version: '2.0.0' },
                   ],
                 },
               },
@@ -882,7 +882,7 @@ describe('rollbackInstallation - feature flag disabled with existing snapshot', 
                   install_source: 'registry',
                   previous_version: oldPkgVersion,
                   version: newPkgVersion,
-                  previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                  previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                 },
               },
             ],
@@ -1097,7 +1097,7 @@ describe('rollbackAvailableCheck', () => {
                       install_source: 'registry',
                       previous_version: oldPkgVersion,
                       version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previousVersion: null }],
+                      previous_dependency_versions: [{ name: depName, previous_version: null }],
                     },
                   },
                 ],
@@ -1153,7 +1153,7 @@ describe('rollbackAvailableCheck', () => {
                       install_source: 'registry',
                       previous_version: oldPkgVersion,
                       version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                     },
                   },
                 ],
@@ -1205,7 +1205,7 @@ describe('rollbackAvailableCheck', () => {
                       install_source: 'registry',
                       previous_version: oldPkgVersion,
                       version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                     },
                   },
                 ],
@@ -1275,7 +1275,7 @@ describe('rollbackAvailableCheck', () => {
                       install_source: 'registry',
                       previous_version: oldPkgVersion,
                       version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previousVersion: '1.5.0' }],
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.5.0' }],
                     },
                   },
                 ],
@@ -1343,7 +1343,7 @@ describe('rollbackAvailableCheck', () => {
                       install_source: 'registry',
                       previous_version: oldPkgVersion,
                       version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                     },
                   },
                 ],
@@ -1395,7 +1395,7 @@ describe('rollbackAvailableCheck', () => {
                       install_source: 'registry',
                       previous_version: oldPkgVersion,
                       version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                     },
                   },
                 ],

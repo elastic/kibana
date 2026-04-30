@@ -187,7 +187,7 @@ export async function rollbackAvailableCheck(
     if (previousDependencyVersions?.length) {
       for (const {
         name: depName,
-        previousVersion: depPreviousVersion,
+        previous_version: depPreviousVersion,
       } of previousDependencyVersions) {
         const depSORes = await getPackageSavedObjects(savedObjectsClient, {
           searchFields: ['name'],
@@ -448,14 +448,14 @@ async function _rollbackDependencies({
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   spaceId: string;
-  previousDependencyVersions: Array<{ name: string; previousVersion: string | null }>;
+  previousDependencyVersions: Array<{ name: string; previous_version: string | null }>;
   logger: Logger;
 }): Promise<string[]> {
   const failedDeps: string[] = [];
 
   await pMap(
     previousDependencyVersions,
-    async ({ name: depName, previousVersion }) => {
+    async ({ name: depName, previous_version: previousVersion }) => {
       try {
         if (previousVersion === null) {
           const depSORes = await getPackageSavedObjects(savedObjectsClient, {
@@ -506,7 +506,7 @@ async function _rollbackDependencies({
         failedDeps.push(depName);
       }
     },
-    { concurrency: 5 }
+    { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
   );
 
   return failedDeps;
