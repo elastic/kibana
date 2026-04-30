@@ -8,6 +8,10 @@ xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
 
+# AlertingV2 dispatcher (in development). Enable for serverless smoke testing
+# on the Observability Complete tier; the feature itself is opt-in via this flag.
+xpack.alerting_v2.enabled: true
+
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
   ### By default, this feature named as `APM and User Experience`, but should be renamed to `Applications`.
