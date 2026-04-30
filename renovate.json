@@ -113,7 +113,6 @@
         "eventsource-parser",
         "fast-glob",
         "gpt-tokenizer",
-        "langsmith",
         "openai",
         "@types/json-schema",
         "table",
@@ -330,15 +329,9 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "matchDepNames": [
-        "react-element-to-jsx-string"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-element-to-jsx-string"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
@@ -348,15 +341,9 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "matchDepNames": [
-        "react-use"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-use"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
@@ -1258,17 +1245,9 @@
     },
     {
       "groupName": "hjson",
-      "matchDepNames": [
-        "@types/hjson",
-        "hjson"
-      ],
-      "reviewers": [
-        "team:kibana-visualizations",
-        "team:fleet"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@types/hjson", "hjson"],
+      "reviewers": ["team:kibana-visualizations", "team:fleet"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
@@ -2229,11 +2208,7 @@
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
-        "backport:all-open",
-        "ci:all-cypress-suites",
-        "effort:high",
-        "upgrade-risk:high"
-      ],
+        "backport:all-open","ci:all-cypress-suites", "effort:high", "upgrade-risk:high"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2298,6 +2273,15 @@
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Security Generative AI", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "langsmith",
+      "matchDepNames": ["langsmith"],
+      "reviewers": ["team:security-threat-hunting"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2375,15 +2359,9 @@
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": [
-        "@elastic/esql"
-      ],
-      "reviewers": [
-        "team:kibana-esql"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@elastic/esql"],
+      "reviewers": ["team:kibana-esql"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
         "backport:all-open"
@@ -2593,15 +2571,9 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": [
-        "oxlint"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["oxlint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team:Operations",
         "release_note:skip",
@@ -2729,15 +2701,9 @@
     },
     {
       "groupName": "alerting v2 dependencies",
-      "matchDepNames": [
-        "apache-arrow"
-      ],
-      "reviewers": [
-        "team:response-ops"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["apache-arrow"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team:ResponseOps"
       ],
