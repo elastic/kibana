@@ -41,9 +41,10 @@ export function DifferentialTopNSearchPanel() {
 
   const totalSeconds = timeRange.inSeconds.end - timeRange.inSeconds.start;
   const totalComparisonSeconds =
-    (new Date(comparisonTimeRange.end!).getTime() -
-      new Date(comparisonTimeRange.start!).getTime()) /
-    1000;
+    comparisonTimeRange.inSeconds.end !== undefined &&
+    comparisonTimeRange.inSeconds.start !== undefined
+      ? comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
+      : totalSeconds;
 
   const baselineTime = 1;
   const comparisonTime = totalSeconds / totalComparisonSeconds;
