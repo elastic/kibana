@@ -38,6 +38,9 @@ describe('useHuntingLeads', () => {
       fetchLeadGenerationStatus: jest.fn().mockResolvedValue({ isEnabled: false }),
       enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
       disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
+      fetchLeadGenerationPrivileges: jest
+        .fn()
+        .mockResolvedValue({ has_read_permissions: true, has_write_permissions: true }),
     });
     mockUseAppToasts.mockReturnValue({
       addSuccess: mockAddSuccess,
@@ -63,7 +66,8 @@ describe('useHuntingLeads', () => {
     mockUseQuery.mockImplementation(
       (config: { queryFn?: (ctx: { signal?: AbortSignal }) => Promise<unknown> }) => {
         queryCallCount++;
-        if (queryCallCount === 1) {
+        // useQuery call order: 1=privileges, 2=fetchLeads, 3=fetchLeadGenerationStatus
+        if (queryCallCount === 2) {
           capturedQueryFn = config.queryFn;
         }
         return {
