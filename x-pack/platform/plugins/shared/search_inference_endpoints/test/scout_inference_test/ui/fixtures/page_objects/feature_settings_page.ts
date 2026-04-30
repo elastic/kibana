@@ -43,8 +43,8 @@ export class FeatureSettingsPage {
   // Per-sub-feature confirmation modals
   readonly disableRecommendedModelsModal: Locator;
   readonly disableRecommendedModelsConfirm: Locator;
-  readonly resetToDefaultsModal: Locator;
-  readonly resetToDefaultsConfirm: Locator;
+  readonly resetDefaultsModal: Locator;
+  readonly resetDefaultsConfirm: Locator;
 
   // Empty State
   readonly noModelsEmptyPrompt: Locator;
@@ -90,8 +90,8 @@ export class FeatureSettingsPage {
     this.disableRecommendedModelsConfirm = this.disableRecommendedModelsModal.getByRole('button', {
       name: /turn off recommended defaults/i,
     });
-    this.resetToDefaultsModal = this.page.testSubj.locator('resetToDefaultsModal');
-    this.resetToDefaultsConfirm = this.resetToDefaultsModal.getByRole('button', {
+    this.resetDefaultsModal = this.page.testSubj.locator('resetDefaultsModal');
+    this.resetDefaultsConfirm = this.resetDefaultsModal.getByRole('button', {
       name: /reset to default/i,
     });
 

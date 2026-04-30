@@ -21,25 +21,25 @@ export const ResetDefaultsModal: React.FC<ResetDefaultsModalProps> = ({ onConfir
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
-      title={i18n.translate('xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.title', {
+      title={i18n.translate('xpack.searchInferenceEndpoints.settings.resetModal.title', {
         defaultMessage: 'Reset to defaults',
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.cancel',
+        'xpack.searchInferenceEndpoints.settings.resetModal.cancel',
         { defaultMessage: 'Cancel' }
       )}
       confirmButtonText={i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.confirm',
+        'xpack.searchInferenceEndpoints.settings.resetModal.confirm',
         { defaultMessage: 'Reset to default' }
       )}
       buttonColor="primary"
       defaultFocusedButton="confirm"
-      data-test-subj="resetToDefaultsModal"
+      data-test-subj="resetDefaultsModal"
     >
       <p>
-        {i18n.translate('xpack.searchInferenceEndpoints.settings.resetToDefaultsModal.body', {
+        {i18n.translate('xpack.searchInferenceEndpoints.settings.resetModal.body', {
           defaultMessage:
             'This will discard your custom model selections for this feature and restore the recommended defaults.',
         })}

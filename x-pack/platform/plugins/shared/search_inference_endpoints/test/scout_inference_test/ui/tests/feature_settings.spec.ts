@@ -176,11 +176,11 @@ test.describe('Feature Settings', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
 
     await test.step('toggling back on prompts the reset modal', async () => {
       await toggle.click();
-      await expect(featureSettings.resetToDefaultsModal).toBeVisible();
+      await expect(featureSettings.resetDefaultsModal).toBeVisible();
     });
 
     await test.step('confirming the reset locks the list back to recommended', async () => {
-      await featureSettings.resetToDefaultsConfirm.click();
+      await featureSettings.resetDefaultsConfirm.click();
       await expect(toggle).toBeChecked();
       await expect(featureSettings.addModelButton('test_feature_alpha')).toBeHidden();
     });

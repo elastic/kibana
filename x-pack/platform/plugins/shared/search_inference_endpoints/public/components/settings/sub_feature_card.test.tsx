@@ -284,7 +284,7 @@ describe('SubFeatureCard', () => {
       );
 
       fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
-      expect(screen.getByTestId('resetToDefaultsModal')).toBeInTheDocument();
+      expect(screen.getByTestId('resetDefaultsModal')).toBeInTheDocument();
       expect(onEndpointsChange).not.toHaveBeenCalled();
     });
 
