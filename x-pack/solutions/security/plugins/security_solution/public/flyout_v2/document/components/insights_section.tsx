@@ -35,7 +35,8 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
-import { ChildLink } from '../../shared/components/child_link';
+import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_link';
+import { OpenFlyoutLink } from '../../shared/components/open_flyout_link';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -158,6 +159,11 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
     );
   }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
 
+  const renderFlyoutLink = useCallback(
+    (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
+    []
+  );
+
   const onShowPrevalenceDetails = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -169,7 +175,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             hit={hit}
             investigationFields={investigationFields}
             scopeId={''}
-            columns={getColumns(cellActionRenderer, isInSecurityApp, '', ChildLink)}
+            columns={getColumns(cellActionRenderer, isInSecurityApp, '', renderFlyoutLink)}
           />
         ),
       }),
@@ -179,7 +185,17 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [history, historyKey, hit, investigationFields, isInSecurityApp, overlays, services, store]);
+  }, [
+    history,
+    historyKey,
+    hit,
+    investigationFields,
+    isInSecurityApp,
+    overlays,
+    services,
+    store,
+    renderFlyoutLink,
+  ]);
 
   return (
     <ExpandableSection
