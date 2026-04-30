@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from './constants';
+import { EXTENDED_TIMEOUT } from './constants';
 
 /**
  * Waits for the APM settings header link to be visible.
@@ -15,7 +15,7 @@ import { BIGGER_TIMEOUT } from './constants';
 export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<void> {
   await page
     .getByTestId('apmSettingsHeaderLink')
-    .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }
 
 /**
@@ -23,5 +23,5 @@ export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<voi
  * This is commonly used to ensure the APM page has fully loaded.
  */
 export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
-  await page.testSubj.waitForSelector('apmMainContainer', { timeout: BIGGER_TIMEOUT });
+  await page.testSubj.waitForSelector('apmMainContainer', { timeout: EXTENDED_TIMEOUT });
 }
