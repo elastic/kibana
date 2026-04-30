@@ -94,14 +94,18 @@ export const ModelSettings: React.FC = () => {
       return;
     }
 
-    // Run both saves; collect outcomes so the telemetry event only fires when at least one
-    // round-trip actually succeeded. `saveDefaultModel` swallows its own errors and surfaces them
-    // via toasts, so its rejection branch is unreachable in practice -- we still guard for safety.
-    const results = await Promise.allSettled([
-      ...(isFeatureDirty ? [saveFeatures()] : []),
-      ...(isDefaultModelDirty ? [saveDefaultModel()] : []),
-    ]);
-    if (results.some((r) => r.status === 'fulfilled')) {
+    // Telemetry: count a save only when at least one dirty slice finished successfully (no placeholder promises).
+    const saveOperations: Array<Promise<unknown>> = [];
+    if (isFeatureDirty) {
+      saveOperations.push(saveFeatures());
+    }
+    if (isDefaultModelDirty) {
+      saveOperations.push(saveDefaultModel());
+    }
+
+    const results = await Promise.allSettled(saveOperations);
+    const anySaveSucceeded = results.some((result) => result.status === 'fulfilled');
+    if (anySaveSucceeded) {
       usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
     }
   }, [
