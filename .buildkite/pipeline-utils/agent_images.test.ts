@@ -134,7 +134,8 @@ describe('agent_images', () => {
 
       expect(config).toEqual(
         expect.objectContaining({
-          machineType: 'n2-standard-4',
+          machineType: 'n4-standard-4',
+          diskType: 'hyperdisk-balanced',
           preemptible: true,
           provider: DEFAULT_AGENT_IMAGE_CONFIG.provider,
         })
@@ -147,6 +148,7 @@ describe('agent_images', () => {
       expect(config).toEqual(
         expect.objectContaining({
           machineType: 'n2-standard-4',
+          diskType: 'hyperdisk-balanced',
           enableNestedVirtualization: true,
         })
       );
@@ -164,6 +166,7 @@ describe('agent_images', () => {
       expect(config).toEqual(
         expect.objectContaining({
           machineType: 'c2-standard-8',
+          diskType: 'hyperdisk-balanced',
           provider: DEFAULT_AGENT_IMAGE_CONFIG.provider,
         })
       );
