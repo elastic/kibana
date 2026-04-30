@@ -123,6 +123,7 @@
                 "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Storage",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -176,7 +177,15 @@
             "tags": [],
             "label": "getIncomingEditorState",
             "description": [
-              "\nFetches an {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id\n"
+              "\nFetches an ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorState",
+                "text": "editor state"
+              },
+              " from the sessionStorage for the provided app id\n"
             ],
             "signature": [
               "(appId: string, removeAfterFetch?: boolean | undefined) => ",
@@ -243,7 +252,15 @@
             "tags": [],
             "label": "clearEditorState",
             "description": [
-              "\nClears the {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id\n"
+              "\nClears the ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorState",
+                "text": "editor state"
+              },
+              " from the sessionStorage for the provided app id\n"
             ],
             "signature": [
               "(appId?: string | undefined) => void"
@@ -283,7 +300,15 @@
             "tags": [],
             "label": "getIncomingEmbeddablePackage",
             "description": [
-              "\nFetches an {@link EmbeddablePackageState | embeddable package} from the sessionStorage for the given AppId\n"
+              "\nFetches an ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePackageState",
+                "text": "embeddable package"
+              },
+              " from the sessionStorage for the given AppId\n"
             ],
             "signature": [
               "(appId: string, removeAfterFetch?: boolean | undefined) => ",
@@ -350,7 +375,22 @@
             "tags": [],
             "label": "navigateToEditor",
             "description": [
-              "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith {@link EmbeddableEditorState | embeddable editor state}"
+              "\nA wrapper around the ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ApplicationStart.navigateToApp",
+                "text": "ApplicationStart.navigateToApp"
+              },
+              " method which navigates to the specified appId\nwith ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorState",
+                "text": "embeddable editor state"
+              }
             ],
             "signature": [
               "(appId: string, options?: { path?: string | undefined; openInNewTab?: boolean | undefined; skipAppLeave?: boolean | undefined; state: ",
@@ -481,7 +521,22 @@
             "tags": [],
             "label": "navigateToWithEmbeddablePackages",
             "description": [
-              "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith multiple {@link EmbeddablePackageState | embeddable package state}"
+              "\nA wrapper around the ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ApplicationStart.navigateToApp",
+                "text": "ApplicationStart.navigateToApp"
+              },
+              " method which navigates to the specified appId\nwith multiple ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePackageState",
+                "text": "embeddable package state"
+              }
             ],
             "signature": [
               "<SerializedStateType extends object = object>(appId: string, options?: { path?: string | undefined; state: ",
@@ -798,18 +853,18 @@
             "section": "def-common.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
-          "<SerializedState>>({ type, maybeId, getParentApi, panelProps, onApiAvailable, hidePanelChrome, }: { type: string; maybeId?: string | undefined; getParentApi: () => ParentApi; onApiAvailable?: ((api: Api) => void) | undefined; panelProps?: Pick<",
+          "<SerializedState>>({ type, maybeId, getParentApi, panelProps, onApiAvailable, hidePanelChrome, }: { type: string; maybeId?: string | undefined; getParentApi: () => ParentApi; onApiAvailable?: ((api: Api) => void) | undefined; panelProps?: Omit<",
           {
-            "pluginId": "presentationPanel",
+            "pluginId": "embeddable",
             "scope": "public",
-            "docId": "kibPresentationPanelPluginApi",
+            "docId": "kibEmbeddablePluginApi",
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined; hidePanelChrome?: boolean | undefined; }) => React.JSX.Element"
+          "<Api, {}>, \"Component\" | \"componentApi\"> | undefined; hidePanelChrome?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-        "lineNumber": 27,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -822,7 +877,7 @@
             "label": "{\n  type,\n  maybeId,\n  getParentApi,\n  panelProps,\n  onApiAvailable,\n  hidePanelChrome,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-            "lineNumber": 38,
+            "lineNumber": 36,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -835,7 +890,7 @@
                 "label": "type",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "lineNumber": 39,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -851,7 +906,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "lineNumber": 40,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -867,7 +922,7 @@
                   "() => ParentApi"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "lineNumber": 41,
+                "lineNumber": 39,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -885,7 +940,7 @@
                   "((api: Api) => void) | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "lineNumber": 42,
+                "lineNumber": 40,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -901,9 +956,10 @@
                       "Api"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                    "lineNumber": 42,
+                    "lineNumber": 40,
                     "columnNumber": 21,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Api",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -918,18 +974,18 @@
                 "label": "panelProps",
                 "description": [],
                 "signature": [
-                  "Pick<",
+                  "Omit<",
                   {
-                    "pluginId": "presentationPanel",
+                    "pluginId": "embeddable",
                     "scope": "public",
-                    "docId": "kibPresentationPanelPluginApi",
+                    "docId": "kibEmbeddablePluginApi",
                     "section": "def-public.PresentationPanelProps",
                     "text": "PresentationPanelProps"
                   },
-                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined"
+                  "<Api, {}>, \"Component\" | \"componentApi\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "lineNumber": 43,
+                "lineNumber": 41,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -945,7 +1001,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
-                "lineNumber": 55,
+                "lineNumber": 42,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1052,6 +1108,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1110,6 +1167,7 @@
             "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1168,6 +1226,7 @@
             "lineNumber": 94,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1226,6 +1285,47 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ChartActionContext",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.PresentationPanelError",
+        "type": "Function",
+        "tags": [],
+        "label": "PresentationPanelError",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "PresentationPanelErrorProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/index.tsx",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "PresentationPanelErrorProps"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/index.tsx",
+            "lineNumber": 58,
+            "columnNumber": 40,
+            "deprecated": false,
+            "docsReferencedTypeName": "PresentationPanelErrorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1243,8 +1343,8 @@
         "signature": [
           "(type: string) => Promise<string>"
         ],
-        "path": "src/platform/plugins/shared/embeddable/public/index.ts",
-        "lineNumber": 46,
+        "path": "src/platform/plugins/shared/embeddable/public/index.tsx",
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1259,8 +1359,8 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/embeddable/public/index.ts",
-            "lineNumber": 46,
+            "path": "src/platform/plugins/shared/embeddable/public/index.tsx",
+            "lineNumber": 66,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1439,6 +1539,7 @@
                 "lineNumber": 133,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1649,6 +1750,7 @@
                 "lineNumber": 147,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedDrilldowns",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1899,6 +2001,7 @@
                 "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "BuildEmbeddableProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2014,10 +2117,421 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.PresentationPanelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentationPanelProps",
+        "description": [
+          "------------------------------------------------------------------------------------------\nPanel Types\n------------------------------------------------------------------------------------------"
+        ],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.PresentationPanelProps",
+            "text": "PresentationPanelProps"
+          },
+          "<ApiType, PropsType>"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.Component",
+            "type": "Function",
+            "tags": [],
+            "label": "Component",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<PropsType>"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.PresentationPanelProps.Component.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 10,
+                "deprecated": false,
+                "docsReferencedTypeName": "P",
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.PresentationPanelProps.Component.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.componentApi",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentApi",
+            "description": [],
+            "signature": [
+              "ApiType"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.componentProps",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentProps",
+            "description": [],
+            "signature": [
+              "PropsType | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.showShadow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showShadow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.showBorder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showBorder",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.showBadges",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showBadges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.showNotifications",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotifications",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.hideLoader",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideLoader",
+            "description": [
+              "\nSet to true to not show PanelLoader component while Panel is loading"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.hideHeader",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideHeader",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.hideInspector",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideInspector",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.actionPredicate",
+            "type": "Function",
+            "tags": [],
+            "label": "actionPredicate",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.PresentationPanelProps.actionPredicate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.getActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getActions",
+            "description": [],
+            "signature": [
+              "((triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object, object>[]>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "\nOrdinal number of the embeddable in the container, used as a\n\"title\" when the panel has no title, i.e. \"Panel {index}\"."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.setDragHandles",
+            "type": "Function",
+            "tags": [],
+            "label": "setDragHandles",
+            "description": [
+              "\nSet the drag handlers to be used by kbn-grid-layout\nNote: If we make kbn-grid-layout responsible for **all** panel placement\n      logic, then this could be removed."
+            ],
+            "signature": [
+              "((refs: (HTMLElement | null)[]) => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.PresentationPanelProps.setDragHandles.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "refs",
+                "description": [],
+                "signature": [
+                  "(HTMLElement | null)[]"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 21,
+                "deprecated": false,
+                "docsReferencedTypeName": "Array",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.hidePanelChrome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePanelChrome",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PresentationPanelProps.titleHighlight",
+            "type": "string",
+            "tags": [],
+            "label": "titleHighlight",
+            "description": [
+              "\nOptional search term to highlight in the panel title"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_component/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ACTION_EDIT_PANEL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_EDIT_PANEL",
+        "description": [],
+        "signature": [
+          "\"editPanel\""
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/edit_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ACTION_REMOVE_PANEL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_REMOVE_PANEL",
+        "description": [],
+        "signature": [
+          "\"deletePanel\""
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/remove_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "embeddable",
         "id": "def-public.CellValueContext",
@@ -2593,6 +3107,25 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddableRendererContext",
+        "type": "Object",
+        "tags": [],
+        "label": "EmbeddableRendererContext",
+        "description": [],
+        "signature": [
+          "React.Context<{ quickActions?: ",
+          "QuickActions",
+          " | undefined; } | undefined>"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/embeddable_renderer_context.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "setup": {
@@ -2690,7 +3223,7 @@
               "id": "def-public.EmbeddableSetup.registerAddFromLibraryType.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n  onAdd,\n  savedObjectType,\n  savedObjectName,\n  getIconForSavedObject,\n  getSavedObjectSubType,\n  getTooltipForSavedObject,\n}",
               "description": [],
               "signature": [
                 "{ onAdd: (container: ",
@@ -2760,7 +3293,15 @@
           "tags": [],
           "label": "registerDrilldown",
           "description": [
-            "\nRegisters an async {@link DrilldownDefintion} getter."
+            "\nRegisters an async ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.DrilldownDefintion",
+              "text": "DrilldownDefintion"
+            },
+            " getter."
           ],
           "signature": [
             "(type: string, getFn: () => Promise<",
@@ -2828,7 +3369,15 @@
           "tags": [],
           "label": "registerEmbeddablePublicDefinition",
           "description": [
-            "\nRegisters an async {@link ReactEmbeddableFactory} getter."
+            "\nRegisters an async ",
+            {
+              "pluginId": "embeddable",
+              "scope": "public",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-public.ReactEmbeddableFactory",
+              "text": "ReactEmbeddableFactory"
+            },
+            " getter."
           ],
           "signature": [
             "<SerializedState extends object = object, Api extends ",
@@ -3113,6 +3662,7 @@
               "lineNumber": 92,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "Storage",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -3606,6 +4156,7 @@
               "lineNumber": 35,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "EmbeddableRegistryDefinition",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3694,6 +4245,7 @@
               "lineNumber": 44,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "DrilldownSetup",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3752,6 +4304,7 @@
               "lineNumber": 52,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "EmbeddableServerDefinition",
               "trackAdoption": false,
               "isRequired": true
             }
