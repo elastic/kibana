@@ -11,20 +11,35 @@ import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { type Control, useController } from 'react-hook-form';
 import type { DataSourceWithSecrets } from '../common/datasource_types';
-import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
 
 export function CreateDataSourceFlyoutTypeSettingsS3({
-  values,
-  onPatch,
   control,
 }: {
-  values: CreateDataSourceFlyoutFormSettings['s3'];
-  onPatch: (patch: Partial<CreateDataSourceFlyoutFormSettings['s3']>) => void;
   control: Control<DataSourceWithSecrets, any>;
 }) {
   const { field: regionField } = useController({
     defaultValue: '',
     name: 'settings.region',
+    control,
+  });
+  const { field: endpointField } = useController({
+    defaultValue: '',
+    name: 'settings.endpoint',
+    control,
+  });
+  const { field: authField } = useController({
+    defaultValue: '',
+    name: 'settings.auth',
+    control,
+  });
+  const { field: accessKeyField } = useController({
+    defaultValue: '',
+    name: 'settings.access_key',
+    control,
+  });
+  const { field: secretKeyField } = useController({
+    defaultValue: '',
+    name: 'settings.secret_key',
     control,
   });
 
@@ -53,11 +68,13 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         fullWidth
       >
         <EuiFieldText
-          value={values.endpoint}
-          onChange={(e) => onPatch({ endpoint: e.target.value })}
           data-test-subj="createDataSourceFlyoutS3Endpoint"
           fullWidth
           autoComplete="off"
+          value={endpointField.value}
+          onChange={(e) => endpointField.onChange(e.target.value)}
+          name={endpointField.name}
+          inputRef={endpointField.ref}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -67,11 +84,13 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         fullWidth
       >
         <EuiFieldText
-          value={values.auth}
-          onChange={(e) => onPatch({ auth: e.target.value })}
           data-test-subj="createDataSourceFlyoutS3Auth"
           fullWidth
           autoComplete="off"
+          value={authField.value}
+          onChange={(e) => authField.onChange(e.target.value)}
+          name={authField.name}
+          inputRef={authField.ref}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -81,11 +100,13 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         fullWidth
       >
         <EuiFieldText
-          value={values.access_key}
-          onChange={(e) => onPatch({ access_key: e.target.value })}
           data-test-subj="createDataSourceFlyoutS3AccessKey"
           fullWidth
           autoComplete="off"
+          value={accessKeyField.value}
+          onChange={(e) => accessKeyField.onChange(e.target.value)}
+          name={accessKeyField.name}
+          inputRef={accessKeyField.ref}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -96,11 +117,13 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
       >
         <EuiFieldPassword
           type="dual"
-          value={values.secret_key}
-          onChange={(e) => onPatch({ secret_key: e.target.value })}
           data-test-subj="createDataSourceFlyoutS3SecretKey"
           fullWidth
           autoComplete="off"
+          value={secretKeyField.value}
+          onChange={(e) => secretKeyField.onChange(e.target.value)}
+          name={secretKeyField.name}
+          inputRef={secretKeyField.ref}
         />
       </EuiFormRow>
     </>

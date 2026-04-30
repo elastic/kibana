@@ -7,40 +7,24 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import omit from 'lodash/omit';
-
-import type { DataSourceType, DataSourceWithSecrets } from '../common';
-import {
-  ALL_DATA_SOURCE_TYPES,
-  DATA_SOURCES_LIST_ROUTE_PATH,
-  getDataSourceByIdApiPath,
-  type DataSource,
-} from '../common';
-import type { DataSourceListItem } from '../common/sample_data_sources_client';
-
-function isDataSourceType(value: unknown): value is DataSourceType {
-  return typeof value === 'string' && (ALL_DATA_SOURCE_TYPES as readonly string[]).includes(value);
-}
-
-function normalizeListRow(row: unknown): DataSourceListItem | null {
-  if (!row || typeof row !== 'object') {
-    return null;
-  }
-  const o = row as Record<string, unknown>;
-  const id = typeof o.id === 'string' ? o.id : null;
-  if (!id) {
-    return null;
-  }
-  const description = typeof o.description === 'string' ? o.description : '';
-  if (!isDataSourceType(o.type)) {
-    return null;
-  }
-  const name = typeof o.name === 'string' ? o.name : id;
-  return { id, name, description, type: o.type };
-}
+import { isNil, omit, omitBy } from 'lodash';
+import type { DataSourceWithSecrets } from '../common';
+import { DATA_SOURCES_LIST_ROUTE_PATH, getDataSourceByIdApiPath, type DataSource } from '../common';
 
 interface GetDataSourcesResponse {
   data_sources: DataSource[];
+}
+
+function omitEmptySettingsFields(settings: object): Record<string, unknown> {
+  return omitBy(settings as Record<string, unknown>, (value) => {
+    if (value === undefined || value === null) {
+      return true;
+    }
+    if (typeof value === 'string' && value.trim() === '') {
+      return true;
+    }
+    return false;
+  });
 }
 /**
  * Browser client for data source management HTTP APIs (mirrors {@link SampleDataSourcesClient}).
@@ -75,9 +59,16 @@ export class HttpDataSourcesClient {
       );
     }
       */
-    console.log('dataSource', dataSource);
+    const withoutName = omit(dataSource, 'name');
+    const body = omitBy(
+      {
+        ...withoutName,
+        settings: omitEmptySettingsFields(dataSource.settings),
+      },
+      isNil
+    ) as unknown as Omit<DataSourceWithSecrets, 'name'>;
     await this.http.put(getDataSourceByIdApiPath(nameTrimmed), {
-      body: JSON.stringify(omit(dataSource, ['name'])),
+      body: JSON.stringify(body),
     });
   }
 

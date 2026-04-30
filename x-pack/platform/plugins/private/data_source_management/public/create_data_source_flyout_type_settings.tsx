@@ -14,13 +14,13 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTextArea,
 } from '@elastic/eui';
 
 import type { Control } from 'react-hook-form';
 import type { DataSourceType, DataSourceWithSecrets } from '../common/datasource_types';
 import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
 import { patchFormSettings } from './create_data_source_flyout_form_state';
+import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
 import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutTypeSettings({
@@ -42,93 +42,11 @@ export function CreateDataSourceFlyoutTypeSettings({
   };
 
   if (dataSourceType === 's3') {
-    return (
-      <CreateDataSourceFlyoutTypeSettingsS3
-        control={control}
-        values={formSettings.s3}
-        onPatch={(p) => patch('s3', p)}
-      />
-    );
+    return <CreateDataSourceFlyoutTypeSettingsS3 control={control} />;
   }
 
   if (dataSourceType === 'gcs') {
-    const v = formSettings.gcs;
-    return (
-      <>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.gcs.fields.projectId', {
-            defaultMessage: 'Project ID',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.project_id}
-            onChange={(e) => patch('gcs', { project_id: e.target.value })}
-            data-test-subj="createDataSourceFlyoutGcsProjectId"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.gcs.fields.endpoint', {
-            defaultMessage: 'Endpoint',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.endpoint}
-            onChange={(e) => patch('gcs', { endpoint: e.target.value })}
-            data-test-subj="createDataSourceFlyoutGcsEndpoint"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.gcs.fields.tokenUri', {
-            defaultMessage: 'Token URI',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.token_uri}
-            onChange={(e) => patch('gcs', { token_uri: e.target.value })}
-            data-test-subj="createDataSourceFlyoutGcsTokenUri"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.gcs.fields.auth', {
-            defaultMessage: 'Auth',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            value={v.auth}
-            onChange={(e) => patch('gcs', { auth: e.target.value })}
-            data-test-subj="createDataSourceFlyoutGcsAuth"
-            fullWidth
-            autoComplete="off"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourceManagement.createFlyout.gcs.fields.credentials', {
-            defaultMessage: 'Credentials (JSON object)',
-          })}
-          fullWidth
-        >
-          <EuiTextArea
-            value={v.credentialsJson}
-            onChange={(e) => patch('gcs', { credentialsJson: e.target.value })}
-            data-test-subj="createDataSourceFlyoutGcsCredentials"
-            fullWidth
-            rows={3}
-            placeholder="{}"
-            autoComplete="off"
-          />
-        </EuiFormRow>
-      </>
-    );
+    return <CreateDataSourceFlyoutTypeSettingsGcs control={control} />;
   }
 
   if (dataSourceType === 'azure_blob') {
