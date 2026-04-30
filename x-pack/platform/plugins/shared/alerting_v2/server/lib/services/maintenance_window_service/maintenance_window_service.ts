@@ -133,7 +133,13 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
       });
       return [];
     } finally {
-      await finder.close();
+      try {
+        await finder.close();
+      } catch (closeError) {
+        this.logger.warn({
+          message: () => `Failed to close maintenance window PIT finder: ${closeError.message}`,
+        });
+      }
     }
 
     return windows;
