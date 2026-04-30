@@ -11,8 +11,7 @@ import type { Context, SpanKind, Link, Attributes } from '@opentelemetry/api';
 import { propagation } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 
-const BAGGAGE_TRACKING_BEACON_KEY = 'kibana.inference.tracing';
-const BAGGAGE_TRACKING_BEACON_VALUE = '1';
+import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
 
 /**
  * Sampler wrapper that ensures inference spans are always recorded, even when

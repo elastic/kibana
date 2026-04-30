@@ -8,23 +8,10 @@
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { ProtobufTraceSerializer } from '@opentelemetry/otlp-transformer';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 const ES_OTLP_TRACES_PATH = '/_otlp/v1/traces';
 const CONTENT_TYPE_PROTOBUF = 'application/x-protobuf';
-
-/**
- * Minimal contract for the Elasticsearch client transport.
- * Keeps this module decoupled from `@kbn/core` so any client
- * that exposes `transport.request()` works.
- */
-export interface ElasticsearchTransport {
-  transport: {
-    request: (
-      params: { method: string; path: string; body: Buffer },
-      options?: { headers?: Record<string, string>; maxRetries?: number }
-    ) => Promise<unknown>;
-  };
-}
 
 /**
  * A {@link tracing.SpanExporter} that ships OTLP-protobuf encoded spans
@@ -33,9 +20,20 @@ export interface ElasticsearchTransport {
  * settings that Kibana already has for talking to Elasticsearch.
  */
 export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
-  constructor(private readonly client: ElasticsearchTransport) {}
+  private readonly sendingPromises = new Set<Promise<void>>();
+  private isShutdown = false;
+
+  constructor(private readonly client: ElasticsearchClient) {}
 
   export(spans: tracing.ReadableSpan[], resultCallback: (result: core.ExportResult) => void): void {
+    if (this.isShutdown) {
+      resultCallback({
+        code: core.ExportResultCode.FAILED,
+        error: new Error('Exporter has been shut down'),
+      });
+      return;
+    }
+
     const serialized = ProtobufTraceSerializer.serializeRequest(spans);
     if (!serialized) {
       resultCallback({
@@ -45,7 +43,7 @@ export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
       return;
     }
 
-    this.client.transport
+    const exportPromise = this.client.transport
       .request(
         {
           method: 'POST',
@@ -54,14 +52,22 @@ export class ElasticsearchOtlpExporter implements tracing.SpanExporter {
         },
         {
           headers: { 'Content-Type': CONTENT_TYPE_PROTOBUF },
-          maxRetries: 0,
+          maxRetries: 3,
         }
       )
       .then(() => resultCallback({ code: core.ExportResultCode.SUCCESS }))
-      .catch((error) => resultCallback({ code: core.ExportResultCode.FAILED, error }));
+      .catch((error) => resultCallback({ code: core.ExportResultCode.FAILED, error }))
+      .finally(() => this.sendingPromises.delete(exportPromise));
+
+    this.sendingPromises.add(exportPromise);
   }
 
-  async shutdown(): Promise<void> {}
+  async forceFlush(): Promise<void> {
+    await Promise.all(this.sendingPromises);
+  }
 
-  async forceFlush(): Promise<void> {}
+  async shutdown(): Promise<void> {
+    this.isShutdown = true;
+    await this.forceFlush();
+  }
 }

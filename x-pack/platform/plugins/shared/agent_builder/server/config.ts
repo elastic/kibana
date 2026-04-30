@@ -26,7 +26,7 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     url: schema.maybe(schema.string()),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    scheduled_delay: scheduledDelay,
+    scheduledDelay,
   }),
 });
 

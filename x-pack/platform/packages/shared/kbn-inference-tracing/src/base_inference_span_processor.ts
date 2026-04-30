@@ -9,7 +9,7 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
-import { isInferenceSpan } from './should_track_span';
+import { isInferenceSpan } from './is_inference_span';
 
 export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcessor {
   private delegate: tracing.SpanProcessor;
