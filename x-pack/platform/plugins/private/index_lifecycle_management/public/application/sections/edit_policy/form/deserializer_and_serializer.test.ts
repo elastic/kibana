@@ -287,6 +287,61 @@ describe('deserializer and serializer', () => {
     expect(result.phases.hot!.actions.rollover).toEqual(defaultRolloverAction);
   });
 
+  it('preserves rollover fields the UI does not manage when using default rollover', () => {
+    formInternal._meta.hot.isUsingDefaultRollover = true;
+    formInternal.phases.hot!.actions.rollover!.min_primary_shard_size = '5gb';
+    // @ts-expect-error - this is an unknown field that should be preserved by the serializer even when using default rollover
+    formInternal.phases.hot!.actions.rollover!.unknown_setting = 123;
+
+    const result = serializer(formInternal);
+    const rollover = result.phases.hot!.actions.rollover;
+
+    expect(rollover).toEqual(
+      expect.objectContaining({
+        ...defaultRolloverAction,
+        min_primary_shard_size: '5gb',
+        unknown_setting: 123,
+      })
+    );
+    expect(rollover!.max_docs).toBeUndefined();
+    expect(rollover!.max_primary_shard_docs).toBeUndefined();
+    expect(rollover!.max_size).toBeUndefined();
+  });
+
+  it('does not drop rollover min_* fields on save when using default rollover', () => {
+    const policyWithRolloverMinFields: SerializedPolicy = {
+      name: 'policyWithRolloverMinFields',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {
+            rollover: {
+              max_age: '30d',
+              max_primary_shard_size: '50gb',
+              min_age: '1d',
+              min_docs: 100,
+              min_size: '10gb',
+              min_primary_shard_size: '5gb',
+              min_primary_shard_docs: 50,
+            },
+          },
+        },
+      },
+    };
+
+    const nextSerializer = createSerializer(cloneDeep(policyWithRolloverMinFields));
+    const nextFormInternal = deserializer(cloneDeep(policyWithRolloverMinFields));
+    const result = nextSerializer(nextFormInternal);
+
+    const rollover = result.phases.hot!.actions.rollover!;
+    expect(rollover.min_age).toBe('1d');
+    expect(rollover.min_docs).toBe(100);
+    expect(rollover.min_size).toBe('10gb');
+    expect(rollover.min_primary_shard_size).toBe('5gb');
+    expect(rollover.min_primary_shard_docs).toBe(50);
+    expect(rollover).toEqual(expect.objectContaining(defaultRolloverAction));
+  });
+
   it('removes snapshot_repository when it is unset', () => {
     delete formInternal.phases.hot!.actions.searchable_snapshot;
     delete formInternal.phases.cold!.actions.searchable_snapshot;
