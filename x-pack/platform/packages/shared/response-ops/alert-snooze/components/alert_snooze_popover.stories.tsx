@@ -32,7 +32,9 @@ const DefaultStory = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-          {JSON.stringify(lastPayload ?? null, null, 2)}
+          {lastPayload === undefined
+            ? 'Click "Snooze alert" to apply a payload.'
+            : JSON.stringify(lastPayload, null, 2)}
         </EuiCodeBlock>
       </div>
     </IntlProvider>

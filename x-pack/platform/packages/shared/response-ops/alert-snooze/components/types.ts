@@ -33,6 +33,11 @@ export type SnoozeCondition =
   | { type: DataConditionType.FIELD_CHANGE; field: string };
 
 export interface ConditionalSnoozeSchedule {
+  /**
+   * ISO timestamp at which the snooze expires.
+   * - `string` — explicit end date.
+   * - `null` — indefinite snooze
+   */
   expiresAt?: string | null;
   conditions?: SnoozeCondition[];
   conditionOperator?: 'any' | 'all';
