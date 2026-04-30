@@ -47,6 +47,19 @@ describe('TagsCache', () => {
     await tagsCache.initialize();
   });
 
+  describe('#isInitialized', () => {
+    it('is false before `initialize` completes', () => {
+      const cache = new TagsCache({ refreshHandler });
+      expect(cache.isInitialized()).toBe(false);
+    });
+
+    it('is true after `initialize` completes', async () => {
+      const cache = new TagsCache({ refreshHandler });
+      await cache.initialize();
+      expect(cache.isInitialized()).toBe(true);
+    });
+  });
+
   describe('#getState$', () => {
     describe('when `waitForInitialization` is `true`', () => {
       it('does not emit before `initialize` completes', async () => {
@@ -80,24 +93,24 @@ describe('TagsCache', () => {
     });
   });
 
-  describe('#onDelete', () => {
+  describe('#onDidDelete', () => {
     it('removes the deleted tag from the cache', async () => {
-      tagsCache.onDelete('tag-1');
+      tagsCache.onDidDelete('tag-1');
 
       expect(tagsCache.getState().map((tag) => tag.id)).toEqual(['tag-2', 'tag-3']);
     });
 
     it('does nothing if the specified id is not in the cache', async () => {
-      tagsCache.onDelete('tag-4');
+      tagsCache.onDidDelete('tag-4');
 
       expect(tagsCache.getState().map((tag) => tag.id)).toEqual(['tag-1', 'tag-2', 'tag-3']);
     });
   });
 
-  describe('#onCreate', () => {
+  describe('#onDidCreate', () => {
     it('adds the new tag to the cache', async () => {
       const newTag = createTag({ id: 'new-tag' });
-      tagsCache.onCreate(newTag);
+      tagsCache.onDidCreate(newTag);
 
       expect(tagsCache.getState().map((tag) => tag.id)).toEqual([
         'tag-1',
@@ -109,7 +122,7 @@ describe('TagsCache', () => {
 
     it('replace the entry from the cache if already existing', async () => {
       const newTag = createTag({ id: 'tag-2', name: 'new-tag' });
-      tagsCache.onCreate(newTag);
+      tagsCache.onDidCreate(newTag);
 
       const cacheState = tagsCache.getState();
       expect(cacheState.map((tag) => tag.id)).toEqual(['tag-1', 'tag-3', 'tag-2']);
@@ -117,10 +130,10 @@ describe('TagsCache', () => {
     });
   });
 
-  describe('#onUpdate', () => {
+  describe('#onDidUpdate', () => {
     it('replace the entry from the cache', async () => {
       const updatedAttributes = createAttributes({ name: 'updated-name' });
-      tagsCache.onUpdate('tag-2', updatedAttributes);
+      tagsCache.onDidUpdate('tag-2', updatedAttributes);
 
       const cacheState = tagsCache.getState();
       expect(cacheState.map((tag) => tag.id)).toEqual(['tag-1', 'tag-2', 'tag-3']);
@@ -132,11 +145,11 @@ describe('TagsCache', () => {
     });
   });
 
-  describe('#onGetAll', () => {
+  describe('#onDidGetAll', () => {
     it('refreshes the cache with the new list', () => {
       const newTags = createTags(['tag-1', 'tag-4', 'tag-5']);
 
-      tagsCache.onGetAll(newTags);
+      tagsCache.onDidGetAll(newTags);
 
       expect(tagsCache.getState()).toEqual(newTags);
     });
