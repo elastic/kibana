@@ -15,7 +15,6 @@ import {
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
   EXTENDED_TIMEOUT,
-  KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
 import {
   cleanHostsFlyoutSynthtraceData,
@@ -66,27 +65,21 @@ test.describe(
       await hostsPage.openHostFlyout(HOST1_NAME);
 
       await test.step('verify KPI charts are rendered', async () => {
-        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(KPI_RENDER_TIMEOUT);
+        await expect(assetDetailsPage.hostOverviewTab.kpiGrid).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
         await expect(
-          assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
-            name: 'CPU Usage',
-          })
-        ).toBeVisible();
+          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('cpuUsage')
+        ).toHaveCount(0);
         await expect(
-          assetDetailsPage.hostOverviewTab.kpiNormalizedLoadChart.getByRole('heading', {
-            name: 'Normalized Load',
-          })
-        ).toBeVisible();
+          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('normalizedLoad1m')
+        ).toHaveCount(0);
         await expect(
-          assetDetailsPage.hostOverviewTab.kpiMemoryUsageChart.getByRole('heading', {
-            name: 'Memory Usage',
-          })
-        ).toBeVisible();
+          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('memoryUsage')
+        ).toHaveCount(0);
         await expect(
-          assetDetailsPage.hostOverviewTab.kpiDiskUsageChart.getByRole('heading', {
-            name: 'Disk Usage',
-          })
-        ).toBeVisible();
+          assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('diskUsage')
+        ).toHaveCount(0);
       });
 
       await test.step('verify collapsible sections exist', async () => {

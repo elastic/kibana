@@ -199,6 +199,14 @@ export class OverviewTab extends AssetDetailsTab {
       .getByRole('progressbar', { name: 'Loading' });
   }
 
+  /**
+   * Lens embeddable error panel shown when a KPI fails to render.
+   * `data-test-subj="embeddableError"` is defined by the shared embeddable panel error component.
+   */
+  public getKPIEmbeddableError(metric: string): Locator {
+    return this.kpiGrid.getByTestId(`infraAssetDetailsKPI${metric}`).getByTestId('embeddableError');
+  }
+
   public async waitForKPILoadingToFinish(timeout?: number) {
     await this.getKPILoadingIndicator('cpuUsage').waitFor({ state: 'hidden', timeout });
   }

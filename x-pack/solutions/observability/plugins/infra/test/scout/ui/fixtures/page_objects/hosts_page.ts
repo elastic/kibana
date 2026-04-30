@@ -217,6 +217,14 @@ export class HostsPage {
   }
 
   /**
+   * Lens embeddable error panel shown when a KPI fails to render.
+   * `data-test-subj="embeddableError"` is defined by the shared embeddable panel error component.
+   */
+  public getHostKPIEmbeddableError(metric: string) {
+    return this.kpiGrid.getByTestId(`infraAssetDetailsKPI${metric}`).getByTestId('embeddableError');
+  }
+
+  /**
    * Waits for the shared host KPI tiles to finish rendering. Uses parallel
    * `waitFor` calls so the budget is shared across charts instead of compounding
    * when one takes longer to render than the others (a common CI flake source).
