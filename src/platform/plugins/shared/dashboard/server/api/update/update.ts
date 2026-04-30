@@ -107,26 +107,16 @@ export async function update(
     desiredAccessMode !== undefined && desiredAccessMode !== currentAccessMode;
 
   if (shouldChangeAccessMode) {
-    try {
-      const changeAccessModeResponse = await core.savedObjects.client.changeAccessMode(
-        [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
-        {
-          accessMode: desiredAccessMode,
-        }
-      );
+    const changeAccessModeResponse = await core.savedObjects.client.changeAccessMode(
+      [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
+      {
+        accessMode: desiredAccessMode,
+      }
+    );
 
-      const [result] = changeAccessModeResponse.objects;
-      if (result?.error) {
-        throw result.error;
-      }
-    } catch (e) {
-      const statusCode = (e as any)?.statusCode;
-      const message = (e as any)?.message ?? (e instanceof Error ? e.message : undefined);
-      if (typeof statusCode === 'number' && statusCode >= 400 && !(e as any)?.isBoom) {
-        const error = e instanceof Error ? e : new Error(message ?? 'Unexpected error');
-        throw Boom.boomify(error, { statusCode });
-      }
-      throw e;
+    const [result] = changeAccessModeResponse.objects;
+    if (result?.error) {
+      throw result.error;
     }
   }
 
