@@ -425,14 +425,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    output?.type === 'logstash' && logstashEnableSSLInput.value
+    typeInput.value === 'logstash' && logstashEnableSSLInput.value
       ? validateSSLCertificate
       : validateSslPathInput,
     isSSLEditable
   );
   const sslKeyInput = useInput(
     output?.ssl?.key ?? '',
-    output?.type === 'logstash' && logstashEnableSSLInput.value
+    typeInput.value === 'logstash' && logstashEnableSSLInput.value
       ? validateSSLKey
       : validateSslPathInput,
     isSSLEditable
@@ -440,7 +440,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKeySecret : undefined,
+    typeInput.value === 'logstash' && logstashEnableSSLInput.value
+      ? validateSSLKeySecret
+      : undefined,
     isSSLEditable
   );
 
