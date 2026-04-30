@@ -19,4 +19,3 @@ export type {
   ChromeNextHeaderMetadataSlotItem,
   ChromeNextHeaderTab,
 } from './header';
-export type { ChromeNextSpaceSelectorConfig } from './space_selector';

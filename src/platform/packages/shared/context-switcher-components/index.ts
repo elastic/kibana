@@ -14,5 +14,5 @@ export type {
   ContextSwitcherEnvironmentConfig,
   SpaceItem,
   LinksListItem,
-  FooterAction,
+  ActionConfig,
 } from './src/components/types';

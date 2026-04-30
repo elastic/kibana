@@ -264,6 +264,16 @@ export function useUserMenu(): ReactNode {
   return useObservable(content$, null);
 }
 
+/**
+ * Returns the current context switcher content set via
+ * `chrome.next.contextSwitcher.set()`, or null if not set.
+ */
+export function useContextSwitcher(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.contextSwitcher.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
 /** Returns whether the next-chrome experience is enabled via feature flag. */
 export function useIsNextChrome(): boolean {
   const { featureFlags } = useChromeComponentsDeps();

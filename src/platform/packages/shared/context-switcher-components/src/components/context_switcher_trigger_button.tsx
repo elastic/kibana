@@ -23,7 +23,7 @@ const CONTEXT_SWITCHER_BUTTON_ARIA_LABEL = i18n.translate(
 
 interface ContextSwitcherTriggerButtonProps {
   readonly solutionIcon: IconType;
-  readonly spaceName: string;
+  readonly label: string;
   readonly onClick: () => void;
   readonly isSelected?: boolean;
 }
@@ -34,7 +34,7 @@ interface ContextSwitcherTriggerButtonProps {
  */
 export const ContextSwitcherTriggerButton = ({
   solutionIcon,
-  spaceName,
+  label,
   onClick,
   isSelected,
 }: ContextSwitcherTriggerButtonProps): ReactElement => {
@@ -50,6 +50,9 @@ export const ContextSwitcherTriggerButton = ({
       isSelected={isSelected}
       aria-label={CONTEXT_SWITCHER_BUTTON_ARIA_LABEL}
       data-test-subj="contextSwitcherTriggerButton"
+      css={css`
+        color: ${euiTheme.colors.textSubdued};
+      `}
     >
       <EuiIcon type={solutionIcon} size="m" aria-hidden={true} />
       <span
@@ -57,7 +60,7 @@ export const ContextSwitcherTriggerButton = ({
           padding-left: ${euiTheme.size.s};
         `}
       >
-        {spaceName}
+        {label}
       </span>
     </EuiButtonEmpty>
   );

@@ -11,10 +11,9 @@ import type { ReactNode } from 'react';
 import type { ChromeNextAiButton } from './ai_button';
 import type { ChromeNextGlobalSearchConfig } from './global_search';
 import type { ChromeNextHeaderConfig } from './header';
-import type { ChromeNextSpaceSelectorConfig } from './space_selector';
 
 /**
- * Chrome-Next APIs: header configuration, AI button slot, global search, user menu, and space selector.
+ * Chrome-Next APIs: header configuration, AI button slot, global search, user menu, and context switcher.
  * @public
  */
 export interface ChromeNext {
@@ -61,12 +60,13 @@ export interface ChromeNext {
      */
     set(content?: ReactNode): void;
   };
-  spaceSelector: {
+  contextSwitcher: {
     /**
-     * Set the space selector configuration for the Chrome-Next sidenav.
-     * Chrome renders a space avatar in the sidenav header with a custom popover.
+     * Set the context switcher content for the Chrome-Next global header.
+     * The provided ReactNode is rendered as-is in the header's context switcher slot.
+     * The consumer owns the full UI (context switcher trigger button, popover, menu items).
      * Pass `undefined` to remove. Global — persists across app changes.
      */
-    set(config?: ChromeNextSpaceSelectorConfig): void;
+    set(content?: ReactNode): void;
   };
 }

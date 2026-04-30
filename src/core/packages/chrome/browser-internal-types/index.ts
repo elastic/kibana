@@ -20,7 +20,6 @@ import type {
   ChromeNextAiButton,
   ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
-  ChromeNextSpaceSelectorConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -134,7 +133,7 @@ export interface InternalChromeNext extends ChromeNext {
   userMenu: ChromeNext['userMenu'] & {
     get$(): Observable<ReactNode>;
   };
-  spaceSelector: ChromeNext['spaceSelector'] & {
-    get$(): Observable<ChromeNextSpaceSelectorConfig | undefined>;
+  contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
   };
 }

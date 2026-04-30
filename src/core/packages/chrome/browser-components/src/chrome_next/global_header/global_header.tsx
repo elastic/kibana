@@ -13,7 +13,7 @@ import { GlobalHeaderLogo } from './global_header_logo';
 import { AiButtonSlot } from './ai_button_slot';
 import { SearchButton } from './search_button';
 import { HelpButton } from './help_button';
-import { useUserMenu } from '../../shared/chrome_hooks';
+import { useContextSwitcher, useUserMenu } from '../../shared/chrome_hooks';
 
 export const GlobalHeader = React.memo(() => (
   <GlobalHeaderShell
@@ -22,6 +22,7 @@ export const GlobalHeader = React.memo(() => (
     help={<HelpButton />}
     actions={<AiButtonSlot />}
     userMenu={useUserMenu()}
+    switcher={useContextSwitcher()}
   />
 ));
 

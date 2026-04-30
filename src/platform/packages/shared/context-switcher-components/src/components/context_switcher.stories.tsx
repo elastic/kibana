@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiAvatar, EuiBadge, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiPanel } from '@elastic/eui';
 
 import { ContextSwitcher } from './context_switcher';
 import type { SpaceItem, LinksListItem } from './types';
@@ -87,22 +87,28 @@ const MOCK_FOOTER_LINKS: LinksListItem[] = [
   },
 ];
 
+const SPACES_HEADER_ACTION = {
+  id: 'manage-spaces',
+  label: 'Manage',
+  onClick: () => action('manage-spaces')(),
+};
+
+const SPACES_FOOTER_ACTION = {
+  id: 'create-space',
+  label: 'Create space',
+  onClick: () => action('create-space')(),
+};
+
 const buildSpaceItems = (showBadges: boolean): SpaceItem[] =>
   MOCK_SPACES.map((s) => ({
     ...s,
-    avatar: <EuiAvatar type="space" name={s.name} size="s" />,
+    avatar: (size) => <EuiAvatar type="space" name={s.name} size={size} />,
     badge: showBadges ? (
       <EuiBadge color="hollow" iconType={s.solutionIcon}>
         {s.solution}
       </EuiBadge>
     ) : undefined,
   }));
-
-const buildManageAction = () => (
-  <EuiButtonEmpty size="s" onClick={action('manage-spaces')}>
-    Manage
-  </EuiButtonEmpty>
-);
 
 const useSpacesConfig = (showBadges: boolean, searchThreshold?: number) => {
   const [activeSpaceId, setActiveSpaceId] = useState('obs');
@@ -114,16 +120,10 @@ const useSpacesConfig = (showBadges: boolean, searchThreshold?: number) => {
       action('select-space')(spaceId);
       setActiveSpaceId(spaceId);
     },
-    headerAction: buildManageAction(),
+    headerAction: SPACES_HEADER_ACTION,
     footerAction: SPACES_FOOTER_ACTION,
     search: searchThreshold != null ? { threshold: searchThreshold } : undefined,
   };
-};
-
-const SPACES_FOOTER_ACTION = {
-  id: 'create-space',
-  label: 'Create space',
-  onClick: () => action('create-space')(),
 };
 
 const CloudScenario = ({ searchThreshold }: { searchThreshold: number }) => {

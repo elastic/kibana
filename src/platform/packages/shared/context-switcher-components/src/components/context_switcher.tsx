@@ -25,6 +25,7 @@ import type { ContextMenuViewProps } from './views/context_menu';
 import { ContextSubmenuView } from './views/context_submenu';
 import type { ContextSubmenuViewProps } from './views/context_submenu';
 import { ContextSwitcherTriggerButton } from './context_switcher_trigger_button';
+import type { ActionConfig } from './types';
 import { POPOVER_WIDTH, type ContextSwitcherProps, type SpaceItem } from './types';
 import type { SelectableListItem } from './selectable_list';
 
@@ -40,7 +41,7 @@ const SUBMENU_TITLES: Record<'project' | 'deployment', string> = {
 };
 
 const SPACES_TITLE = i18n.translate('contextSwitcherComponents.spacesTitle', {
-  defaultMessage: 'Spaces',
+  defaultMessage: 'My spaces',
 });
 
 const CONTEXT_SWITCHER_ARIA_LABEL = i18n.translate('contextSwitcherComponents.popover.ariaLabel', {
@@ -51,7 +52,7 @@ const mapSpaceToSelectableItem = (space: SpaceItem, activeId: string): Selectabl
   id: space.id,
   label: space.name,
   checked: space.id === activeId,
-  prepend: space.avatar ?? <EuiAvatar type="space" name={space.name} size="s" />,
+  prepend: space.avatar?.('s') ?? <EuiAvatar type="space" name={space.name} size="s" />,
   append: space.badge,
   'data-test-subj': `space-${space.id}`,
 });
@@ -97,12 +98,23 @@ export const ContextSwitcher = ({
   spaces,
   environmentContext,
   footerLinks,
+  onOpen,
 }: ContextSwitcherProps) => {
   const { euiTheme } = useEuiTheme();
 
   const [isOpen, setIsOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
+
+  const togglePopover = useCallback(() => {
+    setIsOpen((prev) => {
+      if (!prev) onOpen?.();
+      return !prev;
+    });
+  }, [onOpen]);
+
   const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const isProject = environmentContext?.environmentType === 'project';
+  const isDeployment = environmentContext?.environmentType === 'deployment';
 
   const triggerButtonIcon = spaces.active.solutionIcon ?? 'logoElastic';
 
@@ -111,12 +123,36 @@ export const ContextSwitcher = ({
     [spaces.items, spaces.active.id]
   );
 
+  const triggerLabel = useMemo(() => {
+    if (!environmentContext) {
+      return spaces.active.name;
+    }
+    if (spaces.items.length <= 1) {
+      return environmentContext.name;
+    }
+    return `${environmentContext.name}: ${spaces.active.name}`;
+  }, [environmentContext, spaces.active.name, spaces.items.length]);
+
   const handleSpaceSelect = useCallback<SpacesListViewProps['onSelect']>(
     ({ item }) => {
       spaces.onSelect(item.id);
       closePopover();
     },
     [spaces, closePopover]
+  );
+
+  const withClosePopover = useCallback(
+    (action?: ActionConfig): ActionConfig | undefined => {
+      if (!action) return undefined;
+      return {
+        ...action,
+        onClick: () => {
+          closePopover();
+          action?.onClick?.();
+        },
+      };
+    },
+    [closePopover]
   );
 
   const searchConfig =
@@ -138,27 +174,25 @@ export const ContextSwitcher = ({
   const spacesViewProps = {
     id: 'contextSwitcherSpacesList',
     title: SPACES_TITLE,
-    headerAction: spaces.headerAction,
+    headerAction: withClosePopover(spaces.headerAction),
     items: selectableItems,
     onSelect: handleSpaceSelect,
     search: searchConfig,
     isLoading: spaces.isLoading,
-    footerAction: spaces.footerAction,
+    footerAction: withClosePopover(spaces.footerAction),
   };
 
-  const environmentDescription =
-    environmentContext && spaces.active.solution
-      ? i18n.translate('contextSwitcherComponents.environmentContext.description', {
-          defaultMessage: '{solution} {kind}',
-          values: {
-            solution: spaces.active.solution,
-            kind: environmentContext.environmentType,
-          },
-        })
-      : undefined;
+  const environmentDescription = isProject
+    ? i18n.translate('contextSwitcherComponents.environmentContext.projectDescription', {
+        defaultMessage: '{solution} project',
+        values: { solution: spaces.active.solution },
+      })
+    : i18n.translate('contextSwitcherComponents.environmentContext.deploymentDescription', {
+        defaultMessage: 'Deployment',
+      });
 
   const environmentIcon: ReactElement | undefined =
-    environmentContext?.environmentType === 'project' && spaces.active.solutionIcon ? (
+    isProject && spaces.active.solutionIcon ? (
       <EuiAvatar
         type="space"
         name={spaces.active.solution ?? ''}
@@ -170,7 +204,7 @@ export const ContextSwitcher = ({
     ) : undefined;
 
   const spacesDescription =
-    spaces.active.solution && environmentContext?.environmentType === 'deployment' ? (
+    isDeployment && spaces.active.solution ? (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} component="span">
         {spaces.active.solutionIcon && (
           <EuiFlexItem grow={false} component="span">
@@ -178,13 +212,17 @@ export const ContextSwitcher = ({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false} component="span">
-          {i18n.translate('contextSwitcherComponents.spacesRow.description', {
+          {i18n.translate('contextSwitcherComponents.spacesRow.solutionDescription', {
             defaultMessage: '{solution} space',
             values: { solution: spaces.active.solution },
           })}
         </EuiFlexItem>
       </EuiFlexGroup>
-    ) : undefined;
+    ) : (
+      i18n.translate('contextSwitcherComponents.spacesRow.simpleDescription', {
+        defaultMessage: 'Space',
+      })
+    );
 
   return (
     <EuiPopover
@@ -192,7 +230,7 @@ export const ContextSwitcher = ({
       button={
         <ContextSwitcherTriggerButton
           solutionIcon={triggerButtonIcon}
-          spaceName={spaces.active.name}
+          label={triggerLabel}
           onClick={togglePopover}
           isSelected={isOpen}
         />
@@ -220,7 +258,7 @@ export const ContextSwitcher = ({
             spacesRow: {
               id: 'spaces',
               label: spaces.active.name,
-              prepend: spaces.active.avatar ?? (
+              prepend: spaces.active.avatar?.('l') ?? (
                 <EuiAvatar type="space" name={spaces.active.name} size="l" />
               ),
               value: spacesDescription,
@@ -230,7 +268,7 @@ export const ContextSwitcher = ({
           environmentSubmenuView={{
             title: SUBMENU_TITLES[environmentContext.environmentType],
             items: environmentContext.submenuItems,
-            footerAction: environmentContext.submenuFooterAction,
+            footerAction: withClosePopover(environmentContext.submenuFooterAction),
           }}
           spacesSubmenuView={spacesViewProps}
         />

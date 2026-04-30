@@ -50,7 +50,6 @@ const useGlobalHeaderStyles = () => {
     const leftGroup = css`
       display: flex;
       align-items: center;
-      gap: ${euiTheme.size.s};
       flex-shrink: 0;
     `;
 
@@ -58,6 +57,7 @@ const useGlobalHeaderStyles = () => {
       display: flex;
       align-items: center;
       gap: ${euiTheme.size.xs};
+      margin-inline-end: ${euiTheme.size.xs};
     `;
 
     const spacer = css`
