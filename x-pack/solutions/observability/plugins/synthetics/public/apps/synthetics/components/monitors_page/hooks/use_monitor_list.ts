@@ -37,7 +37,9 @@ export function useMonitorList() {
     },
     [dispatch]
   );
-  const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
+  const reloadPage = useCallback(() => {
+    dispatch(fetchMonitorListAction.get(paramsRef.current.pageState));
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isInitialMount.current) {
