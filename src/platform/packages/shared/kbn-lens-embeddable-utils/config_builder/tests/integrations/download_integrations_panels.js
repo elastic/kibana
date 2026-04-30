@@ -9,7 +9,11 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const zlib = require('zlib');
+const { promisify } = require('util');
 const { execSync } = require('child_process');
+
+const gzipAsync = promisify(zlib.gzip);
 
 /**
  * Clones or updates the elastic/integrations repository
@@ -150,12 +154,15 @@ async function main() {
     process.exit(1);
   }
 
-  // Write results to file
-  const outputFile = 'lens_panels.json';
+  // Write results to gzip-compressed JSON file
+  const outputFile = 'lens_panels.json.gz';
 
   try {
-    const output = JSON.stringify(results);
-    await fs.writeFile(outputFile, output, 'utf8');
+    const output = JSON.stringify(results, null, 2);
+    const compressed = await gzipAsync(Buffer.from(output, 'utf8'), {
+      level: zlib.constants.Z_BEST_COMPRESSION,
+    });
+    await fs.writeFile(outputFile, compressed);
     console.log(
       `Successfully extracted ${results.length} lens metric visualizations to ${outputFile}`
     );

@@ -9,12 +9,15 @@
 
 import path from 'path';
 import fs from 'fs';
+import zlib from 'zlib';
+
 import { validator } from '../utils/validator';
 import type { LensAttributes } from '../..';
 import { groupBy } from 'lodash';
 import { LensConfigBuilder } from '../../config_builder';
 
-const files = fs.readFileSync(path.join(__dirname, './lens_panels.json'), 'utf-8');
+const compressed = fs.readFileSync(path.join(__dirname, './lens_panels.json.gz'));
+const files = zlib.gunzipSync(compressed).toString('utf-8');
 const panels = JSON.parse(files || '[]') as Record<string, LensAttributes>[];
 
 const builder = new LensConfigBuilder(undefined, true);
