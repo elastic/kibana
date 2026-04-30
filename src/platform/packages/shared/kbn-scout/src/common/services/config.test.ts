@@ -92,7 +92,7 @@ describe('createScoutConfig', () => {
   });
 
   describe('valid configs', () => {
-    it('accepts a stateful local config and applies defaults for http2/license (uiam computed)', () => {
+    it('accepts a stateful local config and applies defaults for http2/license', () => {
       writeConfig('local', baseStatefulConfig);
 
       const config = createScoutConfig(tmpDir, 'local', noopLogger);
@@ -101,7 +101,6 @@ describe('createScoutConfig', () => {
         serverless: false,
         isCloud: false,
         http2: false,
-        uiam: false,
         license: 'trial',
         hosts: baseStatefulConfig.hosts,
         auth: baseStatefulConfig.auth,
@@ -118,22 +117,6 @@ describe('createScoutConfig', () => {
       expect(config.serverless).toBe(true);
       expect(config.projectType).toBe('es');
       expect(config.productTier).toBeUndefined();
-    });
-
-    it("computes uiam from 'serverless' (true) on serverless configs", () => {
-      writeConfig('cloud_mki', baseCloudMkiSecurityConfig);
-
-      const config = createScoutConfig(tmpDir, 'cloud_mki', noopLogger);
-
-      expect(config.uiam).toBe(true);
-    });
-
-    it("computes uiam from 'serverless' (false) on stateful configs", () => {
-      writeConfig('local', baseStatefulConfig);
-
-      const config = createScoutConfig(tmpDir, 'local', noopLogger);
-
-      expect(config.uiam).toBe(false);
     });
 
     it('accepts a serverless cloud (MKI) security config with productTier', () => {
@@ -298,46 +281,6 @@ describe('createScoutConfig', () => {
       expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
         /'productTier' must be one of:/
       );
-    });
-
-    it("accepts 'uiam: true' on local serverless configs (matches the started server)", () => {
-      writeConfig('local', { ...baseServerlessLocalConfig, uiam: true });
-
-      const config = createScoutConfig(tmpDir, 'local', noopLogger);
-
-      expect(config.serverless).toBe(true);
-      expect(config.uiam).toBe(true);
-    });
-
-    it("accepts 'uiam: false' on local serverless configs (UIAM-off variant)", () => {
-      writeConfig('local', { ...baseServerlessLocalConfig, uiam: false });
-
-      const config = createScoutConfig(tmpDir, 'local', noopLogger);
-
-      expect(config.serverless).toBe(true);
-      expect(config.uiam).toBe(false);
-    });
-
-    it("rejects 'uiam: true' on stateful configs (UIAM is serverless-only)", () => {
-      writeConfig('local', { ...baseStatefulConfig, uiam: true });
-
-      expect(() => createScoutConfig(tmpDir, 'local', noopLogger)).toThrow(
-        /'uiam' must not be true when 'serverless' is false/
-      );
-    });
-
-    it("rejects 'uiam: false' on cloud serverless configs (UIAM cannot be overridden)", () => {
-      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, uiam: false });
-
-      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
-        /'uiam' must equal 'true' .*when 'isCloud' is true/
-      );
-    });
-
-    it("accepts 'uiam: true' on cloud serverless configs (matches 'serverless')", () => {
-      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, uiam: true });
-
-      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).not.toThrow();
     });
   });
 

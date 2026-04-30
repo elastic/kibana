@@ -22,7 +22,6 @@ export {
   isServerlessProjectType,
   type ServerlessProductTier,
   serverlessProductTiers,
-  isServerlessProjectTier,
   readRolesFromResource,
   readRolesDescriptorsFromResource,
 } from './src/utils';

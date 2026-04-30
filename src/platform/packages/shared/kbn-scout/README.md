@@ -440,10 +440,10 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 
 `cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
 
-- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- `projectType` (serverless only) must be one of `es | oblt | security | chat`.
 - Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 - `license` is optional and defaults to `"trial"`.
-- You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
+- You don't need to set `http2` — Scout manages it; the schema rejects inconsistent values.
 
 #### Starting Servers Only
 

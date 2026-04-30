@@ -7,33 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodError } from '@kbn/zod/v4';
-import { z } from '@kbn/zod/v4';
-import { serverlessProjectTypes, serverlessProductTiers } from '@kbn/es';
+import type { ZodError } from '@kbn/zod';
+import { z } from '@kbn/zod';
+import {
+  serverlessProjectTypes,
+  serverlessProductTiers,
+  type ServerlessProjectType,
+  type ServerlessProductTier,
+} from '@kbn/es';
 
 const PROJECT_TYPES_WITH_TIER: ReadonlySet<string> = new Set(['security', 'oblt']);
 
-const ServerlessProjectTypeSchema = z.enum(serverlessProjectTypes, {
-  error: `must be one of: ${serverlessProjectTypes.join(' | ')}`,
+// `@kbn/es` exposes these as `Set<string>` on 9.2; `z.enum` requires a non-empty
+// readonly tuple, so materialize them once as typed tuples for both schema use
+// and human-readable error messages.
+const projectTypeValues = Array.from(serverlessProjectTypes) as [
+  ServerlessProjectType,
+  ...ServerlessProjectType[]
+];
+const productTierValues = Array.from(serverlessProductTiers) as [
+  ServerlessProductTier,
+  ...ServerlessProductTier[]
+];
+
+const ServerlessProjectTypeSchema = z.enum(projectTypeValues, {
+  errorMap: () => ({ message: `must be one of: ${projectTypeValues.join(' | ')}` }),
 });
 
-const ServerlessProductTierSchema = z.enum(serverlessProductTiers, {
-  error: `must be one of: ${serverlessProductTiers.join(' | ')}`,
+const ServerlessProductTierSchema = z.enum(productTierValues, {
+  errorMap: () => ({ message: `must be one of: ${productTierValues.join(' | ')}` }),
 });
 
 const HostsSchema = z.object({
-  kibana: z.url({ error: "must be a valid URL (e.g. 'https://my.kibana.co')" }),
-  elasticsearch: z.url({ error: "must be a valid URL (e.g. 'https://my.elasticsearch.co')" }),
+  kibana: z
+    .string({ required_error: 'is required', invalid_type_error: 'must be a string' })
+    .url({ message: "must be a valid URL (e.g. 'https://my.kibana.co')" }),
+  elasticsearch: z
+    .string({ required_error: 'is required', invalid_type_error: 'must be a string' })
+    .url({ message: "must be a valid URL (e.g. 'https://my.elasticsearch.co')" }),
 });
 
 const AuthSchema = z.object({
-  username: z.string({ error: 'is required' }).min(1, { error: 'must be a non-empty string' }),
-  password: z.string({ error: 'is required' }).min(1, { error: 'must be a non-empty string' }),
+  username: z
+    .string({ required_error: 'is required', invalid_type_error: 'must be a string' })
+    .min(1, { message: 'must be a non-empty string' }),
+  password: z
+    .string({ required_error: 'is required', invalid_type_error: 'must be a string' })
+    .min(1, { message: 'must be a non-empty string' }),
 });
 
 const LinkedProjectSchema = z.object({
   hosts: z.object({
-    elasticsearch: z.url({ error: 'must be a valid URL' }),
+    elasticsearch: z
+      .string({ required_error: 'is required', invalid_type_error: 'must be a string' })
+      .url({ message: 'must be a valid URL' }),
   }),
   auth: AuthSchema,
 });
@@ -44,7 +71,7 @@ const LinkedProjectSchema = z.object({
  *
  * Defaults are applied for fields that are present in the auto-generated
  * `local.json` but commonly omitted from manually-authored cloud configs
- * (`http2`, `uiam`, `license`). All other required fields raise a clear
+ * (`http2`, `license`). All other required fields raise a clear
  * validation error if missing or invalid.
  *
  * Cross-field rules enforced via `superRefine`:
@@ -52,30 +79,25 @@ const LinkedProjectSchema = z.object({
  * - `serverless: true` with `projectType` of `security` or `oblt` requires
  *   `productTier`.
  * - `serverless: false` (stateful) forbids `projectType`, `productTier`,
- *   `organizationId`, `linkedProject`, and `uiam: true` (UIAM is serverless-
- *   only).
+ *   `organizationId`, and `linkedProject`.
  * - `isCloud: true` requires `cloudHostName` (used by SAML against Elastic
- *   Cloud), forbids `http2: true`, and forbids any `uiam` value that does not
- *   match `serverless` (UIAM behavior on cloud is fixed). Local runs may set
- *   `uiam` freely so TS server configs can drive it via `esServerlessOptions`.
+ *   Cloud) and forbids `http2: true`.
  */
 export const ScoutTestConfigSchema = z
   .object({
-    serverless: z.boolean({ error: 'is required and must be a boolean' }),
+    serverless: z.boolean({
+      required_error: 'is required and must be a boolean',
+      invalid_type_error: 'is required and must be a boolean',
+    }),
     http2: z.boolean().default(false),
-    // `uiam` defaults to mirror `serverless` (UIAM-only on serverless, never
-    // on stateful), but local server configs (the TS files under
-    // `servers/configs/config_sets/**`) can opt in/out via
-    // `esServerlessOptions.uiam`, and that choice is persisted into
-    // `local.json`. We therefore accept any boolean here for local runs and
-    // enforce the canonical rule only when `isCloud: true` (UIAM behavior on
-    // Elastic Cloud cannot be overridden) and reject `uiam: true` on stateful.
-    uiam: z.boolean({ error: 'must be a boolean' }).optional(),
-    isCloud: z.boolean({ error: 'is required and must be a boolean' }),
+    isCloud: z.boolean({
+      required_error: 'is required and must be a boolean',
+      invalid_type_error: 'is required and must be a boolean',
+    }),
     cloudHostName: z.string().min(1).optional(),
     cloudUsersFilePath: z
-      .string({ error: 'is required' })
-      .min(1, { error: 'must be a non-empty file path' }),
+      .string({ required_error: 'is required', invalid_type_error: 'must be a string' })
+      .min(1, { message: 'must be a non-empty file path' }),
     license: z.string().min(1).default('trial'),
     projectType: ServerlessProjectTypeSchema.optional(),
     productTier: ServerlessProductTierSchema.optional(),
@@ -93,7 +115,7 @@ export const ScoutTestConfigSchema = z
           path: ['projectType'],
           message:
             `is required when 'serverless' is true. ` +
-            `Expected one of: ${serverlessProjectTypes.join(' | ')}`,
+            `Expected one of: ${projectTypeValues.join(' | ')}`,
         });
       } else if (PROJECT_TYPES_WITH_TIER.has(cfg.projectType) && cfg.productTier === undefined) {
         ctx.addIssue({
@@ -101,7 +123,7 @@ export const ScoutTestConfigSchema = z
           path: ['productTier'],
           message:
             `is required when 'projectType' is '${cfg.projectType}'. ` +
-            `Expected one of: ${serverlessProductTiers.join(' | ')}`,
+            `Expected one of: ${productTierValues.join(' | ')}`,
         });
       }
     } else {
@@ -139,35 +161,7 @@ export const ScoutTestConfigSchema = z
           `'http2' enables TLS verification bypass and is only meaningful for local development`,
       });
     }
-
-    // UIAM rules:
-    //  - stateful never uses UIAM, so `uiam: true` is invalid;
-    //  - on cloud, UIAM behavior is fixed (UIAM-only on serverless,
-    //    never on stateful) and cannot be overridden;
-    //  - locally, any boolean is allowed so TS server config sets under
-    //    `servers/configs/config_sets/**` can drive the value via
-    //    `esServerlessOptions.uiam` (and round-trip through `local.json`).
-    if (!cfg.serverless && cfg.uiam === true) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['uiam'],
-        message: `must not be true when 'serverless' is false; UIAM is only available for serverless deployments`,
-      });
-    }
-    if (cfg.isCloud && cfg.uiam !== undefined && cfg.uiam !== cfg.serverless) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['uiam'],
-        message:
-          `must equal '${cfg.serverless}' (matches 'serverless') when 'isCloud' is true; ` +
-          `UIAM behavior on Elastic Cloud cannot be overridden`,
-      });
-    }
-  })
-  .transform((cfg) => ({
-    ...cfg,
-    uiam: cfg.uiam ?? cfg.serverless,
-  }));
+  });
 
 /**
  * Format a Zod validation error from {@link ScoutTestConfigSchema} into a

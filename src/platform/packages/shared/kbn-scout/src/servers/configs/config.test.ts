@@ -96,7 +96,6 @@ describe('Config.getScoutTestConfig', () => {
         serverArgs: [],
         ssl: true,
       },
-      esServerlessOptions: { uiam: true },
       kbnTestServer: {
         buildArgs: [],
         env: {},
