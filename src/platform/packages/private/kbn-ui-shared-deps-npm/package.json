@@ -4,7 +4,7 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
-    "build": "node ${REPO_ROOT:-`git rev-parse --show-toplevel`}/scripts/build_package.js $PWD --task-name shared_built_assets"
+    "build": "node ${REPO_ROOT:-`if which jj >/dev/null && jj root 2>/dev/null; then :; else git rev-parse --show-toplevel; fi`}/scripts/build_package.js $PWD --task-name shared_built_assets"
   },
   "buildSourcePaths": {
     "include": [

@@ -17,13 +17,19 @@ const execAsync = promisify(ChildProcess.execFile);
 /**
  * @param {string} repoRoot
  * @param {string} output
+ * @param {boolean} isJJ
  * @returns {Iterable<string>}
  */
-function parseLsFilesOutput(repoRoot, output) {
+function parseFilesOutput(repoRoot, output, isJJ = false) {
   const files = new Set();
 
   for (const line of output.split('\n').map((l) => l.trim())) {
     if (!line) {
+      continue;
+    }
+    if (isJJ) {
+      // jj only lists files that currently exist on disk
+      files.add(line);
       continue;
     }
 
@@ -59,6 +65,38 @@ function getGitFlags(repoRoot, include = undefined, exclude = undefined) {
 }
 
 /**
+ * Detect a jj workspace that is not colocated with a git working tree. In this
+ * case `git ls-files` cannot run because there is no `.git` directory, and
+ * pointing it at the main workspace would reflect the wrong checkout.
+ * @param {string} repoRoot
+ * @returns {boolean}
+ */
+function isJjOnlyWorkspace(repoRoot) {
+  return Fs.existsSync(Path.join(repoRoot, '.jj')) && !Fs.existsSync(Path.join(repoRoot, '.git'));
+}
+
+/**
+ * @param {string} repoRoot
+ * @param {string[] | undefined} include
+ * @param {string[] | undefined} exclude
+ * @returns {string[]}
+ */
+function getJjFlags(repoRoot, include = undefined, exclude = undefined) {
+  const args = ['file', 'list'];
+  const includes = include?.map((p) => (Path.isAbsolute(p) ? Path.relative(repoRoot, p) : p)) ?? [];
+  const excludes = exclude?.map((p) => (Path.isAbsolute(p) ? Path.relative(repoRoot, p) : p)) ?? [];
+
+  if (!includes.length && !excludes.length) {
+    return args;
+  }
+
+  const base = includes.length ? includes.join(' | ') : 'all()';
+  const expr = excludes.length ? `(${base}) ~ (${excludes.join(' | ')})` : base;
+  args.push('--', expr);
+  return args;
+}
+
+/**
  * List the files in the repo, only including files which are manged by version
  * control or "untracked" (new, not committed, and not ignored).
  * @param {string} repoRoot limit the list to specfic absolute paths
@@ -67,13 +105,22 @@ function getGitFlags(repoRoot, include = undefined, exclude = undefined) {
  * @returns {Promise<Iterable<string>>}
  */
 async function getRepoRels(repoRoot, include = undefined, exclude = undefined) {
+  if (isJjOnlyWorkspace(repoRoot)) {
+    const proc = await execAsync('jj', getJjFlags(repoRoot, include, exclude), {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      maxBuffer: Infinity,
+    });
+    return parseFilesOutput(repoRoot, proc.stdout, true);
+  }
+
   const proc = await execAsync('git', getGitFlags(repoRoot, include, exclude), {
     cwd: repoRoot,
     encoding: 'utf8',
     maxBuffer: Infinity,
   });
 
-  return parseLsFilesOutput(repoRoot, proc.stdout);
+  return parseFilesOutput(repoRoot, proc.stdout);
 }
 
 /**
@@ -85,12 +132,20 @@ async function getRepoRels(repoRoot, include = undefined, exclude = undefined) {
  * @returns {Iterable<string>}
  */
 function getRepoRelsSync(repoRoot, include = undefined, exclude = undefined) {
+  if (isJjOnlyWorkspace(repoRoot)) {
+    const stdout = ChildProcess.execFileSync('jj', getJjFlags(repoRoot, include, exclude), {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+    return parseFilesOutput(repoRoot, stdout, true);
+  }
+
   const stdout = ChildProcess.execFileSync('git', getGitFlags(repoRoot, include, exclude), {
     cwd: repoRoot,
     encoding: 'utf8',
   });
 
-  return parseLsFilesOutput(repoRoot, stdout);
+  return parseFilesOutput(repoRoot, stdout);
 }
 
 module.exports = { getRepoRels, getRepoRelsSync };
