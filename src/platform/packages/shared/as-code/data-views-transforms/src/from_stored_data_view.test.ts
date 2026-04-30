@@ -126,4 +126,76 @@ describe('fromStoredDataView', () => {
       },
     });
   });
+
+  describe('when useSavedSchema is true', () => {
+    it('returns saved data view shape and includes popularity when useSavedSchema is true', () => {
+      expect(
+        fromStoredDataView(
+          {
+            id: 'saved-id',
+            name: 'Saved logs',
+            allowHidden: true,
+            title: 'logs-*',
+            timeFieldName: '@timestamp',
+            runtimeFieldMap: { rt: { type: 'keyword' } },
+            fieldAttrs: {
+              mapped: { count: 10, customLabel: 'Mapped' },
+              rt: { count: 5 },
+            },
+          },
+          true
+        )
+      ).toEqual({
+        id: 'saved-id',
+        name: 'Saved logs',
+        allow_hidden_indices: true,
+        index_pattern: 'logs-*',
+        time_field: '@timestamp',
+        field_settings: {
+          mapped: {
+            popularity: 10,
+            custom_label: 'Mapped',
+          },
+          rt: {
+            type: 'keyword',
+            popularity: 5,
+          },
+        },
+      });
+    });
+  });
+
+  describe('when includePopularity is false', () => {
+    it('returns spec shape and omits popularity when useSavedSchema is false', () => {
+      expect(
+        fromStoredDataView(
+          {
+            id: 'saved-id',
+            name: 'Saved logs',
+            allowHidden: true,
+            title: 'logs-*',
+            timeFieldName: '@timestamp',
+            runtimeFieldMap: { rt: { type: 'keyword' } },
+            fieldAttrs: {
+              mapped: { count: 10, customLabel: 'Mapped' },
+              rt: { count: 5 },
+            },
+          },
+          false
+        )
+      ).toEqual({
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'logs-*',
+        time_field: '@timestamp',
+        field_settings: {
+          mapped: {
+            custom_label: 'Mapped',
+          },
+          rt: {
+            type: 'keyword',
+          },
+        },
+      });
+    });
+  });
 });

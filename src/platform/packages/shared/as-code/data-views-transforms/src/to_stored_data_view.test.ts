@@ -12,6 +12,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataViewReference,
   type AsCodeDataViewSpec,
+  type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { toStoredDataView } from './to_stored_data_view';
 
@@ -120,6 +121,38 @@ describe('toStoredDataView', () => {
       fieldAttrs: {
         rt: {},
       },
+    });
+  });
+
+  describe('when it is a saved data view', () => {
+    it('maps saved data view fields and popularity', () => {
+      const dataView: AsCodeSavedDataView = {
+        id: 'saved-id',
+        name: 'Saved logs',
+        allow_hidden_indices: true,
+        index_pattern: 'logs-*',
+        time_field: '@timestamp',
+        field_settings: {
+          mapped: { popularity: 10 },
+          rt: { type: 'keyword', popularity: 5 },
+        },
+      };
+
+      const result = toStoredDataView(dataView);
+      expect(result).toEqual({
+        id: 'saved-id',
+        name: 'Saved logs',
+        allowHidden: true,
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+        runtimeFieldMap: {
+          rt: { type: 'keyword' },
+        },
+        fieldAttrs: {
+          mapped: { count: 10 },
+          rt: { count: 5 },
+        },
+      });
     });
   });
 });

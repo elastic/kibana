@@ -418,3 +418,82 @@ describe('fromStoredFields.field_settings (indexed)', () => {
     });
   });
 });
+
+describe('fromStoredFields.includePopularity', () => {
+  describe('when includePopularity is false', () => {
+    it('does not emit popularity by default when fieldAttrs has count', () => {
+      const result = fromStoredFields({}, {}, { mapped: { count: 7, customLabel: 'Mapped' } });
+
+      expect(result).toEqual({
+        mapped: {
+          custom_label: 'Mapped',
+        },
+      });
+    });
+  });
+
+  describe('when includePopularity is true', () => {
+    describe('when count is undefined', () => {
+      it('does not emit popularity', () => {
+        const result = fromStoredFields(
+          {},
+          {},
+          { mapped: { customLabel: 'Mapped', count: undefined } },
+          true
+        );
+        expect(result).toEqual({
+          mapped: {
+            custom_label: 'Mapped',
+          },
+        });
+      });
+    });
+
+    it('emits popularity', () => {
+      const result = fromStoredFields(
+        {},
+        {},
+        { mapped: { count: 7, customLabel: 'Mapped' } },
+        true
+      );
+
+      expect(result).toEqual({
+        mapped: {
+          popularity: 7,
+          custom_label: 'Mapped',
+        },
+      });
+    });
+
+    it('emits popularity for runtime and composite subfields', () => {
+      const result = fromStoredFields(
+        {
+          rt: { type: 'keyword' },
+          parent: { type: RUNTIME_FIELD_COMPOSITE_TYPE, fields: { child: { type: 'keyword' } } },
+        },
+        {},
+        { rt: { count: 2 }, 'parent.child': { count: 3 }, mapped: { count: 4 } },
+        true
+      );
+
+      expect(result).toEqual({
+        rt: {
+          type: 'keyword',
+          popularity: 2,
+        },
+        parent: {
+          type: RUNTIME_FIELD_COMPOSITE_TYPE,
+          fields: {
+            child: {
+              type: 'keyword',
+              popularity: 3,
+            },
+          },
+        },
+        mapped: {
+          popularity: 4,
+        },
+      });
+    });
+  });
+});
