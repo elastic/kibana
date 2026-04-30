@@ -7,18 +7,19 @@
 
 import { validateSslCertPath } from '../../../../../../common/services';
 
-/**
- * Adapter for `useInput` — validator signature: (value: string) => string[] | undefined
- */
 export function validateSslPathInput(value: string): string[] | undefined {
   const err = validateSslCertPath(value);
   return err ? [err] : undefined;
 }
 
-/**
- * Adapter for `useComboInput` — validator signature:
- * (value: string[]) => Array<{ message: string; index?: number }> | undefined
- */
+// For useSecretInput: skips existing secret references ({ id }), validates plain strings
+export function validateSslPathInputSecret(
+  value: string | { id: string } | undefined
+): string[] | undefined {
+  if (!value || typeof value === 'object') return undefined;
+  return validateSslPathInput(value);
+}
+
 export function validateSslPathsCombo(
   values: string[]
 ): Array<{ message: string; index: number }> | undefined {

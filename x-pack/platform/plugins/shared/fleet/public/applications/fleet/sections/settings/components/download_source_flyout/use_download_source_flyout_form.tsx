@@ -23,7 +23,11 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import type { DownloadSourceBase } from '../../../../../../../common/types';
 
-import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
+import {
+  validateSslPathInput,
+  validateSslPathInputSecret,
+  validateSslPathsCombo,
+} from '../ssl_form_validators';
 
 import { confirmUpdate } from './confirm_update';
 
@@ -91,7 +95,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const sslKeySecretInput = useSecretInput(
     (downloadSource as DownloadSourceBase)?.secrets?.ssl?.key,
-    undefined,
+    validateSslPathInputSecret,
     undefined
   );
 
@@ -372,7 +376,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       isEditDisabled ||
       sslCertificateAuthoritiesInput.props.isInvalid ||
       sslCertificateInput.props.isInvalid ||
-      sslKeyInput.props.isInvalid,
+      (sslKeyInput.value ? sslKeyInput.props.isInvalid : sslKeySecretInput.props.isInvalid),
   };
 }
 
