@@ -33,10 +33,11 @@ test.describe(
 
     test('should NOT show Advanced tab for viewer role on classic stream', async ({
       browserAuth,
+      pageObjects,
       page,
     }) => {
       await browserAuth.loginAsViewer();
-      await page.reload();
+      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
       // Verify the Advanced tab is not visible for viewer
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
@@ -44,10 +45,11 @@ test.describe(
 
     test('should NOT show Advanced tab for editor role on classic stream', async ({
       browserAuth,
+      pageObjects,
       page,
     }) => {
       await browserAuth.loginAs('editor');
-      await page.reload();
+      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
       // Verify the Advanced tab is not visible for editor
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
@@ -59,7 +61,7 @@ test.describe(
       page,
     }) => {
       await browserAuth.loginAsAdmin();
-      await page.reload();
+      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
       // Verify the Advanced tab is visible for admin
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeVisible();
