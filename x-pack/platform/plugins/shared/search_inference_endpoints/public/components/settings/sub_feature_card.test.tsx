@@ -213,7 +213,7 @@ describe('SubFeatureCard', () => {
       // ...with no edit controls.
       expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('remove-endpoint-ep-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('subFeatureOverflowMenu-test_feature')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('copy-to-test_feature')).not.toBeInTheDocument();
     });
 
     it('is unchecked when endpointIds differ from recommended', () => {
@@ -331,8 +331,8 @@ describe('SubFeatureCard', () => {
     });
   });
 
-  describe('overflow menu (Copy to)', () => {
-    it('renders only when other sub-features exist and the toggle is OFF', () => {
+  describe('Copy to control', () => {
+    it('renders visible Copy to beside add model when other sub-features exist and the toggle is OFF', () => {
       mockUseRegisteredFeatures.mockReturnValue({
         features: [
           { ...feature },
@@ -347,7 +347,7 @@ describe('SubFeatureCard', () => {
 
       renderCard(['ep-2']);
 
-      expect(screen.getByTestId('subFeatureOverflowMenu-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('copy-to-test_feature')).toBeInTheDocument();
     });
 
     it('does not render in the locked recommended-defaults mode', () => {
@@ -370,7 +370,7 @@ describe('SubFeatureCard', () => {
         </Wrapper>
       );
 
-      expect(screen.queryByTestId('subFeatureOverflowMenu-test_feature')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('copy-to-test_feature')).not.toBeInTheDocument();
     });
   });
 

@@ -122,12 +122,8 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator(`useRecommendedDefaultsToggle-${featureId}`);
   }
 
-  public subFeatureOverflowMenu(featureId: string): Locator {
-    return this.page.testSubj.locator(`subFeatureOverflowMenu-${featureId}`);
-  }
-
-  public copyToMenuItem(featureId: string): Locator {
-    return this.page.testSubj.locator(`copyToMenuItem-${featureId}`);
+  public copyToButton(featureId: string): Locator {
+    return this.page.testSubj.locator(`copy-to-${featureId}`);
   }
 
   public endpointRowsFor(featureId: string): Locator {

@@ -250,10 +250,7 @@ test.describe('Feature Settings', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('Copy to is reachable through the overflow menu and copies the assignment', async ({
-    page,
-    pageObjects,
-  }) => {
+  test('Copy to copies the assignment to another sub-feature', async ({ page, pageObjects }) => {
     const { featureSettings } = pageObjects;
     await mockInferenceEndpoints(page, mockEndpointsData);
     await featureSettings.goto();
@@ -268,9 +265,8 @@ test.describe('Feature Settings', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(betaCard).not.toContainText('anthropic');
     });
 
-    await test.step('open copy-to via the overflow menu', async () => {
-      await featureSettings.subFeatureOverflowMenu('test_feature_alpha').click();
-      await featureSettings.copyToMenuItem('test_feature_alpha').click();
+    await test.step('open copy to modal from Copy to button', async () => {
+      await featureSettings.copyToButton('test_feature_alpha').click();
       await expect(featureSettings.copyToModalApply).toBeVisible();
       await expect(featureSettings.copyToModalApply).toBeDisabled();
     });

@@ -11,7 +11,6 @@ import {
   EuiBadgeGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenu,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
@@ -21,7 +20,6 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiPanel,
-  EuiPopover,
   EuiSpacer,
   EuiSplitPanel,
   EuiSwitch,
@@ -76,7 +74,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
   // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
@@ -448,51 +445,17 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   )}
                   {(!hasOverflow || isExpanded) && hasOtherSubFeatures && (
                     <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        aria-label={i18n.translate(
-                          'xpack.searchInferenceEndpoints.settings.subFeatureOverflow.popoverAriaLabel',
-                          { defaultMessage: 'More actions' }
-                        )}
-                        button={
-                          <EuiButtonIcon
-                            iconType="boxesVertical"
-                            aria-label={i18n.translate(
-                              'xpack.searchInferenceEndpoints.settings.subFeatureOverflow.ariaLabel',
-                              { defaultMessage: 'More actions' }
-                            )}
-                            color="text"
-                            onClick={() => setIsOverflowOpen((prev) => !prev)}
-                            data-test-subj={`subFeatureOverflowMenu-${featureId}`}
-                          />
-                        }
-                        isOpen={isOverflowOpen}
-                        closePopover={() => setIsOverflowOpen(false)}
-                        panelPaddingSize="none"
-                        anchorPosition="downRight"
+                      <EuiButtonEmpty
+                        iconType="copy"
+                        size="s"
+                        color="text"
+                        onClick={() => setIsCopyModalOpen(true)}
+                        data-test-subj={`copy-to-${featureId}`}
                       >
-                        <EuiContextMenu
-                          initialPanelId={0}
-                          panels={[
-                            {
-                              id: 0,
-                              items: [
-                                {
-                                  name: i18n.translate(
-                                    'xpack.searchInferenceEndpoints.settings.copyTo.button',
-                                    { defaultMessage: 'Copy to' }
-                                  ),
-                                  icon: 'copy',
-                                  'data-test-subj': `copyToMenuItem-${featureId}`,
-                                  onClick: () => {
-                                    setIsOverflowOpen(false);
-                                    setIsCopyModalOpen(true);
-                                  },
-                                },
-                              ],
-                            },
-                          ]}
-                        />
-                      </EuiPopover>
+                        {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.button', {
+                          defaultMessage: 'Copy to',
+                        })}
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
