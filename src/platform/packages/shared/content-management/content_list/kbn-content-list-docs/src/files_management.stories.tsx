@@ -161,9 +161,9 @@ const OriginalStory = () => {
               width="120px"
               sortable
               render={(item) => {
-              const size = item.size == null ? undefined : Number(item.size);
-              return formatBytes(size !== undefined && Number.isFinite(size) ? size : undefined);
-            }}
+                const size = item.size == null ? undefined : Number(item.size);
+                return formatBytes(size !== undefined && Number.isFinite(size) ? size : undefined);
+              }}
             />
             <Column.Actions width="96px">
               <Action.Delete />
@@ -231,7 +231,9 @@ const ProposalStory = () => {
                 sortable
                 render={(item) => {
                   const size = item.size == null ? undefined : Number(item.size);
-                  return formatBytes(size !== undefined && Number.isFinite(size) ? size : undefined);
+                  return formatBytes(
+                    size !== undefined && Number.isFinite(size) ? size : undefined
+                  );
                 }}
               />
               <Column.UpdatedAt width="160px" />
