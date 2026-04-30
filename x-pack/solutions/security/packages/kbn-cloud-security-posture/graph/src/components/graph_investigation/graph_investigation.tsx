@@ -18,9 +18,7 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
-import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
-import { useGraphCallout } from '../../hooks/use_graph_callout';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
@@ -461,9 +459,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       relationshipNodeSources,
     ]);
 
-    // Get callout state based on current graph state
-    const calloutState = useGraphCallout(nodes);
-
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
         .filter((filter) => filter.meta && !filter.meta.disabled)
@@ -556,18 +551,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
-              interactiveBottomRightContent={
-                calloutState.shouldShowCallout ? (
-                  <EuiFlexItem grow={false}>
-                    <Callout
-                      title={calloutState.config.title}
-                      message={calloutState.config.message}
-                      links={calloutState.config.links}
-                      onDismiss={calloutState.onDismiss}
-                    />
-                  </EuiFlexItem>
-                ) : null
-              }
             >
               <Panel position="top-right">
                 <Actions
