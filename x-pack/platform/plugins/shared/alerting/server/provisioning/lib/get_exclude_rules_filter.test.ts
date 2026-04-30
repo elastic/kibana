@@ -106,7 +106,8 @@ describe('getExcludeRulesFilter', () => {
                 value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.message`,
               }),
               expect.objectContaining({
-                value: `*${NON_CLOUD_USER_API_KEY_CREATOR_ERROR}*`,
+                type: 'wildcard',
+                value: expect.stringContaining(NON_CLOUD_USER_API_KEY_CREATOR_ERROR),
               }),
             ]),
           }),
