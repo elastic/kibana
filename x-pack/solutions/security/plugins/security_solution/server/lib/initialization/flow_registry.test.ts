@@ -17,7 +17,7 @@ import {
 } from '../../../common/api/initialization';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import type { InitializationFlowContext } from './types';
-import { FlowInitializationError, runInitializationFlows } from './flow_registry';
+import { runInitializationFlows } from './flow_registry';
 
 jest.mock('./flows/create_list_indices', () => ({
   createListIndicesInitializationFlow: {
@@ -120,27 +120,7 @@ describe('runInitializationFlows', () => {
   });
 
   describe('error handling', () => {
-    it('exposes the message from a FlowInitializationError', async () => {
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
-      createListIndicesInitializationFlow.runFlow.mockRejectedValueOnce(
-        new FlowInitializationError('lists plugin is not available')
-      );
-
-      const context = createMockContext();
-      const response = await runInitializationFlows([flowA], context);
-
-      expect(response.flows[flowA]).toEqual({
-        status: INITIALIZATION_FLOW_STATUS_ERROR,
-        error: 'lists plugin is not available',
-      });
-      expect(context.logger.error).toHaveBeenCalledWith(
-        "Initialization flow 'create-list-indices' failed: lists plugin is not available"
-      );
-    });
-
-    it('returns an opaque error message for unexpected errors', async () => {
+    it('exposes the underlying error message in the response and logs the failure', async () => {
       const { createListIndicesInitializationFlow } = jest.requireMock(
         './flows/create_list_indices'
       );
@@ -153,11 +133,26 @@ describe('runInitializationFlows', () => {
 
       expect(response.flows[flowA]).toEqual({
         status: INITIALIZATION_FLOW_STATUS_ERROR,
-        error: 'internal initialization flow error',
+        error: 'ES connection failed',
       });
       expect(context.logger.error).toHaveBeenCalledWith(
         "Initialization flow 'create-list-indices' failed: ES connection failed"
       );
+    });
+
+    it('falls back to a string error when a non-Error value is thrown', async () => {
+      const { createListIndicesInitializationFlow } = jest.requireMock(
+        './flows/create_list_indices'
+      );
+      createListIndicesInitializationFlow.runFlow.mockRejectedValueOnce('a bare string');
+
+      const context = createMockContext();
+      const response = await runInitializationFlows([flowA], context);
+
+      expect(response.flows[flowA]).toEqual({
+        status: INITIALIZATION_FLOW_STATUS_ERROR,
+        error: 'a bare string',
+      });
     });
   });
 

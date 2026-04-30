@@ -14,7 +14,6 @@ import type {
   InitializationFlowDefinition,
   InitializationFlowResult,
 } from '../../types';
-import { FlowInitializationError } from '../../flow_registry';
 
 const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Promise<void> => {
   try {
@@ -35,7 +34,7 @@ export const createListIndicesInitializationFlow: InitializationFlowDefinition<n
     const listsContext = await context.requestHandlerContext.lists;
 
     if (!listsContext) {
-      throw new FlowInitializationError('lists plugin is not available');
+      throw new Error('lists plugin is not available');
     }
 
     const internalListClient = listsContext.getInternalListClient();

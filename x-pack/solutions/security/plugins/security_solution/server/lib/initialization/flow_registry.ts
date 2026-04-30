@@ -43,8 +43,6 @@ const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
   [INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING]: initDetectionRuleMonitoringFlow,
 };
 
-export class FlowInitializationError extends Error {}
-
 interface FlowRunResult {
   id: InitializationFlowId;
   result: InitializationFlowResult<unknown>;
@@ -105,14 +103,13 @@ const executeSingleFlow = async <TPayload>(
       result,
     };
   } catch (err) {
-    context.logger.error(`Initialization flow '${flowId}' failed: ${err.message}`);
-    const errMessage =
-      err instanceof FlowInitializationError ? err.message : 'internal initialization flow error';
+    const message = err instanceof Error ? err.message : String(err);
+    context.logger.error(`Initialization flow '${flowId}' failed: ${message}`);
     return {
       id: flowId,
       result: {
         status: INITIALIZATION_FLOW_STATUS_ERROR,
-        error: errMessage,
+        error: message,
       },
     };
   }

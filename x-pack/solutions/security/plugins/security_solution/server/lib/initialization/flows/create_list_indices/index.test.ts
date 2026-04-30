@@ -13,7 +13,6 @@ import {
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
-import { FlowInitializationError } from '../../flow_registry';
 import { createListIndicesInitializationFlow } from '.';
 
 const createMockInitializationFlowContext = (listsContext: unknown): InitializationFlowContext =>
@@ -34,15 +33,10 @@ describe('createListIndicesInitializationFlow', () => {
   });
 
   describe('runFlow', () => {
-    it('throws a FlowInitializationError when the lists plugin context is unavailable', async () => {
+    it('throws when the lists plugin context is unavailable', async () => {
       const context = createMockInitializationFlowContext(undefined);
 
       await expect(createListIndicesInitializationFlow.runFlow(context)).rejects.toThrow(
-        FlowInitializationError
-      );
-
-      const context2 = createMockInitializationFlowContext(undefined);
-      await expect(createListIndicesInitializationFlow.runFlow(context2)).rejects.toThrow(
         'lists plugin is not available'
       );
     });
