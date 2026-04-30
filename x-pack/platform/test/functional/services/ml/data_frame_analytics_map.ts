@@ -16,7 +16,7 @@ export function MachineLearningDataFrameAnalyticsMapProvider({ getService }: Ftr
     async assertMapElementsExists() {
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap');
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapLegend');
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapCytoscape');
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapGraph');
     },
     async assertJobMapTitle(id: string) {
       const expected = 'Analytics map';

@@ -186,7 +186,7 @@
                   "<T>"
                 ],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 33796,
+                "lineNumber": 33798,
                 "columnNumber": 22,
                 "deprecated": false,
                 "docsReferencedTypeName": "Criteria",
