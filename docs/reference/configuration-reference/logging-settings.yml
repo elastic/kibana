@@ -203,7 +203,7 @@ groups:
         description: |
           The transport protocol used to send log records to the OTLP endpoint. Applies to the `otel` appender type only.
 
-          * `proto`: OTLP over HTTP using Protobuf encoding (recommended for most deployments).
+          * `proto` (default): OTLP over HTTP using Protobuf encoding. More compact than `http` (JSON) and more broadly compatible than `grpc`, which requires HTTP/2.
           * `http`: OTLP over HTTP using JSON encoding.
           * `grpc`: OTLP over gRPC. Headers must be provided as gRPC metadata key-value pairs.
         datatype: enum
