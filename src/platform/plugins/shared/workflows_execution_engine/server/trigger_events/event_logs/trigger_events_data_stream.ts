@@ -60,3 +60,29 @@ export const initializeTriggerEventsClient = (
 ): Promise<TriggerEventsDataStreamClient> => {
   return coreDataStreams.initializeClient(WORKFLOWS_EVENTS_DATA_STREAM);
 };
+
+export async function writeTriggerEvent(
+  client: TriggerEventsDataStreamClient,
+  params: {
+    timestamp: string;
+    eventId: string;
+    triggerId: string;
+    spaceId: string;
+    subscriptions: string[];
+    payload: Record<string, unknown>;
+    sourceExecutionId?: string;
+  }
+): Promise<void> {
+  const doc: TriggerEventDocument = {
+    '@timestamp': params.timestamp,
+    eventId: params.eventId,
+    triggerId: params.triggerId,
+    spaceId: params.spaceId,
+    subscriptions: params.subscriptions,
+    payload: params.payload,
+    ...(params.sourceExecutionId !== undefined && params.sourceExecutionId !== ''
+      ? { sourceExecutionId: params.sourceExecutionId }
+      : {}),
+  };
+  await client.create({ documents: [doc] });
+}

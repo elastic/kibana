@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
@@ -24,8 +25,11 @@ export function getDashboardCRUResponseBody(
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
   operation: 'create' | 'read' | 'update' | 'search',
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  serverTiming?: RequestTiming
 ) {
+  const timer = serverTiming?.start('transform-dashboard-out');
+
   let sanatizedDashboardState: DashboardState;
   const warnings: Warnings = [];
   try {
@@ -49,9 +53,11 @@ export function getDashboardCRUResponseBody(
     sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
+  } finally {
+    timer?.end();
   }
 
-  return {
+  const result = {
     id: savedObject.id,
     data: {
       ...sanatizedDashboardState,
@@ -64,4 +70,6 @@ export function getDashboardCRUResponseBody(
     meta: getMeta(savedObject),
     ...(operation === 'read' && warnings?.length && { warnings }),
   };
+
+  return result;
 }

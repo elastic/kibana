@@ -15,7 +15,7 @@ export default function changeTrackingEnabledTest({ getService }: FtrProviderCon
   describe('change tracking service - enabled', () => {
     it('should create the change history data stream when ruleChangeTracking is enabled', async () => {
       await retry.tryForTime(30_000, async () => {
-        const response = await es.indices.getDataStream({ name: '.kibana-change-history' });
+        const response = await es.indices.getDataStream({ name: '.kibana_change_history' });
         expect(response.data_streams.length).to.be.greaterThan(0);
       });
     });

@@ -60,7 +60,7 @@ export function getAlertsEmbeddableFactory({
       parentApi,
     }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
         try {
           const result = await openSloConfiguration(

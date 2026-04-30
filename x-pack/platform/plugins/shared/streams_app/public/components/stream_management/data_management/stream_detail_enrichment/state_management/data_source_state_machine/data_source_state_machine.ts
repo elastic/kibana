@@ -238,9 +238,15 @@ export const createDataSourceMachineImplementations = ({
   toasts,
   telemetryClient,
   streamsRepositoryClient,
+  uiSettings,
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
-    collectData: createDataCollectorActor({ data, telemetryClient, streamsRepositoryClient }),
+    collectData: createDataCollectorActor({
+      data,
+      telemetryClient,
+      streamsRepositoryClient,
+      uiSettings,
+    }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
