@@ -37,8 +37,8 @@ const makeInsight = (overrides: Partial<RuleDoctorInsightDoc> = {}): RuleDoctorI
   justification: '',
   rule_ids: ['rule-1', 'rule-2'],
   data: {},
-  current: null,
-  proposed: null,
+  current: {},
+  proposed: {},
   space_id: 'default',
   ...overrides,
 });
