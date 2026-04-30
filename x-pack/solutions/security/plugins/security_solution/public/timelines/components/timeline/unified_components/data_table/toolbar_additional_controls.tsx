@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, type EuiToolTipRef } from '@elastic/eui';
 import React, { useMemo, useCallback, useRef } from 'react';
 
 import { isActiveTimeline } from '../../../../../helpers';
@@ -39,7 +39,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 
-  const toolTipRef = useRef<EuiToolTip>(null);
+  const toolTipRef = useRef<EuiToolTipRef>(null);
 
   const hideToolTip = () => toolTipRef.current?.hideToolTip();
 
@@ -89,7 +89,6 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
             }
             iconType={fullScreen ? 'fullScreenExit' : 'fullScreen'}
             onClick={toggleFullScreen}
-            onMouseOut={hideToolTip}
           />
         </EuiToolTip>
       </span>
