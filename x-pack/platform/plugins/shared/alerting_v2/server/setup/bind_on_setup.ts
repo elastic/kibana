@@ -14,8 +14,7 @@ import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
-import { experimentalFeaturesUiSettings } from '../ui_settings/experimental_features_setting';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/experimental_features';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
 import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
@@ -52,9 +51,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     }));
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
-    
+
     uiSettingsSetup.registerGlobal(alertingV2UiSettings);
-    uiSettingsSetup.registerGlobal(experimentalFeaturesUiSettings);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);

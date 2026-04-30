@@ -18,6 +18,8 @@ import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/quer
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
+const EMPTY_CHANGE_POINTS = { type: {} } as const;
+
 export async function readSignificantEventsFromAlertsIndices(
   params: {
     streamNames?: string[];
@@ -146,11 +148,7 @@ export async function readSignificantEventsFromAlertsIndices(
         ...toStreamQuery(queryLink),
         stream_name: queryLink.stream_name,
         occurrences: [],
-        change_points: {
-          type: {
-            stationary: { p_value: 0, change_point: 0 },
-          },
-        },
+        change_points: EMPTY_CHANGE_POINTS,
         rule_backed: queryLink.rule_backed,
       })),
       aggregated_occurrences: [],
@@ -191,11 +189,7 @@ export async function readSignificantEventsFromAlertsIndices(
       ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
       occurrences: [],
-      change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
-        },
-      },
+      change_points: EMPTY_CHANGE_POINTS,
       rule_backed: queryLink.rule_backed,
     }));
 

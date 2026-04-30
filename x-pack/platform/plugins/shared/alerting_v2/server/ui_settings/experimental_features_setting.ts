@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { UiSettingsParams } from '@kbn/core/types';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/experimental_features';
+import {
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+  ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID,
+} from '../../common/experimental_features';
 
 export const experimentalFeaturesUiSettings: Record<string, UiSettingsParams> = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
@@ -19,10 +22,25 @@ export const experimentalFeaturesUiSettings: Record<string, UiSettingsParams> = 
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingVTwo.experimentalFeaturesSettingDescription', {
-      defaultMessage:
-        'Enables experimental alerting v2 features such as Agent Builder rule management.',
+      defaultMessage: 'Enables experimental alerting v2 features such as Rule Doctor.',
     }),
     schema: schema.boolean(),
+    requiresPageReload: false,
+    technicalPreview: true,
+  },
+  [ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID]: {
+    category: ['observability'],
+    name: i18n.translate('xpack.alertingVTwo.ruleDoctorIntervalSettingName', {
+      defaultMessage: 'Alerting v2: Rule Doctor continuous analysis interval (hours)',
+    }),
+    type: 'number',
+    value: null,
+    description: i18n.translate('xpack.alertingVTwo.ruleDoctorIntervalSettingDescription', {
+      defaultMessage:
+        'Interval for continuous Rule Doctor analysis, in hours. ' +
+        'Leave unset to disable. Requires "Alerting v2: Experimental features" to be enabled.',
+    }),
+    schema: schema.nullable(schema.number({ min: 1, max: 168 })),
     requiresPageReload: false,
     technicalPreview: true,
   },
