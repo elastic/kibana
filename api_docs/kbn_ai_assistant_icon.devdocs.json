@@ -49,6 +49,7 @@
             "lineNumber": 30,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AssistantAvatarProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -102,6 +103,7 @@
             "lineNumber": 39,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AssistantBeaconProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -155,6 +157,7 @@
             "lineNumber": 22,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "AssistantIconProps",
             "trackAdoption": false,
             "isRequired": true
           }

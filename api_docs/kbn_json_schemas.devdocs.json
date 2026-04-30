@@ -101,6 +101,7 @@
                 "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EditorEndpoints",
                 "trackAdoption": false,
                 "isRequired": true
               },

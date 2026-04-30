@@ -27,15 +27,20 @@ import {
   getAffectedPackages,
   listChangedFiles,
   filterFilesByPackages,
-  SELECTIVE_TESTS_LABEL,
+  PREVENT_SELECTIVE_TESTS_LABEL,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   touchedCriticalFiles,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
 } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
-// TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
-const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
+const prLabels =
+  process.env.GITHUB_PR_LABELS?.split(',')
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+const isPrBuild = Boolean(process.env.GITHUB_PR_NUMBER);
+const preventSelectiveTesting = prLabels.includes(PREVENT_SELECTIVE_TESTS_LABEL);
+const USE_SELECTIVE_TESTING = isPrBuild && !preventSelectiveTesting;
 
 const SHARD_ANNOTATION_SEP = '||shard=';
 /**
@@ -90,7 +95,7 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
     ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
-    : 35;
+    : 30;
   if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
     throw new Error(
       `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
@@ -311,11 +316,11 @@ export async function pickTestGroupRunOrder() {
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 60,
+        defaultMin: 15,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
         tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
-        warmupMin: 2,
+        warmupMin: 5,
         concurrency: 1,
         names: jestIntegrationConfigs,
       },

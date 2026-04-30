@@ -68,6 +68,7 @@
                 "lineNumber": 21,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "StartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -87,7 +88,15 @@
         "tags": [],
         "label": "RecentlyAccessed",
         "description": [
-          "\n{@link RecentlyAccessed | APIs} for recently accessed history."
+          "\n",
+          {
+            "pluginId": "@kbn/recently-accessed",
+            "scope": "common",
+            "docId": "kibKbnRecentlyAccessedPluginApi",
+            "section": "def-common.RecentlyAccessed",
+            "text": "APIs"
+          },
+          " for recently accessed history."
         ],
         "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
         "lineNumber": 19,
