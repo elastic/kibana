@@ -158,6 +158,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -202,6 +203,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -246,6 +248,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -485,6 +488,7 @@
             "lineNumber": 9,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -522,6 +526,7 @@
             "lineNumber": 44,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "SetupTechnologySelectorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1709,7 +1714,7 @@
                 "id": "def-public.CloudConnectorSetupProps.updatePolicy.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  updatedPolicy,\n  isValid,\n  isExtensionLoaded,\n}",
                 "description": [],
                 "signature": [
                   "{ updatedPolicy: ",
@@ -2220,7 +2225,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2228,7 +2241,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -2238,7 +2259,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -3870,6 +3899,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -3960,6 +3990,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -4272,6 +4303,7 @@
                 "lineNumber": 61,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExtendedIntegrationCategory",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4333,6 +4365,7 @@
                 "lineNumber": 63,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "IntegrationsURLParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4371,6 +4404,7 @@
                 "lineNumber": 64,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "IntegrationsURLParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4714,6 +4748,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -4930,6 +4965,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -5036,6 +5072,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -5603,6 +5640,7 @@
                 "lineNumber": 630,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               }
             ]
@@ -5872,6 +5910,14 @@
             "section": "def-public.IntegrationCardItem",
             "text": "IntegrationCardItem"
           },
+          "[]; allCards: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.IntegrationCardItem",
+            "text": "IntegrationCardItem"
+          },
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/home/hooks/use_available_packages.tsx",
@@ -5886,7 +5932,7 @@
             "id": "def-public.AvailablePackagesHookType.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  prereleaseIntegrationsEnabled,\n}",
             "description": [],
             "signature": [
               "{ prereleaseIntegrationsEnabled: boolean; }"
@@ -6423,6 +6469,7 @@
             "lineNumber": 25,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "UIExtensionPoint",
             "trackAdoption": false
           }
         ],
@@ -9209,6 +9256,7 @@
               "lineNumber": 25,
               "columnNumber": 48,
               "deprecated": false,
+              "docsReferencedTypeName": "UIExtensionPoint",
               "trackAdoption": false
             }
           ]
@@ -9437,6 +9485,7 @@
             "lineNumber": 209,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -9518,6 +9567,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -9978,6 +10028,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeOf",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9996,6 +10047,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -10014,6 +10066,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -10103,6 +10156,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -10121,6 +10175,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -10200,6 +10255,7 @@
                 "lineNumber": 459,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -11204,6 +11260,7 @@
                 "lineNumber": 460,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false
               },
               {
@@ -11226,6 +11283,7 @@
                 "lineNumber": 461,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "NewAgentPolicy",
                 "trackAdoption": false
               },
               {
@@ -11304,7 +11362,7 @@
                 "id": "def-server.AgentPolicyServiceInterface.createWithPackagePolicies.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n    soClient,\n    esClient,\n    agentPolicy,\n    packagePolicies,\n    options: {\n      hasFleetServer,\n      withSysMonitoring,\n      monitoringEnabled,\n      spaceId,\n      user,\n      request,\n      force,\n      forcePackagePolicyCreation,\n    },\n  }",
                 "description": [],
                 "signature": [
                   "{ soClient: ",
@@ -11382,6 +11440,7 @@
                 "lineNumber": 723,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -11471,6 +11530,7 @@
                 "lineNumber": 882,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -11538,6 +11598,7 @@
                 "lineNumber": 1593,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -12542,6 +12603,7 @@
                 "lineNumber": 1594,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false
               },
               {
@@ -12626,6 +12688,7 @@
                 "lineNumber": 2164,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -12708,6 +12771,7 @@
                 "lineNumber": 765,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -12724,6 +12788,7 @@
                 "lineNumber": 766,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false
               },
               {
@@ -12787,6 +12852,7 @@
                 "lineNumber": 2320,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               }
             ]
@@ -12826,6 +12892,7 @@
                 "lineNumber": 2400,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -12833,7 +12900,7 @@
                 "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicyIds.$2",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "__1",
+                "label": "{ perPage = 1000, kuery = undefined, spaceId = undefined }",
                 "description": [],
                 "signature": [
                   "Pick<",
@@ -12850,6 +12917,7 @@
                 "lineNumber": 2401,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FetchAllAgentPolicyIdsOptions",
                 "trackAdoption": false
               }
             ]
@@ -12897,6 +12965,7 @@
                 "lineNumber": 2430,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -12904,7 +12973,7 @@
                 "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicies.$2",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "__1",
+                "label": "{\n      perPage = 1000,\n      kuery,\n      sortOrder = 'asc',\n      sortField = 'created_at',\n      fields = [],\n      spaceId = undefined,\n    }",
                 "description": [],
                 "signature": [
                   "Pick<",
@@ -12921,6 +12990,7 @@
                 "lineNumber": 2431,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FetchAllAgentPoliciesOptions",
                 "trackAdoption": false
               }
             ]
@@ -12966,6 +13036,7 @@
                 "lineNumber": 1738,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false
               },
               {
@@ -13032,7 +13103,15 @@
         "tags": [],
         "label": "AgentService",
         "description": [
-          "\nA service for interacting with Agent data. See {@link AgentClient} for more information.\n"
+          "\nA service for interacting with Agent data. See ",
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.AgentClient",
+            "text": "AgentClient"
+          },
+          " for more information.\n"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/server/services/agents/agent_service.ts",
         "lineNumber": 34,
@@ -13082,6 +13161,7 @@
                 "lineNumber": 43,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -13312,6 +13392,7 @@
                 "lineNumber": 87,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArtifactsClientCreateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -13498,6 +13579,7 @@
                 "lineNumber": 97,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ListArtifactsProps",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -13619,6 +13701,7 @@
                 "lineNumber": 103,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "FetchAllArtifactsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -13962,7 +14045,7 @@
         "label": "FleetSetupDeps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-        "lineNumber": 176,
+        "lineNumber": 180,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13984,7 +14067,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 177,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14007,7 +14090,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 178,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14029,7 +14112,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 179,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14052,7 +14135,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 180,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14075,7 +14158,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 181,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14098,7 +14181,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 182,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14121,7 +14204,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 183,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14143,7 +14226,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 184,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14165,7 +14248,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 185,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14259,6 +14342,7 @@
                 "lineNumber": 31,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "HapiReadableStream",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -14393,6 +14477,7 @@
                 "lineNumber": 37,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -14762,6 +14847,7 @@
                 "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -15204,6 +15290,7 @@
                 "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FetchFindLatestPackageOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -15262,6 +15349,7 @@
                 "lineNumber": 117,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "BundledPackage",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15753,6 +15841,7 @@
                 "lineNumber": 152,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallablePackage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -15808,6 +15897,7 @@
                 "lineNumber": 157,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeOf",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -15921,6 +16011,7 @@
                 "lineNumber": 164,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -16007,6 +16098,7 @@
                 "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16024,6 +16116,7 @@
                 "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16047,6 +16140,7 @@
                 "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "NewPackagePolicy",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16232,6 +16326,7 @@
                 "lineNumber": 93,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -16250,6 +16345,7 @@
                 "lineNumber": 94,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -16298,6 +16394,7 @@
                 "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16315,6 +16412,7 @@
                 "lineNumber": 99,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "NewPackagePolicyWithId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -16379,6 +16477,7 @@
                 "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16396,6 +16495,7 @@
                 "lineNumber": 104,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16512,6 +16612,7 @@
                 "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -16574,6 +16675,7 @@
                 "lineNumber": 119,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16591,6 +16693,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16633,6 +16736,7 @@
                 "lineNumber": 122,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientBulkUpdateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -16700,6 +16804,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16717,6 +16822,7 @@
                 "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16847,6 +16953,7 @@
                 "lineNumber": 141,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16882,6 +16989,7 @@
                 "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientGetOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -16928,6 +17036,7 @@
                 "lineNumber": 147,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -16962,6 +17071,7 @@
                 "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientFindAllForAgentPolicyOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -17018,6 +17128,7 @@
                 "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17041,6 +17152,7 @@
                 "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackageInfo",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17058,6 +17170,7 @@
                 "lineNumber": 155,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyAssetsMap",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17081,6 +17194,7 @@
                 "lineNumber": 156,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicy",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17146,6 +17260,7 @@
                 "lineNumber": 161,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17181,6 +17296,7 @@
                 "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientGetByIdsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -17243,6 +17359,7 @@
                 "lineNumber": 167,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17315,6 +17432,7 @@
                 "lineNumber": 172,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17332,6 +17450,7 @@
                 "lineNumber": 173,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientListIdsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -17390,6 +17509,7 @@
                 "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17407,6 +17527,7 @@
                 "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17447,6 +17568,7 @@
                 "lineNumber": 180,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdatePackagePolicy",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17598,6 +17720,7 @@
                 "lineNumber": 191,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17615,6 +17738,7 @@
                 "lineNumber": 192,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17650,6 +17774,7 @@
                 "lineNumber": 194,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientDeleteOptions",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -17668,6 +17793,7 @@
                 "lineNumber": 195,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -17686,6 +17812,7 @@
                 "lineNumber": 196,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -17744,6 +17871,7 @@
                 "lineNumber": 200,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17761,6 +17889,7 @@
                 "lineNumber": 201,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17850,6 +17979,7 @@
                 "lineNumber": 204,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicy",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -17921,6 +18051,7 @@
                 "lineNumber": 209,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -17962,6 +18093,7 @@
                 "lineNumber": 211,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicy",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -18033,6 +18165,7 @@
                 "lineNumber": 216,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18056,6 +18189,7 @@
                 "lineNumber": 217,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "NewPackagePolicy",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18110,6 +18244,7 @@
                 "lineNumber": 221,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18229,6 +18364,7 @@
                 "lineNumber": 227,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18247,6 +18383,7 @@
                 "lineNumber": 228,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunExternalCallbacksPackagePolicyArgument",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18264,6 +18401,7 @@
                 "lineNumber": 229,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18281,6 +18419,7 @@
                 "lineNumber": 230,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18299,6 +18438,7 @@
                 "lineNumber": 231,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -18317,6 +18457,7 @@
                 "lineNumber": 232,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -18363,6 +18504,7 @@
                 "lineNumber": 236,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeletePackagePoliciesResponse",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18380,6 +18522,7 @@
                 "lineNumber": 237,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18397,6 +18540,7 @@
                 "lineNumber": 238,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18415,6 +18559,7 @@
                 "lineNumber": 239,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -18433,6 +18578,7 @@
                 "lineNumber": 240,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -18491,6 +18637,7 @@
                 "lineNumber": 244,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PostDeletePackagePoliciesResponse",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18508,6 +18655,7 @@
                 "lineNumber": 245,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18525,6 +18673,7 @@
                 "lineNumber": 246,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18543,6 +18692,7 @@
                 "lineNumber": 247,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -18561,6 +18711,7 @@
                 "lineNumber": 248,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -18601,6 +18752,7 @@
                 "lineNumber": 258,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18691,6 +18843,7 @@
                 "lineNumber": 269,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18709,6 +18862,7 @@
                 "lineNumber": 270,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientFetchAllItemIdsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -18759,6 +18913,7 @@
                 "lineNumber": 279,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18777,6 +18932,7 @@
                 "lineNumber": 280,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientFetchAllItemsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -18821,6 +18977,7 @@
                 "lineNumber": 284,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18838,6 +18995,7 @@
                 "lineNumber": 285,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackagePolicyClientRollbackOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -18882,6 +19040,7 @@
                 "lineNumber": 289,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18902,6 +19061,7 @@
                 "lineNumber": 290,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18959,6 +19119,7 @@
                 "lineNumber": 295,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -18976,6 +19137,7 @@
                 "lineNumber": 296,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RollbackResult",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19016,6 +19178,7 @@
                 "lineNumber": 300,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -19033,6 +19196,7 @@
                 "lineNumber": 301,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RollbackResult",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19073,6 +19237,7 @@
                 "lineNumber": 305,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -19090,6 +19255,7 @@
                 "lineNumber": 306,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RollbackResult",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19152,6 +19318,7 @@
                 "lineNumber": 76,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -19316,6 +19483,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NewPackagePolicy",
             "trackAdoption": false
           },
           {
@@ -19332,6 +19500,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false
           },
           {
@@ -20336,6 +20505,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false
           },
           {
@@ -20353,6 +20523,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandlerContext",
             "trackAdoption": false
           },
           {
@@ -20370,6 +20541,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -20423,6 +20595,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DeletePackagePoliciesResponse",
             "trackAdoption": false
           },
           {
@@ -20439,6 +20612,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false
           },
           {
@@ -21443,6 +21617,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false
           },
           {
@@ -21460,6 +21635,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandlerContext",
             "trackAdoption": false
           },
           {
@@ -21477,6 +21653,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -21543,6 +21720,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PackagePolicy",
             "trackAdoption": false
           },
           {
@@ -21559,6 +21737,7 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false
           },
           {
@@ -22563,6 +22742,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false
           },
           {
@@ -22580,6 +22760,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandlerContext",
             "trackAdoption": false
           },
           {
@@ -22597,6 +22778,7 @@
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -22660,6 +22842,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DeepReadonly",
             "trackAdoption": false
           },
           {
@@ -22676,6 +22859,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false
           },
           {
@@ -23680,6 +23864,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false
           },
           {
@@ -23697,6 +23882,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandlerContext",
             "trackAdoption": false
           },
           {
@@ -23714,6 +23900,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -23780,6 +23967,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UpdatePackagePolicy",
             "trackAdoption": false
           },
           {
@@ -23796,6 +23984,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false
           },
           {
@@ -24800,6 +24989,7 @@
             "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false
           },
           {
@@ -24817,6 +25007,7 @@
             "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandlerContext",
             "trackAdoption": false
           },
           {
@@ -24834,6 +25025,7 @@
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -24852,7 +25044,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-      "lineNumber": 241,
+      "lineNumber": 245,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24869,7 +25061,7 @@
         "\nDescribes public Fleet plugin contract returned at the `startup` stage."
       ],
       "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-      "lineNumber": 259,
+      "lineNumber": 263,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24887,7 +25079,7 @@
             "() => Promise<void>"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 263,
+          "lineNumber": 267,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24905,7 +25097,7 @@
             "{ enabled: boolean; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 269,
+          "lineNumber": 273,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24931,7 +25123,7 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 272,
+          "lineNumber": 276,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24953,7 +25145,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 275,
+          "lineNumber": 279,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24975,7 +25167,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 276,
+          "lineNumber": 280,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24999,7 +25191,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 277,
+          "lineNumber": 281,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25021,7 +25213,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 281,
+          "lineNumber": 285,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25037,7 +25229,7 @@
             "<T = any>(cb: () => Promise<T>) => Promise<T>"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 282,
+          "lineNumber": 286,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25080,7 +25272,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 283,
+          "lineNumber": 287,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25096,7 +25288,7 @@
             "CloudConnectorServiceInterface"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 284,
+          "lineNumber": 288,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25122,7 +25314,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 285,
+          "lineNumber": 289,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25144,9 +25336,10 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 289,
+              "lineNumber": 293,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "ExternalCallback",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -25173,7 +25366,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 291,
+          "lineNumber": 295,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25189,7 +25382,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 295,
+              "lineNumber": 299,
               "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
@@ -25227,7 +25420,7 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 297,
+          "lineNumber": 301,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25249,7 +25442,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 305,
+          "lineNumber": 309,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25265,7 +25458,7 @@
             "UninstallTokenServiceInterface"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 306,
+          "lineNumber": 310,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25282,7 +25475,7 @@
             "FleetActionsClientInterface"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 307,
+          "lineNumber": 311,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25298,7 +25491,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 307,
+              "lineNumber": 311,
               "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
@@ -25318,7 +25511,7 @@
             "(spaceId: string, pkgName: string, tagName: string) => string"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 311,
+          "lineNumber": 315,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25334,7 +25527,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 311,
+              "lineNumber": 315,
               "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,
@@ -25351,7 +25544,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 311,
+              "lineNumber": 315,
               "columnNumber": 42,
               "deprecated": false,
               "trackAdoption": false,
@@ -25368,7 +25561,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 311,
+              "lineNumber": 315,
               "columnNumber": 59,
               "deprecated": false,
               "trackAdoption": false,
@@ -25394,7 +25587,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 313,
+          "lineNumber": 317,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25411,9 +25604,10 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 317,
+              "lineNumber": 321,
               "columnNumber": 24,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -25513,6 +25707,7 @@
                 "lineNumber": 13,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "TMeta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -25574,6 +25769,7 @@
             "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -25599,6 +25795,7 @@
             "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PackagePolicyConfigRecord",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -25624,6 +25821,7 @@
             "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudConnectorVarTarget",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -25738,6 +25936,7 @@
             "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PackageInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -25889,6 +26088,7 @@
             "lineNumber": 130,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudConnectorVarKeyMapping",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -25978,6 +26178,7 @@
             "lineNumber": 117,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudProvider",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -26042,6 +26243,7 @@
             "lineNumber": 43,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "PackageInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -26325,6 +26527,7 @@
             "lineNumber": 490,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PackageInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -26559,6 +26762,7 @@
             "lineNumber": 285,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudProvider",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -26584,6 +26788,7 @@
             "lineNumber": 286,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PackageInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -26734,6 +26939,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudConnectorVarStorageMode",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -26795,6 +27001,7 @@
             "lineNumber": 424,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -26822,6 +27029,7 @@
             "lineNumber": 425,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -26841,6 +27049,7 @@
             "lineNumber": 426,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudProvider",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -26866,6 +27075,7 @@
             "lineNumber": 427,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PackageInfo",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -28472,7 +28682,7 @@
         "label": "EpmPackageAdditions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 663,
+        "lineNumber": 665,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -28485,7 +28695,7 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 664,
+            "lineNumber": 666,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28498,7 +28708,7 @@
             "label": "latestVersion",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 665,
+            "lineNumber": 667,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28530,7 +28740,7 @@
               " | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 666,
+            "lineNumber": 668,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28546,7 +28756,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 667,
+            "lineNumber": 669,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28562,7 +28772,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 668,
+            "lineNumber": 670,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28578,7 +28788,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 669,
+            "lineNumber": 671,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28594,7 +28804,7 @@
         "label": "EsAssetReference",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 854,
+        "lineNumber": 856,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -28607,7 +28817,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 855,
+            "lineNumber": 857,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28629,7 +28839,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 856,
+            "lineNumber": 858,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28645,7 +28855,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 857,
+            "lineNumber": 859,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30714,7 +30924,7 @@
         "label": "Installation",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 769,
+        "lineNumber": 771,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -30737,7 +30947,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 770,
+            "lineNumber": 772,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30761,7 +30971,7 @@
               "[]> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 771,
+            "lineNumber": 773,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30784,7 +30994,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 772,
+            "lineNumber": 774,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30807,7 +31017,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 773,
+            "lineNumber": 775,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30823,7 +31033,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 774,
+            "lineNumber": 776,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30836,7 +31046,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 775,
+            "lineNumber": 777,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30849,7 +31059,7 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 776,
+            "lineNumber": 778,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30865,7 +31075,7 @@
               "\"installed\" | \"installing\" | \"install_failed\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 777,
+            "lineNumber": 779,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30878,7 +31088,7 @@
             "label": "install_version",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 778,
+            "lineNumber": 780,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30891,7 +31101,7 @@
             "label": "install_started_at",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 779,
+            "lineNumber": 781,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30907,7 +31117,7 @@
               "\"custom\" | \"upload\" | \"registry\" | \"bundled\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 780,
+            "lineNumber": 782,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30923,7 +31133,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 781,
+            "lineNumber": 783,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30939,7 +31149,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 782,
+            "lineNumber": 784,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30955,7 +31165,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 783,
+            "lineNumber": 785,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30971,7 +31181,7 @@
               "\"unknown\" | \"verified\" | \"unverified\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 784,
+            "lineNumber": 786,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30987,7 +31197,7 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 785,
+            "lineNumber": 787,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31004,7 +31214,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 786,
+            "lineNumber": 788,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31020,7 +31230,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 787,
+            "lineNumber": 789,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31036,7 +31246,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 788,
+            "lineNumber": 790,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31053,7 +31263,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 789,
+            "lineNumber": 791,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31070,7 +31280,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 790,
+            "lineNumber": 792,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31087,7 +31297,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 791,
+            "lineNumber": 793,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31105,7 +31315,7 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 792,
+            "lineNumber": 794,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31121,7 +31331,7 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 793,
+            "lineNumber": 795,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31137,7 +31347,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 794,
+            "lineNumber": 796,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31153,7 +31363,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 795,
+            "lineNumber": 797,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31171,7 +31381,7 @@
               " | undefined; action?: \"pending\" | \"accepted\" | \"declined\" | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 796,
+            "lineNumber": 798,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31188,7 +31398,7 @@
               " | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 803,
+            "lineNumber": 805,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31207,7 +31417,7 @@
               " | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 804,
+            "lineNumber": 806,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31225,7 +31435,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 806,
+            "lineNumber": 808,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31359,7 +31569,7 @@
         "label": "KibanaAssetReference",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 848,
+        "lineNumber": 850,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31372,7 +31582,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 849,
+            "lineNumber": 851,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31388,7 +31598,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 850,
+            "lineNumber": 852,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31410,7 +31620,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 851,
+            "lineNumber": 853,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31426,7 +31636,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 852,
+            "lineNumber": 854,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33155,7 +33365,7 @@
         "label": "PackageAssetReference",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 860,
+        "lineNumber": 862,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33168,7 +33378,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 861,
+            "lineNumber": 863,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33184,7 +33394,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 862,
+            "lineNumber": 864,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33200,7 +33410,7 @@
               "\"epm-packages-assets\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 863,
+            "lineNumber": 865,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35879,7 +36089,7 @@
         "label": "RegistryVarsEntry",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 594,
+        "lineNumber": 595,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35892,7 +36102,7 @@
             "label": "[RegistryVarsEntryKeys.name]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 595,
+            "lineNumber": 596,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35908,7 +36118,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 596,
+            "lineNumber": 597,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35924,7 +36134,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 597,
+            "lineNumber": 598,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35940,7 +36150,7 @@
               "\"string\" | \"bool\" | \"text\" | \"integer\" | \"password\" | \"duration\" | \"select\" | \"textarea\" | \"url\" | \"yaml\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 598,
+            "lineNumber": 599,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35956,7 +36166,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 599,
+            "lineNumber": 600,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35972,7 +36182,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 600,
+            "lineNumber": 601,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35988,7 +36198,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 601,
+            "lineNumber": 602,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36004,7 +36214,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 602,
+            "lineNumber": 603,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36020,7 +36230,7 @@
               "{ value: string; text: string; }[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 603,
+            "lineNumber": 604,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36036,7 +36246,7 @@
               "string | boolean | string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 604,
+            "lineNumber": 605,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36052,7 +36262,7 @@
               "{ [key: string]: { default: string | string[]; }; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 605,
+            "lineNumber": 606,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36068,7 +36278,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 610,
+            "lineNumber": 611,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36084,7 +36294,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 611,
+            "lineNumber": 612,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36100,7 +36310,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 612,
+            "lineNumber": 613,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36116,7 +36326,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 613,
+            "lineNumber": 614,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36132,7 +36342,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 614,
+            "lineNumber": 615,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36149,7 +36359,23 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 615,
+            "lineNumber": 616,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.migrate_from",
+            "type": "string",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.migrate_from]",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "lineNumber": 617,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36165,7 +36391,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 616,
+            "lineNumber": 618,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36834,7 +37060,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 846,
+        "lineNumber": 848,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37852,7 +38078,7 @@
           "<T>"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 815,
+        "lineNumber": 817,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37904,7 +38130,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 826,
+        "lineNumber": 828,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37921,7 +38147,7 @@
           "T & { status: \"install_failed\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 842,
+        "lineNumber": 844,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37942,7 +38168,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 832,
+        "lineNumber": 834,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37959,7 +38185,7 @@
           "T & { status: undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 822,
+        "lineNumber": 824,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38271,7 +38497,7 @@
           "T & { status: \"not_installed\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 838,
+        "lineNumber": 840,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38424,7 +38650,7 @@
           ">>"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 687,
+        "lineNumber": 689,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38448,7 +38674,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 676,
+        "lineNumber": 678,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38484,7 +38710,7 @@
           " | undefined; packagePoliciesInfo?: { count: number; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 679,
+        "lineNumber": 681,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38738,7 +38964,15 @@
         "tags": [],
         "label": "SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES",
         "description": [
-          "\nAllowlist of integrations in addition to {@link SEARCH_AI_LAKE_PACKAGES} which are available to\ninstall in the Serverless Security SearchAILake tier (AI4DSOC effort)."
+          "\nAllowlist of integrations in addition to ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.SEARCH_AI_LAKE_PACKAGES",
+            "text": "SEARCH_AI_LAKE_PACKAGES"
+          },
+          " which are available to\ninstall in the Serverless Security SearchAILake tier (AI4DSOC effort)."
         ],
         "signature": [
           "string[]"

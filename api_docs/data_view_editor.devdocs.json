@@ -45,6 +45,7 @@
                 "lineNumber": 97,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataViewEditorServiceConstructorArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -311,6 +312,7 @@
                 "lineNumber": 304,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "INDEX_PATTERN_TYPE",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -420,6 +422,7 @@
                 "lineNumber": 50,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataView",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -627,6 +630,7 @@
                 "lineNumber": 87,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataView",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -697,6 +701,7 @@
               "lineNumber": 95,
               "columnNumber": 14,
               "deprecated": false,
+              "docsReferencedTypeName": "DataViewEditorProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -742,6 +747,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {

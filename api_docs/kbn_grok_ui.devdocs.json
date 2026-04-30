@@ -67,6 +67,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrokCollection",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -463,6 +464,7 @@
                 "lineNumber": 84,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -499,6 +501,7 @@
                 "lineNumber": 96,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -551,6 +554,7 @@
                 "lineNumber": 105,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -628,6 +632,7 @@
                 "lineNumber": 170,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "EuiThemeComputed",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -738,6 +743,7 @@
                 "lineNumber": 202,
                 "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrokCollection",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1132,6 +1138,7 @@
             "lineNumber": 33,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "GrokCollectionProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1171,6 +1178,7 @@
             "lineNumber": 113,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "GrokExpressionsProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1210,6 +1218,7 @@
             "lineNumber": 66,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "GrokSampleWithContextProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1249,6 +1258,7 @@
             "lineNumber": 34,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "GrokSampleWithContextProps",
             "trackAdoption": false,
             "isRequired": true
           }
