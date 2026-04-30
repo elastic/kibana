@@ -707,6 +707,8 @@ export interface DocLinks {
   };
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
+    readonly featureSettings: string;
+    readonly externalInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
@@ -723,7 +725,10 @@ export interface DocLinks {
     readonly models: string;
     readonly chat: string;
     readonly agentBuilderAgents: string;
-    readonly tools: string;
+    readonly agentBuilderSkills: string;
+    readonly agentBuilderPlugins: string;
+    readonly agentBuilderConnectors: string;
+    readonly agentBuilderTools: string;
     readonly programmaticAccess: string;
     readonly kibanaApi: string;
     readonly mcpServer: string;

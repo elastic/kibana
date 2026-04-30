@@ -10,13 +10,8 @@ import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
 import { initMetrics } from '@kbn/metrics';
 
-import { resources } from '@elastic/opentelemetry-node/sdk';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import {
-  ATTR_SERVICE_INSTANCE_ID,
-  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
-} from '@opentelemetry/semantic-conventions/incubating';
 import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
+import { buildOtelResources } from './build_otel_resources';
 
 /**
  *
@@ -49,33 +44,7 @@ export const initTelemetry = (
   }
 
   // resource.attributes.*
-  const resource = resources
-    .detectResources({
-      detectors: [
-        resources.envDetector,
-        resources.hostDetector,
-        resources.osDetector,
-        resources.processDetector,
-      ],
-    })
-    .merge(
-      resources.resourceFromAttributes({
-        // TODO: Since we are deprecating `elastic.apm.*` settings, we should provide a way to set these attributes in the `telemetry.*` config.
-        [ATTR_SERVICE_NAME]: apmConfig.serviceName,
-        [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
-        [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
-        // Reverse-mapping APM Server transformations:
-        // https://github.com/elastic/apm-data/blob/2f9cdbf722e5be5bf77d99fbcaab7a70a7e83fff/input/otlp/metadata.go#L69-L74
-        [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: apmConfig.environment,
-
-        // From https://opentelemetry.io/docs/specs/semconv/resource/process/
-        'process.pid': process.pid,
-        'process.runtime.name': 'nodejs',
-        'process.runtime.version': process.version,
-
-        ...(apmConfig.globalLabels as Record<string, unknown>),
-      })
-    );
+  const resource = buildOtelResources(serviceName);
 
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {

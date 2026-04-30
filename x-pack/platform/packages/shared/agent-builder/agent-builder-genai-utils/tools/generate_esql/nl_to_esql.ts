@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
-import { buildServerESQLCallbacks } from '@kbn/esql/server';
+import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
@@ -125,14 +125,19 @@ export const generateEsql = async ({
     },
     async () => {
       try {
-        // Discover index if not provided
+        // Discover index if not provided (`indexExplorer` takes one string; append `additionalContext`
+        // when set so resource selection can use editor notes or any other hints, not only `nlQuery`.)
+        const nlQueryWithContext = additionalContext?.trim()
+          ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
+          : nlQuery.trim();
+
         let selectedTarget = index;
         if (!selectedTarget) {
           logger?.debug('No index provided, discovering target index using indexExplorer');
           const {
             resources: [selectedResource],
           } = await indexExplorer({
-            nlQuery,
+            nlQuery: nlQueryWithContext,
             esClient,
             limit: 1,
             model,

@@ -14,6 +14,7 @@ import { TimeRangeCallout } from '../time_range_callout';
 import { ServiceNameCallout } from '../service_name_callout';
 
 export function APMAlertingThroughputChart({
+  alert,
   rule,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
@@ -48,6 +49,7 @@ export function APMAlertingThroughputChart({
 
   return (
     <ThroughputChart
+      alert={alert}
       transactionType={currentTransactionType}
       transactionTypes={transactionTypes}
       setTransactionType={setTransactionType}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -80,17 +80,17 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
+export const HostPanel = memo(function HostPanel({
   contextID,
   scopeId,
   isPreviewMode = false,
   hostName,
   entityId,
-}: HostPanelProps) => {
+}: HostPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -171,6 +171,7 @@ export const HostPanel = ({
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.host,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -346,6 +347,6 @@ export const HostPanel = ({
       )}
     </>
   );
-};
+});
 
 HostPanel.displayName = 'HostPanel';

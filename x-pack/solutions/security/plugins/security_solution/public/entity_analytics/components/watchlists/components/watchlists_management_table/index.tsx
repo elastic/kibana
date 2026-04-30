@@ -34,7 +34,10 @@ import type { WatchlistTableItemType } from './types';
 export const WATCHLISTS_MANAGEMENT_TABLE_ID = 'watchlistsManagementTableId';
 export const WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID = 'watchlistsManagementTableQueryId';
 
-export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+export const WatchlistsManagementTable: React.FC<{ spaceId: string; canWrite?: boolean }> = ({
+  spaceId,
+  canWrite = true,
+}) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
   const { openFlyout } = useExpandableFlyoutApi();
@@ -93,7 +96,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
     setPendingDelete(null);
     hideDeleteConfirmation();
   }, [deleteMutation, hideDeleteConfirmation, onDeleteCancel, pendingDelete]);
-  const columns = buildWatchlistsManagementTableColumns(euiTheme, onEdit, onDelete);
+  const columns = buildWatchlistsManagementTableColumns(euiTheme, onEdit, onDelete, canWrite);
   const { visibleRecords, isLoading, hasError, refetch, inspect } = useWatchlistsTableData(
     spaceId,
     0,
