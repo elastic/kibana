@@ -31,7 +31,7 @@ export const ExternalLinkOptionsEditor = ({ options, onOptionChange }: Props) =>
             defaultMessage: 'Open URL in new tab',
           })}
           checked={options.open_in_new_tab ?? DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab}
-          onChange={() => onOptionChange({ open_in_new_tab: !options.open_in_new_tab })}
+          onChange={() => onOptionChange({ ...options, open_in_new_tab: !options.open_in_new_tab })}
           data-test-subj="urlDrilldownOpenInNewTab"
         />
         <EuiSpacer size="s" />
@@ -53,7 +53,7 @@ export const ExternalLinkOptionsEditor = ({ options, onOptionChange }: Props) =>
             </>
           }
           checked={options.encode_url ?? DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url}
-          onChange={() => onOptionChange({ encode_url: !options.encode_url })}
+          onChange={() => onOptionChange({ ...options, encode_url: !options.encode_url })}
           data-test-subj="urlDrilldownEncodeUrl"
         />
       </div>
