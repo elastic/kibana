@@ -81,7 +81,7 @@ groups:
               otlp:
                 type: otel
                 protocol: proto
-                url: https://collector:4317/v1/logs
+                url: https://collector:4318/v1/logs
                 headers:
                   Authorization: 'Bearer <token>'
                 attributes:
