@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
 import * as i18n from './translations';
 
 const authSchema = z
@@ -129,7 +130,7 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     }
 
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization = normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },

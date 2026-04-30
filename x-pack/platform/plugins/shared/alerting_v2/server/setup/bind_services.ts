@@ -25,6 +25,8 @@ import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { EventLogService } from '../lib/services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { ActionPolicySavedObjectService } from '../lib/services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
@@ -104,6 +106,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
+  bind(EventLogService).toSelf().inSingletonScope();
+  bind(EventLogServiceToken).toService(EventLogService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)

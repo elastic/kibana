@@ -681,6 +681,7 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
         telemetryClient,
         streamsRepositoryClient,
+        uiSettings: core.uiSettings,
       })
     ),
     simulationMachine: simulationMachine.provide(
