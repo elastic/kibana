@@ -58,7 +58,7 @@ export function SigeventsOverviewPage() {
   const { agentBuilder } = services;
   const { euiTheme } = useEuiTheme();
 
-  const { loading, error, data: eventData } = useFetchLatestSignificantEvent();
+  const { loading, error, data: eventData, otherPromotedEvents } = useFetchLatestSignificantEvent();
   const { loading: overviewLoading, data: overviewData } = useFetchSystemOverview();
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
@@ -78,6 +78,21 @@ export function SigeventsOverviewPage() {
       })
     );
   }, [eventData?.mainEventTitle]);
+
+  const handleFlyoutRemediate = useCallback(() => {
+    handleRemediate();
+    closeDetailFlyout();
+  }, [handleRemediate, closeDetailFlyout]);
+
+  const handleRemediateVerdict = useCallback((eventTitle: string) => {
+    setRemediationPrompt(
+      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
+        defaultMessage:
+          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
+        values: { eventTitle },
+      })
+    );
+  }, []);
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
@@ -253,10 +268,12 @@ export function SigeventsOverviewPage() {
                   impactedServices={eventData.impactedServices}
                   impactedCards={eventData.impactedCards}
                   healthyMetrics={healthyMetrics}
+                  otherPromotedEvents={otherPromotedEvents}
                   lowerPriorityVerdicts={overviewData?.verdicts}
                   lastUpdatedLabel={lastUpdatedLabel}
                   onViewDetails={openDetailFlyout}
                   onRemediate={handleRemediate}
+                  onRemediateVerdict={handleRemediateVerdict}
                 />
               ) : (
                 <SigeventsOverview
@@ -264,6 +281,7 @@ export function SigeventsOverviewPage() {
                   healthyMetrics={healthyMetrics}
                   lowerPriorityVerdicts={overviewData?.verdicts}
                   onViewDetails={openDetailFlyout}
+                  onRemediateVerdict={handleRemediateVerdict}
                 />
               )}
             </EuiFlexItem>
@@ -280,7 +298,7 @@ export function SigeventsOverviewPage() {
                   hideCloseButton
                   initialTitle="Systems overview"
                   initialMessage={remediationPrompt}
-                  autoSendInitialMessage={false}
+                  autoSendInitialMessage={!!remediationPrompt}
                   autoFocus={false}
                 />
               </EuiFlexItem>
@@ -309,7 +327,11 @@ export function SigeventsOverviewPage() {
             </div>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <SignificantEventDetailBody event={detailFields} hideHeader />
+            <SignificantEventDetailBody
+              event={detailFields}
+              hideHeader
+              onRemediate={handleFlyoutRemediate}
+            />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}

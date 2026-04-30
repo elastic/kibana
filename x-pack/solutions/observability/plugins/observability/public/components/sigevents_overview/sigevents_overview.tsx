@@ -17,7 +17,9 @@ import { ImpactedCard } from './impacted_card';
 import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
 import { LowerPriorityVerdicts } from './lower_priority_verdicts';
+import { OtherPromotedEvents } from './other_promoted_events';
 import type { VerdictDocument } from '../../hooks/use_fetch_system_overview';
+import type { LatestSignificantEventData } from '../../hooks/use_fetch_latest_significant_event';
 
 // Re-export VerdictDocument for convenience
 export type { VerdictDocument };
@@ -54,9 +56,11 @@ export interface SigeventsOverviewProps {
   impactedServices?: ImpactedService[];
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
+  otherPromotedEvents?: LatestSignificantEventData[];
   lowerPriorityVerdicts?: VerdictDocument[];
   lastUpdatedLabel?: React.ReactNode;
   onRemediate?: () => void;
+  onRemediateVerdict?: (eventTitle: string) => void;
   onViewDetails?: () => void;
 }
 
@@ -72,9 +76,11 @@ export function SigeventsOverview({
   impactedServices,
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
+  otherPromotedEvents,
   lowerPriorityVerdicts,
   lastUpdatedLabel,
   onRemediate,
+  onRemediateVerdict,
   onViewDetails,
 }: SigeventsOverviewProps) {
   const { euiTheme } = useEuiTheme();
@@ -192,7 +198,10 @@ export function SigeventsOverview({
         {hasLowerPriorityVerdicts && (
           <>
             <EuiSpacer size="l" />
-            <LowerPriorityVerdicts verdicts={lowerPriorityVerdicts} />
+            <LowerPriorityVerdicts
+              verdicts={lowerPriorityVerdicts}
+              onRemediate={onRemediateVerdict}
+            />
           </>
         )}
       </div>
@@ -249,6 +258,13 @@ export function SigeventsOverview({
         onRemediate={onRemediate}
         onViewDetails={onViewDetails}
       />
+
+      {otherPromotedEvents && otherPromotedEvents.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <OtherPromotedEvents events={otherPromotedEvents} />
+        </>
+      )}
     </div>
   );
 }

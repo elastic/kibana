@@ -87,6 +87,7 @@ const formatDetectedAt = (timestamp: string): string => {
 
 export interface LowerPriorityVerdictsProps {
   verdicts: VerdictDocument[];
+  onRemediate?: (eventTitle: string) => void;
 }
 
 const getImpactBadgeColor = (
@@ -118,7 +119,7 @@ const getRecommendedActionIcon = (action: VerdictDocument['recommended_action'])
   }
 };
 
-export function LowerPriorityVerdicts({ verdicts }: LowerPriorityVerdictsProps) {
+export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVerdictsProps) {
   const { euiTheme } = useEuiTheme();
   const {
     http: {
@@ -332,6 +333,7 @@ export function LowerPriorityVerdicts({ verdicts }: LowerPriorityVerdictsProps) 
           verdict={selectedVerdict}
           flyoutHeadingId={flyoutHeadingId}
           onClose={closeFlyout}
+          onRemediate={onRemediate}
         />
       )}
     </>
@@ -342,9 +344,15 @@ interface VerdictDetailFlyoutProps {
   verdict: VerdictDocument;
   flyoutHeadingId: string;
   onClose: () => void;
+  onRemediate?: (eventTitle: string) => void;
 }
 
-function VerdictDetailFlyout({ verdict, flyoutHeadingId, onClose }: VerdictDetailFlyoutProps) {
+function VerdictDetailFlyout({
+  verdict,
+  flyoutHeadingId,
+  onClose,
+  onRemediate,
+}: VerdictDetailFlyoutProps) {
   const {
     http: {
       basePath: { prepend },
@@ -567,6 +575,14 @@ function VerdictDetailFlyout({ verdict, flyoutHeadingId, onClose }: VerdictDetai
                 escalateBadgeLabel={recommendedActionLabel}
                 escalateBadgeColor={getRecommendedActionBadgeColor(verdict.recommended_action)}
                 escalateBadgeIconType={recommendedActionIconType}
+                onRemediate={
+                  onRemediate
+                    ? () => {
+                        onRemediate(verdict.title);
+                        onClose();
+                      }
+                    : undefined
+                }
               />
             </EuiFlexItem>
           ) : null}
