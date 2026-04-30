@@ -18,7 +18,7 @@ export function validateSslCertPath(value: string): string | undefined {
   if (!value || value.trimStart().startsWith('-----BEGIN')) return undefined;
   if (/\s/.test(value)) {
     return i18n.translate('xpack.fleet.sslValidation.pathSpacesError', {
-      defaultMessage: 'SSL certificate path cannot contain spaces',
+      defaultMessage: 'SSL certificate path cannot contain whitespace',
     });
   }
 }

@@ -23,10 +23,7 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import type { DownloadSourceBase } from '../../../../../../../common/types';
 
-import {
-  validateSslPathInput,
-  validateSslPathsCombo,
-} from '../edit_output_flyout/ssl_form_validators';
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 
 import { confirmUpdate } from './confirm_update';
 

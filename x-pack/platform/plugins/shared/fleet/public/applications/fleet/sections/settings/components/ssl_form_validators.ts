@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateSslCertPath } from '../../../../../../../common/services';
+import { validateSslCertPath } from '../../../../../../common/services';
 
 /**
  * Adapter for `useInput` — validator signature: (value: string) => string[] | undefined

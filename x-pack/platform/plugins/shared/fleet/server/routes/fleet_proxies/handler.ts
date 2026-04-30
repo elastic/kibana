@@ -14,8 +14,6 @@ import {
 import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
 
-import Boom from '@hapi/boom';
-
 import {
   listFleetProxies,
   createFleetProxy,
@@ -34,15 +32,7 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../../services';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
-import { validateSslCertPath } from '../../../common/services';
-
-function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
-  for (const p of paths) {
-    if (!p) continue;
-    const err = validateSslCertPath(p);
-    if (err) throw Boom.badRequest(err);
-  }
-}
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 
 async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,

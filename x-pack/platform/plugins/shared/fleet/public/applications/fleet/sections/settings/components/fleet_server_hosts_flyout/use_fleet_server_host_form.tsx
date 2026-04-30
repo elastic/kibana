@@ -22,10 +22,7 @@ import {
   useSecretInput,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
-import {
-  validateSslPathInput,
-  validateSslPathsCombo,
-} from '../edit_output_flyout/ssl_form_validators';
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetServerHost } from '../../../../types';
 import type { ClientAuth, NewFleetServerHost, ValueOf } from '../../../../../../../common/types';

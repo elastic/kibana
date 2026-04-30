@@ -10,9 +10,7 @@ import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/serve
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
-import Boom from '@hapi/boom';
-
-import { validateSslCertPath } from '../../../common/services';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { FleetServerHostUnauthorizedError } from '../../errors';
@@ -24,14 +22,6 @@ import type {
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
 } from '../../types';
-
-function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
-  for (const p of paths) {
-    if (!p) continue;
-    const err = validateSslCertPath(p);
-    if (err) throw Boom.badRequest(err);
-  }
-}
 
 function validateFleetServerHostSsl(fleetServerHost: Partial<FleetServerHost>) {
   throwIfSslPathInvalid([

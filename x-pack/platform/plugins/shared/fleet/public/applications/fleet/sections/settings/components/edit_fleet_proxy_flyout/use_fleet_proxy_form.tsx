@@ -20,7 +20,7 @@ import {
 import { useYaml } from '../../../../../../services';
 
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { validateSslPathInput } from '../edit_output_flyout/ssl_form_validators';
+import { validateSslPathInput } from '../ssl_form_validators';
 import type { FleetProxy } from '../../../../types';
 import { PROXY_URL_REGEX } from '../../../../../../../common/constants';
 

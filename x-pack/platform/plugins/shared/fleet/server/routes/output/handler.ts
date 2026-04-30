@@ -32,15 +32,7 @@ import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
-import { validateSslCertPath } from '../../../common/services';
-
-function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
-  for (const p of paths) {
-    if (!p) continue;
-    const err = validateSslCertPath(p);
-    if (err) throw Boom.badRequest(err);
-  }
-}
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 
 function validateOutputSslPaths(output: Partial<Output>) {
   throwIfSslPathInvalid([

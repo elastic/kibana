@@ -25,30 +25,12 @@ import type {
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
-import { validateSslCertPath } from '../../../common/services';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 
 // Support clearing auth via PUT requests
 export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
   auth?: DownloadSource['auth'] | null;
 };
-
-/**
- * Validates download source auth configuration.
- *
- * Allowed auth configurations:
- * - auth headers only (no credentials)
- * - username + password (together), optionally with headers (no api_key)
- * - api_key, optionally with headers (no username/password)
- * - auth: null (to clear all auth data)
- * - auth: undefined (no changes to auth)
- */
-function throwIfSslPathInvalid(paths: Array<string | undefined | null>) {
-  for (const p of paths) {
-    if (!p) continue;
-    const err = validateSslCertPath(p);
-    if (err) throw Boom.badRequest(err);
-  }
-}
 
 export function validateDownloadSource(downloadSource: DownloadSourceWithNullableAuth) {
   throwIfSslPathInvalid([
