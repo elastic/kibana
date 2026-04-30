@@ -122,7 +122,7 @@ export const getSearchEmbeddableFactory = ({
       /** Build API */
       const titleManager = initializeTitleManager(runtimeState);
       const timeRangeManager = initializeTimeRangeManager(runtimeState);
-      const drilldownsManager = await initializeDrilldownsManager(uuid, runtimeState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({
         initialState: runtimeState,
         dataLoading$,

@@ -1340,7 +1340,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
 
 export interface LensCellValueAction {
   id: string;
-  iconType: string;
+  iconType: IconType;
   type?: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;

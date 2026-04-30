@@ -46,17 +46,16 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       const whileAdditionalContext: Record<string, unknown> = {
         while: { iteration: nextIteration },
       };
+      const context = {
+        ...this.stepExecutionRuntime.contextManager.getContext(),
+        ...whileAdditionalContext,
+      };
 
-      const renderedCondition =
-        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-          this.node.condition,
-          whileAdditionalContext
-        );
-      const conditionResult = evaluateCondition(
-        renderedCondition,
-        { ...this.stepExecutionRuntime.contextManager.getContext(), ...whileAdditionalContext },
-        this.node.stepId
+      const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+        this.node.condition,
+        context
       );
+      const conditionResult = evaluateCondition(renderedCondition, context, this.node.stepId);
       if (conditionResult) {
         this.wfExecutionRuntimeManager.navigateToNode(this.node.startNodeId);
         return;

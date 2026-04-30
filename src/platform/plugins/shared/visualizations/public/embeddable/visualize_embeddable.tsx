@@ -73,7 +73,7 @@ export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableSt
       const titleManager = initializeTitleManager(initialState);
 
       // Initialize dynamic actions
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const runtimeState = await deserializeState(initialState);
 
