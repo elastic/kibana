@@ -19,7 +19,7 @@ export interface PartitionStats {
 export interface PartitioningMetrics {
   totalDocuments: number;
   coverage: number;
-  overlap: number;
+  overlapScore: number;
   perPartitionStats: PartitionStats[];
   partitionCount: number;
 }
@@ -125,7 +125,7 @@ export const calculatePartitioningMetrics = async (
     return {
       totalDocuments,
       coverage: 0,
-      overlap: 0,
+      overlapScore: 0,
       perPartitionStats: [],
       partitionCount: partitions.length,
     };
@@ -135,7 +135,7 @@ export const calculatePartitioningMetrics = async (
   const overlapCount = await countOverlap(esClient, streamName, partitions);
 
   const coverage = unionCount / totalDocuments;
-  const overlap = unionCount > 0 ? overlapCount / unionCount : 0;
+  const overlapScore = unionCount > 0 ? overlapCount / unionCount : 0;
 
   const perPartitionStats: PartitionStats[] = [];
   for (let i = 0; i < partitions.length; i++) {
@@ -160,7 +160,7 @@ export const calculatePartitioningMetrics = async (
   return {
     totalDocuments,
     coverage,
-    overlap,
+    overlapScore,
     perPartitionStats,
     partitionCount: partitions.length,
   };

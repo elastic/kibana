@@ -60,7 +60,7 @@ export const coverageEvaluator: Evaluator<Example, PartitionSuggestionResult> = 
 };
 
 export const overlapEvaluator: Evaluator<Example, PartitionSuggestionResult> = {
-  name: 'partition_overlap',
+  name: 'overlap_score',
   kind: 'CODE',
   evaluate: async ({ output, expected }) => {
     const { metrics } = output.output;
@@ -75,14 +75,14 @@ export const overlapEvaluator: Evaluator<Example, PartitionSuggestionResult> = {
     }
 
     const threshold = exp.max_overlap_threshold;
-    const passed = metrics.overlap <= threshold;
+    const passed = metrics.overlapScore <= threshold;
 
     return {
-      score: 1 - metrics.overlap,
+      score: 1 - metrics.overlapScore,
       label: passed ? 'PASS' : 'FAIL',
-      explanation: `${formatPercent(
-        metrics.overlap
-      )} overlap between suggested partitions (max allowed: ${formatPercent(threshold)})`,
+      explanation: `Score: ${(1 - metrics.overlapScore).toFixed(2)} (${formatPercent(
+        metrics.overlapScore
+      )} documents match multiple partitions; max allowed: ${formatPercent(threshold)})`,
     };
   },
 };
@@ -118,7 +118,9 @@ export const createPartitionQualityLlmEvaluator = (
        - Partitions should not overlap significantly (max ${formatPercent(
          exp.max_overlap_threshold
        )} overlap)
-       - Current overlap: ${formatPercent(metrics.overlap)}
+       - Current overlap score: ${(1 - metrics.overlapScore).toFixed(2)} (${formatPercent(
+        metrics.overlapScore
+      )} overlap)
        - Each partition should capture a cohesive group of documents`,
 
       `NAMING: Partition names should be descriptive and follow naming conventions.
@@ -160,7 +162,7 @@ export const createPartitionQualityLlmEvaluator = (
           condition: p.condition,
         })),
         coverage: metrics.coverage,
-        overlap: metrics.overlap,
+        overlap_score: metrics.overlapScore,
         partition_count: metrics.partitionCount,
         per_partition_stats: metrics.perPartitionStats,
         reason,
