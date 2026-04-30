@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
@@ -24,10 +24,9 @@ export const registerSolutionNavigation = async (
     (productType) => productType.product_line === ProductLine.aiSoc
   );
 
-  const chatExperience$ = services.settings.client.get$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  // Do not pass a defaultOverride: when userValue is unset, get() must use the registered
+  // default (e.g. Agent for security spaces from aiAssistantManagementSelection), not Classic.
+  const chatExperience$ = services.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
   // Get initial chat experience for setting initial navigation tree
   const initialChatExperience = await firstValueFrom(chatExperience$);
