@@ -13,11 +13,12 @@ import { useKibana } from '../utils/kibana_react';
 
 const TRACES_INDEX = 'traces-*';
 const LOGS_INDEX = 'logs-*';
-const VERDICTS_INDEX = 'sigevents-events-ms';
+const EVENTS_INDEX = 'sigevents-events-ms';
 const DETECTIONS_INDEX = 'sigevents-detections-ms';
 
-export interface VerdictDocument {
+export interface EventDocument {
   '@timestamp': string;
+  event_id: string;
   verdict_id: string;
   discovery_id: string;
   discovery_slug: string;
@@ -28,16 +29,15 @@ export interface VerdictDocument {
   rule_names: string[];
   stream_names: string[];
   criticality: number;
-  confidence: number;
-  impact: 'high' | 'medium' | 'low';
+  impact: 'critical' | 'high' | 'medium' | 'low';
   recommendations?: string[];
   recommended_action: 'escalate' | 'monitor' | 'resolve';
-  verdict_summary: string;
+  last_reviewed_at: string;
 }
 
 export interface SystemOverviewData {
   services: Array<{ name: string; traceCount: number; logCount: number }>;
-  verdicts: VerdictDocument[];
+  acknowledgedEvents: EventDocument[];
   detectionCount: number;
   highCount: number;
   mediumCount: number;
@@ -94,8 +94,8 @@ export function useFetchSystemOverview(): {
         },
       };
 
-      const verdictsParams: estypes.SearchRequest = {
-        index: VERDICTS_INDEX,
+      const eventsParams: estypes.SearchRequest = {
+        index: EVENTS_INDEX,
         size: 100,
         query: {
           bool: {
@@ -115,7 +115,7 @@ export function useFetchSystemOverview(): {
         },
       };
 
-      const [traceServicesResp, logServicesResp, verdictsResp, detectionsResp] = await Promise.all([
+      const [traceServicesResp, logServicesResp, eventsResp, detectionsResp] = await Promise.all([
         lastValueFrom(
           dataService.search.search<
             { params: estypes.SearchRequest },
@@ -131,8 +131,8 @@ export function useFetchSystemOverview(): {
         lastValueFrom(
           dataService.search.search<
             { params: estypes.SearchRequest },
-            { rawResponse: estypes.SearchResponse<VerdictDocument> }
-          >({ params: verdictsParams }, { abortSignal: signal })
+            { rawResponse: estypes.SearchResponse<EventDocument> }
+          >({ params: eventsParams }, { abortSignal: signal })
         ),
         lastValueFrom(
           dataService.search.search<
@@ -163,9 +163,9 @@ export function useFetchSystemOverview(): {
 
       servicesList.sort((a, b) => b.traceCount + b.logCount - (a.traceCount + a.logCount));
 
-      const verdicts = (verdictsResp.rawResponse.hits.hits ?? [])
+      const acknowledgedEvents = (eventsResp.rawResponse.hits.hits ?? [])
         .map((hit) => hit._source)
-        .filter((doc): doc is VerdictDocument => doc !== undefined);
+        .filter((doc): doc is EventDocument => doc !== undefined);
 
       const detectionCount =
         typeof detectionsResp.rawResponse.hits.total === 'object'
@@ -176,8 +176,8 @@ export function useFetchSystemOverview(): {
       let mediumCount = 0;
       let lowCount = 0;
 
-      for (const v of verdicts) {
-        switch (v.impact) {
+      for (const ev of acknowledgedEvents) {
+        switch (ev.impact) {
           case 'high':
             highCount++;
             break;
@@ -192,7 +192,7 @@ export function useFetchSystemOverview(): {
 
       return {
         services: servicesList,
-        verdicts,
+        acknowledgedEvents,
         detectionCount,
         highCount,
         mediumCount,

@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, Criteria, EuiHealthProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VerdictDocument } from '../../hooks/use_fetch_system_overview';
+import type { EventDocument } from '../../hooks/use_fetch_system_overview';
 import { useKibana } from '../../utils/kibana_react';
 import { InfoPanel } from './info_panel';
 import { RootCausePanel } from './root_cause_panel';
@@ -39,7 +39,7 @@ import type { RecommendationStep } from './recommendations_plan_panel';
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 const getRecommendedActionBadgeColor = (
-  action: VerdictDocument['recommended_action']
+  action: EventDocument['recommended_action']
 ): 'warning' | 'success' | 'neutral' => {
   switch (action) {
     case 'escalate':
@@ -52,7 +52,7 @@ const getRecommendedActionBadgeColor = (
   }
 };
 
-const getCriticalityHealthColor = (impact: VerdictDocument['impact']): EuiHealthProps['color'] => {
+const getCriticalityHealthColor = (impact: EventDocument['impact']): EuiHealthProps['color'] => {
   switch (impact) {
     case 'critical':
       return 'danger';
@@ -71,7 +71,7 @@ const formatDetectedAt = (timestamp: string): string => {
   if (Number.isNaN(date.getTime())) {
     return timestamp;
   }
-  return i18n.translate('xpack.observability.lowerPriorityVerdicts.detectedAtLabel', {
+  return i18n.translate('xpack.observability.lowerPriorityEvents.detectedAtLabel', {
     defaultMessage: 'Detected on {date}',
     values: {
       date: date.toLocaleString(undefined, {
@@ -85,13 +85,13 @@ const formatDetectedAt = (timestamp: string): string => {
   });
 };
 
-export interface LowerPriorityVerdictsProps {
-  verdicts: VerdictDocument[];
+export interface LowerPriorityEventsProps {
+  events: EventDocument[];
   onRemediate?: (eventTitle: string) => void;
 }
 
 const getImpactBadgeColor = (
-  impact: VerdictDocument['impact']
+  impact: EventDocument['impact']
 ): 'warning' | 'primary' | 'default' | 'danger' => {
   switch (impact) {
     case 'critical':
@@ -106,7 +106,7 @@ const getImpactBadgeColor = (
   }
 };
 
-const getRecommendedActionIcon = (action: VerdictDocument['recommended_action']): string => {
+const getRecommendedActionIcon = (action: EventDocument['recommended_action']): string => {
   switch (action) {
     case 'escalate':
       return 'arrowUp';
@@ -119,28 +119,28 @@ const getRecommendedActionIcon = (action: VerdictDocument['recommended_action'])
   }
 };
 
-export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVerdictsProps) {
+export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEventsProps) {
   const { euiTheme } = useEuiTheme();
   const {
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-  const [selectedVerdict, setSelectedVerdict] = useState<VerdictDocument | null>(null);
-  const [sortField, setSortField] = useState<keyof VerdictDocument>('criticality');
+  const [selectedEvent, setSelectedEvent] = useState<EventDocument | null>(null);
+  const [sortField, setSortField] = useState<keyof EventDocument>('criticality');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'verdictDetailFlyout' });
+  const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'eventDetailFlyout' });
 
-  const closeFlyout = useCallback(() => setSelectedVerdict(null), []);
+  const closeFlyout = useCallback(() => setSelectedEvent(null), []);
 
-  const onTableChange = useCallback(({ sort }: Criteria<VerdictDocument>) => {
+  const onTableChange = useCallback(({ sort }: Criteria<EventDocument>) => {
     if (sort) {
       setSortField(sort.field);
       setSortDirection(sort.direction);
     }
   }, []);
 
-  const sortedVerdicts = [...verdicts].sort((a, b) => {
+  const sortedEvents = [...events].sort((a, b) => {
     const aVal = a[sortField];
     const bVal = b[sortField];
     const direction = sortDirection === 'asc' ? 1 : -1;
@@ -150,43 +150,41 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
     return String(aVal).localeCompare(String(bVal)) * direction;
   });
 
-  const toggleVerdict = useCallback((item: VerdictDocument) => {
-    setSelectedVerdict((current) =>
-      current && current.verdict_id === item.verdict_id ? null : item
-    );
+  const toggleEvent = useCallback((item: EventDocument) => {
+    setSelectedEvent((current) => (current && current.event_id === item.event_id ? null : item));
   }, []);
 
-  const columns: Array<EuiBasicTableColumn<VerdictDocument>> = [
+  const columns: Array<EuiBasicTableColumn<EventDocument>> = [
     {
       field: 'title',
-      name: i18n.translate('xpack.observability.lowerPriorityVerdicts.titleColumn', {
+      name: i18n.translate('xpack.observability.lowerPriorityEvents.titleColumn', {
         defaultMessage: 'Event',
       }),
       sortable: true,
       truncateText: true,
-      render: (title: string, item: VerdictDocument) => {
-        const isExpanded = selectedVerdict?.verdict_id === item.verdict_id;
+      render: (title: string, item: EventDocument) => {
+        const isExpanded = selectedEvent?.event_id === item.event_id;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj={`verdictExpandRow-${item.verdict_id}`}
+                data-test-subj={`eventExpandRow-${item.event_id}`}
                 iconType={isExpanded ? 'minimize' : 'expand'}
-                onClick={() => toggleVerdict(item)}
+                onClick={() => toggleEvent(item)}
                 aria-label={
                   isExpanded
                     ? i18n.translate(
-                        'xpack.observability.lowerPriorityVerdicts.minimizeDetailsAria',
+                        'xpack.observability.lowerPriorityEvents.minimizeDetailsAria',
                         { defaultMessage: 'Minimize details' }
                       )
-                    : i18n.translate('xpack.observability.lowerPriorityVerdicts.viewDetailsAria', {
+                    : i18n.translate('xpack.observability.lowerPriorityEvents.viewDetailsAria', {
                         defaultMessage: 'View details',
                       })
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink data-test-subj="o11yColumnsLink" onClick={() => toggleVerdict(item)}>
+              <EuiLink data-test-subj="o11yColumnsLink" onClick={() => toggleEvent(item)}>
                 {title}
               </EuiLink>
             </EuiFlexItem>
@@ -196,12 +194,12 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
     },
     {
       field: 'impact',
-      name: i18n.translate('xpack.observability.lowerPriorityVerdicts.impactColumn', {
+      name: i18n.translate('xpack.observability.lowerPriorityEvents.impactColumn', {
         defaultMessage: 'Impact',
       }),
       sortable: true,
       width: '100px',
-      render: (impact: VerdictDocument['impact']) => (
+      render: (impact: EventDocument['impact']) => (
         <EuiBadge color={getImpactBadgeColor(impact)}>
           {impact.charAt(0).toUpperCase() + impact.slice(1)}
         </EuiBadge>
@@ -209,7 +207,7 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
     },
     {
       field: 'criticality',
-      name: i18n.translate('xpack.observability.lowerPriorityVerdicts.criticalityColumn', {
+      name: i18n.translate('xpack.observability.lowerPriorityEvents.criticalityColumn', {
         defaultMessage: 'Score',
       }),
       sortable: true,
@@ -218,12 +216,12 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
     },
     {
       field: 'recommended_action',
-      name: i18n.translate('xpack.observability.lowerPriorityVerdicts.actionColumn', {
+      name: i18n.translate('xpack.observability.lowerPriorityEvents.actionColumn', {
         defaultMessage: 'Action',
       }),
       sortable: true,
       width: '120px',
-      render: (action: VerdictDocument['recommended_action'], item: VerdictDocument) => (
+      render: (action: EventDocument['recommended_action'], item: EventDocument) => (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiBadge
@@ -235,16 +233,16 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              data-test-subj={`verdictAttach-${item.verdict_id}`}
+              data-test-subj={`eventAttach-${item.event_id}`}
               iconType="paperClip"
               display="empty"
               size="xs"
               color="text"
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                event.stopPropagation();
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
               }}
               aria-label={i18n.translate(
-                'xpack.observability.lowerPriorityVerdicts.attachActionAria',
+                'xpack.observability.lowerPriorityEvents.attachActionAria',
                 {
                   defaultMessage: 'Attach context for {title}',
                   values: { title: item.title },
@@ -257,7 +255,7 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
     },
   ];
 
-  if (verdicts.length === 0) {
+  if (events.length === 0) {
     return null;
   }
 
@@ -267,13 +265,13 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
         hasShadow={false}
         hasBorder
         paddingSize="m"
-        data-test-subj="sigeventsLowerPriorityVerdicts"
+        data-test-subj="sigeventsLowerPriorityEvents"
       >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h3>
-                {i18n.translate('xpack.observability.lowerPriorityVerdicts.title', {
+                {i18n.translate('xpack.observability.lowerPriorityEvents.title', {
                   defaultMessage: 'Lower priority items to review',
                 })}
               </h3>
@@ -288,7 +286,7 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
               href={prepend('/app/streams/_discovery/knowledge_indicators')}
               data-test-subj="sigeventsViewAllKnowledgeIndicators"
             >
-              {i18n.translate('xpack.observability.lowerPriorityVerdicts.goToSignificantEvents', {
+              {i18n.translate('xpack.observability.lowerPriorityEvents.goToSignificantEvents', {
                 defaultMessage: 'Go to Significant events',
               })}
             </EuiButtonEmpty>
@@ -296,15 +294,15 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.observability.lowerPriorityVerdicts.description', {
+          {i18n.translate('xpack.observability.lowerPriorityEvents.description', {
             defaultMessage:
               'These significant events were assessed and demoted from critical status. Click to see details.',
           })}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiBasicTable<VerdictDocument>
-          itemId="verdict_id"
-          items={sortedVerdicts}
+        <EuiBasicTable<EventDocument>
+          itemId="event_id"
+          items={sortedEvents}
           columns={columns}
           sorting={{
             sort: {
@@ -314,23 +312,23 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
           }}
           onChange={onTableChange}
           rowProps={(item) => {
-            const isExpanded = selectedVerdict?.verdict_id === item.verdict_id;
+            const isExpanded = selectedEvent?.event_id === item.event_id;
             return {
               style: {
                 background: isExpanded ? euiTheme.colors.backgroundBaseSubdued : undefined,
               },
               'data-test-subj': isExpanded
-                ? `verdictRow-${item.verdict_id}-expanded`
-                : `verdictRow-${item.verdict_id}`,
+                ? `eventRow-${item.event_id}-expanded`
+                : `eventRow-${item.event_id}`,
             };
           }}
           tableLayout="fixed"
         />
       </EuiPanel>
 
-      {selectedVerdict && (
-        <VerdictDetailFlyout
-          verdict={selectedVerdict}
+      {selectedEvent && (
+        <EventDetailFlyout
+          event={selectedEvent}
           flyoutHeadingId={flyoutHeadingId}
           onClose={closeFlyout}
           onRemediate={onRemediate}
@@ -340,32 +338,31 @@ export function LowerPriorityVerdicts({ verdicts, onRemediate }: LowerPriorityVe
   );
 }
 
-interface VerdictDetailFlyoutProps {
-  verdict: VerdictDocument;
+interface EventDetailFlyoutProps {
+  event: EventDocument;
   flyoutHeadingId: string;
   onClose: () => void;
   onRemediate?: (eventTitle: string) => void;
 }
 
-function VerdictDetailFlyout({
-  verdict,
+function EventDetailFlyout({
+  event,
   flyoutHeadingId,
   onClose,
   onRemediate,
-}: VerdictDetailFlyoutProps) {
+}: EventDetailFlyoutProps) {
   const {
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-  const severityLabel = capitalize(verdict.impact);
-  const severityColor = getImpactBadgeColor(verdict.impact);
-  const recommendedActionLabel = capitalize(verdict.recommended_action);
-  const recommendedActionIconType = getRecommendedActionIcon(verdict.recommended_action);
-  const criticalityLabel = String(verdict.criticality);
-  const criticalityColor = getCriticalityHealthColor(verdict.impact);
-  const confidenceLabel = `${verdict.confidence}%`;
-  const detectedAtLabel = formatDetectedAt(verdict['@timestamp']);
+  const severityLabel = capitalize(event.impact);
+  const severityColor = getImpactBadgeColor(event.impact);
+  const recommendedActionLabel = capitalize(event.recommended_action);
+  const recommendedActionIconType = getRecommendedActionIcon(event.recommended_action);
+  const criticalityLabel = String(event.criticality);
+  const criticalityColor = getCriticalityHealthColor(event.impact);
+  const detectedAtLabel = formatDetectedAt(event['@timestamp']);
   const rulesTabHref = prepend('/app/streams/_discovery/queries');
 
   const generalInfoItems = useMemo(() => {
@@ -374,33 +371,24 @@ function VerdictDetailFlyout({
       description: NonNullable<React.ReactNode>;
     }> = [
       {
-        title: i18n.translate('xpack.observability.lowerPriorityVerdicts.generalSeverity', {
+        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalSeverity', {
           defaultMessage: 'Severity',
         }),
         description: <EuiBadge color={severityColor}>{severityLabel}</EuiBadge>,
       },
       {
-        title: i18n.translate('xpack.observability.lowerPriorityVerdicts.generalCriticality', {
+        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalCriticality', {
           defaultMessage: 'Criticality score',
         }),
         description: <EuiHealth color={criticalityColor}>{criticalityLabel}</EuiHealth>,
       },
       {
-        title: i18n.translate('xpack.observability.lowerPriorityVerdicts.generalConfidence', {
-          defaultMessage: 'Confidence',
+        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalRecommendedAction', {
+          defaultMessage: 'Recommended action',
         }),
-        description: confidenceLabel,
-      },
-      {
-        title: i18n.translate(
-          'xpack.observability.lowerPriorityVerdicts.generalRecommendedAction',
-          {
-            defaultMessage: 'Recommended action',
-          }
-        ),
         description: (
           <EuiBadge
-            color={getRecommendedActionBadgeColor(verdict.recommended_action)}
+            color={getRecommendedActionBadgeColor(event.recommended_action)}
             iconType={recommendedActionIconType}
           >
             {recommendedActionLabel}
@@ -409,21 +397,21 @@ function VerdictDetailFlyout({
       },
     ];
 
-    if (verdict.stream_names && verdict.stream_names.length > 0) {
+    if (event.stream_names && event.stream_names.length > 0) {
       items.push({
-        title: i18n.translate('xpack.observability.lowerPriorityVerdicts.generalStreams', {
+        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalStreams', {
           defaultMessage: 'Streams',
         }),
         description: (
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {verdict.stream_names.map((stream, idx) => (
+            {event.stream_names.map((stream, idx) => (
               <EuiFlexItem key={`${stream}-${idx}`} grow={false}>
                 <EuiBadge
                   color="hollow"
                   iconType="popout"
                   iconSide="right"
                   href={prepend(`/app/streams/${encodeURIComponent(stream)}`)}
-                  data-test-subj={`verdictStreamLink-${stream}`}
+                  data-test-subj={`eventStreamLink-${stream}`}
                 >
                   {stream}
                 </EuiBadge>
@@ -434,21 +422,21 @@ function VerdictDetailFlyout({
       });
     }
 
-    if (verdict.rule_names && verdict.rule_names.length > 0) {
+    if (event.rule_names && event.rule_names.length > 0) {
       items.push({
-        title: i18n.translate('xpack.observability.lowerPriorityVerdicts.generalRules', {
+        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalRules', {
           defaultMessage: 'Related rules',
         }),
         description: (
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {verdict.rule_names.map((rule, idx) => (
+            {event.rule_names.map((rule, idx) => (
               <EuiFlexItem key={`${rule}-${idx}`} grow={false}>
                 <EuiBadge
                   color="hollow"
                   iconType="popout"
                   iconSide="right"
                   href={rulesTabHref}
-                  data-test-subj={`verdictRuleLink-${rule}`}
+                  data-test-subj={`eventRuleLink-${rule}`}
                 >
                   {rule}
                 </EuiBadge>
@@ -461,7 +449,6 @@ function VerdictDetailFlyout({
 
     return items;
   }, [
-    confidenceLabel,
     criticalityColor,
     criticalityLabel,
     prepend,
@@ -470,20 +457,20 @@ function VerdictDetailFlyout({
     rulesTabHref,
     severityColor,
     severityLabel,
-    verdict.recommended_action,
-    verdict.rule_names,
-    verdict.stream_names,
+    event.recommended_action,
+    event.rule_names,
+    event.stream_names,
   ]);
 
   const recommendationSteps: RecommendationStep[] | undefined = useMemo(() => {
-    if (!verdict.recommendations || verdict.recommendations.length === 0) {
+    if (!event.recommendations || event.recommendations.length === 0) {
       return undefined;
     }
-    return verdict.recommendations.map((rec, idx) => ({
-      id: `${verdict.verdict_id}-rec-${idx}`,
+    return event.recommendations.map((rec, idx) => ({
+      id: `${event.event_id}-rec-${idx}`,
       title: rec,
     }));
-  }, [verdict.recommendations, verdict.verdict_id]);
+  }, [event.recommendations, event.event_id]);
 
   return (
     <EuiFlyout
@@ -495,11 +482,11 @@ function VerdictDetailFlyout({
       pushMinBreakpoint="s"
       paddingSize="m"
       aria-labelledby={flyoutHeadingId}
-      data-test-subj="verdictDetailFlyout"
+      data-test-subj="eventDetailFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="xs">
-          <h2 id={flyoutHeadingId}>{verdict.title}</h2>
+          <h2 id={flyoutHeadingId}>{event.title}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
@@ -510,7 +497,7 @@ function VerdictDetailFlyout({
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
             <InfoPanel
-              title={i18n.translate('xpack.observability.lowerPriorityVerdicts.generalInfoTitle', {
+              title={i18n.translate('xpack.observability.lowerPriorityEvents.generalInfoTitle', {
                 defaultMessage: 'General information',
               })}
               collapsible
@@ -530,40 +517,24 @@ function VerdictDetailFlyout({
             </InfoPanel>
           </EuiFlexItem>
 
-          {verdict.summary ? (
+          {event.summary ? (
             <EuiFlexItem grow={false}>
               <InfoPanel
-                title={i18n.translate(
-                  'xpack.observability.lowerPriorityVerdicts.summaryPanelTitle',
-                  { defaultMessage: 'Summary' }
-                )}
+                title={i18n.translate('xpack.observability.lowerPriorityEvents.summaryPanelTitle', {
+                  defaultMessage: 'Summary',
+                })}
               >
                 <EuiText size="s">
-                  <p>{verdict.summary}</p>
+                  <p>{event.summary}</p>
                 </EuiText>
               </InfoPanel>
             </EuiFlexItem>
           ) : null}
 
-          {verdict.verdict_summary ? (
-            <EuiFlexItem grow={false}>
-              <InfoPanel
-                title={i18n.translate(
-                  'xpack.observability.lowerPriorityVerdicts.verdictPanelTitle',
-                  { defaultMessage: 'Verdict assessment' }
-                )}
-              >
-                <EuiText size="s">
-                  <p>{verdict.verdict_summary}</p>
-                </EuiText>
-              </InfoPanel>
-            </EuiFlexItem>
-          ) : null}
-
-          {verdict.root_cause ? (
+          {event.root_cause ? (
             <EuiFlexItem grow={false}>
               <RootCausePanel>
-                <p>{verdict.root_cause}</p>
+                <p>{event.root_cause}</p>
               </RootCausePanel>
             </EuiFlexItem>
           ) : null}
@@ -573,12 +544,12 @@ function VerdictDetailFlyout({
               <RecommendationsPlanPanel
                 steps={recommendationSteps}
                 escalateBadgeLabel={recommendedActionLabel}
-                escalateBadgeColor={getRecommendedActionBadgeColor(verdict.recommended_action)}
+                escalateBadgeColor={getRecommendedActionBadgeColor(event.recommended_action)}
                 escalateBadgeIconType={recommendedActionIconType}
                 onRemediate={
                   onRemediate
                     ? () => {
-                        onRemediate(verdict.title);
+                        onRemediate(event.title);
                         onClose();
                       }
                     : undefined

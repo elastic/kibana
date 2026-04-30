@@ -34,9 +34,10 @@ describe('SigeventsOverview', () => {
     expect(screen.getByTestId('sigeventsOverview')).toBeInTheDocument();
   });
 
-  it('does not render when state is warning', () => {
-    const { container } = renderWithIntl(<SigeventsOverview {...defaultProps} state="warning" />);
-    expect(container.querySelector('[data-test-subj="sigeventsOverview"]')).not.toBeInTheDocument();
+  it('renders the healthy/no-critical view when state is warning', () => {
+    renderWithIntl(<SigeventsOverview {...defaultProps} state="warning" />);
+    expect(screen.getByTestId('sigeventsOverview')).toBeInTheDocument();
+    expect(screen.getByText('You have no critical significant events')).toBeInTheDocument();
   });
 
   describe('healthy variant', () => {

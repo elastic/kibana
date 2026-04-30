@@ -104,17 +104,18 @@ test.describe(
             ],
             criticality: 85,
             recommended_action: 'escalate',
-            impact: 'high',
+            impact: 'critical',
             recommendations: ['Scale up database connection pool', 'Investigate slow queries'],
             verdict_id: 'scout-verdict-promoted-1',
             last_reviewed_at: timestamp,
           },
         });
 
-        // Index verdicts (non-promoted) for lower-priority list and impact counts
-        const verdictDocs = [
+        // Index acknowledged events (non-promoted) for lower-priority list and impact counts
+        const acknowledgedEventDocs = [
           {
             '@timestamp': timestamp,
+            event_id: 'scout-event-high-1',
             verdict_id: 'scout-verdict-high-1',
             discovery_id: 'scout-disc-2',
             discovery_slug: 'scout-slug-2',
@@ -125,13 +126,13 @@ test.describe(
             rule_names: ['error_rate_threshold'],
             stream_names: ['auth'],
             criticality: 70,
-            confidence: 0.9,
             impact: 'high',
             recommended_action: 'monitor',
-            verdict_summary: 'Auth service errors spiking',
+            last_reviewed_at: timestamp,
           },
           {
             '@timestamp': timestamp,
+            event_id: 'scout-event-medium-1',
             verdict_id: 'scout-verdict-medium-1',
             discovery_id: 'scout-disc-3',
             discovery_slug: 'scout-slug-3',
@@ -142,13 +143,13 @@ test.describe(
             rule_names: ['memory_usage'],
             stream_names: ['api-gateway'],
             criticality: 45,
-            confidence: 0.75,
             impact: 'medium',
             recommended_action: 'monitor',
-            verdict_summary: 'API gateway memory leak',
+            last_reviewed_at: timestamp,
           },
           {
             '@timestamp': timestamp,
+            event_id: 'scout-event-low-1',
             verdict_id: 'scout-verdict-low-1',
             discovery_id: 'scout-disc-4',
             discovery_slug: 'scout-slug-4',
@@ -159,16 +160,15 @@ test.describe(
             rule_names: ['log_volume'],
             stream_names: ['frontend'],
             criticality: 15,
-            confidence: 0.6,
             impact: 'low',
             recommended_action: 'resolve',
-            verdict_summary: 'Frontend log volume dip',
+            last_reviewed_at: timestamp,
           },
         ];
 
         await esClient.bulk({
           refresh: 'wait_for',
-          operations: verdictDocs.flatMap((doc) => [
+          operations: acknowledgedEventDocs.flatMap((doc) => [
             { index: { _index: SIGEVENTS_EVENTS_INDEX } },
             doc,
           ]),

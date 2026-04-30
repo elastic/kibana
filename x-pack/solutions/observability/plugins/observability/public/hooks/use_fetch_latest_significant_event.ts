@@ -189,9 +189,12 @@ export function useFetchLatestSignificantEvent(): {
       .map((hit) => hit._source)
       .filter((doc): doc is SignificantEventDocument => doc !== undefined);
 
-    // Primary event: most recent promoted event with high impact
-    const highImpactIndex = docs.findIndex((doc) => doc.impact === 'high');
-    const primaryDoc = highImpactIndex >= 0 ? docs[highImpactIndex] : docs[0];
+    // Primary event: highest-impact promoted event (critical > high > medium > low)
+    const impactPriority: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    const sortedByImpact = [...docs].sort(
+      (a, b) => (impactPriority[a.impact] ?? 4) - (impactPriority[b.impact] ?? 4)
+    );
+    const primaryDoc = sortedByImpact[0];
     const others = docs.filter((doc) => doc !== primaryDoc);
 
     return {

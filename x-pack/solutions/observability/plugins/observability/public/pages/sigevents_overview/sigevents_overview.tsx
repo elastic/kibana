@@ -84,7 +84,7 @@ export function SigeventsOverviewPage() {
     closeDetailFlyout();
   }, [handleRemediate, closeDetailFlyout]);
 
-  const handleRemediateVerdict = useCallback((eventTitle: string) => {
+  const handleRemediateEvent = useCallback((eventTitle: string) => {
     setRemediationPrompt(
       i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
         defaultMessage:
@@ -269,19 +269,19 @@ export function SigeventsOverviewPage() {
                   impactedCards={eventData.impactedCards}
                   healthyMetrics={healthyMetrics}
                   otherPromotedEvents={otherPromotedEvents}
-                  lowerPriorityVerdicts={overviewData?.verdicts}
+                  lowerPriorityEvents={overviewData?.acknowledgedEvents}
                   lastUpdatedLabel={lastUpdatedLabel}
                   onViewDetails={openDetailFlyout}
                   onRemediate={handleRemediate}
-                  onRemediateVerdict={handleRemediateVerdict}
+                  onRemediateEvent={handleRemediateEvent}
                 />
               ) : (
                 <SigeventsOverview
                   state="healthy"
                   healthyMetrics={healthyMetrics}
-                  lowerPriorityVerdicts={overviewData?.verdicts}
+                  lowerPriorityEvents={overviewData?.acknowledgedEvents}
                   onViewDetails={openDetailFlyout}
-                  onRemediateVerdict={handleRemediateVerdict}
+                  onRemediateEvent={handleRemediateEvent}
                 />
               )}
             </EuiFlexItem>

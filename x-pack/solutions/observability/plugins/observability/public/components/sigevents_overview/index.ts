@@ -11,11 +11,11 @@ export type {
   SigEventSeverity,
   ImpactedCardItem,
   HealthyMetricCardItem,
-  VerdictDocument,
+  EventDocument,
 } from './sigevents_overview';
 
-export { LowerPriorityVerdicts } from './lower_priority_verdicts';
-export type { LowerPriorityVerdictsProps } from './lower_priority_verdicts';
+export { LowerPriorityEvents } from './lower_priority_events';
+export type { LowerPriorityEventsProps } from './lower_priority_events';
 
 export { OtherPromotedEvents } from './other_promoted_events';
 export type { OtherPromotedEventsProps } from './other_promoted_events';

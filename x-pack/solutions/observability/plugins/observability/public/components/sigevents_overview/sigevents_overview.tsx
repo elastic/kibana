@@ -16,13 +16,13 @@ import type { ImpactedService } from './main_significant_event';
 import { ImpactedCard } from './impacted_card';
 import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
-import { LowerPriorityVerdicts } from './lower_priority_verdicts';
+import { LowerPriorityEvents } from './lower_priority_events';
 import { OtherPromotedEvents } from './other_promoted_events';
-import type { VerdictDocument } from '../../hooks/use_fetch_system_overview';
+import type { EventDocument } from '../../hooks/use_fetch_system_overview';
 import type { LatestSignificantEventData } from '../../hooks/use_fetch_latest_significant_event';
 
-// Re-export VerdictDocument for convenience
-export type { VerdictDocument };
+// Re-export EventDocument for convenience
+export type { EventDocument };
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -57,10 +57,10 @@ export interface SigeventsOverviewProps {
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
   otherPromotedEvents?: LatestSignificantEventData[];
-  lowerPriorityVerdicts?: VerdictDocument[];
+  lowerPriorityEvents?: EventDocument[];
   lastUpdatedLabel?: React.ReactNode;
   onRemediate?: () => void;
-  onRemediateVerdict?: (eventTitle: string) => void;
+  onRemediateEvent?: (eventTitle: string) => void;
   onViewDetails?: () => void;
 }
 
@@ -77,10 +77,10 @@ export function SigeventsOverview({
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
   otherPromotedEvents,
-  lowerPriorityVerdicts,
+  lowerPriorityEvents,
   lastUpdatedLabel,
   onRemediate,
-  onRemediateVerdict,
+  onRemediateEvent,
   onViewDetails,
 }: SigeventsOverviewProps) {
   const { euiTheme } = useEuiTheme();
@@ -165,7 +165,7 @@ export function SigeventsOverview({
   ];
 
   const resolvedHealthyMetrics = healthyMetrics ?? defaultHealthyMetrics;
-  const hasLowerPriorityVerdicts = lowerPriorityVerdicts && lowerPriorityVerdicts.length > 0;
+  const hasLowerPriorityEvents = lowerPriorityEvents && lowerPriorityEvents.length > 0;
 
   if (state === 'healthy' || state === 'warning') {
     return (
@@ -195,13 +195,10 @@ export function SigeventsOverview({
           )}
         </EuiFlexGroup>
 
-        {hasLowerPriorityVerdicts && (
+        {hasLowerPriorityEvents && (
           <>
             <EuiSpacer size="l" />
-            <LowerPriorityVerdicts
-              verdicts={lowerPriorityVerdicts}
-              onRemediate={onRemediateVerdict}
-            />
+            <LowerPriorityEvents events={lowerPriorityEvents} onRemediate={onRemediateEvent} />
           </>
         )}
       </div>
