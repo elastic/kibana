@@ -71,7 +71,8 @@ const PAIR_SEPARATOR = '::';
  *     for either current query, but may grow,
  *   - escape characters added when literals contain quotes,
  *   - future ES|QL grammar/serialization changes that grow the per-literal
- *     cost.
+ *     cost,
+ *   - downstream proxy/transport headers that may add fixed overhead.
  */
 export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 
