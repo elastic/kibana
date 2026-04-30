@@ -1,102 +1,157 @@
-# Logs extraction pagination
+# Logs Extraction Pagination
 
-This document describes how **local** (LOOKUP-based) logs extraction paginates through raw log documents and through **aggregated entity** rows. The client runs a **boundary** ESQL on every outer (log-slice) iteration: there is no “skip probe” path. The **first** log slice in a new `extractLogs` run does not apply a persisted `logsPageCursorStart` to the boundary query (the slice is re-established from the time window only); later outer iterations in the same run use the advanced cursor from the previous slice.
+Two nested loops process raw log documents into aggregated entity rows.
 
-For **CCS** (remote-only) extraction, this plugin intentionally keeps the simpler **entity-pagination-only** loop; the same *ideas* (bounding raw scans, compound cursors) apply if that path is extended later.
+**Outer loop — log slices**: Each iteration runs a **boundary probe** (`buildLogPaginationCursorProbeEsql`) to locate the inclusive end of the next raw-log slice (up to `maxLogsPerPage` documents, sorted by `@timestamp ASC, _id ASC`). The probe returns `total_logs` (count before `LIMIT`) so the client knows when the window is exhausted.
 
----
-
-## Why two levels?
-
-1. **Raw logs** arrive in time order. The pipeline applies `STATS … BY entity`, then (for local extraction) `LOOKUP JOIN` against the latest entities index. Scanning an entire lookback window in one query can be expensive and memory-heavy.
-
-2. **Log-slice pagination** caps how many raw documents (sorted by `@timestamp`, then `_id`) participate in one bounded pass. The slice width is controlled by **`maxLogsPerPage`** (global config, default in `LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT`).
-
-3. **Entity pagination** caps how many **aggregated** entity rows are returned per ESQL execute (`docsLimit` / `LIMIT` after `STATS`, possibly after post-LOOKUP filter). Cursors use metadata fields (`entity.EngineMetadata.FirstSeenLogInPage`, `entity.EngineMetadata.UntypedId`) via `buildPaginationSection` and `extractMainPaginationParams` (`MAIN_EXTRACTION_PAGINATION_FIELDS` in `logs_extraction_query_builder.ts`).
-
-Together: **outer loop** = advance log slices; **inner loop** = entity pages inside the current slice.
+**Inner loop — entity pages**: Each log slice is processed via `buildLogsExtractionEsqlQuery`. Results are paginated by `(FirstSeenLogInPage, UntypedId)` up to `docsLimit` entities per query.
 
 ---
 
-## Terms
+## Cursors
 
-| Term | Meaning |
-|------|--------|
-| **Log slice** | Raw documents whose composite key `(@timestamp, _id)` lies in the half-open interval after `logsPageCursorStart` through **inclusive** `logsPageCursorEnd`, within the extraction time window. |
-| **Log cursor (start / lower)** | `logsPageCursorStartTimestamp` / `logsPageCursorStartId` — exclusive lower bound for the next raw-doc scan (or end of the previous slice). |
-| **Slice end (upper)** | `logsPageCursorEndTimestamp` / `logsPageCursorEndId` — inclusive upper bound for the current slice; produced by the boundary query. |
-| **Entity page** | One batch of up to `docsLimit` entity rows after `STATS` (and after post-LOOKUP `WHERE` when defined). |
-| **Entity cursor** | `paginationTimestamp` / `paginationId` — tie-break cursor for the next entity page inside the **current** slice. |
+| Cursor | Persisted fields | Semantics |
+|--------|-----------------|-----------|
+| **Log slice start** | `logsPageCursorStartTimestamp/Id` | Exclusive compound lower bound `(@timestamp, _id)` for the next probe. Set to the previous slice end after completing all entity pages. |
+| **Log slice end** | `logsPageCursorEndTimestamp/Id` | Inclusive upper bound for the current slice. Set by the probe; cleared when the slice is fully processed. |
+| **Entity cursor** | `paginationTimestamp/Id` | `(FirstSeenLogInPage, UntypedId)` of the last ingested entity page. Cleared when a slice finishes. |
 
----
-
-## Persisted state (`EngineLogExtractionState`)
-
-| Field(s) | Role |
-|----------|------|
-| `logsPageCursorStartTimestamp`, `logsPageCursorStartId` | After finishing entity pages for a slice, the cursor is advanced to the slice end so the next boundary query continues after that document. |
-| `logsPageCursorEndTimestamp`, `logsPageCursorEndId` | Inclusive end of the current slice; set after a successful **boundary** query; cleared when moving to the next slice. |
-| `paginationTimestamp`, `paginationId` | Entity pagination inside the current slice; cleared when the slice is complete. |
-| `lastExecutionTimestamp` | Updated when a **full** extraction run completes successfully (not `specificWindow`); anchors the next scheduled window with delay. |
-| Recovery | If `paginationId` is present from a previous run, it is passed once as `recoveryId` to the first bounded extraction query (inclusive lower time bound) and the first boundary ESQL, then cleared. |
-
-`specificWindow` (force APIs / manual runs) **does not** persist `logExtractionState` updates from the loop.
-
----
-
-## Control flow (local)
-
-```mermaid
-flowchart TD
-  outer[OuterFor_logSlices]
-  boundary[executeEsql_buildLogPaginationCursorProbeEsql]
-  checkExhausted{hasLogsToProcess?}
-  inner[InnerDoWhile_entityPages]
-  moreEntities{more entity pages?}
-  advance[Advance_log_cursor_clear_entity_and_slice_end]
-  done[Done]
-
-  outer --> boundary
-  boundary --> checkExhausted
-  checkExhausted -->|no| done
-  checkExhausted -->|yes| inner
-  inner --> moreEntities
-  moreEntities -->|yes| inner
-  moreEntities -->|no| advance
-  advance --> outer
+`logsPageCursorStart` is a **compound** exclusive bound applied as:
+```
+(@timestamp > T) OR (@timestamp = T AND _id > id)
 ```
 
-### Ordering of raw documents
+The time-window base filter always uses `@timestamp >= fromDateISO` (inclusive). The compound cursor owns the exclusive lower bound — never the time-window filter.
 
-Boundary ESQL applies **`INLINE STATS total_logs = count(*)`** on the full filtered set **before** `LIMIT` (so `total_logs` is how many raw rows remain in the window from the probe). It then sorts ascending by `@timestamp`, `_id`, keeps the first `maxLogsPerPage` rows, and takes the **last** of that batch (sort descending, `LIMIT 1`) as the **inclusive** slice end for the bounded extraction WHERE clause. If `total_logs` **≤** `maxLogsPerPage`, this slice exhausts the window (including an exactly full last page); the client can finish without issuing another boundary query.
+---
+
+## Happy path: single log page, single entity page
+
+All logs fit in one slice; all entities fit in one page.
 
 ```mermaid
-flowchart LR
-  logs[Raw_logs_in_window]
-  sortAsc[Sort_ASC_ts_id]
-  capN[Limit_maxLogsPerPage]
-  lastN[Last_doc_equals_slice_end]
-
-  logs --> sortAsc --> capN --> lastN
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+    C->>ES: probe(from ≤ @ts ≤ to) → end=(T1,id1), total≤maxLogs
+    Note over C: isLastPage=true, no further probe needed
+    C->>ES: extract(from ≤ @ts ≤ (T1,id1)) → N entities
+    C->>ES: ingest(entities)
+    Note over C: done — clear all state, set lastExecutionTimestamp=to
 ```
 
 ---
 
-## ESQL touchpoints
+## Happy path: multiple log pages, one entity page each
 
-| Piece | File / symbol |
-|-------|----------------|
-| Probe WHERE (time window, EUID filter, optional log lower bound) | `buildLogPageProbeSourceClause` |
-| Bounded WHERE (+ inclusive slice end) | `buildExtractionSourceClause` when `logsPageCursorEnd` is set |
-| Log pagination cursor probe (slice end + `total_logs`) | `buildLogPaginationCursorProbeEsql`, `parseLogPaginationCursorRow`, `interpretLogPaginationCursorRows` (`log_pagination_probe_query_builder.ts`) |
-| Full local extraction query | `buildLogsExtractionEsqlQuery` |
-| Entity page cursors | `buildPaginationSection`, `extractPaginationParams` / `extractMainPaginationParams` |
-| Remaining-doc count (API) | `buildRemainingLogsCountQuery` — uses probe clause + `STATS COUNT` |
+Logs exceed `maxLogsPerPage`. Each slice produces fewer than `docsLimit` entities.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+
+    C->>ES: probe(from ≤ @ts ≤ to) → end=(T1,id1), total>maxLogs
+    C->>ES: extract(from ≤ @ts ≤ (T1,id1)) → entities
+    C->>ES: ingest
+    Note over C: advance cursorStart=(T1,id1)
+
+    C->>ES: probe(@ts>T1 OR @ts=T1 AND _id>id1) → end=(T2,id2), total≤maxLogs
+    Note over C: isLastPage=true
+    C->>ES: extract(cursorStart ≤ @ts ≤ (T2,id2)) → entities
+    C->>ES: ingest
+    Note over C: done
+```
+
+After each slice, `logsPageCursorStart` advances to the slice end. The next probe's compound filter starts strictly after that document.
 
 ---
 
-## Operational notes
+## Happy path: multiple log pages, multiple entity pages
 
-- **Abort**: an `AbortController` may be passed; the client registers a debug listener on `abort`; queries should respect cancellation via the ES client.
-- **Failures**: errors propagate; partially updated `logExtractionState` may be left on disk for retry (same as before).
-- **Successful run**: `extractLogs` clears all pagination and log-slice fields and sets `lastExecutionTimestamp` when not a manual window.
+Entity count within a slice exceeds `docsLimit`, requiring inner iterations. State is persisted after each entity page in case of interruption.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+
+    C->>ES: probe(from ≤ @ts ≤ to) → end=(T1,id1), total>maxLogs
+
+    loop inner — entity pages
+        C->>ES: extract(@ts ≤ (T1,id1), entityCursor) → docsLimit entities
+        C->>ES: ingest
+        Note over C: persist: cursorEnd=(T1,id1), paginationTimestamp/Id=(Tp,Ep)
+    end
+
+    Note over C: slice done — advance cursorStart=(T1,id1), clear entity cursor
+    C->>ES: probe(cursorStart, @ts≤to) → next slice...
+```
+
+If the process crashes mid inner-loop, `paginationId` is set in the saved state. The next run enters recovery (see below).
+
+---
+
+## Recovery
+
+A crash mid-entity-page leaves the following state on disk:
+
+| Field | Value | Meaning |
+|-------|-------|---------|
+| `paginationTimestamp` | `T_ent` | `MIN(@timestamp)` of logs in the last processed entity page |
+| `paginationId` | `E_ent` | untyped ID of the last ingested entity |
+| `logsPageCursorEnd` | `(T_end, id_end)` | inclusive end of the interrupted slice |
+| `logsPageCursorStart` | `(T_start, id_start)` | exclusive start of the interrupted slice |
+
+On the next run `fromDateISO = T_ent` and `recoveryId = E_ent`.
+
+```mermaid
+sequenceDiagram
+    participant C as Client (recovery)
+    participant ES as Elasticsearch
+
+    Note over C: fromDateISO=T_ent, recoveryId=E_ent
+    Note over C: first iteration — cursorStart ignored, probe re-establishes slice from T_ent
+
+    C->>ES: probe(@ts ≥ T_ent, @ts ≤ to) → new end=(T1,id1)
+    Note over C: entity pagination starts strictly after (T_ent, E_ent)
+
+    loop remaining entity pages
+        C->>ES: extract(@ts ≥ T_ent, @ts ≤ (T1,id1), entityCursor after (T_ent,E_ent))
+        C->>ES: ingest
+    end
+
+    Note over C: recoveryId cleared — continues as normal from cursorStart=(T1,id1)
+```
+
+The entity-level pagination WHERE uses `> T_ent OR (= T_ent AND untypedId > E_ent)` — entities already ingested before the crash are skipped; the slice is re-established from `T_ent` inclusive.
+
+---
+
+## Edge cases
+
+### Timestamp collision at a slice boundary
+
+The compound cursor `(@timestamp = T AND _id > id)` is essential when multiple documents share the same millisecond timestamp. If the base time-window filter used `@timestamp > fromDateISO` (exclusive) and `fromDateISO == T`, all same-timestamp documents would be discarded before the compound filter could apply — permanently losing them.
+
+**Scenario**: recovery where all remaining logs share timestamp `T_ent`.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+
+    Note over C: fromDateISO=T, cursorStart=(T, id3) after first recovery slice
+
+    Note over C: ❌ WRONG — @ts > T kills (T,id4) and (T,id5) before compound filter runs
+    Note over C: ✅ CORRECT — @ts >= T lets compound filter decide: keeps only _id > id3
+
+    C->>ES: probe(@ts≥T AND (@ts>T OR @ts=T AND _id>id3))
+    Note over ES: sees (T,id4), (T,id5) only — correct
+```
+
+This is why the base filter is always `>=` and the compound cursor owns exclusion entirely.
+
+### Exact full page (`total_logs == maxLogsPerPage`)
+
+When the probe returns `total_logs == maxLogsPerPage` the slice is marked `isLastPage = true` and no further probe is issued. This is correct: `total_logs` is the `INLINE STATS count(*)` computed before the `LIMIT`, so an exactly full count means the window is exhausted by this slice.

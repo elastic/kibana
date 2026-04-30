@@ -158,6 +158,7 @@ const heatmapAxesConfigESQLSchemaProps = {
 const heatmapConfigMetricOptionsSchemaProps = {
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, autoColorSchema], {
+      meta: { description: 'Color scale configuration for the heatmap cells.' },
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -175,7 +176,13 @@ export const heatmapConfigSchemaNoESQL = schema.object(
       'heatmapMetric'
     ),
   },
-  { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
+  {
+    meta: {
+      id: 'heatmapNoESQL',
+      title: 'Heatmap Chart (DSL)',
+      description: 'Heatmap configuration using a data view.',
+    },
+  }
 );
 
 export const heatmapConfigSchemaESQL = schema.object(
@@ -186,13 +193,24 @@ export const heatmapConfigSchemaESQL = schema.object(
     styling: schema.maybe(heatmapStylingSchema),
     metric: esqlColumnWithFormatSchema.extends(heatmapConfigMetricOptionsSchemaProps),
   },
-  { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
+  {
+    meta: {
+      id: 'heatmapESQL',
+      title: 'Heatmap Chart (ES|QL)',
+      description: 'Heatmap configuration using an ES|QL query.',
+    },
+  }
 );
 
 export const heatmapConfigSchema = objectUnion(
   [heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL],
   {
-    meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
+    meta: {
+      id: 'heatmapChart',
+      title: 'Heatmap Chart',
+      description:
+        'A grid of colored cells where color intensity represents the metric value at each X/Y intersection.',
+    },
   }
 );
 
