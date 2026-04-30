@@ -8,10 +8,34 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  CLOUD_ACCOUNT_ID,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_PROVIDER,
+  CLOUD_REGION,
+  CONTAINER_ID,
+  HOST_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_POD_NAME,
+} from '@kbn/apm-types';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { INFRA_FIELD_CANDIDATES } from '../../../../common/correlations/constants';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { DurationFieldCandidatesResponse } from './fetch_duration_field_candidates';
+
+const INFRA_FIELD_CANDIDATES = new Set([
+  HOST_NAME,
+  CONTAINER_ID,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_NODE_NAME,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_REGION,
+  CLOUD_PROVIDER,
+  CLOUD_ACCOUNT_ID,
+]);
 
 export async function fetchInfraFieldCandidates({
   apmEventClient,
