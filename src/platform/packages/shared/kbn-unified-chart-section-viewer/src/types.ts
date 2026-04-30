@@ -69,6 +69,7 @@ export interface MetricsESQLResponse {
 
 export interface ParsedMetricItem {
   metricName: string;
+  isDuplicateMetricName: boolean;
   dataStream: string;
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];

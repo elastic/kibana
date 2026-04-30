@@ -30,6 +30,7 @@ jest.mock('../../../common/utils', () => ({
 describe('OverviewTabMetadata', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
     metricName: 'test.metric',
+    isDuplicateMetricName: false,
     dataStream: 'test-data-stream',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     units: ['ms'],

@@ -87,6 +87,7 @@ const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
+    isDuplicateMetricName: false,
     dimensionFields: [dimensions[0]],
     dataStream: 'metrics-*',
     units: [],
@@ -95,6 +96,7 @@ const metricItems: ParsedMetricItem[] = [
   },
   {
     metricName: 'field2',
+    isDuplicateMetricName: false,
     dimensionFields: [dimensions[1]],
     dataStream: 'metrics-*',
     units: [],

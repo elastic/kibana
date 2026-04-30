@@ -21,6 +21,7 @@ jest.mock('../../../common/utils', () => ({
 describe('useChartLayers', () => {
   const mockMetric: ParsedMetricItem = {
     metricName: 'system.cpu.total.norm.pct',
+    isDuplicateMetricName: false,
     dataStream: 'metrics-*',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     metricTypes: ['gauge'],

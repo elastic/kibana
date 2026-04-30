@@ -68,6 +68,7 @@ describe('MetricsGrid', () => {
   const metricItems: MetricsGridProps['metricItems'] = [
     {
       metricName: 'system.cpu.utilization',
+      isDuplicateMetricName: false,
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
@@ -76,6 +77,7 @@ describe('MetricsGrid', () => {
     },
     {
       metricName: 'system.memory.utilization',
+      isDuplicateMetricName: false,
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
@@ -214,6 +216,7 @@ describe('MetricsGrid', () => {
     const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'fieldsense.energy.battery.voltage',
+        isDuplicateMetricName: false,
         dataStream: 'fieldsense-station-metrics',
         units: [null],
         metricTypes: ['gauge'],
@@ -222,6 +225,7 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'system.cpu.utilization',
+        isDuplicateMetricName: false,
         dataStream: 'metrics-hostmetricsreceiver.otel-default',
         units: [null],
         metricTypes: ['gauge'],
@@ -335,6 +339,7 @@ describe('MetricsGrid', () => {
         ...metricItems,
         {
           metricName: 'system.disk.utilization',
+          isDuplicateMetricName: false,
           dataStream: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
@@ -343,6 +348,7 @@ describe('MetricsGrid', () => {
         },
         {
           metricName: 'system.network.utilization',
+          isDuplicateMetricName: false,
           dataStream: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],

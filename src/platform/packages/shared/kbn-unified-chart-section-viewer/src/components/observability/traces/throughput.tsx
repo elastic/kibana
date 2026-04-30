@@ -38,6 +38,7 @@ const ThroughputChartContent = ({
   const chartLayers = useChartLayers({
     metricItem: {
       metricName: 'id',
+      isDuplicateMetricName: false,
       metricTypes: ['counter'],
       units: ['count'],
       dataStream: indexes,

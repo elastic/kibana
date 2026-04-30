@@ -69,6 +69,7 @@ const createMockParsedMetrics = (
 ): ParsedMetricsWithTelemetry => ({
   metricItems: metricNames.map((name) => ({
     metricName: name,
+    isDuplicateMetricName: false,
     dataStream: 'metrics-*',
     units: [null],
     metricTypes: ['gauge'],

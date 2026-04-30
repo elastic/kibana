@@ -62,6 +62,7 @@ const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
+    isDuplicateMetricName: false,
     dataStream: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
@@ -70,6 +71,7 @@ const metricItems: ParsedMetricItem[] = [
   },
   {
     metricName: 'field2',
+    isDuplicateMetricName: false,
     dataStream: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
@@ -165,6 +167,7 @@ describe('MetricsExperienceGridContent', () => {
     // 20 fields, 10 with "cpu" in the name
     const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
       metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
+      isDuplicateMetricName: false,
       dimensionFields: [dimensions[0]],
       dataStream: 'metrics-*',
       units: ['ms'] as MetricUnit[],

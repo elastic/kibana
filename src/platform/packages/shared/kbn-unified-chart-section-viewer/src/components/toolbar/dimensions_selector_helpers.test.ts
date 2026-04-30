@@ -16,6 +16,7 @@ import {
 
 const buildMetricItem = (metricName: string, dimensionFields: Dimension[]): ParsedMetricItem => ({
   metricName,
+  isDuplicateMetricName: false,
   dataStream: 'metrics-test',
   units: [],
   metricTypes: [],
