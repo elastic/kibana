@@ -50,8 +50,8 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 299886
   elasticAssistantSharedState: 4881
-  elasticConsole: 4442
-  embeddable: 16634
+  elasticConsole: 4451
+  embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
@@ -86,6 +86,7 @@ pageLoadAssetSize:
   grokdebugger: 5469
   home: 13091
   imageEmbeddable: 6189
+  inbox: 5344
   indexLifecycleManagement: 35090
   indexManagement: 39694
   inference: 10368
@@ -171,13 +172,13 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 58677
+  share: 64618
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 15433
+  streams: 32595
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755

@@ -9,11 +9,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import {
-  AGENT_BUILDER_INFERENCE_FEATURE_ID,
-  AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-  AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-} from '@kbn/agent-builder-common/constants';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -40,6 +35,7 @@ import { createModelProviderFactory } from './services/execution/runner/model_pr
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { registerInferenceFeatures } from './inference_features';
 
 export class AgentBuilderPlugin
   implements
@@ -82,24 +78,7 @@ export class AgentBuilderPlugin
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
 
-    if (setupDeps.searchInferenceEndpoints) {
-      setupDeps.searchInferenceEndpoints.features.register({
-        featureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder',
-        featureDescription: 'Parent feature for Agent Builder',
-        taskType: 'chat_completion',
-        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-      });
-
-      setupDeps.searchInferenceEndpoints.features.register({
-        parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder',
-        featureDescription: 'Agent Builder inference endpoint configuration',
-        taskType: 'chat_completion',
-        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-      });
-    }
+    registerInferenceFeatures({ searchInferenceEndpoints: setupDeps.searchInferenceEndpoints });
 
     // Register server-side EBT events for Agent Builder
     this.analyticsService = new AnalyticsService(
@@ -267,6 +246,7 @@ export class AgentBuilderPlugin
       savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
+      logger: this.logger.get('model-provider'),
     });
 
     return {
