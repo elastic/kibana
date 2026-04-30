@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -30,6 +30,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { useQueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
@@ -42,13 +43,14 @@ import {
   getRuleIdFromEpisodeRows,
   getTriggeredTimestamp,
 } from '@kbn/alerting-v2-episodes-ui/utils/episode_series_derived';
+import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { EpisodeActionsBar } from '@kbn/alerting-v2-episodes-ui/components/episode_actions_bar';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import { AlertEpisodeGroupingFields } from '@kbn/alerting-v2-episodes-ui/components/grouping/grouping_fields';
 import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
@@ -79,6 +81,7 @@ export function EpisodeDetailsPage() {
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const queryClient = useQueryClient();
   const { data, http, expressions } = services;
   const history = useHistory();
 
@@ -86,6 +89,7 @@ export function EpisodeDetailsPage() {
     data: eventRows = [],
     isLoading: isLoadingEvents,
     isError: isEventsError,
+    refetch: refetchEpisodeEvents,
   } = useFetchEpisodeEventsQuery({
     episodeId,
     data,
@@ -96,20 +100,20 @@ export function EpisodeDetailsPage() {
 
   const { data: rule, isLoading: isLoadingRule } = useFetchRule(ruleId);
 
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
+  const { data: episodeActionsMap, refetch: refetchEpisodeActions } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
-    services,
+    expressions,
   });
 
-  const { data: groupActionsMap } = useFetchGroupActions({
+  const { data: groupActionsMap, refetch: refetchGroupActions } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
-    services,
+    expressions,
   });
 
   const episodeBreadcrumbTitle =
     rule?.metadata.name != null && rule.metadata.name.length > 0
       ? rule.metadata.name
-      : i18n.BREADCRUMB_EPISODE_DETAILS_FALLBACK;
+      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
   const smallMediaQuery = useEuiMaxBreakpoint('s');
@@ -140,24 +144,83 @@ export function EpisodeDetailsPage() {
 
   const ruleOverviewEsql = useMemo(() => (rule ? formatRuleEvaluationEsql(rule) : ''), [rule]);
 
-  const openInDiscoverHref = useMemo(() => {
-    if (!rule) {
+  const episodeActions: EpisodeAction[] = useMemo(
+    () =>
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        queryClient,
+        getEpisodeDetailsHref: (id) =>
+          services.http.basePath.prepend(paths.alertEpisodeDetails(id)),
+        getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
+          getDiscoverHrefForRuleAndEpisodeTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rule?.evaluation?.query?.base,
+            episodeIsoTimestamp: ts,
+          }),
+      }),
+    [services, queryClient, rule]
+  );
+
+  const episode = useMemo(() => {
+    if (!episodeId || !lastStatus || !ruleId || !groupHash) {
       return undefined;
     }
-    return getDiscoverHrefForRuleAndEpisodeTimestamp({
-      share: services.share,
-      capabilities: services.application.capabilities,
-      uiSettings: services.uiSettings,
-      ruleEsql: rule.evaluation?.query?.base,
-      episodeIsoTimestamp,
-    });
+    return {
+      '@timestamp': episodeIsoTimestamp ?? eventRows[0]?.['@timestamp'] ?? '',
+      'episode.id': episodeId,
+      'episode.status': lastStatus,
+      'rule.id': ruleId,
+      group_hash: groupHash,
+      first_timestamp: eventRows[0]?.['@timestamp'] ?? '',
+      last_timestamp: eventRows[eventRows.length - 1]?.['@timestamp'] ?? '',
+      duration: durationMs ?? 0,
+      last_ack_action: (episodeAction?.lastAckAction as 'ack' | 'unack' | undefined) ?? undefined,
+      last_assignee_uid: episodeAction?.lastAssigneeUid ?? undefined,
+      last_snooze_action:
+        (groupAction?.lastSnoozeAction as 'snooze' | 'unsnooze' | undefined) ?? undefined,
+      last_deactivate_action:
+        (groupAction?.lastDeactivateAction as 'activate' | 'deactivate' | undefined) ?? undefined,
+      last_tags: groupAction?.tags,
+    };
   }, [
+    episodeId,
+    lastStatus,
+    ruleId,
+    groupHash,
     episodeIsoTimestamp,
-    rule,
-    services.application.capabilities,
-    services.share,
-    services.uiSettings,
+    eventRows,
+    durationMs,
+    episodeAction,
+    groupAction,
   ]);
+
+  const applicableActions = useMemo(
+    () =>
+      episode
+        ? episodeActions.filter(
+            // We're already on the details page — hide the "View details" action.
+            (action) =>
+              action.id !== 'ALERTING_V2_VIEW_EPISODE_DETAILS' &&
+              action.isCompatible({ episodes: [episode] })
+          )
+        : [],
+    [episodeActions, episode]
+  );
+
+  const handleActionSuccess = useCallback(() => {
+    refetchEpisodeEvents();
+    refetchEpisodeActions();
+    refetchGroupActions();
+  }, [refetchEpisodeEvents, refetchEpisodeActions, refetchGroupActions]);
 
   const ruleKindLabel = rule?.kind === 'signal' ? i18n.RULE_KIND_SIGNAL : i18n.RULE_KIND_ALERTING;
 
@@ -265,7 +328,7 @@ export function EpisodeDetailsPage() {
               {
                 id: 'episode_details',
                 'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
-                label: i18n.SIDEBAR_TAB_DETAILS,
+                label: i18n.SIDEBAR_TAB_TITLE_DETAILS,
               },
               {
                 id: 'runbook',
@@ -304,15 +367,15 @@ export function EpisodeDetailsPage() {
               type="responsiveColumn"
               listItems={[
                 {
-                  title: i18n.LABEL_EPISODE_ID,
+                  title: i18n.EPISODE_ID_LABEL,
                   description: episodeId ?? '—',
                 },
                 {
-                  title: i18n.LABEL_GROUPING,
+                  title: i18n.GROUPING_LABEL,
                   description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
                 },
                 {
-                  title: i18n.LABEL_TRIGGERED,
+                  title: i18n.TRIGGERED_LABEL,
                   description: triggeredAt
                     ? new Date(triggeredAt).toLocaleString(undefined, {
                         dateStyle: 'medium',
@@ -321,11 +384,12 @@ export function EpisodeDetailsPage() {
                     : '—',
                 },
                 {
-                  title: i18n.LABEL_DURATION,
-                  description: durationMs != null ? i18n.formatDurationMs(durationMs) : '—',
+                  title: i18n.DURATION_LABEL,
+                  description:
+                    durationMs != null ? i18n.FORMAT_EPISODE_DURATION_MS(durationMs) : '—',
                 },
                 {
-                  title: i18n.LABEL_ASSIGNEE,
+                  title: i18n.ASSIGNEE_LABEL,
                   description: (
                     <EpisodeAssigneeCell
                       assigneeUid={episodeAction?.lastAssigneeUid}
@@ -555,17 +619,11 @@ export function EpisodeDetailsPage() {
         restrictWidth: false,
         paddingSize: 'none',
         rightSideItems: [
-          <AlertEpisodeActions
+          <EpisodeActionsBar
             key="alertingV2EpisodeHeaderActions"
-            episodeId={episodeId}
-            groupHash={groupHash}
-            episodeAction={episodeAction}
-            groupAction={groupAction}
-            http={http}
-            openInDiscoverHref={openInDiscoverHref}
-            lastAssigneeUid={episodeAction?.lastAssigneeUid}
-            expressions={expressions}
-            buttonsOutlined={false}
+            actions={applicableActions}
+            episodes={episode ? [episode] : []}
+            onSuccess={handleActionSuccess}
           />,
         ],
         rightSideGroupProps: { gutterSize: 's' },
@@ -644,7 +702,12 @@ export function EpisodeDetailsPage() {
               {mainPanel === 'metadata' ? (
                 <EpisodeMetadataTab episodeId={episodeId} ruleQuery={rule?.evaluation.query.base} />
               ) : (
-                <EpisodeOverviewTab episodeId={episodeId} eventRows={eventRows} rule={rule} />
+                <EpisodeOverviewTab
+                  episodeId={episodeId}
+                  eventRows={eventRows}
+                  groupHash={groupHash}
+                  rule={rule}
+                />
               )}
             </EuiSplitPanel.Inner>
             {sidebarPanelInner}

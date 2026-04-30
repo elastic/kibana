@@ -82,5 +82,6 @@ describe('Osquery Results', () => {
     expect(getByTestId('osquery-results-comment'));
     expect(getByText(DETAILS_QUERY)).toBeInTheDocument();
     expect(getByText(DETAILS_ID)).toBeInTheDocument();
+    expect(getByText('Tags')).toBeInTheDocument();
   });
 });

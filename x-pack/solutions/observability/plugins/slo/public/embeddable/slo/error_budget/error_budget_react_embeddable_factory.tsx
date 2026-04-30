@@ -54,7 +54,7 @@ export const getErrorBudgetEmbeddableFactory = ({
       parentApi,
     }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomState>(initialState, {
