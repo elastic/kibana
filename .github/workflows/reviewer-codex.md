@@ -44,7 +44,7 @@ engine:
   env:
     CODEX_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_BASE_URL: https://elastic.litellm-prod.ai/v1
+    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}/v1
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
