@@ -103,6 +103,12 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
   - '@kbn/user-profile-components'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/core-saved-objects-server-mocks'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/management-settings-ids'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod
