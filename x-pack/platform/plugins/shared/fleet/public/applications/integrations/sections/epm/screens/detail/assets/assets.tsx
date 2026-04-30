@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { ExperimentalFeaturesService } from '../../../../../../../services';
 

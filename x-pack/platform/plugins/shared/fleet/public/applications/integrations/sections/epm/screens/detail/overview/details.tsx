@@ -200,7 +200,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>{AssetTitleMap[type]}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiNotificationBadge color="subdued">{assetCount}</EuiNotificationBadge>
+                        <EuiNotificationBadge color="subdued" className="eui-textNoWrap">
+                          {assetCount}
+                        </EuiNotificationBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
