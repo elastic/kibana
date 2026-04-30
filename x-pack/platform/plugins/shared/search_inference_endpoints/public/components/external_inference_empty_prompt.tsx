@@ -37,7 +37,7 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
       }
       footer={
         <EuiLink
-          href={docLinks.createInferenceEndpoint}
+          href={docLinks.externalInference}
           target="_blank"
           external
           data-test-subj="viewDocumentationLink"
