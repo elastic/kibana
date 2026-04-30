@@ -68,6 +68,12 @@ export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 export type CustomBulkActions = Array<
   Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
     onClick: (payload: { selectedDocIds: string[] }) => void;
+    /**
+     * Optional predicate to decide whether the action should be shown for the
+     * current selection. Returning `false` hides the action from the menu.
+     * If omitted, the action is always shown.
+     */
+    isAvailable?: (payload: { selectedDocIds: string[] }) => boolean;
     label: React.ReactElement | string;
     key: string;
   }
