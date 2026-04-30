@@ -17,6 +17,8 @@ const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
+  isEnabled?: () => boolean;
+  forceSample?: boolean;
 }
 
 /**
@@ -31,6 +33,8 @@ interface AgentBuilderSpanProcessorOpts {
  */
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
+  private readonly isEnabled: () => boolean;
+  private readonly forceSample: boolean;
 
   constructor(
     optsOrConfig: AgentBuilderSpanProcessorOpts | InferenceTracingAgentBuilderExportConfig
@@ -39,6 +43,8 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       this.batchProcessor = new tracing.BatchSpanProcessor(optsOrConfig.exporter, {
         scheduledDelayMillis: optsOrConfig.scheduledDelayMillis,
       });
+      this.isEnabled = optsOrConfig.isEnabled ?? (() => true);
+      this.forceSample = optsOrConfig.forceSample ?? true;
     } else {
       if (!optsOrConfig.url) {
         throw new Error(
@@ -52,10 +58,15 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       this.batchProcessor = new tracing.BatchSpanProcessor(exporter, {
         scheduledDelayMillis: optsOrConfig.scheduled_delay,
       });
+      this.isEnabled = () => true;
+      this.forceSample = optsOrConfig.force_sample;
     }
   }
 
   onStart(span: tracing.Span, parentContext: api.Context): void {
+    if (!this.isEnabled()) {
+      return;
+    }
     if (shouldTrackSpan(span, parentContext)) {
       span.setAttribute(SHOULD_TRACK_ATTR, true);
       this.batchProcessor.onStart(span, parentContext);
@@ -72,12 +83,9 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
 
     const exportSpan: tracing.ReadableSpan = {
       ...span,
-      // AgentBuilderSampler upgrades dropped inference spans to RECORD (not RECORD_AND_SAMPLED),
-      // so BatchSpanProcessor.onEnd skips them. Force SAMPLED on the copy to ensure 100% sample
-      // rate for agent builder traces, without affecting the original span or other processors.
       spanContext: () => ({
         ...originalSpanContext,
-        traceFlags: TraceFlags.SAMPLED,
+        traceFlags: this.forceSample ? TraceFlags.SAMPLED : originalSpanContext.traceFlags,
       }),
       attributes: {
         ...cleanAttributes,

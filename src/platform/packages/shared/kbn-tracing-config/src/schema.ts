@@ -45,6 +45,10 @@ export const tracingConfigSchema: Type<TracingConfig> = schema.object({
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
   exporters: schema.oneOf(
     [tracingExportConfigSchema, schema.arrayOf(tracingExportConfigSchema, { maxSize: 25 })],
-    { defaultValue: [] }
+    {
+      defaultValue: [
+        { agent_builder: { send_to_self: true, force_sample: true, scheduled_delay: 5000 } },
+      ],
+    }
   ),
 });

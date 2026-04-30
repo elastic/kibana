@@ -38,9 +38,10 @@ const phoenixExportConfigSchema: Type<InferenceTracingPhoenixExportConfig> = sch
 const agentBuilderExportConfigSchema: Type<InferenceTracingAgentBuilderExportConfig> =
   schema.object(
     {
-      send_to_self: schema.boolean({ defaultValue: false }),
+      send_to_self: schema.boolean({ defaultValue: true }),
       url: schema.maybe(schema.string()),
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+      force_sample: schema.boolean({ defaultValue: true }),
       scheduled_delay: scheduledDelay,
     },
     {

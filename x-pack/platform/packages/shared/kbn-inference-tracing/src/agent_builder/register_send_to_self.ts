@@ -22,14 +22,18 @@ import { ElasticsearchOtlpExporter } from './elasticsearch_otlp_exporter';
 export const registerAgentBuilderSendToSelf = ({
   esClient,
   config,
+  isEnabled,
 }: {
   esClient: ElasticsearchTransport;
   config: InferenceTracingAgentBuilderExportConfig;
+  isEnabled?: () => boolean;
 }): (() => Promise<void>) => {
   const exporter = new ElasticsearchOtlpExporter(esClient);
   const processor = new AgentBuilderSpanProcessor({
     exporter,
     scheduledDelayMillis: config.scheduled_delay,
+    isEnabled,
+    forceSample: config.force_sample,
   });
 
   return LateBindingSpanProcessor.register(processor);

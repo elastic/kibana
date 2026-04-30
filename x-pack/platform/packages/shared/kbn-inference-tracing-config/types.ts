@@ -82,6 +82,12 @@ export interface InferenceTracingAgentBuilderExportConfig {
    */
   headers?: Record<string, string>;
   /**
+   * When true, the processor forces the SAMPLED trace flag on
+   * exported spans so they are always recorded at 100% for the
+   * Agent Builder in-app tracer, regardless of the global sample rate.
+   */
+  force_sample: boolean;
+  /**
    * The delay in milliseconds before the exporter sends another
    * batch of spans.
    */

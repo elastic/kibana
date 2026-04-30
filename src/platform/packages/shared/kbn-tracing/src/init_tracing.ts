@@ -39,7 +39,8 @@ let pendingSendToSelfConfig: InferenceTracingAgentBuilderExportConfig | undefine
  * @returns A teardown function, or `undefined` if nothing was registered.
  */
 export function completeSendToSelfRegistration(
-  esClient: ElasticsearchTransport
+  esClient: ElasticsearchTransport,
+  options?: { isEnabled?: () => boolean }
 ): (() => Promise<void>) | undefined {
   const config = pendingSendToSelfConfig;
   if (!config) {
@@ -51,6 +52,8 @@ export function completeSendToSelfRegistration(
   const processor = new AgentBuilderSpanProcessor({
     exporter,
     scheduledDelayMillis: config.scheduled_delay,
+    isEnabled: options?.isEnabled,
+    forceSample: config.force_sample,
   });
 
   return LateBindingSpanProcessor.get().register(processor);
