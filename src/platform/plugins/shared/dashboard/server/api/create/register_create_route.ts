@@ -74,7 +74,7 @@ export function registerCreateRoute(
           try {
             await trackCreateDashboardAction(result, req);
           } catch (e) {
-            // if traccking throws, just silence the error
+            // if tracking throws, just swallow the error; no need to surface it
           }
           return res.created({ body: result });
         } catch (e) {

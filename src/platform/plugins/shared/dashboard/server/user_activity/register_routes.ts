@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup } from '@kbn/core/server';
+import { querySchema, storedFilterSchema, timeRangeSchema } from '@kbn/es-query-server';
 import { coreServices } from '../kibana_services';
 import { getUserActivityObject } from './user_actions';
 
@@ -31,6 +32,21 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           start: schema.number(),
           end: schema.number(),
           tags: schema.arrayOf(schema.string()),
+          meta: schema.maybe(
+            schema.object({
+              time_range: schema.maybe(timeRangeSchema),
+              query: schema.maybe(querySchema),
+              filters: schema.maybe(
+                schema.arrayOf(storedFilterSchema, {
+                  maxSize: 100,
+                })
+              ),
+              panel_count: schema.maybe(schema.number()),
+              errors: schema.maybe(
+                schema.arrayOf(schema.object({ panel_id: schema.string(), error: schema.string() }))
+              ),
+            })
+          ),
         }),
       },
       security: {
@@ -57,12 +73,11 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           duration,
         },
         object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
-        metadata: {
-          username: user?.username,
-          dashboard_id: req.params.id,
-          dashboard_title: req.body.title,
-          duration,
-        },
+        ...(req.body.meta
+          ? {
+              metadata: req.body.meta,
+            }
+          : {}),
       });
       return res.ok();
     }

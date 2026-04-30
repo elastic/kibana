@@ -10,6 +10,7 @@
 import { type Subscription } from 'rxjs';
 import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from './kibana_services';
+import { hasBlockingError } from '../../../../../packages/shared/presentation/presentation_publishing';
 
 const sessions = new Map<string, DashboardUserActivitySession>();
 export const getDashboardUserActivityService = (api: DashboardApi) => {
@@ -76,6 +77,22 @@ class DashboardUserActivitySession {
     start: number,
     end: number
   ) {
+    const meta = {
+      time_range: this.api.timeRange$.getValue(),
+      query: this.api.query$.getValue(),
+      filters: this.api.filters$.getValue(),
+      panel_count: Object.keys(this.api.children$.getValue()).length,
+      errors: Object.entries(this.api.children$.getValue()).reduce(
+        (prev: Array<{ panel_id: string; error: string }>, [id, child]) => {
+          if (hasBlockingError(child)) {
+            return [...prev, { panel_id: id, error: child.blockingError$.getValue()!.message }];
+          }
+          return prev;
+        },
+        []
+      ),
+    };
+    console.log({ type, meta });
     const result = await coreServices.http.post(
       `/internal/dashboard/user_activity/${encodeURIComponent(type)}/${encodeURIComponent(
         this.api.uuid
@@ -86,6 +103,7 @@ class DashboardUserActivitySession {
           start,
           end,
           tags: this.api.getSettings().tags,
+          ...(type !== 'view' && { meta }),
         }),
         method: 'POST',
         asSystemRequest: true,
