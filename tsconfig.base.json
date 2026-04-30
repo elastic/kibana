@@ -32,6 +32,8 @@
       "@kbn/agent-builder-server/*": ["x-pack/platform/packages/shared/agent-builder/agent-builder-server/*"],
       "@kbn/agent-builder-tools-base": ["x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base"],
       "@kbn/agent-builder-tools-base/*": ["x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/*"],
+      "@kbn/agent-context-layer-plugin": ["x-pack/platform/plugins/shared/agent_context_layer"],
+      "@kbn/agent-context-layer-plugin/*": ["x-pack/platform/plugins/shared/agent_context_layer/*"],
       "@kbn/ai-assistant": ["x-pack/platform/packages/shared/kbn-ai-assistant"],
       "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],
