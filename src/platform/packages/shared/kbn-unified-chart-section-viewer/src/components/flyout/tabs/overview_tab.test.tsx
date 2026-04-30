@@ -299,6 +299,13 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
         'remote_cluster:metrics-activemq.broker-default'
       );
+      // Remote sources are not classified via `_resolve/index`; the hook is
+      // always called with `undefined` so we never issue a request that would
+      // fail or return a misleading result.
+      expect(mockedUseMetricSourceKind).toHaveBeenCalledWith(
+        undefined,
+        METRIC_SOURCE_KIND.DATA_STREAM
+      );
     });
   });
 });

@@ -155,4 +155,24 @@ describe('useMetricSourceKind', () => {
     await waitFor(() => expect(b.result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX));
     expect(getIndices).toHaveBeenCalledTimes(1);
   });
+
+  it('does not expose the previous source kind when the name changes (stale guard)', async () => {
+    const getIndices = jest.fn(async (args: { pattern: string }) =>
+      args.pattern === 'first-source'
+        ? [matchedItem('first-source', 'index')]
+        : new Promise(() => {})
+    );
+    mockedUseExternalServices.mockReturnValue({ dataViews: buildDataViews(getIndices) });
+
+    const { result, rerender } = renderHook(
+      ({ name }: { name: string }) => useMetricSourceKind(name, METRIC_SOURCE_KIND.DATA_STREAM),
+      { initialProps: { name: 'first-source' } }
+    );
+
+    await waitFor(() => expect(result.current.kind).toBe(METRIC_SOURCE_KIND.INDEX));
+
+    rerender({ name: 'second-source' });
+
+    expect(result.current.kind).toBe(METRIC_SOURCE_KIND.DATA_STREAM);
+  });
 });

@@ -27,7 +27,6 @@ import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
-import { StreamFieldSection } from '../components/stream_field_section';
 import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
 import { useStreamsFlyoutRenderer } from '../hooks/use_streams_flyout_renderer';
 
@@ -43,20 +42,18 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { kind: sourceKind } = useMetricSourceKind(
-    metricItem.dataStream && !isNonLocalIndexName(metricItem.dataStream)
-      ? metricItem.dataStream
-      : undefined,
-    METRIC_SOURCE_KIND.DATA_STREAM
-  );
+  const localSourceName = isNonLocalIndexName(metricItem.dataStream)
+    ? undefined
+    : metricItem.dataStream;
+
+  const { kind: sourceKind } = useMetricSourceKind(localSourceName, METRIC_SOURCE_KIND.DATA_STREAM);
   const renderStreamFlyout = useStreamsFlyoutRenderer();
 
-  const showStreamSection = Boolean(
-    metricItem.dataStream &&
-      sourceKind === METRIC_SOURCE_KIND.DATA_STREAM &&
-      renderStreamFlyout &&
-      !isNonLocalIndexName(metricItem.dataStream)
-  );
+  const streamSection =
+    localSourceName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamFlyout
+      ? renderStreamFlyout({ streamName: localSourceName })
+      : null;
+  const metadataSourceKind = streamSection ? undefined : sourceKind;
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -100,12 +97,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      {showStreamSection && <StreamFieldSection sourceName={metricItem.dataStream} />}
+      {streamSection}
 
-      <OverviewTabMetadata
-        metricItem={metricItem}
-        metadataSourceKind={showStreamSection ? undefined : sourceKind}
-      />
+      <OverviewTabMetadata metricItem={metricItem} metadataSourceKind={metadataSourceKind} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

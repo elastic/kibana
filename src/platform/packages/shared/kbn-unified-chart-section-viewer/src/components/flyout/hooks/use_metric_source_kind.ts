@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { useExternalServices } from '../../../context/external_services';
 
 // Tag key emitted by data_views.getIndices() / responseToItemArray for plain
@@ -34,21 +33,26 @@ export interface UseMetricSourceKindResult {
  * Best-effort: returns `fallbackKind` whenever the kind cannot be determined
  * (missing `dataViews`, missing `name`, request in flight, fetch error, or
  * source not found in the response). Only flips when the response confirms a
- * different kind.
+ * different kind for the current `name`.
+ *
+ * Multiple consumers asking for the same `name` share a single in-flight
+ * request via the module-level cache below.
  */
 export const useMetricSourceKind = (
   name: string | undefined,
   fallbackKind: MetricSourceKind
 ): UseMetricSourceKindResult => {
   const dataViews = useExternalServices()?.dataViews;
-  const [{ value }, resolve] = useAsyncFn(resolveSourceKind, []);
 
-  useEffect(() => {
-    if (!dataViews || !name) return;
-    resolve(dataViews, name);
-  }, [dataViews, name, resolve]);
+  const { value } = useAbortableAsync<ClassifiedSource | undefined>(async () => {
+    if (!dataViews || !name) return undefined;
+    return resolveSourceKind(dataViews, name);
+  }, [dataViews, name]);
 
-  if (!dataViews || !name || !value || value.name !== name) {
+  // Guard against stale results: `useAbortableAsync` keeps the previous value
+  // while a new request is in flight, so without this check we could briefly
+  // expose the previous source's kind on a different name.
+  if (!value || value.name !== name) {
     return { kind: fallbackKind };
   }
   return { kind: value.kind ?? fallbackKind };
