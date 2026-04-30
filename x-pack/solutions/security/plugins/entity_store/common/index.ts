@@ -119,3 +119,14 @@ export {
   getEntitiesAlias,
   getLatestEntitiesIndexName,
 } from './domain/entity_index';
+
+export type {
+  EngineStatus,
+  EngineDescriptor,
+  EngineComponentResource,
+  EngineComponentStatus,
+  GetEntityStoreStatusResponse,
+  InitEntityStoreResponse,
+  InspectQuery,
+  ListEntitiesResponse,
+} from './api_types';

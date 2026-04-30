@@ -231,18 +231,6 @@ import type {
   EntityDetailsHighlightsRequestBodyInput,
   EntityDetailsHighlightsResponse,
 } from './entity_analytics/entity_details/highlights.gen';
-import type {
-  InitEntityStoreRequestBodyInput,
-  InitEntityStoreResponse,
-} from './entity_analytics/entity_store/enable.gen';
-import type {
-  ListEntitiesRequestQueryInput,
-  ListEntitiesResponse,
-} from './entity_analytics/entity_store/entities/list_entities.gen';
-import type {
-  GetEntityStoreStatusRequestQueryInput,
-  GetEntityStoreStatusResponse,
-} from './entity_analytics/entity_store/status.gen';
 import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type {
   CreatePrivilegesImportIndexRequestBodyInput,
@@ -1887,23 +1875,6 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
-   */
-  async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
-    return this.kbnClient
-      .request<GetEntityStoreStatusResponse>({
-        path: '/api/entity_store/status',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
     * Returns Security Timeline notes as saved objects.
 
 **Query modes (mutually exclusive branches on the server):**
@@ -2277,22 +2248,6 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-   * Initialize the entire Entity Store, creating engines for all or specified entity types.
-   */
-  async initEntityStore(props: InitEntityStoreProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
-    return this.kbnClient
-      .request<InitEntityStoreResponse>({
-        path: '/api/entity_store/enable',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
     return this.kbnClient
@@ -2448,23 +2403,6 @@ Each row will match up to 10,000 entities.
         },
         method: 'POST',
         body: props.attachment,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * List entities records, paging, sorting and filtering as needed.
-   */
-  async listEntities(props: ListEntitiesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
-    return this.kbnClient
-      .request<ListEntitiesResponse>({
-        path: '/api/entity_store/entities/list',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3740,9 +3678,6 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntitySourceProps {
   params: GetEntitySourceRequestParamsInput;
 }
-export interface GetEntityStoreStatusProps {
-  query: GetEntityStoreStatusRequestQueryInput;
-}
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
@@ -3794,9 +3729,6 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
-export interface InitEntityStoreProps {
-  body: InitEntityStoreRequestBodyInput;
-}
 export interface InitializeSecuritySolutionProps {
   body: InitializeSecuritySolutionRequestBodyInput;
 }
@@ -3813,9 +3745,6 @@ export interface InstallPrepackedTimelinesProps {
 }
 export interface InternalUploadAssetCriticalityV2CsvProps {
   attachment: FormData;
-}
-export interface ListEntitiesProps {
-  query: ListEntitiesRequestQueryInput;
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;

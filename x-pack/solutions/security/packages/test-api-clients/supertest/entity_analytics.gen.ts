@@ -56,11 +56,8 @@ import type {
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
-import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import type { GetWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/get.gen';
 import type { GetWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
-import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
-import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
 import type {
   ListWatchlistEntitySourcesRequestQueryInput,
@@ -405,17 +402,6 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
-   */
-  getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
-    return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
-  /**
    * Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
    */
   getPrivilegedAccessDetectionPackageStatus(kibanaSpace: string = 'default') {
@@ -471,17 +457,6 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Initialize the entire Entity Store, creating engines for all or specified entity types.
-   */
-  initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
-  },
-  /**
    * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
    */
   initMonitoringEngine(kibanaSpace: string = 'default') {
@@ -530,17 +505,6 @@ Each row will match up to 10,000 entities.
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  /**
-   * List entities records, paging, sorting and filtering as needed.
-   */
-  listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
-    return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
   },
   listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
     return supertest
@@ -908,20 +872,11 @@ export interface GetAssetCriticalityRecordProps {
 export interface GetEntitySourceProps {
   params: GetEntitySourceRequestParamsInput;
 }
-export interface GetEntityStoreStatusProps {
-  query: GetEntityStoreStatusRequestQueryInput;
-}
 export interface GetWatchlistProps {
   params: GetWatchlistRequestParamsInput;
 }
 export interface GetWatchlistEntitySourceProps {
   params: GetWatchlistEntitySourceRequestParamsInput;
-}
-export interface InitEntityStoreProps {
-  body: InitEntityStoreRequestBodyInput;
-}
-export interface ListEntitiesProps {
-  query: ListEntitiesRequestQueryInput;
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
