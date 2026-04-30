@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export {
-  generateWorkflow,
-  type GenerateWorkflowOptions,
-  type GenerateWorkflowDeps,
-  type GenerateWorkflowParams,
-  type GenerateWorkflowResponse,
-} from './generate_workflow';
+export { generateWorkflow } from './generate_workflow';
+export type {
+  GenerateWorkflowOptions,
+  GenerateWorkflowDeps,
+  GenerateWorkflowParams,
+  GenerateWorkflowResponse,
+} from './types';
