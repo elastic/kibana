@@ -72,11 +72,11 @@ describe('retryEs', () => {
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
+    await jest.advanceTimersByTimeAsync(1_000);
     await jest.advanceTimersByTimeAsync(2_000);
     await jest.advanceTimersByTimeAsync(4_000);
     await jest.advanceTimersByTimeAsync(8_000);
     await jest.advanceTimersByTimeAsync(16_000);
-    await jest.advanceTimersByTimeAsync(32_000);
 
     await expect(promise).resolves.toBe('done');
     expect(operation).toHaveBeenCalledTimes(6);
@@ -87,7 +87,7 @@ describe('retryEs', () => {
       )
     );
     expect(logger.warn).toHaveBeenLastCalledWith(
-      expect.stringContaining('attempt 5 in 32 seconds')
+      expect.stringContaining('attempt 5 in 16 seconds')
     );
   });
 
@@ -107,12 +107,12 @@ describe('retryEs', () => {
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
+    await jest.advanceTimersByTimeAsync(1_000);
     await jest.advanceTimersByTimeAsync(2_000);
     await jest.advanceTimersByTimeAsync(4_000);
     await jest.advanceTimersByTimeAsync(8_000);
     await jest.advanceTimersByTimeAsync(16_000);
     await jest.advanceTimersByTimeAsync(32_000);
-    await jest.advanceTimersByTimeAsync(64_000);
     await jest.advanceTimersByTimeAsync(64_000);
 
     await expect(promise).resolves.toBe('done');
@@ -134,10 +134,10 @@ describe('retryEs', () => {
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
+    await jest.advanceTimersByTimeAsync(1_000);
     await jest.advanceTimersByTimeAsync(2_000);
     await jest.advanceTimersByTimeAsync(4_000);
     await jest.advanceTimersByTimeAsync(8_000);
-    await jest.advanceTimersByTimeAsync(16_000);
 
     await expect(promise).resolves.toBe('done');
     expect(operation).toHaveBeenCalledTimes(5);

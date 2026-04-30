@@ -91,7 +91,7 @@ export async function retryEs<R>(fn: () => Promise<R>, options: RetryEsOptions =
       retryCount++;
 
       if (error instanceof EsErrors.ResponseError && error.statusCode === 429) {
-        const retryDelay = getExponentialDelayMs(retryCount, {
+        const retryDelay = getExponentialDelayMs(retryCount - 1, {
           maxDelayMs: maxIndefiniteRetryDelayMs,
         });
         const dataStream = options.dataStreamName
