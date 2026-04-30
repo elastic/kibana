@@ -22,18 +22,6 @@ if [[ -z "$SCOUT_CONFIG" ]]; then
 fi
 
 if [[ -z "$SCOUT_SERVER_RUN_FLAGS" ]]; then
-<<<<<<< HEAD
-  echo "Missing SCOUT_SERVER_RUN_FLAGS env var"
-  exit 1
-fi
-
-config_path="$SCOUT_CONFIG"
-config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
-passed_count=0
-failedModes=()
-
-FINAL_EXIT_CODE=0
-=======
   echo "Missing SCOUT_SERVER_RUN_FLAGS env var (expected one '--arch X --domain Y' pair)"
   exit 1
 fi
@@ -41,7 +29,6 @@ fi
 # Normalize optional leading "./" so logs match planner-emitted labels.
 config_path="${SCOUT_CONFIG#./}"
 mode="$SCOUT_SERVER_RUN_FLAGS"
->>>>>>> 06d1970ceabe (Split scout flaky test runs by arch+domain (#265991))
 
 run_failed_test_reporter_and_annotate() {
   if ! ls .scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson >/dev/null 2>&1; then
