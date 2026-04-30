@@ -30,7 +30,7 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
           if (cfg[section] instanceof Map) {
             def keys = new ArrayList(cfg[section].keySet());
             Collections.sort(keys);
-            parts.add(section + ':' + keys.join(','));
+            parts.add(section + ':' + String.join(',', keys));
           }
         }
 
@@ -45,7 +45,7 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
               def pr = pipe.processors instanceof List ? new ArrayList(pipe.processors) : new ArrayList();
               def ex = pipe.exporters  instanceof List ? new ArrayList(pipe.exporters)  : new ArrayList();
               Collections.sort(r); Collections.sort(pr); Collections.sort(ex);
-              parts.add('pipe:' + p + '[' + r.join(',') + '|' + pr.join(',') + '|' + ex.join(',') + ']');
+              parts.add('pipe:' + p + '[' + String.join(',', r) + '|' + String.join(',', pr) + '|' + String.join(',', ex) + ']');
             }
           }
 
@@ -53,13 +53,13 @@ export const PIPELINE_CONFIG_RUNTIME_FIELD: estypes.MappingRuntimeFields = {
           if (cfg.service.extensions instanceof List) {
             def exts = new ArrayList(cfg.service.extensions);
             Collections.sort(exts);
-            parts.add('ext:' + exts.join(','));
+            parts.add('ext:' + String.join(',', exts));
           }
         }
 
         if (parts.isEmpty()) return;
 
-        emit(parts.join(';'));
+        emit(String.join(';', parts));
       `,
     },
   },
