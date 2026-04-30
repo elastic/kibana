@@ -42,7 +42,9 @@ const LazySavedObjectSaveModalDashboard = React.lazy(async () => {
 
   return { default: SavedObjectSaveModalDashboard };
 });
-export const SavedObjectSaveModalDashboard = <SaveResponse=void>(props: SaveModalDashboardProps<SaveResponse>) => {
+export const SavedObjectSaveModalDashboard = <SaveResponse = void,>(
+  props: SaveModalDashboardProps<SaveResponse>
+) => {
   return (
     <Suspense>
       <LazySavedObjectSaveModalDashboard {...props} />

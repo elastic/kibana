@@ -21,9 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useState } from 'react';
 import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';

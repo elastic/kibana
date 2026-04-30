@@ -26,9 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';

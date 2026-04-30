@@ -14,9 +14,7 @@ import type {
   ShowSaveModalMinimalSaveModalProps,
 } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,

@@ -23,9 +23,7 @@ import type {
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type {
   EmbeddableStateTransfer,

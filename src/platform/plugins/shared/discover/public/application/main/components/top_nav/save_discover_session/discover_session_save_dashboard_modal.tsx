@@ -13,9 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 

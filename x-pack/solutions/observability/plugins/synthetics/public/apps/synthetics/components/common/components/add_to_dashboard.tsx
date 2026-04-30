@@ -15,9 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import type { ClientPluginsStart } from '../../../../../plugin';

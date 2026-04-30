@@ -14,7 +14,5 @@ export const hasLibraryItemWithTitle = async (title: string) => {
     query: `"${title}"`,
   });
 
-  return markdowns.some(
-    (markdown) => markdown.data.title.toLowerCase() === title.toLowerCase()
-  );
+  return markdowns.some((markdown) => markdown.data.title.toLowerCase() === title.toLowerCase());
 };

@@ -9,9 +9,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
   selectTabSavedSearchByValueAttributes,

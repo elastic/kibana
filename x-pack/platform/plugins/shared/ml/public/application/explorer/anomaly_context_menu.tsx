@@ -34,9 +34,7 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  SavedObjectSaveModalDashboard,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
