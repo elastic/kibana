@@ -20,11 +20,7 @@ import {
 } from './composite_slo_summary_index';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
-import {
-  computeCompositeSummary,
-  buildNoDataSummary,
-  type MemberSummaryData,
-} from './compute_composite_summary';
+import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 
 export interface GetCompositeSloSummaryReadContext {
   spaceId: string;
@@ -117,8 +113,8 @@ export class GetCompositeSLO {
       burnRateWindows: summaryResults[i].burnRateWindows,
     }));
 
-    const { members } = computeCompositeSummary(compositeSlo, memberSummaries);
-    const summary = persisted?.summary ?? buildNoDataSummary();
+    const { compositeSummary, members } = computeCompositeSummary(compositeSlo, memberSummaries);
+    const summary = persisted?.summary ?? compositeSummary;
 
     return {
       ...compositeSlo,
