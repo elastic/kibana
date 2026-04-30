@@ -15,8 +15,6 @@ import { getMeta, setMeta, addMeta } from '../../../schema_connector_metadata';
 
 const meta = { getMeta, setMeta };
 
-const meta = { getMeta, addMeta };
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );

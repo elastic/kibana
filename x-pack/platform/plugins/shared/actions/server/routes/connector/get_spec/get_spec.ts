@@ -46,7 +46,7 @@ export const getConnectorSpecRoute = (
       },
       validate: {
         request: {
-          // TODO: needs to be versioned
+          // Unversioned: internal-only route; version request/response when this API is promoted or stabilized.
           params: schema.object({
             id: schema.string({ minLength: 1 }),
           }),

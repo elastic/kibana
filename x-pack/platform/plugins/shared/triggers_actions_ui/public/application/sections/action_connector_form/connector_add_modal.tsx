@@ -12,6 +12,7 @@ import {
   EuiModal,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
@@ -312,29 +313,53 @@ const ConnectorAddModal = ({
             </SectionLoading>
           ) : (
             <>
-              {groupActionTypeModel && (
+              {actionTypeModelError && (
                 <>
-                  <EuiButtonGroup
-                    isFullWidth
-                    buttonSize="m"
-                    color="primary"
-                    legend=""
-                    options={groupActionButtons}
-                    idSelected={actionType.id}
-                    onChange={onChangeGroupAction}
-                    data-test-subj="slackTypeChangeButton"
-                  />
-                  <EuiSpacer size="xs" />
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="connector-spec-load-error"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                      {
+                        defaultMessage: 'Failed to load connector configuration',
+                      }
+                    )}
+                  >
+                    <p>{actionTypeModelError.message}</p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
                 </>
               )}
-              <ConnectorForm
-                actionTypeModel={actionTypeModel}
-                connector={initialConnector}
-                isEdit={false}
-                onChange={setFormState}
-                setResetForm={setResetForm}
-              />
-              {preSubmitValidationErrorMessage}
+              {!actionTypeModelError && (
+                <>
+                  {groupActionTypeModel && (
+                    <>
+                      <EuiButtonGroup
+                        isFullWidth
+                        buttonSize="m"
+                        color="primary"
+                        legend=""
+                        options={groupActionButtons}
+                        idSelected={actionType.id}
+                        onChange={onChangeGroupAction}
+                        data-test-subj="slackTypeChangeButton"
+                      />
+                      <EuiSpacer size="xs" />
+                    </>
+                  )}
+                  <ConnectorForm
+                    actionTypeModel={actionTypeModel}
+                    connector={initialConnector}
+                    isEdit={false}
+                    onChange={setFormState}
+                    setResetForm={setResetForm}
+                  />
+                  {preSubmitValidationErrorMessage}
+                </>
+              )}
             </>
           )}
         </EuiModalBody>
@@ -355,7 +380,7 @@ const ConnectorAddModal = ({
               type="submit"
               iconType="check"
               isLoading={isSaving}
-              disabled={hasErrors || !!actionTypeModelError}
+              disabled={hasErrors || isLoadingActionTypeModel || !!actionTypeModelError}
               onClick={onSubmit}
             >
               <FormattedMessage

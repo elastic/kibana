@@ -124,6 +124,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
   const disabled = hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError;
+  // Only stack connectors (not spec-based) support the test tab
   const isTestable =
     !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 

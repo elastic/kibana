@@ -61,6 +61,8 @@ export function useActionTypeModel(
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
     queryFn: async ({ signal }) => {
       const spec = await fetchConnectorSpec(http, actionType!.id, signal);
+      // Validate eagerly — fail fast before caching. The schema is re-parsed
+      // lazily inside actionConnectorFields when the form component mounts.
       if (!fromConnectorSpecSchema(spec.schema)) {
         throw new Error(`Failed to parse connector spec schema for "${actionType!.id}"`);
       }

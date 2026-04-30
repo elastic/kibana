@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
@@ -22,6 +21,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
+import { shouldHideWorkflowsOnlyConnector } from '../../hooks/use_action_type_model_utils';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -120,18 +120,12 @@ export const ActionTypeMenu = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
+  const registeredActionTypes = Object.entries(actionTypesIndex ?? {})
     .filter(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
-        // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
-        const supportedFeatureIds = actionType.supportedFeatureIds;
-        if (
-          supportedFeatureIds.length === 1 &&
-          supportedFeatureIds[0] === WorkflowsConnectorFeatureId
-        ) {
-          const isWorkflowsUiEnabled = uiSettings.get<boolean>('workflows:ui:enabled', true);
-          return isWorkflowsUiEnabled;
+        if (shouldHideWorkflowsOnlyConnector(actionType.supportedFeatureIds, uiSettings)) {
+          return false;
         }
 
         return actionType.enabledInConfig === true;

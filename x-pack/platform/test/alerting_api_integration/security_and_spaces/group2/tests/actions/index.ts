@@ -18,6 +18,8 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
       await tearDown(getService);
     });
 
+    loadTestFile(require.resolve('./get_connector_spec'));
+
     // Connector types A-P (first ~15 alphabetically)
     loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));

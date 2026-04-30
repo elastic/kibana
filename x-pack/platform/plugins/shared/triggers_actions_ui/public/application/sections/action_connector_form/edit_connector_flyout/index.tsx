@@ -13,6 +13,9 @@ import {
   EuiFlyoutBody,
   EuiConfirmModal,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -159,7 +162,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               supportedFeatureIds: [],
               isSystemActionType: false,
               isDeprecated: false,
-              source: ACTION_TYPE_SOURCES.spec,
             } as ActionType)
         );
       } catch {
@@ -321,14 +323,47 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               )}
-              <ConnectorForm
-                actionTypeModel={actionTypeModel}
-                connector={getConnectorWithoutSecrets(connector)}
-                isEdit={isEdit}
-                onChange={setFormState}
-                onFormModifiedChange={onFormModifiedChange}
-              />
-              {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+              {isLoadingActionTypeModel && (
+                <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="xl" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+
+              {actionTypeModelError && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="danger"
+                    iconType="error"
+                    data-test-subj="connector-spec-load-error"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                      {
+                        defaultMessage: 'Failed to load connector configuration',
+                      }
+                    )}
+                  >
+                    <p>{actionTypeModelError.message}</p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {!isLoadingActionTypeModel && !actionTypeModelError && (
+                <>
+                  <ConnectorForm
+                    actionTypeModel={actionTypeModel}
+                    connector={getConnectorWithoutSecrets(connector)}
+                    isEdit={isEdit}
+                    onChange={setFormState}
+                    onFormModifiedChange={onFormModifiedChange}
+                  />
+                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                </>
+              )}
             </>
           )}
         </>
@@ -347,7 +382,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     connector,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
+    actionTypeModelError,
     isEdit,
+    isLoadingActionTypeModel,
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
@@ -395,7 +432,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const isTestable =
     isTestableProp ??
-    (!actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack);
+    (() => {
+      if (!resolvedActionType && !actionTypeModel) {
+        return false;
+      }
+      const source = actionTypeModel?.source ?? resolvedActionType?.source;
+      return source == null || source === ACTION_TYPE_SOURCES.stack;
+    })();
 
   return (
     <>

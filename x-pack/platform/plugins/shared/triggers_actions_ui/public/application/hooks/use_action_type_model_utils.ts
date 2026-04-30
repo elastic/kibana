@@ -16,6 +16,16 @@ import { fromConnectorSpecSchema, getMeta, setMeta } from '@kbn/connector-specs'
 import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type { ActionTypeModel } from '../../types';
 
+export function shouldHideWorkflowsOnlyConnector(
+  supportedFeatureIds: string[],
+  uiSettings?: IUiSettingsClient
+): boolean {
+  if (supportedFeatureIds.length !== 1 || supportedFeatureIds[0] !== WorkflowsConnectorFeatureId) {
+    return false;
+  }
+  return !(uiSettings?.get<boolean>('workflows:ui:enabled', true) ?? true);
+}
+
 /** Response from GET /internal/actions/connector_types/{id}/spec */
 export interface ConnectorSpecResponse {
   metadata: {
@@ -79,15 +89,8 @@ export function transformSpecToActionTypeModel(
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
-    getHideInUi: (_actionTypes: ActionType[]) => {
-      if (
-        spec.metadata.supportedFeatureIds.length === 1 &&
-        spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
-      ) {
-        return !(uiSettings?.get<boolean>('workflows:ui:enabled', true) ?? true);
-      }
-      return false;
-    },
+    getHideInUi: (_actionTypes: ActionType[]) =>
+      shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(() => {
       const zodSchema = fromConnectorSpecSchema(spec.schema);
       if (!zodSchema) {
@@ -103,7 +106,9 @@ export function transformSpecToActionTypeModel(
         },
       });
     }),
+    // Spec-based connectors don't have custom action params UI
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
+    // Validation is handled server-side via the Zod schema
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
       serializer: createConnectorFormSerializer(),

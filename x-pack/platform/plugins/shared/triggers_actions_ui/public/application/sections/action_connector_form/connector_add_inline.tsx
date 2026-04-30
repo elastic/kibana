@@ -159,7 +159,7 @@ export const AddConnectorInline = ({
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+              <EuiIcon type={actionTypeRegistered?.iconClass ?? 'plugs'} size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -168,7 +168,7 @@ export const AddConnectorInline = ({
                     defaultMessage="{actionConnectorName}"
                     id="xpack.triggersActionsUI.sections.connectorAddInline.newRuleActionTypeEditTitle"
                     values={{
-                      actionConnectorName: actionTypeRegistered.actionTypeTitle,
+                      actionConnectorName: actionTypeRegistered?.actionTypeTitle ?? actionTypeName,
                     }}
                   />
                 </div>
@@ -190,7 +190,7 @@ export const AddConnectorInline = ({
                 />
               </EuiFlexItem>
             )}
-            {actionTypeRegistered && actionTypeRegistered.isExperimental && (
+            {actionTypeRegistered?.isExperimental && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
                   label={TECH_PREVIEW_LABEL}
