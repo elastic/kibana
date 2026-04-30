@@ -28,6 +28,7 @@
       "management",
       "kibanaUtils",
       "share",
+      "eventLog",
       "unifiedDocViewer"
     ],
     "optionalPlugins": ["usageCollection"],
