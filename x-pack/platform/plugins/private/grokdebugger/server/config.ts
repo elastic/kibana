@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { config } from './config';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
-export async function plugin() {
-  const { Plugin } = await import('./plugin');
-  return new Plugin();
-}
-
-export { config };
+export const config = {
+  schema: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+};
