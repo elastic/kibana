@@ -16,7 +16,7 @@ import { StaticLookupFormatEditor } from './static_lookup';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn(),
+  reactConvert: jest.fn(),
 };
 const formatParams = {
   lookupEntries: [{}] as StaticLookupFormatEditorFormatParams['lookupEntries'],

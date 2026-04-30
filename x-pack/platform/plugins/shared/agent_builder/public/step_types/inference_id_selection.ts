@@ -7,12 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  PropertySelectionHandler,
-  SelectionContext,
-  SelectionDetails,
-  SelectionOption,
-} from '@kbn/workflows';
+import type { PropertySelectionHandler } from '@kbn/workflows';
 import { internalApiPath } from '../../common/constants';
 
 const TRANSLATIONS = {
@@ -54,10 +49,7 @@ export function createInferenceIdSelectionHandler(
   getHttp: () => Promise<HttpStart>
 ): PropertySelectionHandler<string> {
   return {
-    search: async (
-      input: string,
-      _context: SelectionContext
-    ): Promise<SelectionOption<string>[]> => {
+    search: async (input) => {
       try {
         const http = await getHttp();
         const endpoints = await loadInferenceEndpoints(http);
@@ -73,10 +65,7 @@ export function createInferenceIdSelectionHandler(
       }
     },
 
-    resolve: async (
-      value: string,
-      _context: SelectionContext
-    ): Promise<SelectionOption<string> | null> => {
+    resolve: async (value) => {
       try {
         const http = await getHttp();
         const endpoints = await loadInferenceEndpoints(http);
@@ -95,13 +84,9 @@ export function createInferenceIdSelectionHandler(
       }
     },
 
-    getDetails: async (
-      input: string,
-      _context: SelectionContext,
-      option: SelectionOption<string> | null
-    ): Promise<SelectionDetails> => {
+    getDetails: async (input, _context, option) => {
       if (option) {
-        return { message: TRANSLATIONS.connectedToEndpoint(option.label) };
+        return { message: TRANSLATIONS.connectedToEndpoint(option.label ?? '') }; // label type is optional but we always set it
       }
       return { message: TRANSLATIONS.notFound(input) };
     },

@@ -29,7 +29,7 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
     !visitedGettingStartedPage || visitedGettingStartedPage === 'false'; // visit if null or value is false
 
   const shouldRedirect =
-    storageStats !== undefined &&
+    storageStats != null &&
     ((cloud?.isCloudEnabled ? cloud?.isInTrial() : isTrial) || storageStats.hasNoDocuments) &&
     shouldVisitGettingStartedPage;
 

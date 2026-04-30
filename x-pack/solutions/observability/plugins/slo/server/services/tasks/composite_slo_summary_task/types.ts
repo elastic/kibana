@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type TaskState = Record<string, unknown>;
+export interface CompositeSloSummaryTaskState {
+  lastCompositeListVisitRunSoonAt?: number;
+}
