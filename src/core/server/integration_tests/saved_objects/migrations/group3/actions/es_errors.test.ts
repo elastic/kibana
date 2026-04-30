@@ -140,7 +140,21 @@ describe('Elasticsearch Errors', () => {
   });
   describe('isClusterShardLimitExceeded', () => {
     beforeAll(async () => {
-      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
+      // Compute the current shard count so we can set the limit to exactly
+      // that value. Adding any new shard will then exceed the limit regardless
+      // of how many system indices the cluster has (which differs between
+      // FIPS and non-FIPS environments).
+      const stats = await client.cluster.stats();
+      const numDataNodes = stats.nodes.count.data ?? 1;
+      const totalShards = stats.indices.shards.total ?? 0;
+      const maxShardsPerNode = Math.floor(totalShards / numDataNodes);
+      // eslint-disable-next-line no-console
+      console.log(
+        `[isClusterShardLimitExceeded] numDataNodes=${numDataNodes}, totalShards=${totalShards}, maxShardsPerNode=${maxShardsPerNode}`
+      );
+      await client.cluster.putSettings({
+        persistent: { cluster: { max_shards_per_node: 1 } },
+      });
     });
     afterAll(async () => {
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });
