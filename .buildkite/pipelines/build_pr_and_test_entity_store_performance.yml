@@ -94,7 +94,7 @@ steps:
         label: 'Run Entity Store Performance Tests'
         env:
           # SECURITY_DOCS_GEN_BRANCH: branch-name # Optional: checkout a specific branch from security-documents-generator repo (default: main branch)
-          SECURITY_DOCS_GEN_PR: 332 # Use security-documents-generator PR for Entity Store V2 support; remove when merged to main
+          # SECURITY_DOCS_GEN_PR: 332 # Use security-documents-generator PR for Entity Store V2 support; remove when merged to main
           PERF_INTERVAL: 100
           PERF_COUNT: 1
           PERF_SAMPLING_INTERVAL: 1
