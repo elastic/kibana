@@ -57,7 +57,6 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
     },
     async (ctx, req, res) => {
       const user = (await ctx.core).security.authc.getCurrentUser();
-      const duration = req.body.start !== undefined ? req.body.end - req.body.start : 0;
       coreServices.userActivity.trackUserAction({
         message:
           req.params.type === 'refresh_auto'
@@ -70,7 +69,7 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
           type: 'access',
           start: new Date(req.body.start).toISOString(),
           end: new Date(req.body.end).toISOString(),
-          duration,
+          duration: (req.body.end - req.body.start) * 1000000, // convert to nanoseconds
         },
         object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
         ...(req.body.meta

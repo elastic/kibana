@@ -8,9 +8,9 @@
  */
 
 import { type Subscription } from 'rxjs';
+import { hasBlockingError } from '@kbn/presentation-publishing';
 import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from './kibana_services';
-import { hasBlockingError } from '../../../../../packages/shared/presentation/presentation_publishing';
 
 const sessions = new Map<string, DashboardUserActivitySession>();
 export const getDashboardUserActivityService = (api: DashboardApi) => {
@@ -92,7 +92,7 @@ class DashboardUserActivitySession {
         []
       ),
     };
-    console.log({ type, meta });
+
     const result = await coreServices.http.post(
       `/internal/dashboard/user_activity/${encodeURIComponent(type)}/${encodeURIComponent(
         this.api.uuid

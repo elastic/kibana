@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
+
 import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 import { loadDashboardApi } from './load_dashboard_api';
-
 jest.mock('../performance/query_performance_tracking', () => {
   return {
     startQueryPerformanceTracking: jest.fn(),
   };
 });
-
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
@@ -44,12 +44,13 @@ const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const 
 
 describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
+  const userActivity$ = new Subject();
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
-      api: {},
+      api: { userActivity$ },
       cleanUp: jest.fn(),
       internalApi: {},
     });
@@ -138,6 +139,30 @@ describe('loadDashboardApi', () => {
         firstLoad: true,
         creationStartTime: 12345,
       });
+    });
+  });
+
+  describe('user activity', () => {
+    test('should not track view on load of brand new dashboard', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+      });
+      expect(nextSpy).toBeCalledTimes(0);
+    });
+
+    test('should track view on load of saved object', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+      expect(nextSpy).toBeCalledTimes(1);
+      expect(nextSpy).toBeCalledWith(expect.objectContaining({ type: 'view' }));
     });
   });
 });
