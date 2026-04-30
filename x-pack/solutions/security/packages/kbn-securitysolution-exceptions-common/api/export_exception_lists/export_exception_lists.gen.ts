@@ -14,22 +14,24 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
+
 import { ExceptionNamespaceType } from '../model/exception_list_common.gen';
 
+export const ExportExceptionListsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filters the returned results according to the KQL query string
+     */
+    filter: z.string().optional(),
+    /**
+     * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
+     */
+    include_expired_exceptions: z.enum(['true', 'false']).default('true'),
+    namespace_type: ExceptionNamespaceType,
+  })
+);
 export type ExportExceptionListsRequestQuery = z.infer<typeof ExportExceptionListsRequestQuery>;
-export const ExportExceptionListsRequestQuery = z.object({
-  /**
-   * Filters the returned results according to the KQL query string
-   */
-  filter: z.string().optional(),
-  /**
-   * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
-   */
-  include_expired_exceptions: z.enum(['true', 'false']).default('true'),
-  namespace_type: ExceptionNamespaceType.default('single'),
-});
-
 export type ExportExceptionListsRequestQueryInput = z.input<
   typeof ExportExceptionListsRequestQuery
 >;
