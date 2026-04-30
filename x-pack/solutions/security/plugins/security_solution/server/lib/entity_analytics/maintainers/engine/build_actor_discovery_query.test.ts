@@ -48,11 +48,15 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     expect(hasRange).toBe(true);
   });
 
-  it('includes user identity filter', () => {
-    const result = buildActorDiscoveryQuery(accessesConfig, undefined);
-    const queryStr = JSON.stringify(result);
-    // euid.dsl.getEuidDocumentsContainsIdFilter('user') adds a user.* existence check
-    expect(queryStr).toContain('user');
+  it('includes the user-EUID-exists DSL filter (deep-equality, not substring)', () => {
+    const filters = (
+      buildActorDiscoveryQuery(accessesConfig, undefined) as {
+        query: { bool: { filter: Array<Record<string, unknown>> } };
+      }
+    ).query.bool.filter;
+    const expected = JSON.stringify(USER_EUID_FILTER);
+    const matches = filters.filter((f) => JSON.stringify(f) === expected);
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it('does NOT inject the engine-side event.outcome == "success" term filter that used to be auto-applied to accesses', () => {
@@ -120,13 +124,23 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     });
   });
 
-  it('uses actorFields as composite sources when provided', () => {
+  it('uses actorFields as composite sources when provided (structural, not substring)', () => {
     const config: RelationshipIntegrationConfig = {
       ...accessesConfig,
       actorFields: ['custom.actor.field'],
     };
-    const result = buildActorDiscoveryQuery(config, undefined);
-    expect(JSON.stringify(result)).toContain('custom.actor.field');
+    const result = buildActorDiscoveryQuery(config, undefined) as {
+      aggs: {
+        users: {
+          composite: { sources: Array<Record<string, { terms: { field: string } }>> };
+        };
+      };
+    };
+    const sources = result.aggs.users.composite.sources;
+    expect(sources).toHaveLength(1);
+    expect(sources[0]).toEqual({
+      'custom.actor.field': { terms: { field: 'custom.actor.field', missing_bucket: true } },
+    });
   });
 
   it('uses actorFields in bucket filter when provided', () => {
@@ -146,15 +160,18 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     expect(JSON.stringify(result)).toContain('alice');
   });
 
-  it('appends compositeAggAdditionalFilters to the base filters', () => {
+  it('appends compositeAggAdditionalFilters to the base filters (deep-equality, not substring)', () => {
+    const extra = { term: { 'event.action': 'log_on' } };
     const config: RelationshipIntegrationConfig = {
       ...accessesConfig,
-      compositeAggAdditionalFilters: [{ term: { 'event.action': 'log_on' } }],
+      compositeAggAdditionalFilters: [extra],
     };
-    const result = buildActorDiscoveryQuery(config, undefined);
-    const queryStr = JSON.stringify(result);
-    expect(queryStr).toContain('event.action');
-    expect(queryStr).toContain('log_on');
+    const filters = (
+      buildActorDiscoveryQuery(config, undefined) as {
+        query: { bool: { filter: Array<Record<string, unknown>> } };
+      }
+    ).query.bool.filter;
+    expect(filters.some((f) => JSON.stringify(f) === JSON.stringify(extra))).toBe(true);
   });
 
   it('does NOT include extra event filters when compositeAggAdditionalFilters is absent', () => {
