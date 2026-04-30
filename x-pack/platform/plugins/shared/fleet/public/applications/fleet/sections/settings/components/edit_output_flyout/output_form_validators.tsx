@@ -339,6 +339,7 @@ export function validateSSLCertificate(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export function validateSSLKey(value: string) {
@@ -349,6 +350,7 @@ export function validateSSLKey(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export const validateSSLKeySecret = toSecretValidator(validateSSLKey);
