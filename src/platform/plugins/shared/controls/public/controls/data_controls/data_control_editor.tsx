@@ -60,7 +60,6 @@ export interface ControlEditorProps<State extends DataControlEditorState = DataC
   onSave: (data_view_id?: string) => void;
   onUpdate: (newState: Partial<State>) => void;
   ariaLabelledBy: string;
-  isPinned?: boolean;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -197,7 +196,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   onCancel,
   parentApi,
   ariaLabelledBy,
-  isPinned,
 }: ControlEditorProps<State>) => {
   const controlActionRegistry = useControlActionRegistry();
 
@@ -436,7 +434,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                       embeddable: parentApi,
                       state: transformedState ?? editorState,
                       controlId,
-                      isPinned,
                     });
                   } catch (e) {
                     coreServices.notifications.toasts.addError(e, {

@@ -54,6 +54,22 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
     keyId: schema.string({ meta: { description: 'The ID of the enrollment API key' } }),
   }),
+  query: schema.object({
+    forceDelete: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.',
+      },
+    }),
+    includeHidden: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'When true, allow deletion of hidden enrollment tokens (managed/agentless policies). Defaults to false.',
+      },
+    }),
+  }),
 };
 
 export const DeleteEnrollmentAPIKeyResponseSchema = schema.object({
@@ -67,3 +83,62 @@ export const PostEnrollmentAPIKeyRequestSchema = {
     expiration: schema.maybe(schema.string()),
   }),
 };
+
+export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
+  body: schema.object(
+    {
+      tokenIds: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          maxSize: 10000,
+          meta: { description: 'List of enrollment token IDs to delete.' },
+        })
+      ),
+      kuery: schema.maybe(
+        schema.string({
+          meta: { description: 'KQL query to select enrollment tokens to delete.' },
+          validate: (value: string) => {
+            const validationObj = validateKuery(
+              value,
+              [FLEET_ENROLLMENT_API_PREFIX],
+              ENROLLMENT_API_KEY_MAPPINGS,
+              true
+            );
+            if (validationObj?.error) {
+              return validationObj?.error;
+            }
+          },
+        })
+      ),
+      forceDelete: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.',
+        },
+      }),
+      includeHidden: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'When true, allow deletion of hidden enrollment tokens (managed/agentless policies). Defaults to false.',
+        },
+      }),
+    },
+    {
+      validate: (value) => {
+        const hasTokenIds = value.tokenIds && value.tokenIds.length > 0;
+        const hasKuery = value.kuery && value.kuery.trim() !== '';
+        if (!hasTokenIds && !hasKuery) {
+          return 'Either tokenIds or kuery must be provided';
+        }
+      },
+    }
+  ),
+};
+
+export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object({
+  action: schema.string(),
+  count: schema.number(),
+  successCount: schema.number(),
+  errorCount: schema.number(),
+});

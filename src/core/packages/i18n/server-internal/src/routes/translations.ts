@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import { createHash } from 'crypto';
+import { i18n, i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
 
@@ -23,17 +24,18 @@ interface TranslationCache {
 export const registerTranslationsRoute = ({
   router,
   locale,
-  translationHash,
+  translationHashes,
   isDist,
 }: {
   router: IRouter;
   locale: string;
-  translationHash: string;
+  translationHashes: Record<string, string>;
   isDist: boolean;
 }) => {
-  let translationCache: TranslationCache;
+  const supportedLocales = Object.keys(translationHashes);
+  const translationCaches = new Map<string, TranslationCache>();
 
-  ['/translations/{locale}.json', `/translations/${translationHash}/{locale}.json`].forEach(
+  ['/translations/{locale}.json', `/translations/{translationHash}/{locale}.json`].forEach(
     (routePath) => {
       router.get(
         {
@@ -52,6 +54,7 @@ export const registerTranslationsRoute = ({
           validate: {
             params: schema.object({
               locale: schema.string(),
+              translationHash: schema.maybe(schema.string()),
             }),
           },
           options: {
@@ -60,18 +63,38 @@ export const registerTranslationsRoute = ({
             excludeFromRateLimiter: true,
           },
         },
-        (ctx, req, res) => {
-          if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
+        async (_ctx, req, res) => {
+          const requestedLocale = req.params.locale.toLowerCase();
+          if (!supportedLocales.some((supported) => supported.toLowerCase() === requestedLocale)) {
             return res.notFound({
               body: `Unknown locale: ${req.params.locale}`,
             });
           }
-          if (!translationCache) {
-            const translations = JSON.stringify(i18n.getTranslation());
-            translationCache = {
-              translations,
-              hash: translationHash,
-            };
+
+          // Validate the translation hash if provided in the URL
+          const requestedHash = req.params.translationHash;
+          const expectedHash = translationHashes[req.params.locale];
+          if (requestedHash && expectedHash && requestedHash !== expectedHash) {
+            return res.notFound({
+              body: `Stale translation hash for locale: ${req.params.locale}`,
+            });
+          }
+
+          let cached = translationCaches.get(requestedLocale);
+          if (!cached) {
+            let translations: string;
+            if (requestedLocale === locale.toLowerCase()) {
+              // Default locale: use the already-initialized global translations
+              translations = JSON.stringify(i18n.getTranslation());
+            } else {
+              // Other locale: lazily load from disk via the loader
+              const translationData = await i18nLoader.getTranslationsByLocale(req.params.locale);
+              translationData.locale = req.params.locale;
+              translations = JSON.stringify(translationData);
+            }
+            const hash = createHash('sha256').update(translations).digest('hex').slice(0, 12);
+            cached = { translations, hash };
+            translationCaches.set(requestedLocale, cached);
           }
 
           let headers: Record<string, string>;
@@ -84,13 +107,13 @@ export const registerTranslationsRoute = ({
             headers = {
               'content-type': 'application/json',
               'cache-control': 'must-revalidate',
-              etag: translationCache.hash,
+              etag: cached.hash,
             };
           }
 
           return res.ok({
             headers,
-            body: translationCache.translations,
+            body: cached.translations,
           });
         }
       );
