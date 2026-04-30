@@ -43,7 +43,6 @@ describe('resolveLinkInfo', () => {
       title: 'Dashboard 001',
       description: 'Some descriptive text.',
       label: undefined,
-      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     });
   });
 
@@ -59,7 +58,6 @@ describe('resolveLinkInfo', () => {
       title: 'Dashboard 001',
       description: 'Some descriptive text.',
       label: 'My Dashboard',
-      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     });
   });
 
