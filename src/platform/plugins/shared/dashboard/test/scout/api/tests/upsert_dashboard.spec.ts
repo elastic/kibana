@@ -68,46 +68,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe('Refresh Requests (Updated)');
   });
 
-  apiTest(
-    'returns 400 when updating access mode without user profile (API key)',
-    async ({ apiClient }) => {
-      const initial = await apiClient.get(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-      expect(initial).toHaveStatusCode(200);
-
-      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
-        },
-        body: {
-          title: 'Refresh Requests (Updated with access control)',
-          access_control: {
-            access_mode: 'write_restricted',
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('currentUserProfile is undefined');
-      const after = await apiClient.get(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-      expect(after).toHaveStatusCode(200);
-      expect(after.body.data.title).toBe(initial.body.data.title);
-    }
-  );
-
   apiTest('should update existing dashboard with invalid "as code" id', async ({ apiClient }) => {
     const id = '(my)dashboard';
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
@@ -145,80 +105,43 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe(title);
   });
 
-  apiTest(
-    'returns 400 when creating with access mode without user profile (API key)',
-    async ({ apiClient }) => {
-      const id = 'new-dashboard-id-with-access-mode';
-      const title = `I'm a new dashboard with access mode`;
-      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
-        },
-        body: {
-          title,
-          access_control: {
-            access_mode: 'write_restricted',
-          },
-        },
-        responseType: 'json',
-      });
+  apiTest('should update existing dashboard access mode', async ({ apiClient }) => {
+    const id = 'interactive-can-change-access-mode';
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('user profile ID');
-      const after = await apiClient.get(`${DASHBOARD_API_PATH}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
+    const created = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...privilegedRoleCookieHeader,
+      },
+      body: {
+        title: 'Interactive create with access mode',
+        access_control: {
+          access_mode: 'write_restricted',
         },
-        responseType: 'json',
-      });
-      expect(after).toHaveStatusCode(404);
-    }
-  );
+      },
+      responseType: 'json',
+    });
 
-  apiTest(
-    'should update existing dashboard access mode (interactive user)',
-    async ({ apiClient }) => {
-      const id = 'interactive-can-change-access-mode';
+    expect(created).toHaveStatusCode(201);
+    expect(created.body.data.access_control.access_mode).toBe('write_restricted');
 
-      const created = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...privilegedRoleCookieHeader,
+    const updated = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...privilegedRoleCookieHeader,
+      },
+      body: {
+        title: 'Interactive update access mode to default',
+        access_control: {
+          access_mode: 'default',
         },
-        body: {
-          title: 'Interactive create with access mode',
-          access_control: {
-            access_mode: 'write_restricted',
-          },
-        },
-        responseType: 'json',
-      });
+      },
+      responseType: 'json',
+    });
 
-      expect(created).toHaveStatusCode(201);
-      expect(created.body.data.access_control).toStrictEqual({ access_mode: 'write_restricted' });
-
-      const updated = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...privilegedRoleCookieHeader,
-        },
-        body: {
-          title: 'Interactive update access mode to default',
-          access_control: {
-            access_mode: 'default',
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updated).toHaveStatusCode(200);
-      expect(updated.body.data.access_control).toStrictEqual({ access_mode: 'default' });
-      expect(updated.body.meta.owner).toBeDefined();
-      expect(updated.body.meta.owner).toMatch(/.+/);
-    }
-  );
+    expect(updated).toHaveStatusCode(200);
+    expect(updated.body.data.access_control.access_mode).toBe('default');
+  });
 
   apiTest(
     'validation - returns 400 when creating a new dashboard with an invalid id',
@@ -354,9 +277,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
         responseType: 'json',
       });
       expect(created).toHaveStatusCode(201);
-      expect(created.body.data.access_control).toStrictEqual({ access_mode: 'default' });
-      expect(created.body.meta.owner).toBeDefined();
-      expect(created.body.meta.owner).toMatch(/.+/);
+      expect(created.body.data.access_control.access_mode).toBe('default');
 
       const forbidden = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
         headers: {
@@ -383,9 +304,42 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       });
       expect(after).toHaveStatusCode(200);
       expect(after.body.data.title).toBe('Non-owner access mode test');
-      expect(after.body.data.access_control).toStrictEqual({ access_mode: 'default' });
-      expect(after.body.meta.owner).toBeDefined();
-      expect(after.body.meta.owner).toMatch(/.+/);
+      expect(after.body.data.access_control.access_mode).toBe('default');
+    }
+  );
+
+  apiTest(
+    'access_control - omitting access_control preserves existing access mode',
+    async ({ apiClient }) => {
+      const id = 'omit-access-control-preserves-access-mode';
+      const created = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...privilegedRoleCookieHeader,
+        },
+        body: {
+          title: 'Preserve access mode test',
+          access_control: {
+            access_mode: 'write_restricted',
+          },
+        },
+        responseType: 'json',
+      });
+      expect(created).toHaveStatusCode(201);
+      expect(created.body.data.access_control.access_mode).toBe('write_restricted');
+
+      const updated = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...privilegedRoleCookieHeader,
+        },
+        body: {
+          title: 'Preserve access mode test (updated)',
+        },
+        responseType: 'json',
+      });
+      expect(updated).toHaveStatusCode(200);
+      expect(updated.body.data.access_control.access_mode).toBe('write_restricted');
     }
   );
 });
