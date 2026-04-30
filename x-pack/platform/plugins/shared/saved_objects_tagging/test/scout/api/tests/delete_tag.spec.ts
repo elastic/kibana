@@ -52,18 +52,18 @@ apiTest.describe('tags - delete', { tag: tags.deploymentAgnostic }, () => {
   );
 
   apiTest('deletes an existing tag (204)', async ({ apiClient }) => {
-    const deleteResponse = await apiClient.delete('api/tags/tag-1', {
+    const deleteResponse = await apiClient.delete('api/tags/tag-2', {
       headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
     });
     expect(deleteResponse).toHaveStatusCode(204);
 
-    const getResponse = await apiClient.get('api/tags/tag-1', {
+    const getResponse = await apiClient.get('api/tags/tag-2', {
       headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       responseType: 'json',
     });
     expect(getResponse).toHaveStatusCode(404);
     expect(getResponse.body).toMatchObject({
-      message: 'A tag with ID [tag-1] was not found.',
+      message: 'A tag with ID [tag-2] was not found.',
     });
   });
 });

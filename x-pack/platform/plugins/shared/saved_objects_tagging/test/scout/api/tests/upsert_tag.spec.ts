@@ -121,8 +121,8 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
       attributes: {
         valid: false,
         errors: expect.objectContaining({
-          name: expect.stringContaining(''),
-          color: expect.stringContaining(''),
+          name: 'Tag name must be at least 2 characters',
+          color: 'Tag color must be a valid hex color',
         }),
       },
     });
