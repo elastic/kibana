@@ -7,7 +7,7 @@
 
 import React, { useMemo, memo, type ReactNode } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, transparentize } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -164,54 +164,69 @@ export const DiamondNode = memo(
       display: block;
     `;
 
-    const highlightBackground = transparentize(euiTheme.colors.primary, 0.1);
-    const searchHighlightStyles = isActiveSearchMatch
-      ? css`
-          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.size.m};
+    const searchFrameStyles = useMemo(
+      () => css`
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        padding: ${euiTheme.size.s};
+        border: ${euiTheme.border.width.thick} solid transparent;
+        border-radius: ${euiTheme.border.radius.medium};
+        ${isActiveSearchMatch
+          ? `
+          padding: ${euiTheme.size.s};
+          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.textSubdued};
+          outline-offset: -${euiTheme.border.width.thick};
           border-radius: ${euiTheme.border.radius.medium};
-          box-shadow: 0 0 0 100vmax ${highlightBackground} inset,
-            0 0 0 ${euiTheme.size.m} ${highlightBackground};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
         `
-      : undefined;
+          : ''}
+      `,
+      [euiTheme, isActiveSearchMatch]
+    );
 
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        css={searchHighlightStyles}
-        data-test-subj={`serviceMapNode-${testSubjPrefix}-${id}`}
+      <div
+        data-test-subj={isActiveSearchMatch ? 'serviceMapNodeSearchHighlightFrame' : undefined}
+        css={searchFrameStyles}
         data-search-match={isSearchMatch || undefined}
         data-search-active-match={isActiveSearchMatch || undefined}
       >
-        <EuiFlexItem grow={false} css={containerStyles}>
-          <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
-          {badge}
-          <div
-            data-test-subj="serviceMapNodeDiamondHit"
-            css={diamondStyles}
-            role="button"
-            tabIndex={0}
-            aria-label={ariaLabel}
-            aria-pressed={selected}
-          >
-            <div css={iconContainerStyles}>
-              {iconUrl && (
-                <img
-                  src={iconUrl}
-                  alt={spanType || spanSubtype || iconAltFallback}
-                  css={iconStyles}
-                  aria-hidden="true"
-                />
-              )}
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          data-test-subj={`serviceMapNode-${testSubjPrefix}-${id}`}
+        >
+          <EuiFlexItem grow={false} css={containerStyles}>
+            <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
+            {badge}
+            <div
+              data-test-subj="serviceMapNodeDiamondHit"
+              css={diamondStyles}
+              role="button"
+              tabIndex={0}
+              aria-label={ariaLabel}
+              aria-pressed={selected}
+            >
+              <div css={iconContainerStyles}>
+                {iconUrl && (
+                  <img
+                    src={iconUrl}
+                    alt={spanType || spanSubtype || iconAltFallback}
+                    css={iconStyles}
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
-        </EuiFlexItem>
-        <NodeLabel label={label} selected={selected} />
-      </EuiFlexGroup>
+            <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
+          </EuiFlexItem>
+          <NodeLabel label={label} selected={selected} />
+        </EuiFlexGroup>
+      </div>
     );
   }
 );

@@ -7,14 +7,7 @@
 
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import {
-  useEuiTheme,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  transparentize,
-} from '@elastic/eui';
+import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -174,17 +167,6 @@ export const ServiceNode = memo(
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
-    const highlightBackground = transparentize(euiTheme.colors.primary, 0.1);
-    const searchHighlightStyles = isActiveSearchMatch
-      ? css`
-          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.size.m};
-          border-radius: ${euiTheme.border.radius.medium};
-          box-shadow: 0 0 0 100vmax ${highlightBackground} inset,
-            0 0 0 ${euiTheme.size.m} ${highlightBackground};
-        `
-      : undefined;
-
     const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
       defaultMessage:
         '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
@@ -197,6 +179,9 @@ export const ServiceNode = memo(
         flex-direction: column;
         align-items: center;
         max-width: 100%;
+        padding: ${euiTheme.size.s};
+        border: ${euiTheme.border.width.thick} solid transparent;
+        border-radius: ${euiTheme.border.radius.medium};
         ${contextHighlight
           ? `
           padding: ${euiTheme.size.s};
@@ -205,24 +190,38 @@ export const ServiceNode = memo(
           background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
         `
           : ''}
+        ${isActiveSearchMatch
+          ? `
+          padding: ${euiTheme.size.s};
+          outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.textSubdued};
+          outline-offset: -${euiTheme.border.width.thick};
+          border-radius: ${euiTheme.border.radius.medium};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        `
+          : ''}
       `,
-      [euiTheme, contextHighlight]
+      [euiTheme, contextHighlight, isActiveSearchMatch]
     );
 
     return (
       <div
-        data-test-subj={contextHighlight ? 'serviceMapNodeContextHighlightFrame' : undefined}
+        data-test-subj={
+          contextHighlight
+            ? 'serviceMapNodeContextHighlightFrame'
+            : isActiveSearchMatch
+            ? 'serviceMapNodeSearchHighlightFrame'
+            : undefined
+        }
         css={contextFrameStyles}
+        data-search-match={isSearchMatch || undefined}
+        data-search-active-match={isActiveSearchMatch || undefined}
       >
         <EuiFlexGroup
           direction="column"
           alignItems="center"
           gutterSize="xs"
           responsive={false}
-          css={searchHighlightStyles}
           data-test-subj={`serviceMapNode-service-${data.id}`}
-          data-search-match={isSearchMatch || undefined}
-          data-search-active-match={isActiveSearchMatch || undefined}
         >
           <EuiFlexItem grow={false} css={containerStyles}>
             <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
