@@ -118,7 +118,6 @@ export const SplitButtonWithNotification = ({
       }}
     >
       <EuiSplitButton
-        data-test-subj={dataTestSubj}
         color={color}
         size={size}
         isDisabled={isEffectivelyDisabled}
@@ -133,6 +132,7 @@ export const SplitButtonWithNotification = ({
         ]}
       >
         <EuiSplitButton.ActionPrimary
+          data-test-subj={dataTestSubj}
           id={id}
           onClick={onClick as MouseEventHandler}
           iconType={iconType}
