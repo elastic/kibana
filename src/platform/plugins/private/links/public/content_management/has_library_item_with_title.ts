@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { linksClient } from './links_content_management_client';
-export { hasLibraryItemWithTitle } from './has_library_item_with_title';
-export { runSaveToLibrary } from './save_to_library';
+import { linksClient } from './links_content_management_client';
+
+export const hasLibraryItemWithTitle = async (title: string) => {
+  const { hits } = await linksClient.search(
+    {
+      text: `"${title}"`,
+      limit: 10,
+    },
+    { onlyTitle: true }
+  );
+
+  return hits.some((obj) => obj.attributes.title?.toLowerCase() === title.toLowerCase());
+};
