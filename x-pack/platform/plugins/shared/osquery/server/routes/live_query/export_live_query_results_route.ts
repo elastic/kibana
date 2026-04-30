@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IRouter } from '@kbn/core/server';
+import { lastValueFrom } from 'rxjs';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { escapeKuery } from '@kbn/es-query';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+
+import { PLUGIN_ID } from '../../../common';
+import { API_VERSIONS } from '../../../common/constants';
+import type {
+  ActionDetailsRequestOptions,
+  ActionDetailsStrategyResponse,
+} from '../../../common/search_strategy';
+import { OsqueryQueries } from '../../../common/search_strategy';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createExportRouteHandler } from '../export/create_export_route_handler';
+import {
+  exportLiveQueryParamsSchema,
+  exportQuerySchema,
+  exportRequestBodySchema,
+} from '../export/export_request_body_schema';
+
+export const exportLiveQueryResultsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
+  router.versioned
+    .post({
+      access: 'public',
+      path: '/api/osquery/live_queries/{id}/results/{actionId}/_export',
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            params: exportLiveQueryParamsSchema,
+            query: exportQuerySchema,
+            body: exportRequestBodySchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        const { id, actionId } = request.params;
+
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
+
+        let query: string | undefined;
+        let ecsMapping: ECSMapping | undefined;
+
+        // Fetch action details to populate export metadata and ECS mapping for
+        // proper CSV column headers. Failure here is non-fatal — the export
+        // will proceed without enriched metadata.
+        try {
+          const abortController = new AbortController();
+          const sub = request.events.aborted$.subscribe(() => abortController.abort());
+          const search = await context.search;
+
+          const { actionDetails } = await lastValueFrom(
+            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+              {
+                actionId: id,
+                factoryQueryType: OsqueryQueries.actionDetails,
+                spaceId,
+              },
+              { abortSignal: abortController.signal, strategy: 'osquerySearchStrategy' }
+            )
+          );
+
+          sub.unsubscribe();
+
+          const matchingQuery = actionDetails?._source?.queries?.find(
+            (q) => q.action_id === actionId
+          );
+          if (matchingQuery) {
+            query = matchingQuery.query;
+            ecsMapping = matchingQuery.ecs_mapping as ECSMapping | undefined;
+          }
+        } catch {
+          // Continue without metadata enrichment
+        }
+
+        const handler = createExportRouteHandler(osqueryContext);
+
+        return handler(
+          context,
+          // The handler uses request.query.format and request.body; route params
+          // are not accessed inside the shared handler so the cast is safe.
+          request as Parameters<typeof handler>[1],
+          response,
+          {
+            baseFilter: `action_id: "${escapeKuery(actionId)}"`,
+            metadata: { action_id: actionId, query },
+            fileNamePrefix: `osquery-results-${actionId}`,
+            ecsMapping,
+          }
+        );
+      }
+    );
+};

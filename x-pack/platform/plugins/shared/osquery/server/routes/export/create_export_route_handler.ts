@@ -21,12 +21,8 @@ import { getQueryFilter } from '../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
-import {
-  createFormatter,
-  parseExportFormat,
-  SUPPORTED_EXPORT_FORMATS,
-} from '../../lib/format_results';
-import type { ExportMetadata } from '../../lib/format_results';
+import { createFormatter } from '../../lib/format_results';
+import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
@@ -51,33 +47,19 @@ export const createExportRouteHandler =
     context: RequestHandlerContext & DataRequestHandlerContext,
     request: KibanaRequest<
       unknown,
-      { format?: string },
+      { format: ExportFormat },
       { kuery?: string; agentIds?: string[]; esFilters?: unknown[] } | null
     >,
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
     const { baseFilter, metadata: routeMetadata, fileNamePrefix, ecsMapping } = params;
-    const format = parseExportFormat(request.query.format);
+    const { format } = request.query;
     const kuery = request.body?.kuery;
     const agentIds = request.body?.agentIds;
     const esFilters = request.body?.esFilters;
 
     const logger = osqueryContext.logFactory.get('export_results');
-
-    if (!osqueryContext.experimentalFeatures.exportResults) {
-      return response.forbidden({
-        body: { message: 'Export results feature is not enabled' },
-      });
-    }
-
-    if (!format) {
-      return response.badRequest({
-        body: {
-          message: `Invalid format: must be one of ${SUPPORTED_EXPORT_FORMATS.join(', ')}`,
-        },
-      });
-    }
 
     // Build filter query. Every clause is wrapped in parens defensively so
     // that KQL precedence cannot allow a user-supplied `kuery` to escape the
