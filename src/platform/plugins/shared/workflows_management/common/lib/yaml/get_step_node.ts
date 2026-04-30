@@ -9,8 +9,7 @@
 
 import type { Document, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
-
-const NESTED_STEP_KEYS = ['steps', 'else', 'on-failure', 'iteration-on-failure', 'fallback'];
+import { NESTED_STEP_KEYS } from '@kbn/workflows-yaml';
 
 function findInNode(node: unknown, stepName: string): YAMLMap | null {
   if (isSeq(node)) {

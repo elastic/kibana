@@ -9,11 +9,8 @@
 
 import type { RecursivePartial } from '@kbn/utility-types';
 import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
+import { getValueFromValueNode, type StepInfo } from '@kbn/workflows-yaml';
 import { isRecord } from '../../../../../../common/lib/type_guards';
-import {
-  getValueFromValueNode,
-  type StepInfo,
-} from '../../../../../../common/lib/yaml/build_workflow_lookup';
 
 export {
   buildWorkflowLookup,
@@ -22,7 +19,7 @@ export {
   type StepInfo,
   type StepPropInfo,
   type WorkflowLookup,
-} from '../../../../../../common/lib/yaml/build_workflow_lookup';
+} from '@kbn/workflows-yaml';
 
 // Path segments come from YAML keys; use null-prototype objects so keys like "__proto__"
 // cannot resolve inherited accessors or pollute Object.prototype when nesting.

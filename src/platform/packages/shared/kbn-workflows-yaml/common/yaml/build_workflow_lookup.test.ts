@@ -176,7 +176,6 @@ steps:
       expect(result.parent_step).toBeDefined();
       expect(result.parent_step.parentStepId).toBeUndefined();
 
-      // Verify that child_step is found in the main result with correct parentStepId
       expect(result.child_step).toBeDefined();
       expect(result.child_step.parentStepId).toBe('parent_step');
     });
@@ -318,9 +317,8 @@ steps:
 
       expect(result.if_step).toBeDefined();
       expect(result.nested_step).toBeDefined();
-      expect(result.nested_step.parentStepId).toBe('if_step'); // parentStepId is now correctly set
+      expect(result.nested_step.parentStepId).toBe('if_step');
 
-      // Check nested step properties
       expect(result.nested_step.propInfos).toHaveProperty('message');
       expect(getValueFromValueNode(result.nested_step.propInfos.message.valueNode)).toBe(
         'inside if'
@@ -345,7 +343,7 @@ steps:
 
       expect(result.foreach_step).toBeDefined();
       expect(result.loop_body).toBeDefined();
-      expect(result.loop_body.parentStepId).toBe('foreach_step'); // parentStepId is now correctly set
+      expect(result.loop_body.parentStepId).toBe('foreach_step');
       expect(result.loop_body.propInfos).toHaveProperty('message');
     });
   });
@@ -375,7 +373,6 @@ steps:
       const result = inspectStep(stepsNode, lineCounter);
 
       expect(result.minimal_step).toBeDefined();
-      // name and type are included in propInfos since they're not excluded
       expect(result.minimal_step.propInfos).toHaveProperty('name');
       expect(result.minimal_step.propInfos).toHaveProperty('type');
     });
@@ -393,12 +390,8 @@ steps:
       const result = inspectStep(stepsNode, lineCounter);
 
       expect(result.step1).toBeDefined();
-      // name and type are included in propInfos
-      // Empty map values are not processed by visitStepProps (it only processes when value is a Map with items or Scalar)
       expect(result.step1.propInfos).toHaveProperty('name');
       expect(result.step1.propInfos).toHaveProperty('type');
-      // Empty map may or may not be in propInfos depending on implementation
-      // Let's just verify the step is parsed correctly
       expect(result.step1.stepId).toBe('step1');
       expect(result.step1.stepType).toBe('console');
     });
@@ -416,10 +409,8 @@ steps:
       const stepsNode = (yamlDocument.contents as any).get('steps');
       const result = inspectStep(stepsNode, lineCounter);
 
-      // Line numbers are 1-indexed, accounting for the leading newline and "steps:" line
       expect(result.step1.lineStart).toBeGreaterThan(0);
       expect(result.step1.lineEnd).toBeGreaterThanOrEqual(result.step1.lineStart);
-      // The step starts on the line with "- name: step1" which is line 3 (after empty line and "steps:")
       expect(result.step1.lineStart).toBe(3);
     });
 
@@ -572,7 +563,6 @@ steps:
     const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
     const result = buildWorkflowLookup(yamlDocument, lineCounter);
 
-    // Should only have step1, not the inputs
     expect(Object.keys(result.steps)).toHaveLength(1);
     expect(result.steps).toHaveProperty('step1');
     expect(result.steps).not.toHaveProperty('people');

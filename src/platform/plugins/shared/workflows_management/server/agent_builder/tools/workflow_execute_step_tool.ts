@@ -12,11 +12,15 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  buildWorkflowLookup,
+  isWorkflowValidationError,
+  NESTED_STEP_KEYS,
+  type StepInfo,
+  type WorkflowLookup,
+} from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
-import { isWorkflowValidationError } from '../../../common/lib/errors/workflow_validation_error';
-import type { StepInfo, WorkflowLookup } from '../../../common/lib/yaml';
-import { buildWorkflowLookup, NESTED_STEP_KEYS } from '../../../common/lib/yaml';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
@@ -513,11 +517,12 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
         });
       }
 
-      const yaml = inlineYaml
-        ? ensureMinimalWorkflow(inlineYaml)
-        : attachment
-        ? attachment.yaml
-        : '';
+      let yaml: string;
+      if (inlineYaml) {
+        yaml = ensureMinimalWorkflow(inlineYaml);
+      } else {
+        yaml = attachment?.yaml ?? '';
+      }
       const workflowId = attachment?.workflowId;
 
       const yamlParseError = getYamlParseError(yaml);

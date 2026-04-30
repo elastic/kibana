@@ -10,11 +10,11 @@
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import {
   registerWorkflowExecuteStepTool,
   WORKFLOW_EXECUTE_STEP_TOOL_ID,
 } from './workflow_execute_step_tool';
-import { WorkflowValidationError } from '../../../common/lib/errors/workflow_validation_error';
 
 const VALID_WORKFLOW_YAML = `version: '1'
 name: test-workflow
@@ -533,7 +533,7 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).toHaveBeenCalled();
     });
 
-    it('stubs unsafe fallback children under on-failure when the flag is enabled', async () => {
+    it('stubs unsafe fallback children under on-failure', async () => {
       jest.useRealTimers();
 
       mockApi.testStep.mockResolvedValue('exec-fallback');

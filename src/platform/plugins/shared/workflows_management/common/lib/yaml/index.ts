@@ -29,4 +29,4 @@ export {
   type StepInfo,
   type StepPropInfo,
   type WorkflowLookup,
-} from './build_workflow_lookup';
+} from '@kbn/workflows-yaml';
