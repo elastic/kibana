@@ -250,7 +250,7 @@ const lookupRelease = (r?: AgentlessDeploymentReleaseStatus) => {
  */
 export const getAgentlessRelease = (
   packageInfo: Pick<PackageInfo, 'name' | 'version' | 'policy_templates'>,
-  integrationToEnable: string
+  integrationToEnable?: string
 ): IntegrationCardReleaseLabel | undefined => {
   const version = packageInfo.version ?? '';
   const templates = packageInfo.policy_templates ?? [];
@@ -260,12 +260,18 @@ export const getAgentlessRelease = (
     return getPackageReleaseLabel(version);
   }
 
-  const template = templates.find(({ name }) => name === integrationToEnable);
+  const template = integrationToEnable
+    ? templates.find(({ name }) => name === integrationToEnable)
+    : templates.length === 1
+    ? templates[0]
+    : undefined;
+
   if (!template?.deployment_modes?.agentless?.enabled) return undefined;
+  const integrationName = integrationToEnable ?? template.name;
   const { release } = template.deployment_modes.agentless;
   if (
     release === undefined &&
-    isGABeforeReleaseField(packageInfo.name, integrationToEnable, packageInfo.version)
+    isGABeforeReleaseField(packageInfo.name, integrationName, packageInfo.version)
   ) {
     return AgentlessDeploymentReleaseStatus.GA;
   }

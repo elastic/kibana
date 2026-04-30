@@ -352,11 +352,7 @@ export function Detail() {
   const integrationName = integration ?? undefined;
 
   const releaseLabel = useMemo(() => {
-    if (
-      packageInfo &&
-      integrationName &&
-      isOnlyAgentlessIntegration(packageInfo, integrationName)
-    ) {
+    if (packageInfo && isOnlyAgentlessIntegration(packageInfo, integrationName)) {
       const release = getAgentlessRelease(packageInfo, integrationName);
       if (release !== undefined) return release;
     }

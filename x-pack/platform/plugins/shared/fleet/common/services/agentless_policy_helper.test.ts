@@ -512,6 +512,47 @@ describe('agentless_policy_helper', () => {
       };
       expect(getAgentlessRelease(packageInfo, 'template1')).toBe('beta');
     });
+
+    it('should evaluate the single template when integrationToEnable is omitted', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.Beta },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBe('beta');
+    });
+
+    it('should return undefined when integrationToEnable is omitted and there are multiple templates', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBeUndefined();
+    });
   });
 
   describe('isInputAllowedForDeploymentMode', () => {
