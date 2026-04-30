@@ -10,6 +10,7 @@ import {
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
+import { SECURITY_AI_PROMPTS_PACKAGE_NAME } from '../../../../../common/detection_engine/constants';
 import type {
   InitializationFlowContext,
   InitializationFlowDefinition,
@@ -31,7 +32,7 @@ export const initAiPromptsFlow: InitializationFlowDefinition<PackageInstallReady
         return {
           status: INITIALIZATION_FLOW_STATUS_READY,
           payload: {
-            name: 'security_ai_prompts',
+            name: SECURITY_AI_PROMPTS_PACKAGE_NAME,
             version: '',
             install_status: 'skipped',
           },

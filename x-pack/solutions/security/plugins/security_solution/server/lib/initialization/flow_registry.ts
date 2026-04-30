@@ -17,6 +17,7 @@ import {
   INITIALIZATION_FLOW_INIT_AI_PROMPTS,
   INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
   INITIALIZATION_FLOW_STATUS_ERROR,
+  INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../common/api/initialization';
 import type {
   InitializationFlowContext,
@@ -150,10 +151,10 @@ export const runInitializationFlows = async (
 
   const allResults = [...sequentialResults, ...parallelResults];
   const succeededFlows = allResults
-    .filter(({ result }) => result.status === 'ready')
+    .filter(({ result }) => result.status === INITIALIZATION_FLOW_STATUS_READY)
     .map(({ id }) => id);
   const failedFlows = allResults
-    .filter(({ result }) => result.status !== 'ready')
+    .filter(({ result }) => result.status !== INITIALIZATION_FLOW_STATUS_READY)
     .map(({ id }) => id);
 
   logger.debug(

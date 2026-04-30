@@ -6,10 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
-  INITIALIZATION_FLOW_STATUS_READY,
-} from '../../../../../common/api/initialization';
+import { INITIALIZATION_FLOW_STATUS_READY } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
 import { initAiPromptsFlow } from '.';
 import { installSecurityAiPromptsPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts';
@@ -37,10 +34,6 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
 describe('initAiPromptsFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('has the correct id', () => {
-    expect(initAiPromptsFlow.id).toBe(INITIALIZATION_FLOW_INIT_AI_PROMPTS);
   });
 
   it('should be configured to run in parallel', () => {

@@ -11,6 +11,7 @@ import {
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
+import { ENDPOINT_PACKAGE_NAME } from '../../../../../common/detection_engine/constants';
 import type {
   InitializationFlowContext,
   InitializationFlowDefinition,
@@ -36,7 +37,7 @@ export const initEndpointProtectionFlow: InitializationFlowDefinition<
       return {
         status: INITIALIZATION_FLOW_STATUS_READY,
         payload: {
-          name: 'endpoint',
+          name: ENDPOINT_PACKAGE_NAME,
           version: '',
           install_status: 'skipped',
         },
