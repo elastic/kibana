@@ -194,6 +194,7 @@
     "@kbn/agent-builder-plugin": "link:x-pack/platform/plugins/shared/agent_builder",
     "@kbn/agent-builder-server": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-server",
     "@kbn/agent-builder-tools-base": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base",
+    "@kbn/agent-context-layer-plugin": "link:x-pack/platform/plugins/shared/agent_context_layer",
     "@kbn/ai-assistant": "link:x-pack/platform/packages/shared/kbn-ai-assistant",
     "@kbn/ai-assistant-common": "link:x-pack/platform/packages/shared/ai-assistant/common",
     "@kbn/ai-assistant-connector-selector-action": "link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action",
