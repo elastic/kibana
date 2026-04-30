@@ -49,11 +49,7 @@ test.describe(
       await expect(page.getByRole('tab', { name: 'Advanced' })).toBeHidden();
     });
 
-    test('should show Advanced tab for admin role', async ({
-      browserAuth,
-      pageObjects,
-      page,
-    }) => {
+    test('should show Advanced tab for admin role', async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 
