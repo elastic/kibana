@@ -36,3 +36,6 @@ export const EBT_CLICK_ACTION_VIEW_SERVICE = 'viewService';
 
 /** User intends to view an error's details. */
 export const EBT_CLICK_ACTION_VIEW_ERROR = 'viewError';
+
+/** Navigates to the APM app. Use when the user explicitly chooses to open something in APM. */
+export const EBT_CLICK_ACTION_OPEN_IN_APM = 'openInApm';
