@@ -44,6 +44,7 @@ export function VisualizeLens({
         color="danger"
         iconType="error"
         size="s"
+        announceOnMount
       >
         <p>{error.message}</p>
       </EuiCallOut>
