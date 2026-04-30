@@ -66,7 +66,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
     expect(mockValidate).not.toHaveBeenCalled();
   });
 
-  it('runs validateQuery on plain ES|QL and surfaces real diagnostics', async () => {
+  it('row 10: runs validateQuery on plain ES|QL and surfaces real diagnostics', async () => {
     const text = buildStep('FROM logs-* | KEEPP @timestamp');
     const model = createTextModel(text);
     mockValidate.mockResolvedValue({
@@ -88,7 +88,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
   });
 
   describe('mask path: Liquid only inside string literals', () => {
-    it('passes a whitespace-masked query to validateQuery', async () => {
+    it('row 1: passes a whitespace-masked query to validateQuery', async () => {
       const text = buildStep('WHERE host == "{{ inputs.host }}"');
       const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
@@ -145,20 +145,41 @@ describe('validateEsqlSteps — Liquid policy', () => {
   });
 
   describe('skip path: Liquid in structural position', () => {
-    const cases: Array<{ name: string; query: string }> = [
-      { name: 'Liquid in index pattern', query: 'FROM logs-{{ env }}-*' },
-      { name: 'Liquid as the entire source', query: 'FROM {{ source }}' },
-      { name: 'Liquid as a pipe command', query: 'FROM logs-* | {{ cmd }} count' },
-      { name: 'Liquid as a numeric literal', query: 'FROM logs-* | LIMIT {{ n }}' },
+    // Numbers reference the scenario matrix in the plan
+    // (`/Users/marcoliberati/.claude/plans/you-are-a-very-fancy-waffle.md`).
+    const cases: Array<{ row: number | string; description: string; query: string }> = [
+      { row: 2, description: 'Liquid in index pattern', query: 'FROM logs-{{ env }}-*' },
+      { row: 3, description: 'Liquid as the entire source', query: 'FROM {{ source }}' },
       {
-        name: 'Liquid in if-block tag outside string',
+        row: 4,
+        description: 'Liquid as a pipe command',
+        query: 'FROM logs-* | {{ cmd }} count',
+      },
+      {
+        row: 5,
+        description: 'Liquid in a function arg list',
+        query: 'FROM logs-* | EVAL x = TO_INT({{ field }})',
+      },
+      {
+        row: 6,
+        description: 'Liquid as a numeric literal',
+        query: 'FROM logs-* | LIMIT {{ n }}',
+      },
+      { row: 7, description: 'Liquid wraps the whole query', query: '{{ query }}' },
+      {
+        row: 9,
+        description: 'Liquid `{% raw %}` block outside a string',
+        query: '{% raw %}FROM logs-* | LIMIT 1{% endraw %}',
+      },
+      {
+        row: 'extra',
+        description: 'Liquid `{% if %}` tag outside any string',
         query: '{%- if env -%} FROM logs {%- endif -%}',
       },
-      { name: 'Liquid as the entire query', query: '{{ query }}' },
     ];
 
-    for (const { name, query } of cases) {
-      it(`skips validation for: ${name}`, async () => {
+    for (const { row, description, query } of cases) {
+      it(`row ${row}: skips validation for ${description}`, async () => {
         const text = buildStep(query);
         const model = createTextModel(text);
         const markers = await validateEsqlSteps(parseDocument(text), model, stubCallbacks);
@@ -169,7 +190,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
   });
 
   describe('Liquid comments and ES|QL comments stay on the mask path', () => {
-    it('a `{# … #}` Liquid comment outside any string is masked, not skipped', async () => {
+    it('row 8: a `{# … #}` Liquid comment outside any string is masked, not skipped', async () => {
       const text = buildStep('FROM logs-* {# pick the env #} | LIMIT 10');
       const model = createTextModel(text);
       mockValidate.mockResolvedValue({ errors: [], warnings: [] });
