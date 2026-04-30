@@ -38,5 +38,5 @@ export const exportLiveQueryParamsSchema = schema.object({
 /** Route params schema for the scheduled query export route. */
 export const exportScheduledQueryParamsSchema = schema.object({
   scheduleId: schema.string(),
-  executionCount: schema.number(),
+  executionCount: schema.number({ min: 0 }),
 });

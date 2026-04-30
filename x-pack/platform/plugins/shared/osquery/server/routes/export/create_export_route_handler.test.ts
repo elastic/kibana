@@ -255,9 +255,7 @@ describe('createExportRouteHandler', () => {
     const getIntegrationNamespaces = jest.fn().mockResolvedValue({
       [OSQUERY_INTEGRATION_NAME]: ['fleet-ns'],
     });
-    const handler = createExportRouteHandler(
-      createOsqueryContext({ getIntegrationNamespaces })
-    );
+    const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
       query: { format: 'ndjson' },
@@ -274,7 +272,7 @@ describe('createExportRouteHandler', () => {
     );
   });
 
-  it('adds an agent ID allowlist clause to the ES query when agentIds are provided', async () => {
+  it('adds a quoted agent ID allowlist clause to the ES query when agentIds are provided', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
@@ -285,8 +283,33 @@ describe('createExportRouteHandler', () => {
     await handler(createContext(), request, response, baseParams);
 
     const esQueryArg = mockExportResultsToStream.mock.calls[0][0].query;
-    expect(JSON.stringify(esQueryArg)).toContain('agent.id');
-    expect(JSON.stringify(esQueryArg)).toContain('agent-1');
+    const queryStr = JSON.stringify(esQueryArg);
+    expect(queryStr).toContain('agent.id');
+    expect(queryStr).toContain('agent-1');
+    // Values must be double-quoted in the KQL filter for consistent parsing
+    expect(queryStr).toContain('"agent-1"');
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('sanitizes double-quotes in fileNamePrefix for the Content-Disposition header', async () => {
+    const handler = createExportRouteHandler(createOsqueryContext());
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'csv' },
+      body: {},
+    });
+    const params: ExportRouteParams = {
+      ...baseParams,
+      fileNamePrefix: 'osquery-results-sched"evil"',
+    };
+
+    await handler(createContext(), request, response, params);
+
+    const disposition: string = (response.ok as jest.Mock).mock.calls[0][0].headers[
+      'Content-Disposition'
+    ];
+    // The embedded double-quote must be replaced so the header value is valid
+    expect(disposition).not.toContain('"evil"');
+    expect(disposition).toMatch(/^attachment; filename="[^"]*\.csv"$/);
   });
 });

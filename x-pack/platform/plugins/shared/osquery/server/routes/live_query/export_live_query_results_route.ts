@@ -31,6 +31,8 @@ export const exportLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
   osqueryContext: OsqueryAppContext
 ) => {
+  const handler = createExportRouteHandler(osqueryContext);
+
   router.versioned
     .post({
       access: 'public',
@@ -68,33 +70,33 @@ export const exportLiveQueryResultsRoute = (
         try {
           const abortController = new AbortController();
           const sub = request.events.aborted$.subscribe(() => abortController.abort());
-          const search = await context.search;
+          try {
+            const search = await context.search;
 
-          const { actionDetails } = await lastValueFrom(
-            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-              {
-                actionId: id,
-                factoryQueryType: OsqueryQueries.actionDetails,
-                spaceId,
-              },
-              { abortSignal: abortController.signal, strategy: 'osquerySearchStrategy' }
-            )
-          );
+            const { actionDetails } = await lastValueFrom(
+              search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+                {
+                  actionId: id,
+                  factoryQueryType: OsqueryQueries.actionDetails,
+                  spaceId,
+                },
+                { abortSignal: abortController.signal, strategy: 'osquerySearchStrategy' }
+              )
+            );
 
-          sub.unsubscribe();
-
-          const matchingQuery = actionDetails?._source?.queries?.find(
-            (q) => q.action_id === actionId
-          );
-          if (matchingQuery) {
-            query = matchingQuery.query;
-            ecsMapping = matchingQuery.ecs_mapping as ECSMapping | undefined;
+            const matchingQuery = actionDetails?._source?.queries?.find(
+              (q) => q.action_id === actionId
+            );
+            if (matchingQuery) {
+              query = matchingQuery.query;
+              ecsMapping = matchingQuery.ecs_mapping as ECSMapping | undefined;
+            }
+          } finally {
+            sub.unsubscribe();
           }
         } catch {
           // Continue without metadata enrichment
         }
-
-        const handler = createExportRouteHandler(osqueryContext);
 
         return handler(
           context,

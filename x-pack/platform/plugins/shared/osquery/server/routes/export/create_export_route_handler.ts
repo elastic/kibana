@@ -13,9 +13,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { AuditEvent } from '@kbn/core-security-server';
 
 import type { Filter } from '@kbn/es-query';
-import { buildQueryFromFilters } from '@kbn/es-query';
-
-import { escapeKuery } from '@kbn/es-query';
+import { buildQueryFromFilters, escapeKuery } from '@kbn/es-query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { getQueryFilter } from '../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
@@ -66,7 +64,7 @@ export const createExportRouteHandler =
     // action_id / schedule_id gate (e.g. `foo OR action_id: "other"`).
     let filter = `(${baseFilter})`;
     if (agentIds && agentIds.length > 0) {
-      const agentFilter = agentIds.map((id) => `agent.id: ${escapeKuery(id)}`).join(' OR ');
+      const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
       filter += ` AND (${agentFilter})`;
     }
 
@@ -142,9 +140,11 @@ export const createExportRouteHandler =
 
     const formatter = createFormatter(format);
     const timestamp = new Date().toISOString();
-    const fileName = `${fileNamePrefix}-${timestamp.replace(/[:.]/g, '-')}.${
-      formatter.fileExtension
-    }`;
+    // Strip characters that would break the quoted Content-Disposition filename token
+    // (double-quotes, backslashes, and CR/LF). The fileNamePrefix may contain
+    // user-supplied values such as scheduleId / actionId from URL params.
+    const safePrefix = fileNamePrefix.replace(/["\\\r\n]/g, '_');
+    const fileName = `${safePrefix}-${timestamp.replace(/[:.]/g, '-')}.${formatter.fileExtension}`;
 
     const csvColumnsForEmptyExport =
       format === 'csv' && ecsMapping

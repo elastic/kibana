@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { exportQuerySchema, exportRequestBodySchema } from './export_request_body_schema';
+import {
+  exportQuerySchema,
+  exportRequestBodySchema,
+  exportScheduledQueryParamsSchema,
+} from './export_request_body_schema';
 import { SUPPORTED_EXPORT_FORMATS } from '../../lib/format_results';
 
 describe('exportRequestBodySchema', () => {
@@ -79,5 +83,28 @@ describe('exportQuerySchema', () => {
 
   it('rejects a missing format', () => {
     expect(() => exportQuerySchema.validate({})).toThrow();
+  });
+});
+
+describe('exportScheduledQueryParamsSchema', () => {
+  it('accepts a valid scheduleId and non-negative executionCount', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'sched-uuid-1', executionCount: 0 })
+    ).not.toThrow();
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'sched-uuid-1', executionCount: 42 })
+    ).not.toThrow();
+  });
+
+  it('rejects a negative executionCount', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'sched-uuid-1', executionCount: -1 })
+    ).toThrow();
+  });
+
+  it('rejects a missing scheduleId', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ executionCount: 1 })
+    ).toThrow();
   });
 });

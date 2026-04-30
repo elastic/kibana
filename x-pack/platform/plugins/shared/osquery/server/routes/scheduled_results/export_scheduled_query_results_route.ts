@@ -23,6 +23,8 @@ export const exportScheduledQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
   osqueryContext: OsqueryAppContext
 ) => {
+  const handler = createExportRouteHandler(osqueryContext);
+
   router.versioned
     .post({
       access: 'public',
@@ -46,8 +48,6 @@ export const exportScheduledQueryResultsRoute = (
       },
       async (context, request, response) => {
         const { scheduleId, executionCount } = request.params;
-
-        const handler = createExportRouteHandler(osqueryContext);
 
         return handler(
           context,
