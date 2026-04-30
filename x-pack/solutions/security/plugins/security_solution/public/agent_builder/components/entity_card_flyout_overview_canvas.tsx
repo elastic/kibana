@@ -845,20 +845,22 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
     [serviceName]
   );
+  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,
     filterQuery: serviceNameFilterQuery as unknown as ESQuery | undefined,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: true,
+    skip: !!observedService?.entityRecord,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
-  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
   const { data: serviceRisk } = riskScoreState;
   const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
-  const isRiskScoreExist = !!serviceRiskData?.service.risk;
+  const isRiskScoreExist = entityFromStoreResult.entityRecord
+    ? !!getRiskFromEntityRecord(entityFromStoreResult.entityRecord)
+    : !!serviceRiskData?.service.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID) ?? noop;
   const refetchRiskScore = useCallback(() => {

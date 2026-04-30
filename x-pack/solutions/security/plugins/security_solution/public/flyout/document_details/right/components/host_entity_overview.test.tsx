@@ -30,6 +30,7 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 const hostName = 'host';
 const identityFields = { 'host.name': hostName };
@@ -109,6 +110,9 @@ jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');
 
+const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
+
 const renderHostEntityContent = () =>
   render(
     <TestProviders>
@@ -124,6 +128,15 @@ describe('<HostEntityContent />', () => {
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
   });
 
   describe('license is valid', () => {

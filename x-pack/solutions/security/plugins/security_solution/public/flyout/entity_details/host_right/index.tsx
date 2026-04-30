@@ -120,12 +120,14 @@ export const HostPanel = memo(function HostPanel({
     [hostName]
   );
 
+  const observedHost = useObservedHost(hostName, scopeId, entityFromStoreResult);
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.host,
     filterQuery: hostNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: true,
+    skip: !!observedHost?.entityRecord,
   });
 
   const { refetch } = riskScoreState;
@@ -167,8 +169,6 @@ export const HostPanel = memo(function HostPanel({
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
   });
-
-  const observedHost = useObservedHost(hostName, scopeId, entityFromStoreResult);
 
   const panelDisplayEntityId = observedHost.entityRecord?.entity?.id;
 

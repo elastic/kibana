@@ -221,7 +221,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     filterQuery,
     riskEntity: EntityType.user,
     timerange,
-    skip: true,
+    skip: !!observedUser?.entityRecord,
   });
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   // Always show observed user fields from the same indices useObservedUser queries (security
