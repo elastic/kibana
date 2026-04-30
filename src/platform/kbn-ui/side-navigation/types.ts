@@ -91,6 +91,11 @@ export interface MenuItem {
    */
   badgeType?: BadgeType;
   /**
+   * (optional) When true, sections are only shown in the hover popover and never
+   * in the persistent expanded side panel.
+   */
+  popoverOnly?: boolean;
+  /**
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];

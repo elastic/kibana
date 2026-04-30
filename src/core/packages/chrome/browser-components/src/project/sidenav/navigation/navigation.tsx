@@ -8,10 +8,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
+import type { SecondaryMenuSection } from '@kbn/ui-side-navigation/types';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
@@ -54,17 +56,51 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
+const MAX_RECENT_DASHBOARDS = 5;
+
 const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
-    return chrome.project.getNavigation$().pipe(
-      map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
-        solutionId: nav.solutionId,
-      }))
+    return combineLatest([chrome.project.getNavigation$(), chrome.recentlyAccessed.get$()]).pipe(
+      map(([nav, recentlyAccessed]) => {
+        const navItems = toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager);
+
+        const recentDashboards = recentlyAccessed
+          .filter((item) => item.link.startsWith('/app/dashboards'))
+          .slice(0, MAX_RECENT_DASHBOARDS);
+
+        if (recentDashboards.length > 0) {
+          const dashboardItem = navItems.navItems.primaryItems.find((item) =>
+            item.href.includes('/app/dashboards')
+          );
+
+          if (dashboardItem) {
+            const recentSection: SecondaryMenuSection = {
+              id: 'recent-dashboards',
+              label: i18n.translate('core.chrome.sideNav.recentlyViewedDashboards', {
+                defaultMessage: 'Recently viewed',
+              }),
+              items: recentDashboards.map((rd) => ({
+                id: `recent-${rd.id}`,
+                label: rd.label,
+                href: basePath.prepend(rd.link),
+                'data-test-subj': `nav-item-recent-dashboard-${rd.id}`,
+              })),
+            };
+
+            dashboardItem.popoverOnly = true;
+            dashboardItem.sections = [recentSection, ...(dashboardItem.sections ?? [])];
+          }
+        }
+
+        return {
+          ...navItems,
+          solutionId: nav.solutionId,
+        };
+      })
     );
   }, [chrome, basePath]);
 
