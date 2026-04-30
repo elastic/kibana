@@ -26,6 +26,10 @@ steps:
     type: console
     with:
       message: "hello"
+  - name: get_case
+    type: cases.getCase
+    with:
+      case_id: "case-1"
   - name: search_step
     type: elasticsearch.search
     with:
@@ -235,6 +239,35 @@ describe('registerWorkflowExecuteStepTool', () => {
 
       expect(data.success).toBe(true);
       expect(data.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('executes a cases.getCase step (safe)', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockResolvedValue('exec-cases-123');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'get_case', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 90,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'get_case' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(data.executionId).toBe('exec-cases-123');
+      expect(data.status).toBe(ExecutionStatus.COMPLETED);
+      expect(mockApi.testStep).toHaveBeenCalledWith(
+        VALID_WORKFLOW_YAML,
+        'get_case',
+        'wf-1',
+        undefined,
+        {},
+        'default',
+        context.request
+      );
     });
 
     it('passes contextOverride to testStep', async () => {

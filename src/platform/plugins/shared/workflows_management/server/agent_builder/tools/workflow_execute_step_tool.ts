@@ -39,7 +39,6 @@ const SAFE_STEP_TYPES = new Set([
   'data.regexExtract',
   'data.regexReplace',
   'data.stringifyJson',
-  'data.transform',
   'if',
   'foreach',
   'while',
@@ -47,10 +46,16 @@ const SAFE_STEP_TYPES = new Set([
   'elasticsearch.search',
   'elasticsearch.esql.query',
   'elasticsearch.indices.exists',
-  'kibana.get_case',
-  'kibana.streams_list',
-  'kibana.streams_get',
-  'kibana.streams_get_significant_events',
+  'kibana.getCase',
+  'kibana.streams.list',
+  'kibana.streams.get',
+  'kibana.streams.getSignificantEvents',
+  'cases.getCase',
+  'cases.getCases',
+  'cases.findCases',
+  'cases.findSimilarCases',
+  'cases.getAllAttachments',
+  'cases.getCasesByAlertId',
 ]);
 
 const POLL_INTERVAL_MS = 1000;
