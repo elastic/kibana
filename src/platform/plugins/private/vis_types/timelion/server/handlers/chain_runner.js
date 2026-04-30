@@ -123,6 +123,12 @@ export default function chainRunner(tlConfig) {
     } else if (!result) {
       promise = invoke('first', [link]);
     } else {
+      const functionDef = tlConfig.getFunction(link.function);
+      if (functionDef.datasource) {
+        throw new Error(
+          `Cannot chain datasource function ${link.function}() after another function. Datasource functions must be used at the start of a chain.`
+        );
+      }
       const args = link.arguments ? result.concat(link.arguments) : result;
       promise = invoke(link.function, args);
     }
