@@ -296,6 +296,8 @@
       "@kbn/console-plugin/*": ["src/platform/plugins/shared/console/*"],
       "@kbn/content-connectors-plugin": ["x-pack/platform/plugins/shared/content_connectors"],
       "@kbn/content-connectors-plugin/*": ["x-pack/platform/plugins/shared/content_connectors/*"],
+      "@kbn/content-list": ["src/platform/packages/shared/content-management/content_list/kbn-content-list"],
+      "@kbn/content-list/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list/*"],
       "@kbn/content-list-assembly": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly"],
       "@kbn/content-list-assembly/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/*"],
       "@kbn/content-list-docs": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-docs"],
