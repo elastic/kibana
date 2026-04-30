@@ -176,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('returns error if profile is executed with no valid indices', async () => {
-        await PageObjects.searchProfiler.setIndexName('_all');
+        await PageObjects.searchProfiler.setIndexName('non_existent_test_index');
         await PageObjects.searchProfiler.setQuery(testQuery);
 
         await PageObjects.searchProfiler.clickProfileButton();
