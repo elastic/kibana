@@ -115,6 +115,34 @@ export const parseDeclarativeChildren = (children: ReactNode, assembly: string):
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Component type helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Recursively unwraps `React.memo` and `React.forwardRef` wrappers to reach
+ * the underlying render function.
+ *
+ * - `React.memo` wraps as `{ $$typeof: REACT_MEMO_TYPE, type: <inner> }`.
+ * - `React.forwardRef` wraps as `{ $$typeof: REACT_FORWARD_REF_TYPE, render: <inner> }`.
+ *
+ * The loop handles arbitrarily deep nesting (e.g. `memo(forwardRef(fn))`).
+ * Returns `undefined` if the final unwrapped value is not a function.
+ */
+const unwrapComponentType = (
+  type: unknown
+): ((...args: unknown[]) => unknown) | undefined => {
+  let current = type;
+  while (current !== null && typeof current === 'object') {
+    // React.memo wraps as { $$typeof, type }; forwardRef wraps as { $$typeof, render }.
+    const wrapped = current as Record<string, unknown>;
+    current = wrapped.type ?? wrapped.render;
+  }
+  return typeof current === 'function'
+    ? (current as (...args: unknown[]) => unknown)
+    : undefined;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Core child walker
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -172,22 +200,9 @@ const walkChildren = (children: ReactNode, assembly: string): ParsedItem[] => {
     // HTML tags were filtered by `getPartType` above), but consumers may wrap
     // their component in `React.memo(...)` or `React.forwardRef(...)`, which
     // produce an object with `$$typeof` rather than a bare function. Unwrap
-    // those wrappers so the resolver WeakMap lookup works regardless of how the
-    // component was decorated.
-    const rawType = child.type as unknown;
-    let componentFn: ((...args: unknown[]) => unknown) | undefined;
-
-    if (typeof rawType === 'function') {
-      componentFn = rawType as (...args: unknown[]) => unknown;
-    } else if (rawType !== null && typeof rawType === 'object') {
-      // React.memo wraps as { $$typeof: REACT_MEMO_TYPE, type: <inner> }
-      // React.forwardRef wraps as { $$typeof: REACT_FORWARD_REF_TYPE, render: <inner> }
-      const wrapped = rawType as Record<string, unknown>;
-      const inner = wrapped.type ?? wrapped.render;
-      if (typeof inner === 'function') {
-        componentFn = inner as (...args: unknown[]) => unknown;
-      }
-    }
+    // those wrappers recursively so the resolver WeakMap lookup works regardless
+    // of how deeply the component was decorated (e.g. memo(forwardRef(fn))).
+    const componentFn = unwrapComponentType(child.type as unknown);
     const displayName =
       componentFn !== undefined
         ? (componentFn as unknown as { displayName?: string }).displayName
