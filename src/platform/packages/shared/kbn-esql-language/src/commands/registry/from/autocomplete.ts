@@ -26,6 +26,7 @@ import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
 } from '../../definitions/utils/autocomplete/resource_browser_suggestions';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
@@ -66,7 +67,7 @@ async function handleFromAutocomplete(
   }
 
   // Extract text relative to command start (critical for subqueries)
-  // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
+  // Use commandText for pattern matching (e.g., /METADATA\s+$/ and trailing whitespace)
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
   const subquerySuggestion =
@@ -104,7 +105,7 @@ async function handleFromAutocomplete(
   }
 
   // Case 2: FROM index | (after space, suggest next actions)
-  if (/\s$/.test(commandText) && !isRestartingExpression(commandText)) {
+  if (endsWithWhitespace(commandText) && !isRestartingExpression(commandText)) {
     return suggestNextActions(context, callbacks);
   }
 

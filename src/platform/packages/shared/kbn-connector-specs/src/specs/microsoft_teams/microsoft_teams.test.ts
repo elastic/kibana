@@ -66,13 +66,14 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
-    it('should support bearer, oauth_authorization_code, and oauth_client_credentials', () => {
+    it('should support bearer, oauth_authorization_code, oauth_client_credentials, and ears', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
-      expect(auth?.types).toHaveLength(3);
+      expect(auth?.types).toHaveLength(4);
       expect(auth?.types[0]).toEqual(expect.objectContaining({ type: 'bearer' }));
       expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
       expect(auth?.types[2]).toEqual(expect.objectContaining({ type: 'oauth_client_credentials' }));
+      expect(auth?.types[3]).toEqual(expect.objectContaining({ type: 'ears' }));
     });
 
     it('should have correct oauth_authorization_code defaults', () => {
@@ -86,6 +87,26 @@ describe('MicrosoftTeams', () => {
           scope: expect.stringContaining('offline_access'),
         },
       });
+    });
+
+    it('should have correct ears defaults with microsoft provider and Teams scopes', () => {
+      const earsType = MicrosoftTeams.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'ears'
+      ) as
+        | {
+            type: string;
+            defaults?: { provider?: string; scope?: string };
+            overrides?: { meta?: { scope?: { disabled?: boolean } } };
+          }
+        | undefined;
+      expect(earsType).toBeDefined();
+      expect(earsType?.defaults?.provider).toBe('microsoft');
+      expect(earsType?.defaults?.scope).toContain('Team.ReadBasic.All');
+      expect(earsType?.defaults?.scope).toContain('Channel.ReadBasic.All');
+      expect(earsType?.defaults?.scope).toContain('Chat.Read');
+      expect(earsType?.defaults?.scope).toContain('ChannelMessage.Read.All');
+      expect(earsType?.defaults?.scope).toContain('offline_access');
+      expect(earsType?.overrides?.meta?.scope?.disabled).toBe(true);
     });
 
     it('oauth_authorization_code scope should include Teams-required permissions', () => {

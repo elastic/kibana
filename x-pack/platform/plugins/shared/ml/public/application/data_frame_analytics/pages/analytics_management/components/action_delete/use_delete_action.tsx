@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
@@ -26,8 +27,6 @@ import type {
 import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
-
-import type { JobType } from '../../../../../../../common/types/saved_objects';
 
 import { getDestinationIndex } from '../../../../common/get_destination_index';
 
