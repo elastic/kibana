@@ -440,6 +440,7 @@
                 "lineNumber": 35,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScopeableRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -757,6 +758,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1202,7 +1204,15 @@
             "tags": [],
             "label": "log",
             "description": [
-              "\nLogs an {@link AuditEvent} and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
+              "\nLogs an ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditEvent",
+                "text": "AuditEvent"
+              },
+              " and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
             ],
             "signature": [
               "(event: ",
@@ -1681,7 +1691,15 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates an {@link AuditLogger} scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
+              "\nCreates an ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
             ],
             "signature": [
               "(request: ",
@@ -1710,6 +1728,7 @@
                 "lineNumber": 27,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1723,7 +1742,15 @@
             "tags": [],
             "label": "withoutRequest",
             "description": [
-              "\n{@link AuditLogger} for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
+              "\n",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
             ],
             "signature": [
               "AuditLogger"
@@ -1791,6 +1818,7 @@
                 "lineNumber": 26,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1834,6 +1862,7 @@
                 "lineNumber": 34,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2223,6 +2252,117 @@
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
             "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.CreateUiamOAuthClientParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateUiamOAuthClientParams",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CreateUiamOAuthClientParams.resource",
+            "type": "string",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CreateUiamOAuthClientParams.client_name",
+            "type": "string",
+            "tags": [],
+            "label": "client_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CreateUiamOAuthClientParams.client_type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "client_type",
+            "description": [],
+            "signature": [
+              "UiamOAuthClientType",
+              " | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CreateUiamOAuthClientParams.client_metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "client_metadata",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CreateUiamOAuthClientParams.client_logo",
+            "type": "Object",
+            "tags": [],
+            "label": "client_logo",
+            "description": [],
+            "signature": [
+              "UiamOAuthClientLogo",
+              " | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CreateUiamOAuthClientParams.redirect_uris",
+            "type": "Array",
+            "tags": [],
+            "label": "redirect_uris",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2692,6 +2832,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2711,6 +2852,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2758,6 +2900,7 @@
                 "lineNumber": 57,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2777,6 +2920,7 @@
                 "lineNumber": 58,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2826,6 +2970,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2889,6 +3034,7 @@
                 "lineNumber": 75,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2936,6 +3082,7 @@
                 "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2955,6 +3102,7 @@
                 "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2999,6 +3147,7 @@
                 "lineNumber": 91,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3081,6 +3230,7 @@
                 "lineNumber": 41,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3125,6 +3275,7 @@
                 "lineNumber": 52,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3167,6 +3318,7 @@
                 "lineNumber": 58,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3211,6 +3363,7 @@
                 "lineNumber": 64,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3317,6 +3470,7 @@
                 "lineNumber": 25,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSecurityDelegateContract",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3330,7 +3484,14 @@
             "tags": [],
             "label": "fips",
             "description": [
-              "\nThe {@link CoreFipsService | FIPS service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CoreFipsService",
+                "text": "FIPS service"
+              }
             ],
             "signature": [
               "CoreFipsService"
@@ -3366,7 +3527,14 @@
             "tags": [],
             "label": "authc",
             "description": [
-              "\nThe {@link CoreAuthenticationService | authentication service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CoreAuthenticationService",
+                "text": "authentication service"
+              }
             ],
             "signature": [
               "CoreAuthenticationService"
@@ -3384,7 +3552,14 @@
             "tags": [],
             "label": "audit",
             "description": [
-              "\nThe {@link CoreAuditService | audit service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CoreAuditService",
+                "text": "audit service"
+              }
             ],
             "signature": [
               "CoreAuditService"
@@ -3456,6 +3631,7 @@
                 "lineNumber": 27,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3475,6 +3651,7 @@
                 "lineNumber": 27,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrantUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3526,6 +3703,7 @@
                 "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3545,6 +3723,7 @@
                 "lineNumber": 39,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3655,6 +3834,7 @@
                 "lineNumber": 30,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrantUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3703,6 +3883,7 @@
                 "lineNumber": 39,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3754,6 +3935,1083 @@
             "returnComment": [
               "A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled."
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UiamOAuthClientLogo",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiamOAuthClientLogo",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientLogo.media_type",
+            "type": "string",
+            "tags": [],
+            "label": "media_type",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientLogo.data",
+            "type": "string",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UiamOAuthClientResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiamOAuthClientResponse",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.client_name",
+            "type": "string",
+            "tags": [],
+            "label": "client_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.client_secret",
+            "type": "string",
+            "tags": [],
+            "label": "client_secret",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.resource",
+            "type": "string",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "UiamOAuthClientType",
+              " | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.creation",
+            "type": "string",
+            "tags": [],
+            "label": "creation",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.revoked",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "revoked",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.revocation",
+            "type": "string",
+            "tags": [],
+            "label": "revocation",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.revocation_reason",
+            "type": "string",
+            "tags": [],
+            "label": "revocation_reason",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.client_metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "client_metadata",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.client_logo",
+            "type": "Object",
+            "tags": [],
+            "label": "client_logo",
+            "description": [],
+            "signature": [
+              "UiamOAuthClientLogo",
+              " | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.redirect_uris",
+            "type": "Array",
+            "tags": [],
+            "label": "redirect_uris",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthClientResponse.connections",
+            "type": "Object",
+            "tags": [],
+            "label": "connections",
+            "description": [],
+            "signature": [
+              "UiamOAuthConnectionsSummary",
+              " | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UiamOAuthConnectionResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiamOAuthConnectionResponse",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.client_id",
+            "type": "string",
+            "tags": [],
+            "label": "client_id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.resource",
+            "type": "string",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.creation",
+            "type": "string",
+            "tags": [],
+            "label": "creation",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.revoked",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "revoked",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.revocation",
+            "type": "string",
+            "tags": [],
+            "label": "revocation",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.revocation_reason",
+            "type": "string",
+            "tags": [],
+            "label": "revocation_reason",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionResponse.scopes",
+            "type": "Array",
+            "tags": [],
+            "label": "scopes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UiamOAuthConnectionsSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiamOAuthConnectionsSummary",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionsSummary.active",
+            "type": "Array",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthConnectionsSummary.revoked",
+            "type": "Array",
+            "tags": [],
+            "label": "revoked",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UiamOAuthType",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiamOAuthType",
+        "description": [
+          "\nInterface for managing UIAM OAuth client and connection operations."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.createClient",
+            "type": "Function",
+            "tags": [],
+            "label": "createClient",
+            "description": [
+              "\nCreates an OAuth client."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, params: ",
+              "CreateUiamOAuthClientParams",
+              ") => Promise<",
+              "UiamOAuthClientResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.createClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 82,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.createClient.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The parameters for creating the OAuth client."
+                ],
+                "signature": [
+                  "CreateUiamOAuthClientParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 83,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "CreateUiamOAuthClientParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.listClients",
+            "type": "Function",
+            "tags": [],
+            "label": "listClients",
+            "description": [
+              "\nLists OAuth clients, optionally filtered by client ID."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, clientId?: string | undefined) => Promise<{ clients: ",
+              "UiamOAuthClientResponse",
+              "[]; } | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.listClients.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 92,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.listClients.$2",
+                "type": "string",
+                "tags": [],
+                "label": "clientId",
+                "description": [
+                  "Optional client ID filter."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 93,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.updateClient",
+            "type": "Function",
+            "tags": [],
+            "label": "updateClient",
+            "description": [
+              "\nUpdates an OAuth client's metadata."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, clientId: string, params: ",
+              "UpdateUiamOAuthClientParams",
+              ") => Promise<",
+              "UiamOAuthClientResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 103,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateClient.$2",
+                "type": "string",
+                "tags": [],
+                "label": "clientId",
+                "description": [
+                  "The ID of the client to update."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateClient.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The parameters for updating the OAuth client."
+                ],
+                "signature": [
+                  "UpdateUiamOAuthClientParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "UpdateUiamOAuthClientParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.revokeClient",
+            "type": "Function",
+            "tags": [],
+            "label": "revokeClient",
+            "description": [
+              "\nRevokes an OAuth client."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, clientId: string, reason?: string | undefined) => Promise<",
+              "UiamOAuthClientResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 115,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeClient.$2",
+                "type": "string",
+                "tags": [],
+                "label": "clientId",
+                "description": [
+                  "The ID of the client to revoke."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 116,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeClient.$3",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [
+                  "Optional reason for revocation."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 117,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.listConnections",
+            "type": "Function",
+            "tags": [],
+            "label": "listConnections",
+            "description": [
+              "\nLists OAuth connections, optionally filtered by client ID and/or connection ID."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, clientId?: string | undefined, connectionId?: string | undefined) => Promise<{ connections: ",
+              "UiamOAuthConnectionResponse",
+              "[]; } | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.listConnections.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 127,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.listConnections.$2",
+                "type": "string",
+                "tags": [],
+                "label": "clientId",
+                "description": [
+                  "Optional client ID filter."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 128,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.listConnections.$3",
+                "type": "string",
+                "tags": [],
+                "label": "connectionId",
+                "description": [
+                  "Optional connection ID filter."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 129,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.updateConnection",
+            "type": "Function",
+            "tags": [],
+            "label": "updateConnection",
+            "description": [
+              "\nUpdates an OAuth connection's display name."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, clientId: string, connectionId: string, params: ",
+              "UpdateUiamOAuthConnectionParams",
+              ") => Promise<",
+              "UiamOAuthConnectionResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateConnection.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 140,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateConnection.$2",
+                "type": "string",
+                "tags": [],
+                "label": "clientId",
+                "description": [
+                  "The ID of the client owning the connection."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 141,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateConnection.$3",
+                "type": "string",
+                "tags": [],
+                "label": "connectionId",
+                "description": [
+                  "The ID of the connection to update."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 142,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.updateConnection.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The parameters for updating the OAuth connection."
+                ],
+                "signature": [
+                  "UpdateUiamOAuthConnectionParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 143,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "UpdateUiamOAuthConnectionParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UiamOAuthType.revokeConnection",
+            "type": "Function",
+            "tags": [],
+            "label": "revokeConnection",
+            "description": [
+              "\nRevokes an OAuth connection."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, clientId: string, connectionId: string, reason?: string | undefined) => Promise<",
+              "UiamOAuthConnectionResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeConnection.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The Kibana request containing the authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 154,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeConnection.$2",
+                "type": "string",
+                "tags": [],
+                "label": "clientId",
+                "description": [
+                  "The ID of the client owning the connection."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 155,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeConnection.$3",
+                "type": "string",
+                "tags": [],
+                "label": "connectionId",
+                "description": [
+                  "The ID of the connection to revoke."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 156,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.UiamOAuthType.revokeConnection.$4",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [
+                  "Optional reason for revocation."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+                "lineNumber": 157,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4043,6 +5301,116 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UpdateUiamOAuthClientParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateUiamOAuthClientParams",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UpdateUiamOAuthClientParams.client_name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "client_name",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UpdateUiamOAuthClientParams.client_metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "client_metadata",
+            "description": [],
+            "signature": [
+              "Record<string, string | null> | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UpdateUiamOAuthClientParams.client_logo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "client_logo",
+            "description": [],
+            "signature": [
+              "UiamOAuthClientLogo",
+              " | null | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UpdateUiamOAuthClientParams.redirect_uris",
+            "type": "Array",
+            "tags": [],
+            "label": "redirect_uris",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UpdateUiamOAuthConnectionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateUiamOAuthConnectionParams",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.UpdateUiamOAuthConnectionParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
         "id": "def-server.ValidateAPIKeyParams",
         "type": "Interface",
         "tags": [],
@@ -4230,6 +5598,23 @@
         ],
         "path": "src/core/packages/security/server/src/roles/schema.ts",
         "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.UiamOAuthClientType",
+        "type": "Type",
+        "tags": [],
+        "label": "UiamOAuthClientType",
+        "description": [],
+        "signature": [
+          "\"public\" | \"confidential\""
+        ],
+        "path": "src/core/packages/security/server/src/authentication/oauth/uiam_oauth.ts",
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

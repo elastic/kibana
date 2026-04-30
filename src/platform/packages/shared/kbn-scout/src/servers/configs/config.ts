@@ -117,7 +117,13 @@ export class Config {
     return {
       serverless: isServerless,
       http2: this.get('http2'),
-      uiam: this.get('esServerlessOptions.uiam', false),
+      // `uiam` reflects what the local server was actually started with:
+      // - on serverless, it comes from `esServerlessOptions.uiam` (set by the
+      //   chosen TS config set, e.g. the default UIAM-on configs in
+      //   `default/serverless/...` or future UIAM-off variants);
+      // - on stateful, UIAM is never available, so we force `false` regardless
+      //   of any (mis)configured server option.
+      uiam: isServerless ? this.get('esServerlessOptions.uiam') : false,
       projectType,
       productTier: isServerless ? getProductTier(serverArgs, projectType) : undefined,
       organizationId: isServerless ? getOrganizationId(serverArgs) : undefined,
