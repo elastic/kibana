@@ -55,7 +55,7 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 5 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
-      params: { formatOverride: true, pattern: '0,0.00000' },
+      params: { formatOverride: true, pattern: '0,0.00000', decimals: 5 },
     });
   });
 
@@ -73,7 +73,7 @@ describe('format_column', () => {
         suffixString: 'ABC',
         id: 'number',
         formatOverride: true,
-        params: { formatOverride: true, pattern: '0,0.00000' },
+        params: { formatOverride: true, pattern: '0,0.00000', decimals: 5 },
       },
     });
   });
@@ -83,7 +83,7 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
-      params: { formatOverride: true, pattern: '0,0' },
+      params: { formatOverride: true, pattern: '0,0', decimals: 0 },
     });
   });
 
@@ -224,8 +224,9 @@ describe('format_column', () => {
           formatOverride: true,
           wrapperParam: 123,
           id: 'number',
-          params: { formatOverride: true, pattern: '0,0.00000' },
+          params: { formatOverride: true, pattern: '0,0.00000', decimals: 5 },
           pattern: '0,0.00000',
+          decimals: 5,
         },
       });
     });
@@ -249,9 +250,10 @@ describe('format_column', () => {
           paramsPerField: [
             {
               id: 'number',
-              params: { formatOverride: true, pattern: '0,0.00000' },
+              params: { formatOverride: true, pattern: '0,0.00000', decimals: 5 },
               formatOverride: true,
               pattern: '0,0.00000',
+              decimals: 5,
             },
           ],
         },
@@ -307,7 +309,7 @@ describe('format_column', () => {
       type: 'number',
       params: {
         id: 'number',
-        params: { pattern: '0,0.00000a', formatOverride: true },
+        params: { pattern: '0,0.00000a', formatOverride: true, decimals: 5 },
       },
     });
   });
@@ -350,6 +352,7 @@ describe('format_column', () => {
           useShortSuffix: true,
           showSuffix: true,
           includeSpaceWithSuffix: true,
+          decimals: 2,
         },
       },
     });
@@ -382,6 +385,7 @@ describe('format_column', () => {
             useShortSuffix: true,
             showSuffix: true,
             includeSpaceWithSuffix: true,
+            decimals: 2,
           },
         },
       },

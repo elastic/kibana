@@ -20,7 +20,9 @@ import {
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
@@ -110,6 +112,30 @@ export const module = new ContainerModule(({ bind }) => {
           coreStart,
         });
       },
+    });
+
+    getStartServices().then(([coreStart]) => {
+      const experimentalEnabled = coreStart.uiSettings.get<boolean>(
+        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+        false
+      );
+      if (experimentalEnabled) {
+        alertingV2Section.registerApp({
+          id: ALERTING_V2_RULE_DOCTOR_APP_ID,
+          title: i18n.translate('xpack.alertingV2.management.ruleDoctorNavTitle', {
+            defaultMessage: 'Rule Doctor',
+          }),
+          order: 4,
+          async mount(params) {
+            const { mountRuleDoctorApp } = await import('./application/mount');
+            return mountRuleDoctorApp({
+              params,
+              container: coreStart.injection.getContainer(),
+              coreStart,
+            });
+          },
+        });
+      }
     });
   });
 });

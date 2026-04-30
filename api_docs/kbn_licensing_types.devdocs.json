@@ -777,11 +777,11 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_license_check.test.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_availability_check.test.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_license_check.test.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_availability_check.test.ts"
               }
             ]
           }
