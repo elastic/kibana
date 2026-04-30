@@ -100,6 +100,7 @@
             "lineNumber": 302,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSpec",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -198,6 +199,7 @@
             "lineNumber": 306,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSpec",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -314,6 +316,7 @@
             "lineNumber": 298,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSpec",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -365,9 +368,10 @@
                   "<D>"
                 ],
                 "path": "node_modules/axios/index.d.ts",
-                "lineNumber": 735,
-                "columnNumber": 5,
+                "lineNumber": 650,
+                "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "AxiosRequestConfig",
                 "trackAdoption": false
               }
             ]
@@ -585,6 +589,7 @@
                 "lineNumber": 200,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -602,6 +607,7 @@
                 "lineNumber": 200,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "TInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -752,6 +758,7 @@
                 "lineNumber": 104,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetTokenOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -986,6 +993,7 @@
                 "lineNumber": 115,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1040,6 +1048,7 @@
                 "lineNumber": 116,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AuthContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1057,6 +1066,7 @@
                 "lineNumber": 116,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "AxiosInstance",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1074,6 +1084,7 @@
                 "lineNumber": 116,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1639,6 +1650,7 @@
                 "lineNumber": 239,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }

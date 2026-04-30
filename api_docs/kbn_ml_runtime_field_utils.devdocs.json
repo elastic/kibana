@@ -92,6 +92,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RuntimeMappings",
             "trackAdoption": false,
             "isRequired": false
           }

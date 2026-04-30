@@ -339,9 +339,46 @@ const staticItem: AppMenuWrapperProps['staticItems'] = [
   },
 ];
 
+const threeItemsWithStaticItemConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'item1',
+      order: 1,
+      label: 'Item 1',
+      run: action('item-1-clicked'),
+      iconType: 'gear',
+      testId: 'item1Button',
+    },
+    {
+      id: 'item2',
+      order: 2,
+      label: 'Item 2',
+      run: action('item-2-clicked'),
+      iconType: 'gear',
+      testId: 'item2Button',
+    },
+    {
+      id: 'item3',
+      order: 3,
+      label: 'Item 3',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+  ],
+};
+
 export const StandaloneStaticItem: Story = {
   name: 'Static items - standalone',
   args: {
+    staticItems: staticItem,
+  },
+};
+
+export const StaticItemWithConfig: Story = {
+  name: 'Static items with config',
+  args: {
+    config: threeItemsWithStaticItemConfig,
     staticItems: staticItem,
   },
 };

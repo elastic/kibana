@@ -99,6 +99,7 @@
             "lineNumber": 94,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidateOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -145,6 +146,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

@@ -36,7 +36,7 @@
           " & S, any>"
         ],
         "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-        "lineNumber": 65,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -49,7 +49,7 @@
             "label": "formatId",
             "description": [],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 69,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -72,7 +72,7 @@
               " & S"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 70,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -112,7 +112,7 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 72,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -135,9 +135,10 @@
                   "<{}>"
                 ],
                 "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                "lineNumber": 72,
+                "lineNumber": 69,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormatEditorProps",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -158,9 +159,10 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                "lineNumber": 72,
+                "lineNumber": 69,
                 "columnNumber": 69,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormatEditorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -178,7 +180,7 @@
               "(newParams?: Partial<{ type?: string | undefined; } & P>) => void"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 84,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -194,7 +196,7 @@
                   "Partial<{ type?: string | undefined; } & P>"
                 ],
                 "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                "lineNumber": 84,
+                "lineNumber": 80,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -214,7 +216,7 @@
               "() => React.JSX.Element"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 93,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -366,7 +368,14 @@
         "tags": [],
         "label": "FormatEditorProps",
         "description": [
-          "\nProps for received by {@link FieldFormatEditor}"
+          "\nProps for received by ",
+          {
+            "pluginId": "dataViewFieldEditor",
+            "scope": "public",
+            "docId": "kibDataViewFieldEditorPluginApi",
+            "section": "def-public.FieldFormatEditor",
+            "text": "FieldFormatEditor"
+          }
         ],
         "signature": [
           {
@@ -479,6 +488,7 @@
                 "lineNumber": 22,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -882,6 +892,7 @@
                 "lineNumber": 18,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteFieldFunc",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -987,10 +998,13 @@
           {
             "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.Sample.output",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "output",
             "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/types.ts",
             "lineNumber": 16,
             "columnNumber": 3,
@@ -1167,6 +1181,7 @@
               "lineNumber": 42,
               "columnNumber": 14,
               "deprecated": false,
+              "docsReferencedTypeName": "OpenFieldEditorOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1223,6 +1238,7 @@
               "lineNumber": 47,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "OpenFieldDeleteModalOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1320,6 +1336,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {

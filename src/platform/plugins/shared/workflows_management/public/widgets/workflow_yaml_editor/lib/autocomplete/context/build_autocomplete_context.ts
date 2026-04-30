@@ -12,6 +12,8 @@ import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
+import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
@@ -27,8 +29,6 @@ import {
   isInWorkflowInputsByPosition,
   isInWorkflowInputsPath,
 } from './triggers_utils';
-import { getPathAtOffset } from '../../../../../../common/lib/yaml';
-import { getSchemaAtPath } from '../../../../../../common/lib/zod';
 import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
 import { getRegisteredTriggerConditionDefinition } from '../get_registered_trigger_condition_definition';
