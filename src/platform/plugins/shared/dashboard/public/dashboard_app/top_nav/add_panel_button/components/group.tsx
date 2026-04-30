@@ -34,7 +34,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
         showToolTip: true,
         label: item.name,
         onClick: item.onClick,
-        iconType: item.icon,
+        ...(typeof item.icon === 'string' ? { iconType: item.icon } : { icon: <item.icon /> }),
         isDisabled: item.isDisabled,
         'data-test-subj': item['data-test-subj'],
         role: 'menuitem',

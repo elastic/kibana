@@ -20,7 +20,7 @@ const DASHBOARD_PANEL_GROUP_ORDER = [
   'legacyGroup',
 ];
 
-const DASHBOARD_PANEL_TYPE_COUNT = 18;
+const DASHBOARD_PANEL_TYPE_COUNT = 19;
 
 spaceTest.describe(
   'Dashboard panel listing',

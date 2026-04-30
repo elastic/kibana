@@ -252,9 +252,6 @@ export const useMonitorsTableColumns = ({
                       size="xs"
                       color="danger"
                       data-test-subj="syntheticsLatestErrorCell"
-                      // Wrap onto multiple lines naturally, then clamp to 3
-                      // lines with an ellipsis. `word-break: break-word`
-                      // keeps long URLs / hashes from overflowing.
                       css={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -272,9 +269,6 @@ export const useMonitorsTableColumns = ({
             },
             {
               name: TAGS,
-              // 15% was wider than typical 1–2 short tags need; 12% keeps two
-              // tags visible inline and the rest collapse into a "+N more"
-              // chip via TagsList's built-in overflow handling.
               width: '12%',
               render: (monitor: OverviewStatusMetaData) => (
                 <TagsList
