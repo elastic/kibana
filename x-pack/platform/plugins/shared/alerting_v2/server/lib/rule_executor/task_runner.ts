@@ -6,6 +6,7 @@
  */
 
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 
 import type { HaltReason, RuleExecutorTaskParams } from './types';
@@ -73,6 +74,10 @@ export class RuleExecutorTaskRunner {
       return { state: {} };
     }
 
+    if (result.haltReason === 'rule_deleted') {
+      throwUnrecoverableError(new Error('Rule no longer exists'));
+    }
+
     return { state: this.getStateForHaltReason(taskInstance, result.haltReason) };
   }
 
@@ -84,7 +89,6 @@ export class RuleExecutorTaskRunner {
     reason?: HaltReason
   ): Record<string, unknown> {
     switch (reason) {
-      case 'rule_deleted':
       case 'rule_disabled':
         return taskInstance.state ?? {};
       default:
