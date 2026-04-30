@@ -168,8 +168,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     params: any,
     debug: boolean = false
   ): Promise<any> {
-    // Get current space ID from workflow context
-    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+    const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
 
     // Extract and remove fetcher configuration from params (it's only for our internal use)
     const { fetcher: fetcherOptions, ...cleanParams } = params;

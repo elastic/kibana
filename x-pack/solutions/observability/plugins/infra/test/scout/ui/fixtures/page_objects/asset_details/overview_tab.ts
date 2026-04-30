@@ -9,10 +9,13 @@ import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
 
+const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
+
 export class OverviewTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Overview';
   public readonly tab: Locator;
 
+  public readonly kpiGrid: Locator;
   public readonly kpiCpuUsageChart: Locator;
   public readonly kpiNormalizedLoadChart: Locator;
   public readonly kpiMemoryUsageChart: Locator;
@@ -67,10 +70,11 @@ export class OverviewTab extends AssetDetailsTab {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
-    this.kpiCpuUsageChart = this.page.getByTestId('infraAssetDetailsKPIcpuUsage');
-    this.kpiNormalizedLoadChart = this.page.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
-    this.kpiMemoryUsageChart = this.page.getByTestId('infraAssetDetailsKPImemoryUsage');
-    this.kpiDiskUsageChart = this.page.getByTestId('infraAssetDetailsKPIdiskUsage');
+    this.kpiGrid = this.page.getByTestId('infraAssetDetailsKPIGrid');
+    this.kpiCpuUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIcpuUsage');
+    this.kpiNormalizedLoadChart = this.kpiGrid.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
+    this.kpiMemoryUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPImemoryUsage');
+    this.kpiDiskUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIdiskUsage');
 
     this.metadataSection = this.page
       .getByTestId('infraAssetDetailsCollapseExpandSection')
@@ -176,5 +180,70 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsDiskIOChart = this.metricsDiskSection.getByTestId(
       'infraAssetDetailsMetricChartdiskIOReadWrite'
     );
+  }
+
+  private getKPIValueSelector(kpiPanelTestId: string): string {
+    // Relative to `kpiGrid` — do not repeat `infraAssetDetailsKPIGrid` here or
+    // Playwright will nest the selector twice (grid + grid + KPI).
+    return `[data-test-subj="${kpiPanelTestId}"] .echMetricText__value`;
+  }
+
+  public getKPIValue(metric: string): Locator {
+    const kpiPanelTestId = `infraAssetDetailsKPI${metric}`;
+    return this.kpiGrid.locator(this.getKPIValueSelector(kpiPanelTestId));
+  }
+
+  private getKPILoadingIndicator(metric: string): Locator {
+    return this.kpiGrid
+      .getByTestId(`infraAssetDetailsKPI${metric}`)
+      .getByRole('progressbar', { name: 'Loading' });
+  }
+
+  /**
+   * Lens embeddable error panel shown when a KPI fails to render.
+   * `data-test-subj="embeddableError"` is defined by the shared embeddable panel error component.
+   */
+  public getKPIEmbeddableError(metric: string): Locator {
+    return this.kpiGrid.getByTestId(`infraAssetDetailsKPI${metric}`).getByTestId('embeddableError');
+  }
+
+  public async waitForKPILoadingToFinish(timeout?: number) {
+    await this.getKPILoadingIndicator('cpuUsage').waitFor({ state: 'hidden', timeout });
+  }
+
+  private async waitForKPIValueTitleToBeSet(metric: string, timeout?: number) {
+    await this.getKPIValue(metric).waitFor({ state: 'attached', timeout });
+    const kpiPanelTestId = `infraAssetDetailsKPI${metric}`;
+    const selector = `[data-test-subj="infraAssetDetailsKPIGrid"] ${this.getKPIValueSelector(
+      kpiPanelTestId
+    )}`;
+
+    await this.page.waitForFunction(
+      ({ sel }) => {
+        const valueEl = document.querySelector(sel);
+        const title = valueEl?.getAttribute('title');
+        return typeof title === 'string' && title.trim().length > 0;
+      },
+      { sel: selector },
+      { timeout }
+    );
+  }
+
+  /**
+   * Waits for all KPI Lens charts to finish rendering in parallel. The
+   * `.echMetricText__value` element only appears once elastic-charts has
+   * painted, so it's a sufficient single signal: it implies the outer panel
+   * dropped `-loading`, Lens attributes resolved, and the chart didn't end up
+   * in the `-error` state. Running the waits concurrently shares the budget
+   * across all 4 charts instead of cascading it.
+   */
+  public async waitForKPIChartsToLoad(timeout?: number) {
+    await this.kpiGrid.scrollIntoViewIfNeeded();
+
+    await this.waitForKPILoadingToFinish(timeout);
+
+    for (const metric of KPI_METRICS) {
+      await this.waitForKPIValueTitleToBeSet(metric, timeout);
+    }
   }
 }

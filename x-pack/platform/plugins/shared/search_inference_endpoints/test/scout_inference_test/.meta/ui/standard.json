@@ -1,5 +1,5 @@
 {
-  "sha1": "c4d1b0837e3f07a14bfd6c4f32f9b94468591a04",
+  "sha1": "4f39ad4e7f436aa9081d5d8bf48359a25a2938f8",
   "tests": [
     {
       "id": "42293a2b206815f-21f4f530da45d0c",
@@ -12,8 +12,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 64,
+        "column": 7
       }
     },
     {
@@ -72,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 85,
-        "column": 9
+        "line": 83,
+        "column": 7
       }
     },
     {
@@ -87,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 103,
-        "column": 9
+        "line": 101,
+        "column": 7
       }
     },
     {
@@ -312,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 34,
-        "column": 9
+        "line": 32,
+        "column": 7
       }
     },
     {
@@ -327,8 +327,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -342,8 +342,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 48,
-        "column": 9
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -357,8 +357,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 64,
-        "column": 9
+        "line": 62,
+        "column": 7
       }
     },
     {
@@ -372,8 +372,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 86,
-        "column": 9
+        "line": 84,
+        "column": 7
       }
     },
     {
@@ -387,8 +387,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 107,
-        "column": 9
+        "line": 105,
+        "column": 7
       }
     },
     {
@@ -402,8 +402,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 117,
+        "column": 7
       }
     },
     {
@@ -417,8 +417,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 126,
+        "column": 7
       }
     },
     {
@@ -432,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 143,
-        "column": 9
+        "line": 141,
+        "column": 7
       }
     },
     {
@@ -447,8 +447,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 158,
-        "column": 9
+        "line": 156,
+        "column": 7
       }
     },
     {
@@ -462,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 177,
-        "column": 9
+        "line": 175,
+        "column": 7
       }
     },
     {
@@ -477,8 +477,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 204,
-        "column": 9
+        "line": 202,
+        "column": 7
       }
     },
     {
@@ -492,8 +492,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -507,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 50,
-        "column": 9
+        "line": 48,
+        "column": 7
       }
     },
     {
@@ -522,8 +522,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 72,
+        "column": 7
       }
     },
     {
@@ -537,8 +537,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 97,
+        "column": 7
       }
     },
     {
@@ -552,8 +552,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 125,
-        "column": 9
+        "line": 123,
+        "column": 7
       }
     }
   ]
