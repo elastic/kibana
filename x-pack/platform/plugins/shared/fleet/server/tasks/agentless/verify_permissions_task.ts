@@ -24,16 +24,17 @@ import { getPackageInfo } from '../../services/epm/packages';
 import { ensureInstalledPackage } from '../../services/epm/packages/install';
 import { throwIfAborted } from '../utils';
 
+import { VERIFICATION_TTL_MS } from './verifier_policy_cleanup';
+
 const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
 const TASK_TIMEOUT = '1d';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const TASK_INTERVAL = '12h';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
-const VERIFICATION_TTL_MS = 5 * 60 * 1000;
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
 /** Buffer added to VERIFICATION_TTL_MS when computing `runAt` for the next run, so
- *  Phase 1 cleanup reliably sees the just-created verifier as expired on the
+ *  the verifier-policy cleanup task reliably sees the just-created verifier as expired on the
  *  next fire (protects against clock skew and task-manager polling jitter). */
 const RESCHEDULE_BUFFER_MS = 30 * 1000;
 
@@ -94,10 +95,7 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  * Task flow (fires on a 12 h cron, and self-reschedules at VERIFICATION_TTL_MS
  * cadence whenever additional work remains):
  *
- * Phase 1 - Cleanup: Delete stale verifier policies. A policy is deleted when:
- *           - TTL expired: has agents but the oldest enrollment exceeds TTL.
- *           - Orphan: 0 agents and updated_at exceeds TTL (deployment never
- *             came up or was torn down externally).
+ * Phase 1 - Gate: If a non-expired verifier agent policy exists, skip this run.
  *
  * Phase 2 - Pre-filter: Fetch package policies with cloud_connector_id to build
  *           a map of connector ID -> package policy IDs. Then fetch only the
@@ -114,10 +112,12 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  *           On failure the connector is marked failed; on success the separate
  *           status update task sets the final status.
  *
- * Returns `shouldReschedule: true` if there is still work to do (either a
- * gating verifier that will expire soon, or additional eligible connectors
- * waiting their turn). The caller uses this to return `runAt = now + TTL` so
- * task manager fires the task again without waiting for the 12 h cron.
+ * Returns `shouldReschedule: true` if there is still work to do: a gating
+ * verifier that will expire soon, additional eligible connectors waiting their
+ * turn, or a verifier policy was just created (so fleet:verifier_policy_cleanup
+ * can remove it after TTL without waiting for the 12 h cron). The caller uses this to return
+ * `runAt = now + TTL` so task manager fires the task again without waiting for
+ * the 12 h cron.
  */
 async function runPermissionVerifierTask(
   abortController: AbortController
@@ -134,19 +134,10 @@ async function runPermissionVerifierTask(
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
 
-  // Phase 1: Cleanup expired verifier policies before creating new ones
-  try {
-    await cleanupExpiredVerifierPolicies(soClient, esClient, abortController);
-  } catch (error) {
-    logger.error(
-      `${VERIFY_PERMISSIONS_TASK} Failed to cleanup expired verifier policies: ${error.message}`
-    );
-  }
-
   try {
     throwIfAborted(abortController);
 
-    // Gate check: only one verifier deployment at a time.
+    // Phase 1 — Gate: only one verifier deployment at a time.
     // If a non-expired verifier policy still exists, skip this run.
     const saveObjectType = await getAgentPolicySavedObjectType();
     const activeVerifiers = await agentPolicyService.list(soClient, {
@@ -213,6 +204,7 @@ async function runPermissionVerifierTask(
     // the task runner reschedules the next run for `now + TTL + buffer` so we
     // drain the backlog at TTL cadence instead of every 12 h.
     let verifiedConnectorId: string | undefined;
+    let verifierPolicyCreated = false;
     for (const connector of connectors) {
       throwIfAborted(abortController);
 
@@ -237,7 +229,13 @@ async function runPermissionVerifierTask(
         continue;
       }
       try {
-        await verifyConnector(soClient, esClient, connector, policyTemplates, abortController);
+        verifierPolicyCreated = await verifyConnector(
+          soClient,
+          esClient,
+          connector,
+          policyTemplates,
+          abortController
+        );
       } catch (error) {
         logger.error(
           `${VERIFY_PERMISSIONS_TASK} Failed to verify connector ${connector.id}: ${error.message}`
@@ -263,7 +261,11 @@ async function runPermissionVerifierTask(
         (packagePolicyMap.get(c.id)?.length ?? 0) > 0
     );
 
-    return { shouldReschedule: hasMoreEligible };
+    // Reschedule when more connectors need verification, or when we created a
+    // verifier deployment so fleet:verifier_policy_cleanup can remove it after TTL
+    // (otherwise a single-connector run would fall back to the 12 h interval and leave the
+    // verifier policy orphaned until then).
+    return { shouldReschedule: hasMoreEligible || verifierPolicyCreated };
   } catch (error) {
     if (abortController.signal.aborted) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task was aborted`);
@@ -271,63 +273,6 @@ async function runPermissionVerifierTask(
     }
     logger.error(`${VERIFY_PERMISSIONS_TASK} Task run failed: ${error.message}`);
     throw error;
-  }
-}
-
-/**
- * Phase 1: Delete verifier policies whose creation time has exceeded the TTL.
- * Uses the immutable `created_at` timestamp — unaffected by subsequent SO updates.
- * Runs before picking a new connector to ensure at most one active verifier deployment.
- */
-async function cleanupExpiredVerifierPolicies(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  abortController: AbortController
-) {
-  const logger = appContextService.getLogger().get('otel-verifier');
-  const saveObjectType = await getAgentPolicySavedObjectType();
-
-  try {
-    const verifierPolicies = await agentPolicyService.list(soClient, {
-      kuery: `${saveObjectType}.is_verifier: true`,
-      perPage: 50,
-      spaceId: '*',
-    });
-
-    logger.info(
-      `${VERIFY_PERMISSIONS_TASK} Found ${verifierPolicies.items.length} verifier policies for cleanup check`
-    );
-
-    for (const policy of verifierPolicies.items) {
-      throwIfAborted(abortController);
-      logger.info(
-        `${VERIFY_PERMISSIONS_TASK} Current policy verifier policy ${policy.id} created at ${policy.created_at} updated at ${policy.updated_at}`
-      );
-      const createdAt = policy.created_at ?? policy.updated_at;
-      const ageMs = Date.now() - new Date(createdAt).getTime();
-
-      if (ageMs <= VERIFICATION_TTL_MS) {
-        continue;
-      }
-
-      try {
-        const ageSec = Math.round(ageMs / 1000);
-        const ttlSec = Math.round(VERIFICATION_TTL_MS / 1000);
-        logger.info(
-          `${VERIFY_PERMISSIONS_TASK} Deleting verifier policy ${policy.id} (age: ${ageSec}s, TTL: ${ttlSec}s)`
-        );
-        await agentPolicyService.deleteVerifierPolicy(soClient, esClient, policy.id);
-        logger.info(`${VERIFY_PERMISSIONS_TASK} Deleted verifier policy ${policy.id}`);
-      } catch (err) {
-        logger.error(
-          `${VERIFY_PERMISSIONS_TASK} Failed to delete verifier policy ${policy.id}: ${err.message}`
-        );
-      }
-    }
-  } catch (error) {
-    logger.error(
-      `${VERIFY_PERMISSIONS_TASK} Failed to cleanup verifier policies: ${error.message}`
-    );
   }
 }
 
@@ -412,13 +357,6 @@ function isConnectorEligible(attrs: CloudConnectorSOAttributes): boolean {
   return false;
 }
 
-/**
- * Verify a single cloud connector.
- *
- * Stamps verification_started_at to move it to the back of the queue,
- * then creates a verifier policy using the pre-fetched package policy IDs.
- * On failure, marks the connector as failed with verification_failed_at.
- */
 async function updateConnectorStatus(
   soClient: SavedObjectsClientContract,
   connectorId: string,
@@ -438,13 +376,23 @@ async function updateConnectorStatus(
   }
 }
 
+/**
+ * Verify a single cloud connector.
+ *
+ * Stamps verification_started_at after creating the verifier policy. On failure
+ * before deployment, marks the connector as failed with verification_failed_at.
+ * The separate status update task sets the final status after success.
+ *
+ * @returns true if a verifier agent policy was created (caller must reschedule
+ *          for TTL cleanup); false if verification failed before that.
+ */
 async function verifyConnector(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   connector: SavedObject<CloudConnectorSOAttributes>,
   policyTemplates: string[],
   abortController: AbortController
-) {
+): Promise<boolean> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
   try {
@@ -497,6 +445,7 @@ async function verifyConnector(
       verification_started_at: startedAt,
       verification_status: 'pending',
     });
+    return true;
   } catch (err) {
     logger.error(
       `${VERIFY_PERMISSIONS_TASK} Failed to verify connector ${connector.id}: ${err.message}`
@@ -505,5 +454,6 @@ async function verifyConnector(
       verification_status: 'failed',
       verification_failed_at: new Date().toISOString(),
     });
+    return false;
   }
 }

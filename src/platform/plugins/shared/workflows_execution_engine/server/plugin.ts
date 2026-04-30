@@ -43,12 +43,14 @@ import {
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
+import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
@@ -56,6 +58,7 @@ import type {
   ExecuteWorkflowStep,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
+  TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -142,6 +145,7 @@ export class WorkflowsExecutionEnginePlugin
     this.coreSetup = core;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
+    initializeTriggerEventsDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -241,8 +245,6 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
-                  isEventDrivenExecutionEnabled:
-                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -644,6 +646,23 @@ export class WorkflowsExecutionEnginePlugin
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
+      const eventPayload = context.event as Record<string, unknown> | undefined;
+      let rootEventChainDepth: number | undefined;
+      if (eventPayload) {
+        const rawDepth = eventPayload.eventChainDepth;
+        if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
+          rootEventChainDepth = rawDepth;
+        } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
+          const parsed = parseInt(rawDepth, 10);
+          if (!Number.isNaN(parsed) && parsed >= 0) {
+            rootEventChainDepth = parsed;
+          }
+        }
+      }
+      const rootVisited = normalizeEventChainVisitedWorkflowIds(
+        eventPayload?.eventChainVisitedWorkflowIds,
+        this.config.eventDriven.maxChainDepth
+      );
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
@@ -659,6 +678,8 @@ export class WorkflowsExecutionEnginePlugin
         executedBy: authenticatedUser,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
+        ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
+        ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
       };
 
@@ -1232,6 +1253,23 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const triggerEventHandler = new TriggerEventHandler({
+      coreStart,
+      workflowRepository,
+      workflowsExtensions: plugins.workflowsExtensions,
+      spaces: plugins.spaces?.spacesService,
+      scheduleWorkflow,
+      logger: this.logger,
+      config: this.config.eventDriven,
+    });
+
+    const triggerEvents: TriggerEventsContract = {
+      emitEvent: (params) => triggerEventHandler.handleEvent(params),
+      isEnabled: this.config.eventDriven.enabled,
+      isLogEventsEnabled: this.config.eventDriven.logEvents,
+      maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+    };
+
     return {
       workflowEventLoggerService,
       executeWorkflow,
@@ -1241,30 +1279,11 @@ export class WorkflowsExecutionEnginePlugin
       cancelWorkflowExecution,
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
-      isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
-      isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
-      getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),
-      getMaxWorkflowDepth: this.getMaxWorkflowDepth.bind(this),
+      triggerEvents,
     };
   }
 
   public stop() {}
-
-  private isEventDrivenExecutionEnabled(): boolean {
-    return this.config?.eventDriven?.enabled ?? true;
-  }
-
-  private isLogTriggerEventsEnabled(): boolean {
-    return this.config?.eventDriven?.logEvents ?? true;
-  }
-
-  private getMaxEventChainDepth(): number {
-    return this.config?.eventDriven?.maxChainDepth ?? 10;
-  }
-
-  private getMaxWorkflowDepth(): number {
-    return this.config?.maxWorkflowDepth ?? 10;
-  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {
