@@ -672,6 +672,23 @@ describe('integration schemas', () => {
       expectParseSuccess(result);
     });
 
+    it('accepts integrationResponse with optional categories', () => {
+      const payload = {
+        integrationResponse: {
+          integrationId: 'integration-123',
+          title: 'Test Integration',
+          description: 'Integration for testing purposes',
+          status: 'pending' as const,
+          dataStreams: [],
+          categories: ['security'],
+        },
+      };
+
+      const result = GetAutoImportIntegrationResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data.integrationResponse.categories).toEqual(['security']);
+    });
+
     it('strips unknown properties in integrationResponse', () => {
       const payload = {
         integrationResponse: {

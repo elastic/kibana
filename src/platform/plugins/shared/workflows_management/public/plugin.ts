@@ -8,18 +8,21 @@
  */
 
 import { filter, first, Subject, type Subscription } from 'rxjs';
-import {
-  type AppDeepLinkLocations,
-  type AppMountParameters,
-  type AppUpdater,
-  type CoreSetup,
-  type CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  type Plugin,
+import type {
+  AppDeepLinkLocations,
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
@@ -35,8 +38,6 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
-const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
-const VisibleInNotAvailable: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -46,14 +47,16 @@ export class WorkflowsPlugin
       WorkflowsPublicPluginStartDependencies
     >
 {
+  private logger: Logger;
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
   private availabilityService: AvailabilityService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
   private settingsSubscription?: Subscription;
-  private availabilityStatusSubscription?: Subscription;
+  private appVisibilitySubscription?: Subscription;
 
-  constructor() {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
@@ -91,8 +94,8 @@ export class WorkflowsPlugin
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
       euiIconType: 'workflowsApp',
-      visibleIn: VisibleIn,
-      category: DEFAULT_APP_CATEGORIES.management,
+      visibleIn: this.getVisibleIn({ isAuthorized: true, isAvailable: true }),
+      category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
@@ -119,13 +122,8 @@ export class WorkflowsPlugin
 
     // Availability service: set license and subscribe to availability for app visibility changes
     this.availabilityService.setLicense$(plugins.licensing.license$);
-    this.availabilityStatusSubscription = this.availabilityService
-      .getIsAvailable$()
-      .subscribe((isAvailable) => {
-        this.appUpdater$.next(() => ({
-          visibleIn: isAvailable ? VisibleIn : VisibleInNotAvailable,
-        }));
-      });
+
+    this.subscribeAppVisibilityChanges(core);
 
     return {
       setUnavailableInServerlessTier: (options) => {
@@ -136,7 +134,7 @@ export class WorkflowsPlugin
 
   public stop() {
     this.settingsSubscription?.unsubscribe();
-    this.availabilityStatusSubscription?.unsubscribe();
+    this.appVisibilitySubscription?.unsubscribe();
     this.availabilityService.stop();
   }
 
@@ -154,10 +152,48 @@ export class WorkflowsPlugin
       )
       .subscribe(() => {
         core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to disable space workflows on opt-out:', err);
+          this.logger.error('Failed to disable all workflows on opt-out', { error: err });
         });
       });
+  }
+
+  /**
+   * Subscribes to the availability change and updates the application visibility accordingly.
+   * @param core - The core start services.
+   */
+  private subscribeAppVisibilityChanges(core: CoreStart): void {
+    const capabilities = getWorkflowsCapabilities(core.application.capabilities);
+    const isAuthorized = capabilities.canReadWorkflow; // Read privilege is the minimum privilege required
+
+    this.appVisibilitySubscription = this.availabilityService
+      .getIsAvailable$()
+      .subscribe((isAvailable) => {
+        this.appUpdater$.next(() => ({
+          visibleIn: this.getVisibleIn({ isAuthorized, isAvailable }),
+        }));
+      });
+  }
+
+  /**
+   * Returns the visible locations for the workflows application based on the user's capabilities and availability.
+   * @param isAuthorized - Whether the user is authorized to access workflows UI.
+   * @param isAvailable - Whether the workflows application is available (license / tier).
+   * @returns The visible locations for the workflows application.
+   */
+  private getVisibleIn(params: {
+    isAuthorized: boolean;
+    isAvailable: boolean;
+  }): AppDeepLinkLocations[] {
+    // Not available takes precedence over authorized.
+    if (!params.isAvailable) {
+      // Remove generic locations, but keep in sideNav and globalSearch to make users aware of the feature.
+      return ['globalSearch', 'sideNav'];
+    }
+    if (!params.isAuthorized) {
+      // Remove from sideNav so it does not use nav real estate, but keep in globalSearch to make it discoverable
+      return ['globalSearch'];
+    }
+    return ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
   }
 
   /**

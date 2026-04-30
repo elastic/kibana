@@ -1841,7 +1841,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "\"Background\" | \"Labels\" | \"None\""
+          "\"Labels\" | \"Background\" | \"None\""
         ],
         "path": "src/platform/plugins/shared/charts/common/static/components/collections.ts",
         "lineNumber": 18,
@@ -3766,7 +3766,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "\"Background\" | \"Labels\" | \"None\""
+          "\"Labels\" | \"Background\" | \"None\""
         ],
         "path": "src/platform/plugins/shared/charts/common/static/components/collections.ts",
         "lineNumber": 18,
