@@ -46,7 +46,7 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
         message:
           req.params.type === 'refresh_auto'
             ? `Dashboard "${req.body.title}" (id: ${req.params.id}) was refreshed automatically.`
-            : `User ${user ? `"${user.username}" (id: ${user.profile_uid})` : ''} ${
+            : `User ${user ? `"${user.username}"` : ''} ${
                 req.params.type === 'view' ? 'viewed' : 'manually refreshed'
               } dashboard "${req.body.title}" (id: ${req.params.id}).`,
         event: {
@@ -58,7 +58,6 @@ export function registerTrackDashboardViewRoute({ http }: { http: HttpServiceSet
         },
         object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
         metadata: {
-          user_id: user?.profile_uid,
           username: user?.username,
           dashboard_id: req.params.id,
           dashboard_title: req.body.title,

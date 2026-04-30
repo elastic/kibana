@@ -22,14 +22,17 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKey('viewer');
+  });
+
+  apiTest.beforeEach(async ({ kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterEach(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
@@ -64,6 +67,7 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
   apiTest(
     'authorization - should return 403 if the user is not authorized to delete the dashboard',
     async ({ apiClient }) => {
+      console.log('HERE!!!!!!');
       const response = await apiClient.delete(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
         headers: {
           ...COMMON_HEADERS,
