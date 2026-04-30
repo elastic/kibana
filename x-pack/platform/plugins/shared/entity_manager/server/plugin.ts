@@ -12,12 +12,10 @@ import type {
   KibanaRequest,
   Logger,
   Plugin,
-  PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { EntityManagerConfig } from '../common/config';
-import { configSchema, exposeToBrowserConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
 import { entityManagerRouteRepository } from './routes';
 import type { EntityManagerRouteDependencies } from './routes/types';
@@ -36,11 +34,6 @@ export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
 }
-
-export const config: PluginConfigDescriptor<EntityManagerConfig> = {
-  schema: configSchema,
-  exposeToBrowser: exposeToBrowserConfig,
-};
 
 export class EntityManagerServerPlugin
   implements

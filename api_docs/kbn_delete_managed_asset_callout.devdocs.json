@@ -63,6 +63,7 @@
             "lineNumber": 20,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DeleteManagedAssetsCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }

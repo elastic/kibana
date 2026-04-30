@@ -365,7 +365,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(400);
       });
 
-      it('should return 400 when neither ids nor filter is provided', async () => {
+      it('should return 400 when neither ids nor filter nor match_all is provided', async () => {
         const response = await supertestWithoutAuth
           .post(`${RULE_API_PATH}/_bulk_disable`)
           .set(roleAuthc.apiKeyHeader)
@@ -373,6 +373,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .send({});
 
         expect(response.status).to.be(400);
+      });
+
+      it('should treat match_all as targeting all rules', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ match_all: true });
+
+        expect(response.status).to.be(200);
       });
     });
 
@@ -449,7 +459,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(400);
       });
 
-      it('should return 400 when neither ids nor filter is provided', async () => {
+      it('should return 400 when neither ids nor filter nor match_all is provided', async () => {
         const response = await supertestWithoutAuth
           .post(`${RULE_API_PATH}/_bulk_enable`)
           .set(roleAuthc.apiKeyHeader)
@@ -457,6 +467,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .send({});
 
         expect(response.status).to.be(400);
+      });
+
+      it('should treat match_all as targeting all rules', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_enable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ match_all: true });
+
+        expect(response.status).to.be(200);
       });
     });
   });
